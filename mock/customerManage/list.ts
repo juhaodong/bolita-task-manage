@@ -4,7 +4,7 @@ const customerManageList = (pageSize) => {
   const result: any[] = [];
   doCustomTimes(pageSize, () => {
     result.push({
-      name: 'admin',
+      name: '@name',
       adminUser: 'admin',
       password: '******',
       'no|100000-10000000': 100000,
