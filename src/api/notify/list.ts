@@ -117,8 +117,13 @@ export async function changeArriveCountForNotifyTask(
     const notifyNow = await getNotifyById(notifyId);
     const statusNow = notifyNow.status;
     const arrivedTotalCount = notifyNow.taskList.reduce(
-      (sum, i) => sum + parseInt(i.arriveCount ?? '0'),
+      (sum, i) => sum + parseInt(i.arrivedCount ?? '0'),
       0
+    );
+    await setDoc(
+      doc(db, notifyPath, notifyId),
+      { arrivedCount: arrivedTotalCount },
+      { merge: true }
     );
     let statusLater = statusNow;
     if (arrivedTotalCount == notifyNow.totalCount) {

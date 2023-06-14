@@ -219,8 +219,10 @@
       files
     );
     await handleRequest(res, () => {
+      reload();
       editingTaskId = '';
       showNumberEditModal = false;
+
       toastSuccess('更新成功');
     });
   }
