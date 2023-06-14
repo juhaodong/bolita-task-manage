@@ -1,18 +1,9 @@
 <template>
-  <n-card v-if="notifyId" size="small" style="max-width: 800px">
-    <n-page-header>
-      <template #title> 到货预报详情</template>
-    </n-page-header>
-    <n-grid x-gap="12" cols="5">
+  <n-card title="到货预报详情" v-if="notifyId" size="small" style="max-width: 800px" closable>
+    <n-grid class="mt-4" x-gap="12" cols="5">
       <n-gi span="3">
-        <n-descriptions
-          bordered
-          :column="2"
-          size="small"
-          title="基础信息"
-          class="mt-8"
-          label-placement="top"
-        >
+        <n-h4>基础信息</n-h4>
+        <n-descriptions bordered :column="2" size="small" label-placement="top">
           <n-descriptions-item label="预报ID">
             {{ notifyId }}
           </n-descriptions-item>
@@ -36,28 +27,57 @@
             {{ notifyDetail?.note }}
           </n-descriptions-item>
         </n-descriptions>
-        <n-descriptions
-          class="mt-8"
-          v-if="notifyDetail?.arriveMedia === ArriveMediaTypes.Container"
-          bordered
-          :column="2"
-          size="small"
-          title="货柜信息"
-          label-placement="top"
-        >
-          <n-descriptions-item label="预报ID">
-            {{ arriveDetail?.containerNo }}
-          </n-descriptions-item>
-          <n-descriptions-item label="车牌号">
-            {{ arriveDetail?.carNo }}
-          </n-descriptions-item>
-          <n-descriptions-item label="货柜尺寸">
-            {{ arriveDetail?.containerSize }}
-          </n-descriptions-item>
-          <n-descriptions-item label="货柜类型">
-            {{ arriveDetail?.containerType }}
-          </n-descriptions-item>
-        </n-descriptions>
+        <template v-if="notifyDetail?.arriveMedia === ArriveMediaTypes.Container">
+          <div class="mt-8">
+            <n-h4>货柜信息</n-h4>
+            <n-descriptions bordered :column="2" label-placement="top">
+              <n-descriptions-item label="货柜号码">
+                {{ arriveDetail?.containerNo }}
+              </n-descriptions-item>
+              <n-descriptions-item label="车牌号">
+                {{ arriveDetail?.carNo }}
+              </n-descriptions-item>
+              <n-descriptions-item label="货柜尺寸">
+                {{ arriveDetail?.containerSize }}
+              </n-descriptions-item>
+              <n-descriptions-item label="货柜类型">
+                {{ arriveDetail?.containerType }}
+              </n-descriptions-item>
+            </n-descriptions>
+          </div>
+        </template>
+        <template v-if="notifyDetail?.arriveMedia === ArriveMediaTypes.Tray">
+          <div class="mt-8">
+            <n-h4>托盘信息</n-h4>
+            <n-descriptions bordered :column="2" label-placement="top">
+              <n-descriptions-item label="托盘尺寸">
+                {{ arriveDetail?.traySize }}
+              </n-descriptions-item>
+              <n-descriptions-item label="托盘类型">
+                {{ arriveDetail?.trayType }}
+              </n-descriptions-item>
+              <n-descriptions-item label="托盘数量">
+                {{ arriveDetail?.trayCount }}
+              </n-descriptions-item>
+              <n-descriptions-item label="车牌号">
+                {{ arriveDetail?.carNo }}
+              </n-descriptions-item>
+              <n-descriptions-item label="货品类型">
+                {{ arriveDetail?.goodsType }}
+              </n-descriptions-item>
+            </n-descriptions>
+          </div>
+        </template>
+        <template v-if="notifyDetail?.arriveMedia === ArriveMediaTypes.Box">
+          <div class="mt-8">
+            <n-h4>散货信息</n-h4>
+            <n-descriptions bordered :column="2" label-placement="top">
+              <n-descriptions-item label="物流渠道">
+                {{ arriveDetail?.deliveryMethod }}
+              </n-descriptions-item>
+            </n-descriptions>
+          </div>
+        </template>
       </n-gi>
       <n-gi span="2">
         <n-h4>变动时间线</n-h4>

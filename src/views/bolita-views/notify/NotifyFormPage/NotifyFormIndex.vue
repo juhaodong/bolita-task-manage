@@ -10,7 +10,7 @@
   import dayjs from 'dayjs';
   import readXlsxFile from 'read-excel-file';
 
-  let currentStep = $ref(2);
+  let currentStep = $ref(0);
   let arriveMedia: ArriveMediaTypes = $ref(ArriveMediaTypes.Container);
 
   let basicInfo: any = $ref(null);
@@ -18,15 +18,12 @@
   const emit = defineEmits(['submit']);
 
   function firstFormResult(result) {
-    console.log(result, 'firstStep');
     basicInfo = result;
     arriveMedia = result.arriveMedia;
-    console.log(arriveMedia);
     currentStep++;
   }
 
   function fileChanged(fileList) {
-    console.log(fileList, 'list');
     readFile(fileList[0]);
   }
 
@@ -84,6 +81,10 @@
       FBA: { prop: 'fba', type: String },
       PO: { prop: 'po', type: String },
       地址: { prop: 'address', type: String },
+      物流渠道: {
+        prop: 'deliveryMethod',
+        type: String,
+      },
     };
     const { rows, errors } = await readXlsxFile(file, { schema });
     console.log(rows, errors);
@@ -116,6 +117,7 @@
           { label: 'FBA Code', value: 'fbaCode' },
           { label: 'FBA', value: 'fba' },
           { label: 'PO', value: 'po' },
+          { label: '物流渠道', value: 'deliveryMethod' },
           { label: '地址', value: 'address' },
         ],
         content: content,
