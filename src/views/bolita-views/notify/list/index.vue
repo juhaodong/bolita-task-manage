@@ -27,7 +27,11 @@
       </template>
     </BasicTable>
     <n-modal v-model:show="showDetailModal">
-      <notify-detail-page v-if="currentNotifyId != null" :notify-id="currentNotifyId" />
+      <notify-detail-page
+        v-if="currentNotifyId != null"
+        @close="showDetailModal = false"
+        :notify-id="currentNotifyId"
+      />
     </n-modal>
 
     <n-modal v-model:show="showModal" :show-icon="false" preset="dialog" title="新建到货预报">
@@ -241,30 +245,10 @@
   function onCheckedRow(rowKeys) {
     console.log(rowKeys);
   }
-
   function reloadTable() {
     actionRef.value.reload();
   }
-
-  function confirmForm(e) {
-    e.preventDefault();
-    formBtnLoading.value = true;
-    formRef.value.validate((errors) => {
-      if (!errors) {
-        window['$message'].success('新建成功');
-        setTimeout(() => {
-          showModal.value = false;
-          reloadTable();
-        });
-      } else {
-        window['$message'].error('请填写完整信息');
-      }
-      formBtnLoading.value = false;
-    });
-  }
-
   const user = useUserStore();
-
   async function createNewNotify(notifyInfo) {
     console.log(notifyInfo);
     console.log(user.info);
@@ -274,11 +258,11 @@
       arriveWarehouseId: notifyInfo.arriveWarehouseId,
       arrivedCount: 0,
       customerId: user.info.id,
-      note: notifyInfo.arriveDetail.note,
+      note: notifyInfo.arriveDetail.note ?? '',
       planArriveDateTime: notifyInfo.arriveDetail.planArriveDateTime,
       sortingLabelCount: notifyInfo.arriveDetail.sortingLabelCount,
       status: NotifyStatusList.NotSubmit,
-      taskList: [],
+      taskList: notifyInfo.taskList,
       totalCount: notifyInfo.totalCount,
     };
     const res = await createNotify(info);
@@ -288,7 +272,7 @@
     });
   }
 
-  let currentNotifyId = $ref(null);
+  let currentNotifyId: string | null = $ref(null);
   function handleEdit(record: Recordable) {
     currentNotifyId = record.id;
     showDetailModal = true;

@@ -65,8 +65,19 @@ const notifyPath = 'notify';
 
 export async function createNotify(notifyInfo: NotifyModel) {
   try {
+    const info = {
+      arriveWarehouseId: '',
+      arrivedCount: 0,
+      customerId: '',
+      note: '',
+      planArriveDateTime: 0,
+      sortingLabelCount: '',
+      status: '',
+      taskList: [],
+      totalCount: 0,
+    };
     console.log(notifyInfo, 'info');
-    const { id } = await addDoc(collection(db, notifyPath), notifyInfo);
+    const { id } = await addDoc(collection(db, notifyPath), Object.assign(info, notifyInfo));
     await doLog({
       fromStatus: NotifyStatusList.NotSubmit,
       toStatus: NotifyStatusList.NotSubmit,

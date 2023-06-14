@@ -1,7 +1,14 @@
 <template>
-  <n-card title="到货预报详情" v-if="notifyId" size="small" style="max-width: 800px" closable>
-    <n-grid class="mt-4" x-gap="12" cols="5">
-      <n-gi span="3">
+  <n-card
+    title="到货预报详情"
+    v-if="notifyId"
+    size="small"
+    style="max-width: 800px"
+    @close="emit('close')"
+    closable
+  >
+    <n-tabs type="line" animated class="mt-4">
+      <n-tab-pane name="信息">
         <n-h4>基础信息</n-h4>
         <n-descriptions bordered :column="2" size="small" label-placement="top">
           <n-descriptions-item label="预报ID">
@@ -24,7 +31,7 @@
             {{ notifyDetail?.status }}
           </n-descriptions-item>
           <n-descriptions-item label="备注">
-            {{ notifyDetail?.note }}
+            {{ notifyDetail?.note || '-' }}
           </n-descriptions-item>
         </n-descriptions>
         <template v-if="notifyDetail?.arriveMedia === ArriveMediaTypes.Container">
@@ -78,8 +85,15 @@
             </n-descriptions>
           </div>
         </template>
-      </n-gi>
-      <n-gi span="2">
+      </n-tab-pane>
+      <n-tab-pane name="到货货品列表">
+        <div style="overflow-x: scroll">
+          <div style="width: fit-content">
+            <n-data-table scroll-x="max-content" :columns="columns" :data="notifyDetail.taskList" />
+          </div>
+        </div>
+      </n-tab-pane>
+      <n-tab-pane name="操作记录">
         <n-h4>变动时间线</n-h4>
 
         <n-timeline>
@@ -121,19 +135,57 @@
             </div>
           </n-timeline-item>
         </n-timeline>
-      </n-gi>
-    </n-grid>
+      </n-tab-pane>
+    </n-tabs>
   </n-card>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { ArriveMediaTypes, getNotifyById } from '@/api/notify/list';
-  import { watchEffect } from 'vue';
+  import { computed, watchEffect } from 'vue';
   import dayjs from 'dayjs';
 
-  const props = defineProps({ notifyId: String });
-  let notifyDetail = $ref(null);
+  const columns = computed(() => {
+    const boxField =
+      arriveMedia == ArriveMediaTypes.Box ? [{ title: '物流追踪号', key: 'trackingCode' }] : [];
+    const trayField =
+      arriveMedia == ArriveMediaTypes.Tray
+        ? [
+            { title: '托盘号（选填）', key: 'trayCode' },
+            { title: '托盘长度', key: 'trayLength' },
+            { title: '托盘宽度', key: 'trayWidth' },
+            { title: '托盘高度', key: 'trayHeight' },
+          ]
+        : [];
+    return [
+      { title: '分拣码', key: 'sortCode' },
+      ...boxField,
+      ...trayField,
+      { title: '件数', key: 'count' },
+      { title: '实重', key: 'actualWeight' },
+      { title: '体积', key: 'volume' },
+      { title: '长', key: 'length' },
+      { title: '宽', key: 'width' },
+      { title: '高', key: 'height' },
+      { title: 'SKU', key: 'sku' },
+      { title: '操作类型', key: 'operationType' },
+      { title: '地址类型', key: 'addressType' },
+      { title: '目的地', key: 'targetCountry' },
+      { title: '邮编', key: 'postCode' },
+      { title: 'FBA Code', key: 'fbaCode' },
+      { title: 'FBA', key: 'fba' },
+      { title: 'PO', key: 'po' },
+      { title: '物流渠道', key: 'deliveryMethod' },
+      { title: '地址', key: 'address' },
+    ];
+  });
 
+  const arriveMedia: ArriveMediaTypes | null = $computed(() => {
+    return notifyDetail?.arriveMedia;
+  });
+  const props = defineProps({ notifyId: String || null });
+  let notifyDetail: any | null = $ref(null);
+  const emit = defineEmits(['close']);
   watchEffect(async () => {
     if (props.notifyId != null) {
       notifyDetail = await getNotifyById(props.notifyId);
@@ -146,7 +198,7 @@
       time: dayjs(it.timestamp).format('YYYY-MM-DD HH:mm:ss'),
       type: 'info',
       title: '操作人:' + it.userId,
-      content: it.fromStatus + '->' + it.toStatus,
+      content: it.fromStatus + ' -> ' + it.toStatus,
       note: it.note,
     }));
   });

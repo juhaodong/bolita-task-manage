@@ -9,6 +9,8 @@
   import { Archive } from '@vicons/ionicons5';
   import dayjs from 'dayjs';
   import readXlsxFile from 'read-excel-file';
+  import { computed } from 'vue';
+  import { uniqBy } from 'lodash-es';
 
   let currentStep = $ref(0);
   let arriveMedia: ArriveMediaTypes = $ref(ArriveMediaTypes.Container);
@@ -24,7 +26,8 @@
   }
 
   function fileChanged(fileList) {
-    readFile(fileList[0]);
+    console.log(fileList);
+    readFile(fileList[0].file);
   }
 
   function generateNotifyTaskModel(count) {
@@ -58,6 +61,10 @@
     return res;
   }
 
+  let uploadFailed = $ref(false);
+  let failReason = $ref('');
+  let detailedTasks: any[] = $ref([]);
+
   async function readFile(file) {
     const schema = {
       分拣码: { prop: 'sortCode', type: String },
@@ -74,7 +81,7 @@
       高: { prop: 'height', type: String },
       SKU: { prop: 'sku', type: String },
       操作类型: { prop: 'operationType', type: String },
-      地址类型: { prop: 'addressType', type: String, oneOf: ['AMZ', 'B2B', 'B2C'] },
+      地址类型: { prop: 'addressType', type: String, oneOf: ['Amz', 'B2B', 'B2C'] },
       目的地: { prop: 'targetCountry', type: String },
       邮编: { prop: 'postCode', type: String },
       'FBA Code': { prop: 'fbaCode', type: String },
@@ -86,8 +93,28 @@
         type: String,
       },
     };
-    const { rows, errors } = await readXlsxFile(file, { schema });
-    console.log(rows, errors);
+    try {
+      const { rows, errors } = await readXlsxFile(file, { schema });
+      console.log(rows, errors);
+      if (rows.length > 0 && errors.length == 0) {
+        uploadFailed = false;
+        detailedTasks = rows;
+      } else if (errors.length > 0) {
+        uploadFailed = true;
+        failReason = errors.reduce(
+          (sum, i) => `${sum}第${i.row}行数据异常，原因为：${i.reason}\n`,
+          ''
+        );
+      } else {
+        uploadFailed = true;
+        failReason = '没有读取到有效的数据';
+      }
+    } catch (e: any) {
+      uploadFailed = true;
+      failReason = '文件上传异常' + e?.message;
+    } finally {
+      currentStep++;
+    }
   }
 
   function downloadTemplate() {
@@ -130,13 +157,38 @@
     xlsx(data, setting);
   }
 
+  let detailInfo: any = $ref(null);
+  const differentSortCode = computed(() => {
+    return uniqBy(detailedTasks, 'sortCode').length;
+  });
+  const requiredDifferentSortCode = computed(() => {
+    return detailInfo?.sortingLabelCount ?? 0;
+  });
+  const requiredTotalCount = computed(() => {
+    return basicInfo.totalCount;
+  });
+  const totalCount = computed(() => {
+    return detailedTasks.reduce((sum, i) => sum + parseInt(i.count), 0);
+  });
+  const canUpload = computed(() => {
+    return (
+      requiredDifferentSortCode.value == differentSortCode.value &&
+      requiredTotalCount.value == totalCount.value
+    );
+  });
   function secondFormResult(result) {
     console.log(result);
     console.log(basicInfo);
+    detailInfo = result;
+    currentStep++;
+  }
+
+  function complete() {
     if (basicInfo != null) {
       emit('submit', {
         ...basicInfo,
-        arriveDetail: result,
+        arriveDetail: detailInfo,
+        taskList: detailedTasks,
       });
     }
   }
@@ -164,13 +216,46 @@
             </n-icon>
           </div>
           <n-text style="font-size: 16px"> 点击或者拖动文件到该区域来上传</n-text>
-          <n-p depth="3" style="margin: 8px 0 0 0">
-            请不要上传敏感数据，比如你的银行卡号和密码，信用卡号有效期和安全码
-          </n-p>
+          <n-p depth="3" style="margin: 8px 0 0 0"> 请仔细检查您提交的文件 </n-p>
         </n-upload-dragger>
       </n-upload>
-
-      <div></div>
+    </template>
+    <template v-else-if="currentStep === 3">
+      <template v-if="uploadFailed">
+        <div class="p-4 flex flex-col justify-center items-center">
+          <n-h4>上传失败</n-h4>
+          <n-text code>{{ failReason }}</n-text>
+          <n-button @click="currentStep = 2" class="mt-2">重新上传</n-button>
+        </div>
+      </template>
+      <template v-else>
+        <div class="flex items-center mt-4">
+          <div>您上传的任务</div>
+          <div class="flex-grow"></div>
+        </div>
+        <n-descriptions class="mt-4" column="2">
+          <n-descriptions-item label="应有总数"> {{ requiredTotalCount }} </n-descriptions-item>
+          <n-descriptions-item label="实际总数">
+            <n-text :type="totalCount != requiredTotalCount ? 'error' : 'default'">{{
+              totalCount
+            }}</n-text>
+          </n-descriptions-item>
+          <n-descriptions-item label="应有分拣码数量">
+            {{ requiredDifferentSortCode }}
+          </n-descriptions-item>
+          <n-descriptions-item label="实际分拣码数量">
+            <n-text :type="requiredDifferentSortCode != differentSortCode ? 'error' : 'default'">
+              {{ differentSortCode }}
+            </n-text>
+          </n-descriptions-item>
+        </n-descriptions>
+        <div class="mt-8">
+          <n-space>
+            <n-button @click="currentStep = 2" type="warning">重新上传</n-button>
+            <n-button :disabled="!canUpload" @click="complete" type="primary">新建任务</n-button>
+          </n-space>
+        </div>
+      </template>
     </template>
   </div>
 </template>
