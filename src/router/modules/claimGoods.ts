@@ -2,6 +2,7 @@ import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
 import { renderIcon } from '@/utils';
 import { BellOutlined } from '@vicons/antd';
+
 const name = 'claimGoods';
 
 const routes: Array<RouteRecordRaw> = [
@@ -23,7 +24,7 @@ const routes: Array<RouteRecordRaw> = [
           title: '无主货管理',
           activeMenu: `${name}_index`,
         },
-        component: () => import('@/views/claimGoods/list/index.vue'),
+        component: () => import('@/views/bolita-views/claimGoods/list/index.vue'),
       },
     ],
   },

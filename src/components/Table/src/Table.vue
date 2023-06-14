@@ -69,14 +69,7 @@
     </div>
   </div>
   <div class="s-table">
-    <n-data-table
-      ref="tableElRef"
-      v-bind="getBindValues"
-      :striped="isStriped"
-      :pagination="pagination"
-      @update:page="updatePage"
-      @update:page-size="updatePageSize"
-    >
+    <n-data-table virtual-scroll ref="tableElRef" v-bind="getBindValues" :striped="isStriped">
       <template #[item]="data" v-for="item in Object.keys($slots)" :key="item">
         <slot :name="item" v-bind="data"></slot>
       </template>
@@ -86,17 +79,17 @@
 
 <script lang="ts">
   import {
-    ref,
-    defineComponent,
-    reactive,
-    unref,
-    toRaw,
     computed,
-    toRefs,
-    onMounted,
+    defineComponent,
     nextTick,
+    onMounted,
+    reactive,
+    ref,
+    toRaw,
+    toRefs,
+    unref,
   } from 'vue';
-  import { ReloadOutlined, ColumnHeightOutlined, QuestionCircleOutlined } from '@vicons/antd';
+  import { ColumnHeightOutlined, QuestionCircleOutlined, ReloadOutlined } from '@vicons/antd';
   import { createTableContext } from './hooks/useTableContext';
 
   import ColumnSetting from './components/settings/ColumnSetting.vue';
@@ -227,9 +220,13 @@
           'max-height': maxHeight,
         };
       });
-
+      const paginationReactive = reactive({
+        defaultPage: 1,
+        defaultPageSize: 10,
+        showSizePicker: true,
+        pageSizes: [10, 30, 100],
+      });
       //获取分页信息
-      const pagination = computed(() => toRaw(unref(getPaginationInfo)));
 
       function setProps(props: Partial<BasicTableProps>) {
         innerPropsRef.value = { ...unref(innerPropsRef), ...props };
@@ -264,7 +261,7 @@
         const headerH = 64;
         let paginationH = 2;
         let marginH = 24;
-        if (!isBoolean(unref(pagination))) {
+        if (!isBoolean(unref(paginationReactive))) {
           paginationEl = tableEl.querySelector('.n-data-table__pagination') as HTMLElement;
           if (paginationEl) {
             const offsetHeight = paginationEl.offsetHeight;
@@ -300,7 +297,7 @@
         densitySelect,
         updatePage,
         updatePageSize,
-        pagination,
+        pagination: paginationReactive,
         tableAction,
         setStriped,
         isStriped,

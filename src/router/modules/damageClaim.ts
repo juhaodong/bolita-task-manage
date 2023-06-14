@@ -22,7 +22,7 @@ const routes: Array<RouteRecordRaw> = [
           title: '索赔管理',
           activeMenu: 'damageClaim_index',
         },
-        component: () => import('@/views/damageClaim/list/index.vue'),
+        component: () => import('@/views/bolita-views/damageClaim/list/index.vue'),
       },
     ],
   },

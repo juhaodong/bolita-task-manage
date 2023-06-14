@@ -6,7 +6,7 @@ export type customerManageModel = {
 };
 
 //获取table
-export function getcustomerManageList(params) {
+export function getCustomerManageList(params) {
   return http.request({
     url: '/customerManage/list',
     method: 'get',

@@ -1,12 +1,20 @@
-import Mock from 'mockjs';
+import { ResultEnum } from '@/enums/httpEnum';
 
-export function resultSuccess(result, { message = 'ok' } = {}) {
-  return Mock.mock({
+export function resultSuccess(
+  result,
+  { message = 'ok' } = {}
+): {
+  code: number;
+  result: any;
+  message: string;
+  type: ResultEnum;
+} {
+  return {
     code: 200,
     result,
     message,
-    type: 'success',
-  });
+    type: ResultEnum.TYPE,
+  };
 }
 
 export function resultPageSuccess<T = any>(

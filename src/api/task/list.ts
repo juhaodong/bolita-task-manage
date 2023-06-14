@@ -1,5 +1,5 @@
 import { http } from '@/utils/http/axios';
-import { ArriveMedia } from '@/api/notify/statusList';
+import { ArriveMediaTypes } from '@/api/notify/list';
 
 export type TaskModel = {
   id: number;
@@ -10,7 +10,7 @@ export type TaskModel = {
   finishAmount: string;
   salesType: number;
   deliveryMethod: string;
-  status: ArriveMedia;
+  status: ArriveMediaTypes;
   operatorID: string;
   deliveryDate: string;
   completionRate: string;

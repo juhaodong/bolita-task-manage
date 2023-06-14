@@ -1,7 +1,7 @@
-import { ref, ComputedRef, unref, computed, onMounted, watchEffect, watch } from 'vue';
+import { computed, ComputedRef, onMounted, ref, unref, watch, watchEffect } from 'vue';
 import type { BasicTableProps } from '../types/table';
 import type { PaginationProps } from '../types/pagination';
-import { isBoolean, isFunction, isArray } from '@/utils/is';
+import { isBoolean, isFunction } from '@/utils/is';
 import { APISETTING } from '../const';
 
 export function useDataSource(
@@ -31,8 +31,8 @@ export function useDataSource(
     return rowKey
       ? rowKey
       : () => {
-        return 'key';
-      };
+          return 'key';
+        };
   });
 
   const getDataSourceRef = computed(() => {
@@ -52,7 +52,6 @@ export function useDataSource(
       const pageField = APISETTING.pageField;
       const sizeField = APISETTING.sizeField;
       const totalField = APISETTING.totalField;
-      const listField = APISETTING.listField;
 
       let pageParams = {};
       const { page = 1, pageSize = 10 } = unref(getPaginationInfo) as PaginationProps;
@@ -85,7 +84,7 @@ export function useDataSource(
           fetch(opt);
         }
       }
-      let resultInfo = res[listField] ? res[listField] : [];
+      let resultInfo = res ?? [];
       if (afterRequest && isFunction(afterRequest)) {
         // can modify the data returned by the interface for processing
         resultInfo = (await afterRequest(resultInfo)) || resultInfo;

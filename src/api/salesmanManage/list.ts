@@ -6,7 +6,7 @@ export type salesmanManageModel = {
 };
 
 //获取table
-export function getsalesmanManageList(params) {
+export function getSalesList(params) {
   return http.request({
     url: '/salesmanManage/list',
     method: 'get',
