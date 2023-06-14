@@ -11,6 +11,10 @@ export function toastError(message: string) {
   const $message = window['$message'];
   $message.error(message);
 }
+export function toastSuccess(message: string) {
+  const $message = window['$message'];
+  $message.success(message);
+}
 
 export function showErrorDialog(message: string) {
   const $dialog = window['$dialog'];

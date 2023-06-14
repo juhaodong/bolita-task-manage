@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, query } from 'firebase/firestore';
+import { addDoc, collection, doc, query, setDoc } from 'firebase/firestore';
 import { db, executeQuery, getDocContent } from '@/plugins/firebase';
 import { resultError, resultSuccess } from '../../../mock/_util';
 import { checkLog, doLog } from '@/api/statusChangeLog';
@@ -15,10 +15,11 @@ export type NotifyModel = {
   note: string;
   arriveDetail: ContainerArriveDetail | TrayArriveDetail | BoxArriveDetail;
   sortingLabelCount: string;
-  taskList: [];
+  taskList: NotifyTaskModel[];
 };
 
 export type NotifyTaskModel = {
+  arrivedCount: number;
   sortCode: string;
   trackingCode: string;
   trayCode: string;
@@ -62,6 +63,11 @@ export type BoxArriveDetail = {
 };
 
 const notifyPath = 'notify';
+const taskListPath = 'taskList';
+
+export async function getTasksForNotify(notifyId) {
+  return await executeQuery(query(collection(db, notifyPath, notifyId, taskListPath)));
+}
 
 export async function createNotify(notifyInfo: NotifyModel) {
   try {
@@ -73,11 +79,13 @@ export async function createNotify(notifyInfo: NotifyModel) {
       planArriveDateTime: 0,
       sortingLabelCount: '',
       status: '',
-      taskList: [],
       totalCount: 0,
     };
-    console.log(notifyInfo, 'info');
     const { id } = await addDoc(collection(db, notifyPath), Object.assign(info, notifyInfo));
+
+    await Promise.all(
+      notifyInfo.taskList.map((it) => addDoc(collection(db, notifyPath, id, taskListPath), it))
+    );
     await doLog({
       fromStatus: NotifyStatusList.NotSubmit,
       toStatus: NotifyStatusList.NotSubmit,
@@ -93,13 +101,58 @@ export async function createNotify(notifyInfo: NotifyModel) {
   }
 }
 
+export async function changeArriveCountForNotifyTask(
+  notifyId,
+  taskId,
+  newArriveCount,
+  note,
+  files
+) {
+  try {
+    await setDoc(
+      doc(db, notifyPath, notifyId, taskListPath, taskId),
+      { arrivedCount: newArriveCount },
+      { merge: true }
+    );
+    const notifyNow = await getNotifyById(notifyId);
+    const statusNow = notifyNow.status;
+    const arrivedTotalCount = notifyNow.taskList.reduce(
+      (sum, i) => sum + parseInt(i.arriveCount ?? '0'),
+      0
+    );
+    let statusLater = statusNow;
+    if (arrivedTotalCount == notifyNow.totalCount) {
+      statusLater = NotifyStatusList.AlreadyArrived;
+      await setDoc(
+        doc(db, notifyPath, notifyId),
+        { status: NotifyStatusList.AlreadyArrived },
+        { merge: true }
+      );
+    }
+    await doLog({
+      files: files,
+      fromStatus: statusNow,
+      logRef: notifyId,
+      note: '修改' + taskId + '到货数量为' + newArriveCount + '.备注:' + note,
+      timestamp: dayjs().valueOf(),
+      toStatus: statusLater,
+      userId: null,
+    });
+    return resultSuccess('');
+  } catch (e: any) {
+    return resultError(e?.message);
+  }
+}
+
 export async function getNotifyById(id: string) {
   const mainInfo = await getDocContent(doc(db, notifyPath, id));
   return {
     ...mainInfo,
     changeLogs: await checkLog(id),
+    taskList: await getTasksForNotify(id),
   };
 }
+
 //获取table
 export async function getNotifyList(params) {
   console.log(params);

@@ -16,14 +16,24 @@
       :scroll-x="1090"
     >
       <template #tableTitle>
-        <n-button type="primary" @click="addTable">
-          <template #icon>
-            <n-icon>
-              <PlusOutlined />
-            </n-icon>
-          </template>
-          新建
-        </n-button>
+        <n-space>
+          <n-button type="primary" @click="addTable">
+            <template #icon>
+              <n-icon>
+                <PlusOutlined />
+              </n-icon>
+            </template>
+            新建
+          </n-button>
+          <n-button type="default" @click="showScanInput">
+            <template #icon>
+              <n-icon>
+                <ScanOutlined />
+              </n-icon>
+            </template>
+            扫描
+          </n-button>
+        </n-space>
       </template>
     </BasicTable>
     <n-modal v-model:show="showDetailModal">
@@ -46,7 +56,7 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { BasicForm, FormSchema, useForm } from '@/components/Form';
   import { columns } from './columns';
-  import { PlusOutlined } from '@vicons/antd';
+  import { PlusOutlined, ScanOutlined } from '@vicons/antd';
   import { useRouter } from 'vue-router';
   import {
     arriveMedia,
@@ -289,6 +299,12 @@
 
   function handleReset(values: Recordable) {
     console.log(values);
+  }
+
+  let scanModal = $ref(false);
+  let scanInput = $ref('');
+  function showScanInput() {
+    scanModal = true;
   }
 </script>
 

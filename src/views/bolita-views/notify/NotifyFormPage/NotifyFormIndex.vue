@@ -35,6 +35,7 @@
 
     for (let i = 1; i < count; i++) {
       res.push({
+        arrivedCount: 0,
         actualWeight: '',
         address: '',
         addressType: '',
@@ -98,7 +99,7 @@
       console.log(rows, errors);
       if (rows.length > 0 && errors.length == 0) {
         uploadFailed = false;
-        detailedTasks = rows;
+        detailedTasks = rows.map((it) => ({ ...it, arrivedCount: 0 }));
       } else if (errors.length > 0) {
         uploadFailed = true;
         failReason = errors.reduce(

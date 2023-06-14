@@ -8,6 +8,8 @@ import {
   Query,
   QuerySnapshot,
 } from 'firebase/firestore';
+import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
+import dayjs from 'dayjs';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyChABcKKZVM1BZTvky3xkVl0b3pCLZaTuQ',
@@ -22,6 +24,18 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
+
+export const storageRef = ref(storage, 'bolita');
+
+export async function uploadImage(file, type = 'image') {
+  const name = dayjs().valueOf() + '-' + type + '.' + file.name.split('.').pop();
+  console.log(name, '将要上传的文件名字');
+  const res = await uploadBytes(ref(storageRef, name), file);
+  console.log(res, 'Image Result');
+  return await getDownloadURL(ref(storageRef, name));
+}
+
 export const analytics = getAnalytics(app);
 
 export async function executeQuery(query: Query<DocumentData>) {

@@ -87,9 +87,14 @@
         </template>
       </n-tab-pane>
       <n-tab-pane name="到货货品列表">
-        <div style="overflow-x: scroll">
+        <div class="bg-green-100" style="overflow-x: scroll">
           <div style="width: fit-content">
-            <n-data-table scroll-x="max-content" :columns="columns" :data="notifyDetail.taskList" />
+            <n-data-table
+              :row-class-name="(row) => (row.arrivedCount == row.count ? 'bg-green-100' : '')"
+              scroll-x="max-content"
+              :columns="columns"
+              :data="notifyDetail.taskList"
+            />
           </div>
         </div>
       </n-tab-pane>
@@ -119,17 +124,10 @@
               </div>
             </template>
             <div class="mt-4">{{ log.note || '暂无留言' }} </div>
-            <div class="px-2 py-2 mt-4">
+            <div class="px-2 py-2 mt-4" v-if="log.files.length > 0">
               <n-image-group>
                 <n-space>
-                  <n-image
-                    width="72"
-                    src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-                  />
-                  <n-image
-                    width="72"
-                    src="https://gw.alipayobjects.com/zos/antfincdn/aPkFc8Sj7n/method-draw-image.svg"
-                  />
+                  <n-image v-for="f in log.files" width="72" :src="f" />
                 </n-space>
               </n-image-group>
             </div>
@@ -137,14 +135,98 @@
         </n-timeline>
       </n-tab-pane>
     </n-tabs>
+    <n-modal v-model:show="showNumberEditModal">
+      <n-card style="width: 600px" title="修改到货数量">
+        <n-form :rules="rules" :model="formValue" ref="formRef" :label-width="80">
+          <n-form-item label="实际到货数量" path="arriveCount">
+            <n-input-number
+              v-model:value="formValue.arriveCount"
+              :max="233"
+              placeholder="输入实际到货数量"
+            />
+          </n-form-item>
+          <n-form-item label="备注" path="note">
+            <n-input v-model:value="formValue.note" placeholder="输入备注" />
+          </n-form-item>
+          <n-form-item label="附件" path="files">
+            <n-upload
+              multiple
+              accept="image/*"
+              v-model:file-list="formValue.files"
+              :default-upload="false"
+            >
+              <n-upload-dragger>
+                <div style="margin-bottom: 12px">
+                  <n-icon size="48" :depth="3">
+                    <archive />
+                  </n-icon>
+                </div>
+                <n-text style="font-size: 16px"> 点击或者拖动文件到该区域来上传</n-text>
+                <n-p depth="3" style="margin: 8px 0 0 0"> 请仔细检查您提交的文件 </n-p>
+              </n-upload-dragger>
+            </n-upload>
+          </n-form-item>
+          <n-form-item>
+            <n-button @click="submitChange" type="primary" attr-type="button">确认</n-button>
+          </n-form-item>
+        </n-form>
+      </n-card>
+    </n-modal>
   </n-card>
 </template>
 
 <script setup lang="ts">
-  import { ArriveMediaTypes, getNotifyById } from '@/api/notify/list';
-  import { computed, watchEffect } from 'vue';
+  import {
+    ArriveMediaTypes,
+    changeArriveCountForNotifyTask,
+    getNotifyById,
+  } from '@/api/notify/list';
+  import { computed, h, Ref, ref, watchEffect } from 'vue';
   import dayjs from 'dayjs';
+  import { NButton } from 'naive-ui';
+  import { Archive } from '@vicons/ionicons5';
+  import { handleRequest, toastSuccess } from '@/utils/utils';
+  import { uploadImage } from '@/plugins/firebase';
 
+  const formValue: Ref<{ arriveCount: number; note: string; files: any[] }> = ref({
+    arriveCount: 0,
+    note: '',
+    files: [],
+  });
+
+  const rules = ref({
+    arriveCount: {
+      required: true,
+      message: '请输入将要修改的数量',
+      trigger: ['input', 'blur'],
+      type: 'number',
+    },
+    note: {},
+    files: {},
+  });
+
+  async function submitChange() {
+    const files = formValue.value.files;
+    console.log(files, 'files');
+    for (const key in files) {
+      files[key] = await uploadImage(files[key].file);
+    }
+    const res = await changeArriveCountForNotifyTask(
+      props.notifyId,
+      editingTaskId,
+      formValue.value.arriveCount,
+      formValue.value.note,
+      files
+    );
+    await handleRequest(res, () => {
+      editingTaskId = '';
+      showNumberEditModal = false;
+      toastSuccess('更新成功');
+    });
+  }
+
+  let showNumberEditModal = $ref(false);
+  let editingTaskId = $ref('');
   const columns = computed(() => {
     const boxField =
       arriveMedia == ArriveMediaTypes.Box ? [{ title: '物流追踪号', key: 'trackingCode' }] : [];
@@ -158,10 +240,28 @@
           ]
         : [];
     return [
+      {
+        title: '到货状态',
+        key: 'arrived',
+        render(row) {
+          return h('div', [
+            h(
+              NButton,
+              {
+                onClick() {
+                  console.log(row);
+                  showNumberEditModal = true;
+                  editingTaskId = row.id;
+                },
+              },
+              (row.arrivedCount ?? 0) + '/' + row.count
+            ),
+          ]);
+        },
+      },
       { title: '分拣码', key: 'sortCode' },
       ...boxField,
       ...trayField,
-      { title: '件数', key: 'count' },
       { title: '实重', key: 'actualWeight' },
       { title: '体积', key: 'volume' },
       { title: '长', key: 'length' },
@@ -187,11 +287,14 @@
   let notifyDetail: any | null = $ref(null);
   const emit = defineEmits(['close']);
   watchEffect(async () => {
+    await reload();
+  });
+  async function reload() {
     if (props.notifyId != null) {
       notifyDetail = await getNotifyById(props.notifyId);
       console.log(notifyDetail);
     }
-  });
+  }
   const changeLog = $computed(() => {
     return notifyDetail?.changeLogs.map((it) => ({
       id: it.id,
@@ -200,6 +303,7 @@
       title: '操作人:' + it.userId,
       content: it.fromStatus + ' -> ' + it.toStatus,
       note: it.note,
+      files: it.files,
     }));
   });
   const arriveDetail = $computed(() => {
