@@ -1,25 +1,98 @@
-import { http } from '@/utils/http/axios';
+import { addDoc, collection, doc, query } from 'firebase/firestore';
+import { db, executeQuery, getDocContent } from '@/plugins/firebase';
+import { resultError, resultSuccess } from '../../../mock/_util';
+import { checkLog, doLog } from '@/api/statusChangeLog';
+import dayjs from 'dayjs';
 
 export type NotifyModel = {
-  salesId: string;
   customerId: string;
-  status: string;
-  planArriveDate: number;
-  arriveWarehouseName: string;
-  totalCount: number;
-  arrivedCount: number;
-  deliveryMethod: string;
   arriveMedia: ArriveMediaTypes;
+  arriveWarehouseId: string;
+  arrivedCount: number;
+  totalCount: number;
+  planArriveDateTime: number;
+  status: string;
   note: string;
+  arriveDetail: ContainerArriveDetail | TrayArriveDetail | BoxArriveDetail;
+  sortingLabelCount: string;
+  taskList: [];
 };
 
+export type NotifyTaskModel = {
+  sortCode: string;
+  trackingCode: string;
+  trayCode: string;
+  trayHeight: string;
+  trayWidth: string;
+  trayLength: string;
+  count: number;
+  actualWeight: string;
+  volume: string;
+  height: string;
+  length: string;
+  width: string;
+  sku: string;
+  operationType: string;
+  addressType: string;
+  targetCountry: string;
+  postCode: string;
+  fbaCode: string;
+  fba: string;
+  po: string;
+  address: string;
+};
+
+export type ContainerArriveDetail = {
+  containerNo: string;
+  carNo: string;
+  containerSize: string;
+  containerType: string;
+};
+
+export type TrayArriveDetail = {
+  traySize: string;
+  trayCount: number;
+  trayType: string;
+  goodsType: string;
+  carNo: string;
+};
+
+export type BoxArriveDetail = {
+  deliveryMethod: string;
+};
+
+const notifyPath = 'notify';
+
+export async function createNotify(notifyInfo: NotifyModel) {
+  try {
+    console.log(notifyInfo, 'info');
+    const { id } = await addDoc(collection(db, notifyPath), notifyInfo);
+    await doLog({
+      fromStatus: NotifyStatusList.NotSubmit,
+      toStatus: NotifyStatusList.NotSubmit,
+      timestamp: dayjs().valueOf(),
+      note: '',
+      files: [],
+      userId: null,
+      logRef: id,
+    });
+    return resultSuccess(id);
+  } catch (e: any) {
+    return resultError(e.message);
+  }
+}
+
+export async function getNotifyById(id: string) {
+  const mainInfo = await getDocContent(doc(db, notifyPath, id));
+  return {
+    ...mainInfo,
+    changeLogs: await checkLog(id),
+  };
+}
 //获取table
-export function getNotifyList(params) {
-  return http.request({
-    url: '/notify/list',
-    method: 'get',
-    params,
-  });
+export async function getNotifyList(params) {
+  console.log(params);
+  return await executeQuery(query(collection(db, notifyPath)));
 }
 
 export enum NotifyStatusList {

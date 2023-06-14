@@ -7,8 +7,8 @@ import { getUserInfo as getUserInfoApi, login } from '@/api/system/user';
 import { storage } from '@/utils/Storage';
 
 export type UserInfoType = {
-  name: string;
-  email: string;
+  username: string;
+  id: string;
 };
 
 export interface IUserState {
@@ -92,7 +92,7 @@ export const useUserStore = defineStore({
     // 登出
     async logout() {
       this.setPermissions([]);
-      this.setUserInfo({ name: '', email: '' });
+      this.setUserInfo({ id: '', username: '' });
       storage.remove(ACCESS_TOKEN);
       storage.remove(CURRENT_USER);
     },

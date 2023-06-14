@@ -1,16 +1,12 @@
 import { DataTableColumns } from 'naive-ui';
 import { h } from 'vue';
 import { NotifyModel } from '@/api/notify/list';
+import dayjs from 'dayjs';
 
 export const columns: DataTableColumns<NotifyModel> = [
   {
     title: '预报ID',
     key: 'id',
-    width: 100,
-  },
-  {
-    title: '负责人',
-    key: 'salesName',
     width: 100,
   },
   {
@@ -23,8 +19,8 @@ export const columns: DataTableColumns<NotifyModel> = [
     key: 'arriveMedia',
   },
   {
-    title: '到货仓库',
-    key: 'arriveWarehouseName',
+    title: '到货仓库ID',
+    key: 'arriveWarehouseId',
   },
   {
     title: '箱数',
@@ -35,11 +31,10 @@ export const columns: DataTableColumns<NotifyModel> = [
   },
   {
     title: '计划到货日期',
-    key: 'planArriveDate',
-  },
-  {
-    title: '物流渠道',
-    key: 'deliveryMethod',
+    key: 'planArriveDateTime',
+    render(data) {
+      return h('div', {}, [dayjs(data.planArriveDateTime).format('YYYY-MM-DD HH:mm')]);
+    },
   },
   {
     title: '备注',

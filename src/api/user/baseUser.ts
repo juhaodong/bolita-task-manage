@@ -21,7 +21,7 @@ export enum PermissionEnums {
 }
 
 export type BaseUser = {
-  userId: string;
+  id: string;
   username: string;
   realName: string;
   desc: string;

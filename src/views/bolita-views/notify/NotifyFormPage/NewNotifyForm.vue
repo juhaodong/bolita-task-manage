@@ -5,10 +5,12 @@
 </template>
 <script setup lang="ts">
   import { FormSchema, useForm } from '@/components/Form';
-  import { warehouseList } from '@/api/warehouse';
   import { generateOptionFromArray } from '@/utils/utils';
   import { arriveMedia } from '@/api/notify/list';
+  import { listUser, PermissionEnums } from '@/api/user/baseUser';
+  import { ref } from 'vue';
 
+  let warehouseList = ref([]);
   const schemas: FormSchema[] = [
     {
       field: 'totalCount',
@@ -37,22 +39,14 @@
       rules: [{ required: true, message: '请选择入库类型', trigger: ['blur'] }],
     },
     {
-      field: 'arriveWarehouseName',
+      field: 'arriveWarehouseId',
       component: 'NSelect',
       label: '到货仓库',
       componentProps: {
         placeholder: '请选择到货仓库',
-        options: warehouseList.map((it) => {
-          return {
-            value: it,
-            label: it,
-          };
-        }),
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
+        options: warehouseList,
       },
-      rules: [{ required: true, message: '请输入姓名', trigger: ['blur'] }],
+      rules: [{ required: true, message: '请选择到货仓库', trigger: ['blur'] }],
     },
   ];
 
@@ -73,6 +67,15 @@
   function handleReset(value: Recordable) {
     console.log(value);
   }
+
+  async function init() {
+    warehouseList.value = (await listUser(PermissionEnums.Operator)).result.map((it) => ({
+      label: it.realName,
+      value: it.id,
+    }));
+    console.log(warehouseList);
+  }
+  init();
 </script>
 
 <style scoped lang="less"></style>

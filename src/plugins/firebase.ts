@@ -1,9 +1,14 @@
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
-import { getDocs, getFirestore, Query, DocumentData, QuerySnapshot } from 'firebase/firestore';
+import {
+  DocumentData,
+  getDoc,
+  getDocs,
+  getFirestore,
+  Query,
+  QuerySnapshot,
+} from 'firebase/firestore';
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: 'AIzaSyChABcKKZVM1BZTvky3xkVl0b3pCLZaTuQ',
   authDomain: 'bolita-task-manage.firebaseapp.com',
@@ -23,9 +28,17 @@ export async function executeQuery(query: Query<DocumentData>) {
   return getDocContentWithId(await getDocs(query));
 }
 
-export function getDocContentWithId(docs: QuerySnapshot<DocumentData>): any[] {
-  return docs.docs.map((it) => ({
-    id: it.id,
-    ...it.data(),
-  }));
+function getDocContentWithId(docs: QuerySnapshot<DocumentData>): any[] {
+  return docs.docs.map(docContent);
+}
+
+export async function getDocContent(docRef) {
+  return docContent(await getDoc(docRef));
+}
+
+export function docContent(doc) {
+  return {
+    id: doc.id,
+    ...doc.data(),
+  };
 }

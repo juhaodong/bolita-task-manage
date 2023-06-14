@@ -25,14 +25,13 @@
           新建
         </n-button>
       </template>
-
-      <template #toolbar>
-        <n-button type="primary" @click="reloadTable">刷新数据</n-button>
-      </template>
     </BasicTable>
+    <n-modal v-model:show="showDetailModal">
+      <notify-detail-page v-if="currentNotifyId != null" :notify-id="currentNotifyId" />
+    </n-modal>
 
     <n-modal v-model:show="showModal" :show-icon="false" preset="dialog" title="新建到货预报">
-      <notify-form-index />
+      <notify-form-index @submit="createNewNotify" />
     </n-modal>
   </n-card>
 </template>
@@ -45,13 +44,23 @@
   import { columns } from './columns';
   import { PlusOutlined } from '@vicons/antd';
   import { useRouter } from 'vue-router';
-  import { arriveMedia, getNotifyList, notifyStatusList } from '@/api/notify/list';
+  import {
+    arriveMedia,
+    createNotify,
+    getNotifyList,
+    NotifyModel,
+    NotifyStatusList,
+    notifyStatusList,
+  } from '@/api/notify/list';
   import { salesNameList } from '@/api/sales';
   import { deliveryMethod } from '@/api/deliveryMethod';
   import { warehouseList } from '@/api/warehouse';
   import dayjs from 'dayjs';
   import NotifyFormIndex from '@/views/bolita-views/notify/NotifyFormPage/NotifyFormIndex.vue';
-  import { generateOptionFromArray } from '@/utils/utils';
+  import { generateOptionFromArray, handleRequest } from '@/utils/utils';
+  import { useUserStore } from '@/store/modules/user';
+  import NotifyDetailPage from '@/views/bolita-views/notify/NotifyDetail/NotifyDetailPage.vue';
+  import { $ref } from 'vue/macros';
 
   const schemas: FormSchema[] = [
     {
@@ -162,19 +171,10 @@
   const formRef: any = ref(null);
   // const message = useMessage();
   const actionRef = ref();
+  let showDetailModal = $ref(false);
 
   const showModal = ref(false);
   const formBtnLoading = ref(false);
-  const formParams = reactive({
-    name: '',
-    address: '',
-    date: null,
-  });
-
-  const params = ref({
-    pageSize: 5,
-    name: 'xiaoMa',
-  });
 
   const actionColumn = reactive({
     width: 220,
@@ -234,10 +234,8 @@
     showModal.value = true;
   }
 
-  const loadDataTable = async (res) => {
-    const { list } = await getNotifyList({ pageSize: 60 });
-    console.log();
-    return list;
+  const loadDataTable = async () => {
+    return await getNotifyList({});
   };
 
   function onCheckedRow(rowKeys) {
@@ -265,9 +263,35 @@
     });
   }
 
+  const user = useUserStore();
+
+  async function createNewNotify(notifyInfo) {
+    console.log(notifyInfo);
+    console.log(user.info);
+    const info: NotifyModel = {
+      arriveDetail: notifyInfo.arriveDetail,
+      arriveMedia: notifyInfo.arriveMedia,
+      arriveWarehouseId: notifyInfo.arriveWarehouseId,
+      arrivedCount: 0,
+      customerId: user.info.id,
+      note: notifyInfo.arriveDetail.note,
+      planArriveDateTime: notifyInfo.arriveDetail.planArriveDateTime,
+      sortingLabelCount: notifyInfo.arriveDetail.sortingLabelCount,
+      status: NotifyStatusList.NotSubmit,
+      taskList: [],
+      totalCount: notifyInfo.totalCount,
+    };
+    const res = await createNotify(info);
+    await handleRequest(res, () => {
+      showModal.value = false;
+      reloadTable();
+    });
+  }
+
+  let currentNotifyId = $ref(null);
   function handleEdit(record: Recordable) {
-    console.log('点击了编辑', record);
-    router.push({ name: 'basic-info', params: { id: record.id } });
+    currentNotifyId = record.id;
+    showDetailModal = true;
   }
 
   function handleDelete() {

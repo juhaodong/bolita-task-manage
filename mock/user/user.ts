@@ -6,7 +6,7 @@ const Random = Mock.Random;
 const token = Random.string('upper', 32, 32);
 
 const adminInfo = {
-  userId: '1',
+  id: '1',
   username: 'admin',
   realName: 'Admin',
   avatar: Random.image(),
