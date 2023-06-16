@@ -73,7 +73,6 @@
       label: it.realName,
       value: it.id,
     }));
-    console.log(warehouseList);
   }
   init();
 </script>
