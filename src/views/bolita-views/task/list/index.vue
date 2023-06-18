@@ -32,6 +32,7 @@
     </n-modal>
     <n-modal v-model:show="showDetailModel">
       <task-detail-page
+        @refresh="reloadTable"
         @close="
           showDetailModel = false;
           currentTaskId = '';
@@ -39,7 +40,6 @@
         :task-id="currentTaskId"
       />
     </n-modal>
-    <n-modal v-model:show="showTaskFeedBackModel" />
   </n-card>
 </template>
 
@@ -225,7 +225,7 @@
             },
           },
           {
-            label: '提交到物流',
+            label: '物流回传',
             onClick() {},
             ifShow: () => {
               return [TaskStatus.Finished].includes(record.status);

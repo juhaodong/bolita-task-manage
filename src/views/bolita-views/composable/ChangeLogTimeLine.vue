@@ -3,6 +3,10 @@
   import { watchEffect } from 'vue';
   import dayjs from 'dayjs';
   import { $computed } from 'vue/macros';
+  import { FileTextOutlined } from '@vicons/antd';
+  import { getFileNameAndTypeForFirebaseLink } from '../../../utils/utils';
+  import { downloadByUrl } from '@/utils/downloadFile';
+  import { downloadFile } from '@/plugins/firebase';
 
   const props = defineProps({ logRef: String });
   let logData: any[] = $ref([]);
@@ -61,9 +65,16 @@
           </n-space>
         </n-image-group>
         <n-space v-if="otherFiles(log.files).length > 0">
-          <n-button :key="f" v-for="(f, i) in otherFiles(log.files)">
-            下载附件{{ i + 1 }}
-          </n-button>
+          <div @click="downloadFile(f)" :key="f" v-for="f in otherFiles(log.files)">
+            <div class="p-4 flex justify-center items-center flex-col">
+              <n-icon size="24">
+                <file-text-outlined />
+              </n-icon>
+            </div>
+            <n-ellipsis style="max-width: 80px" class="text-xs">
+              {{ getFileNameAndTypeForFirebaseLink(f).name }}
+            </n-ellipsis>
+          </div>
         </n-space>
       </div>
     </n-timeline-item>

@@ -10,6 +10,7 @@ import {
 } from 'firebase/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import dayjs from 'dayjs';
+import { UploadFileInfo } from 'naive-ui';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyChABcKKZVM1BZTvky3xkVl0b3pCLZaTuQ',
@@ -29,11 +30,19 @@ export const storage = getStorage(app);
 export const storageRef = ref(storage, 'bolita');
 
 export async function uploadFile(file, type: string | null = 'image') {
-  const name = dayjs().valueOf() + '-' + (type?.split('/')[1] ?? 'no-type') + '/' + file.name;
+  const name = dayjs().valueOf() + '-' + (type ?? 'no-type') + '/' + file.name;
   console.log(name, '将要上传的文件名字');
   const res = await uploadBytes(ref(storageRef, name), file);
   console.log(res, 'Image Result');
   return await getDownloadURL(ref(storageRef, name));
+}
+
+export async function getFileUrlFromFileUpload(file: UploadFileInfo) {
+  return await uploadFile(file.file, file.type?.split('/')[1]);
+}
+
+export async function getFileListUrl(files: UploadFileInfo[]) {
+  return await Promise.all(files.map(getFileUrlFromFileUpload));
 }
 
 export const analytics = getAnalytics(app);
@@ -55,4 +64,8 @@ export function docContent(doc) {
     id: doc.id,
     ...doc.data(),
   };
+}
+
+export function downloadFile(url) {
+  window.open(url, '_blank');
 }

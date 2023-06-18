@@ -23,6 +23,7 @@ export function downloadByUrl({
   target?: '_self' | '_blank';
   fileName?: string;
 }): Promise<boolean> {
+  console.log(url);
   // 是否同源
   const isSameHost = new URL(url).host == location.host;
   return new Promise<boolean>((resolve, reject) => {

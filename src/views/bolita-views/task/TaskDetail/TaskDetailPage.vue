@@ -1,27 +1,31 @@
 <script setup lang="ts">
   import { $computed, $ref } from 'vue/macros';
   import { ref, watchEffect } from 'vue';
-  import { getTaskById, TaskModel, TaskStatus } from '@/api/task/task-api';
+  import { changeTaskFeedBack, getTaskById, TaskModel, TaskStatus } from '@/api/task/task-api';
   import dayjs from 'dayjs';
   import ChangeLogTimeLine from '@/views/bolita-views/composable/ChangeLogTimeLine.vue';
-  import { FileTextOutlined } from '@vicons/antd';
-  import { getFileNameAndTypeForFirebaseLink } from '@/utils/utils';
+  import { handleRequest, toastSuccess } from '@/utils/utils';
   import { Archive } from '@vicons/ionicons5';
   import { laterFilledInOperationRequirement } from '@/api/operationType';
+  import { getFileListUrl } from '@/plugins/firebase';
+  import AppendFileListDisplay from '@/views/bolita-views/composable/AppendFileListDisplay.vue';
 
   const props = defineProps({
     taskId: String,
   });
   const files = ref([]);
+  let note = $ref('');
 
   let taskDetail: TaskModel | null = $ref(null);
   watchEffect(async () => {
     await reload();
   });
-  const emit = defineEmits(['close', 'submit-feed-back']);
+  const emit = defineEmits(['close', 'refresh']);
 
   async function reload() {
     if (props.taskId != null) {
+      files.value = [];
+      note = '';
       taskDetail = await getTaskById(props.taskId);
       console.log(taskDetail);
     }
@@ -44,6 +48,25 @@
       taskDetail?.status ?? TaskStatus.Warning
     );
   });
+
+  let loading = $ref(false);
+
+  async function submitFeedBack() {
+    loading = true;
+    const filesUrl = await getFileListUrl(files.value);
+    const res = await changeTaskFeedBack(
+      props.taskId ?? '',
+      taskDetail?.operationRequirements ?? [],
+      note,
+      filesUrl
+    );
+    await handleRequest(res, () => {
+      toastSuccess('反馈成功！');
+      emit('refresh');
+      emit('close');
+    });
+    loading = false;
+  }
 </script>
 
 <template>
@@ -86,19 +109,7 @@
         </n-descriptions>
       </n-tab-pane>
       <n-tab-pane name="附件">
-        <n-list hoverable>
-          <n-list-item v-for="f in taskDetail.files" :key="f">
-            <template #prefix>
-              <div>
-                <file-text-outlined />
-              </div>
-            </template>
-            {{ getFileNameAndTypeForFirebaseLink(f).name }}
-            <template #suffix>
-              <n-button>下载</n-button>
-            </template>
-          </n-list-item>
-        </n-list>
+        <append-file-list-display :files-url="taskDetail?.files" />
       </n-tab-pane>
       <n-tab-pane name="任务反馈">
         <n-form>
@@ -149,7 +160,7 @@
                 <n-text strong>反馈</n-text>
               </div>
               <n-form-item label="备注">
-                <n-input />
+                <n-input v-model:value="note" />
               </n-form-item>
               <n-form-item label="本次反馈附件">
                 <n-upload multiple v-model:file-list="files" :default-upload="false">
@@ -165,7 +176,14 @@
                 </n-upload>
               </n-form-item>
 
-              <n-button type="primary" style="width: 100%"> 提交反馈</n-button>
+              <n-button
+                :loading="loading"
+                type="primary"
+                style="width: 100%"
+                @click="submitFeedBack"
+              >
+                提交反馈
+              </n-button>
             </n-gi>
           </n-grid>
         </n-form>

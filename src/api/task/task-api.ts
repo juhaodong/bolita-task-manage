@@ -2,8 +2,10 @@ import { OperationRequirementModel } from '@/api/operationType';
 import { db, executeQuery, getDocContent } from '@/plugins/firebase';
 import { addDoc, collection, doc, query, setDoc } from 'firebase/firestore';
 import { TaskType } from '@/api/task/task-types';
-import { checkLog, doLog } from '@/api/statusChangeLog';
+import { doLog } from '@/api/statusChangeLog';
 import { resultError, resultSuccess } from '../../../mock/_util';
+import dayjs from 'dayjs';
+import { keyBy } from 'lodash-es';
 
 export enum TaskStatus {
   NotSubmit = '未提交',
@@ -98,11 +100,49 @@ export async function changeTaskStatus(id: string, newStatus: TaskStatus) {
   }
 }
 
+export async function changeTaskFeedBack(
+  id: string,
+  newOR: OperationRequirementModel[],
+  note: string,
+  files: string[]
+) {
+  try {
+    const currentTask = await getTaskById(id);
+    const oldTaskDetail = keyBy(currentTask.operationRequirements, 'operationType');
+    const haveChange = newOR.some((it) => {
+      return it.completeAmount != oldTaskDetail[it.operationType].completeAmount;
+    });
+    if (!haveChange) {
+      return resultError('您未进行任何变动，无法提交反馈');
+    }
+    const updateObj: any = {
+      operationRequirements: newOR,
+    };
+    const isComplete = newOR.every((it) => it.completeAmount >= it.requireAmount);
+    if (currentTask.operateTime == null) {
+      updateObj.operateTime = dayjs().valueOf();
+    }
+    updateObj.status = isComplete ? TaskStatus.Finished : TaskStatus.Handling;
+    await setDoc(doc(taskCollection, id), updateObj, { merge: true });
+    await doLog({
+      files: files,
+      fromStatus: currentTask.status,
+      logRef: id,
+      note: note,
+      timestamp: 0,
+      toStatus: updateObj.status,
+      userId: null,
+    });
+
+    return resultSuccess('');
+  } catch (e: any) {
+    return resultError(e?.message);
+  }
+}
+
 export async function getTaskById(id: string) {
-  const mainInfo = await getDocContent(doc(db, taskPath, id));
-  return {
-    ...mainInfo,
-  };
+  const mainInfo: TaskModel = await getDocContent(doc(db, taskPath, id));
+  return mainInfo;
 }
 
 export async function getTaskList(params) {

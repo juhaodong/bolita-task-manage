@@ -5455,6 +5455,11 @@ jest@^29.3.1:
     import-local "^3.0.2"
     jest-cli "^29.3.1"
 
+js-file-downloader@^1.1.25:
+  version "1.1.25"
+  resolved "https://registry.yarnpkg.com/js-file-downloader/-/js-file-downloader-1.1.25.tgz#05371e02f61a6ef11176d544bd2fdbb36cfbce92"
+  integrity sha512-msD5K5Ot7e74/JZSu4evznZqbcZQaUBd6ENbev9IUzI+2RqvckoAe1mVm3ZyvwFh/WKe3gN1IwyHEKycDU1jkA==
+
 js-sdsl@^4.1.4:
   version "4.2.0"
   resolved "https://registry.npmmirror.com/js-sdsl/-/js-sdsl-4.2.0.tgz"
