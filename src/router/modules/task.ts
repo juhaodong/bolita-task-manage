@@ -1,7 +1,7 @@
 import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
 import { renderIcon } from '@/utils';
-import { BellOutlined } from '@vicons/antd';
+import { FlagOutlined } from '@vicons/antd';
 
 const name = 'task';
 
@@ -14,7 +14,7 @@ const routes: Array<RouteRecordRaw> = [
       title: '任务管理',
       sort: 2,
       isRoot: true,
-      icon: renderIcon(BellOutlined),
+      icon: renderIcon(FlagOutlined),
     },
     children: [
       {

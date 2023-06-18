@@ -9,6 +9,7 @@
   import { laterFilledInOperationRequirement } from '@/api/operationType';
   import { getFileListUrl } from '@/plugins/firebase';
   import AppendFileListDisplay from '@/views/bolita-views/composable/AppendFileListDisplay.vue';
+  import { CheckCircleFilled } from '@vicons/antd';
 
   const props = defineProps({
     taskId: String,
@@ -132,6 +133,9 @@
                     :show-button="false"
                     v-model:value="m.completeAmount"
                   >
+                    <template #prefix v-if="m.completeAmount >= m.requireAmount">
+                      <n-icon color="green"><check-circle-filled /></n-icon>
+                    </template>
                     <template #suffix> / 共 {{ m.requireAmount }}</template>
                   </n-input-number>
                 </n-form-item-gi>

@@ -5,7 +5,7 @@ import { TaskType } from '@/api/task/task-types';
 import { doLog } from '@/api/statusChangeLog';
 import { resultError, resultSuccess } from '../../../mock/_util';
 import dayjs from 'dayjs';
-import { keyBy } from 'lodash-es';
+import { clamp, keyBy } from 'lodash-es';
 
 export enum TaskStatus {
   NotSubmit = '未提交',
@@ -109,6 +109,12 @@ export async function changeTaskFeedBack(
   try {
     const currentTask = await getTaskById(id);
     const oldTaskDetail = keyBy(currentTask.operationRequirements, 'operationType');
+    const totalTaskCount = currentTask.operationRequirements.reduce(
+      (sum, i) => sum + parseInt(i.requireAmount),
+      0
+    );
+    const completeTaskCount = newOR.reduce((sum, i) => sum + parseInt(i.completeAmount), 0);
+    const newCompleteRate = clamp(completeTaskCount / totalTaskCount, 0, 1).toFixed(2);
     const haveChange = newOR.some((it) => {
       return it.completeAmount != oldTaskDetail[it.operationType].completeAmount;
     });
@@ -117,6 +123,7 @@ export async function changeTaskFeedBack(
     }
     const updateObj: any = {
       operationRequirements: newOR,
+      completionRate: newCompleteRate,
     };
     const isComplete = newOR.every((it) => it.completeAmount >= it.requireAmount);
     if (currentTask.operateTime == null) {
@@ -128,7 +135,7 @@ export async function changeTaskFeedBack(
       files: files,
       fromStatus: currentTask.status,
       logRef: id,
-      note: note,
+      note: '完成率: ' + currentTask.completionRate + '%-->' + newCompleteRate + '%. 备注：' + note,
       timestamp: 0,
       toStatus: updateObj.status,
       userId: null,
