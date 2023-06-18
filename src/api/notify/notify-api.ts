@@ -1,7 +1,7 @@
 import { addDoc, collection, doc, query, setDoc } from 'firebase/firestore';
 import { db, executeQuery, getDocContent } from '@/plugins/firebase';
 import { resultError, resultSuccess } from '../../../mock/_util';
-import { checkLog, doLog } from '@/api/statusChangeLog';
+import { doLog } from '@/api/statusChangeLog';
 import dayjs from 'dayjs';
 
 export type NotifyModel = {
@@ -153,7 +153,6 @@ export async function getNotifyById(id: string) {
   const mainInfo = await getDocContent(doc(db, notifyPath, id));
   return {
     ...mainInfo,
-    changeLogs: await checkLog(id),
     taskList: await getTasksForNotify(id),
   };
 }

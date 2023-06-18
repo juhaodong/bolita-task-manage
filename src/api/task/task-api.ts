@@ -1,10 +1,11 @@
 import { OperationRequirementModel } from '@/api/operationType';
-import { db, executeQuery } from '@/plugins/firebase';
-import { addDoc, collection, query } from 'firebase/firestore';
+import { db, executeQuery, getDocContent } from '@/plugins/firebase';
+import { addDoc, collection, doc, query } from 'firebase/firestore';
 import { TaskType } from '@/api/task/task-types';
-import { doLog } from '@/api/statusChangeLog';
+import { checkLog, doLog } from '@/api/statusChangeLog';
 import dayjs from 'dayjs';
 import { resultError, resultSuccess } from '../../../mock/_util';
+import { getTasksForNotify } from '@/api/notify/notify-api';
 
 export enum TaskStatus {
   NotSubmit = '未提交',
@@ -57,6 +58,7 @@ export async function createTask(taskInfo: TaskModel) {
       warehouseId: '',
     };
     const realInfo = Object.assign(info, taskInfo);
+    console.log(realInfo, 'info');
     const { id } = await addDoc(collection(db, taskPath), realInfo);
     await Promise.all(
       taskInfo.operationRequirements.map((it) =>
@@ -76,6 +78,14 @@ export async function createTask(taskInfo: TaskModel) {
   } catch (e: any) {
     return resultError(e?.message);
   }
+}
+
+export async function getTaskById(id: string) {
+  const mainInfo = await getDocContent(doc(db, taskPath, id));
+  return {
+    ...mainInfo,
+    changeLogs: await checkLog(id),
+  };
 }
 
 export async function getTaskList(params) {

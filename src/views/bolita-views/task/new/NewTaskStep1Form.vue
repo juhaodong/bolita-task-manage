@@ -14,7 +14,7 @@
   let warehouseList = ref([]);
   const schemas: FormSchema[] = [
     {
-      field: 'totalCount',
+      field: 'boxCount',
       labelMessage: '请在此填入本次预计到达的总箱数，如果是货柜，请填写货柜内的总箱数',
       component: 'NInputNumber',
       label: '箱数',
@@ -37,11 +37,11 @@
       rules: [{ required: true, message: '请选择任务类型', trigger: ['blur'] }],
     },
     {
-      field: 'arriveWarehouseId',
+      field: 'warehouseId',
       component: 'NSelect',
-      label: '到货仓库',
+      label: '操作仓库',
       componentProps: {
-        placeholder: '请选择到货仓库',
+        placeholder: '请选择操作仓库',
         options: warehouseList,
       },
       rules: [{ required: true, message: '请选择到货仓库', trigger: ['blur'] }],

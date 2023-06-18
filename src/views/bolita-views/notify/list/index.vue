@@ -181,14 +181,10 @@
     },
   ];
 
-  const router = useRouter();
-  const formRef: any = ref(null);
-  // const message = useMessage();
   const actionRef = ref();
   let showDetailModal = $ref(false);
 
   const showModal = ref(false);
-  const formBtnLoading = ref(false);
 
   const actionColumn = reactive({
     width: 220,

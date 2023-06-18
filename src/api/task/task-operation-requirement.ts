@@ -133,8 +133,13 @@ export const completedList = ['0%', '25%', '50%', '75%', '100%'];
 export const operationalRequirementList = ['认真', '仔细'];
 export const linkList = ['www.baidu.com', 'www.bilibili.com'];
 
-export function getNewORsByName(operationType) {
-  return getTaskTypeOperationKeys(operationType).filter(
+export function getNewORsByTaskType(taskType: TaskType) {
+  return getTaskTypeOperationKeys(taskType).filter(
     (it) => !laterFilledInOperationRequirement.includes(it.operationType)
+  );
+}
+export function getLaterORsByTaskType(taskType: TaskType) {
+  return getTaskTypeOperationKeys(taskType).filter((it) =>
+    laterFilledInOperationRequirement.includes(it.operationType)
   );
 }

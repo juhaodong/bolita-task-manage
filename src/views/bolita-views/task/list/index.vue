@@ -25,14 +25,13 @@
           新建
         </n-button>
       </template>
-
-      <template #toolbar>
-        <n-button type="primary" @click="reloadTable">刷新数据</n-button>
-      </template>
     </BasicTable>
 
     <n-modal v-model:show="showModal" :show-icon="false" preset="dialog" title="新建任务">
-      <new-task-form-index />
+      <new-task-form-index @submit="createNewTask" />
+    </n-modal>
+    <n-modal v-model:show="showDetailModel">
+      <task-detail-page :task-id="currentTaskId" />
     </n-modal>
   </n-card>
 </template>
@@ -49,9 +48,12 @@
   import { deliveryMethod } from '@/api/deliveryMethod';
   import { warehouseList } from '@/api/warehouse';
   import dayjs from 'dayjs';
-  import { getTaskList } from '@/api/task/task-api';
+  import { createTask, getTaskList, TaskModel } from '@/api/task/task-api';
   import { notifyStatusList } from '@/api/notify/notify-api';
   import NewTaskFormIndex from '@/views/bolita-views/task/new/NewTaskFormIndex.vue';
+  import { handleRequest } from '@/utils/utils';
+  import { $ref } from 'vue/macros';
+  import TaskDetailPage from '@/views/bolita-views/task/TaskDetail/TaskDetailPage.vue';
 
   const schemas: FormSchema[] = [
     {
@@ -225,8 +227,8 @@
   }
 
   function handleEdit(record: Recordable) {
-    console.log('点击了编辑', record);
-    router.push({ name: 'basic-info', params: { id: record.id } });
+    showDetailModel = true;
+    currentTaskId = record.id;
   }
 
   function handleDelete() {
@@ -241,6 +243,17 @@
   function handleReset(values: Recordable) {
     console.log(values);
   }
+
+  async function createNewTask(taskInfo: TaskModel) {
+    const res = await createTask(taskInfo);
+    await handleRequest(res, () => {
+      showModal.value = false;
+      reloadTable();
+    });
+  }
+
+  let showDetailModel = $ref(false);
+  let currentTaskId = $ref('');
 </script>
 
 <style lang="less" scoped></style>
