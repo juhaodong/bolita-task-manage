@@ -126,7 +126,8 @@ export async function changeTaskFeedBack(
       completionRate: (newCompleteRate * 100).toFixed(2),
     };
     const isComplete = newOR.every((it) => it.completeAmount >= it.requireAmount);
-    if (currentTask.operateTime == null) {
+    console.log(currentTask.operateTime);
+    if (!currentTask.operateTime) {
       updateObj.operateTime = dayjs().valueOf();
     }
     updateObj.status = isComplete ? TaskStatus.Finished : TaskStatus.Handling;

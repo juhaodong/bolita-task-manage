@@ -1,6 +1,7 @@
 import { DataTableColumns } from 'naive-ui';
 import { TaskModel } from '@/api/task/task-api';
 import { h } from 'vue';
+import dayjs from 'dayjs';
 
 export const columns: DataTableColumns<TaskModel> = [
   {
@@ -34,6 +35,12 @@ export const columns: DataTableColumns<TaskModel> = [
   {
     title: '操作日期',
     key: 'operateTime',
+    render(record) {
+      return h(
+        'div',
+        record.operateTime && dayjs(record.operateTime).format('YYYY-MM-DD HH:mm:ss')
+      );
+    },
   },
   {
     title: '发货日期',
