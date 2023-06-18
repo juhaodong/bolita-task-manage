@@ -1,24 +1,25 @@
 import { http } from '@/utils/http/axios';
-import { ArriveMediaTypes } from '@/api/notify/list';
+import { OperationRequirementModel } from '@/api/operationType';
+
+export enum TaskStatus {}
 
 export type TaskModel = {
   id: number;
   operateTime: string;
-  customerID: string;
+  customerId: string;
   salesName: string;
   planAmount: number;
   finishAmount: string;
   salesType: number;
   deliveryMethod: string;
-  status: ArriveMediaTypes;
-  operatorID: string;
+  status: string;
+  salesId: string;
   deliveryDate: string;
   completionRate: string;
   note: string;
   annex: string;
-  operationalRequirement: string;
-  timeLine: string;
-  businessLink: string;
+  operationRequirements: OperationRequirementModel[];
+  refLink: string;
 };
 
 //获取table

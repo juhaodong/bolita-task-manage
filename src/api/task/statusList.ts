@@ -1,3 +1,5 @@
+import { getORListByNames, OperationType } from '@/api/operationType';
+
 export const taskStatusList = [
   '未提交',
   '待审核',
@@ -8,37 +10,50 @@ export const taskStatusList = [
   '已完成',
 ];
 
-export type ArriveMedia = '货柜' | '托盘' | '散货' | '认领件';
-export const ArriveMediaTypes: Record<string, ArriveMedia> = {
-  Container: '货柜',
-  Tray: '托盘',
-  Box: '散货',
-  ClaimGood: '认领件',
-};
+export enum TaskType {
+  Shelves = '上架',
+  BoxTransfer = '散货中转',
+  AmazonTransfer = 'AMZ托盘转运',
+  NormalTrayTransfer = '普通托盘转运',
+  BoxFastTransfer = '散货快转',
+  OneForSend = '一件代发',
+  ChangeLogo = '换标',
+  OutBound = '出库',
+  Inventory = '盘点',
+  Destroy = '销毁',
+  Return = '退货',
+  InStorageOperation = '库内操作',
+}
 
-export const arriveMedia: ArriveMedia[] = Object.values(ArriveMediaTypes);
+export const taskTypes: TaskType[] = Object.values(TaskType);
 
-export type SalesType =
-  | '上架'
-  | '散货中转'
-  | '快转'
-  | '一件代发'
-  | '换标'
-  | '退货'
-  | '异常'
-  | '盘点';
-export const SalesTypes: Record<string, SalesType> = {
-  Shelves: '上架',
-  Transshipment: '散货中转',
-  FastTurn: '快转',
-  OneForSend: '一件代发',
-  ChangeLogo: '换标',
-  Return: '退货',
-  Wrong: '异常',
-  Check: '盘点',
-};
-
-export const salesTypeList: SalesType[] = Object.values(SalesTypes);
+function getTaskTypeOperationKeys(taskType: TaskType) {
+  switch (taskType) {
+    case TaskType.Shelves:
+      return getORListByNames([OperationType.Amount, OperationType.Check, OperationType.OpenBox]);
+    case TaskType.BoxTransfer:
+      break;
+    case TaskType.NormalTrayTransfer:
+      break;
+    case TaskType.BoxFastTransfer:
+      break;
+    case TaskType.OneForSend:
+      break;
+    case TaskType.ChangeLogo:
+      break;
+    case TaskType.OutBound:
+      break;
+    case TaskType.Inventory:
+      break;
+    case TaskType.Destroy:
+      break;
+    case TaskType.Return:
+      break;
+    case TaskType.InStorageOperation:
+      break;
+    case TaskType.AmazonTransfer:
+  }
+}
 
 export const completedList = ['0%', '25%', '50%', '75%', '100%'];
 

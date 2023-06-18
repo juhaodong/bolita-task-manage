@@ -6,7 +6,7 @@ import {
   completedList,
   linkList,
   operationalRequirementList,
-  salesTypeList,
+  taskTypes,
   taskStatusList,
 } from '@/api/task/statusList';
 
@@ -21,7 +21,7 @@ Random.extend({
     return this.pick(taskStatusList);
   },
   salesType: function () {
-    return this.pick(salesTypeList);
+    return this.pick(taskTypes);
   },
   completed: function () {
     return this.pick(completedList);
