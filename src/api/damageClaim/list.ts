@@ -1,4 +1,9 @@
-import { http } from '@/utils/http/axios';
+import { db, executeQuery } from '@/plugins/firebase';
+import { addDoc, collection, query } from 'firebase/firestore';
+import { doLog } from '@/api/statusChangeLog';
+import dayjs from 'dayjs';
+import { resultError, resultSuccess } from '../../../mock/_util';
+import { DamageClaimStatus } from '@/api/damageClaim/serve';
 
 export type DamageModel = {
   submitTime: string;
@@ -17,11 +22,39 @@ export type DamageModel = {
   annex: string;
 };
 
+const damageClaimPath = 'damageClaim';
+
 //获取table
-export function getDamageList(params) {
-  return http.request({
-    url: '/damageClaim/list',
-    method: 'get',
-    params,
-  });
+export async function getDamageClaimList() {
+  return await executeQuery(query(collection(db, damageClaimPath)));
+}
+
+export async function creatDamageClaim(damageClaimInfo: DamageModel) {
+  try {
+    const info = {
+      submitTime: dayjs().valueOf(),
+      orderID: '',
+      trackId: '',
+      goodsStatus: '',
+      applicationsAmount: 0,
+      files: [],
+      status: DamageClaimStatus.waitForAccept,
+    };
+    const { id } = await addDoc(
+      collection(db, damageClaimPath),
+      Object.assign(info, damageClaimInfo)
+    );
+    await doLog({
+      fromStatus: '',
+      toStatus: '',
+      timestamp: dayjs().valueOf(),
+      note: '',
+      files: [],
+      userId: null,
+      logRef: id,
+    });
+    return resultSuccess(id);
+  } catch (e: any) {
+    return resultError(e?.message);
+  }
 }
