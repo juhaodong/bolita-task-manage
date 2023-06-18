@@ -1,5 +1,6 @@
 import { DataTableColumns } from 'naive-ui';
 import { TaskModel } from '@/api/task/task-api';
+import { h } from 'vue';
 
 export const columns: DataTableColumns<TaskModel> = [
   {
@@ -41,6 +42,9 @@ export const columns: DataTableColumns<TaskModel> = [
   {
     title: '完成率',
     key: 'completionRate',
+    render(record) {
+      return h('div', record.completionRate + '%');
+    },
   },
   {
     title: '备注',

@@ -114,7 +114,7 @@ export async function changeTaskFeedBack(
       0
     );
     const completeTaskCount = newOR.reduce((sum, i) => sum + parseInt(i.completeAmount), 0);
-    const newCompleteRate = clamp(completeTaskCount / totalTaskCount, 0, 1).toFixed(2);
+    const newCompleteRate = clamp(completeTaskCount / totalTaskCount, 0, 1);
     const haveChange = newOR.some((it) => {
       return it.completeAmount != oldTaskDetail[it.operationType].completeAmount;
     });
@@ -123,7 +123,7 @@ export async function changeTaskFeedBack(
     }
     const updateObj: any = {
       operationRequirements: newOR,
-      completionRate: newCompleteRate,
+      completionRate: (newCompleteRate * 100).toFixed(2),
     };
     const isComplete = newOR.every((it) => it.completeAmount >= it.requireAmount);
     if (currentTask.operateTime == null) {
