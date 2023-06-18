@@ -37,3 +37,12 @@ export async function handleRequest(res, action) {
     toastError(res.message);
   }
 }
+
+export function getFileNameAndTypeForFirebaseLink(firebaseLink: string) {
+  const res = firebaseLink.split('?')[0];
+  const name = res.split('%2F').pop();
+  return {
+    name: name,
+    type: '',
+  };
+}

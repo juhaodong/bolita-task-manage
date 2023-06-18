@@ -31,24 +31,35 @@
       <new-task-form-index @submit="createNewTask" />
     </n-modal>
     <n-modal v-model:show="showDetailModel">
-      <task-detail-page :task-id="currentTaskId" />
+      <task-detail-page
+        @close="
+          showDetailModel = false;
+          currentTaskId = '';
+        "
+        :task-id="currentTaskId"
+      />
     </n-modal>
+    <n-modal v-model:show="showTaskFeedBackModel" />
   </n-card>
 </template>
 
 <script lang="ts" setup>
   import { h, reactive, ref } from 'vue';
-  // import { useMessage } from 'naive-ui';
   import { BasicTable, TableAction } from '@/components/Table';
   import { BasicForm, FormSchema, useForm } from '@/components/Form';
   import { columns } from './columns';
   import { PlusOutlined } from '@vicons/antd';
-  import { useRouter } from 'vue-router';
   import { salesNameList } from '@/api/sales';
   import { deliveryMethod } from '@/api/deliveryMethod';
   import { warehouseList } from '@/api/warehouse';
   import dayjs from 'dayjs';
-  import { createTask, getTaskList, TaskModel } from '@/api/task/task-api';
+  import {
+    changeTaskStatus,
+    createTask,
+    getTaskList,
+    TaskModel,
+    TaskStatus,
+  } from '@/api/task/task-api';
   import { notifyStatusList } from '@/api/notify/notify-api';
   import NewTaskFormIndex from '@/views/bolita-views/task/new/NewTaskFormIndex.vue';
   import { handleRequest } from '@/utils/utils';
@@ -139,8 +150,6 @@
     },
   ];
 
-  const router = useRouter();
-
   const actionRef = ref();
 
   const showModal = ref(false);
@@ -155,9 +164,9 @@
     pageSize: 5,
     name: 'xiaoMa',
   });
-
+  let showTaskFeedBackModel = $ref(false);
   const actionColumn = reactive({
-    width: 220,
+    width: 300,
     title: '操作',
     key: 'action',
     fixed: 'right',
@@ -174,14 +183,53 @@
             auth: ['basic_list'],
           },
           {
-            label: '审核',
-            onClick: handleDelete.bind(null, record),
-            // 根据业务控制是否显示 isShow 和 auth 是并且关系
-            ifShow: () => {
-              return record.status == '审核中';
+            label: '提交到审核',
+            onClick() {
+              window['$dialog'].info({
+                title: '您确定吗？',
+                content: '一旦提交到审核就不能再修改该任务了',
+                positiveText: '是的',
+                negativeText: '取消',
+                async onPositiveClick() {
+                  await changeTaskStatus(record.id, TaskStatus.WaitForCheck);
+                  reloadTable();
+                },
+                onNegativeClick() {},
+              });
             },
-            // 根据权限控制是否显示: 有权限，会显示，支持多个
-            auth: ['basic_list'],
+            ifShow: () => {
+              return [TaskStatus.NotSubmit, TaskStatus.Refused].includes(record.status);
+            },
+          },
+          {
+            label: '审核',
+            onClick() {
+              window['$dialog'].info({
+                title: '资料是否可以通过审核？',
+                content:
+                  '请点击详情以查看任务详情，如果资料没有问题，请点击通过审核，否则请点击拒绝任务',
+                positiveText: '通过审核',
+                negativeText: '拒绝任务',
+                async onPositiveClick() {
+                  await changeTaskStatus(record.id, TaskStatus.NotHandled);
+                  reloadTable();
+                },
+                async onNegativeClick() {
+                  await changeTaskStatus(record.id, TaskStatus.Refused);
+                  reloadTable();
+                },
+              });
+            },
+            ifShow: () => {
+              return record.status == TaskStatus.WaitForCheck;
+            },
+          },
+          {
+            label: '提交到物流',
+            onClick() {},
+            ifShow: () => {
+              return [TaskStatus.Finished].includes(record.status);
+            },
           },
         ],
         dropDownActions: [

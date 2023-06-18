@@ -6,14 +6,13 @@ export const columns: DataTableColumns<TaskModel> = [
     title: '预报ID',
     key: 'id',
   },
-
-  {
-    title: '客户ID',
-    key: 'customerId',
-  },
   {
     title: '仓库ID',
     key: 'warehouseId',
+  },
+  {
+    title: '客户ID',
+    key: 'customerId',
   },
   {
     title: '业务员ID',

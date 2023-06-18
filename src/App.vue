@@ -44,6 +44,7 @@
         primaryColorHover: lightenStr,
         primaryColorPressed: lightenStr,
         primaryColorSuppl: appTheme,
+        fontWeightStrong: 600,
       },
       LoadingBar: {
         colorLoading: appTheme,

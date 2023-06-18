@@ -1,11 +1,9 @@
 import { OperationRequirementModel } from '@/api/operationType';
 import { db, executeQuery, getDocContent } from '@/plugins/firebase';
-import { addDoc, collection, doc, query } from 'firebase/firestore';
+import { addDoc, collection, doc, query, setDoc } from 'firebase/firestore';
 import { TaskType } from '@/api/task/task-types';
 import { checkLog, doLog } from '@/api/statusChangeLog';
-import dayjs from 'dayjs';
 import { resultError, resultSuccess } from '../../../mock/_util';
-import { getTasksForNotify } from '@/api/notify/notify-api';
 
 export enum TaskStatus {
   NotSubmit = '未提交',
@@ -37,7 +35,9 @@ export type TaskModel = {
 };
 
 const taskPath = 'task-list';
+const taskCollection = collection(db, taskPath);
 const operationRequirementsPath = 'operationRequirements';
+
 export async function createTask(taskInfo: TaskModel) {
   try {
     const info: TaskModel = {
@@ -59,7 +59,7 @@ export async function createTask(taskInfo: TaskModel) {
     };
     const realInfo = Object.assign(info, taskInfo);
     console.log(realInfo, 'info');
-    const { id } = await addDoc(collection(db, taskPath), realInfo);
+    const { id } = await addDoc(taskCollection, realInfo);
     await Promise.all(
       taskInfo.operationRequirements.map((it) =>
         addDoc(collection(db, taskPath, id, operationRequirementsPath), it)
@@ -67,8 +67,8 @@ export async function createTask(taskInfo: TaskModel) {
     );
     await doLog({
       fromStatus: '',
-      toStatus: TaskStatus.NotSubmit,
-      timestamp: dayjs().valueOf(),
+      toStatus: realInfo.status,
+      timestamp: 0,
       note: '',
       files: taskInfo.files,
       userId: null,
@@ -80,11 +80,28 @@ export async function createTask(taskInfo: TaskModel) {
   }
 }
 
+export async function changeTaskStatus(id: string, newStatus: TaskStatus) {
+  try {
+    const currentTask = await getTaskById(id);
+    await setDoc(doc(taskCollection, id), { status: newStatus }, { merge: true });
+    await doLog({
+      files: [],
+      fromStatus: currentTask.status,
+      logRef: id,
+      note: '',
+      timestamp: 0,
+      toStatus: newStatus,
+      userId: null,
+    });
+  } catch (e: any) {
+    return resultError(e?.message);
+  }
+}
+
 export async function getTaskById(id: string) {
   const mainInfo = await getDocContent(doc(db, taskPath, id));
   return {
     ...mainInfo,
-    changeLogs: await checkLog(id),
   };
 }
 

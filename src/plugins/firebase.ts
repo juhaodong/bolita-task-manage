@@ -29,7 +29,7 @@ export const storage = getStorage(app);
 export const storageRef = ref(storage, 'bolita');
 
 export async function uploadFile(file, type: string | null = 'image') {
-  const name = dayjs().valueOf() + '-' + (type ?? 'no-type') + '.' + file.name.split('.').pop();
+  const name = dayjs().valueOf() + '-' + (type?.split('/')[1] ?? 'no-type') + '/' + file.name;
   console.log(name, '将要上传的文件名字');
   const res = await uploadBytes(ref(storageRef, name), file);
   console.log(res, 'Image Result');
