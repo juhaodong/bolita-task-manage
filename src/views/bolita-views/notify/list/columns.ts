@@ -1,6 +1,6 @@
 import { DataTableColumns } from 'naive-ui';
 import { h } from 'vue';
-import { NotifyModel } from '@/api/notify/list';
+import { NotifyModel } from '@/api/notify/notify-api';
 import dayjs from 'dayjs';
 
 export const columns: DataTableColumns<NotifyModel> = [

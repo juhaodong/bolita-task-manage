@@ -97,7 +97,7 @@ export async function createNotify(notifyInfo: NotifyModel) {
     });
     return resultSuccess(id);
   } catch (e: any) {
-    return resultError(e.message);
+    return resultError(e?.message);
   }
 }
 

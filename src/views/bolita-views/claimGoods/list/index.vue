@@ -51,7 +51,7 @@
   import dayjs from 'dayjs';
   import NotifyFormIndex from '@/views/bolita-views/notify/NotifyFormPage/NotifyFormIndex.vue';
   import { getClaimList } from '@/api/claimGoods/list';
-  import { notifyStatusList } from '@/api/notify/list';
+  import { notifyStatusList } from '@/api/notify/notify-api';
 
   const schemas: FormSchema[] = [
     {

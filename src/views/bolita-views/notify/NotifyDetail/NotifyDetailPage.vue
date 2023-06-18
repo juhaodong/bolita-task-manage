@@ -180,7 +180,7 @@
     ArriveMediaTypes,
     changeArriveCountForNotifyTask,
     getNotifyById,
-  } from '@/api/notify/list';
+  } from '@/api/notify/notify-api';
   import { computed, h, Ref, ref, watchEffect } from 'vue';
   import dayjs from 'dayjs';
   import { NButton } from 'naive-ui';

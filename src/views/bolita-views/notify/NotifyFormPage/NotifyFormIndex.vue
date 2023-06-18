@@ -5,7 +5,7 @@
   import BoxForm from '@/views/bolita-views/notify/NotifyFormPage/BoxForm.vue';
   import TrayForm from '@/views/bolita-views/notify/NotifyFormPage/TrayForm.vue';
   import NotifyContainerForm from '@/views/bolita-views/notify/NotifyFormPage/NotifyContainerForm.vue';
-  import { ArriveMediaTypes, NotifyTaskModel } from '@/api/notify/list';
+  import { ArriveMediaTypes, NotifyTaskModel } from '@/api/notify/notify-api';
   import { Archive } from '@vicons/ionicons5';
   import dayjs from 'dayjs';
   import readXlsxFile from 'read-excel-file';
@@ -177,6 +177,7 @@
       requiredTotalCount.value == totalCount.value
     );
   });
+
   function secondFormResult(result) {
     console.log(result);
     console.log(basicInfo);
@@ -207,7 +208,7 @@
       <div class="flex items-center mt-4">
         <div> 上传任务详情</div>
         <div class="flex-grow"></div>
-        <n-button type="info" text @click="downloadTemplate">下载模板</n-button>
+        <n-button type="info" text @click="downloadTemplate">下载模板 </n-button>
       </div>
       <n-upload :default-upload="false" class="mt-8" @update-file-list="fileChanged">
         <n-upload-dragger>
@@ -226,7 +227,7 @@
         <div class="p-4 flex flex-col justify-center items-center">
           <n-h4>上传失败</n-h4>
           <n-text code>{{ failReason }}</n-text>
-          <n-button @click="currentStep = 2" class="mt-2">重新上传</n-button>
+          <n-button @click="currentStep = 2" class="mt-2">重新上传 </n-button>
         </div>
       </template>
       <template v-else>
@@ -235,11 +236,11 @@
           <div class="flex-grow"></div>
         </div>
         <n-descriptions class="mt-4" column="2">
-          <n-descriptions-item label="应有总数"> {{ requiredTotalCount }} </n-descriptions-item>
+          <n-descriptions-item label="应有总数"> {{ requiredTotalCount }}</n-descriptions-item>
           <n-descriptions-item label="实际总数">
-            <n-text :type="totalCount != requiredTotalCount ? 'error' : 'default'">{{
-              totalCount
-            }}</n-text>
+            <n-text :type="totalCount != requiredTotalCount ? 'error' : 'default'"
+              >{{ totalCount }}
+            </n-text>
           </n-descriptions-item>
           <n-descriptions-item label="应有分拣码数量">
             {{ requiredDifferentSortCode }}
@@ -252,8 +253,8 @@
         </n-descriptions>
         <div class="mt-8">
           <n-space>
-            <n-button @click="currentStep = 2" type="warning">重新上传</n-button>
-            <n-button :disabled="!canUpload" @click="complete" type="primary">新建任务</n-button>
+            <n-button @click="currentStep = 2" type="warning">重新上传 </n-button>
+            <n-button :disabled="!canUpload" @click="complete" type="primary">新建任务 </n-button>
           </n-space>
         </div>
       </template>

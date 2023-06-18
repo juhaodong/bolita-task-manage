@@ -1,5 +1,5 @@
 import { DataTableColumns } from 'naive-ui';
-import { TaskModel } from '@/api/task/list';
+import { TaskModel } from '@/api/task/task-api';
 
 export const columns: DataTableColumns<TaskModel> = [
   {

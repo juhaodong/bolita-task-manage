@@ -65,7 +65,7 @@
     NotifyModel,
     NotifyStatusList,
     notifyStatusList,
-  } from '@/api/notify/list';
+  } from '@/api/notify/notify-api';
   import { salesNameList } from '@/api/sales';
   import { deliveryMethod } from '@/api/deliveryMethod';
   import { warehouseList } from '@/api/warehouse';

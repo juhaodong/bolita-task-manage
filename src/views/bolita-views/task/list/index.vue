@@ -31,8 +31,8 @@
       </template>
     </BasicTable>
 
-    <n-modal v-model:show="showModal" :show-icon="false" preset="dialog" title="新建到货预报">
-      <notify-form-index />
+    <n-modal v-model:show="showModal" :show-icon="false" preset="dialog" title="新建任务">
+      <new-task-form-index />
     </n-modal>
   </n-card>
 </template>
@@ -49,9 +49,9 @@
   import { deliveryMethod } from '@/api/deliveryMethod';
   import { warehouseList } from '@/api/warehouse';
   import dayjs from 'dayjs';
-  import NotifyFormIndex from '@/views/bolita-views/notify/NotifyFormPage/NotifyFormIndex.vue';
-  import { getTaskList } from '@/api/task/list';
-  import { notifyStatusList } from '@/api/notify/list';
+  import { getTaskList } from '@/api/task/task-api';
+  import { notifyStatusList } from '@/api/notify/notify-api';
+  import NewTaskFormIndex from '@/views/bolita-views/task/new/NewTaskFormIndex.vue';
 
   const schemas: FormSchema[] = [
     {
@@ -138,12 +138,11 @@
   ];
 
   const router = useRouter();
-  const formRef: any = ref(null);
-  // const message = useMessage();
+
   const actionRef = ref();
 
   const showModal = ref(false);
-  const formBtnLoading = ref(false);
+
   const formParams = reactive({
     name: '',
     address: '',
@@ -223,23 +222,6 @@
 
   function reloadTable() {
     actionRef.value.reload();
-  }
-
-  function confirmForm(e) {
-    e.preventDefault();
-    formBtnLoading.value = true;
-    formRef.value.validate((errors) => {
-      if (!errors) {
-        window['$message'].success('新建成功');
-        setTimeout(() => {
-          showModal.value = false;
-          reloadTable();
-        });
-      } else {
-        window['$message'].error('请填写完整信息');
-      }
-      formBtnLoading.value = false;
-    });
   }
 
   function handleEdit(record: Recordable) {

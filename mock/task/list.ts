@@ -6,9 +6,8 @@ import {
   completedList,
   linkList,
   operationalRequirementList,
-  taskTypes,
-  taskStatusList,
-} from '@/api/task/statusList';
+} from '@/api/task/task-operation-requirement';
+import { taskStatusList, taskTypes } from '@/api/task/task-types';
 
 Random.extend({
   deliveryMethod: function () {

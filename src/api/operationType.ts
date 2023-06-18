@@ -37,6 +37,16 @@ export type OperationRequirementModel = {
   updateTimestamp: number;
 };
 
+export const laterFilledInOperationRequirement = [
+  OperationType.OpenBox,
+  OperationType.MakeBoxStrong,
+  OperationType.CoverLogo,
+  OperationType.PaperBox,
+  OperationType.CourierBag,
+  OperationType.OtherConsumables,
+  OperationType.NoLogoSelect,
+];
+
 function getOperationRequirementModelByName(
   operationType: OperationType
 ): OperationRequirementModel {

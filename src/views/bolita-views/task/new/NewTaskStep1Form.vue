@@ -6,9 +6,10 @@
 <script setup lang="ts">
   import { FormSchema, useForm } from '@/components/Form';
   import { generateOptionFromArray } from '@/utils/utils';
-  import { arriveMedia } from '@/api/notify/notify-api';
   import { listUser, PermissionEnums } from '@/api/user/baseUser';
   import { ref } from 'vue';
+
+  import { taskTypes } from '@/api/task/task-types';
 
   let warehouseList = ref([]);
   const schemas: FormSchema[] = [
@@ -26,17 +27,14 @@
       rules: [{ required: true, message: '请输入箱数', trigger: ['blur'], type: 'number' }],
     },
     {
-      field: 'arriveMedia',
+      field: 'taskType',
       component: 'NSelect',
-      label: '入库类型',
+      label: '任务类型',
       componentProps: {
-        placeholder: '请选择入库类型',
-        options: generateOptionFromArray(arriveMedia),
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
+        placeholder: '请选择任务类型',
+        options: generateOptionFromArray(taskTypes),
       },
-      rules: [{ required: true, message: '请选择入库类型', trigger: ['blur'] }],
+      rules: [{ required: true, message: '请选择任务类型', trigger: ['blur'] }],
     },
     {
       field: 'arriveWarehouseId',
@@ -47,6 +45,24 @@
         options: warehouseList,
       },
       rules: [{ required: true, message: '请选择到货仓库', trigger: ['blur'] }],
+    },
+    {
+      field: 'note',
+      component: 'NInput',
+      label: '备注',
+      componentProps: {
+        placeholder: '一些需要我们注意的事情',
+      },
+      rules: [{ required: false, trigger: ['blur'] }],
+    },
+    {
+      field: 'refLink',
+      component: 'NInput',
+      label: '业务链接',
+      componentProps: {
+        placeholder: '业务操作后台的链接',
+      },
+      rules: [{ required: false, trigger: ['blur'] }],
     },
   ];
 
@@ -74,6 +90,7 @@
       value: it.id,
     }));
   }
+
   init();
 </script>
 
