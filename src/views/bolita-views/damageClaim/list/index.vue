@@ -1,19 +1,19 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <BasicForm @register="register" @submit="handleSubmit" @reset="handleReset">
+    <BasicForm @register="register" @reset="handleReset" @submit="handleSubmit">
       <template #statusSlot="{ model, field }">
         <n-input v-model:value="model[field]" />
       </template>
     </BasicForm>
     <div class="my-2"></div>
     <BasicTable
+      ref="actionRef"
+      :actionColumn="actionColumn"
       :columns="columns"
       :request="loadDataTable"
       :row-key="(row) => row.id"
-      ref="actionRef"
-      :actionColumn="actionColumn"
-      @update:checked-row-keys="onCheckedRow"
       :scroll-x="1090"
+      @update:checked-row-keys="onCheckedRow"
     >
       <template #tableTitle>
         <n-button type="primary" @click="addTable">
@@ -31,8 +31,8 @@
       </template>
     </BasicTable>
 
-    <n-modal v-model:show="showModal" :show-icon="false" preset="dialog" title="新建到货预报">
-      <notify-form-index />
+    <n-modal v-model:show="showModal" :show-icon="false" preset="dialog" title="新建索赔">
+      <new-damage-claim-form @submit="createNewDamageClaim" />
     </n-modal>
   </n-card>
 </template>
@@ -41,101 +41,13 @@
   import { h, reactive, ref } from 'vue';
   // import { useMessage } from 'naive-ui';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { BasicForm, FormSchema, useForm } from '@/components/Form';
+  import { BasicForm } from '@/components/Form';
   import { columns } from './columns';
   import { PlusOutlined } from '@vicons/antd';
   import { useRouter } from 'vue-router';
-  import { salesNameList } from '@/api/sales';
-  import { deliveryMethod } from '@/api/deliveryMethod';
-  import { warehouseList } from '@/api/warehouse';
-  import dayjs from 'dayjs';
-  import NotifyFormIndex from '@/views/bolita-views/notify/NotifyFormPage/NotifyFormIndex.vue';
-  import { getDamageList } from '@/api/damageClaim/list';
-  import { notifyStatusList } from '@/api/notify/notify-api';
-
-  const schemas: FormSchema[] = [
-    {
-      field: 'salesName',
-      component: 'NSelect',
-      label: '负责人',
-      componentProps: {
-        placeholder: '请选择负责人',
-        options: salesNameList.map((it) => {
-          return {
-            value: it,
-            label: it,
-          };
-        }),
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
-      },
-    },
-    {
-      field: 'planArriveDate',
-      component: 'NDatePicker',
-      label: '预约时间',
-      defaultValue: dayjs().valueOf(),
-      componentProps: {
-        type: 'date',
-        clearable: true,
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
-      },
-    },
-    {
-      field: 'deliveryMethod',
-      component: 'NSelect',
-      label: '物流渠道',
-      componentProps: {
-        placeholder: '请选择物流渠道',
-        options: deliveryMethod.map((it) => {
-          return {
-            value: it,
-            label: it,
-          };
-        }),
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
-      },
-    },
-    {
-      field: 'arriveWarehouseName',
-      component: 'NSelect',
-      label: '到货仓库',
-      componentProps: {
-        placeholder: '请选择到货仓库',
-        options: warehouseList.map((it) => {
-          return {
-            value: it,
-            label: it,
-          };
-        }),
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
-      },
-    },
-    {
-      field: 'status',
-      component: 'NSelect',
-      label: '状态',
-      componentProps: {
-        placeholder: '状态',
-        options: notifyStatusList.map((it) => {
-          return {
-            value: it,
-            label: it,
-          };
-        }),
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
-      },
-    },
-  ];
+  import NewDamageClaimForm from '@/views/bolita-views/damageClaim/DamageClaimFormPage/NewDamageClaimForm.vue';
+  import { creatDamageClaim, getDamageClaimList } from '@/api/damageClaim/list';
+  import { handleRequest } from '@/utils/utils';
 
   const router = useRouter();
   const formRef: any = ref(null);
@@ -203,18 +115,12 @@
     },
   });
 
-  const [register, {}] = useForm({
-    gridProps: { cols: '1 s:1 m:2 l:3 xl:4 2xl:4' },
-    labelWidth: 80,
-    schemas,
-  });
-
   function addTable() {
     showModal.value = true;
   }
 
-  const loadDataTable = async (res) => {
-    return await getDamageList({ ...formParams, ...params.value, ...res });
+  const loadDataTable = async () => {
+    return await getDamageClaimList({});
   };
 
   function onCheckedRow(rowKeys) {
@@ -223,6 +129,14 @@
 
   function reloadTable() {
     actionRef.value.reload();
+  }
+
+  async function createNewDamageClaim(info) {
+    const res = await creatDamageClaim(info);
+    await handleRequest(res, () => {
+      showModal.value = false;
+      reloadTable();
+    });
   }
 
   function confirmForm(e) {

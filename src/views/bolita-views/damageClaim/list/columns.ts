@@ -1,20 +1,20 @@
 import { DataTableColumns } from 'naive-ui';
 import { ClaimModel } from '@/api/claimGoods/list';
+import { h } from 'vue';
+import dayjs from 'dayjs';
 
 export const columns: DataTableColumns<ClaimModel> = [
   {
     title: '提交时间',
     key: 'submitTime',
+    render(data) {
+      return h('div', {}, [dayjs(data.submitTime).format('YYYY-MM-DD HH:mm')]);
+    },
     width: 75,
   },
   {
     title: '订单号',
     key: 'orderID',
-    width: 75,
-  },
-  {
-    title: '物流渠道',
-    key: 'deliveryMethod',
     width: 75,
   },
   {
@@ -25,6 +25,21 @@ export const columns: DataTableColumns<ClaimModel> = [
   {
     title: '货物状态',
     key: 'goodsStatus',
+    width: 75,
+  },
+  {
+    title: '申请金额',
+    key: 'applicationsAmount',
+    width: 75,
+  },
+  {
+    title: '状态',
+    key: 'status',
+    width: 75,
+  },
+  {
+    title: '物流渠道',
+    key: 'deliveryMethod',
     width: 75,
   },
   {
@@ -43,11 +58,6 @@ export const columns: DataTableColumns<ClaimModel> = [
     width: 75,
   },
   {
-    title: '申请金额',
-    key: 'applicationsAmount',
-    width: 75,
-  },
-  {
     title: '索赔金额',
     key: 'claimAmount',
     width: 75,
@@ -55,11 +65,6 @@ export const columns: DataTableColumns<ClaimModel> = [
   {
     title: '业务员ID',
     key: 'salesName',
-    width: 75,
-  },
-  {
-    title: '状态',
-    key: 'status',
     width: 75,
   },
   {
