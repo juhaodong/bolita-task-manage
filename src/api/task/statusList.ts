@@ -17,7 +17,6 @@ export enum TaskType {
   NormalTrayTransfer = '普通托盘转运',
   BoxFastTransfer = '散货快转',
   OneForSend = '一件代发',
-  ChangeLogo = '换标',
   OutBound = '出库',
   Inventory = '盘点',
   Destroy = '销毁',
@@ -30,28 +29,123 @@ export const taskTypes: TaskType[] = Object.values(TaskType);
 function getTaskTypeOperationKeys(taskType: TaskType) {
   switch (taskType) {
     case TaskType.Shelves:
-      return getORListByNames([OperationType.Amount, OperationType.Check, OperationType.OpenBox]);
+      return getORListByNames([
+        OperationType.Amount,
+        OperationType.Check,
+        OperationType.OpenBox,
+        OperationType.OpenTray,
+        OperationType.SkuLabel,
+        OperationType.NoLogoSelect,
+        OperationType.PaperBox,
+        OperationType.OtherConsumables,
+        OperationType.Delivery,
+      ]);
     case TaskType.BoxTransfer:
-      break;
+      return getORListByNames([
+        OperationType.Amount,
+        OperationType.Check,
+        OperationType.OpenBox,
+        OperationType.OpenTray,
+        OperationType.SkuLabel,
+        OperationType.TakePic,
+        OperationType.MakeBoxStrong,
+        OperationType.BoxLabel,
+        OperationType.SelectBoxOnSku,
+        OperationType.PaperBox,
+        OperationType.OtherConsumables,
+        OperationType.Delivery,
+        OperationType.CoverLogo,
+      ]);
     case TaskType.NormalTrayTransfer:
-      break;
+      return getORListByNames([
+        OperationType.Amount,
+        OperationType.Check,
+        OperationType.TakePic,
+        OperationType.MakeBoxStrong,
+        OperationType.PaperBox,
+        OperationType.CoverLogo,
+        OperationType.SelectBoxOnSku,
+        OperationType.TrayAmount,
+        OperationType.TraySize,
+        OperationType.OneUseTray,
+      ]);
     case TaskType.BoxFastTransfer:
-      break;
+      return getORListByNames([
+        OperationType.Amount,
+        OperationType.Check,
+        OperationType.OpenBox,
+        OperationType.OpenTray,
+        OperationType.SkuLabel,
+        OperationType.TakePic,
+        OperationType.MakeBoxStrong,
+        OperationType.BoxLabel,
+        OperationType.PaperBox,
+        OperationType.OtherConsumables,
+        OperationType.Delivery,
+        OperationType.CoverLogo,
+      ]);
     case TaskType.OneForSend:
-      break;
-    case TaskType.ChangeLogo:
-      break;
+      return getORListByNames([
+        OperationType.Amount,
+        OperationType.Check,
+        OperationType.PaperBox,
+        OperationType.CoverLogo,
+        OperationType.CourierBag,
+        OperationType.OtherConsumables,
+        OperationType.TotalPackages,
+        OperationType.Delivery,
+        OperationType.SingleThingOneOrder,
+        OperationType.MultipleThingOneOrder,
+      ]);
     case TaskType.OutBound:
-      break;
+      return getORListByNames([
+        OperationType.Amount,
+        OperationType.TakePic,
+        OperationType.MakeBoxStrong,
+        OperationType.Delivery,
+      ]);
     case TaskType.Inventory:
-      break;
+      return getORListByNames([
+        OperationType.Amount,
+        OperationType.Check,
+        OperationType.BoxLabel,
+        OperationType.SkuLabel,
+        OperationType.TakePic,
+      ]);
     case TaskType.Destroy:
-      break;
+      return getORListByNames([OperationType.Amount, OperationType.Destruction]);
     case TaskType.Return:
-      break;
+      return getORListByNames([
+        OperationType.Amount,
+        OperationType.Check,
+        OperationType.OpenBox,
+        OperationType.OpenTray,
+        OperationType.BoxLabel,
+        OperationType.SkuLabel,
+        OperationType.TakePic,
+        OperationType.MakeBoxStrong,
+        OperationType.NoLogoSelect,
+        OperationType.PaperBox,
+        OperationType.OtherConsumables,
+        OperationType.CoverLogo,
+        OperationType.TotalPackages,
+      ]);
     case TaskType.InStorageOperation:
-      break;
+      return getORListByNames([OperationType.Amount]);
     case TaskType.AmazonTransfer:
+      return getORListByNames([
+        OperationType.Amount,
+        OperationType.Check,
+        OperationType.TakePic,
+        OperationType.MakeBoxStrong,
+        OperationType.PaperBox,
+        OperationType.OtherConsumables,
+        OperationType.Delivery,
+        OperationType.CoverLogo,
+        OperationType.SelectBoxOnSku,
+        OperationType.TrayAmount,
+        OperationType.TraySize,
+      ]);
   }
 }
 
