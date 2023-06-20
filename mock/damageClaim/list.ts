@@ -2,12 +2,6 @@ import { Random } from 'mockjs';
 import { doCustomTimes, resultSuccess } from '../_util';
 import { deliveryMethod } from '@/api/deliveryMethod';
 import { salesNameList } from '@/api/sales';
-import {
-  damageStatusList,
-  channelFeedback,
-  goodStatus,
-  warehouseFeedback,
-} from '@/api/damageClaim/serve';
 
 Random.extend({
   deliveryMethod: function () {
@@ -15,18 +9,6 @@ Random.extend({
   },
   salesName: function () {
     return this.pick(salesNameList);
-  },
-  goodStatus: function () {
-    return this.pick(goodStatus);
-  },
-  claimStatus: function () {
-    return this.pick(damageStatusList);
-  },
-  channelFeedback: function () {
-    return this.pick(channelFeedback);
-  },
-  warehouseFeedback: function () {
-    return this.pick(warehouseFeedback);
   },
 });
 

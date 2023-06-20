@@ -2,7 +2,6 @@ import { addDoc, collection, doc, query, setDoc } from 'firebase/firestore';
 import { db, executeQuery, getDocContent } from '@/plugins/firebase';
 import { resultError, resultSuccess } from '../../../mock/_util';
 import { doLog } from '@/api/statusChangeLog';
-import dayjs from 'dayjs';
 
 export type NotifyModel = {
   customerId: string;
@@ -89,10 +88,8 @@ export async function createNotify(notifyInfo: NotifyModel) {
     await doLog({
       fromStatus: NotifyStatusList.NotSubmit,
       toStatus: NotifyStatusList.NotSubmit,
-      timestamp: dayjs().valueOf(),
       note: '',
       files: [],
-      userId: null,
       logRef: id,
     });
     return resultSuccess(id);
@@ -139,9 +136,7 @@ export async function changeArriveCountForNotifyTask(
       fromStatus: statusNow,
       logRef: notifyId,
       note: '修改' + taskId + '到货数量为' + newArriveCount + '.备注:' + note,
-      timestamp: dayjs().valueOf(),
       toStatus: statusLater,
-      userId: null,
     });
     return resultSuccess('');
   } catch (e: any) {

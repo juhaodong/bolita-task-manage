@@ -1,4 +1,4 @@
-import { addDoc, collection, query, where } from 'firebase/firestore';
+import { collection, doc, query, setDoc, where } from 'firebase/firestore';
 import { db, executeQuery } from '@/plugins/firebase';
 import { resultError } from '../../../mock/_util';
 import { useUser } from '@/store/modules/user';
@@ -9,18 +9,31 @@ export type StatusChangeLogModel = {
   toStatus: string;
   timestamp: number;
   note: string;
-  userId: string | null;
+  userId: string;
+  files: string[];
+  logRef: string;
+};
+
+export type ChangeLogDTO = {
+  fromStatus: string;
+  toStatus: string;
+  note: string;
   files: string[];
   logRef: string;
 };
 const logPath = 'statusChangeLog';
 
-export async function doLog(log: StatusChangeLogModel) {
+export async function doLog(dto: ChangeLogDTO) {
   const userStore = useUser();
   try {
-    log.userId = userStore.info.id;
-    log.timestamp = dayjs().valueOf();
-    await addDoc(collection(db, logPath), log);
+    const currentTimestamp = dayjs().valueOf();
+    const log: StatusChangeLogModel = {
+      ...dto,
+      userId: userStore.info.id,
+      timestamp: currentTimestamp,
+    };
+
+    await setDoc(doc(db, logPath, currentTimestamp.toString()), log);
   } catch (e: any) {
     return resultError(e.message);
   }

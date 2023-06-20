@@ -3,7 +3,7 @@ import { store } from '@/store';
 import { ACCESS_TOKEN, CURRENT_USER, IS_SCREENLOCKED } from '@/store/mutation-types';
 import { ResultEnum } from '@/enums/httpEnum';
 
-import { getUserInfo as getUserInfoApi, login } from '@/api/system/user';
+import { getUserInfo as getUserInfoApi, login } from '@/api/user/baseUser';
 import { storage } from '@/utils/Storage';
 
 export type UserInfoType = {
@@ -64,6 +64,7 @@ export const useUserStore = defineStore({
     async login(params: any) {
       const response = await login(params);
       const { result, code } = response;
+      console.log(result);
       if (code === ResultEnum.SUCCESS) {
         const ex = 7 * 24 * 60 * 60;
         storage.set(ACCESS_TOKEN, result.token, ex);
@@ -77,7 +78,8 @@ export const useUserStore = defineStore({
 
     // 获取用户信息
     async getInfo() {
-      const result = await getUserInfoApi();
+      const { result } = await getUserInfoApi();
+
       if (result.permissions && result.permissions.length) {
         const permissionsList = result.permissions;
         this.setPermissions(permissionsList);
@@ -85,7 +87,7 @@ export const useUserStore = defineStore({
       } else {
         throw new Error('getInfo: permissionsList must be a non-null array !');
       }
-      this.setAvatar(result.avatar);
+      this.setAvatar('');
       return result;
     },
 

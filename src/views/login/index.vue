@@ -139,9 +139,10 @@
           if (code == ResultEnum.SUCCESS) {
             const toPath = decodeURIComponent((route.query?.redirect || '/') as string);
             message.success('登录成功，即将进入系统');
+            console.log(route.name);
             if (route.name === LOGIN_NAME) {
-              router.replace('/');
-            } else router.replace(toPath);
+              await router.replace('/');
+            } else await router.replace(toPath);
           } else {
             message.info(msg || '登录失败');
           }

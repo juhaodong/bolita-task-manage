@@ -47,10 +47,8 @@ export async function creatDamageClaim(damageClaimInfo: DamageModel) {
     await doLog({
       fromStatus: '',
       toStatus: '',
-      timestamp: dayjs().valueOf(),
       note: '',
       files: [],
-      userId: null,
       logRef: id,
     });
     return resultSuccess(id);

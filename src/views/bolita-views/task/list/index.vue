@@ -65,6 +65,7 @@
   import { handleRequest } from '@/utils/utils';
   import { $ref } from 'vue/macros';
   import TaskDetailPage from '@/views/bolita-views/task/TaskDetail/TaskDetailPage.vue';
+  import { PermissionEnums } from '@/api/user/baseUser';
 
   const schemas: FormSchema[] = [
     {
@@ -180,7 +181,6 @@
             ifShow: () => {
               return true;
             },
-            auth: ['basic_list'],
           },
           {
             label: '提交到审核',
@@ -197,6 +197,7 @@
                 onNegativeClick() {},
               });
             },
+            auth: [PermissionEnums.Customer],
             ifShow: () => {
               return [TaskStatus.NotSubmit, TaskStatus.Refused].includes(record.status);
             },
@@ -220,6 +221,7 @@
                 },
               });
             },
+            auth: [PermissionEnums.Sales],
             ifShow: () => {
               return record.status == TaskStatus.WaitForCheck;
             },

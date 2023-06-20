@@ -1,7 +1,7 @@
 import { addDoc, collection, doc, query, setDoc, where } from 'firebase/firestore';
 import { db, executeQuery } from '@/plugins/firebase';
 import { Random } from 'mockjs';
-import { resultError, resultSuccess } from '../../../mock/_util';
+import { Result, resultError, resultSuccess } from '../../../mock/_util';
 import { ACCESS_TOKEN } from '@/store/mutation-types';
 import { storage } from '@/utils/Storage';
 
@@ -18,6 +18,7 @@ export enum PermissionEnums {
   Operator = '操作员',
   Logistic = '物流',
   Customer = '客户',
+  Technical = '技术部门',
 }
 
 export type BaseUser = {
@@ -27,7 +28,7 @@ export type BaseUser = {
   desc: string;
   password: string;
   token: string;
-  permissions: Permission[];
+  permissions: PermissionEnums[];
 };
 
 export async function createUser(username, realName, password, permission: PermissionEnums) {
@@ -71,7 +72,7 @@ export async function login(params: { username: string; password: string }) {
     (it) => it.password === params.password
   );
   if (exist) {
-    return resultSuccess(exist.token);
+    return resultSuccess({ token: exist.token });
   } else {
     return resultError('用户不存在');
   }
@@ -85,7 +86,7 @@ async function userExist(username) {
   return (await findUserWithUsername(username)).length > 0;
 }
 
-export async function getUserInfo() {
+export async function getUserInfo(): Promise<Result<BaseUser>> {
   const currentToken = storage.get(ACCESS_TOKEN, '');
   const exist = await executeQuery(
     query(collection(db, userPath), where('token', '==', currentToken))

@@ -39,6 +39,7 @@ export type OperationRequirementModel = {
 
 export const laterFilledInOperationRequirement = [
   OperationType.OpenBox,
+  OperationType.OpenTray,
   OperationType.MakeBoxStrong,
   OperationType.CoverLogo,
   OperationType.PaperBox,

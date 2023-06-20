@@ -70,10 +70,8 @@ export async function createTask(taskInfo: TaskModel) {
     await doLog({
       fromStatus: '',
       toStatus: realInfo.status,
-      timestamp: 0,
       note: '',
       files: taskInfo.files,
-      userId: null,
       logRef: id,
     });
     return resultSuccess(id);
@@ -91,9 +89,7 @@ export async function changeTaskStatus(id: string, newStatus: TaskStatus) {
       fromStatus: currentTask.status,
       logRef: id,
       note: '',
-      timestamp: 0,
       toStatus: newStatus,
-      userId: null,
     });
   } catch (e: any) {
     return resultError(e?.message);
@@ -137,9 +133,7 @@ export async function changeTaskFeedBack(
       fromStatus: currentTask.status,
       logRef: id,
       note: '完成率: ' + currentTask.completionRate + '%-->' + newCompleteRate + '%. 备注：' + note,
-      timestamp: 0,
       toStatus: updateObj.status,
-      userId: null,
     });
 
     return resultSuccess('');

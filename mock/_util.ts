@@ -1,14 +1,6 @@
 import { ResultEnum } from '@/enums/httpEnum';
 
-export function resultSuccess(
-  result,
-  { message = 'ok' } = {}
-): {
-  code: number;
-  result: any;
-  message: string;
-  type: ResultEnum;
-} {
+export function resultSuccess<T>(result: T, { message = 'ok' } = {}): Result<T> {
   return {
     code: 200,
     result,
@@ -16,6 +8,13 @@ export function resultSuccess(
     type: ResultEnum.TYPE,
   };
 }
+
+export type Result<T> = {
+  code: number;
+  result: T;
+  message: string;
+  type: ResultEnum;
+};
 
 export function resultPageSuccess<T = any>(
   page: number,
@@ -36,12 +35,15 @@ export function resultPageSuccess<T = any>(
   };
 }
 
-export function resultError(message = 'Request failed', { code = -1, result = null } = {}) {
+export function resultError(
+  message = 'Request failed',
+  { code = -1, result = null } = {}
+): Result<any> {
   return {
     code,
     result,
     message,
-    type: 'error',
+    type: ResultEnum.ERROR_MESSAGE,
   };
 }
 
