@@ -1,5 +1,5 @@
 import { addDoc, collection, doc, query, setDoc, where } from 'firebase/firestore';
-import { db, executeQuery } from '@/plugins/firebase';
+import { db, executeQuery, getNameById } from '@/plugins/firebase';
 import { Random } from 'mockjs';
 import { Result, resultError, resultSuccess } from '../../../mock/_util';
 import { ACCESS_TOKEN } from '@/store/mutation-types';
@@ -96,4 +96,8 @@ export async function getUserInfo(): Promise<Result<BaseUser>> {
   } else {
     return resultError('用户不存在');
   }
+}
+
+export async function getUserNameById(id) {
+  return await getNameById(id, userPath, 'realName');
 }

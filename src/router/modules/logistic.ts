@@ -1,9 +1,9 @@
 import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
 import { renderIcon } from '@/utils';
-import { BoxSearch24Filled } from '@vicons/fluent';
+import { DeliveryTruck } from '@vicons/carbon';
 
-const name = 'claimGoods';
+const name = 'logistic';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -11,17 +11,17 @@ const routes: Array<RouteRecordRaw> = [
     name: name,
     component: Layout,
     meta: {
-      title: '无主货管理',
+      title: '物流管理',
       sort: 5,
       isRoot: true,
-      icon: renderIcon(BoxSearch24Filled),
+      icon: renderIcon(DeliveryTruck),
     },
     children: [
       {
         path: 'index',
         name: `${name}_index`,
         meta: {
-          title: '无主货管理',
+          title: '物流管理',
           activeMenu: `${name}_index`,
         },
         component: () => import('@/views/bolita-views/claimGoods/list/index.vue'),

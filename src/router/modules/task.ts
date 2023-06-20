@@ -18,6 +18,14 @@ const routes: Array<RouteRecordRaw> = [
     },
     children: [
       {
+        path: 'dashboard',
+        name: `${name}_dashboard`,
+        meta: {
+          title: '未处理任务总览',
+        },
+        component: () => import('@/views/bolita-views/task/list/index.vue'),
+      },
+      {
         path: 'index',
         name: `${name}_index`,
         meta: {

@@ -1,7 +1,7 @@
 import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
 import { renderIcon } from '@/utils';
-import { BellOutlined } from '@vicons/antd';
+import { Angry } from '@vicons/fa';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -12,7 +12,7 @@ const routes: Array<RouteRecordRaw> = [
       title: '索赔管理',
       sort: 6,
       isRoot: true,
-      icon: renderIcon(BellOutlined),
+      icon: renderIcon(Angry),
     },
     children: [
       {

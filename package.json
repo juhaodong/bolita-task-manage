@@ -28,8 +28,6 @@
     "test prod gzip": "http-server dist --cors --gzip -c-1"
   },
   "dependencies": {
-    "@vicons/antd": "^0.12.0",
-    "@vicons/ionicons5": "^0.12.0",
     "@vueup/vue-quill": "^1.0.0",
     "@vueuse/core": "^9.5.0",
     "axios": "^1.1.3",
@@ -61,6 +59,14 @@
     "@types/node": "^18.11.9",
     "@typescript-eslint/eslint-plugin": "^5.42.1",
     "@typescript-eslint/parser": "^5.42.1",
+    "@vicons/antd": "^0.12.0",
+    "@vicons/carbon": "^0.12.0",
+    "@vicons/fa": "^0.12.0",
+    "@vicons/fluent": "^0.12.0",
+    "@vicons/ionicons4": "^0.12.0",
+    "@vicons/ionicons5": "^0.12.0",
+    "@vicons/material": "^0.12.0",
+    "@vicons/tabler": "^0.12.0",
     "@vitejs/plugin-vue": "^3.2.0",
     "@vitejs/plugin-vue-jsx": "^2.1.1",
     "@vue-macros/reactivity-transform": "^0.3.10",

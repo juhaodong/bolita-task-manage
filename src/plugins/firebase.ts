@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
 import {
+  doc,
   DocumentData,
   getDoc,
   getDocs,
@@ -68,4 +69,19 @@ export function docContent(doc) {
 
 export function downloadFile(url) {
   window.open(url, '_blank');
+}
+const cache: any = {};
+export async function getNameById(
+  id: string,
+  collection: string,
+  nameField = 'name'
+): Promise<string> {
+  const cacheKey = collection + '-' + id;
+  if (cache[cacheKey]) {
+    return cache[cacheKey];
+  } else {
+    const res = (await getDocContent(doc(db, collection, id)))?.[nameField] ?? 'no name';
+    cache[cacheKey] = res;
+    return res;
+  }
 }
