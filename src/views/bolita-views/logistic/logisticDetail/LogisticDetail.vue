@@ -1,12 +1,13 @@
 <script setup lang="ts">
   import { $ref } from 'vue/macros';
   import { ref, watchEffect } from 'vue';
-  import { getTaskById } from '@/api/task/task-api';
   import ChangeLogTimeLine from '@/views/bolita-views/composable/ChangeLogTimeLine.vue';
   import { Archive } from '@vicons/ionicons5';
   import AppendFileListDisplay from '@/views/bolita-views/composable/AppendFileListDisplay.vue';
   import { CheckCircleFilled } from '@vicons/antd';
   import dayjs from 'dayjs';
+  import { LogisticModel } from '@/api/deliveryMethod/logistic-type';
+  import { getLogisticInfoById } from '@/api/deliveryMethod/logistic-api';
 
   const props = defineProps({
     id: {
@@ -27,7 +28,7 @@
     if (props.id != null) {
       files.value = [];
       note = '';
-      detail = await getTaskById(props.id);
+      detail = await getLogisticInfoById(props.id);
       console.log(detail);
     }
   }
@@ -56,15 +57,14 @@
           <n-descriptions-item label="箱数">
             {{ detail?.boxCount }}
           </n-descriptions-item>
-
-          <n-descriptions-item label="操作完成率">
-            {{ detail?.completionRate }}%
+          <n-descriptions-item label="物流渠道">
+            {{ detail?.deliveryMethod }}%
           </n-descriptions-item>
-          <n-descriptions-item label="操作时间">
-            {{ dayjs(detail?.operateTime).format('YYYY-MM-DD HH:mm') || '-' }}
+          <n-descriptions-item label="下单时间">
+            {{ dayjs(detail?.orderDate).format('YYYY-MM-DD HH:mm') || '-' }}
           </n-descriptions-item>
           <n-descriptions-item label="发货时间">
-            {{ dayjs(detail?.deliveryDate).format('YYYY-MM-DD HH:mm') || '-' }}
+            {{ dayjs(detail?.pickupDate).format('YYYY-MM-DD HH:mm') || '-' }}
           </n-descriptions-item>
           <n-descriptions-item label="状态">
             {{ detail?.status }}

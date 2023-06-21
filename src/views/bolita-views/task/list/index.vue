@@ -37,7 +37,7 @@
           showDetailModel = false;
           currentTaskId = '';
         "
-        :task-id="currentTaskId"
+        :id="currentTaskId"
       />
     </n-modal>
   </n-card>

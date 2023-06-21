@@ -29,7 +29,7 @@ export async function changeLogisticStatus(id: string, newStatus: LogisticStatus
   }
 }
 
-export async function getLogisticInfoById(id: string) {
+export async function getLogisticInfoById(id: string): Promise<LogisticModel> {
   return await getDocContent(doc(ref, id));
 }
 
