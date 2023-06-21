@@ -86,7 +86,7 @@
               <n-select
                 v-else
                 v-model:value="model.value"
-                :options="generateOptionFromArray(model.operationType.split('/'))"
+                :options="generateOptionFromArray(model.options)"
               />
             </n-form-item-gi>
             <n-form-item-gi :span="12" label="任务附件">

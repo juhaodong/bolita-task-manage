@@ -1,65 +1,30 @@
 import { DataTableColumns } from 'naive-ui';
-import { ClaimModel } from '@/api/claimGoods/list';
+import { LogisticModel } from '@/api/deliveryMethod/logistic-type';
+import { getTimeColumn } from '@/views/bolita-views/composable/dataTableUtils';
 
-export const columns: DataTableColumns<ClaimModel> = [
+export const columns: DataTableColumns<LogisticModel> = [
   {
     title: '订单号',
-    key: 'orderID',
-    width: 75,
+    key: 'id',
   },
   {
-    title: '跟踪单号',
-    key: 'trackId',
-    width: 75,
+    title: '仓库',
+    key: 'warehouseId',
   },
-  {
-    title: '货物状态',
-    key: 'goodsStatus',
-    width: 75,
-  },
-  {
-    title: '申请金额',
-    key: 'applicationsAmount',
-    width: 75,
-  },
+  getTimeColumn({
+    title: '下单时间',
+    key: 'orderDate',
+  }),
   {
     title: '状态',
     key: 'status',
-    width: 75,
+  },
+  {
+    title: '箱数',
+    key: 'boxCount',
   },
   {
     title: '物流渠道',
     key: 'deliveryMethod',
-    width: 75,
-  },
-  {
-    title: '渠道反馈',
-    key: 'channelFeedback',
-    width: 75,
-  },
-  {
-    title: '仓库反馈',
-    key: 'warehouseFeedback',
-    width: 75,
-  },
-  {
-    title: '索赔号',
-    key: 'claimId',
-    width: 75,
-  },
-  {
-    title: '索赔金额',
-    key: 'claimAmount',
-    width: 75,
-  },
-  {
-    title: '业务员ID',
-    key: 'salesName',
-    width: 75,
-  },
-  {
-    title: '附件',
-    key: 'annex',
-    width: 75,
   },
 ];

@@ -49,7 +49,7 @@ export async function createTask(taskInfo: TaskModel) {
       deliveryDate: '',
       deliveryMethod: '',
       files: [],
-      logisticId: null,
+      id: null,
       note: '',
       operateTime: '',
       operationRequirements: [],

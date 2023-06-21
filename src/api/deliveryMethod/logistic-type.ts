@@ -3,24 +3,47 @@ import { DeliveryMethod } from '@/api/deliveryMethod/index';
 export type LogisticModel = {
   logisticType: LogisticType;
   orderDate: number;
-  taskId: string | null;
-  customerId: string | null;
-  warehouseId: string | null;
-  fbaDesc: string;
-  fbaFile: string;
-  poDesc: string;
-  poFile: string;
-  fbaCode: string;
-  boxCount: number;
-  trayCount: number;
+  taskId?: string;
+  customerId?: string;
+  warehouseId?: string;
   deliveryMethod: DeliveryMethod;
-  deliveryAddress: string;
-  trayInfo: TrayInfoModel;
-  totalWeight: string;
-  totalVolume: string;
+  otherDeliveryName: string;
+  boxCount: number;
   status: LogisticStatus;
-  price: string | null;
+  price?: string;
   note: string;
+  files: string[];
+  orderNo: string;
+  pickupDate?: number;
+  pickupFile?: string;
+  logisticDetail: LogisticAmazonDetail | LogisticBoxDetail | LogisticOtherTrayDetail;
+};
+
+export type LogisticAmazonDetail = {
+  transferTray: string;
+  amazonReservationNo: string;
+  fba: string;
+  po: string;
+  fbaCode: string;
+  trayCount: number;
+  deliveryAddress: string;
+  totalWeight: string;
+};
+
+export type LogisticBoxDetail = {
+  fba: string;
+  po: string;
+  fbaCode: string;
+  deliveryAddress: string;
+  totalVolume: string;
+};
+
+export type LogisticOtherTrayDetail = {
+  transferTray: string;
+  trayCount: number;
+  deliveryAddress: string;
+  deliveryNo: string;
+  trayInfo: TrayInfoModel;
 };
 
 export enum LogisticStatus {
@@ -35,18 +58,6 @@ export enum LogisticStatus {
   Sent = '已发货',
   Finished = '已提交POD',
 }
-
-export type LogisticPrepareModel = {
-  amazonReservationNo: string;
-  files: string[];
-  orderNo: string;
-  pickupDate: number;
-};
-
-export type LogisticFeedBackModel = {
-  transferTray: string;
-  pickupFile: string;
-};
 
 export enum TrayType {
   FP = 'FP',
@@ -64,6 +75,7 @@ export type TrayInfoModel = {
 };
 
 export enum LogisticType {
+  None = '无',
   AmazonTray = '亚马逊托盘',
   Box = '散货',
   OtherTray = '其他托盘',

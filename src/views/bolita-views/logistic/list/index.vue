@@ -44,21 +44,17 @@
   import { BasicForm, useForm } from '@/components/Form';
   import { columns } from './columns';
   import { PlusOutlined } from '@vicons/antd';
-  import { useRouter } from 'vue-router';
-  import { creatDamageClaim } from '@/api/damageClaim/list';
   import { handleRequest } from '@/utils/utils';
-  import { getLogisticList } from '@/api/deliveryMethod/logistic-api';
+  import { createLogistic, getLogisticList } from '@/api/deliveryMethod/logistic-api';
   import { searchField } from '@/views/bolita-views/logistic/list/SearchField';
   import NewLogisticFromIndex from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticFromIndex.vue';
+  import { getFileListUrl } from '@/plugins/firebase';
 
-  const router = useRouter();
-
-  // const message = useMessage();
   const actionRef = ref();
   const [register, {}] = useForm({
     gridProps: { cols: '1 s:1 m:2 l:3 xl:4 2xl:4' },
     labelWidth: 80,
-    searchField,
+    schemas: searchField,
   });
   const showModal = ref(false);
 
@@ -97,15 +93,22 @@
   }
 
   async function createNewLogistic(info) {
-    const res = await creatDamageClaim(info);
+    console.log(info);
+    info.files = await getFileListUrl(info.logisticDetail.files);
+    delete info.logisticDetail.files;
+    const res = await createLogistic(info);
     await handleRequest(res, () => {
       showModal.value = false;
       reloadTable();
     });
   }
 
+  let showDetailModal = $ref(false);
+  let currentLogisticId = $ref('');
+
   function showDetail(record: Recordable) {
-    router.push({ name: 'basic-info', params: { id: record.id } });
+    showDetailModal = true;
+    currentLogisticId = record.id;
   }
 
   function handleSubmit(values: Recordable) {

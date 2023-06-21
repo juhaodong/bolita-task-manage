@@ -1,26 +1,23 @@
 <script setup lang="ts">
-  import { $computed, $ref } from 'vue/macros';
+  import { $ref } from 'vue/macros';
   import { ref, watchEffect } from 'vue';
-  import { changeTaskFeedBack, getTaskById, TaskModel, TaskStatus } from '@/api/task/task-api';
+  import { getTaskById } from '@/api/task/task-api';
   import ChangeLogTimeLine from '@/views/bolita-views/composable/ChangeLogTimeLine.vue';
-  import { handleRequest, toastSuccess } from '@/utils/utils';
   import { Archive } from '@vicons/ionicons5';
-  import {
-    laterFilledInOperationRequirement,
-    OperationRequirementModel,
-  } from '@/api/operationType';
-  import { getFileListUrl } from '@/plugins/firebase';
   import AppendFileListDisplay from '@/views/bolita-views/composable/AppendFileListDisplay.vue';
   import { CheckCircleFilled } from '@vicons/antd';
   import dayjs from 'dayjs';
 
   const props = defineProps({
-    id: String,
+    id: {
+      required: true,
+      type: String,
+    },
   });
   const files = ref([]);
   let note = $ref('');
 
-  let taskDetail: TaskModel | null = $ref(null);
+  let detail: LogisticModel | null = $ref(null);
   watchEffect(async () => {
     await reload();
   });
@@ -30,58 +27,12 @@
     if (props.id != null) {
       files.value = [];
       note = '';
-      taskDetail = await getTaskById(props.id);
-      console.log(taskDetail);
+      detail = await getTaskById(props.id);
+      console.log(detail);
     }
   }
 
-  const requiredORs: OperationRequirementModel[] = $computed(() => {
-    return (
-      taskDetail?.operationRequirements.filter(
-        (it) => !laterFilledInOperationRequirement.includes(it.operationType)
-      ) ?? []
-    );
-  });
-
-  const appendORs: OperationRequirementModel[] = $computed(() => {
-    return (
-      taskDetail?.operationRequirements.filter((it) =>
-        laterFilledInOperationRequirement.includes(it.operationType)
-      ) ?? []
-    );
-  });
-
-  const canEditFeedBack = $computed(() => {
-    console.log(taskDetail?.status);
-    return [TaskStatus.Handling, TaskStatus.NotHandled, TaskStatus.Finished].includes(
-      taskDetail?.status ?? TaskStatus.Warning
-    );
-  });
-
   let loading = $ref(false);
-
-  async function submitFeedBack() {
-    loading = true;
-    const filesUrl = await getFileListUrl(files.value);
-    const res = await changeTaskFeedBack(
-      props.id ?? '',
-      taskDetail?.operationRequirements ?? [],
-      note,
-      filesUrl
-    );
-    await handleRequest(res, () => {
-      toastSuccess('反馈成功！');
-      emit('refresh');
-      emit('close');
-    });
-    loading = false;
-  }
-
-  function fillItAll() {
-    requiredORs.forEach((it) => {
-      it.completeAmount = it.requireAmount;
-    });
-  }
 </script>
 
 <template>
@@ -90,8 +41,8 @@
     style="max-width: 800px"
     @close="emit('close')"
     closable
-    title="任务详情"
-    v-if="id && taskDetail"
+    title="物流详情"
+    v-if="id && detail"
   >
     <n-tabs type="line" animated class="mt-4">
       <n-tab-pane name="信息">
@@ -100,31 +51,31 @@
             {{ id }}
           </n-descriptions-item>
           <n-descriptions-item label="操作仓库">
-            {{ taskDetail?.warehouseId }}
+            {{ detail?.warehouseId }}
           </n-descriptions-item>
           <n-descriptions-item label="箱数">
-            {{ taskDetail?.boxCount }}
+            {{ detail?.boxCount }}
           </n-descriptions-item>
 
           <n-descriptions-item label="操作完成率">
-            {{ taskDetail?.completionRate }}%
+            {{ detail?.completionRate }}%
           </n-descriptions-item>
           <n-descriptions-item label="操作时间">
-            {{ dayjs(taskDetail?.operateTime).format('YYYY-MM-DD HH:mm') || '-' }}
+            {{ dayjs(detail?.operateTime).format('YYYY-MM-DD HH:mm') || '-' }}
           </n-descriptions-item>
           <n-descriptions-item label="发货时间">
-            {{ dayjs(taskDetail?.deliveryDate).format('YYYY-MM-DD HH:mm') || '-' }}
+            {{ dayjs(detail?.deliveryDate).format('YYYY-MM-DD HH:mm') || '-' }}
           </n-descriptions-item>
           <n-descriptions-item label="状态">
-            {{ taskDetail?.status }}
+            {{ detail?.status }}
           </n-descriptions-item>
           <n-descriptions-item label="备注">
-            {{ taskDetail?.note || '-' }}
+            {{ detail?.note || '-' }}
           </n-descriptions-item>
         </n-descriptions>
       </n-tab-pane>
       <n-tab-pane name="附件">
-        <append-file-list-display :files-url="taskDetail?.files" />
+        <append-file-list-display :files-url="detail?.files" />
       </n-tab-pane>
       <n-tab-pane name="任务反馈">
         <n-form>

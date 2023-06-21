@@ -1,3 +1,11 @@
+import { deliveryMethods } from '@/api/deliveryMethod';
+
+export enum SelectBoxBase {
+  SKU = 'SKU挑箱',
+  Mai = '箱唛挑箱',
+}
+export const selectBoxBases = Object.values(SelectBoxBase);
+
 export enum OperationType {
   Amount = '数量',
   Check = '清点',
@@ -33,13 +41,14 @@ export type OperationRequirementModel = {
   operationType: OperationType;
   requireAmount: number;
   completeAmount: number;
+  options?: string[]; //only for selectType
   value: string; //only for selectType
   operationStatus: OperationStatus;
   updateTimestamp: number;
   operationInputType: 'input' | 'select';
 };
 
-export const selectTypeORs = [OperationType.SelectBoxOnSku];
+export const selectTypeORs = [OperationType.SelectBoxOnSku, OperationType.Delivery];
 
 export const laterFilledInOperationRequirement = [
   OperationType.OpenBox,
@@ -55,12 +64,19 @@ export const laterFilledInOperationRequirement = [
 function getOperationRequirementModelByName(
   operationType: OperationType
 ): OperationRequirementModel {
+  let options: string[] = [];
+  if (operationType === OperationType.Delivery) {
+    options = deliveryMethods;
+  } else if (operationType === OperationType.SelectBoxOnSku) {
+    options = selectBoxBases;
+  }
   return {
     completeAmount: 0,
     operationStatus: OperationStatus.NotFinished,
     operationType: operationType,
     requireAmount: 0,
-    value: operationType.split('/')[0],
+    value: '',
+    options,
     updateTimestamp: 0,
     operationInputType: selectTypeORs.includes(operationType) ? 'select' : 'input',
   };

@@ -4,36 +4,18 @@
   </n-card>
 </template>
 <script setup lang="ts">
-  import { FormField } from '@/views/bolita-views/composable/form-field-type';
+  import { filesUpload, FormField } from '@/views/bolita-views/composable/form-field-type';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
 
   const schemas: FormField[] = [
     {
-      field: 'fbaDesc',
-      label: 'FBA描述',
+      field: 'fba',
+      label: 'FBA',
       required: true,
     },
     {
-      field: 'fbaFile',
-      component: 'NUpload',
-      label: 'FBA文件',
-      componentProps: {
-        multiple: true,
-      },
-      required: true,
-    },
-    {
-      field: 'poDesc',
-      label: 'PO描述',
-      required: true,
-    },
-    {
-      field: 'poFile',
-      component: 'NUpload',
-      label: 'PO文件',
-      componentProps: {
-        multiple: true,
-      },
+      field: 'po',
+      label: 'PO',
       required: true,
     },
     {
@@ -60,6 +42,7 @@
       label: '总重量',
       required: true,
     },
+    filesUpload,
   ];
 
   const emit = defineEmits(['submit']);

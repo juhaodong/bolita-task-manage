@@ -26,7 +26,6 @@
 
   function handleSubmit(values: Recordable) {
     emit('submit', values);
-    console.log(values);
   }
 
   function handleReset(value: Recordable) {

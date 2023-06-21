@@ -5,25 +5,30 @@
   import LogisticAmazonForm from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticStep2Form/LogisticAmazonForm.vue';
   import LogisticBoxForm from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticStep2Form/LogisticBoxForm.vue';
   import LogisitcOthersForm from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticStep2Form/LogisitcOthersForm.vue';
+  import { getLogisticTypeByDeliveryMethod } from '@/api/deliveryMethod';
 
   let currentStep = $ref(0);
   let logisticType: LogisticType | null = $ref(null);
-  let basicInfo: any | null = $ref(null);
+  let basicInfo: any = $ref(null);
+  let secondStepInfo: any = $ref(null);
   let loading = $ref(false);
 
   function firstFormResult(result) {
     basicInfo = result;
+    basicInfo.logisticType = getLogisticTypeByDeliveryMethod(basicInfo.deliveryMethod);
     logisticType = basicInfo.logisticType;
     currentStep++;
   }
 
   function secondFormResult(result) {
-    console.log(result);
+    secondStepInfo = result;
+    submit();
   }
 
   async function submit() {
+    const sumInfo = { ...basicInfo, logisticDetail: secondStepInfo };
     loading = true;
-    emit('submit', basicInfo);
+    emit('submit', sumInfo);
     loading = false;
   }
 

@@ -1,9 +1,7 @@
 import Mock from 'mockjs';
 import { resultSuccess } from '../_util';
 
-const Random = Mock.Random;
-
-const token = Random.string('upper', 32, 32);
+const token = Mock.Random.string('upper', 32, 32);
 
 export default [
   {

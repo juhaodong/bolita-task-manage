@@ -4,52 +4,23 @@
   </n-card>
 </template>
 <script setup lang="ts">
-  import { FormField } from '@/views/bolita-views/composable/form-field-type';
+  import { filesUpload, FormField } from '@/views/bolita-views/composable/form-field-type';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
-  import { generateOptionFromArray } from '@/utils/utils';
-  import { deliveryMethods } from '@/api/deliveryMethod';
 
   const schemas: FormField[] = [
     {
-      field: 'fbaDesc',
-      label: 'FBA描述',
+      field: 'fba',
+      label: 'FBA',
       required: true,
     },
     {
-      field: 'fbaFile',
-      component: 'NUpload',
-      label: 'FBA文件',
-      componentProps: {
-        multiple: true,
-      },
-      required: true,
-    },
-    {
-      field: 'poDesc',
+      field: 'po',
       label: 'PO描述',
-      required: true,
-    },
-    {
-      field: 'poFile',
-      component: 'NUpload',
-      label: 'PO文件',
-      componentProps: {
-        multiple: true,
-      },
       required: true,
     },
     {
       field: 'fbaCode',
       label: 'FBA代码',
-      required: true,
-    },
-    {
-      field: 'deliveryMethod',
-      label: '配送方式',
-      component: 'NSelect',
-      componentProps: {
-        options: generateOptionFromArray(deliveryMethods),
-      },
       required: true,
     },
     {
@@ -60,19 +31,18 @@
       },
       required: true,
     },
-
     {
       field: 'totalVolume',
       label: '总体积',
       required: true,
     },
+    filesUpload,
   ];
 
   const emit = defineEmits(['submit']);
 
   function handleSubmit(values: Recordable) {
     emit('submit', values);
-    console.log(values);
   }
 </script>
 

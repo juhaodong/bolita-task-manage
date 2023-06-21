@@ -4,22 +4,18 @@
   </n-card>
 </template>
 <script setup lang="ts">
-  import {
-    deliveryMethodSelection,
-    FormField,
-  } from '@/views/bolita-views/composable/form-field-type';
+  import { filesUpload } from '@/views/bolita-views/composable/form-field-type';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { generateOptionFromArray } from '@/utils/utils';
   import { trayTypes } from '@/api/deliveryMethod/logistic-type';
 
-  const schemas: FormField[] = [
+  const schemas = [
     {
       field: 'trayCount',
       label: '托数',
       component: 'NInputNumber',
       required: true,
     },
-    ...deliveryMethodSelection,
     {
       field: 'deliveryAddress',
       label: '送货地址',
@@ -27,6 +23,11 @@
         type: 'textarea',
       },
       required: true,
+    },
+    {
+      field: 'deliveryNo',
+      label: '送仓号',
+      required: false,
     },
     {
       field: 'trayInfo.length',
@@ -57,6 +58,7 @@
       },
       required: true,
     },
+    filesUpload,
   ];
 
   const emit = defineEmits(['submit']);

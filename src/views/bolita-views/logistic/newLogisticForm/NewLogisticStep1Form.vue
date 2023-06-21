@@ -1,48 +1,32 @@
 <template>
-  <n-card class="proCard">
-    <BasicForm @register="register" @submit="handleSubmit" @reset="handleReset" />
-  </n-card>
+  <n-card class="proCard"> <normal-form :form-fields="schemas" @submit="handleSubmit" /></n-card>
 </template>
 <script setup lang="ts">
-  import { FormSchema, useForm } from '@/components/Form';
-  import { generateOptionFromArray } from '@/utils/utils';
   import { listUser, PermissionEnums } from '@/api/user/baseUser';
   import { Ref, ref, UnwrapRef } from 'vue';
-  import { logisticTypes } from '@/api/deliveryMethod/logistic-type';
+  import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
+  import {
+    FormField,
+    getDeliveryMethodSelection,
+  } from '@/views/bolita-views/composable/form-field-type';
 
   let warehouseList: Ref<UnwrapRef<Array<any>>> = ref([]);
-  const schemas: FormSchema[] = [
+  const schemas: FormField[] = [
     {
       field: 'boxCount',
       component: 'NInputNumber',
       label: '箱数',
-      componentProps: {
-        type: 'number',
-        step: 1,
-        precision: 0,
-        placeholder: '请输入箱数',
-      },
-      rules: [{ required: true, message: '请输入箱数', trigger: ['blur'], type: 'number' }],
+      required: true,
     },
-    {
-      field: 'logisticType',
-      component: 'NSelect',
-      label: '物流类型',
-      componentProps: {
-        placeholder: '请选择物流类型',
-        options: generateOptionFromArray(logisticTypes),
-      },
-      rules: [{ required: true, message: '请选择物流类型', trigger: ['blur'] }],
-    },
+    ...getDeliveryMethodSelection(true),
     {
       field: 'warehouseId',
       component: 'NSelect',
       label: '操作仓库',
       componentProps: {
-        placeholder: '请选择操作仓库',
         options: warehouseList,
       },
-      rules: [{ required: true, message: '请选择到货仓库', trigger: ['blur'] }],
+      required: true,
     },
     {
       field: 'note',
@@ -51,28 +35,16 @@
       componentProps: {
         placeholder: '一些需要我们注意的事情',
       },
-      rules: [{ required: false, trigger: ['blur'] }],
+      required: false,
     },
   ];
 
-  const [register, {}] = useForm({
-    gridProps: { cols: 1 },
-    labelWidth: 80,
-    layout: 'vertical',
-    submitButtonText: '下一步',
-    schemas,
-  });
   const emit = defineEmits(['submit']);
 
   function handleSubmit(values: Recordable) {
     emit('submit', values);
     console.log(values);
   }
-
-  function handleReset(value: Recordable) {
-    console.log(value);
-  }
-
   async function init() {
     warehouseList.value = (await listUser(PermissionEnums.Operator)).result.map((it) => ({
       label: it.realName,
