@@ -2,7 +2,6 @@
   import { $computed, $ref } from 'vue/macros';
   import { ref, watchEffect } from 'vue';
   import { changeTaskFeedBack, getTaskById, TaskModel, TaskStatus } from '@/api/task/task-api';
-  import dayjs from 'dayjs';
   import ChangeLogTimeLine from '@/views/bolita-views/composable/ChangeLogTimeLine.vue';
   import { handleRequest, toastSuccess } from '@/utils/utils';
   import { Archive } from '@vicons/ionicons5';
@@ -13,6 +12,7 @@
   import { getFileListUrl } from '@/plugins/firebase';
   import AppendFileListDisplay from '@/views/bolita-views/composable/AppendFileListDisplay.vue';
   import { CheckCircleFilled } from '@vicons/antd';
+  import dayjs from 'dayjs';
 
   const props = defineProps({
     taskId: String,
@@ -52,6 +52,7 @@
   });
 
   const canEditFeedBack = $computed(() => {
+    console.log(taskDetail?.status);
     return [TaskStatus.Handling, TaskStatus.NotHandled, TaskStatus.Finished].includes(
       taskDetail?.status ?? TaskStatus.Warning
     );
@@ -74,6 +75,12 @@
       emit('close');
     });
     loading = false;
+  }
+
+  function fillItAll() {
+    requiredORs.forEach((it) => {
+      it.completeAmount = it.requireAmount;
+    });
   }
 </script>
 
@@ -134,7 +141,7 @@
                   :key="m.operationType"
                 >
                   <n-input-number
-                    v-if="m.operationInputType === 'input'"
+                    v-if="m.operationInputType !== 'select'"
                     :status="m.completeAmount >= m.requireAmount ? 'success' : 'warning'"
                     :disabled="!canEditFeedBack"
                     style="width: 100%"
@@ -188,15 +195,17 @@
                   </n-upload-dragger>
                 </n-upload>
               </n-form-item>
-
-              <n-button
-                :loading="loading"
-                type="primary"
-                style="width: 100%"
-                @click="submitFeedBack"
-              >
-                提交反馈
-              </n-button>
+              <n-space vertical>
+                <n-button style="width: 100%" @click="fillItAll"> 自动补齐 </n-button>
+                <n-button
+                  :loading="loading"
+                  type="primary"
+                  style="width: 100%"
+                  @click="submitFeedBack"
+                >
+                  提交反馈
+                </n-button>
+              </n-space>
             </n-gi>
           </n-grid>
         </n-form>

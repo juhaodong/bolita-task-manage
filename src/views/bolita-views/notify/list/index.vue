@@ -57,7 +57,6 @@
   import { BasicForm, FormSchema, useForm } from '@/components/Form';
   import { columns } from './columns';
   import { PlusOutlined, ScanOutlined } from '@vicons/antd';
-  import { useRouter } from 'vue-router';
   import {
     arriveMedia,
     createNotify,
