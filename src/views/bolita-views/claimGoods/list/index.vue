@@ -46,7 +46,7 @@
   import { PlusOutlined } from '@vicons/antd';
   import { useRouter } from 'vue-router';
   import { salesNameList } from '@/api/sales';
-  import { deliveryMethod } from '@/api/deliveryMethod';
+  import { deliveryMethods } from '@/api/deliveryMethod';
   import { warehouseList } from '@/api/warehouse';
   import dayjs from 'dayjs';
   import NotifyFormIndex from '@/views/bolita-views/notify/NotifyFormPage/NotifyFormIndex.vue';
@@ -90,7 +90,7 @@
       label: '物流渠道',
       componentProps: {
         placeholder: '请选择物流渠道',
-        options: deliveryMethod.map((it) => {
+        options: deliveryMethods.map((it) => {
           return {
             value: it,
             label: it,

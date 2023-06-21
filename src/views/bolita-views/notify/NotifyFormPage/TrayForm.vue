@@ -7,6 +7,7 @@
   import { FormSchema, useForm } from '@/components/Form';
   import dayjs from 'dayjs';
   import { generateOptionFromArray } from '@/utils/utils';
+  import { trayTypes } from '@/api/deliveryMethod/logistic-type';
 
   const schemas: FormSchema[] = [
     {
@@ -51,7 +52,7 @@
       label: '托盘类型',
       componentProps: {
         placeholder: '请选择托盘类型',
-        options: generateOptionFromArray(['FP', 'XP']),
+        options: generateOptionFromArray(trayTypes),
       },
       rules: [{ required: true, message: '请选择托盘类型', trigger: ['blur'] }],
     },

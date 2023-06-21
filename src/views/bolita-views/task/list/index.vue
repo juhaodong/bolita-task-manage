@@ -50,7 +50,7 @@
   import { columns } from './columns';
   import { PlusOutlined } from '@vicons/antd';
   import { salesNameList } from '@/api/sales';
-  import { deliveryMethod } from '@/api/deliveryMethod';
+  import { deliveryMethods } from '@/api/deliveryMethod';
   import { warehouseList } from '@/api/warehouse';
   import dayjs from 'dayjs';
   import {
@@ -104,7 +104,7 @@
       label: '物流渠道',
       componentProps: {
         placeholder: '请选择物流渠道',
-        options: deliveryMethod.map((it) => {
+        options: deliveryMethods.map((it) => {
           return {
             value: it,
             label: it,

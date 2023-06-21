@@ -1,6 +1,6 @@
 import { Random } from 'mockjs';
 import { doCustomTimes, resultSuccess } from '../_util';
-import { deliveryMethod } from '@/api/deliveryMethod';
+import { deliveryMethods } from '@/api/deliveryMethod';
 import { salesNameList } from '@/api/sales';
 import {
   completedList,
@@ -11,7 +11,7 @@ import { taskStatusList, taskTypes } from '@/api/task/task-types';
 
 Random.extend({
   deliveryMethod: function () {
-    return this.pick(deliveryMethod);
+    return this.pick(deliveryMethods);
   },
   salesName: function () {
     return this.pick(salesNameList);

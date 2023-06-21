@@ -66,7 +66,7 @@
     notifyStatusList,
   } from '@/api/notify/notify-api';
   import { salesNameList } from '@/api/sales';
-  import { deliveryMethod } from '@/api/deliveryMethod';
+  import { deliveryMethods } from '@/api/deliveryMethod';
   import { warehouseList } from '@/api/warehouse';
   import dayjs from 'dayjs';
   import NotifyFormIndex from '@/views/bolita-views/notify/NotifyFormPage/NotifyFormIndex.vue';
@@ -74,6 +74,7 @@
   import { useUserStore } from '@/store/modules/user';
   import NotifyDetailPage from '@/views/bolita-views/notify/NotifyDetail/NotifyDetailPage.vue';
   import { $ref } from 'vue/macros';
+  import { PermissionEnums } from '@/api/user/baseUser';
 
   const schemas: FormSchema[] = [
     {
@@ -112,7 +113,7 @@
       label: '物流渠道',
       componentProps: {
         placeholder: '请选择物流渠道',
-        options: deliveryMethod.map((it) => {
+        options: deliveryMethods.map((it) => {
           return {
             value: it,
             label: it,
@@ -200,7 +201,6 @@
             ifShow: () => {
               return true;
             },
-            auth: ['basic_list'],
           },
           {
             label: '审核',
@@ -210,7 +210,7 @@
               return record.status == '审核中';
             },
             // 根据权限控制是否显示: 有权限，会显示，支持多个
-            auth: ['basic_list'],
+            auth: [PermissionEnums.Manager, PermissionEnums.Sales, PermissionEnums.Technical],
           },
         ],
         dropDownActions: [
@@ -220,7 +220,6 @@
             ifShow: () => {
               return true;
             },
-            auth: ['basic_list'],
           },
           {
             label: '取消预报',

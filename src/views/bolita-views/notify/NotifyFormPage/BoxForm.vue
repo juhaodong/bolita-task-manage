@@ -7,7 +7,7 @@
   import { FormSchema, useForm } from '@/components/Form';
   import dayjs from 'dayjs';
   import { generateOptionFromArray } from '@/utils/utils';
-  import { deliveryMethod } from '@/api/deliveryMethod';
+  import { deliveryMethods } from '@/api/deliveryMethod';
 
   const schemas: FormSchema[] = [
     {
@@ -16,7 +16,7 @@
       label: '物流渠道',
       componentProps: {
         placeholder: '请选择物流渠道',
-        options: generateOptionFromArray(deliveryMethod),
+        options: generateOptionFromArray(deliveryMethods),
       },
       rules: [{ required: true, message: '请选择物流渠道', trigger: ['blur'] }],
     },
