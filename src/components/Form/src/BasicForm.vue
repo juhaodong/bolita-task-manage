@@ -54,6 +54,15 @@
               </n-space>
             </n-radio-group>
           </template>
+
+          <template v-else-if="schema.component === 'NUpload'">
+            <n-upload
+              v-model:file-list="formModel[schema.field]"
+              v-bind="getComponentProps(schema)"
+            >
+              <n-button> 上传文件 </n-button>
+            </n-upload>
+          </template>
           <!--动态渲染表单组件-->
           <component
             v-else
@@ -122,17 +131,16 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, reactive, ref, computed, unref, onMounted, watch } from 'vue';
+  import type { Ref } from 'vue';
+  import { computed, defineComponent, onMounted, reactive, ref, unref, watch } from 'vue';
   import { createPlaceholderMessage } from './helper';
   import { useFormEvents } from './hooks/useFormEvents';
   import { useFormValues } from './hooks/useFormValues';
 
   import { basicProps } from './props';
-  import { DownOutlined, UpOutlined, QuestionCircleOutlined } from '@vicons/antd';
-
-  import type { Ref } from 'vue';
+  import { DownOutlined, QuestionCircleOutlined, UpOutlined } from '@vicons/antd';
   import type { GridProps } from 'naive-ui/lib/grid';
-  import type { FormSchema, FormProps, FormActionType } from './types/form';
+  import type { FormActionType, FormProps, FormSchema } from './types/form';
 
   import { isArray } from '@/utils/is/index';
   import { deepMerge } from '@/utils';

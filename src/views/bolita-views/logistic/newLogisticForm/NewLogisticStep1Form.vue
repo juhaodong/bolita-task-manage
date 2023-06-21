@@ -14,7 +14,6 @@
   const schemas: FormSchema[] = [
     {
       field: 'boxCount',
-      labelMessage: '请在此填入本次预计到达的总箱数，如果是货柜，请填写货柜内的总箱数',
       component: 'NInputNumber',
       label: '箱数',
       componentProps: {
@@ -26,7 +25,7 @@
       rules: [{ required: true, message: '请输入箱数', trigger: ['blur'], type: 'number' }],
     },
     {
-      field: 'logisticModel',
+      field: 'logisticType',
       component: 'NSelect',
       label: '物流类型',
       componentProps: {

@@ -31,7 +31,7 @@
       </template>
     </BasicTable>
 
-    <n-modal v-model:show="showModal" :show-icon="false" preset="dialog" title="新建索赔">
+    <n-modal v-model:show="showModal" :show-icon="false" preset="dialog" title="新建物流">
       <new-logistic-from-index @submit="createNewLogistic" />
     </n-modal>
   </n-card>

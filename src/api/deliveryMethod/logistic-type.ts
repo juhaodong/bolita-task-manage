@@ -1,15 +1,19 @@
+import { DeliveryMethod } from '@/api/deliveryMethod/index';
+
 export type LogisticModel = {
   logisticType: LogisticType;
   orderDate: number;
   taskId: string | null;
   customerId: string | null;
   warehouseId: string | null;
+  fbaDesc: string;
   fbaFile: string;
+  poDesc: string;
   poFile: string;
   fbaCode: string;
   boxCount: number;
   trayCount: number;
-  deliveryMethod: string;
+  deliveryMethod: DeliveryMethod;
   deliveryAddress: string;
   trayInfo: TrayInfoModel;
   totalWeight: string;
