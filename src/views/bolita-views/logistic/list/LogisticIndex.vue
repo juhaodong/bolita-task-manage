@@ -35,6 +35,15 @@
       <logistic-detail @close="showDetailModal = false" :id="currentLogisticId" />
     </n-modal>
 
+    <n-modal v-model:show="showAction" preset="dialog" title="提交物流更新信息">
+      <logistic-status-form-index
+        v-if="currentLogisticInfo"
+        :logistic-type="currentLogisticInfo.logisticType"
+        :status="currentLogisticInfo.status"
+        @submit="handleStatusAction"
+      />
+    </n-modal>
+
     <n-modal v-model:show="showInputPrice">
       <n-card title="输入价格" style="max-width: 400px">
         <n-form-item label="价格">
@@ -57,7 +66,10 @@
     changeLogisticPrice,
     changeLogisticStatus,
     createLogistic,
+    finishLogistic,
     getLogisticList,
+    sendOutLogistic,
+    submitLogisticFeedBack,
   } from '@/api/deliveryMethod/logistic-api';
   import { searchField } from '@/views/bolita-views/logistic/list/SearchField';
   import NewLogisticFromIndex from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticFromIndex.vue';
@@ -65,6 +77,8 @@
   import LogisticDetail from '@/views/bolita-views/logistic/logisticDetail/LogisticDetail.vue';
   import { LogisticModel, LogisticStatus } from '@/api/deliveryMethod/logistic-type';
   import { PermissionEnums } from '@/api/user/baseUser';
+  import LogisticStatusFormIndex from '@/views/bolita-views/logistic/StatusForms/LogisticStatusFormIndex.vue';
+  import { resultError } from '../../../../../mock/_util';
 
   const actionRef = ref();
   const [register, {}] = useForm({
@@ -73,6 +87,7 @@
     schemas: searchField,
   });
   const showModal = ref(false);
+  let showAction = $ref(false);
   let showInputPrice = $ref(false);
   let price: string = $ref('');
   function showPriceInput(id) {
@@ -141,6 +156,30 @@
             },
             auth: [PermissionEnums.Technical, PermissionEnums.Manager, PermissionEnums.Customer],
           },
+          {
+            label: '提交文件',
+            onClick: showStatusAction.bind(null, record),
+            ifShow() {
+              return record.status === LogisticStatus.WaitForFeedBack;
+            },
+            auth: [PermissionEnums.Technical, PermissionEnums.Manager, PermissionEnums.Logistic],
+          },
+          {
+            label: '提交提货单',
+            onClick: showStatusAction.bind(null, record),
+            ifShow() {
+              return record.status === LogisticStatus.ReadyToSend;
+            },
+            auth: [PermissionEnums.Technical, PermissionEnums.Manager, PermissionEnums.Logistic],
+          },
+          {
+            label: '提交POD',
+            onClick: showStatusAction.bind(null, record),
+            ifShow() {
+              return record.status === LogisticStatus.Sent;
+            },
+            auth: [PermissionEnums.Technical, PermissionEnums.Manager, PermissionEnums.Logistic],
+          },
         ],
       });
     },
@@ -175,6 +214,7 @@
 
   let showDetailModal = $ref(false);
   let currentLogisticId: string = $ref('');
+  let currentLogisticInfo: LogisticModel | null = $ref(null);
 
   function showDetail(record: Recordable) {
     showDetailModal = true;
@@ -237,6 +277,30 @@
 
   function handleReset(values: Recordable) {
     console.log(values);
+  }
+
+  function showStatusAction(record) {
+    currentLogisticInfo = record;
+    showAction = true;
+  }
+
+  async function handleStatusAction(value) {
+    if (currentLogisticInfo != null) {
+      const { status } = currentLogisticInfo;
+      let res = resultError('');
+      if (status == LogisticStatus.WaitForFeedBack) {
+        res = await submitLogisticFeedBack(currentLogisticInfo.id, value);
+      } else if (status == LogisticStatus.ReadyToSend) {
+        res = await sendOutLogistic(currentLogisticInfo.id, value);
+      } else if (status == LogisticStatus.Sent) {
+        res = await finishLogistic(currentLogisticInfo.id, value);
+      }
+      await handleRequest(res, () => {
+        showAction = false;
+        currentLogisticInfo = null;
+        reloadTable();
+      });
+    }
   }
 </script>
 

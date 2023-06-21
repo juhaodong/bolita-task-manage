@@ -27,7 +27,7 @@
           },
         ]
       : []),
-    getFilesUploadFormField('feedBackFiles'),
+    getFilesUploadFormField('pickupFile'),
   ];
 
   const emit = defineEmits(['submit']);

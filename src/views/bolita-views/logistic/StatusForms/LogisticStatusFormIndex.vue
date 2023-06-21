@@ -26,10 +26,11 @@
     logisticType: LogisticType;
     status: LogisticStatus;
   }
-  const props = defineProps<Props>();
+  defineProps<Props>();
   const emit = defineEmits(['submit']);
 
   function submit(value) {
+    console.log(value);
     emit('submit', value);
   }
 </script>

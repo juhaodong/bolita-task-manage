@@ -1,5 +1,5 @@
 import { addDoc, collection, doc, query, setDoc } from 'firebase/firestore';
-import { db, executeQuery, getDocContent } from '@/plugins/firebase';
+import { db, executeQuery, getDocContent, getFileListUrl } from '@/plugins/firebase';
 import { doLog } from '@/api/statusChangeLog';
 import { resultError, resultSuccess } from '../../../mock/_util';
 import {
@@ -10,6 +10,7 @@ import {
   LogisticType,
 } from '@/api/deliveryMethod/logistic-type';
 import dayjs from 'dayjs';
+import { UploadFileInfo } from 'naive-ui';
 
 const path = 'logistic';
 const ref = collection(db, path);
@@ -57,7 +58,7 @@ export async function changeLogisticPrice(id: string, price: string) {
 }
 
 interface LogisticFeedBackDTO {
-  feedBackFiles: string[];
+  feedBackFiles: UploadFileInfo[];
   orderNo: string;
   pickupDate: number;
   amazonReservationNo?: string;
@@ -69,19 +70,20 @@ export async function submitLogisticFeedBack(id: string, info: LogisticFeedBackD
       (currentModel.logisticDetail as LogisticAmazonDetail).amazonReservationNo =
         info?.amazonReservationNo ?? '';
     }
+    const feedBackFiles = await getFileListUrl(info.feedBackFiles);
     await setDoc(
       doc(ref, id),
       {
         status: LogisticStatus.ReadyToSend,
         logisticDetail: currentModel.logisticDetail,
-        feedBackFiles: info.feedBackFiles,
+        feedBackFiles,
         orderNo: info.orderNo,
         pickupDate: info.pickupDate,
       },
       { merge: true }
     );
     await doLog({
-      files: info.feedBackFiles,
+      files: feedBackFiles,
       fromStatus: currentModel.status,
       logRef: id,
       note: '物流人员提交了反馈。',
@@ -95,7 +97,7 @@ export async function submitLogisticFeedBack(id: string, info: LogisticFeedBackD
 
 export async function sendOutLogistic(
   id: string,
-  info: { transferTray?: string; pickupFile: string[] }
+  info: { transferTray?: string; pickupFile: UploadFileInfo[] }
 ) {
   try {
     const currentModel = await getLogisticInfoById(id);
@@ -106,17 +108,18 @@ export async function sendOutLogistic(
       (currentModel.logisticDetail as LogisticAmazonDetail | LogisticOtherTrayDetail).transferTray =
         info?.transferTray ?? '';
     }
+    const pickupFile = await getFileListUrl(info.pickupFile);
     await setDoc(
       doc(ref, id),
       {
-        status: LogisticStatus.ReadyToSend,
+        status: LogisticStatus.Sent,
         logisticDetail: currentModel.logisticDetail,
-        pickupFile: info.pickupFile,
+        pickupFile,
       },
       { merge: true }
     );
     await doLog({
-      files: info.pickupFile,
+      files: pickupFile,
       fromStatus: currentModel.status,
       logRef: id,
       note: '物流已上传提货单。',
@@ -130,23 +133,25 @@ export async function sendOutLogistic(
 
 export async function finishLogistic(
   id: string,
-  info: { deliveryCompany: string; podFile: string[] }
+  info: { deliveryCompany: string; podFile: UploadFileInfo[] }
 ) {
   try {
     const currentModel = await getLogisticInfoById(id);
+    const podFile = await getFileListUrl(info.podFile);
     await setDoc(
       doc(ref, id),
       {
-        status: LogisticStatus.ReadyToSend,
-        ...info,
+        status: LogisticStatus.Finished,
+        deliveryCompany: info.deliveryCompany,
+        podFile,
       },
       { merge: true }
     );
     await doLog({
-      files: info.podFile,
+      files: podFile,
       fromStatus: currentModel.status,
       logRef: id,
-      note: '物流已上传提货单。',
+      note: '物流已上传POD。',
       toStatus: LogisticStatus.WaitForPriceConfirm,
     });
     return resultSuccess('');
