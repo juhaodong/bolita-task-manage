@@ -2,7 +2,11 @@
   <n-form v-bind="getBindValue" :model="formModel" ref="formElRef">
     <n-grid v-bind="getGrid">
       <n-gi v-bind="schema.giProps" v-for="schema in getSchema" :key="schema.field">
-        <n-form-item :label="schema.label" :path="schema.field">
+        <n-form-item
+          v-if="schema?.displayCondition ? schema?.displayCondition(formModel) : true"
+          :label="schema.label"
+          :path="schema.field"
+        >
           <!--标签名右侧温馨提示-->
           <template #label v-if="schema.labelMessage">
             {{ schema.label }}

@@ -67,6 +67,7 @@ export enum LogisticType {
   AmazonTray = '亚马逊托盘',
   Box = '散货',
   OtherTray = '其他托盘',
+  DirectSent = '直送/其他',
 }
 
 export const logisticTypes = Object.values(LogisticType);
