@@ -24,7 +24,7 @@ const routes: Array<RouteRecordRaw> = [
           title: '物流管理',
           activeMenu: `${name}_index`,
         },
-        component: () => import('@/views/bolita-views/logistic/list/index.vue'),
+        component: () => import('@/views/bolita-views/logistic/list/LogisticIndex.vue'),
       },
     ],
   },

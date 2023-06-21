@@ -11,15 +11,19 @@ export type FormField = {
   defaultValue?: any;
   displayCondition?: (formValue: any) => boolean;
 };
-export const filesUpload: FormField = {
-  field: 'files',
-  label: '附件',
-  component: 'NUpload',
-  componentProps: {
-    multiple: true,
-  },
-  required: true,
-};
+
+export function getFilesUploadFormField(key = 'files'): FormField {
+  return {
+    field: key,
+    label: '附件',
+    component: 'NUpload',
+    componentProps: {
+      multiple: true,
+    },
+    required: true,
+  };
+}
+export const filesUpload: FormField = getFilesUploadFormField();
 export function getDeliveryMethodSelection(onlyWithLogistic = false): FormField[] {
   return [
     {

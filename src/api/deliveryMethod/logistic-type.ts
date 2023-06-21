@@ -1,6 +1,7 @@
 import { DeliveryMethod } from '@/api/deliveryMethod/index';
 
 export type LogisticModel = {
+  id: string;
   logisticType: LogisticType;
   orderDate: number;
   taskId?: string;
@@ -13,9 +14,12 @@ export type LogisticModel = {
   price?: string;
   note: string;
   files: string[];
+  feedBackFiles?: string[];
   orderNo: string;
   pickupDate?: number;
   pickupFile?: string;
+  deliveryCompany?: string;
+  podFile?: String;
   logisticDetail: LogisticAmazonDetail | LogisticBoxDetail | LogisticOtherTrayDetail;
 };
 

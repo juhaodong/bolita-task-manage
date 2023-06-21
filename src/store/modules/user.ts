@@ -5,6 +5,7 @@ import { ResultEnum } from '@/enums/httpEnum';
 
 import { getUserInfo as getUserInfoApi, login } from '@/api/user/baseUser';
 import { storage } from '@/utils/Storage';
+import { generateOptionFromArray } from '@/utils/utils';
 
 export type UserInfoType = {
   username: string;
@@ -81,7 +82,7 @@ export const useUserStore = defineStore({
       const { result } = await getUserInfoApi();
 
       if (result.permissions && result.permissions.length) {
-        const permissionsList = result.permissions;
+        const permissionsList = generateOptionFromArray(result.permissions);
         this.setPermissions(permissionsList);
         this.setUserInfo(result);
       } else {

@@ -9,6 +9,7 @@ export function usePermission() {
    */
   function _somePermissions(accesses: string[]) {
     return userStore.getPermissions.some((item) => {
+      console.log(item);
       const { value }: any = item;
       return accesses.includes(value);
     });

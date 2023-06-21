@@ -7,6 +7,7 @@
   import { LogisticModel, LogisticType } from '@/api/deliveryMethod/logistic-type';
   import { getLogisticInfoById } from '@/api/deliveryMethod/logistic-api';
   import TrayInfoDisplay from '@/views/bolita-views/composable/TrayInfoDisplay.vue';
+  import DeliveryMethodDisplay from '@/views/bolita-views/composable/DeliveryMethodDisplay.vue';
 
   const props = defineProps({
     id: {
@@ -57,8 +58,14 @@
           <n-descriptions-item label="箱数">
             {{ detail?.boxCount }}
           </n-descriptions-item>
+          <n-descriptions-item label="报价">
+            {{ detail?.price ?? '-' }}
+          </n-descriptions-item>
           <n-descriptions-item label="物流渠道">
-            {{ detail?.deliveryMethod }}
+            <delivery-method-display
+              :delivery-method="detail?.deliveryMethod"
+              :other-delivery-name="detail?.otherDeliveryName"
+            />
           </n-descriptions-item>
           <n-descriptions-item label="下单时间">
             {{ dayjs(detail?.orderDate).format('YYYY-MM-DD HH:mm') || '-' }}

@@ -1,0 +1,40 @@
+<template>
+  <n-card class="proCard">
+    <normal-form :form-fields="schemas" @submit="handleSubmit" />
+  </n-card>
+</template>
+<script setup lang="ts">
+  import {
+    FormField,
+    getFilesUploadFormField,
+  } from '@/views/bolita-views/composable/form-field-type';
+  import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
+  import { LogisticType } from '@/api/deliveryMethod/logistic-type';
+
+  interface Props {
+    logisticType: LogisticType;
+  }
+
+  const props = defineProps<Props>();
+  const schemas: FormField[] = [
+    ...(props.logisticType === LogisticType.AmazonTray ||
+    props.logisticType === LogisticType.OtherTray
+      ? [
+          {
+            field: 'transferTray',
+            label: '交接托盘',
+            required: true,
+          },
+        ]
+      : []),
+    getFilesUploadFormField('feedBackFiles'),
+  ];
+
+  const emit = defineEmits(['submit']);
+
+  function handleSubmit(values: Recordable) {
+    emit('submit', values);
+  }
+</script>
+
+<style scoped lang="less"></style>

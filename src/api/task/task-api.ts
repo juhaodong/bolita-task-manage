@@ -19,10 +19,11 @@ export enum TaskStatus {
 }
 
 export type TaskModel = {
+  id?: string;
   salesId: string;
   customerId: string;
   warehouseId: string;
-  logisticId: string | null;
+  logisticId?: string;
   boxCount: number;
   taskType: TaskType;
   deliveryMethod: string;
@@ -49,7 +50,6 @@ export async function createTask(taskInfo: TaskModel) {
       deliveryDate: '',
       deliveryMethod: '',
       files: [],
-      id: null,
       note: '',
       operateTime: '',
       operationRequirements: [],

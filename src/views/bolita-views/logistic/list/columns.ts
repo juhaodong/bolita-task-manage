@@ -11,6 +11,7 @@ export const columns: DataTableColumns<LogisticModel> = [
     title: '仓库',
     key: 'warehouseId',
   },
+
   getTimeColumn({
     title: '下单时间',
     key: 'orderDate',
@@ -19,9 +20,15 @@ export const columns: DataTableColumns<LogisticModel> = [
     title: '状态',
     key: 'status',
   },
+
   {
     title: '箱数',
     key: 'boxCount',
+  },
+  {
+    title: '报价',
+    key: 'price',
+    width: 75,
   },
   {
     title: '物流渠道',
