@@ -61,7 +61,8 @@ export async function createTask(taskInfo: TaskModel) {
     };
     const realInfo = Object.assign(info, taskInfo);
     console.log(realInfo, 'info');
-    const { id } = await addDoc(taskCollection, realInfo);
+    const id = dayjs().valueOf().toString();
+    await setDoc(doc(taskCollection, id), realInfo);
     await Promise.all(
       taskInfo.operationRequirements.map((it) =>
         addDoc(collection(db, taskPath, id, operationRequirementsPath), it)

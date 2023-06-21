@@ -33,9 +33,13 @@ export type OperationRequirementModel = {
   operationType: OperationType;
   requireAmount: number;
   completeAmount: number;
+  value: string; //only for selectType
   operationStatus: OperationStatus;
   updateTimestamp: number;
+  operationInputType: 'input' | 'select';
 };
+
+export const selectTypeORs = [OperationType.SelectBoxOnSku];
 
 export const laterFilledInOperationRequirement = [
   OperationType.OpenBox,
@@ -56,7 +60,9 @@ function getOperationRequirementModelByName(
     operationStatus: OperationStatus.NotFinished,
     operationType: operationType,
     requireAmount: 0,
+    value: operationType.split('/')[0],
     updateTimestamp: 0,
+    operationInputType: selectTypeORs.includes(operationType) ? 'select' : 'input',
   };
 }
 

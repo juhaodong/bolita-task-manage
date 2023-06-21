@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 
 export const columns: DataTableColumns<TaskModel> = [
   {
-    title: '预报ID',
+    title: '任务ID',
     key: 'id',
   },
   {

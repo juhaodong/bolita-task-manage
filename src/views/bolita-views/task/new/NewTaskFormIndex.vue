@@ -12,6 +12,7 @@
   import { uploadFile } from '@/plugins/firebase';
   import { UploadFileInfo } from 'naive-ui';
   import { TaskStatus } from '@/api/task/task-api';
+  import { generateOptionFromArray } from '@/utils/utils';
 
   let currentStep = $ref(0);
   let taskType: TaskType | null = $ref(null);
@@ -76,10 +77,16 @@
               :label="model.operationType"
             >
               <n-input-number
+                v-if="model.operationInputType === 'input'"
                 @focus="model.requireAmount === 0 ? (model.requireAmount = null) : null"
                 clearable
                 placeholder="如果不填写，那么为0"
                 v-model:value="model.requireAmount"
+              />
+              <n-select
+                v-else
+                v-model:value="model.value"
+                :options="generateOptionFromArray(model.operationType.split('/'))"
               />
             </n-form-item-gi>
             <n-form-item-gi :span="12" label="任务附件">

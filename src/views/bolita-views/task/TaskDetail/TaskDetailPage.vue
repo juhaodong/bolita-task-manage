@@ -6,7 +6,10 @@
   import ChangeLogTimeLine from '@/views/bolita-views/composable/ChangeLogTimeLine.vue';
   import { handleRequest, toastSuccess } from '@/utils/utils';
   import { Archive } from '@vicons/ionicons5';
-  import { laterFilledInOperationRequirement } from '@/api/operationType';
+  import {
+    laterFilledInOperationRequirement,
+    OperationRequirementModel,
+  } from '@/api/operationType';
   import { getFileListUrl } from '@/plugins/firebase';
   import AppendFileListDisplay from '@/views/bolita-views/composable/AppendFileListDisplay.vue';
   import { CheckCircleFilled } from '@vicons/antd';
@@ -32,15 +35,19 @@
     }
   }
 
-  const requiredORs = $computed(() => {
-    return taskDetail?.operationRequirements.filter(
-      (it) => !laterFilledInOperationRequirement.includes(it.operationType)
+  const requiredORs: OperationRequirementModel[] = $computed(() => {
+    return (
+      taskDetail?.operationRequirements.filter(
+        (it) => !laterFilledInOperationRequirement.includes(it.operationType)
+      ) ?? []
     );
   });
 
-  const appendORs = $computed(() => {
-    return taskDetail?.operationRequirements.filter((it) =>
-      laterFilledInOperationRequirement.includes(it.operationType)
+  const appendORs: OperationRequirementModel[] = $computed(() => {
+    return (
+      taskDetail?.operationRequirements.filter((it) =>
+        laterFilledInOperationRequirement.includes(it.operationType)
+      ) ?? []
     );
   });
 
@@ -127,6 +134,7 @@
                   :key="m.operationType"
                 >
                   <n-input-number
+                    v-if="m.operationInputType === 'input'"
                     :status="m.completeAmount >= m.requireAmount ? 'success' : 'warning'"
                     :disabled="!canEditFeedBack"
                     style="width: 100%"
@@ -138,6 +146,7 @@
                     </template>
                     <template #suffix> / 共 {{ m.requireAmount }}</template>
                   </n-input-number>
+                  <n-input disabled v-model:value="m.value" v-else />
                 </n-form-item-gi>
                 <n-gi span="12" class="mb-2">
                   <n-text strong>操作中产生的额外费用</n-text>
