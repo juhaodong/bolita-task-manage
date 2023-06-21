@@ -1,13 +1,12 @@
 <script setup lang="ts">
   import { $ref } from 'vue/macros';
-  import { ref, watchEffect } from 'vue';
+  import { watchEffect } from 'vue';
   import ChangeLogTimeLine from '@/views/bolita-views/composable/ChangeLogTimeLine.vue';
-  import { Archive } from '@vicons/ionicons5';
   import AppendFileListDisplay from '@/views/bolita-views/composable/AppendFileListDisplay.vue';
-  import { CheckCircleFilled } from '@vicons/antd';
   import dayjs from 'dayjs';
-  import { LogisticModel } from '@/api/deliveryMethod/logistic-type';
+  import { LogisticModel, LogisticType } from '@/api/deliveryMethod/logistic-type';
   import { getLogisticInfoById } from '@/api/deliveryMethod/logistic-api';
+  import TrayInfoDisplay from '@/views/bolita-views/composable/TrayInfoDisplay.vue';
 
   const props = defineProps({
     id: {
@@ -15,8 +14,13 @@
       type: String,
     },
   });
-  const files = ref([]);
-  let note = $ref('');
+
+  const logisticType = $computed(() => {
+    return detail?.logisticType;
+  });
+  const detailInfo = $computed(() => {
+    return detail?.logisticDetail;
+  });
 
   let detail: LogisticModel | null = $ref(null);
   watchEffect(async () => {
@@ -26,14 +30,9 @@
 
   async function reload() {
     if (props.id != null) {
-      files.value = [];
-      note = '';
       detail = await getLogisticInfoById(props.id);
-      console.log(detail);
     }
   }
-
-  let loading = $ref(false);
 </script>
 
 <template>
@@ -47,6 +46,7 @@
   >
     <n-tabs type="line" animated class="mt-4">
       <n-tab-pane name="信息">
+        <n-h4>基础信息</n-h4>
         <n-descriptions bordered :column="2" size="small" label-placement="top">
           <n-descriptions-item label="任务ID">
             {{ id }}
@@ -58,7 +58,7 @@
             {{ detail?.boxCount }}
           </n-descriptions-item>
           <n-descriptions-item label="物流渠道">
-            {{ detail?.deliveryMethod }}%
+            {{ detail?.deliveryMethod }}
           </n-descriptions-item>
           <n-descriptions-item label="下单时间">
             {{ dayjs(detail?.orderDate).format('YYYY-MM-DD HH:mm') || '-' }}
@@ -73,93 +73,84 @@
             {{ detail?.note || '-' }}
           </n-descriptions-item>
         </n-descriptions>
+        <template v-if="detailInfo">
+          <template v-if="logisticType === LogisticType.AmazonTray">
+            <div class="mt-8">
+              <n-h4>亚马逊托盘</n-h4>
+              <n-descriptions bordered :column="2" label-placement="top">
+                <n-descriptions-item label="FBA">
+                  {{ detailInfo?.fba }}
+                </n-descriptions-item>
+                <n-descriptions-item label="po">
+                  {{ detailInfo?.po }}
+                </n-descriptions-item>
+                <n-descriptions-item label="po">
+                  {{ detailInfo?.fba }}
+                </n-descriptions-item>
+                <n-descriptions-item label="托盘数量">
+                  {{ detailInfo?.trayCount }}
+                </n-descriptions-item>
+                <n-descriptions-item label="配送地址">
+                  {{ detailInfo?.deliveryAddress }}
+                </n-descriptions-item>
+                <n-descriptions-item label="总重量">
+                  {{ detailInfo?.totalWeight }}
+                </n-descriptions-item>
+                <n-descriptions-item label="转托">
+                  {{ detailInfo?.transferTray }}
+                </n-descriptions-item>
+                <n-descriptions-item label="亚马逊预约号">
+                  {{ detailInfo?.amazonReservationNo }}
+                </n-descriptions-item>
+              </n-descriptions>
+            </div>
+          </template>
+          <template v-else-if="logisticType === LogisticType.Box">
+            <div class="mt-8">
+              <n-h4>散货</n-h4>
+              <n-descriptions bordered :column="2" label-placement="top">
+                <n-descriptions-item label="转托">
+                  {{ detailInfo?.transferTray }}
+                </n-descriptions-item>
+                <n-descriptions-item label="托盘数量">
+                  {{ detailInfo?.trayCount }}
+                </n-descriptions-item>
+                <n-descriptions-item label="po">
+                  {{ detailInfo?.fba }}
+                </n-descriptions-item>
+                <n-descriptions-item label="配送地址">
+                  {{ detailInfo?.deliveryAddress }}
+                </n-descriptions-item>
+              </n-descriptions>
+            </div>
+          </template>
+          <template v-else-if="logisticType === LogisticType.OtherTray">
+            <div class="mt-8">
+              <n-h4>其他托盘</n-h4>
+              <n-descriptions bordered :column="2" label-placement="top">
+                <n-descriptions-item label="交换托盘">
+                  {{ detailInfo?.transferTray ?? '-' }}
+                </n-descriptions-item>
+                <n-descriptions-item label="托盘数量">
+                  {{ detailInfo?.trayCount }}
+                </n-descriptions-item>
+                <n-descriptions-item label="送仓号">
+                  {{ detailInfo?.deliveryNo }}
+                </n-descriptions-item>
+                <n-descriptions-item label="配送地址">
+                  {{ detailInfo?.deliveryAddress }}
+                </n-descriptions-item>
+              </n-descriptions>
+            </div>
+            <div class="mt-8">
+              <n-h4>托盘详情</n-h4>
+              <tray-info-display :info="detailInfo.trayInfo" />
+            </div>
+          </template>
+        </template>
       </n-tab-pane>
       <n-tab-pane name="附件">
         <append-file-list-display :files-url="detail?.files" />
-      </n-tab-pane>
-      <n-tab-pane name="任务反馈">
-        <n-form>
-          <n-grid :cols="3" x-gap="24">
-            <n-gi :span="canEditFeedBack ? 2 : 3">
-              <n-grid :cols="12" x-gap="24">
-                <n-gi span="12" class="mb-2">
-                  <n-text strong>操作完成情况</n-text>
-                </n-gi>
-                <n-form-item-gi
-                  :span="6"
-                  :label="m.operationType"
-                  v-for="m in requiredORs"
-                  :key="m.operationType"
-                >
-                  <n-input-number
-                    v-if="m.operationInputType !== 'select'"
-                    :status="m.completeAmount >= m.requireAmount ? 'success' : 'warning'"
-                    :disabled="!canEditFeedBack"
-                    style="width: 100%"
-                    :show-button="false"
-                    v-model:value="m.completeAmount"
-                  >
-                    <template #prefix v-if="m.completeAmount >= m.requireAmount">
-                      <n-icon color="green"><check-circle-filled /></n-icon>
-                    </template>
-                    <template #suffix> / 共 {{ m.requireAmount }}</template>
-                  </n-input-number>
-                  <n-input disabled v-model:value="m.value" v-else />
-                </n-form-item-gi>
-                <n-gi span="12" class="mb-2">
-                  <n-text strong>操作中产生的额外费用</n-text>
-                </n-gi>
-                <n-form-item-gi
-                  :span="6"
-                  :label="m.operationType"
-                  v-for="m in appendORs"
-                  :key="m.operationType"
-                >
-                  <n-input-number
-                    :disabled="!canEditFeedBack"
-                    style="width: 100%"
-                    :show-button="false"
-                    v-model:value="m.completeAmount"
-                  >
-                    <template #suffix> / 共 {{ m.requireAmount }}</template>
-                  </n-input-number>
-                </n-form-item-gi>
-              </n-grid>
-            </n-gi>
-            <n-gi v-if="canEditFeedBack">
-              <div class="mb-2">
-                <n-text strong>反馈</n-text>
-              </div>
-              <n-form-item label="备注">
-                <n-input v-model:value="note" />
-              </n-form-item>
-              <n-form-item label="本次反馈附件">
-                <n-upload multiple v-model:file-list="files" :default-upload="false">
-                  <n-upload-dragger>
-                    <div style="margin-bottom: 12px">
-                      <n-icon size="48" :depth="3">
-                        <archive />
-                      </n-icon>
-                    </div>
-                    <n-text style="font-size: 16px"> 点击或者拖动文件到该区域来上传</n-text>
-                    <n-p depth="3" style="margin: 8px 0 0 0"> 请仔细检查您提交的文件</n-p>
-                  </n-upload-dragger>
-                </n-upload>
-              </n-form-item>
-              <n-space vertical>
-                <n-button style="width: 100%" @click="fillItAll"> 自动补齐 </n-button>
-                <n-button
-                  :loading="loading"
-                  type="primary"
-                  style="width: 100%"
-                  @click="submitFeedBack"
-                >
-                  提交反馈
-                </n-button>
-              </n-space>
-            </n-gi>
-          </n-grid>
-        </n-form>
       </n-tab-pane>
       <n-tab-pane name="操作记录">
         <change-log-time-line :log-ref="id" />

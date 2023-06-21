@@ -19,32 +19,32 @@ export type LogisticModel = {
   logisticDetail: LogisticAmazonDetail | LogisticBoxDetail | LogisticOtherTrayDetail;
 };
 
-export type LogisticAmazonDetail = {
-  transferTray: string;
-  amazonReservationNo: string;
+export interface LogisticAmazonDetail {
   fba: string;
   po: string;
   fbaCode: string;
   trayCount: number;
   deliveryAddress: string;
   totalWeight: string;
-};
+  transferTray: string;
+  amazonReservationNo: string;
+}
 
-export type LogisticBoxDetail = {
+export interface LogisticBoxDetail {
   fba: string;
   po: string;
   fbaCode: string;
   deliveryAddress: string;
   totalVolume: string;
-};
+}
 
-export type LogisticOtherTrayDetail = {
+export interface LogisticOtherTrayDetail {
   transferTray: string;
   trayCount: number;
   deliveryAddress: string;
   deliveryNo: string;
   trayInfo: TrayInfoModel;
-};
+}
 
 export enum LogisticStatus {
   NotSubmit = '未提交',

@@ -2,7 +2,12 @@ import { addDoc, collection, doc, query, setDoc } from 'firebase/firestore';
 import { db, executeQuery, getDocContent } from '@/plugins/firebase';
 import { doLog } from '@/api/statusChangeLog';
 import { resultError, resultSuccess } from '../../../mock/_util';
-import { LogisticModel, LogisticStatus } from '@/api/deliveryMethod/logistic-type';
+import {
+  LogisticModel,
+  LogisticOtherTrayDetail,
+  LogisticStatus,
+  LogisticType,
+} from '@/api/deliveryMethod/logistic-type';
 import dayjs from 'dayjs';
 
 const path = 'logistic';
@@ -43,6 +48,15 @@ export async function createLogistic(model: LogisticModel) {
       pickupFile: '',
       status: LogisticStatus.NotSubmit,
     };
+    if (model.logisticType === LogisticType.OtherTray) {
+      (model.logisticDetail as LogisticOtherTrayDetail).trayInfo = {
+        height: model.logisticDetail['trayInfo.height'],
+        length: model.logisticDetail['trayInfo.length'],
+        trayType: model.logisticDetail['trayInfo.trayType'],
+        weight: model.logisticDetail['trayInfo.weight'],
+        width: model.logisticDetail['trayInfo.width'],
+      };
+    }
 
     const { id } = await addDoc(ref, Object.assign(info, model));
 
