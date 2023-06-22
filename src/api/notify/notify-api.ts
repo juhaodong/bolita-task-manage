@@ -63,6 +63,7 @@ export type BoxArriveDetail = {
 
 const notifyPath = 'notify';
 const taskListPath = 'taskList';
+const ref = collection(db, notifyPath);
 
 export async function getTasksForNotify(notifyId) {
   return await executeQuery(query(collection(db, notifyPath, notifyId, taskListPath)));
@@ -86,13 +87,28 @@ export async function createNotify(notifyInfo: NotifyModel) {
       notifyInfo.taskList.map((it) => addDoc(collection(db, notifyPath, id, taskListPath), it))
     );
     await doLog({
-      fromStatus: NotifyStatusList.NotSubmit,
-      toStatus: NotifyStatusList.NotSubmit,
+      fromStatus: NotifyStatus.NotSubmit,
+      toStatus: NotifyStatus.NotSubmit,
       note: '',
       files: [],
       logRef: id,
     });
     return resultSuccess(id);
+  } catch (e: any) {
+    return resultError(e?.message);
+  }
+}
+export async function changeNotifyStatus(id: string, newStatus: NotifyStatus) {
+  try {
+    const currentModel = await getNotifyById(id);
+    await setDoc(doc(ref, id), { status: newStatus }, { merge: true });
+    await doLog({
+      files: [],
+      fromStatus: currentModel.status,
+      logRef: id,
+      note: '',
+      toStatus: newStatus,
+    });
   } catch (e: any) {
     return resultError(e?.message);
   }
@@ -124,10 +140,10 @@ export async function changeArriveCountForNotifyTask(
     );
     let statusLater = statusNow;
     if (arrivedTotalCount == notifyNow.totalCount) {
-      statusLater = NotifyStatusList.AlreadyArrived;
+      statusLater = NotifyStatus.AlreadyArrived;
       await setDoc(
         doc(db, notifyPath, notifyId),
-        { status: NotifyStatusList.AlreadyArrived },
+        { status: NotifyStatus.AlreadyArrived },
         { merge: true }
       );
     }
@@ -158,17 +174,17 @@ export async function getNotifyList(params) {
   return await executeQuery(query(collection(db, notifyPath)));
 }
 
-export enum NotifyStatusList {
+export enum NotifyStatus {
   NotSubmit = '未提交',
-  InAuth = '审核中',
-  WaitForEdit = '待修改',
+  WaitForCheck = '审核中',
+  Refused = '未通过审核',
   WaitFroArrive = '等待到货',
   AlreadyArrived = '已经到货',
   Warning = '异常',
   Canceled = '已取消',
 }
 
-export const notifyStatusList = Object.values(NotifyStatusList);
+export const notifyStatusList = Object.values(NotifyStatus);
 
 export enum ArriveMediaTypes {
   Container = '货柜',

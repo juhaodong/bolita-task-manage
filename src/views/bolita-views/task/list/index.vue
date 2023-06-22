@@ -220,7 +220,7 @@
                 },
               });
             },
-            auth: [PermissionEnums.Sales],
+            auth: [PermissionEnums.Sales, PermissionEnums.Manager, PermissionEnums.Technical],
             ifShow: () => {
               return record.status == TaskStatus.WaitForCheck;
             },
@@ -278,10 +278,6 @@
   function handleEdit(record: Recordable) {
     showDetailModel = true;
     currentTaskId = record.id;
-  }
-
-  function handleDelete() {
-    window['$message'].info('点击了审核');
   }
 
   function handleSubmit(values: Recordable) {

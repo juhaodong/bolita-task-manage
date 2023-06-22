@@ -103,10 +103,8 @@
               </n-upload>
             </n-form-item-gi>
             <n-form-item-gi :span="12">
-              <n-space>
-                <n-button @click="submit(true)" type="primary">提交</n-button>
-                <n-button @click="submit(false)">保存到草稿</n-button>
-              </n-space>
+              <n-button @click="submit(true)" type="primary">提交</n-button>
+              <n-button @click="submit(false)">保存到草稿</n-button>
             </n-form-item-gi>
           </n-grid>
         </n-form>

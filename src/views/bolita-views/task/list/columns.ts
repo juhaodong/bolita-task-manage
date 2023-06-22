@@ -17,16 +17,13 @@ export const columns: DataTableColumns<TaskModel> = [
     key: 'customerId',
   },
   {
-    title: '业务员ID',
-    key: 'salesId',
-  },
-  {
     title: '箱数',
     key: 'boxCount',
   },
   {
     title: '业务类型',
     key: 'taskType',
+    width: 100,
   },
   {
     title: '状态',
@@ -35,6 +32,7 @@ export const columns: DataTableColumns<TaskModel> = [
   {
     title: '操作日期',
     key: 'operateTime',
+    width: 110,
     render(record) {
       return h(
         'div',

@@ -38,6 +38,7 @@
     </BasicTable>
     <n-modal v-model:show="showDetailModal">
       <notify-detail-page
+        @refresh="reloadTable"
         v-if="currentNotifyId != null"
         @close="showDetailModal = false"
         :notify-id="currentNotifyId"
@@ -59,10 +60,11 @@
   import { PlusOutlined, ScanOutlined } from '@vicons/antd';
   import {
     arriveMedia,
+    changeNotifyStatus,
     createNotify,
     getNotifyList,
     NotifyModel,
-    NotifyStatusList,
+    NotifyStatus,
     notifyStatusList,
   } from '@/api/notify/notify-api';
   import { salesNameList } from '@/api/sales';
@@ -197,26 +199,29 @@
         actions: [
           {
             label: '详情',
-            onClick: handleEdit.bind(null, record),
+            onClick: goDetail.bind(null, record),
+          },
+          {
+            label: '提交',
+            onClick: submitToCheck.bind(null, record),
             ifShow: () => {
-              return true;
+              return record.status == NotifyStatus.NotSubmit;
             },
+            auth: [PermissionEnums.Manager, PermissionEnums.Customer, PermissionEnums.Technical],
           },
           {
             label: '审核',
-            onClick: handleDelete.bind(null, record),
-            // 根据业务控制是否显示 isShow 和 auth 是并且关系
+            onClick: check.bind(null, record),
             ifShow: () => {
-              return record.status == '审核中';
+              return record.status == NotifyStatus.WaitForCheck;
             },
-            // 根据权限控制是否显示: 有权限，会显示，支持多个
             auth: [PermissionEnums.Manager, PermissionEnums.Sales, PermissionEnums.Technical],
           },
         ],
         dropDownActions: [
           {
             label: '编辑',
-            onClick: handleEdit.bind(null, record),
+            onClick: goDetail.bind(null, record),
             ifShow: () => {
               return true;
             },
@@ -254,8 +259,6 @@
   }
   const user = useUserStore();
   async function createNewNotify(notifyInfo) {
-    console.log(notifyInfo);
-    console.log(user.info);
     const info: NotifyModel = {
       arriveDetail: notifyInfo.arriveDetail,
       arriveMedia: notifyInfo.arriveMedia,
@@ -265,7 +268,7 @@
       note: notifyInfo.arriveDetail.note ?? '',
       planArriveDateTime: notifyInfo.arriveDetail.planArriveDateTime,
       sortingLabelCount: notifyInfo.arriveDetail.sortingLabelCount,
-      status: NotifyStatusList.NotSubmit,
+      status: NotifyStatus.NotSubmit,
       taskList: notifyInfo.taskList,
       totalCount: notifyInfo.totalCount,
     };
@@ -277,13 +280,40 @@
   }
 
   let currentNotifyId: string | null = $ref(null);
-  function handleEdit(record: Recordable) {
+  function goDetail(record: Recordable) {
     currentNotifyId = record.id;
     showDetailModal = true;
   }
 
-  function handleDelete() {
-    window['$message'].info('点击了审核');
+  function check(record) {
+    window['$dialog'].info({
+      title: '资料是否可以通过审核？',
+      content: '请点击详情以查看任务详情，如果资料没有问题，请点击通过审核，否则请点击拒绝任务',
+      positiveText: '通过审核',
+      negativeText: '拒绝任务',
+      async onPositiveClick() {
+        await changeNotifyStatus(record.id, NotifyStatus.WaitFroArrive);
+        reloadTable();
+      },
+      async onNegativeClick() {
+        await changeNotifyStatus(record.id, NotifyStatus.Refused);
+        reloadTable();
+      },
+    });
+  }
+
+  function submitToCheck(record) {
+    window['$dialog'].info({
+      title: '您确定吗？',
+      content: '一旦提交到审核就不能再修改了',
+      positiveText: '是的',
+      negativeText: '取消',
+      async onPositiveClick() {
+        await changeNotifyStatus(record.id, NotifyStatus.WaitForCheck);
+        reloadTable();
+      },
+      onNegativeClick() {},
+    });
   }
 
   function handleSubmit(values: Recordable) {

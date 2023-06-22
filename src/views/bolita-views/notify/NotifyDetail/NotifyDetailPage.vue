@@ -106,11 +106,7 @@
       <n-card style="width: 600px" title="修改到货数量">
         <n-form :rules="rules" :model="formValue" ref="formRef" :label-width="80">
           <n-form-item label="实际到货数量" path="arriveCount">
-            <n-input-number
-              v-model:value="formValue.arriveCount"
-              :max="233"
-              placeholder="输入实际到货数量"
-            />
+            <n-input-number v-model:value="formValue.arriveCount" placeholder="输入实际到货数量" />
           </n-form-item>
           <n-form-item label="备注" path="note">
             <n-input v-model:value="formValue.note" placeholder="输入备注" />
@@ -147,6 +143,7 @@
     ArriveMediaTypes,
     changeArriveCountForNotifyTask,
     getNotifyById,
+    NotifyStatus,
   } from '@/api/notify/notify-api';
   import { computed, h, Ref, ref, watchEffect } from 'vue';
   import dayjs from 'dayjs';
@@ -218,8 +215,9 @@
             h(
               NButton,
               {
+                type: (row.arrivedCount ?? 0) >= row.count ? 'success' : 'default',
+                disabled: notifyDetail?.status !== NotifyStatus.WaitFroArrive,
                 onClick() {
-                  console.log(row);
                   showNumberEditModal = true;
                   editingTaskId = row.id;
                 },
@@ -255,14 +253,14 @@
   });
   const props = defineProps({ notifyId: String || null });
   let notifyDetail: any | null = $ref(null);
-  const emit = defineEmits(['close']);
+  const emit = defineEmits(['close', 'refresh']);
   watchEffect(async () => {
     await reload();
   });
   async function reload() {
     if (props.notifyId != null) {
       notifyDetail = await getNotifyById(props.notifyId);
-      console.log(notifyDetail);
+      emit('refresh');
     }
   }
   const arriveDetail = $computed(() => {

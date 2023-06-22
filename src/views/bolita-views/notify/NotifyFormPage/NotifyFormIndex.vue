@@ -33,7 +33,7 @@
   function generateNotifyTaskModel(count) {
     const res: NotifyTaskModel[] = [];
 
-    for (let i = 1; i < count; i++) {
+    for (let i = 1; i <= count; i++) {
       res.push({
         arrivedCount: 0,
         actualWeight: '',
@@ -119,8 +119,7 @@
   }
 
   function downloadTemplate() {
-    const sortingCount = 5;
-    const content = generateNotifyTaskModel(sortingCount);
+    const content = generateNotifyTaskModel(requiredDifferentSortCode);
     const data = [
       {
         sheet: 'sheet 1',
@@ -162,7 +161,7 @@
   const differentSortCode = computed(() => {
     return uniqBy(detailedTasks, 'sortCode').length;
   });
-  const requiredDifferentSortCode = computed(() => {
+  const requiredDifferentSortCode = $computed(() => {
     return detailInfo?.sortingLabelCount ?? 0;
   });
   const requiredTotalCount = computed(() => {

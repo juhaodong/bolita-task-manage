@@ -60,7 +60,6 @@ export async function createTask(taskInfo: TaskModel) {
       warehouseId: '',
     };
     const realInfo = Object.assign(info, taskInfo);
-    console.log(realInfo, 'info');
     const id = dayjs().valueOf().toString();
     await setDoc(doc(taskCollection, id), realInfo);
     await Promise.all(
@@ -107,10 +106,10 @@ export async function changeTaskFeedBack(
     const currentTask = await getTaskById(id);
     const oldTaskDetail = keyBy(currentTask.operationRequirements, 'operationType');
     const totalTaskCount = currentTask.operationRequirements.reduce(
-      (sum, i) => sum + parseInt(i.requireAmount),
+      (sum, i) => sum + (parseInt(i.requireAmount) || 0),
       0
     );
-    const completeTaskCount = newOR.reduce((sum, i) => sum + parseInt(i.completeAmount), 0);
+    const completeTaskCount = newOR.reduce((sum, i) => sum + (parseInt(i.completeAmount) || 0), 0);
     const newCompleteRate = clamp(completeTaskCount / totalTaskCount, 0, 1);
     const haveChange = newOR.some((it) => {
       return it.completeAmount != oldTaskDetail[it.operationType].completeAmount;
