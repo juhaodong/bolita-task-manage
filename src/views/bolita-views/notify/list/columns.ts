@@ -10,6 +10,11 @@ export const columns: DataTableColumns<NotifyModel> = [
     width: 100,
   },
   {
+    title: '客户ID',
+    key: 'customerId',
+    width: 100,
+  },
+  {
     title: '状态',
     key: 'status',
     width: 100,
@@ -30,7 +35,7 @@ export const columns: DataTableColumns<NotifyModel> = [
     },
   },
   {
-    title: '计划到货日期',
+    title: '预约仓位',
     key: 'planArriveDateTime',
     render(data) {
       return h('div', {}, [dayjs(data.planArriveDateTime).format('YYYY-MM-DD HH:mm')]);

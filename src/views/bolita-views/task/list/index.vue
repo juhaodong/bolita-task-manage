@@ -204,6 +204,7 @@
           {
             label: '审核',
             onClick() {
+              //审核通过算作
               window['$dialog'].info({
                 title: '资料是否可以通过审核？',
                 content:
