@@ -1,7 +1,7 @@
 import { addDoc, collection, doc, query, setDoc, where } from 'firebase/firestore';
 import { db, executeQuery, getNameById } from '@/plugins/firebase';
 import { Random } from 'mockjs';
-import { Result, resultError, resultSuccess } from '../../../mock/_util';
+import { Result, resultError, resultSuccess } from '../../utils/request/_util';
 import { ACCESS_TOKEN } from '@/store/mutation-types';
 import { storage } from '@/utils/Storage';
 

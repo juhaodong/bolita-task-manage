@@ -1,46 +1,22 @@
 import { addDoc, collection, doc, query, setDoc } from 'firebase/firestore';
 import { db, executeQuery, getDocContent } from '@/plugins/firebase';
-import { resultError, resultSuccess } from '../../../mock/_util';
+import { resultError, resultSuccess } from '../../utils/request/_util';
 import { doLog } from '@/api/statusChangeLog';
+import { BasicModel } from '@/api/quest/quest-type';
+import dayjs from 'dayjs';
+import { getTasksForNotify, NotifyDetailModel } from '@/api/notify/notify-detail';
 
-export type NotifyModel = {
-  customerId: string;
+export interface NotifyModel extends BasicModel {
+  questId: string;
   arriveMedia: ArriveMediaTypes;
-  arriveWarehouseId: string;
   arrivedCount: number;
   totalCount: number;
   planArriveDateTime: number;
   status: string;
-  note: string;
   arriveDetail: ContainerArriveDetail | TrayArriveDetail | BoxArriveDetail;
   sortingLabelCount: string;
-  taskList: NotifyTaskModel[];
-};
-
-export type NotifyTaskModel = {
-  arrivedCount: number;
-  sortCode: string;
-  trackingCode: string;
-  trayCode: string;
-  trayHeight: string;
-  trayWidth: string;
-  trayLength: string;
-  count: number;
-  actualWeight: string;
-  volume: string;
-  height: string;
-  length: string;
-  width: string;
-  sku: string;
-  operationType: string;
-  addressType: string;
-  targetCountry: string;
-  postCode: string;
-  fbaCode: string;
-  fba: string;
-  po: string;
-  address: string;
-};
+  taskList: NotifyDetailModel[];
+}
 
 export type ContainerArriveDetail = {
   containerNo: string;
@@ -62,30 +38,38 @@ export type BoxArriveDetail = {
 };
 
 const notifyPath = 'notify';
-const taskListPath = 'taskList';
 const ref = collection(db, notifyPath);
 
-export async function getTasksForNotify(notifyId) {
-  return await executeQuery(query(collection(db, notifyPath, notifyId, taskListPath)));
+export interface NotifyCreateDTO {
+  questId: string;
+  arriveMedia: ArriveMediaTypes;
+  warehouseId: string;
+  totalCount: number;
+  planArriveDateTime: number;
+  arriveDetail: ContainerArriveDetail | TrayArriveDetail | BoxArriveDetail;
+  sortingLabelCount: string;
+  customerId?: string;
+  files?: string[];
 }
 
-export async function createNotify(notifyInfo: NotifyModel) {
+export async function createNotify(notifyInfo: NotifyCreateDTO) {
   try {
     const info = {
-      arriveWarehouseId: '',
+      files: [],
+      questId: '',
+      warehouseId: '',
       arrivedCount: 0,
       customerId: '',
       note: '',
       planArriveDateTime: 0,
       sortingLabelCount: '',
-      status: '',
+      status: NotifyStatus.NotSubmit,
       totalCount: 0,
+      taskList: [],
+      createTimestamp: dayjs().valueOf(),
     };
     const { id } = await addDoc(collection(db, notifyPath), Object.assign(info, notifyInfo));
 
-    await Promise.all(
-      notifyInfo.taskList.map((it) => addDoc(collection(db, notifyPath, id, taskListPath), it))
-    );
     await doLog({
       fromStatus: NotifyStatus.NotSubmit,
       toStatus: NotifyStatus.NotSubmit,
@@ -109,52 +93,6 @@ export async function changeNotifyStatus(id: string, newStatus: NotifyStatus) {
       note: '',
       toStatus: newStatus,
     });
-  } catch (e: any) {
-    return resultError(e?.message);
-  }
-}
-
-export async function changeArriveCountForNotifyTask(
-  notifyId,
-  taskId,
-  newArriveCount,
-  note,
-  files
-) {
-  try {
-    await setDoc(
-      doc(db, notifyPath, notifyId, taskListPath, taskId),
-      { arrivedCount: newArriveCount },
-      { merge: true }
-    );
-    const notifyNow = await getNotifyById(notifyId);
-    const statusNow = notifyNow.status;
-    const arrivedTotalCount = notifyNow.taskList.reduce(
-      (sum, i) => sum + parseInt(i.arrivedCount ?? '0'),
-      0
-    );
-    await setDoc(
-      doc(db, notifyPath, notifyId),
-      { arrivedCount: arrivedTotalCount },
-      { merge: true }
-    );
-    let statusLater = statusNow;
-    if (arrivedTotalCount == notifyNow.totalCount) {
-      statusLater = NotifyStatus.AlreadyArrived;
-      await setDoc(
-        doc(db, notifyPath, notifyId),
-        { status: NotifyStatus.AlreadyArrived },
-        { merge: true }
-      );
-    }
-    await doLog({
-      files: files,
-      fromStatus: statusNow,
-      logRef: notifyId,
-      note: '修改' + taskId + '到货数量为' + newArriveCount + '.备注:' + note,
-      toStatus: statusLater,
-    });
-    return resultSuccess('');
   } catch (e: any) {
     return resultError(e?.message);
   }
@@ -190,7 +128,6 @@ export enum ArriveMediaTypes {
   Container = '货柜',
   Tray = '托盘',
   Box = '散货',
-  ClaimGood = '认领件',
 }
 
 export const arriveMedia = Object.values(ArriveMediaTypes);

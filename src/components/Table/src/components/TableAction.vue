@@ -2,7 +2,22 @@
   <div class="tableAction">
     <div class="flex items-center justify-center">
       <template v-for="(action, index) in getActions" :key="`${index}-${action.label}`">
-        <n-button v-bind="action" class="mx-2">
+        <n-popconfirm
+          :show-icon="false"
+          @positive-click="action.popConfirm.confirm"
+          v-if="action.popConfirm"
+        >
+          <template #trigger>
+            <n-button v-bind="action" class="mx-2">
+              {{ action.label }}
+              <template #icon v-if="action.hasOwnProperty('icon')">
+                <n-icon :component="action.icon" />
+              </template>
+            </n-button>
+          </template>
+          {{ action.popConfirm.title }}
+        </n-popconfirm>
+        <n-button v-else v-bind="action" class="mx-2">
           {{ action.label }}
           <template #icon v-if="action.hasOwnProperty('icon')">
             <n-icon :component="action.icon" />
@@ -33,7 +48,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, PropType, computed, toRaw } from 'vue';
+  import { computed, defineComponent, PropType, toRaw } from 'vue';
   import { ActionItem } from '@/components/Table';
   import { usePermission } from '@/hooks/web/usePermission';
   import { isBoolean, isFunction } from '@/utils/is';
@@ -117,7 +132,6 @@
           })
           .map((action) => {
             const { popConfirm } = action;
-            //需要展示什么风格，自己修改一下参数
             return {
               size: 'small',
               text: actionText,

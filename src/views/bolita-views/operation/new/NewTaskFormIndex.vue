@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { $ref } from 'vue/macros';
-  import NewTaskStep1Form from '@/views/bolita-views/task/new/NewTaskStep1Form.vue';
+  import NewTaskStep1Form from '@/views/bolita-views/operation/new/NewTaskStep1Form.vue';
   import {
     getLaterORsByTaskType,
     getNewORsByTaskType,
@@ -8,10 +8,9 @@
   import { reactive, Ref, ref, UnwrapRef, watchEffect } from 'vue';
   import { OperationRequirementModel } from '@/api/operationType';
   import { Archive } from '@vicons/ionicons5';
-  import { TaskType } from '@/api/task/task-types';
+  import { TaskStatus, TaskType } from '@/api/task/task-types';
   import { uploadFile } from '@/plugins/firebase';
   import { UploadFileInfo } from 'naive-ui';
-  import { TaskStatus } from '@/api/task/task-api';
   import { generateOptionFromArray } from '@/utils/utils';
 
   let currentStep = $ref(0);

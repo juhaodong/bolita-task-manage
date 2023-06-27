@@ -139,12 +139,7 @@
 </template>
 
 <script setup lang="ts">
-  import {
-    ArriveMediaTypes,
-    changeArriveCountForNotifyTask,
-    getNotifyById,
-    NotifyStatus,
-  } from '@/api/notify/notify-api';
+  import { ArriveMediaTypes, getNotifyById, NotifyStatus } from '@/api/notify/notify-api';
   import { computed, h, Ref, ref, watchEffect } from 'vue';
   import dayjs from 'dayjs';
   import { NButton } from 'naive-ui';
@@ -152,6 +147,7 @@
   import { handleRequest, toastSuccess } from '@/utils/utils';
   import { uploadFile } from '@/plugins/firebase';
   import ChangeLogTimeLine from '@/views/bolita-views/composable/ChangeLogTimeLine.vue';
+  import { changeArriveCountForNotifyTask } from '@/api/notify/notify-detail';
 
   const formValue: Ref<{ arriveCount: number; note: string; files: any[] }> = ref({
     arriveCount: 0,

@@ -6,7 +6,8 @@ export type FormField = {
   field: string;
   label: string;
   componentProps?: object;
-  required: boolean;
+  labelMessage?: string;
+  required?: boolean;
   component?: ComponentType;
   defaultValue?: any;
   displayCondition?: (formValue: any) => boolean;
@@ -45,7 +46,6 @@ export function getDeliveryMethodSelection(onlyWithLogistic = false): FormField[
         options: generateOptionFromArray(deliveryMethods),
       },
       displayCondition(value) {
-        console.log(value);
         return value.deliveryMethod === DeliveryMethod.Others;
       },
       required: true,
@@ -58,15 +58,16 @@ export function convertFormFieldToSchema(formField: FormField): FormSchema {
   const type = formField?.component ?? 'NInput';
   const verb = ['NInput', 'NInputNumber'].includes(type) ? '输入' : '选择';
   const shouldUseNumber = ['NInputNumber', 'NDatePicker'].includes(type);
+  const required = formField?.required ?? true;
   const extraType = shouldUseNumber ? { type: 'number' } : {};
   let rule: any = Object.assign(extraType, {
-    required: formField.required,
+    required: required,
     message: '请' + verb + formField.label,
     trigger: ['blur'],
   });
   if (type === 'NUpload') {
     rule = {
-      required: formField.required,
+      required: required,
       message: '请' + verb + formField.label,
       trigger: ['blur'],
       validator: (rule: { message: string; required: boolean }, value: any) => {
@@ -86,10 +87,11 @@ export function convertFormFieldToSchema(formField: FormField): FormSchema {
       },
       formField.componentProps
     ),
+    labelMessage: formField.labelMessage,
     defaultValue: formField.defaultValue,
     field: formField.field,
     label: formField.label,
     displayCondition: formField?.displayCondition,
-    rules: formField.required ? [rule] : [],
+    rules: required ? [rule] : [],
   };
 }

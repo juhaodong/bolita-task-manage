@@ -9,8 +9,8 @@ const routes: Array<RouteRecordRaw> = [
     name: 'notify',
     component: Layout,
     meta: {
-      title: '到货预报',
-      sort: 1,
+      title: '到货计划',
+      sort: 2,
       isRoot: true,
       icon: renderIcon(BellOutlined),
     },

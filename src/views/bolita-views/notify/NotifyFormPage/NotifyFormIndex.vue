@@ -5,12 +5,13 @@
   import BoxForm from '@/views/bolita-views/notify/NotifyFormPage/BoxForm.vue';
   import TrayForm from '@/views/bolita-views/notify/NotifyFormPage/TrayForm.vue';
   import NotifyContainerForm from '@/views/bolita-views/notify/NotifyFormPage/NotifyContainerForm.vue';
-  import { ArriveMediaTypes, NotifyTaskModel } from '@/api/notify/notify-api';
+  import { ArriveMediaTypes } from '@/api/notify/notify-api';
   import { Archive } from '@vicons/ionicons5';
   import dayjs from 'dayjs';
   import readXlsxFile from 'read-excel-file';
   import { computed } from 'vue';
   import { uniqBy } from 'lodash-es';
+  import { NotifyDetailModel } from '@/api/notify/notify-detail';
 
   let currentStep = $ref(0);
   let arriveMedia: ArriveMediaTypes = $ref(ArriveMediaTypes.Container);
@@ -26,12 +27,11 @@
   }
 
   function fileChanged(fileList) {
-    console.log(fileList);
     readFile(fileList[0].file);
   }
 
   function generateNotifyTaskModel(count) {
-    const res: NotifyTaskModel[] = [];
+    const res: NotifyDetailModel[] = [];
 
     for (let i = 1; i <= count; i++) {
       res.push({

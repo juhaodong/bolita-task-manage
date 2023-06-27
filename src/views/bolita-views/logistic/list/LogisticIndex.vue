@@ -78,7 +78,7 @@
   import { LogisticModel, LogisticStatus } from '@/api/deliveryMethod/logistic-type';
   import { PermissionEnums } from '@/api/user/baseUser';
   import LogisticStatusFormIndex from '@/views/bolita-views/logistic/StatusForms/LogisticStatusFormIndex.vue';
-  import { resultError } from '../../../../../mock/_util';
+  import { resultError } from '../../../../utils/request/_util';
 
   const actionRef = ref();
   const [register, {}] = useForm({

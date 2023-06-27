@@ -1,9 +1,9 @@
 import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
 import { renderIcon } from '@/utils';
-import { DeliveryTruck } from '@vicons/carbon';
+import { Box } from '@vicons/fa';
 
-const name = 'logistic';
+const name = 'operation';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -11,20 +11,21 @@ const routes: Array<RouteRecordRaw> = [
     name: name,
     component: Layout,
     meta: {
-      title: '物流管理',
-      sort: 4,
+      title: '操作管理',
+      sort: 3,
       isRoot: true,
-      icon: renderIcon(DeliveryTruck),
+      icon: renderIcon(Box),
     },
     children: [
       {
         path: 'index',
         name: `${name}_index`,
         meta: {
-          title: '物流管理',
+          title: '操作管理',
           activeMenu: `${name}_index`,
         },
-        component: () => import('@/views/bolita-views/logistic/list/LogisticIndex.vue'),
+        component: () =>
+          import('@/views/bolita-views/operation/NewQuestOperationList/OperationTable.vue'),
       },
     ],
   },

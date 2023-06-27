@@ -128,11 +128,6 @@ export function getTaskTypeOperationKeys(taskType: TaskType) {
   }
 }
 
-export const completedList = ['0%', '25%', '50%', '75%', '100%'];
-
-export const operationalRequirementList = ['认真', '仔细'];
-export const linkList = ['www.baidu.com', 'www.bilibili.com'];
-
 export function getNewORsByTaskType(taskType: TaskType) {
   return getTaskTypeOperationKeys(taskType).filter(
     (it) => !laterFilledInOperationRequirement.includes(it.operationType)

@@ -16,9 +16,9 @@ import { renderIcon } from '@/utils';
  * */
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/list',
+    path: '/NewQuestOperationList',
     name: 'List',
-    redirect: '/list/basic-list',
+    redirect: '/NewQuestOperationList/basic-NewQuestOperationList',
     component: Layout,
     meta: {
       title: '列表页面',
@@ -27,8 +27,8 @@ const routes: Array<RouteRecordRaw> = [
     },
     children: [
       {
-        path: 'basic-list',
-        name: 'basic-list',
+        path: 'basic-NewQuestOperationList',
+        name: 'basic-NewQuestOperationList',
         meta: {
           title: '基础列表',
         },
@@ -40,7 +40,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           title: '基础详情',
           hidden: true,
-          activeMenu: 'basic-list',
+          activeMenu: 'basic-NewQuestOperationList',
         },
         component: () => import('@/views/list/basicList/info.vue'),
       },

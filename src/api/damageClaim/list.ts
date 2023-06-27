@@ -2,7 +2,7 @@ import { db, executeQuery } from '@/plugins/firebase';
 import { addDoc, collection, query } from 'firebase/firestore';
 import { doLog } from '@/api/statusChangeLog';
 import dayjs from 'dayjs';
-import { resultError, resultSuccess } from '../../../mock/_util';
+import { resultError, resultSuccess } from '../../utils/request/_util';
 import { DamageClaimStatus } from '@/api/damageClaim/serve';
 
 export type DamageModel = {

@@ -1,6 +1,6 @@
 import { collection, doc, query, setDoc, where } from 'firebase/firestore';
 import { db, executeQuery } from '@/plugins/firebase';
-import { resultError } from '../../../mock/_util';
+import { resultError } from '../../utils/request/_util';
 import { useUser } from '@/store/modules/user';
 import dayjs from 'dayjs';
 

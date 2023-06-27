@@ -1,7 +1,7 @@
 import { addDoc, collection, doc, query, setDoc } from 'firebase/firestore';
 import { db, executeQuery, getDocContent, getFileListUrl } from '@/plugins/firebase';
 import { doLog } from '@/api/statusChangeLog';
-import { resultError, resultSuccess } from '../../../mock/_util';
+import { resultError, resultSuccess } from '../../utils/request/_util';
 import {
   LogisticAmazonDetail,
   LogisticModel,

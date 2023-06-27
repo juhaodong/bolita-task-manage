@@ -1,11 +1,5 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <BasicForm @register="register" @submit="handleSubmit" @reset="handleReset">
-      <template #statusSlot="{ model, field }">
-        <n-input v-model:value="model[field]" />
-      </template>
-    </BasicForm>
-    <div class="my-2"></div>
     <BasicTable
       :columns="columns"
       :request="loadDataTable"
@@ -27,7 +21,7 @@
       </template>
     </BasicTable>
 
-    <n-modal v-model:show="showModal" :show-icon="false">
+    <n-modal v-model:show="showModal" :show-icon="false" preset="dialog" title="新建任务">
       <new-task-form-index @submit="createNewTask" />
     </n-modal>
     <n-modal v-model:show="showDetailModel">
@@ -46,21 +40,20 @@
 <script lang="ts" setup>
   import { h, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { BasicForm, FormSchema, useForm } from '@/components/Form';
+  import { FormSchema, useForm } from '@/components/Form';
   import { columns } from './columns';
   import { PlusOutlined } from '@vicons/antd';
   import { salesNameList } from '@/api/sales';
   import { deliveryMethods } from '@/api/deliveryMethod';
   import { warehouseList } from '@/api/warehouse';
   import dayjs from 'dayjs';
-  import { changeTaskStatus, createTask, getTaskList } from '@/api/task/task-api';
+  import { createTask, getTaskList } from '@/api/task/task-api';
   import { notifyStatusList } from '@/api/notify/notify-api';
   import NewTaskFormIndex from '@/views/bolita-views/task/new/NewQuestFormIndex.vue';
   import { handleRequest } from '@/utils/utils';
   import { $ref } from 'vue/macros';
   import TaskDetailPage from '@/views/bolita-views/task/TaskDetail/TaskDetailPage.vue';
-  import { PermissionEnums } from '@/api/user/baseUser';
-  import { TaskModel, TaskStatus } from '@/api/task/task-types';
+  import { TaskModel } from '@/api/task/task-types';
 
   const schemas: FormSchema[] = [
     {
@@ -161,10 +154,9 @@
     name: 'xiaoMa',
   });
   const actionColumn = reactive({
-    width: 300,
+    width: 100,
     title: '操作',
     key: 'action',
-    fixed: 'right',
     render(record) {
       return h(TableAction as any, {
         style: 'button',
@@ -177,55 +169,10 @@
             },
           },
           {
-            label: '提交到审核',
-            onClick() {
-              window['$dialog'].info({
-                title: '您确定吗？',
-                content: '一旦提交到审核就不能再修改该任务了',
-                positiveText: '是的',
-                negativeText: '取消',
-                async onPositiveClick() {
-                  await changeTaskStatus(record.id, TaskStatus.WaitForCheck);
-                  reloadTable();
-                },
-                onNegativeClick() {},
-              });
-            },
-            auth: [PermissionEnums.Customer],
+            label: '删除',
+            onClick: handleEdit.bind(null, record),
             ifShow: () => {
-              return [TaskStatus.NotSubmit, TaskStatus.Refused].includes(record.status);
-            },
-          },
-          {
-            label: '审核',
-            onClick() {
-              //审核通过算作
-              window['$dialog'].info({
-                title: '资料是否可以通过审核？',
-                content:
-                  '请点击详情以查看任务详情，如果资料没有问题，请点击通过审核，否则请点击拒绝任务',
-                positiveText: '通过审核',
-                negativeText: '拒绝任务',
-                async onPositiveClick() {
-                  await changeTaskStatus(record.id, TaskStatus.NotHandled);
-                  reloadTable();
-                },
-                async onNegativeClick() {
-                  await changeTaskStatus(record.id, TaskStatus.Refused);
-                  reloadTable();
-                },
-              });
-            },
-            auth: [PermissionEnums.Sales, PermissionEnums.Manager, PermissionEnums.Technical],
-            ifShow: () => {
-              return record.status == TaskStatus.WaitForCheck;
-            },
-          },
-          {
-            label: '物流回传',
-            onClick() {},
-            ifShow: () => {
-              return [TaskStatus.Finished].includes(record.status);
+              return true;
             },
           },
         ],

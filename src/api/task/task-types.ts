@@ -1,12 +1,4 @@
-export const taskStatusList = [
-  '未提交',
-  '待审核',
-  '未通过',
-  '未处理',
-  '处理中',
-  '已处理',
-  '已完成',
-];
+import { OperationRequirementModel } from '@/api/operationType';
 
 export enum TaskType {
   Shelves = '上架',
@@ -23,3 +15,32 @@ export enum TaskType {
 }
 
 export const taskTypes: TaskType[] = Object.values(TaskType);
+
+export enum TaskStatus {
+  NotSubmit = '未提交',
+  WaitForCheck = '待审核',
+  Refused = '未通过',
+  NotHandled = '未处理',
+  Handling = '处理中',
+  Finished = '已处理',
+  CompletedConfirmed = '已完成',
+  Warning = '异常',
+}
+
+export type TaskModel = {
+  id?: string;
+  customerId: string;
+  warehouseId: string;
+  logisticId?: string;
+  boxCount: number;
+  taskType: TaskType;
+  deliveryMethod: string;
+  status: TaskStatus;
+  operateTime: string;
+  deliveryDate: string;
+  completionRate: number;
+  note: string;
+  files: string[];
+  operationRequirements: OperationRequirementModel[];
+  refLink: string;
+};

@@ -12,7 +12,7 @@ const routes: Array<RouteRecordRaw> = [
     component: Layout,
     meta: {
       title: '任务管理',
-      sort: 2,
+      sort: 1,
       isRoot: true,
       icon: renderIcon(FlagOutlined),
     },
