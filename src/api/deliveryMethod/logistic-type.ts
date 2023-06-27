@@ -15,7 +15,7 @@ export type LogisticModel = {
   note: string;
   files: string[];
   feedBackFiles?: string[];
-  orderNo: string;
+  orderNo?: string;
   pickupDate?: number;
   pickupFile?: string;
   deliveryCompany?: string;

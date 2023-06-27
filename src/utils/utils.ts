@@ -1,10 +1,12 @@
 import { ResultEnum } from '@/enums/httpEnum';
 
-export function generateOptionFromArray(arr: any[]) {
-  return arr.map((it) => ({
-    label: it,
-    value: it,
-  }));
+export function generateOptionFromArray(arr?: any[]) {
+  return (
+    arr?.map((it) => ({
+      label: it,
+      value: it,
+    })) ?? []
+  );
 }
 
 export function toastError(message: string) {

@@ -39,7 +39,7 @@ export enum OperationStatus {
 
 export type OperationRequirementModel = {
   operationType: OperationType;
-  requireAmount: number;
+  requireAmount: number | null;
   completeAmount: number;
   options?: string[]; //only for selectType
   value: string; //only for selectType

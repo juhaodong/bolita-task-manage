@@ -6,17 +6,26 @@
     getNewORsByTaskType,
   } from '@/api/task/task-operation-requirement';
   import { reactive, Ref, ref, UnwrapRef, watchEffect } from 'vue';
-  import { OperationRequirementModel } from '@/api/operationType';
+  import { OperationRequirementModel, OperationType } from '@/api/operationType';
   import { Archive } from '@vicons/ionicons5';
   import { TaskStatus, TaskType } from '@/api/task/task-types';
-  import { uploadFile } from '@/plugins/firebase';
+  import { getFileListUrl, uploadFile } from '@/plugins/firebase';
   import { UploadFileInfo } from 'naive-ui';
-  import { generateOptionFromArray } from '@/utils/utils';
+  import { generateOptionFromArray, handleRequest } from '@/utils/utils';
+  import { LogisticType } from '@/api/deliveryMethod/logistic-type';
+  import LogisticOtherForm from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticStep2Form/LogisitcOthersForm.vue';
+  import LogisticBoxForm from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticStep2Form/LogisticBoxForm.vue';
+  import LogisticAmazonForm from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticStep2Form/LogisticAmazonForm.vue';
+  import { DeliveryMethod, getLogisticTypeByDeliveryMethod } from '@/api/deliveryMethod';
+  import { createLogistic } from '@/api/deliveryMethod/logistic-api';
 
   let currentStep = $ref(0);
   let taskType: TaskType | null = $ref(null);
   let basicInfo: any | null = $ref(null);
   const ORModels: OperationRequirementModel[] = reactive([]);
+  const deliveryOR = $computed(() => {
+    return ORModels.find((it) => it.operationType == OperationType.Delivery);
+  });
   const files: Ref<UnwrapRef<UploadFileInfo[]>> = ref([]);
   let loading = $ref(false);
   interface Props {
@@ -32,6 +41,12 @@
 
   async function submit(directSubmit = false) {
     loading = true;
+    const end = () => {
+      basicInfo.status = directSubmit ? TaskStatus.WaitForCheck : TaskStatus.NotSubmit;
+      basicInfo.completionRate = 0;
+      emit('submit', basicInfo);
+      loading = false;
+    };
     const fileUrls: string[] = [];
     for (const f of files.value) {
       fileUrls.push(await uploadFile(f.file, f.type));
@@ -40,10 +55,24 @@
     if (taskType != null) {
       basicInfo.operationRequirements = [...ORModels, ...getLaterORsByTaskType(taskType)];
     }
-    basicInfo.status = directSubmit ? TaskStatus.WaitForCheck : TaskStatus.NotSubmit;
-    basicInfo.completionRate = 0;
-    emit('submit', basicInfo);
-    loading = false;
+    if (deliveryOR && logisticType != null) {
+      const info: any = {
+        files: [],
+        boxCount: basicInfo.boxCount,
+        deliveryMethod: (deliveryOR?.value as DeliveryMethod) ?? DeliveryMethod.Others,
+        logisticDetail: secondStepInfo,
+        logisticType: logisticType,
+      };
+      info.files = await getFileListUrl(info.logisticDetail.files);
+      delete info.logisticDetail.files;
+      const res = await createLogistic(info);
+      await handleRequest(res, () => {
+        basicInfo.logisticId = res.result;
+        end();
+      });
+    } else {
+      end();
+    }
   }
 
   const emit = defineEmits(['submit']);
@@ -54,6 +83,19 @@
       ORModels.push(...getNewORsByTaskType(taskType));
     }
   });
+  let logisticType: LogisticType | null = $ref(null);
+
+  function fillInDetails() {
+    const value = deliveryOR?.value ?? DeliveryMethod.DHL;
+    console.log(value);
+    logisticType = getLogisticTypeByDeliveryMethod(value as DeliveryMethod);
+    currentStep++;
+  }
+  let secondStepInfo: any = $ref(null);
+  function secondFormResult(result) {
+    secondStepInfo = result;
+    submit();
+  }
 </script>
 
 <template>
@@ -111,11 +153,27 @@
               </n-upload>
             </n-form-item-gi>
             <n-form-item-gi :span="12">
-              <n-button @click="submit(true)" type="primary">提交</n-button>
-              <n-button @click="submit(false)">保存到草稿</n-button>
+              <template v-if="deliveryOR">
+                <n-button @click="fillInDetails" type="primary">补充物流细节</n-button>
+              </template>
+              <template v-else>
+                <n-button @click="submit(true)" type="primary">提交</n-button>
+                <n-button @click="submit(false)">保存到草稿</n-button>
+              </template>
             </n-form-item-gi>
           </n-grid>
         </n-form>
+      </template>
+      <template v-else-if="currentStep === 2">
+        <logistic-amazon-form
+          @submit="secondFormResult"
+          v-if="logisticType == LogisticType.AmazonTray"
+        />
+        <logistic-box-form
+          @submit="secondFormResult"
+          v-else-if="logisticType === LogisticType.Box"
+        />
+        <logistic-other-form v-else @submit="secondFormResult" />
       </template>
     </template>
   </div>

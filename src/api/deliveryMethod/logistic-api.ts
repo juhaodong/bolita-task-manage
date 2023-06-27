@@ -4,6 +4,7 @@ import { doLog } from '@/api/statusChangeLog';
 import { resultError, resultSuccess } from '../../utils/request/_util';
 import {
   LogisticAmazonDetail,
+  LogisticBoxDetail,
   LogisticModel,
   LogisticOtherTrayDetail,
   LogisticStatus,
@@ -11,6 +12,7 @@ import {
 } from '@/api/deliveryMethod/logistic-type';
 import dayjs from 'dayjs';
 import { UploadFileInfo } from 'naive-ui';
+import { DeliveryMethod } from '@/api/deliveryMethod/index';
 
 const path = 'logistic';
 const ref = collection(db, path);
@@ -164,7 +166,14 @@ export async function getLogisticInfoById(id: string): Promise<LogisticModel> {
   return await getDocContent(doc(ref, id));
 }
 
-export async function createLogistic(model: LogisticModel) {
+export interface CreateLogisticDTO {
+  files?: string[];
+  boxCount: number;
+  deliveryMethod: DeliveryMethod;
+  logisticDetail: LogisticAmazonDetail | LogisticBoxDetail | LogisticOtherTrayDetail;
+  logisticType: LogisticType;
+}
+export async function createLogistic(model: CreateLogisticDTO) {
   try {
     const info = {
       files: [],
