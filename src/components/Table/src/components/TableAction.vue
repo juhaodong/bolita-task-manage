@@ -1,6 +1,6 @@
 <template>
   <div class="tableAction">
-    <div class="flex items-center justify-center">
+    <n-space :wrap="false">
       <template v-for="(action, index) in getActions" :key="`${index}-${action.label}`">
         <n-popconfirm
           :show-icon="false"
@@ -43,7 +43,7 @@
           <!--          </template>-->
         </n-button>
       </n-dropdown>
-    </div>
+    </n-space>
   </div>
 </template>
 

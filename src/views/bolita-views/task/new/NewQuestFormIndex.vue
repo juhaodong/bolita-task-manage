@@ -8,28 +8,34 @@
   import NotifyTasksTable from '@/views/bolita-views/notify/NotifyDetail/NotifyTasksTable.vue';
   import { createNotify, NotifyCreateDTO } from '@/api/notify/notify-api';
   import { handleRequest } from '@/utils/utils';
-  import OperationTable from '@/views/bolita-views/operation/NewQuestOperationList/OperationTable.vue';
+  import NewOperationTable from '@/views/bolita-views/operation/NewQuestOperationList/NewOperationTable.vue';
+  import { createNewQuest, updateNotifyInfo } from '@/api/quest/quest-api';
 
   enum Steps {
     BasicInfo,
     NotifyInfo,
     TaskInfo,
   }
-  let currentStep = $ref(Steps.NotifyInfo);
+  let currentStep = $ref(Steps.TaskInfo);
   let questNotifyType: QuestNotifyType | null = $ref(null);
   let currentNotifyId = $ref('NnT7Bu3HPsMyAoRXUI8w');
+  let currentQuestId = $ref('OIrpN3S8x98Xur3qLdQx');
   let basicInfo: any | null = $ref(null);
   let loading = $ref(false);
 
-  function basicInfoSubmit(result) {
+  async function basicInfoSubmit(result) {
     basicInfo = result;
     questNotifyType = basicInfo.notifyType;
-    if (questNotifyType != QuestNotifyType.None) {
-      currentStep = Steps.NotifyInfo;
-      notifyInfoStep = 0;
-    } else {
-      currentStep = Steps.TaskInfo;
-    }
+    const res = await createNewQuest(basicInfo);
+    await handleRequest(res, () => {
+      currentQuestId = res.result;
+      if (questNotifyType !== QuestNotifyType.None) {
+        currentStep = Steps.NotifyInfo;
+        notifyInfoStep = 0;
+      } else {
+        currentStep = Steps.TaskInfo;
+      }
+    });
   }
   async function createNewNotify(value) {
     if (basicInfo != null) {
@@ -45,9 +51,10 @@
         warehouseId: basicInfo.warehouseId,
       };
       const res = await createNotify(info);
-      await handleRequest(res, () => {
+      await handleRequest(res, async () => {
         notifyInfoStep = 1;
         currentNotifyId = res.result;
+        await handleRequest(await updateNotifyInfo(currentNotifyId, currentQuestId), () => {});
         console.log(currentNotifyId, '预报创建成功，id');
       });
     }
@@ -93,7 +100,7 @@
         </template>
       </template>
       <template v-else-if="currentStep === Steps.TaskInfo">
-        <operation-table />
+        <new-operation-table :quest-id="currentQuestId" />
       </template>
     </template>
   </n-card>

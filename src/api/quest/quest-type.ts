@@ -1,4 +1,5 @@
 import { TaskModel } from '@/api/task/task-types';
+import { NotifyModel } from '../notify/notify-api';
 
 export interface BasicModel {
   id?: string;
@@ -14,6 +15,7 @@ export interface QuestModel extends BasicModel {
   status: QuestStatus;
   notifyType: QuestNotifyType;
   notifyId?: string;
+  notifyInfo?: NotifyModel;
   tasks: TaskModel[];
   completeRate: number;
 }

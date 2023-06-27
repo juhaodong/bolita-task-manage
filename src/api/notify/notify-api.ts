@@ -98,7 +98,10 @@ export async function changeNotifyStatus(id: string, newStatus: NotifyStatus) {
   }
 }
 
-export async function getNotifyById(id: string) {
+export async function getNotifyById(id?: string) {
+  if (id == null) {
+    return null;
+  }
   const mainInfo = await getDocContent(doc(db, notifyPath, id));
   return {
     ...mainInfo,

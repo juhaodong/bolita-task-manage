@@ -25,7 +25,7 @@ const routes: Array<RouteRecordRaw> = [
           activeMenu: `${name}_index`,
         },
         component: () =>
-          import('@/views/bolita-views/operation/NewQuestOperationList/OperationTable.vue'),
+          import('@/views/bolita-views/operation/NewQuestOperationList/NewOperationTable.vue'),
       },
     ],
   },

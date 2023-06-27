@@ -31,6 +31,7 @@ export type TaskModel = {
   id?: string;
   customerId: string;
   warehouseId: string;
+  questId?: string;
   logisticId?: string;
   boxCount: number;
   taskType: TaskType;

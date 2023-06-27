@@ -1,6 +1,6 @@
 import { OperationRequirementModel } from '@/api/operationType';
 import { db, executeQuery, getDocContent } from '@/plugins/firebase';
-import { addDoc, collection, doc, query, setDoc } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, query, setDoc, where } from 'firebase/firestore';
 import { TaskModel, TaskStatus, TaskType } from '@/api/task/task-types';
 import { doLog } from '@/api/statusChangeLog';
 import { resultError, resultSuccess } from '@/utils/request/_util';
@@ -10,7 +10,9 @@ import { clamp, keyBy } from 'lodash-es';
 const taskPath = 'task-NewQuestOperationList';
 const taskCollection = collection(db, taskPath);
 const operationRequirementsPath = 'operationRequirements';
-
+export async function getTasksForQuest(questId) {
+  return await executeQuery(query(taskCollection, where('questId', '==', questId)));
+}
 export async function createTask(taskInfo: TaskModel) {
   try {
     const info: TaskModel = {
@@ -44,6 +46,15 @@ export async function createTask(taskInfo: TaskModel) {
       logRef: id,
     });
     return resultSuccess(id);
+  } catch (e: any) {
+    return resultError(e?.message);
+  }
+}
+
+export async function deleteTask(id) {
+  try {
+    await deleteDoc(doc(taskCollection, id));
+    return resultSuccess('');
   } catch (e: any) {
     return resultError(e?.message);
   }

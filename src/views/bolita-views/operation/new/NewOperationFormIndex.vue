@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { $ref } from 'vue/macros';
-  import NewTaskStep1Form from '@/views/bolita-views/operation/new/NewTaskStep1Form.vue';
+  import NewTaskStep1Form from '@/views/bolita-views/operation/new/NewOperationFormStep1.vue';
   import {
     getLaterORsByTaskType,
     getNewORsByTaskType,
