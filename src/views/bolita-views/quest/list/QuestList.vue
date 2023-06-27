@@ -27,8 +27,8 @@
       </template>
     </BasicTable>
 
-    <n-modal v-model:show="showModal" :show-icon="false">
-      <new-quest-form-index @submit="createNewTask" />
+    <n-modal :mask-closable="false" v-model:show="showModal" :show-icon="false">
+      <new-quest-form-index @submit="createNewTask" @close="showModal = false" />
     </n-modal>
     <n-modal v-model:show="showDetailModel">
       <task-detail-page

@@ -134,3 +134,29 @@ export enum ArriveMediaTypes {
 }
 
 export const arriveMedia = Object.values(ArriveMediaTypes);
+
+export function getNeededColumnsByArriveMedia(arriveMedia: ArriveMediaTypes | null) {
+  const boxField =
+    arriveMedia == ArriveMediaTypes.Box ? [{ title: '物流追踪号', key: 'trackingCode' }] : [];
+  const trayField =
+    arriveMedia == ArriveMediaTypes.Tray
+      ? [
+          { title: '托盘号（选填）', key: 'trayCode' },
+          { title: '托盘长度', key: 'trayLength' },
+          { title: '托盘宽度', key: 'trayWidth' },
+          { title: '托盘高度', key: 'trayHeight' },
+        ]
+      : [];
+  return [
+    { title: '件数', key: 'count' },
+    { title: '分拣码', key: 'sortCode' },
+    ...boxField,
+    ...trayField,
+    { title: '实重', key: 'actualWeight' },
+    { title: '体积', key: 'volume' },
+    { title: '长', key: 'length' },
+    { title: '宽', key: 'width' },
+    { title: '高', key: 'height' },
+    { title: 'SKU', key: 'sku' },
+  ];
+}
