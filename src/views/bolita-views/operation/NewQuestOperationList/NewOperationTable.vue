@@ -10,26 +10,39 @@
         :scroll-x="1090"
       >
         <template #tableTitle>
-          <n-button type="primary" @click="addTable">
-            <template #icon>
-              <n-icon>
-                <PlusOutlined />
-              </n-icon>
+          <n-popselect
+            placement="bottom-start"
+            @update:value="addTable"
+            :options="allSortingLabelAndCount"
+          >
+            <n-button type="primary" @click="addTable">
+              <template #icon>
+                <n-icon>
+                  <PlusOutlined />
+                </n-icon>
+              </template>
+              新建
+            </n-button>
+            <template #empty>
+              <div>请点击新建按钮</div>
             </template>
-            新建
-          </n-button>
+          </n-popselect>
         </template>
       </BasicTable>
       <n-space>
         <n-tag size="large" :type="planedBoxCount == questDetail?.boxCount ? 'success' : 'warning'"
           >总计划箱数 {{ planedBoxCount }}/{{ questDetail?.boxCount }}</n-tag
         >
-        <n-button :disabled="!canGoNext">保存并提交</n-button>
+        <n-button type="success" :disabled="!canGoNext">保存并提交</n-button>
       </n-space>
     </n-space>
 
     <n-modal v-model:show="showModal" :show-icon="false" preset="dialog" title="新建任务">
-      <new-operation-form-index @submit="createNewTask" />
+      <new-operation-form-index
+        :default-sort-label="useSortCode"
+        :default-box-count="useBoxCount"
+        @submit="createNewTask"
+      />
     </n-modal>
     <n-modal v-model:show="showDetailModel">
       <task-detail-page
@@ -48,7 +61,6 @@
   import { computed, h, reactive, ref, watchEffect } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns } from './columns';
-  import { PlusOutlined } from '@vicons/antd';
   import { createTask, deleteTask, getTasksForQuest } from '@/api/task/task-api';
   import { handleRequest } from '@/utils/utils';
   import { $ref } from 'vue/macros';
@@ -57,6 +69,9 @@
   import NewOperationFormIndex from '@/views/bolita-views/operation/new/NewOperationFormIndex.vue';
   import { getQuestById } from '@/api/quest/quest-api';
   import { QuestModel } from '@/api/quest/quest-type';
+  import { PlusOutlined } from '@vicons/antd';
+  import { SelectOption } from 'naive-ui';
+  import { clamp } from 'lodash-es';
 
   interface Props {
     questId: string;
@@ -76,13 +91,21 @@
     return questDetail?.tasks.reduce((sum, i) => sum + parseInt(i.boxCount), 0) ?? 0;
   });
 
-  let allSoringLabelAndCount = computed(() => {
-    return questDetail?.notifyInfo?.taskList.map((it) => {
-      return {
-        label: it.sortCode,
-        count: it.count,
-      };
-    });
+  const usedSortLabel = $computed(() => {
+    return questDetail?.tasks.map((it) => it.sortLabel) ?? [];
+  });
+
+  const allSortingLabelAndCount: SelectOption[] = $computed(() => {
+    return (
+      questDetail?.notifyInfo?.taskList
+        ?.filter((it) => !usedSortLabel.includes(it.sortCode))
+        ?.map((it) => {
+          return {
+            label: '分拣码：' + it.sortCode + '(' + it.count + '箱)',
+            value: it.sortCode,
+          };
+        }) ?? []
+    );
   });
 
   const canGoNext = computed(() => {
@@ -94,6 +117,8 @@
   const showModal = ref(false);
   let showDetailModel = $ref(false);
   let currentTaskId = $ref('');
+  let useSortCode = $ref('');
+  let useBoxCount = $ref(0);
 
   const actionColumn = reactive({
     width: 160,
@@ -138,7 +163,21 @@
     },
   });
 
-  function addTable() {
+  function addTable(presetSortLabel = '') {
+    const preset = questDetail?.notifyInfo?.taskList.find((it) => it.sortCode === presetSortLabel);
+    if (preset) {
+      useSortCode = presetSortLabel;
+      useBoxCount = parseInt(preset.count);
+      console.log(preset.count);
+    } else {
+      console.log(questDetail?.boxCount ?? 0, planedBoxCount.value, 0);
+      useBoxCount = clamp(
+        (questDetail?.boxCount ?? 0) - planedBoxCount.value,
+        0,
+        Number.MAX_SAFE_INTEGER
+      );
+      useSortCode = '';
+    }
     showModal.value = true;
   }
 

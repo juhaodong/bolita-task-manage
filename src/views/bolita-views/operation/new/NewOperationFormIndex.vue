@@ -19,7 +19,11 @@
   const ORModels: OperationRequirementModel[] = reactive([]);
   const files: Ref<UnwrapRef<UploadFileInfo[]>> = ref([]);
   let loading = $ref(false);
-
+  interface Props {
+    defaultBoxCount: number;
+    defaultSortLabel: string;
+  }
+  defineProps<Props>();
   function firstFormResult(result) {
     basicInfo = result;
     taskType = basicInfo.taskType;
@@ -60,7 +64,12 @@
       </div>
     </template>
     <template v-else>
-      <new-task-step1-form v-if="currentStep == 0" @submit="firstFormResult" />
+      <new-task-step1-form
+        :default-box-count="defaultBoxCount"
+        :default-sort-label="defaultSortLabel"
+        v-if="currentStep == 0"
+        @submit="firstFormResult"
+      />
       <template v-else-if="currentStep === 1">
         <n-form>
           <n-grid :cols="12" :x-gap="24">

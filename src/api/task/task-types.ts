@@ -33,6 +33,7 @@ export type TaskModel = {
   warehouseId: string;
   questId?: string;
   logisticId?: string;
+  sortLabel?: string;
   boxCount: number;
   taskType: TaskType;
   deliveryMethod: string;

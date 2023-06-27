@@ -12,6 +12,11 @@
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
+  interface Props {
+    defaultBoxCount: number;
+    defaultSortLabel: string;
+  }
+  const props = defineProps<Props>();
   let warehouseList = ref<any[]>([]);
   const schemas: FormField[] = [
     {
@@ -19,6 +24,7 @@
       labelMessage: '请在此填入本次预计到达的总箱数，如果是货柜，请填写货柜内的总箱数',
       component: 'NInputNumber',
       label: '箱数',
+      defaultValue: props.defaultBoxCount,
       componentProps: {
         type: 'number',
         step: 1,
@@ -35,6 +41,7 @@
     },
     {
       field: 'sortLabel',
+      defaultValue: props.defaultSortLabel,
       label: '分拣码',
       required: false,
     },
@@ -42,18 +49,13 @@
       field: 'note',
       component: 'NInput',
       label: '备注',
-      componentProps: {
-        placeholder: '一些需要我们注意的事情',
-      },
       required: false,
     },
     {
       field: 'refLink',
       component: 'NInput',
       label: '业务链接',
-      componentProps: {
-        placeholder: '业务操作后台的链接',
-      },
+      required: false,
     },
   ];
 
