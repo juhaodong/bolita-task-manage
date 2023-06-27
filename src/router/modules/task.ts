@@ -23,7 +23,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           title: '未处理任务总览',
         },
-        component: () => import('@/views/bolita-views/task/list/index.vue'),
+        component: () => import('@/views/bolita-views/quest/list/QuestList.vue'),
       },
       {
         path: 'index',
@@ -32,7 +32,7 @@ const routes: Array<RouteRecordRaw> = [
           title: '任务管理',
           activeMenu: `${name}_index`,
         },
-        component: () => import('@/views/bolita-views/task/list/index.vue'),
+        component: () => import('@/views/bolita-views/quest/list/QuestList.vue'),
       },
     ],
   },

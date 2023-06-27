@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { $ref } from 'vue/macros';
-  import NewTaskStep1Form from '@/views/bolita-views/task/new/step/NewQuestFormStep1.vue';
+  import NewTaskStep1Form from '@/views/bolita-views/quest/new/step/NewQuestFormStep1.vue';
   import { QuestNotifyType } from '@/api/quest/quest-type';
   import BoxForm from '@/views/bolita-views/notify/NotifyFormPage/BoxForm.vue';
   import TrayForm from '@/views/bolita-views/notify/NotifyFormPage/TrayForm.vue';
@@ -16,10 +16,10 @@
     NotifyInfo,
     TaskInfo,
   }
-  let currentStep = $ref(Steps.TaskInfo);
+  let currentStep = $ref(Steps.BasicInfo);
   let questNotifyType: QuestNotifyType | null = $ref(null);
-  let currentNotifyId = $ref('NnT7Bu3HPsMyAoRXUI8w');
-  let currentQuestId = $ref('OIrpN3S8x98Xur3qLdQx');
+  let currentNotifyId = $ref('');
+  let currentQuestId = $ref('');
   let basicInfo: any | null = $ref(null);
   let loading = $ref(false);
 

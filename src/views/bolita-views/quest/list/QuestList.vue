@@ -28,7 +28,7 @@
     </BasicTable>
 
     <n-modal v-model:show="showModal" :show-icon="false">
-      <new-task-form-index @submit="createNewTask" />
+      <new-quest-form-index @submit="createNewTask" />
     </n-modal>
     <n-modal v-model:show="showDetailModel">
       <task-detail-page
@@ -55,10 +55,10 @@
   import dayjs from 'dayjs';
   import { changeTaskStatus, createTask, getTaskList } from '@/api/task/task-api';
   import { notifyStatusList } from '@/api/notify/notify-api';
-  import NewTaskFormIndex from '@/views/bolita-views/task/new/NewQuestFormIndex.vue';
+  import NewQuestFormIndex from '@/views/bolita-views/quest/new/NewQuestFormIndex.vue';
   import { handleRequest } from '@/utils/utils';
   import { $ref } from 'vue/macros';
-  import TaskDetailPage from '@/views/bolita-views/task/TaskDetail/TaskDetailPage.vue';
+  import TaskDetailPage from '@/views/bolita-views/quest/TaskDetail/TaskDetailPage.vue';
   import { PermissionEnums } from '@/api/user/baseUser';
   import { TaskModel, TaskStatus } from '@/api/task/task-types';
 
