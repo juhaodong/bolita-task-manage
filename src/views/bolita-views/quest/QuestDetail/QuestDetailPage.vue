@@ -14,7 +14,6 @@
     id: String,
   });
   const files = ref([]);
-  let note = $ref('');
 
   let questDetail: QuestModel | null = $ref(null);
   watchEffect(async () => {
@@ -25,12 +24,9 @@
   async function reload() {
     if (props.id) {
       files.value = [];
-      note = '';
       questDetail = await getQuestById(props.id);
     }
   }
-
-  let loading = $ref(false);
 </script>
 
 <template>
@@ -79,7 +75,7 @@
       <n-tab-pane name="预报详情" v-if="questDetail?.notifyId">
         <notify-detail-basic-info :notify-id="questDetail.notifyId" />
       </n-tab-pane>
-      <n-tab-pane name="预报列表" v-if="questDetail?.notifyId">
+      <n-tab-pane name="货品列表" v-if="questDetail?.notifyId">
         <notify-tasks-table :editable="false" :notify-id="questDetail.notifyId" />
       </n-tab-pane>
       <n-tab-pane name="任务列表" />
@@ -90,13 +86,6 @@
         <change-log-time-line :log-ref="id" />
       </n-tab-pane>
     </n-tabs>
-    <template #action>
-      <n-space>
-        <n-button type="primary">审核</n-button>
-        <n-button type="primary">提交</n-button>
-        <n-button type="error">删除</n-button>
-      </n-space>
-    </template>
   </n-card>
 </template>
 

@@ -13,7 +13,7 @@ export type FormField = {
   displayCondition?: (formValue: any) => boolean;
 };
 
-export function getFilesUploadFormField(key = 'files'): FormField {
+export function getFilesUploadFormField(key = 'files', required = true): FormField {
   return {
     field: key,
     label: '附件',
@@ -21,10 +21,25 @@ export function getFilesUploadFormField(key = 'files'): FormField {
     componentProps: {
       multiple: true,
     },
-    required: true,
+    required: required,
   };
 }
+
 export const filesUpload: FormField = getFilesUploadFormField();
+export function getCheckFormField(warehouseList): FormField[] {
+  return [
+    {
+      field: 'warehouseId',
+      label: '执行仓库',
+      component: 'NSelect',
+      componentProps: {
+        options: warehouseList,
+      },
+    },
+    { field: 'note', label: '备注', required: false },
+    getFilesUploadFormField('files', false),
+  ];
+}
 export function getDeliveryMethodSelection(onlyWithLogistic = false): FormField[] {
   return [
     {

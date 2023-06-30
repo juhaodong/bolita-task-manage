@@ -41,7 +41,8 @@
       <new-quest-form-index
         :operation-mode="operationMode"
         @submit="submit"
-        @close="showModal = false"
+        :quest-id="currentTaskId"
+        @close="close"
       />
     </n-modal>
     <n-modal v-model:show="showDetailModel">
@@ -67,18 +68,22 @@
   import { deliveryMethods } from '@/api/deliveryMethod';
   import { warehouseList } from '@/api/warehouse';
   import dayjs from 'dayjs';
-  import { changeTaskStatus } from '@/api/task/task-api';
   import { notifyStatusList } from '@/api/notify/notify-api';
   import NewQuestFormIndex from '@/views/bolita-views/quest/new/NewQuestFormIndex.vue';
   import { $ref } from 'vue/macros';
-  import TaskDetailPage from '@/views/bolita-views/quest/TaskDetail/QuestDetailPage.vue';
+  import TaskDetailPage from '@/views/bolita-views/quest/QuestDetail/QuestDetailPage.vue';
   import { PermissionEnums } from '@/api/user/baseUser';
   import { Bell } from '@vicons/tabler';
   import { TaskStatus } from '@/api/task/task-types';
   import { QuestStatus } from '@/api/quest/quest-type';
-  import { changeQuestStatus, getQuestList } from '@/api/quest/quest-api';
-  import { handleRequest } from '@/utils/utils';
+  import { changeQuestStatus, checkQuest, deleteQuest, getQuestList } from '@/api/quest/quest-api';
+  import { handleRequest, toastSuccess } from '@/utils/utils';
+  import { useCheckDialog } from '@/store/modules/checkDialogState';
 
+  function close() {
+    showModal.value = false;
+    reloadTable();
+  }
   const schemas: FormSchema[] = [
     {
       field: 'salesName',
@@ -162,6 +167,29 @@
         style: 'button',
         actions: [
           {
+            label: '编辑',
+            onClick: edit.bind(null, record.id, record.operationType),
+            ifShow() {
+              return record.status == QuestStatus.NotSubmit;
+            },
+          },
+          {
+            label: '删除',
+            popConfirm: {
+              title: '您是否确认删除本任务？',
+              async confirm() {
+                const res = await deleteQuest(record.id);
+                await handleRequest(res, () => {
+                  toastSuccess('删除成功');
+                  reloadTable();
+                });
+              },
+            },
+            ifShow() {
+              return record.status == QuestStatus.NotSubmit;
+            },
+          },
+          {
             label: '详情',
             onClick: handleEdit.bind(null, record),
             ifShow: () => {
@@ -177,7 +205,7 @@
                 positiveText: '是的',
                 negativeText: '取消',
                 async onPositiveClick() {
-                  await changeTaskStatus(record.id, TaskStatus.WaitForCheck);
+                  await changeQuestStatus(record.id, QuestStatus.WaitForCheck);
                   reloadTable();
                 },
                 onNegativeClick() {},
@@ -190,23 +218,14 @@
           },
           {
             label: '审核',
-            onClick() {
+            async onClick() {
               //审核通过算作
-              window['$dialog'].info({
-                title: '资料是否可以通过审核？',
-                content:
-                  '请点击详情以查看任务详情，如果资料没有问题，请点击通过审核，否则请点击拒绝任务',
-                positiveText: '通过审核',
-                negativeText: '拒绝任务',
-                async onPositiveClick() {
-                  await changeTaskStatus(record.id, TaskStatus.NotHandled);
-                  reloadTable();
-                },
-                async onNegativeClick() {
-                  await changeTaskStatus(record.id, TaskStatus.Refused);
-                  reloadTable();
-                },
+              const res = await useCheckDialog().check();
+              const re = await checkQuest(record.id, res);
+              await handleRequest(re, () => {
+                reloadTable();
               });
+              console.log(res);
             },
             auth: [PermissionEnums.Sales, PermissionEnums.Manager, PermissionEnums.Technical],
             ifShow: () => {
@@ -237,12 +256,20 @@
 
   function addNotify() {
     showModal.value = true;
+    currentTaskId = '';
     operationMode = 'all';
   }
 
   function addTask() {
     showModal.value = true;
+    currentTaskId = '';
     operationMode = 'task';
+  }
+
+  function edit(id) {
+    showModal.value = true;
+    currentTaskId = id;
+    operationMode = 'all';
   }
 
   const loadDataTable = async () => {

@@ -13,6 +13,7 @@ export interface BasicModel {
 export interface QuestModel extends BasicModel {
   boxCount: number;
   status: QuestStatus;
+  operationMode: 'all' | 'task';
   notifyType: QuestNotifyType;
   notifyId?: string;
   notifyInfo?: NotifyModel;

@@ -1,11 +1,11 @@
-import { ref, Ref, ComputedRef, unref, computed, watch, toRaw, h } from 'vue';
+import { computed, ComputedRef, h, Ref, ref, toRaw, unref, watch } from 'vue';
 import type { BasicColumn, BasicTableProps } from '../types/table';
-import { isEqual, cloneDeep } from 'lodash-es';
-import { isArray, isString, isBoolean, isFunction } from '@/utils/is';
+import { cloneDeep, isEqual } from 'lodash-es';
+import { isArray, isBoolean, isFunction, isString } from '@/utils/is';
 import { usePermission } from '@/hooks/web/usePermission';
 import { ActionItem } from '@/components/Table';
 import { renderEditCell } from '../components/editable';
-import { NTooltip, NIcon } from 'naive-ui';
+import { NIcon, NTooltip } from 'naive-ui';
 import { FormOutlined } from '@vicons/antd';
 
 export function useColumns(propsRef: ComputedRef<BasicTableProps>) {
@@ -77,6 +77,7 @@ export function useColumns(propsRef: ComputedRef<BasicTableProps>) {
             };
           }
         }
+        column.sorter = 'default';
         return column;
       });
   });
@@ -131,7 +132,12 @@ export function useColumns(propsRef: ComputedRef<BasicTableProps>) {
   function getColumns(): BasicColumn[] {
     const columns = toRaw(unref(getColumnsRef));
     return columns.map((item) => {
-      return { ...item, title: item.title, key: item.key, fixed: item.fixed || undefined };
+      return {
+        ...item,
+        title: item.title,
+        key: item.key,
+        fixed: item.fixed || undefined,
+      };
     });
   }
 

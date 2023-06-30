@@ -58,7 +58,7 @@
   import NewTaskFormIndex from '@/views/bolita-views/operation/new/NewOperationFormIndex.vue';
   import { handleRequest } from '@/utils/utils';
   import { $ref } from 'vue/macros';
-  import TaskDetailPage from '@/views/bolita-views/operation/TaskDetail/TaskDetailPage.vue';
+  import TaskDetailPage from '@/views/bolita-views/operation/OperationDetail/OperationDetailPage.vue';
   import { PermissionEnums } from '@/api/user/baseUser';
   import { TaskModel, TaskStatus } from '@/api/task/task-types';
 
@@ -172,10 +172,8 @@
           {
             label: '详情',
             onClick: handleEdit.bind(null, record),
-            ifShow: () => {
-              return true;
-            },
           },
+
           {
             label: '提交到审核',
             onClick() {

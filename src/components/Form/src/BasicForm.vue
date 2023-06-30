@@ -87,26 +87,22 @@
         </n-form-item>
       </n-gi>
       <!--提交 重置 展开 收起 按钮-->
-      <n-gi
-        :span="isInline ? '' : 24"
-        :suffix="isInline ? true : false"
-        #="{ overflow }"
-        v-if="getProps.showActionButtonGroup"
-      >
+      <n-gi :span="isInline ? '' : 24" :suffix="isInline ? true : false" #="{ overflow }">
         <n-space
           align="center"
           :justify="isInline ? 'end' : 'start'"
           :style="{ 'margin-left': `${isInline ? 12 : getProps.labelWidth}px` }"
         >
+          <slot></slot>
           <n-button
-            v-if="getProps.showSubmitButton"
+            v-if="getProps.showActionButtonGroup && getProps.showSubmitButton"
             v-bind="getSubmitBtnOptions"
             @click="handleSubmit"
             :loading="loadingSub"
             >{{ getProps.submitButtonText }}</n-button
           >
           <n-button
-            v-if="getProps.showResetButton"
+            v-if="getProps.showActionButtonGroup && getProps.showResetButton"
             v-bind="getResetBtnOptions"
             @click="resetFields"
             >{{ getProps.resetButtonText }}</n-button

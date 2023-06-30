@@ -8,6 +8,7 @@
   >
     <AppProvider>
       <RouterView />
+      <check-dialog />
     </AppProvider>
   </NConfigProvider>
 
@@ -18,13 +19,14 @@
 
 <script lang="ts" setup>
   import { computed, onMounted, onUnmounted } from 'vue';
-  import { zhCN, dateZhCN, darkTheme } from 'naive-ui';
+  import { darkTheme, dateZhCN, zhCN } from 'naive-ui';
   import { LockScreen } from '@/components/Lockscreen';
   import { AppProvider } from '@/components/Application';
   import { useScreenLockStore } from '@/store/modules/screenLock.js';
   import { useRoute } from 'vue-router';
   import { useDesignSettingStore } from '@/store/modules/designSetting';
   import { lighten } from '@/utils/index';
+  import CheckDialog from '@/views/bolita-views/composable/CheckDialog.vue';
 
   const route = useRoute();
   const useScreenLock = useScreenLockStore();

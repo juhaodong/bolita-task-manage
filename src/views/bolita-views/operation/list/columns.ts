@@ -1,5 +1,4 @@
 import { DataTableColumns } from 'naive-ui';
-import { TaskModel } from '@/api/task/task-api';
 import { h } from 'vue';
 import dayjs from 'dayjs';
 

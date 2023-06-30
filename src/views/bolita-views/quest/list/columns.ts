@@ -7,6 +7,7 @@ export const columns: DataTableColumns<QuestModel> = [
   {
     title: '任务ID',
     key: 'id',
+    sorter: 'default',
   },
   {
     title: '仓库ID',

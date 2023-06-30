@@ -26,7 +26,6 @@
   const columns = computed(() => {
     const list = getNeededColumnsByArriveMedia(arriveMedia);
     return [
-      { title: '预报ID', key: 'id' },
       {
         title: '到货状态',
         key: 'arrived',

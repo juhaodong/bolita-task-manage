@@ -64,7 +64,7 @@
   import { createTask, deleteTask, getTaskList, getTasksForQuest } from '@/api/task/task-api';
   import { handleRequest } from '@/utils/utils';
   import { $ref } from 'vue/macros';
-  import TaskDetailPage from '@/views/bolita-views/quest/TaskDetail/QuestDetailPage.vue';
+  import TaskDetailPage from '@/views/bolita-views/operation/OperationDetail/OperationDetailPage.vue';
   import { TaskModel } from '@/api/task/task-types';
   import NewOperationFormIndex from '@/views/bolita-views/operation/new/NewOperationFormIndex.vue';
   import { getQuestById } from '@/api/quest/quest-api';

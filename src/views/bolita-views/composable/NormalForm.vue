@@ -4,13 +4,19 @@
     FormField,
   } from '@/views/bolita-views/composable/form-field-type';
   import { FormSchema, useForm } from '@/components/Form';
+  import { ref } from 'vue';
 
+  const form = ref<any>(null);
   interface NormalFormProps {
     formFields: FormField[];
+    showButtons?: boolean;
     schemas?: FormSchema[];
     defaultValueModel?: any;
   }
-  const props = defineProps<NormalFormProps>();
+
+  const props = withDefaults(defineProps<NormalFormProps>(), {
+    showButtons: true,
+  });
 
   const schemas = $computed(() => {
     return [...(props?.schemas ?? []), ...props.formFields.map(convertFormFieldToSchema)].map(
@@ -23,17 +29,23 @@
     );
   });
 
-  const [register, {}] = useForm({
+  const [register, { submit }] = useForm({
     gridProps: { cols: 1 },
     labelWidth: 80,
     layout: 'vertical',
     submitButtonText: '下一步',
+    showActionButtonGroup: props.showButtons,
     schemas,
   });
-  const emit = defineEmits(['submit']);
+  const emit = defineEmits(['submit', 'cancel']);
 
   function handleSubmit(values: Recordable) {
     emit('submit', values);
+  }
+
+  function cancel() {
+    console.log(form.value.formModel);
+    emit('cancel', form.value.formModel);
   }
 
   function handleReset(value: Recordable) {
@@ -42,7 +54,10 @@
 </script>
 
 <template>
-  <BasicForm @register="register" @submit="handleSubmit" @reset="handleReset" />
+  <BasicForm ref="form" @register="register" @submit="handleSubmit" @reset="handleReset">
+    <slot name="extraSubmitButton" :submit="submit"></slot>
+    <slot name="extraCancelButton" :cancel="cancel"></slot>
+  </BasicForm>
 </template>
 
 <style scoped lang="less"></style>

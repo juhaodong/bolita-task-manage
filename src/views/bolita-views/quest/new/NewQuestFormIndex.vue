@@ -9,10 +9,12 @@
   import { NotifyCreateDTO, saveNotify } from '@/api/notify/notify-api';
   import { handleRequest } from '@/utils/utils';
   import NewOperationTable from '@/views/bolita-views/operation/NewQuestOperationList/NewOperationTable.vue';
-  import { saveQuest, updateNotifyInfo } from '@/api/quest/quest-api';
+  import { getQuestById, saveQuest, updateNotifyInfo } from '@/api/quest/quest-api';
+  import { watchEffect } from 'vue';
 
   interface Prop {
     operationMode: 'all' | 'task';
+    questId: string;
   }
   const props = defineProps<Prop>();
   enum Steps {
@@ -26,13 +28,28 @@
   let questNotifyType: QuestNotifyType | null = $ref(null);
   let currentNotifyId = $ref('');
   let currentQuestId = $ref('');
+  let notifyFormInfo: any | null = $ref(null);
   let basicInfo: any | null = $ref(null);
   let loading = $ref(false);
+
+  watchEffect(async () => {
+    if (props.questId) {
+      loading = true;
+      basicInfo = await getQuestById(props.questId);
+      notifyFormInfo = { ...basicInfo?.notifyInfo, ...basicInfo?.notifyInfo?.arriveDetail };
+      currentQuestId = props.questId;
+      currentNotifyId = basicInfo?.notifyId;
+      console.log('update', basicInfo);
+      console.log(notifyFormInfo);
+      loading = false;
+    }
+  });
 
   async function basicInfoSubmit(result) {
     basicInfo = result;
     questNotifyType = basicInfo.notifyType;
     basicInfo.warehouseId = null;
+    basicInfo.operationMode = props.operationMode;
     const res = await saveQuest(basicInfo, currentQuestId);
     await handleRequest(res, () => {
       currentQuestId = res.result;
@@ -44,7 +61,6 @@
     });
   }
 
-  let notifyFormInfo: any | null = $ref(null);
   async function createNewNotify(value) {
     if (basicInfo != null) {
       notifyFormInfo = value;

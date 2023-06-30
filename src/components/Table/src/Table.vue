@@ -216,7 +216,6 @@
           rowKey: unref(getRowKey),
           data: tableData,
           size: unref(getTableSize),
-          remote: true,
           'max-height': maxHeight,
         };
       });

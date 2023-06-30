@@ -1,11 +1,12 @@
 import { QuestModel, QuestStatus } from '@/api/quest/quest-type';
 import { db, executeQuery, getDocContent } from '@/plugins/firebase';
-import { addDoc, collection, doc, orderBy, query, setDoc } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, orderBy, query, setDoc } from 'firebase/firestore';
 import { resultError, resultSuccess } from '@/utils/request/_util';
 import dayjs from 'dayjs';
 import { getTasksForQuest } from '@/api/task/task-api';
 import { getNotifyById } from '@/api/notify/notify-api';
 import { doLog } from '@/api/statusChangeLog';
+import { CheckResult } from '@/store/modules/checkDialogState';
 
 const path = 'quest';
 const ref = collection(db, path);
@@ -49,6 +50,40 @@ export async function changeQuestStatus(id: string, newStatus: QuestStatus) {
   }
 }
 
+async function getStatusAfterCheck(id: string) {
+  const model = await getQuestById(id);
+  if (model.notifyId) {
+    return QuestStatus.NotArrived;
+  } else {
+    return QuestStatus.WaitAllTaskCheckPass;
+  }
+}
+
+export async function checkQuest(id: string, checkResult: CheckResult) {
+  const newStatus = checkResult.checkPassed
+    ? await getStatusAfterCheck(id)
+    : QuestStatus.CheckRefused;
+  try {
+    const currentModel = await getQuestById(id);
+    await setDoc(
+      doc(ref, id),
+      { status: newStatus, warehouseId: checkResult.warehouseId },
+      { merge: true }
+    );
+    console.log(id, 'dolog');
+    await doLog({
+      files: checkResult.files,
+      fromStatus: currentModel.status,
+      logRef: id,
+      note: checkResult.note,
+      toStatus: newStatus,
+    });
+    return resultSuccess('');
+  } catch (e: any) {
+    return resultError(e?.message);
+  }
+}
+
 export async function saveQuest(questInfo: QuestModel, id: string | null = null) {
   if (!id) {
     return await createNewQuest(questInfo);
@@ -73,6 +108,15 @@ export async function getQuestById(id: string): Promise<QuestModel> {
     tasks: await getTasksForQuest(id),
     notifyInfo: await getNotifyById(mainInfo?.notifyId),
   };
+}
+
+export async function deleteQuest(id) {
+  try {
+    await deleteDoc(doc(ref, id));
+    return resultSuccess('');
+  } catch (e: any) {
+    return resultError(e?.message);
+  }
 }
 
 export async function getQuestList() {
