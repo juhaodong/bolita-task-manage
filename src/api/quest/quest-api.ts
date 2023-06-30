@@ -1,6 +1,6 @@
 import { QuestModel, QuestStatus } from '@/api/quest/quest-type';
 import { db, executeQuery, getDocContent } from '@/plugins/firebase';
-import { addDoc, collection, doc, query, setDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, orderBy, query, setDoc } from 'firebase/firestore';
 import { resultError, resultSuccess } from '@/utils/request/_util';
 import dayjs from 'dayjs';
 import { getTasksForQuest } from '@/api/task/task-api';
@@ -76,5 +76,5 @@ export async function getQuestById(id: string): Promise<QuestModel> {
 }
 
 export async function getQuestList() {
-  return await executeQuery(query(ref));
+  return await executeQuery(query(ref, orderBy('createTimestamp')));
 }

@@ -17,7 +17,7 @@
     >
       <template #tableTitle>
         <n-space>
-          <n-button type="primary" @click="addTable">
+          <n-button type="primary" @click="addNotify">
             <template #icon>
               <n-icon>
                 <Bell />
@@ -25,7 +25,7 @@
             </template>
             新建预报
           </n-button>
-          <n-button>
+          <n-button @click="addTask">
             <template #icon>
               <n-icon>
                 <PlusOutlined />
@@ -38,7 +38,11 @@
     </BasicTable>
 
     <n-modal :mask-closable="false" v-model:show="showModal" :show-icon="false">
-      <new-quest-form-index @submit="submit" @close="showModal = false" />
+      <new-quest-form-index
+        :operation-mode="operationMode"
+        @submit="submit"
+        @close="showModal = false"
+      />
     </n-modal>
     <n-modal v-model:show="showDetailModel">
       <task-detail-page
@@ -163,16 +167,6 @@
 
   const showModal = ref(false);
 
-  const formParams = reactive({
-    name: '',
-    address: '',
-    date: null,
-  });
-
-  const params = ref({
-    pageSize: 5,
-    name: 'xiaoMa',
-  });
   const actionColumn = reactive({
     width: 300,
     title: '操作',
@@ -268,11 +262,17 @@
     schemas,
   });
 
-  function addTable() {
+  function addNotify() {
     showModal.value = true;
+    operationMode = 'all';
   }
 
-  const loadDataTable = async (res) => {
+  function addTask() {
+    showModal.value = true;
+    operationMode = 'task';
+  }
+
+  const loadDataTable = async () => {
     return await getQuestList();
   };
 
@@ -308,6 +308,7 @@
 
   let showDetailModel = $ref(false);
   let currentTaskId = $ref('');
+  let operationMode: 'all' | 'task' = $ref('all');
 </script>
 
 <style lang="less" scoped></style>

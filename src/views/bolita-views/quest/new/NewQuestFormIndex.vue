@@ -11,6 +11,10 @@
   import NewOperationTable from '@/views/bolita-views/operation/NewQuestOperationList/NewOperationTable.vue';
   import { saveQuest, updateNotifyInfo } from '@/api/quest/quest-api';
 
+  interface Prop {
+    operationMode: 'all' | 'task';
+  }
+  const props = defineProps<Prop>();
   enum Steps {
     BasicInfo,
     NotifyBasicInfo,
@@ -32,7 +36,11 @@
     const res = await saveQuest(basicInfo, currentQuestId);
     await handleRequest(res, () => {
       currentQuestId = res.result;
-      currentStep = Steps.NotifyBasicInfo;
+      if (props.operationMode == 'all') {
+        currentStep = Steps.NotifyBasicInfo;
+      } else {
+        currentStep = Steps.TaskInfo;
+      }
     });
   }
 
@@ -92,11 +100,13 @@
     >
       <n-step :disabled="(currentStep as number)<1" title="基本信息" description="任务的基本信息" />
       <n-step
+        v-if="props.operationMode != 'task'"
         :disabled="(currentStep as number)<2"
         title="到货计划"
         description="任务涵盖的到货计划"
       />
       <n-step
+        v-if="props.operationMode != 'task'"
         :disabled="(currentStep as number)<3"
         title="到货计划详情"
         description="任务涵盖的到货计划"

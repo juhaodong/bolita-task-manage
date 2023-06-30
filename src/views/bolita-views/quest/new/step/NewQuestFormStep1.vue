@@ -17,18 +17,23 @@
   const { hasPermission } = usePermission();
   interface Props {
     model: any;
+    operationMode: 'task' | 'all';
   }
-  defineProps<Props>();
+  const props = defineProps<Props>();
 
   const schemas: FormField[] = [
-    {
-      field: 'notifyType',
-      component: 'NSelect',
-      label: '货物预报类型',
-      componentProps: {
-        options: generateOptionFromArray(questNotifyTypeList),
-      },
-    },
+    ...(props.operationMode == 'all'
+      ? [
+          {
+            field: 'notifyType',
+            component: 'NSelect',
+            label: '货物预报类型',
+            componentProps: {
+              options: generateOptionFromArray(questNotifyTypeList),
+            },
+          },
+        ]
+      : []),
     {
       field: 'customerId',
       label: '客户',
