@@ -1,6 +1,6 @@
 <template>
   <n-card class="proCard">
-    <normal-form :form-fields="schemas" @submit="handleSubmit" />
+    <normal-form :form-fields="schemas" @submit="handleSubmit" :default-value-model="model" />
   </n-card>
 </template>
 <script setup lang="ts">
@@ -15,6 +15,11 @@
   let warehouseList = ref<any[]>([]);
   let customerList = ref<any[]>([]);
   const { hasPermission } = usePermission();
+  interface Props {
+    model: any;
+  }
+  const props = defineProps<Props>();
+
   const schemas: FormField[] = [
     {
       field: 'notifyType',
@@ -33,14 +38,6 @@
       },
       displayCondition() {
         return !hasPermission([PermissionEnums.Customer]);
-      },
-    },
-    {
-      field: 'warehouseId',
-      component: 'NSelect',
-      label: '任务执行仓库',
-      componentProps: {
-        options: warehouseList,
       },
     },
     {

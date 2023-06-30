@@ -16,14 +16,24 @@
       :scroll-x="1090"
     >
       <template #tableTitle>
-        <n-button type="primary" @click="addTable">
-          <template #icon>
-            <n-icon>
-              <PlusOutlined />
-            </n-icon>
-          </template>
-          新建
-        </n-button>
+        <n-space>
+          <n-button type="primary" @click="addTable">
+            <template #icon>
+              <n-icon>
+                <Bell />
+              </n-icon>
+            </template>
+            新建预报
+          </n-button>
+          <n-button>
+            <template #icon>
+              <n-icon>
+                <PlusOutlined />
+              </n-icon>
+            </template>
+            新建任务
+          </n-button>
+        </n-space>
       </template>
     </BasicTable>
 
@@ -60,6 +70,7 @@
   import { $ref } from 'vue/macros';
   import TaskDetailPage from '@/views/bolita-views/quest/TaskDetail/TaskDetailPage.vue';
   import { PermissionEnums } from '@/api/user/baseUser';
+  import { Bell } from '@vicons/tabler';
   import { TaskModel, TaskStatus } from '@/api/task/task-types';
 
   const schemas: FormSchema[] = [

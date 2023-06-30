@@ -8,11 +8,19 @@
   interface NormalFormProps {
     formFields: FormField[];
     schemas?: FormSchema[];
+    defaultValueModel?: any;
   }
   const props = defineProps<NormalFormProps>();
 
   const schemas = $computed(() => {
-    return [...(props?.schemas ?? []), ...props.formFields.map(convertFormFieldToSchema)];
+    return [...(props?.schemas ?? []), ...props.formFields.map(convertFormFieldToSchema)].map(
+      (it) => {
+        if (props?.defaultValueModel?.[it.field]) {
+          it.defaultValue = props?.defaultValueModel?.[it.field];
+        }
+        return it;
+      }
+    );
   });
 
   const [register, {}] = useForm({

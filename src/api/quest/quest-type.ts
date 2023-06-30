@@ -4,7 +4,7 @@ import { NotifyModel } from '../notify/notify-api';
 export interface BasicModel {
   id?: string;
   customerId: string;
-  warehouseId: string;
+  warehouseId?: string;
   createTimestamp: number;
   note: string;
   files: string[];
@@ -21,7 +21,6 @@ export interface QuestModel extends BasicModel {
 }
 
 export enum QuestNotifyType {
-  None = '无预报',
   Box = '散货',
   Tray = '托盘',
   Container = '货柜',

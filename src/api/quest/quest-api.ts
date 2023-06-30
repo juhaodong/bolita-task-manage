@@ -8,7 +8,7 @@ import { getNotifyById } from '@/api/notify/notify-api';
 
 const path = 'quest';
 const ref = collection(db, path);
-export async function createNewQuest(newQuestInfo: QuestModel) {
+async function createNewQuest(newQuestInfo: QuestModel) {
   newQuestInfo.createTimestamp = dayjs().valueOf();
   newQuestInfo.status = QuestStatus.NotSubmit;
   newQuestInfo.tasks = [];
@@ -18,6 +18,24 @@ export async function createNewQuest(newQuestInfo: QuestModel) {
     return resultSuccess(id);
   } catch (e: any) {
     return resultError(e?.message);
+  }
+}
+async function updateQuest(questInfo: QuestModel, id) {
+  const currentQuestInfo = await getQuestById(id);
+  const newData = Object.assign({}, currentQuestInfo, questInfo);
+  try {
+    await setDoc(doc(ref, id), newData);
+    return resultSuccess('');
+  } catch (e: any) {
+    return resultError(e?.message);
+  }
+}
+
+export async function saveQuest(questInfo: QuestModel, id: string | null = null) {
+  if (!id) {
+    return await createNewQuest(questInfo);
+  } else {
+    return await updateQuest(questInfo, id);
   }
 }
 

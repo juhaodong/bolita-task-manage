@@ -9,7 +9,7 @@
   import { createNotify, NotifyCreateDTO } from '@/api/notify/notify-api';
   import { handleRequest } from '@/utils/utils';
   import NewOperationTable from '@/views/bolita-views/operation/NewQuestOperationList/NewOperationTable.vue';
-  import { createNewQuest, updateNotifyInfo } from '@/api/quest/quest-api';
+  import { saveQuest, updateNotifyInfo } from '@/api/quest/quest-api';
 
   enum Steps {
     BasicInfo,
@@ -26,7 +26,8 @@
   async function basicInfoSubmit(result) {
     basicInfo = result;
     questNotifyType = basicInfo.notifyType;
-    const res = await createNewQuest(basicInfo);
+    basicInfo.warehouseId = null;
+    const res = await saveQuest(basicInfo, currentQuestId);
     await handleRequest(res, () => {
       currentQuestId = res.result;
       if (questNotifyType !== QuestNotifyType.None) {
@@ -65,15 +66,34 @@
     await createNewNotify(value);
   }
 
+  async function updateStep(step) {
+    if (step == 1) {
+      currentStep = Steps.BasicInfo;
+    } else if (step == 2) {
+      currentStep = Steps.NotifyInfo;
+    } else {
+      currentStep = Steps.TaskInfo;
+    }
+  }
+
   const emit = defineEmits(['submit', 'close']);
 </script>
 
 <template>
   <n-card title="新建任务" style="max-width: 80%" closable @close="emit('close')">
-    <n-steps class="mt-4" :current="(currentStep as number)+1" :status="'process'">
-      <n-step title="基本信息" description="任务的基本信息" />
-      <n-step title="到货计划" description="任务涵盖的到货计划" />
-      <n-step title="操作计划" description="操作具体的计划" />
+    <n-steps
+      @update:current="updateStep"
+      class="mt-4"
+      :current="(currentStep as number)+1"
+      :status="'process'"
+    >
+      <n-step :disabled="(currentStep as number)<1" title="基本信息" description="任务的基本信息" />
+      <n-step
+        :disabled="(currentStep as number)<2"
+        title="到货计划"
+        description="任务涵盖的到货计划"
+      />
+      <n-step :disabled="(currentStep as number)<3" title="操作计划" description="操作具体的计划" />
     </n-steps>
     <n-divider class="mb-4 mt-8" />
     <template v-if="loading">
@@ -82,7 +102,11 @@
       </div>
     </template>
     <template v-else>
-      <new-task-step1-form v-if="currentStep == Steps.BasicInfo" @submit="basicInfoSubmit" />
+      <new-task-step1-form
+        v-if="currentStep == Steps.BasicInfo"
+        @submit="basicInfoSubmit"
+        :model="basicInfo"
+      />
       <template v-else-if="currentStep === Steps.NotifyInfo">
         <template v-if="notifyInfoStep == 0">
           <box-form v-if="questNotifyType == QuestNotifyType.Box" @submit="notifyInfoSubmit" />
