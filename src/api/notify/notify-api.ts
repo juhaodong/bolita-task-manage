@@ -82,6 +82,24 @@ export async function createNotify(notifyInfo: NotifyCreateDTO) {
     return resultError(e?.message);
   }
 }
+export async function saveNotify(info: NotifyCreateDTO, id: string | null = null) {
+  if (!id) {
+    return await createNotify(info);
+  } else {
+    return await updateNotify(info, id);
+  }
+}
+async function updateNotify(info: NotifyCreateDTO, id) {
+  const currentInfo = await getNotifyById(id);
+  const newData = Object.assign({}, currentInfo, info);
+  try {
+    await setDoc(doc(ref, id), newData);
+    return resultSuccess(id);
+  } catch (e: any) {
+    return resultError(e?.message);
+  }
+}
+
 export async function changeNotifyStatus(id: string, newStatus: NotifyStatus) {
   try {
     const currentModel = await getNotifyById(id);

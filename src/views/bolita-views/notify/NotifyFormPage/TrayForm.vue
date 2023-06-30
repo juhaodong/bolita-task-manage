@@ -1,24 +1,27 @@
 <template>
   <n-card class="proCard">
-    <BasicForm @register="register" @submit="handleSubmit" @reset="handleReset" />
+    <normal-form :form-fields="schemas" @submit="handleSubmit" :default-value-model="model" />
   </n-card>
 </template>
 <script setup lang="ts">
-  import { FormSchema, useForm } from '@/components/Form';
   import dayjs from 'dayjs';
   import { generateOptionFromArray } from '@/utils/utils';
   import { trayTypes } from '@/api/deliveryMethod/logistic-type';
+  import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
+  import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
-  const schemas: FormSchema[] = [
+  interface Props {
+    model: any;
+  }
+  defineProps<Props>();
+  const schemas: FormField[] = [
     {
       field: 'traySize',
       component: 'NSelect',
       label: '托盘尺寸',
       componentProps: {
-        placeholder: '请选择托盘尺寸',
         options: generateOptionFromArray(['80*120', '60*80', '100*100', '120*120', '80*240']),
       },
-      rules: [{ required: true, message: '请选择托盘尺寸', trigger: ['blur'] }],
     },
     {
       field: 'trayCount',
@@ -28,9 +31,7 @@
         type: 'number',
         step: 1,
         precision: 0,
-        placeholder: '请输入托盘数量',
       },
-      rules: [{ required: true, message: '请输入托盘数量', trigger: ['blur'], type: 'number' }],
     },
     {
       field: 'sortingLabelCount',
@@ -40,11 +41,7 @@
         type: 'number',
         step: 1,
         precision: 0,
-        placeholder: '请输入SKU分拣标签数量',
       },
-      rules: [
-        { required: true, message: '请输入SKU分拣标签数量', trigger: ['blur'], type: 'number' },
-      ],
     },
     {
       field: 'trayType',
@@ -54,7 +51,6 @@
         placeholder: '请选择托盘类型',
         options: generateOptionFromArray(trayTypes),
       },
-      rules: [{ required: true, message: '请选择托盘类型', trigger: ['blur'] }],
     },
     {
       field: 'goodsType',
@@ -64,7 +60,6 @@
         placeholder: '请选择货品类型',
         options: generateOptionFromArray(['超规', '常规']),
       },
-      rules: [{ required: true, message: '请选择货品类型', trigger: ['blur'] }],
     },
     {
       field: 'planArriveDateTime',
@@ -85,43 +80,25 @@
           );
         },
       },
-      rules: [{ required: true, message: '请选择预约仓位', trigger: ['blur'], type: 'number' }],
     },
     {
       field: 'carNo',
-      component: 'NInput',
       label: '车牌号',
-      componentProps: {
-        placeholder: '请输入车牌号',
-      },
+      required: false,
     },
 
     {
       field: 'note',
-      component: 'NInput',
       label: '备注',
-      componentProps: {
-        placeholder: '请输入备注',
-      },
+      required: false,
     },
   ];
 
-  const [register, {}] = useForm({
-    gridProps: { cols: 1 },
-    labelWidth: 80,
-    layout: 'vertical',
-    submitButtonText: '下一步',
-    schemas,
-  });
   const emit = defineEmits(['submit']);
 
   function handleSubmit(values: Recordable) {
     emit('submit', values);
     console.log(values);
-  }
-
-  function handleReset(value: Recordable) {
-    console.log(value);
   }
 </script>
 

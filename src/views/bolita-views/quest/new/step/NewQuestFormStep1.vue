@@ -18,7 +18,7 @@
   interface Props {
     model: any;
   }
-  const props = defineProps<Props>();
+  defineProps<Props>();
 
   const schemas: FormField[] = [
     {

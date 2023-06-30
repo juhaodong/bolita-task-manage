@@ -33,7 +33,7 @@
         <n-tag size="large" :type="planedBoxCount == questDetail?.boxCount ? 'success' : 'warning'"
           >总计划箱数 {{ planedBoxCount }}/{{ questDetail?.boxCount }}</n-tag
         >
-        <n-button type="success" :disabled="!canGoNext">保存并提交</n-button>
+        <n-button @click="emit('next')" type="success" :disabled="!canGoNext">保存并提交</n-button>
       </n-space>
     </n-space>
 
@@ -73,6 +73,7 @@
   import { SelectOption } from 'naive-ui';
   import { clamp } from 'lodash-es';
 
+  const emit = defineEmits(['next']);
   interface Props {
     questId: string;
   }
@@ -83,6 +84,7 @@
   });
   async function reload() {
     if (props.questId != null) {
+      console.log(props.questId);
       questDetail = await getQuestById(props.questId);
     }
   }

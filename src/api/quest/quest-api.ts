@@ -1,10 +1,11 @@
 import { QuestModel, QuestStatus } from '@/api/quest/quest-type';
-import { db, getDocContent } from '@/plugins/firebase';
-import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
+import { db, executeQuery, getDocContent } from '@/plugins/firebase';
+import { addDoc, collection, doc, query, setDoc } from 'firebase/firestore';
 import { resultError, resultSuccess } from '@/utils/request/_util';
 import dayjs from 'dayjs';
 import { getTasksForQuest } from '@/api/task/task-api';
 import { getNotifyById } from '@/api/notify/notify-api';
+import { doLog } from '@/api/statusChangeLog';
 
 const path = 'quest';
 const ref = collection(db, path);
@@ -25,6 +26,23 @@ async function updateQuest(questInfo: QuestModel, id) {
   const newData = Object.assign({}, currentQuestInfo, questInfo);
   try {
     await setDoc(doc(ref, id), newData);
+    return resultSuccess(id);
+  } catch (e: any) {
+    return resultError(e?.message);
+  }
+}
+
+export async function changeQuestStatus(id: string, newStatus: QuestStatus) {
+  try {
+    const currentModel = await getQuestById(id);
+    await setDoc(doc(ref, id), { status: newStatus }, { merge: true });
+    await doLog({
+      files: [],
+      fromStatus: currentModel.status,
+      logRef: id,
+      note: '',
+      toStatus: newStatus,
+    });
     return resultSuccess('');
   } catch (e: any) {
     return resultError(e?.message);
@@ -55,4 +73,8 @@ export async function getQuestById(id: string): Promise<QuestModel> {
     tasks: await getTasksForQuest(id),
     notifyInfo: await getNotifyById(mainInfo?.notifyId),
   };
+}
+
+export async function getQuestList() {
+  return await executeQuery(query(ref));
 }

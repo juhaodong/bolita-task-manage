@@ -1,9 +1,8 @@
 import { DataTableColumns } from 'naive-ui';
 import { h } from 'vue';
-import dayjs from 'dayjs';
-import { TaskModel } from '@/api/task/task-types';
+import { QuestModel } from '@/api/quest/quest-type';
 
-export const columns: DataTableColumns<TaskModel> = [
+export const columns: DataTableColumns<QuestModel> = [
   {
     title: '任务ID',
     key: 'id',
@@ -21,34 +20,14 @@ export const columns: DataTableColumns<TaskModel> = [
     key: 'boxCount',
   },
   {
-    title: '业务类型',
-    key: 'taskType',
-    width: 100,
-  },
-  {
     title: '状态',
     key: 'status',
   },
   {
-    title: '操作日期',
-    key: 'operateTime',
-    width: 110,
-    render(record) {
-      return h(
-        'div',
-        record.operateTime && dayjs(record.operateTime).format('YYYY-MM-DD HH:mm:ss')
-      );
-    },
-  },
-  {
-    title: '发货日期',
-    key: 'deliveryDate',
-  },
-  {
     title: '完成率',
-    key: 'completionRate',
+    key: 'completeRate',
     render(record) {
-      return h('div', record.completionRate + '%');
+      return h('div', record.completeRate + '%');
     },
   },
   {

@@ -38,7 +38,7 @@
     </BasicTable>
 
     <n-modal :mask-closable="false" v-model:show="showModal" :show-icon="false">
-      <new-quest-form-index @submit="createNewTask" @close="showModal = false" />
+      <new-quest-form-index @submit="submit" @close="showModal = false" />
     </n-modal>
     <n-modal v-model:show="showDetailModel">
       <task-detail-page
@@ -63,15 +63,17 @@
   import { deliveryMethods } from '@/api/deliveryMethod';
   import { warehouseList } from '@/api/warehouse';
   import dayjs from 'dayjs';
-  import { changeTaskStatus, createTask, getTaskList } from '@/api/task/task-api';
+  import { changeTaskStatus } from '@/api/task/task-api';
   import { notifyStatusList } from '@/api/notify/notify-api';
   import NewQuestFormIndex from '@/views/bolita-views/quest/new/NewQuestFormIndex.vue';
-  import { handleRequest } from '@/utils/utils';
   import { $ref } from 'vue/macros';
   import TaskDetailPage from '@/views/bolita-views/quest/TaskDetail/TaskDetailPage.vue';
   import { PermissionEnums } from '@/api/user/baseUser';
   import { Bell } from '@vicons/tabler';
-  import { TaskModel, TaskStatus } from '@/api/task/task-types';
+  import { TaskStatus } from '@/api/task/task-types';
+  import { QuestStatus } from '@/api/quest/quest-type';
+  import { changeQuestStatus, getQuestList } from '@/api/quest/quest-api';
+  import { handleRequest } from '@/utils/utils';
 
   const schemas: FormSchema[] = [
     {
@@ -271,7 +273,7 @@
   }
 
   const loadDataTable = async (res) => {
-    return await getTaskList({ ...formParams, ...params.value, ...res });
+    return await getQuestList();
   };
 
   function onCheckedRow(rowKeys) {
@@ -296,8 +298,8 @@
     console.log(values);
   }
 
-  async function createNewTask(taskInfo: TaskModel) {
-    const res = await createTask(taskInfo);
+  async function submit(questId) {
+    const res = await changeQuestStatus(questId, QuestStatus.WaitForCheck);
     await handleRequest(res, () => {
       showModal.value = false;
       reloadTable();

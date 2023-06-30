@@ -1,24 +1,28 @@
 <template>
   <n-card class="proCard">
-    <BasicForm @register="register" @submit="handleSubmit" @reset="handleReset" />
+    <normal-form :form-fields="schemas" :default-value-model="model" @submit="handleSubmit" />
   </n-card>
 </template>
 <script setup lang="ts">
-  import { FormSchema, useForm } from '@/components/Form';
   import dayjs from 'dayjs';
   import { generateOptionFromArray } from '@/utils/utils';
   import { deliveryMethods } from '@/api/deliveryMethod';
+  import { FormField } from '@/views/bolita-views/composable/form-field-type';
+  import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
 
-  const schemas: FormSchema[] = [
+  interface Props {
+    model: any;
+  }
+  defineProps<Props>();
+
+  const schemas: FormField[] = [
     {
       field: 'deliveryMethod',
       component: 'NSelect',
       label: '物流渠道',
       componentProps: {
-        placeholder: '请选择物流渠道',
         options: generateOptionFromArray(deliveryMethods),
       },
-      rules: [{ required: true, message: '请选择物流渠道', trigger: ['blur'] }],
     },
     {
       field: 'sortingLabelCount',
@@ -28,11 +32,7 @@
         type: 'number',
         step: 1,
         precision: 0,
-        placeholder: '请输入SKU分拣标签数量',
       },
-      rules: [
-        { required: true, message: '请输入SKU分拣标签数量', trigger: ['blur'], type: 'number' },
-      ],
     },
     {
       field: 'planArriveDateTime',
@@ -53,34 +53,18 @@
           );
         },
       },
-      rules: [{ required: true, message: '请选择预约仓位', trigger: ['blur'], type: 'number' }],
     },
     {
       field: 'note',
-      component: 'NInput',
       label: '备注',
-      componentProps: {
-        placeholder: '请输入备注',
-      },
+      required: false,
     },
   ];
 
-  const [register, {}] = useForm({
-    gridProps: { cols: 1 },
-    labelWidth: 80,
-    layout: 'vertical',
-    submitButtonText: '下一步',
-    schemas,
-  });
   const emit = defineEmits(['submit']);
-
   function handleSubmit(values: Recordable) {
     emit('submit', values);
     console.log(values);
-  }
-
-  function handleReset(value: Recordable) {
-    console.log(value);
   }
 </script>
 
