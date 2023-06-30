@@ -28,7 +28,7 @@
   const emit = defineEmits(['close', 'refresh']);
 
   async function reload() {
-    if (props.id != null) {
+    if (props.id) {
       files.value = [];
       note = '';
       taskDetail = await getTaskById(props.id);

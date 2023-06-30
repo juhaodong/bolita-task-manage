@@ -1,48 +1,34 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <n-space vertical>
-      <BasicTable
-        :columns="columns"
-        :request="loadDataTable"
-        :row-key="(row) => row.id"
-        ref="actionRef"
-        :actionColumn="actionColumn"
-        :scroll-x="1090"
-      >
-        <template #tableTitle>
-          <n-popselect
-            placement="bottom-start"
-            @update:value="addTable"
-            :options="allSortingLabelAndCount"
-          >
-            <n-button type="primary" @click="addTable">
-              <template #icon>
-                <n-icon>
-                  <PlusOutlined />
-                </n-icon>
-              </template>
-              新建
-            </n-button>
-            <template #empty>
-              <div>请点击新建按钮</div>
-            </template>
-          </n-popselect>
-        </template>
-      </BasicTable>
-      <n-space>
-        <n-tag size="large" :type="planedBoxCount == questDetail?.boxCount ? 'success' : 'warning'"
-          >总计划箱数 {{ planedBoxCount }}/{{ questDetail?.boxCount }}</n-tag
-        >
-        <n-button @click="emit('next')" type="success" :disabled="!canGoNext">保存并提交</n-button>
-      </n-space>
-    </n-space>
+    <BasicForm @register="register" @submit="handleSubmit" @reset="handleReset">
+      <template #statusSlot="{ model, field }">
+        <n-input v-model:value="model[field]" />
+      </template>
+    </BasicForm>
+    <div class="my-2"></div>
+    <BasicTable
+      :columns="columns"
+      :request="loadDataTable"
+      :row-key="(row) => row.id"
+      ref="actionRef"
+      :actionColumn="actionColumn"
+      @update:checked-row-keys="onCheckedRow"
+      :scroll-x="1090"
+    >
+      <template #tableTitle>
+        <n-button type="primary" @click="addTable">
+          <template #icon>
+            <n-icon>
+              <PlusOutlined />
+            </n-icon>
+          </template>
+          新建
+        </n-button>
+      </template>
+    </BasicTable>
 
     <n-modal v-model:show="showModal" :show-icon="false" preset="dialog" title="新建任务">
-      <new-operation-form-index
-        :default-sort-label="useSortCode"
-        :default-box-count="useBoxCount"
-        @submit="createNewTask"
-      />
+      <new-task-form-index @submit="createNewTask" />
     </n-modal>
     <n-modal v-model:show="showDetailModel">
       <task-detail-page
@@ -58,104 +44,201 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, h, reactive, ref, watchEffect } from 'vue';
+  import { h, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
+  import { BasicForm, FormSchema, useForm } from '@/components/Form';
   import { columns } from './columns';
-  import { createTask, deleteTask, getTaskList, getTasksForQuest } from '@/api/task/task-api';
+  import { PlusOutlined } from '@vicons/antd';
+  import { salesNameList } from '@/api/sales';
+  import { deliveryMethods } from '@/api/deliveryMethod';
+  import { warehouseList } from '@/api/warehouse';
+  import dayjs from 'dayjs';
+  import { changeTaskStatus, createTask, getTaskList } from '@/api/task/task-api';
+  import { notifyStatusList } from '@/api/notify/notify-api';
+  import NewTaskFormIndex from '@/views/bolita-views/operation/new/NewOperationFormIndex.vue';
   import { handleRequest } from '@/utils/utils';
   import { $ref } from 'vue/macros';
-  import TaskDetailPage from '@/views/bolita-views/quest/TaskDetail/QuestDetailPage.vue';
-  import { TaskModel } from '@/api/task/task-types';
-  import NewOperationFormIndex from '@/views/bolita-views/operation/new/NewOperationFormIndex.vue';
-  import { getQuestById } from '@/api/quest/quest-api';
-  import { QuestModel } from '@/api/quest/quest-type';
-  import { PlusOutlined } from '@vicons/antd';
-  import { SelectOption } from 'naive-ui';
-  import { clamp } from 'lodash-es';
+  import TaskDetailPage from '@/views/bolita-views/operation/TaskDetail/TaskDetailPage.vue';
+  import { PermissionEnums } from '@/api/user/baseUser';
+  import { TaskModel, TaskStatus } from '@/api/task/task-types';
 
-  const emit = defineEmits(['next']);
-  interface Props {
-    questId?: string;
-  }
-  let questDetail: QuestModel | null = $ref(null);
-  const props = defineProps<Props>();
-  watchEffect(async () => {
-    await reload();
-  });
-  async function reload() {
-    if (props.questId != null) {
-      console.log(props.questId);
-      questDetail = await getQuestById(props.questId);
-    }
-  }
-
-  const planedBoxCount = computed(() => {
-    return questDetail?.tasks.reduce((sum, i) => sum + parseInt(i.boxCount), 0) ?? 0;
-  });
-
-  const usedSortLabel = $computed(() => {
-    return questDetail?.tasks.map((it) => it.sortLabel) ?? [];
-  });
-
-  const allSortingLabelAndCount: SelectOption[] = $computed(() => {
-    return (
-      questDetail?.notifyInfo?.taskList
-        ?.filter((it) => !usedSortLabel.includes(it.sortCode))
-        ?.map((it) => {
+  const schemas: FormSchema[] = [
+    {
+      field: 'salesName',
+      component: 'NSelect',
+      label: '负责人',
+      componentProps: {
+        placeholder: '请选择负责人',
+        options: salesNameList.map((it) => {
           return {
-            label: '分拣码：' + it.sortCode + '(' + it.count + '箱)',
-            value: it.sortCode,
+            value: it,
+            label: it,
           };
-        }) ?? []
-    );
-  });
-
-  const canGoNext = computed(() => {
-    return planedBoxCount.value == questDetail?.boxCount;
-  });
+        }),
+        onUpdateValue: (e: any) => {
+          console.log(e);
+        },
+      },
+    },
+    {
+      field: 'planArriveDate',
+      component: 'NDatePicker',
+      label: '预约时间',
+      defaultValue: dayjs().valueOf(),
+      componentProps: {
+        type: 'date',
+        clearable: true,
+        onUpdateValue: (e: any) => {
+          console.log(e);
+        },
+      },
+    },
+    {
+      field: 'deliveryMethod',
+      component: 'NSelect',
+      label: '物流渠道',
+      componentProps: {
+        placeholder: '请选择物流渠道',
+        options: deliveryMethods.map((it) => {
+          return {
+            value: it,
+            label: it,
+          };
+        }),
+        onUpdateValue: (e: any) => {
+          console.log(e);
+        },
+      },
+    },
+    {
+      field: 'arriveWarehouseName',
+      component: 'NSelect',
+      label: '到货仓库',
+      componentProps: {
+        placeholder: '请选择到货仓库',
+        options: warehouseList.map((it) => {
+          return {
+            value: it,
+            label: it,
+          };
+        }),
+        onUpdateValue: (e: any) => {
+          console.log(e);
+        },
+      },
+    },
+    {
+      field: 'status',
+      component: 'NSelect',
+      label: '状态',
+      componentProps: {
+        placeholder: '状态',
+        options: notifyStatusList.map((it) => {
+          return {
+            value: it,
+            label: it,
+          };
+        }),
+        onUpdateValue: (e: any) => {
+          console.log(e);
+        },
+      },
+    },
+  ];
 
   const actionRef = ref();
 
   const showModal = ref(false);
-  let showDetailModel = $ref(false);
-  let currentTaskId = $ref('');
-  let useSortCode = $ref('');
-  let useBoxCount = $ref(0);
 
+  const formParams = reactive({
+    name: '',
+    address: '',
+    date: null,
+  });
+
+  const params = ref({
+    pageSize: 5,
+    name: 'xiaoMa',
+  });
   const actionColumn = reactive({
-    width: 160,
-    fixed: 'right',
+    width: 300,
     title: '操作',
     key: 'action',
+    fixed: 'right',
     render(record) {
       return h(TableAction as any, {
         style: 'button',
         actions: [
           {
             label: '详情',
-            onClick() {
-              showDetailModel = true;
-              currentTaskId = record.id;
-            },
+            onClick: handleEdit.bind(null, record),
             ifShow: () => {
               return true;
             },
           },
           {
-            label: '删除',
-            popConfirm: {
-              title: '您确定要删除本条记录吗',
-              async confirm() {
-                const res = await deleteTask(record.id);
-                await handleRequest(res, () => {
-                  reload();
+            label: '提交到审核',
+            onClick() {
+              window['$dialog'].info({
+                title: '您确定吗？',
+                content: '一旦提交到审核就不能再修改该任务了',
+                positiveText: '是的',
+                negativeText: '取消',
+                async onPositiveClick() {
+                  await changeTaskStatus(record.id, TaskStatus.WaitForCheck);
                   reloadTable();
-                });
-              },
+                },
+                onNegativeClick() {},
+              });
             },
+            auth: [PermissionEnums.Customer],
+            ifShow: () => {
+              return [TaskStatus.NotSubmit, TaskStatus.Refused].includes(record.status);
+            },
+          },
+          {
+            label: '审核',
+            onClick() {
+              window['$dialog'].info({
+                title: '资料是否可以通过审核？',
+                content:
+                  '请点击详情以查看任务详情，如果资料没有问题，请点击通过审核，否则请点击拒绝任务',
+                positiveText: '通过审核',
+                negativeText: '拒绝任务',
+                async onPositiveClick() {
+                  await changeTaskStatus(record.id, TaskStatus.NotHandled);
+                  reloadTable();
+                },
+                async onNegativeClick() {
+                  await changeTaskStatus(record.id, TaskStatus.Refused);
+                  reloadTable();
+                },
+              });
+            },
+            auth: [PermissionEnums.Sales, PermissionEnums.Manager, PermissionEnums.Technical],
+            ifShow: () => {
+              return record.status == TaskStatus.WaitForCheck;
+            },
+          },
+          {
+            label: '物流回传',
+            onClick() {},
+            ifShow: () => {
+              return [TaskStatus.Finished].includes(record.status);
+            },
+          },
+        ],
+        dropDownActions: [
+          {
+            label: '编辑',
+            onClick: handleEdit.bind(null, record),
             ifShow: () => {
               return true;
             },
+            auth: ['basic_list'],
+          },
+          {
+            label: '取消预报',
           },
         ],
         select: (key) => {
@@ -165,43 +248,52 @@
     },
   });
 
-  function addTable(presetSortLabel = '') {
-    const preset = questDetail?.notifyInfo?.taskList.find((it) => it.sortCode === presetSortLabel);
-    if (preset) {
-      useSortCode = presetSortLabel;
-      useBoxCount = parseInt(preset.count);
-      console.log(preset.count);
-    } else {
-      console.log(questDetail?.boxCount ?? 0, planedBoxCount.value, 0);
-      useBoxCount = clamp(
-        (questDetail?.boxCount ?? 0) - planedBoxCount.value,
-        0,
-        Number.MAX_SAFE_INTEGER
-      );
-      useSortCode = '';
-    }
+  const [register, {}] = useForm({
+    gridProps: { cols: '1 s:1 m:2 l:3 xl:4 2xl:4' },
+    labelWidth: 80,
+    schemas,
+  });
+
+  function addTable() {
     showModal.value = true;
   }
 
-  const loadDataTable = async () => {
-    const re = props?.questId ? await getTasksForQuest(props.questId) : await getTaskList({});
-    console.log(re);
-    return re;
+  const loadDataTable = async (res) => {
+    return await getTaskList({ ...formParams, ...params.value, ...res });
   };
+
+  function onCheckedRow(rowKeys) {
+    console.log(rowKeys);
+  }
 
   function reloadTable() {
     actionRef.value.reload();
   }
 
+  function handleEdit(record: Recordable) {
+    showDetailModel = true;
+    currentTaskId = record.id;
+  }
+
+  function handleSubmit(values: Recordable) {
+    console.log(values);
+    reloadTable();
+  }
+
+  function handleReset(values: Recordable) {
+    console.log(values);
+  }
+
   async function createNewTask(taskInfo: TaskModel) {
-    taskInfo.questId = props.questId;
     const res = await createTask(taskInfo);
     await handleRequest(res, () => {
       showModal.value = false;
       reloadTable();
-      reload();
     });
   }
+
+  let showDetailModel = $ref(false);
+  let currentTaskId = $ref('');
 </script>
 
 <style lang="less" scoped></style>
