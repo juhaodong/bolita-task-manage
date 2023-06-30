@@ -237,6 +237,9 @@
           if (defaultValue) {
             schema.defaultValue = defaultValue;
           }
+          schema.giProps = {
+            span: 1,
+          };
         }
         return schemas as FormSchema[];
       });

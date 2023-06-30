@@ -26,6 +26,7 @@
   const columns = computed(() => {
     const list = getNeededColumnsByArriveMedia(arriveMedia);
     return [
+      { title: '预报ID', key: 'id' },
       {
         title: '到货状态',
         key: 'arrived',
@@ -70,38 +71,41 @@
   }
   interface Props {
     notifyId: string;
+    editable: boolean;
   }
   const props = defineProps<Props>();
-  const actionColumn = reactive({
-    width: 100,
-    title: '操作',
-    key: 'action',
-    fixed: 'right',
-    render(record) {
-      return h(TableAction as any, {
-        style: 'button',
-        actions: [
-          {
-            label: '删除',
-            popConfirm: {
-              title: '您是否确定删除此条记录?',
-              async confirm() {
-                const res = await deleteDetailForNotify(record.id, props.notifyId);
-                await handleRequest(res, () => {
-                  tableReload();
-                  reload();
-                  toastSuccess('删除成功');
-                });
+  const actionColumn = props.editable
+    ? reactive({
+        width: 100,
+        title: '操作',
+        key: 'action',
+        fixed: 'right',
+        render(record) {
+          return h(TableAction as any, {
+            style: 'button',
+            actions: [
+              {
+                label: '删除',
+                popConfirm: {
+                  title: '您是否确定删除此条记录?',
+                  async confirm() {
+                    const res = await deleteDetailForNotify(record.id, props.notifyId);
+                    await handleRequest(res, () => {
+                      tableReload();
+                      reload();
+                      toastSuccess('删除成功');
+                    });
+                  },
+                },
               },
+            ],
+            select: (key) => {
+              window['$message'].info(`您点击了，${key} 按钮`);
             },
-          },
-        ],
-        select: (key) => {
-          window['$message'].info(`您点击了，${key} 按钮`);
+          });
         },
-      });
-    },
-  });
+      })
+    : null;
   let showAdd = $ref(false);
   const loadDataTable = async () => {
     return await getTasksForNotify(props.notifyId);
@@ -254,7 +258,7 @@
       :actionColumn="actionColumn"
       :scroll-x="1090"
     >
-      <template #tableTitle>
+      <template #tableTitle v-if="editable">
         <n-space>
           <n-button @click="showAdd = true" type="primary"> 添加预报详情 </n-button>
           <n-button @click="startMassImport"> 批量导入 </n-button>
@@ -262,7 +266,7 @@
       </template>
       <template #toolbar> </template>
     </BasicTable>
-    <n-space>
+    <n-space v-if="editable">
       <n-tag
         size="large"
         :type="totalRecordCount == notifyDetail?.totalCount ? 'success' : 'warning'"
@@ -277,7 +281,9 @@
       >
         分拣码数量: {{ notifyDetail?.taskList.length }}/{{ notifyDetail?.sortingLabelCount }}
       </n-tag>
-      <n-button @click="emit('next')" :disabled="!canGoNext" type="success"> 下一步 </n-button>
+      <n-button v-if="editable" @click="emit('next')" :disabled="!canGoNext" type="success">
+        下一步
+      </n-button>
     </n-space>
   </n-space>
 

@@ -76,5 +76,5 @@ export async function getQuestById(id: string): Promise<QuestModel> {
 }
 
 export async function getQuestList() {
-  return await executeQuery(query(ref, orderBy('createTimestamp')));
+  return await executeQuery(query(ref, orderBy('createTimestamp', 'desc')));
 }

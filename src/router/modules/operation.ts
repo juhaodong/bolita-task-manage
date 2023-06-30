@@ -24,8 +24,7 @@ const routes: Array<RouteRecordRaw> = [
           title: '操作管理',
           activeMenu: `${name}_index`,
         },
-        component: () =>
-          import('@/views/bolita-views/operation/NewQuestOperationList/NewOperationTable.vue'),
+        component: () => import('@/views/bolita-views/operation/list/OperationList.vue'),
       },
     ],
   },

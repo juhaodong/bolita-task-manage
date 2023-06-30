@@ -71,7 +71,7 @@
   import { notifyStatusList } from '@/api/notify/notify-api';
   import NewQuestFormIndex from '@/views/bolita-views/quest/new/NewQuestFormIndex.vue';
   import { $ref } from 'vue/macros';
-  import TaskDetailPage from '@/views/bolita-views/quest/TaskDetail/TaskDetailPage.vue';
+  import TaskDetailPage from '@/views/bolita-views/quest/TaskDetail/QuestDetailPage.vue';
   import { PermissionEnums } from '@/api/user/baseUser';
   import { Bell } from '@vicons/tabler';
   import { TaskStatus } from '@/api/task/task-types';
@@ -92,9 +92,6 @@
             label: it,
           };
         }),
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
       },
     },
     {
@@ -105,9 +102,6 @@
       componentProps: {
         type: 'date',
         clearable: true,
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
       },
     },
     {
@@ -122,9 +116,6 @@
             label: it,
           };
         }),
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
       },
     },
     {
@@ -139,9 +130,6 @@
             label: it,
           };
         }),
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
       },
     },
     {
@@ -156,9 +144,6 @@
             label: it,
           };
         }),
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
       },
     },
   ];
@@ -236,19 +221,7 @@
             },
           },
         ],
-        dropDownActions: [
-          {
-            label: '编辑',
-            onClick: handleEdit.bind(null, record),
-            ifShow: () => {
-              return true;
-            },
-            auth: ['basic_list'],
-          },
-          {
-            label: '取消预报',
-          },
-        ],
+        dropDownActions: [],
         select: (key) => {
           window['$message'].info(`您点击了，${key} 按钮`);
         },

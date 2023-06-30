@@ -1,6 +1,7 @@
 import { DataTableColumns } from 'naive-ui';
 import { h } from 'vue';
 import { QuestModel } from '@/api/quest/quest-type';
+import { statusColumn } from '@/views/bolita-views/composable/useableColumns';
 
 export const columns: DataTableColumns<QuestModel> = [
   {
@@ -19,10 +20,7 @@ export const columns: DataTableColumns<QuestModel> = [
     title: '箱数',
     key: 'boxCount',
   },
-  {
-    title: '状态',
-    key: 'status',
-  },
+  statusColumn,
   {
     title: '完成率',
     key: 'completeRate',

@@ -124,6 +124,7 @@
         v-if="currentStep == Steps.BasicInfo"
         @submit="basicInfoSubmit"
         :model="basicInfo"
+        :operation-mode="operationMode"
       />
       <template v-else-if="currentStep === Steps.NotifyBasicInfo">
         <box-form
@@ -144,7 +145,11 @@
       </template>
       <template v-else-if="currentStep == Steps.NotifyDetail">
         <div>
-          <notify-tasks-table @next="currentStep = Steps.TaskInfo" :notify-id="currentNotifyId" />
+          <notify-tasks-table
+            @next="currentStep = Steps.TaskInfo"
+            :notify-id="currentNotifyId"
+            :editable="true"
+          />
         </div>
       </template>
       <template v-else-if="currentStep === Steps.TaskInfo">

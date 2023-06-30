@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, query, setDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, orderBy, query, setDoc } from 'firebase/firestore';
 import { db, executeQuery, getDocContent } from '@/plugins/firebase';
 import { resultError, resultSuccess } from '../../utils/request/_util';
 import { doLog } from '@/api/statusChangeLog';
@@ -130,7 +130,7 @@ export async function getNotifyById(id?: string) {
 //获取table
 export async function getNotifyList(params) {
   console.log(params);
-  return await executeQuery(query(collection(db, notifyPath)));
+  return await executeQuery(query(collection(db, notifyPath), orderBy('createTimestamp', 'desc')));
 }
 
 export enum NotifyStatus {
