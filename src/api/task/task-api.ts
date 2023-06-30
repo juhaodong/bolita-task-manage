@@ -27,7 +27,7 @@ export async function createTask(taskInfo: TaskModel) {
       operationRequirements: [],
       refLink: '',
       status: TaskStatus.NotSubmit,
-      taskType: TaskType.AmazonTransfer,
+      taskType: TaskType.AmazonTray,
       warehouseId: '',
     };
     const realInfo = Object.assign(info, taskInfo);

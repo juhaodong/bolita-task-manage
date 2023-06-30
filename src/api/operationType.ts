@@ -1,40 +1,56 @@
-import { deliveryMethods } from '@/api/deliveryMethod';
-
 export enum SelectBoxBase {
-  SKU = 'SKU挑箱',
+  SKU = 'FNSKU挑箱',
   Mai = '箱唛挑箱',
 }
+
+export enum ChangeOrderType {
+  Scan = '扫码',
+  Manual = '人工',
+}
+
+export enum YesOrNo {
+  Yes = '是',
+  No = '否',
+}
+
 export const selectBoxBases = Object.values(SelectBoxBase);
+export const changeOrderTypes = Object.values(ChangeOrderType);
+export const yesOrNo = Object.values(YesOrNo);
 
 export enum OperationType {
   Amount = '数量',
+  Unload = '卸柜',
+  Sort = '分拣',
+  Load = '装柜（装车）',
+  TrayStorage = '托盘入库',
+  BoxStorage = '包裹入库',
+  OnShelf = '上架',
   Check = '清点',
-  OpenBox = '拆箱',
-  OpenTray = '拆托',
-  BoxLabel = '箱唛标签（含A4纸）',
-  SkuLabel = 'SKU标签',
-  SelectBoxOnSku = 'SKU挑箱/箱唛挑箱',
-  TrayAmount = '托盘数',
+  SelectBoxOnSku = '挑箱出库',
+  FastOutBound = '快转出库',
+  TrayOutBound = '托盘出库',
+  ShouldChangeTray = '是否更换托盘',
+  SelfOutbound = '自提出库',
+  BoxLabel = '大标签（含A4纸）',
+  SkuLabel = '小标签',
+  MakeTray = '打托',
+  ChangeOrder = '换单',
+  Other = '其他',
   OneUseTray = '一次性托盘',
-  TraySize = '托盘尺寸',
+  EuropeStandardTray = '欧标托盘',
+  PaperBox = '纸箱耗材',
+  CourierBag = '快递袋耗材',
+  OtherConsumables = '其他耗材',
   TakePic = '拍照',
   MakeBoxStrong = '箱体加固',
   NoLogoSelect = '无标识附加费',
   CoverLogo = '覆盖',
-  PaperBox = '纸箱耗材',
-  CourierBag = '快递袋耗材',
-  OtherConsumables = '其他耗材',
   Destruction = '销毁',
-  Delivery = '物流',
+  OrderCancel = '取消订单',
+  OtherSpecial = '其他',
   SingleThingOneOrder = '一单一件订单',
   MultipleThingOneOrder = '一单多件订单',
   TotalPackages = '总件数',
-}
-
-export enum OperationStatus {
-  NotFinished = '未完成',
-  Finished = '已完成',
-  Warning = '警告',
 }
 
 export type OperationRequirementModel = {
@@ -43,16 +59,13 @@ export type OperationRequirementModel = {
   completeAmount: number;
   options?: string[]; //only for selectType
   value: string; //only for selectType
-  operationStatus: OperationStatus;
   updateTimestamp: number;
   operationInputType: 'input' | 'select';
 };
 
-export const selectTypeORs = [OperationType.SelectBoxOnSku, OperationType.Delivery];
-
 export const laterFilledInOperationRequirement = [
-  OperationType.OpenBox,
-  OperationType.OpenTray,
+  OperationType.ShouldChangeTray,
+  OperationType.OrderCancel,
   OperationType.MakeBoxStrong,
   OperationType.CoverLogo,
   OperationType.PaperBox,
@@ -65,20 +78,21 @@ function getOperationRequirementModelByName(
   operationType: OperationType
 ): OperationRequirementModel {
   let options: string[] = [];
-  if (operationType === OperationType.Delivery) {
-    options = deliveryMethods;
-  } else if (operationType === OperationType.SelectBoxOnSku) {
+  if (operationType === OperationType.SelectBoxOnSku) {
     options = selectBoxBases;
+  } else if (operationType === OperationType.ShouldChangeTray) {
+    options = yesOrNo;
+  } else if (operationType === OperationType.ChangeOrder) {
+    options = changeOrderTypes;
   }
   return {
     completeAmount: 0,
-    operationStatus: OperationStatus.NotFinished,
     operationType: operationType,
     requireAmount: 0,
     value: '',
     options,
     updateTimestamp: 0,
-    operationInputType: selectTypeORs.includes(operationType) ? 'select' : 'input',
+    operationInputType: options.length > 0 ? 'select' : 'input',
   };
 }
 

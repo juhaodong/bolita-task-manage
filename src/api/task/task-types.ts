@@ -1,17 +1,12 @@
 import { OperationRequirementModel } from '@/api/operationType';
 
 export enum TaskType {
-  Shelves = '上架',
-  BoxTransfer = '散货中转',
-  AmazonTransfer = 'AMZ托盘转运',
-  NormalTrayTransfer = '普通托盘转运',
-  BoxFastTransfer = '散货快转',
+  InBound = '入库',
+  Transfer = '中转/快转',
+  AmazonTray = 'AMZ卡派',
+  NormalTray = '普通卡派',
   OneForSend = '一件代发',
-  OutBound = '出库',
-  Inventory = '盘点',
-  Destroy = '销毁',
-  Return = '退货',
-  InStorageOperation = '库内操作',
+  Return = '移仓/退货',
 }
 
 export const taskTypes: TaskType[] = Object.values(TaskType);

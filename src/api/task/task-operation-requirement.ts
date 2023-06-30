@@ -7,35 +7,22 @@ import { TaskType } from '@/api/task/task-types';
 
 export function getTaskTypeOperationKeys(taskType: TaskType) {
   switch (taskType) {
-    case TaskType.Shelves:
+    case TaskType.InBound:
       return getORListByNames([
         OperationType.Amount,
         OperationType.Check,
-        OperationType.OpenBox,
-        OperationType.OpenTray,
-        OperationType.SkuLabel,
+        OperationType.Unload,
+        OperationType.Sort,
+        OperationType.Load,
+        OperationType.TrayStorage,
+        OperationType.BoxStorage,
+        OperationType.OnShelf,
         OperationType.NoLogoSelect,
         OperationType.PaperBox,
         OperationType.OtherConsumables,
         OperationType.Delivery,
       ]);
-    case TaskType.BoxTransfer:
-      return getORListByNames([
-        OperationType.Amount,
-        OperationType.Check,
-        OperationType.OpenBox,
-        OperationType.OpenTray,
-        OperationType.SkuLabel,
-        OperationType.TakePic,
-        OperationType.MakeBoxStrong,
-        OperationType.BoxLabel,
-        OperationType.SelectBoxOnSku,
-        OperationType.PaperBox,
-        OperationType.OtherConsumables,
-        OperationType.Delivery,
-        OperationType.CoverLogo,
-      ]);
-    case TaskType.NormalTrayTransfer:
+    case TaskType.NormalTray:
       return getORListByNames([
         OperationType.Amount,
         OperationType.Check,
@@ -48,7 +35,7 @@ export function getTaskTypeOperationKeys(taskType: TaskType) {
         OperationType.TraySize,
         OperationType.OneUseTray,
       ]);
-    case TaskType.BoxFastTransfer:
+    case TaskType.Transfer:
       return getORListByNames([
         OperationType.Amount,
         OperationType.Check,
@@ -76,23 +63,7 @@ export function getTaskTypeOperationKeys(taskType: TaskType) {
         OperationType.SingleThingOneOrder,
         OperationType.MultipleThingOneOrder,
       ]);
-    case TaskType.OutBound:
-      return getORListByNames([
-        OperationType.Amount,
-        OperationType.TakePic,
-        OperationType.MakeBoxStrong,
-        OperationType.Delivery,
-      ]);
-    case TaskType.Inventory:
-      return getORListByNames([
-        OperationType.Amount,
-        OperationType.Check,
-        OperationType.BoxLabel,
-        OperationType.SkuLabel,
-        OperationType.TakePic,
-      ]);
-    case TaskType.Destroy:
-      return getORListByNames([OperationType.Amount, OperationType.Destruction]);
+
     case TaskType.Return:
       return getORListByNames([
         OperationType.Amount,
@@ -109,9 +80,7 @@ export function getTaskTypeOperationKeys(taskType: TaskType) {
         OperationType.CoverLogo,
         OperationType.TotalPackages,
       ]);
-    case TaskType.InStorageOperation:
-      return getORListByNames([OperationType.Amount]);
-    case TaskType.AmazonTransfer:
+    case TaskType.AmazonTray:
       return getORListByNames([
         OperationType.Amount,
         OperationType.Check,
