@@ -1,4 +1,5 @@
 import { OperationRequirementModel } from '@/api/operationType';
+import { BasicModel } from '@/api/quest/quest-type';
 
 export enum TaskType {
   InBound = '入库',
@@ -24,10 +25,7 @@ export enum TaskStatus {
   Warning = '异常',
 }
 
-export type TaskModel = {
-  id?: string;
-  customerId: string;
-  warehouseId: string;
+export interface TaskModel extends BasicModel {
   questId?: string;
   logisticId?: string;
   sortLabel?: string;
@@ -38,8 +36,6 @@ export type TaskModel = {
   operateTime: string;
   deliveryDate: string;
   completionRate: number;
-  note: string;
-  files: string[];
   operationRequirements: OperationRequirementModel[];
   refLink: string;
-};
+}

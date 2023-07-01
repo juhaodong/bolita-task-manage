@@ -1,6 +1,15 @@
 import { OperationRequirementModel } from '@/api/operationType';
 import { db, executeQuery, getDocContent } from '@/plugins/firebase';
-import { addDoc, collection, deleteDoc, doc, query, setDoc, where } from 'firebase/firestore';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  orderBy,
+  query,
+  setDoc,
+  where,
+} from 'firebase/firestore';
 import { TaskModel, TaskStatus, TaskType } from '@/api/task/task-types';
 import { doLog } from '@/api/statusChangeLog';
 import { resultError, resultSuccess } from '@/utils/request/_util';
@@ -20,6 +29,7 @@ export async function createTask(taskInfo: TaskModel) {
       completionRate: 0,
       customerId: '',
       deliveryDate: '',
+      createTimestamp: dayjs().valueOf(),
       deliveryMethod: '',
       files: [],
       note: '',
@@ -155,5 +165,5 @@ export async function getTaskById(id: string) {
 
 export async function getTaskList(params) {
   console.log(params);
-  return await executeQuery(query(collection(db, taskPath)));
+  return await executeQuery(query(taskCollection, orderBy('createTimestamp', 'desc')));
 }

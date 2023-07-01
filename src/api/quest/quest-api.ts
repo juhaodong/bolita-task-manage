@@ -3,10 +3,11 @@ import { db, executeQuery, getDocContent } from '@/plugins/firebase';
 import { addDoc, collection, deleteDoc, doc, orderBy, query, setDoc } from 'firebase/firestore';
 import { resultError, resultSuccess } from '@/utils/request/_util';
 import dayjs from 'dayjs';
-import { changeTaskWarehouse, getTasksForQuest } from '@/api/task/task-api';
+import { changeTaskStatus, changeTaskWarehouse, getTasksForQuest } from '@/api/task/task-api';
 import { changeNotifyStatus, getNotifyById, NotifyStatus } from '@/api/notify/notify-api';
 import { doLog } from '@/api/statusChangeLog';
 import { CheckResult } from '@/store/modules/checkDialogState';
+import { TaskStatus } from '@/api/task/task-types';
 
 const path = 'quest';
 const ref = collection(db, path);
@@ -76,6 +77,9 @@ export async function checkQuest(id: string, checkResult: CheckResult) {
     const tasks = await getTasksForQuest(id);
     for (const task of tasks) {
       await changeTaskWarehouse(task.id, checkResult.warehouseId);
+      if (!notifyId) {
+        await changeTaskStatus(task.id, TaskStatus.NotHandled);
+      }
     }
     await setDoc(
       doc(ref, id),
