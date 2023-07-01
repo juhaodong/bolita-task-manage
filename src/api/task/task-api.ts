@@ -60,10 +60,36 @@ export async function deleteTask(id) {
   }
 }
 
-export async function changeTaskStatus(id: string, newStatus: TaskStatus) {
+export async function changeTaskWarehouse(id: string, warehouseId: string) {
+  try {
+    const currentTask = await getTaskById(id);
+    if (warehouseId) {
+      await setDoc(doc(taskCollection, id), { warehouseId }, { merge: true });
+    }
+
+    await doLog({
+      files: [],
+      fromStatus: currentTask.status,
+      logRef: id,
+      note: '执行仓库变更为' + warehouseId,
+      toStatus: currentTask.status,
+    });
+  } catch (e: any) {
+    return resultError(e?.message);
+  }
+}
+export async function changeTaskStatus(
+  id: string,
+  newStatus: TaskStatus,
+  warehouseId: string | null = null
+) {
   try {
     const currentTask = await getTaskById(id);
     await setDoc(doc(taskCollection, id), { status: newStatus }, { merge: true });
+    if (warehouseId) {
+      await setDoc(doc(taskCollection, id), { warehouseId }, { merge: true });
+    }
+
     await doLog({
       files: [],
       fromStatus: currentTask.status,

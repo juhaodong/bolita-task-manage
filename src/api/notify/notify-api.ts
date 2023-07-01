@@ -100,10 +100,17 @@ async function updateNotify(info: NotifyCreateDTO, id) {
   }
 }
 
-export async function changeNotifyStatus(id: string, newStatus: NotifyStatus) {
+export async function changeNotifyStatus(
+  id: string,
+  newStatus: NotifyStatus,
+  warehouseId: string | null = null
+) {
   try {
     const currentModel = await getNotifyById(id);
     await setDoc(doc(ref, id), { status: newStatus }, { merge: true });
+    if (warehouseId) {
+      await setDoc(doc(ref, id), { warehouseId }, { merge: true });
+    }
     await doLog({
       files: [],
       fromStatus: currentModel.status,
