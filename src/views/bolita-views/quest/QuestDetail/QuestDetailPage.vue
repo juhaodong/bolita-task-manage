@@ -9,6 +9,7 @@
   import { TaskStatus } from '@/api/task/task-types';
   import NotifyTasksTable from '@/views/bolita-views/notify/NotifyDetail/NotifyTasksTable.vue';
   import NotifyDetailBasicInfo from '@/views/bolita-views/notify/NotifyDetail/Fragment/NotifyDetailBasicInfo.vue';
+  import OperationList from '@/views/bolita-views/operation/list/OperationList.vue';
 
   const props = defineProps({
     id: String,
@@ -78,7 +79,9 @@
       <n-tab-pane name="货品列表" v-if="questDetail?.notifyId">
         <notify-tasks-table :editable="false" :notify-id="questDetail.notifyId" />
       </n-tab-pane>
-      <n-tab-pane name="任务列表" />
+      <n-tab-pane name="任务列表">
+        <operation-list :quest-id="id" />
+      </n-tab-pane>
       <n-tab-pane name="附件">
         <append-file-list-display :files-url="questDetail?.files" />
       </n-tab-pane>

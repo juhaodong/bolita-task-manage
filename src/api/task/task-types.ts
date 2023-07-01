@@ -13,8 +13,10 @@ export const taskTypes: TaskType[] = Object.values(TaskType);
 
 export enum TaskStatus {
   NotSubmit = '未提交',
+  WaitForArrive = '等待到货',
   WaitForCheck = '待审核',
   Refused = '未通过',
+  WaitForLogisticPriceConfirm = '等待物流报价',
   NotHandled = '未处理',
   Handling = '处理中',
   Finished = '已处理',

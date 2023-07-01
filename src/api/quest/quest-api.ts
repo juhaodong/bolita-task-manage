@@ -4,7 +4,7 @@ import { addDoc, collection, deleteDoc, doc, orderBy, query, setDoc } from 'fire
 import { resultError, resultSuccess } from '@/utils/request/_util';
 import dayjs from 'dayjs';
 import { getTasksForQuest } from '@/api/task/task-api';
-import { getNotifyById } from '@/api/notify/notify-api';
+import { changeNotifyStatus, getNotifyById, NotifyStatus } from '@/api/notify/notify-api';
 import { doLog } from '@/api/statusChangeLog';
 import { CheckResult } from '@/store/modules/checkDialogState';
 
@@ -65,12 +65,18 @@ export async function checkQuest(id: string, checkResult: CheckResult) {
     : QuestStatus.CheckRefused;
   try {
     const currentModel = await getQuestById(id);
+    const notifyId = currentModel?.notifyId;
+    if (notifyId) {
+      await changeNotifyStatus(
+        notifyId,
+        checkResult.checkPassed ? NotifyStatus.WaitFroArrive : NotifyStatus.Refused
+      );
+    }
     await setDoc(
       doc(ref, id),
       { status: newStatus, warehouseId: checkResult.warehouseId },
       { merge: true }
     );
-    console.log(id, 'dolog');
     await doLog({
       files: checkResult.files,
       fromStatus: currentModel.status,
@@ -122,3 +128,5 @@ export async function deleteQuest(id) {
 export async function getQuestList() {
   return await executeQuery(query(ref, orderBy('createTimestamp', 'desc')));
 }
+
+export async function checkAndMoveToNewState() {}

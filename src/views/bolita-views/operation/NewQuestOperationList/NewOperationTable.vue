@@ -65,7 +65,7 @@
   import { handleRequest } from '@/utils/utils';
   import { $ref } from 'vue/macros';
   import TaskDetailPage from '@/views/bolita-views/operation/OperationDetail/OperationDetailPage.vue';
-  import { TaskModel } from '@/api/task/task-types';
+  import { TaskModel, TaskStatus } from '@/api/task/task-types';
   import NewOperationFormIndex from '@/views/bolita-views/operation/new/NewOperationFormIndex.vue';
   import { getQuestById } from '@/api/quest/quest-api';
   import { QuestModel } from '@/api/quest/quest-type';
@@ -195,6 +195,11 @@
 
   async function createNewTask(taskInfo: TaskModel) {
     taskInfo.questId = props.questId;
+    taskInfo.status = TaskStatus.WaitForCheck;
+    if (questDetail?.notifyId) {
+      taskInfo.status = TaskStatus.WaitForArrive;
+    }
+
     const res = await createTask(taskInfo);
     await handleRequest(res, () => {
       showModal.value = false;

@@ -1,11 +1,14 @@
 <template>
   <n-card :bordered="false" class="proCard">
+    ´
     <BasicForm @register="register" @submit="handleSubmit" @reset="handleReset">
       <template #statusSlot="{ model, field }">
         <n-input v-model:value="model[field]" />
       </template>
     </BasicForm>
     <div class="my-2"></div>
+    ´
+
     <BasicTable
       :columns="columns"
       :request="loadDataTable"
@@ -46,7 +49,7 @@
       />
     </n-modal>
     <n-modal v-model:show="showDetailModel">
-      <task-detail-page
+      <quest-detail-page
         @refresh="reloadTable"
         @close="
           showDetailModel = false;
@@ -71,7 +74,7 @@
   import { notifyStatusList } from '@/api/notify/notify-api';
   import NewQuestFormIndex from '@/views/bolita-views/quest/new/NewQuestFormIndex.vue';
   import { $ref } from 'vue/macros';
-  import TaskDetailPage from '@/views/bolita-views/quest/QuestDetail/QuestDetailPage.vue';
+  import QuestDetailPage from '@/views/bolita-views/quest/QuestDetail/QuestDetailPage.vue';
   import { PermissionEnums } from '@/api/user/baseUser';
   import { Bell } from '@vicons/tabler';
   import { TaskStatus } from '@/api/task/task-types';

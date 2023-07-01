@@ -1,11 +1,14 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <BasicForm @register="register" @submit="handleSubmit" @reset="handleReset">
-      <template #statusSlot="{ model, field }">
-        <n-input v-model:value="model[field]" />
-      </template>
-    </BasicForm>
-    <div class="my-2"></div>
+    <template v-if="!questId">
+      <BasicForm @register="register" @submit="handleSubmit" @reset="handleReset">
+        <template #statusSlot="{ model, field }">
+          <n-input v-model:value="model[field]" />
+        </template>
+      </BasicForm>
+      <div class="my-2"></div>
+    </template>
+
     <BasicTable
       :columns="columns"
       :request="loadDataTable"
@@ -15,7 +18,7 @@
       @update:checked-row-keys="onCheckedRow"
       :scroll-x="1090"
     >
-      <template #tableTitle>
+      <template #tableTitle v-if="!questId">
         <n-button type="primary" @click="addTable">
           <template #icon>
             <n-icon>
@@ -53,7 +56,7 @@
   import { deliveryMethods } from '@/api/deliveryMethod';
   import { warehouseList } from '@/api/warehouse';
   import dayjs from 'dayjs';
-  import { changeTaskStatus, createTask, getTaskList } from '@/api/task/task-api';
+  import { changeTaskStatus, createTask, getTaskList, getTasksForQuest } from '@/api/task/task-api';
   import { notifyStatusList } from '@/api/notify/notify-api';
   import NewTaskFormIndex from '@/views/bolita-views/operation/new/NewOperationFormIndex.vue';
   import { handleRequest } from '@/utils/utils';
@@ -62,6 +65,11 @@
   import { PermissionEnums } from '@/api/user/baseUser';
   import { TaskModel, TaskStatus } from '@/api/task/task-types';
 
+  interface Props {
+    questId?: string;
+  }
+
+  const props = defineProps<Props>();
   const schemas: FormSchema[] = [
     {
       field: 'salesName',
@@ -161,7 +169,7 @@
     name: 'xiaoMa',
   });
   const actionColumn = reactive({
-    width: 300,
+    width: 240,
     title: '操作',
     key: 'action',
     fixed: 'right',
@@ -226,19 +234,6 @@
             },
           },
         ],
-        dropDownActions: [
-          {
-            label: '编辑',
-            onClick: handleEdit.bind(null, record),
-            ifShow: () => {
-              return true;
-            },
-            auth: ['basic_list'],
-          },
-          {
-            label: '取消预报',
-          },
-        ],
         select: (key) => {
           window['$message'].info(`您点击了，${key} 按钮`);
         },
@@ -257,6 +252,9 @@
   }
 
   const loadDataTable = async (res) => {
+    if (props.questId) {
+      return await getTasksForQuest(props.questId);
+    }
     return await getTaskList({ ...formParams, ...params.value, ...res });
   };
 
