@@ -164,6 +164,5 @@ export async function getTaskById(id: string) {
 }
 
 export async function getTaskList(params) {
-  console.log(params);
   return await executeQuery(query(taskCollection, orderBy('createTimestamp', 'desc')));
 }

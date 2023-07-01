@@ -1,4 +1,5 @@
 import { LogisticType } from '@/api/deliveryMethod/logistic-type';
+import { TaskType } from '@/api/task/task-types';
 
 export enum DeliveryMethod {
   DHL = 'DHL',
@@ -53,6 +54,22 @@ export function getLogisticTypeByDeliveryMethod(deliveryMethod: DeliveryMethod):
     case DeliveryMethod.DirectSend:
     case DeliveryMethod.Others:
       return LogisticType.DirectSent;
+  }
+}
+
+export function getLogisticTypeByTaskType(taskType: TaskType) {
+  switch (taskType) {
+    case TaskType.InBound:
+    case TaskType.Return:
+      return LogisticType.None;
+    case TaskType.Transfer:
+      return LogisticType.OtherTray;
+    case TaskType.AmazonTray:
+      return LogisticType.AmazonTray;
+    case TaskType.NormalTray:
+      return LogisticType.OtherTray;
+    case TaskType.OneForSend:
+      return LogisticType.Box;
   }
 }
 

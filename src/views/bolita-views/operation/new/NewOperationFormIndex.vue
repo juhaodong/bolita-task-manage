@@ -1,12 +1,12 @@
 <script setup lang="ts">
-  import { $ref } from 'vue/macros';
+  import { $computed, $ref } from 'vue/macros';
   import NewTaskStep1Form from '@/views/bolita-views/operation/new/NewOperationFormStep1.vue';
   import {
     getLaterORsByTaskType,
     getNewORsByTaskType,
   } from '@/api/task/task-operation-requirement';
   import { reactive, Ref, ref, UnwrapRef, watchEffect } from 'vue';
-  import { OperationRequirementModel, OperationType } from '@/api/operationType';
+  import { OperationRequirementModel } from '@/api/operationType';
   import { Archive } from '@vicons/ionicons5';
   import { TaskStatus, TaskType } from '@/api/task/task-types';
   import { getFileListUrl, uploadFile } from '@/plugins/firebase';
@@ -16,15 +16,15 @@
   import LogisticOtherForm from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticStep2Form/LogisitcOthersForm.vue';
   import LogisticBoxForm from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticStep2Form/LogisticBoxForm.vue';
   import LogisticAmazonForm from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticStep2Form/LogisticAmazonForm.vue';
-  import { DeliveryMethod, getLogisticTypeByDeliveryMethod } from '@/api/deliveryMethod';
+  import { DeliveryMethod, getLogisticTypeByTaskType } from '@/api/deliveryMethod';
   import { createLogistic } from '@/api/deliveryMethod/logistic-api';
 
   let currentStep = $ref(0);
   let taskType: TaskType | null = $ref(null);
   let basicInfo: any | null = $ref(null);
   const ORModels: OperationRequirementModel[] = reactive([]);
-  const deliveryOR = $computed(() => {
-    return ORModels.find((it) => it.operationType == OperationType.Delivery);
+  const haveDelivery = $computed(() => {
+    return [TaskType.AmazonTray, TaskType.NormalTray, TaskType.Transfer].includes(taskType);
   });
   const files: Ref<UnwrapRef<UploadFileInfo[]>> = ref([]);
   let loading = $ref(false);
@@ -55,11 +55,11 @@
     if (taskType != null) {
       basicInfo.operationRequirements = [...ORModels, ...getLaterORsByTaskType(taskType)];
     }
-    if (deliveryOR && logisticType != null) {
+    if (haveDelivery && logisticType != null) {
       const info: any = {
         files: [],
         boxCount: basicInfo.boxCount,
-        deliveryMethod: (deliveryOR?.value as DeliveryMethod) ?? DeliveryMethod.Others,
+        deliveryMethod: (haveDelivery?.value as DeliveryMethod) ?? DeliveryMethod.Others,
         logisticDetail: secondStepInfo,
         logisticType: logisticType,
       };
@@ -86,9 +86,7 @@
   let logisticType: LogisticType | null = $ref(null);
 
   function fillInDetails() {
-    const value = deliveryOR?.value ?? DeliveryMethod.DHL;
-    console.log(value);
-    logisticType = getLogisticTypeByDeliveryMethod(value as DeliveryMethod);
+    logisticType = getLogisticTypeByTaskType(taskType ?? TaskType.Transfer);
     currentStep++;
   }
   let secondStepInfo: any = $ref(null);
@@ -153,7 +151,7 @@
               </n-upload>
             </n-form-item-gi>
             <n-form-item-gi :span="12">
-              <template v-if="deliveryOR">
+              <template v-if="haveDelivery">
                 <n-button @click="fillInDetails" type="primary">补充物流细节</n-button>
               </template>
               <template v-else>
