@@ -1,6 +1,7 @@
 import { ComponentType, FormSchema } from '@/components/Form';
 import { generateOptionFromArray } from '@/utils/utils';
 import { canHaveLogisticMethods, DeliveryMethod, deliveryMethods } from '@/api/deliveryMethod';
+import { yesOrNo } from '@/api/operationType';
 
 export type FormField = {
   field: string;
@@ -68,6 +69,25 @@ export function getDeliveryMethodSelection(onlyWithLogistic = false): FormField[
   ];
 }
 export const deliveryMethodSelection: FormField[] = getDeliveryMethodSelection();
+
+export const commonDeliveryFields: FormField[] = [
+  {
+    field: 'deliveryAddress',
+    label: '送货地址',
+    componentProps: {
+      type: 'textarea',
+    },
+    required: true,
+  },
+  {
+    field: 'needPrice',
+    label: '需要确认报价',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(yesOrNo),
+    },
+  },
+];
 
 export function convertFormFieldToSchema(formField: FormField): FormSchema {
   const type = formField?.component ?? 'NInput';

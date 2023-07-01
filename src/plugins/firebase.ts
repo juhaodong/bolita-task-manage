@@ -42,7 +42,10 @@ export async function getFileUrlFromFileUpload(file: UploadFileInfo) {
   return await uploadFile(file.file, file.type?.split('/')[1]);
 }
 
-export async function getFileListUrl(files: UploadFileInfo[]) {
+export async function getFileListUrl(files?: UploadFileInfo[]) {
+  if (!files) {
+    return [];
+  }
   return await Promise.all(files.map(getFileUrlFromFileUpload));
 }
 

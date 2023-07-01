@@ -4,7 +4,7 @@
   </n-card>
 </template>
 <script setup lang="ts">
-  import { filesUpload, FormField } from '@/views/bolita-views/composable/form-field-type';
+  import { commonDeliveryFields, FormField } from '@/views/bolita-views/composable/form-field-type';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
 
   const schemas: FormField[] = [
@@ -24,25 +24,11 @@
       required: true,
     },
     {
-      field: 'trayCount',
-      label: '托数',
-      component: 'NInputNumber',
-      required: true,
-    },
-    {
-      field: 'deliveryAddress',
-      label: '送货地址',
-      componentProps: {
-        type: 'textarea',
-      },
-      required: true,
-    },
-    {
       field: 'totalWeight',
       label: '总重量',
       required: true,
     },
-    filesUpload,
+    ...commonDeliveryFields,
   ];
 
   const emit = defineEmits(['submit']);

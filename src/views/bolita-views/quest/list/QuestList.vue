@@ -171,7 +171,7 @@
         actions: [
           {
             label: '编辑',
-            onClick: edit.bind(null, record.id, record.operationType),
+            onClick: edit.bind(null, record),
             ifShow() {
               return record.status == QuestStatus.NotSubmit;
             },
@@ -269,10 +269,10 @@
     operationMode = 'task';
   }
 
-  function edit(id) {
+  function edit(record) {
+    currentTaskId = record.id;
+    operationMode = record.operationMode;
     showModal.value = true;
-    currentTaskId = id;
-    operationMode = 'all';
   }
 
   const loadDataTable = async () => {
@@ -290,6 +290,7 @@
   function handleEdit(record: Recordable) {
     showDetailModel = true;
     currentTaskId = record.id;
+    operationMode = record.operationMode;
   }
 
   function handleSubmit(values: Recordable) {
