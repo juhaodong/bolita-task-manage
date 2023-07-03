@@ -192,7 +192,7 @@ export function getNeededFieldByNotifyType(notifyType: NotifyType | null): any[]
     formFieldTargetCountrySelection,
     { label: '邮编', field: 'postCode' },
     formFieldFBACodeSelection,
-    { label: 'po', field: 'po' },
+    { label: 'PO', field: 'po' },
     ...commonDeliveryFields,
     ...deliveryMethodSelection,
     { label: '操作备注', field: 'operationNote' },

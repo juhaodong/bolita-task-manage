@@ -12,7 +12,7 @@
     >
       <template #tableTitle>
         <n-space>
-          <n-button type="primary" @click="addTable(NotifyType.Container)">
+          <n-button @click="addTable(NotifyType.Container)">
             <template #icon>
               <n-icon>
                 <Box20Filled />
@@ -20,7 +20,7 @@
             </template>
             新建货柜预报
           </n-button>
-          <n-button type="primary" @click="addTable(NotifyType.TrayOrBox)">
+          <n-button @click="addTable(NotifyType.TrayOrBox)">
             <template #icon>
               <n-icon>
                 <TruckDelivery />

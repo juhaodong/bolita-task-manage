@@ -8,6 +8,7 @@ export enum TaskType {
   NormalTray = '普通卡派',
   OneForSend = '一件代发',
   Return = '移仓/退货',
+  Reserve = '留仓',
 }
 
 export const taskTypes: TaskType[] = Object.values(TaskType);
