@@ -16,6 +16,7 @@ export interface FormSchema {
   giProps?: GridItemProps;
   isFull?: boolean;
   suffix?: string;
+  group?: string;
   displayCondition?: (formValue: any) => boolean;
   disableCondition?: (formValue: any) => boolean;
   onFormUpdate?: (formValue: any) => void;

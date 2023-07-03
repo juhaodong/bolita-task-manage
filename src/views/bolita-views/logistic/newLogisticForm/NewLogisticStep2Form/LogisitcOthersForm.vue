@@ -4,10 +4,11 @@
   </n-card>
 </template>
 <script setup lang="ts">
-  import { commonDeliveryFields } from '@/views/bolita-views/composable/form-field-type';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { generateOptionFromArray } from '@/utils/utils';
   import { trayTypes } from '@/api/deliveryMethod/logistic-type';
+
+  import { commonDeliveryFields } from '@/api/model/common/addressGroup';
 
   const schemas = [
     {

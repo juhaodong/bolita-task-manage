@@ -1,10 +1,8 @@
 import { ComponentType, FormSchema } from '@/components/Form';
 import { generateOptionFromArray } from '@/utils/utils';
 import { canHaveLogisticMethods, DeliveryMethod, deliveryMethods } from '@/api/deliveryMethod';
-import { yesOrNo } from '@/api/operationType';
 import { taskTypes } from '@/api/task/task-types';
-import { AddressType } from '@/api/model/common/AddressType';
-import { fbaDict, generateFbaAddress } from '@/api/model/common/FBACode';
+import { deliveryAddressDetail } from '@/api/model/common/addressGroup';
 
 export type FormField = {
   field: string;
@@ -14,6 +12,7 @@ export type FormField = {
   required?: boolean;
   component?: ComponentType;
   defaultValue?: any;
+  group?: string;
   displayCondition?: (formValue: any) => boolean;
   disableCondition?: (formValue: any) => boolean;
   onFormUpdate?: (formValue: any) => void;
@@ -75,33 +74,6 @@ export function getDeliveryMethodSelection(onlyWithLogistic = false): FormField[
 }
 export const deliveryMethodSelection: FormField[] = getDeliveryMethodSelection();
 
-export const commonDeliveryFields: FormField[] = [
-  {
-    field: 'deliveryAddress',
-    label: '送货地址',
-    componentProps: {
-      type: 'textarea',
-    },
-    required: true,
-    disableCondition(model) {
-      return model?.addressType === AddressType.AMZ;
-    },
-    onFormUpdate(value) {
-      if (value?.fbaCode) {
-        value['deliveryAddress'] = generateFbaAddress(fbaDict[value.fbaCode]);
-      }
-    },
-  },
-  {
-    field: 'needPrice',
-    label: '需要确认报价',
-    component: 'NSelect',
-    componentProps: {
-      options: generateOptionFromArray(yesOrNo),
-    },
-  },
-];
-
 export function convertFormFieldToSchema(formField: FormField): FormSchema {
   const type = formField?.component ?? 'NInput';
   const verb = ['NInput', 'NInputNumber'].includes(type) ? '输入' : '选择';
@@ -143,6 +115,7 @@ export function convertFormFieldToSchema(formField: FormField): FormSchema {
     rules: required ? [rule] : [],
     disableCondition: formField?.disableCondition,
     onFormUpdate: formField?.onFormUpdate,
+    group: formField?.group,
   };
 }
 

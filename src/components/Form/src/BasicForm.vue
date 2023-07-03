@@ -1,88 +1,94 @@
 <template>
   <n-form v-bind="getBindValue" :model="formModel" ref="formElRef">
     <n-grid v-bind="getGrid" x-gap="8">
-      <n-gi v-bind="schema.giProps" v-for="schema in getSchema" :key="schema.field">
-        <n-form-item :label="schema.label" :path="schema.field">
-          <!--标签名右侧温馨提示-->
-          <template #label v-if="schema.labelMessage">
-            {{ schema.label }}
-            <n-tooltip trigger="hover" :style="schema.labelMessageStyle">
-              <template #trigger>
-                <n-icon size="18" class="cursor-pointer text-gray-400">
-                  <QuestionCircleOutlined />
-                </n-icon>
-              </template>
-              {{ schema.labelMessage }}
-            </n-tooltip>
-          </template>
+      <template v-for="g in groupedSchema" :key="g.group">
+        <n-gi :span="24">
+          <n-h4>{{ g.group }}</n-h4>
+        </n-gi>
+        <n-gi v-bind="schema.giProps" v-for="schema in g.schema" :key="schema.field">
+          <n-form-item :label="schema.label" :path="schema.field">
+            <!--标签名右侧温馨提示-->
+            <template #label v-if="schema.labelMessage">
+              {{ schema.label }}
+              <n-tooltip trigger="hover" :style="schema.labelMessageStyle">
+                <template #trigger>
+                  <n-icon size="18" class="cursor-pointer text-gray-400">
+                    <QuestionCircleOutlined />
+                  </n-icon>
+                </template>
+                {{ schema.labelMessage }}
+              </n-tooltip>
+            </template>
 
-          <!--判断插槽-->
-          <template v-if="schema.slot">
-            <slot
-              :name="schema.slot"
-              :model="formModel"
-              :field="schema.field"
-              :value="formModel[schema.field]"
-            ></slot>
-          </template>
+            <!--判断插槽-->
+            <template v-if="schema.slot">
+              <slot
+                :name="schema.slot"
+                :model="formModel"
+                :field="schema.field"
+                :value="formModel[schema.field]"
+              ></slot>
+            </template>
 
-          <!--NCheckbox-->
-          <template v-else-if="schema.component === 'NCheckbox'">
-            <n-checkbox-group v-model:value="formModel[schema.field]">
-              <n-space>
-                <n-checkbox
-                  v-for="item in schema.componentProps.options"
-                  :key="item.value"
-                  :value="item.value"
-                  :label="item.label"
-                />
-              </n-space>
-            </n-checkbox-group>
-          </template>
+            <!--NCheckbox-->
+            <template v-else-if="schema.component === 'NCheckbox'">
+              <n-checkbox-group v-model:value="formModel[schema.field]">
+                <n-space>
+                  <n-checkbox
+                    v-for="item in schema.componentProps.options"
+                    :key="item.value"
+                    :value="item.value"
+                    :label="item.label"
+                  />
+                </n-space>
+              </n-checkbox-group>
+            </template>
 
-          <!--NRadioGroup-->
-          <template v-else-if="schema.component === 'NRadioGroup'">
-            <n-radio-group v-model:value="formModel[schema.field]">
-              <n-space>
-                <n-radio
-                  v-for="item in schema.componentProps.options"
-                  :key="item.value"
-                  :value="item.value"
-                >
-                  {{ item.label }}
-                </n-radio>
-              </n-space>
-            </n-radio-group>
-          </template>
+            <!--NRadioGroup-->
+            <template v-else-if="schema.component === 'NRadioGroup'">
+              <n-radio-group v-model:value="formModel[schema.field]">
+                <n-space>
+                  <n-radio
+                    v-for="item in schema.componentProps.options"
+                    :key="item.value"
+                    :value="item.value"
+                  >
+                    {{ item.label }}
+                  </n-radio>
+                </n-space>
+              </n-radio-group>
+            </template>
 
-          <template v-else-if="schema.component === 'NUpload'">
-            <n-upload
-              v-model:file-list="formModel[schema.field]"
+            <template v-else-if="schema.component === 'NUpload'">
+              <n-upload
+                v-model:file-list="formModel[schema.field]"
+                v-bind="getComponentProps(schema)"
+              >
+                <n-button> 上传文件 </n-button>
+              </n-upload>
+            </template>
+            <!--动态渲染表单组件-->
+            <component
+              v-else
+              :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
               v-bind="getComponentProps(schema)"
-            >
-              <n-button> 上传文件 </n-button>
-            </n-upload>
-          </template>
-          <!--动态渲染表单组件-->
-          <component
-            v-else
-            :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
-            v-bind="getComponentProps(schema)"
-            :is="schema.component"
-            v-model:value="formModel[schema.field]"
-            :class="{ isFull: schema.isFull != false && getProps.isFull }"
-          />
-          <!--组件后面的内容-->
-          <template v-if="schema.suffix">
-            <slot
-              :name="schema.suffix"
-              :model="formModel"
-              :field="schema.field"
-              :value="formModel[schema.field]"
-            ></slot>
-          </template>
-        </n-form-item>
-      </n-gi>
+              :is="schema.component"
+              v-model:value="formModel[schema.field]"
+              :class="{ isFull: schema.isFull != false && getProps.isFull }"
+            />
+            <!--组件后面的内容-->
+            <template v-if="schema.suffix">
+              <slot
+                :name="schema.suffix"
+                :model="formModel"
+                :field="schema.field"
+                :value="formModel[schema.field]"
+              ></slot>
+            </template>
+          </n-form-item>
+        </n-gi>
+      </template>
+
       <!--提交 重置 展开 收起 按钮-->
       <n-gi :span="isInline ? '' : 24" :suffix="isInline ? true : false" #="{ overflow }">
         <n-space
@@ -141,6 +147,7 @@
 
   import { isArray } from '@/utils/is';
   import { deepMerge } from '@/utils';
+  import { groupBy } from 'lodash-es';
 
   export default defineComponent({
     name: 'BasicForm',
@@ -239,6 +246,17 @@
         );
       });
 
+      const groupedSchema = computed(() => {
+        return Object.entries(groupBy(getSchema.value, 'group')).map((it) => {
+          const [index, t] = it;
+          console.log(it);
+          return {
+            group: index === 'undefined' ? '基本信息' : index,
+            schema: t,
+          };
+        });
+      });
+
       const { handleFormValues, initDefault } = useFormValues({
         defaultFormModel,
         getSchema,
@@ -316,6 +334,7 @@
         isInline,
         getComponentProps,
         unfoldToggle,
+        groupedSchema,
       };
     },
   });

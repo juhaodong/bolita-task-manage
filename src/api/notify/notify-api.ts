@@ -5,16 +5,9 @@ import { doLog } from '@/api/statusChangeLog';
 import { BasicModel } from '@/api/quest/quest-type';
 import dayjs from 'dayjs';
 import { getTasksForNotify, NotifyDetailModel } from '@/api/notify/notify-detail';
-import {
-  commonDeliveryFields,
-  deliveryMethodSelection,
-  FormField,
-  formFieldTaskTypeSelection,
-} from '@/views/bolita-views/composable/form-field-type';
+import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { formFieldUnitSelection } from '@/api/model/common/BoxOrTray';
-import { formFieldAddressTypeSelection } from '@/api/model/common/AddressType';
-import { formFieldTargetCountrySelection } from '@/api/model/common/TargetCountry';
-import { formFieldFBACodeSelection } from '@/api/model/common/FBACode';
+import { targetAddressSelectionGroup } from '@/api/model/common/addressGroup';
 
 export interface NotifyModel extends BasicModel {
   arriveMedia: NotifyType;
@@ -187,14 +180,7 @@ export function getNeededFieldByNotifyType(notifyType: NotifyType | null): any[]
     { label: '实重kg', field: 'actualWeight' },
     { label: '体积', field: 'volume' },
     { label: 'SKU', field: 'sku' },
-    formFieldTaskTypeSelection,
-    formFieldAddressTypeSelection,
-    formFieldTargetCountrySelection,
-    { label: '邮编', field: 'postCode' },
-    formFieldFBACodeSelection,
-    { label: 'PO', field: 'po' },
-    ...commonDeliveryFields,
-    ...deliveryMethodSelection,
-    { label: '操作备注', field: 'operationNote' },
+    ...targetAddressSelectionGroup,
+    { label: '操作备注', field: 'operationNote', required: false },
   ];
 }
