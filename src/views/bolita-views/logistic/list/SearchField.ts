@@ -3,7 +3,7 @@ import { salesNameList } from '@/api/sales';
 import dayjs from 'dayjs';
 import { deliveryMethods } from '@/api/deliveryMethod';
 import { generateOptionFromArray } from '@/utils/utils';
-import { arriveMedia, notifyStatusList } from '@/api/notify/notify-api';
+import { notifyStatusList, notifyType } from '@/api/notify/notify-api';
 import { warehouseList } from '@/api/warehouse';
 
 export const searchField: FormSchema[] = [
@@ -60,7 +60,7 @@ export const searchField: FormSchema[] = [
     label: '到货类型',
     componentProps: {
       placeholder: '请选择到货类型',
-      options: generateOptionFromArray(arriveMedia),
+      options: generateOptionFromArray(notifyType),
       onUpdateValue: (e: any) => {
         console.log(e);
       },

@@ -17,6 +17,8 @@ export interface FormSchema {
   isFull?: boolean;
   suffix?: string;
   displayCondition?: (formValue: any) => boolean;
+  disableCondition?: (formValue: any) => boolean;
+  onFormUpdate?: (formValue: any) => void;
 }
 
 export interface FormProps {

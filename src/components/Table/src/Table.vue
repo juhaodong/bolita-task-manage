@@ -69,11 +69,14 @@
     </div>
   </div>
   <div class="s-table">
-    <n-data-table virtual-scroll ref="tableElRef" v-bind="getBindValues" :striped="isStriped">
-      <template #[item]="data" v-for="item in Object.keys($slots)" :key="item">
-        <slot :name="item" v-bind="data"></slot>
-      </template>
-    </n-data-table>
+    <div style="overflow-x: scroll">
+      <div style="width: fit-content">
+        <n-data-table virtual-scroll ref="tableElRef" v-bind="getBindValues" :striped="true">
+          <template #[item]="data" v-for="item in Object.keys($slots)" :key="item">
+            <slot :name="item" v-bind="data"></slot>
+          </template>
+        </n-data-table> </div
+    ></div>
   </div>
 </template>
 

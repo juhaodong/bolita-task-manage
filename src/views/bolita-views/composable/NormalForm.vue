@@ -30,10 +30,10 @@
   });
 
   const [register, { submit }] = useForm({
-    gridProps: { cols: 1 },
+    gridProps: { cols: schemas.length > 8 ? 2 : 1 },
     labelWidth: 80,
-    layout: 'vertical',
-    submitButtonText: '下一步',
+    layout: 'Horizontal',
+    submitButtonText: '保存',
     showActionButtonGroup: props.showButtons,
     schemas,
   });
@@ -55,6 +55,9 @@
 
 <template>
   <BasicForm ref="form" @register="register" @submit="handleSubmit" @reset="handleReset">
+    <template #extraContent>
+      <slot name="extraContent"></slot>
+    </template>
     <slot name="extraSubmitButton" :submit="submit"></slot>
     <slot name="extraCancelButton" :cancel="cancel"></slot>
   </BasicForm>

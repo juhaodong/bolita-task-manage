@@ -1,16 +1,26 @@
 import { addDoc, collection, doc, orderBy, query, setDoc } from 'firebase/firestore';
 import { db, executeQuery, getDocContent } from '@/plugins/firebase';
-import { resultError, resultSuccess } from '../../utils/request/_util';
+import { resultError, resultSuccess } from '@/utils/request/_util';
 import { doLog } from '@/api/statusChangeLog';
 import { BasicModel } from '@/api/quest/quest-type';
 import dayjs from 'dayjs';
 import { getTasksForNotify, NotifyDetailModel } from '@/api/notify/notify-detail';
+import {
+  commonDeliveryFields,
+  deliveryMethodSelection,
+  FormField,
+  formFieldTaskTypeSelection,
+} from '@/views/bolita-views/composable/form-field-type';
+import { formFieldUnitSelection } from '@/api/model/common/BoxOrTray';
+import { formFieldAddressTypeSelection } from '@/api/model/common/AddressType';
+import { formFieldTargetCountrySelection } from '@/api/model/common/TargetCountry';
+import { formFieldFBACodeSelection } from '@/api/model/common/FBACode';
 
 export interface NotifyModel extends BasicModel {
-  questId: string;
-  arriveMedia: ArriveMediaTypes;
+  arriveMedia: NotifyType;
   arrivedCount: number;
   totalCount: number;
+  reserveTime: number;
   planArriveDateTime: number;
   status: string;
   arriveDetail: ContainerArriveDetail | TrayArriveDetail | BoxArriveDetail;
@@ -40,13 +50,10 @@ const notifyPath = 'notify';
 const ref = collection(db, notifyPath);
 
 export interface NotifyCreateDTO {
-  questId: string;
-  arriveMedia: ArriveMediaTypes;
-  warehouseId: string;
+  arriveMedia: NotifyType;
   totalCount: number;
   planArriveDateTime: number;
   arriveDetail: ContainerArriveDetail | TrayArriveDetail | BoxArriveDetail;
-  sortingLabelCount: string;
   customerId?: string;
   files?: string[];
 }
@@ -150,36 +157,44 @@ export enum NotifyStatus {
 
 export const notifyStatusList = Object.values(NotifyStatus);
 
-export enum ArriveMediaTypes {
+export enum NotifyType {
   Container = '货柜',
-  Tray = '托盘',
-  Box = '散货',
+  TrayOrBox = '托盘/散货',
 }
 
-export const arriveMedia = Object.values(ArriveMediaTypes);
+export const notifyType = Object.values(NotifyType);
 
-export function getNeededColumnsByArriveMedia(arriveMedia: ArriveMediaTypes | null) {
-  const boxField =
-    arriveMedia == ArriveMediaTypes.Box ? [{ title: '物流追踪号', key: 'trackingCode' }] : [];
-  const trayField =
-    arriveMedia == ArriveMediaTypes.Tray
-      ? [
-          { title: '托盘号（选填）', key: 'trayCode' },
-          { title: '托盘长度', key: 'trayLength' },
-          { title: '托盘宽度', key: 'trayWidth' },
-          { title: '托盘高度', key: 'trayHeight' },
-        ]
-      : [];
+export function getNeededColumnByNotifyType(notifyType: NotifyType | null) {
+  return getNeededFieldByNotifyType(notifyType).map((it) => {
+    return {
+      title: it.label,
+      key: it.field,
+    };
+  });
+}
+
+export function getNeededFieldByNotifyType(notifyType: NotifyType | null): any[] {
+  const boxField: FormField[] =
+    notifyType == NotifyType.TrayOrBox ? [{ label: '快递单号', field: 'trackingCode' }] : [];
   return [
-    { title: '件数', key: 'count' },
-    { title: '分拣码', key: 'sortCode' },
+    { label: '分拣标识', field: 'sortCode' },
     ...boxField,
-    ...trayField,
-    { title: '实重', key: 'actualWeight' },
-    { title: '体积', key: 'volume' },
-    { title: '长', key: 'length' },
-    { title: '宽', key: 'width' },
-    { title: '高', key: 'height' },
-    { title: 'SKU', key: 'sku' },
+    formFieldUnitSelection,
+    { label: '数量', field: 'count' },
+    { label: '长', field: 'length' },
+    { label: '宽', field: 'width' },
+    { label: '高', field: 'height' },
+    { label: '实重kg', field: 'actualWeight' },
+    { label: '体积', field: 'volume' },
+    { label: 'SKU', field: 'sku' },
+    formFieldTaskTypeSelection,
+    formFieldAddressTypeSelection,
+    formFieldTargetCountrySelection,
+    { label: '邮编', field: 'postCode' },
+    formFieldFBACodeSelection,
+    { label: 'po', field: 'po' },
+    ...commonDeliveryFields,
+    ...deliveryMethodSelection,
+    { label: '操作备注', field: 'operationNote' },
   ];
 }

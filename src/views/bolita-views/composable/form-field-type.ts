@@ -2,6 +2,9 @@ import { ComponentType, FormSchema } from '@/components/Form';
 import { generateOptionFromArray } from '@/utils/utils';
 import { canHaveLogisticMethods, DeliveryMethod, deliveryMethods } from '@/api/deliveryMethod';
 import { yesOrNo } from '@/api/operationType';
+import { taskTypes } from '@/api/task/task-types';
+import { AddressType } from '@/api/model/common/AddressType';
+import { fbaDict, generateFbaAddress } from '@/api/model/common/FBACode';
 
 export type FormField = {
   field: string;
@@ -12,6 +15,8 @@ export type FormField = {
   component?: ComponentType;
   defaultValue?: any;
   displayCondition?: (formValue: any) => boolean;
+  disableCondition?: (formValue: any) => boolean;
+  onFormUpdate?: (formValue: any) => void;
 };
 
 export function getFilesUploadFormField(key = 'files', required = true): FormField {
@@ -78,6 +83,15 @@ export const commonDeliveryFields: FormField[] = [
       type: 'textarea',
     },
     required: true,
+    disableCondition(model) {
+      return model?.addressType === AddressType.AMZ;
+    },
+    onFormUpdate(value) {
+      if (value?.fbaCode) {
+        value['deliveryAddress'] = generateFbaAddress(fbaDict[value.fbaCode]);
+        console.log(value);
+      }
+    },
   },
   {
     field: 'needPrice',
@@ -128,5 +142,16 @@ export function convertFormFieldToSchema(formField: FormField): FormSchema {
     label: formField.label,
     displayCondition: formField?.displayCondition,
     rules: required ? [rule] : [],
+    disableCondition: formField?.disableCondition,
+    onFormUpdate: formField?.onFormUpdate,
   };
 }
+
+export const formFieldTaskTypeSelection: FormField = {
+  label: '操作类型',
+  field: 'taskType',
+  component: 'NSelect',
+  componentProps: {
+    options: generateOptionFromArray(taskTypes),
+  },
+};

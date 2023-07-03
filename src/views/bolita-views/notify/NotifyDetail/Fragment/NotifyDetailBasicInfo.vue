@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { watchEffect } from 'vue';
-  import { ArriveMediaTypes, getNotifyById } from '@/api/notify/notify-api';
+  import { getNotifyById, NotifyType } from '@/api/notify/notify-api';
   import dayjs from 'dayjs';
 
   interface Props {
@@ -47,7 +47,7 @@
       {{ notifyDetail?.note || '-' }}
     </n-descriptions-item>
   </n-descriptions>
-  <template v-if="notifyDetail?.arriveMedia === ArriveMediaTypes.Container">
+  <template v-if="notifyDetail?.arriveMedia === NotifyType.Container">
     <div class="mt-8">
       <n-h4>货柜信息</n-h4>
       <n-descriptions bordered :column="2" label-placement="top">
@@ -66,7 +66,7 @@
       </n-descriptions>
     </div>
   </template>
-  <template v-if="notifyDetail?.arriveMedia === ArriveMediaTypes.Tray">
+  <template v-if="notifyDetail?.arriveMedia === NotifyType.TrayOrBox">
     <div class="mt-8">
       <n-h4>托盘信息</n-h4>
       <n-descriptions bordered :column="2" label-placement="top">
@@ -88,7 +88,7 @@
       </n-descriptions>
     </div>
   </template>
-  <template v-if="notifyDetail?.arriveMedia === ArriveMediaTypes.Box">
+  <template v-if="notifyDetail?.arriveMedia === NotifyType.Box">
     <div class="mt-8">
       <n-h4>散货信息</n-h4>
       <n-descriptions bordered :column="2" label-placement="top">

@@ -1,10 +1,5 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <BasicForm @register="register" @submit="handleSubmit" @reset="handleReset">
-      <template #statusSlot="{ model, field }">
-        <n-input v-model:value="model[field]" />
-      </template>
-    </BasicForm>
     <div class="my-2"></div>
     <BasicTable
       :columns="columns"
@@ -17,21 +12,21 @@
     >
       <template #tableTitle>
         <n-space>
-          <n-button type="primary" @click="addTable">
+          <n-button type="primary" @click="addTable(NotifyType.Container)">
             <template #icon>
               <n-icon>
-                <PlusOutlined />
+                <Box20Filled />
               </n-icon>
             </template>
-            新建
+            新建货柜预报
           </n-button>
-          <n-button type="default" @click="showScanInput">
+          <n-button type="primary" @click="addTable(NotifyType.TrayOrBox)">
             <template #icon>
               <n-icon>
-                <ScanOutlined />
+                <TruckDelivery />
               </n-icon>
             </template>
-            扫描
+            新建托盘/散包裹预报
           </n-button>
         </n-space>
       </template>
@@ -45,143 +40,40 @@
       />
     </n-modal>
 
-    <n-modal v-model:show="showModal" :show-icon="false" preset="dialog" title="新建到货预报">
-      <notify-form-index @submit="createNewNotify" />
+    <n-modal
+      v-model:show="showModal"
+      :show-icon="false"
+      preset="card"
+      title="新建到货预报"
+      style="width: 90%; min-width: 600px; max-width: 1200px"
+    >
+      <notify-form-index :type="notifyType" @submit="createNewNotify" />
     </n-modal>
   </n-card>
 </template>
 
 <script lang="ts" setup>
   import { h, reactive, ref } from 'vue';
-  // import { useMessage } from 'naive-ui';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { BasicForm, FormSchema, useForm } from '@/components/Form';
   import { columns } from './columns';
-  import { PlusOutlined, ScanOutlined } from '@vicons/antd';
+  import { Box20Filled } from '@vicons/fluent';
+  import { TruckDelivery } from '@vicons/tabler';
   import {
-    arriveMedia,
     changeNotifyStatus,
     createNotify,
     getNotifyList,
-    NotifyModel,
+    NotifyCreateDTO,
     NotifyStatus,
-    notifyStatusList,
+    NotifyType,
   } from '@/api/notify/notify-api';
-  import { salesNameList } from '@/api/sales';
-  import { deliveryMethods } from '@/api/deliveryMethod';
-  import { warehouseList } from '@/api/warehouse';
-  import dayjs from 'dayjs';
   import NotifyFormIndex from '@/views/bolita-views/notify/NotifyFormPage/NotifyFormIndex.vue';
-  import { generateOptionFromArray, handleRequest } from '@/utils/utils';
+  import { handleRequest } from '@/utils/utils';
   import { useUserStore } from '@/store/modules/user';
   import NotifyDetailPage from '@/views/bolita-views/notify/NotifyDetail/NotifyDetailPage.vue';
   import { $ref } from 'vue/macros';
   import { PermissionEnums } from '@/api/user/baseUser';
 
-  const schemas: FormSchema[] = [
-    {
-      field: 'salesName',
-      component: 'NSelect',
-      label: '负责人',
-      componentProps: {
-        placeholder: '请选择负责人',
-        options: salesNameList.map((it) => {
-          return {
-            value: it,
-            label: it,
-          };
-        }),
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
-      },
-    },
-    {
-      field: 'planArriveDate',
-      component: 'NDatePicker',
-      label: '预约时间',
-      defaultValue: dayjs().valueOf(),
-      componentProps: {
-        type: 'date',
-        clearable: true,
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
-      },
-    },
-    {
-      field: 'deliveryMethod',
-      component: 'NSelect',
-      label: '物流渠道',
-      componentProps: {
-        placeholder: '请选择物流渠道',
-        options: deliveryMethods.map((it) => {
-          return {
-            value: it,
-            label: it,
-          };
-        }),
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
-      },
-    },
-    {
-      field: 'arriveMedia',
-      component: 'NSelect',
-      label: '到货类型',
-      componentProps: {
-        placeholder: '请选择到货类型',
-        options: generateOptionFromArray(arriveMedia),
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
-      },
-    },
-
-    {
-      field: 'customerId',
-      component: 'NInput',
-      label: '客户代码',
-      componentProps: {
-        placeholder: '请输入客户代码',
-      },
-    },
-    {
-      field: 'arriveWarehouseName',
-      component: 'NSelect',
-      label: '到货仓库',
-      componentProps: {
-        placeholder: '请选择到货仓库',
-        options: warehouseList.map((it) => {
-          return {
-            value: it,
-            label: it,
-          };
-        }),
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
-      },
-    },
-    {
-      field: 'status',
-      component: 'NSelect',
-      label: '状态',
-      componentProps: {
-        placeholder: '状态',
-        options: notifyStatusList.map((it) => {
-          return {
-            value: it,
-            label: it,
-          };
-        }),
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
-      },
-    },
-  ];
+  let notifyType: NotifyType = $ref(NotifyType.Container);
 
   const actionRef = ref();
   let showDetailModal = $ref(false);
@@ -237,13 +129,8 @@
     },
   });
 
-  const [register, {}] = useForm({
-    gridProps: { cols: '1 s:1 m:2 l:3 xl:4 2xl:4' },
-    labelWidth: 80,
-    schemas,
-  });
-
-  function addTable() {
+  function addTable(type: NotifyType) {
+    notifyType = type;
     showModal.value = true;
   }
 
@@ -259,17 +146,12 @@
   }
   const user = useUserStore();
   async function createNewNotify(notifyInfo) {
-    const info: NotifyModel = {
+    const info: NotifyCreateDTO = {
+      files: [],
       arriveDetail: notifyInfo.arriveDetail,
       arriveMedia: notifyInfo.arriveMedia,
-      arriveWarehouseId: notifyInfo.arriveWarehouseId,
-      arrivedCount: 0,
       customerId: user.info.id,
-      note: notifyInfo.arriveDetail.note ?? '',
       planArriveDateTime: notifyInfo.arriveDetail.planArriveDateTime,
-      sortingLabelCount: notifyInfo.arriveDetail.sortingLabelCount,
-      status: NotifyStatus.NotSubmit,
-      taskList: notifyInfo.taskList,
       totalCount: notifyInfo.totalCount,
     };
     const res = await createNotify(info);
@@ -314,21 +196,6 @@
       },
       onNegativeClick() {},
     });
-  }
-
-  function handleSubmit(values: Recordable) {
-    console.log(values);
-    reloadTable();
-  }
-
-  function handleReset(values: Recordable) {
-    console.log(values);
-  }
-
-  let scanModal = $ref(false);
-  let scanInput = $ref('');
-  function showScanInput() {
-    scanModal = true;
   }
 </script>
 

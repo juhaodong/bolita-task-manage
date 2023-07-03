@@ -64,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ArriveMediaTypes, getNotifyById, NotifyStatus } from '@/api/notify/notify-api';
+  import { getNotifyById, NotifyStatus, NotifyType } from '@/api/notify/notify-api';
   import { computed, h, Ref, ref, watchEffect } from 'vue';
   import { NButton } from 'naive-ui';
   import { Archive } from '@vicons/ionicons5';
@@ -117,9 +117,9 @@
   let editingTaskId = $ref('');
   const columns = computed(() => {
     const boxField =
-      arriveMedia == ArriveMediaTypes.Box ? [{ title: '物流追踪号', key: 'trackingCode' }] : [];
+      arriveMedia == NotifyType.Box ? [{ title: '物流追踪号', key: 'trackingCode' }] : [];
     const trayField =
-      arriveMedia == ArriveMediaTypes.Tray
+      arriveMedia == NotifyType.TrayOrBox
         ? [
             { title: '托盘号（选填）', key: 'trayCode' },
             { title: '托盘长度', key: 'trayLength' },
@@ -169,7 +169,7 @@
     ];
   });
 
-  const arriveMedia: ArriveMediaTypes | null = $computed(() => {
+  const arriveMedia: NotifyType | null = $computed(() => {
     return notifyDetail?.arriveMedia;
   });
   const props = defineProps({ notifyId: String || null });

@@ -1,76 +1,34 @@
 <script setup lang="ts">
   import { BasicTable, TableAction } from '@/components/Table';
-  import { computed, h, reactive, ref, watchEffect } from 'vue';
+  import { computed, h, reactive, ref } from 'vue';
   import {
-    ArriveMediaTypes,
-    getNeededColumnsByArriveMedia,
-    getNotifyById,
-    NotifyStatus,
+    getNeededColumnByNotifyType,
+    getNeededFieldByNotifyType,
+    NotifyType,
   } from '@/api/notify/notify-api';
   import { NButton } from 'naive-ui';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
-  import { handleRequest, toastSuccess } from '@/utils/utils';
-  import {
-    addNotifyDetail,
-    deleteDetailForNotify,
-    getTasksForNotify,
-    NotifyDetailModel,
-  } from '@/api/notify/notify-detail';
+  import { toastSuccess } from '@/utils/utils';
+  import { NotifyDetailModel } from '@/api/notify/notify-detail';
   import { Archive } from '@vicons/ionicons5';
   import dayjs from 'dayjs';
   import xlsx from 'json-as-xlsx';
   import readXlsxFile from 'read-excel-file';
   import { $ref } from 'vue/macros';
 
-  let notifyDetail: any | null = $ref(null);
   const columns = computed(() => {
-    const list = getNeededColumnsByArriveMedia(arriveMedia);
-    return [
-      {
-        title: '到货状态',
-        key: 'arrived',
-        render(row) {
-          return h('div', [
-            h(
-              NButton,
-              {
-                type: (row.arrivedCount ?? 0) >= row.count ? 'success' : 'default',
-                disabled: notifyDetail?.status !== NotifyStatus.WaitFroArrive,
-                onClick() {},
-              },
-              (row.arrivedCount ?? 0) + '/' + row.count
-            ),
-          ]);
-        },
-      },
-      ...list,
-    ];
+    const list = getNeededColumnByNotifyType(props.notifyType);
+    return [...list];
   });
+  const notifyStore = reactive<any[]>([]);
 
   const addFormField = computed(() => {
-    return getNeededColumnsByArriveMedia(arriveMedia).map((it) => ({
-      label: it.title,
-      field: it.key,
-    }));
+    return getNeededFieldByNotifyType(props.notifyType);
   });
 
-  const totalRecordCount = computed(() => {
-    return notifyDetail?.taskList?.reduce((sum, i) => sum + parseInt(i.count), 0) ?? 0;
-  });
-  const arriveMedia: ArriveMediaTypes | null = $computed(() => {
-    return notifyDetail?.arriveMedia;
-  });
-  watchEffect(async () => {
-    await reload();
-  });
-  async function reload() {
-    if (props.notifyId != null) {
-      notifyDetail = await getNotifyById(props.notifyId);
-    }
-  }
   interface Props {
-    notifyId: string;
-    editable: boolean;
+    editable?: boolean;
+    notifyType: NotifyType;
   }
   const props = defineProps<Props>();
   const actionColumn = props.editable
@@ -88,12 +46,7 @@
                 popConfirm: {
                   title: '您是否确定删除此条记录?',
                   async confirm() {
-                    const res = await deleteDetailForNotify(record.id, props.notifyId);
-                    await handleRequest(res, () => {
-                      tableReload();
-                      reload();
-                      toastSuccess('删除成功');
-                    });
+                    notifyStore.filter((it) => it.tempId != record.tempId);
                   },
                 },
               },
@@ -107,7 +60,7 @@
     : null;
   let showAdd = $ref(false);
   const loadDataTable = async () => {
-    return await getTasksForNotify(props.notifyId);
+    return notifyStore;
   };
   const actionRef: null | any = ref(null);
 
@@ -115,20 +68,13 @@
     actionRef.value?.reload();
   }
 
-  const canGoNext = computed(() => {
-    return (
-      totalRecordCount.value == notifyDetail?.totalCount &&
-      notifyDetail?.taskList.length == notifyDetail?.sortingLabelCount
-    );
-  });
+  let tempId = 0;
   async function addNewDetailNotify(detailInfo) {
-    const res = await addNotifyDetail(detailInfo, props.notifyId);
-    await handleRequest(res, () => {
-      toastSuccess('添加成功');
-      showAdd = false;
-      tableReload();
-      reload();
-    });
+    detailInfo.tempId = tempId++;
+    notifyStore.push(detailInfo);
+    toastSuccess('添加成功');
+    showAdd = false;
+    tableReload();
   }
 
   const emit = defineEmits(['next']);
@@ -221,8 +167,8 @@
   }
   let step = $ref(0);
   function downloadTemplate() {
-    const content = generateNotifyTaskModel(notifyDetail?.sortingLabelCount ?? 5);
-    const list = getNeededColumnsByArriveMedia(arriveMedia).map((it) => ({
+    const content = generateNotifyTaskModel(5);
+    const list = getNeededColumnByNotifyType(props.notifyType).map((it) => ({
       label: it.title,
       value: it.key,
     }));
@@ -239,12 +185,6 @@
     };
     xlsx(data, setting);
   }
-  const canUpload = computed(() => {
-    return (
-      notifyDetail?.sortingLabelCount == notifyDetail?.taskList.length &&
-      notifyDetail?.totalCount == totalRecordCount.value
-    );
-  });
 </script>
 
 <template>
@@ -254,8 +194,8 @@
       :request="loadDataTable"
       :row-key="(row) => row.id"
       ref="actionRef"
+      scroll-x="2500px"
       :actionColumn="actionColumn"
-      :scroll-x="1090"
     >
       <template #tableTitle v-if="editable">
         <n-space>
@@ -265,28 +205,9 @@
       </template>
       <template #toolbar> </template>
     </BasicTable>
-    <n-space v-if="editable">
-      <n-tag
-        size="large"
-        :type="totalRecordCount == notifyDetail?.totalCount ? 'success' : 'warning'"
-      >
-        总件数: {{ totalRecordCount }}/{{ notifyDetail?.totalCount }}
-      </n-tag>
-      <n-tag
-        size="large"
-        :type="
-          notifyDetail?.taskList.length == notifyDetail?.sortingLabelCount ? 'success' : 'warning'
-        "
-      >
-        分拣码数量: {{ notifyDetail?.taskList.length }}/{{ notifyDetail?.sortingLabelCount }}
-      </n-tag>
-      <n-button v-if="editable" @click="emit('next')" :disabled="!canGoNext" type="success">
-        下一步
-      </n-button>
-    </n-space>
   </n-space>
 
-  <n-modal preset="dialog" title="添加预报详情" v-model:show="showAdd">
+  <n-modal preset="card" style="max-width: 700px" title="添加预报详情" v-model:show="showAdd">
     <n-card>
       <normal-form :form-fields="addFormField" @submit="addNewDetailNotify" />
     </n-card>

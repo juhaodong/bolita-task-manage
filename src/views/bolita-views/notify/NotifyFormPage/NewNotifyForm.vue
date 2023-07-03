@@ -6,7 +6,7 @@
 <script setup lang="ts">
   import { FormSchema, useForm } from '@/components/Form';
   import { generateOptionFromArray } from '@/utils/utils';
-  import { arriveMedia } from '@/api/notify/notify-api';
+  import { notifyType } from '@/api/notify/notify-api';
   import { listUser, PermissionEnums } from '@/api/user/baseUser';
   import { ref } from 'vue';
 
@@ -31,7 +31,7 @@
       label: '入库类型',
       componentProps: {
         placeholder: '请选择入库类型',
-        options: generateOptionFromArray(arriveMedia),
+        options: generateOptionFromArray(notifyType),
         onUpdateValue: (e: any) => {
           console.log(e);
         },

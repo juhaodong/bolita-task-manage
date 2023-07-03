@@ -1,12 +1,8 @@
 <template>
   <n-form v-bind="getBindValue" :model="formModel" ref="formElRef">
-    <n-grid v-bind="getGrid">
+    <n-grid v-bind="getGrid" x-gap="8">
       <n-gi v-bind="schema.giProps" v-for="schema in getSchema" :key="schema.field">
-        <n-form-item
-          v-if="schema?.displayCondition ? schema?.displayCondition(formModel) : true"
-          :label="schema.label"
-          :path="schema.field"
-        >
+        <n-form-item :label="schema.label" :path="schema.field">
           <!--标签名右侧温馨提示-->
           <template #label v-if="schema.labelMessage">
             {{ schema.label }}
@@ -70,6 +66,7 @@
           <!--动态渲染表单组件-->
           <component
             v-else
+            :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
             v-bind="getComponentProps(schema)"
             :is="schema.component"
             v-model:value="formModel[schema.field]"
@@ -142,7 +139,7 @@
   import type { GridProps } from 'naive-ui/lib/grid';
   import type { FormActionType, FormProps, FormSchema } from './types/form';
 
-  import { isArray } from '@/utils/is/index';
+  import { isArray } from '@/utils/is';
   import { deepMerge } from '@/utils';
 
   export default defineComponent({
@@ -237,7 +234,9 @@
             span: 1,
           };
         }
-        return schemas as FormSchema[];
+        return (schemas as FormSchema[]).filter(
+          (it) => !it?.displayCondition || it.displayCondition(formModel)
+        );
       });
 
       const { handleFormValues, initDefault } = useFormValues({
@@ -289,6 +288,14 @@
         }
       );
 
+      watch(formModel, (value) => {
+        const notify = getSchema.value.filter((it) => it?.onFormUpdate);
+        notify.forEach((it) => {
+          if (it) {
+            it?.onFormUpdate(value);
+          }
+        });
+      });
       onMounted(() => {
         initDefault();
         emit('register', formActionType);
