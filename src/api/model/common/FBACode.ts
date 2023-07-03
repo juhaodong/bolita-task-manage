@@ -20,7 +20,7 @@ const fbaCode: FBAAddress[] = [
   {
     code: 'EDE5',
     state: 'Werne',
-    address: 'Werne Wahrbrink 23 59368 Werne',
+    address: 'Werne Wahrbrink 23',
     postCode: '59368',
     countryCode: 'DE',
   },

@@ -89,7 +89,6 @@ export const commonDeliveryFields: FormField[] = [
     onFormUpdate(value) {
       if (value?.fbaCode) {
         value['deliveryAddress'] = generateFbaAddress(fbaDict[value.fbaCode]);
-        console.log(value);
       }
     },
   },
