@@ -11,6 +11,9 @@ function hashCode(str) {
 }
 
 function pickColor(str) {
+  return `hsl(${hashCode(str) % 360}, 100%, 95%)`;
+}
+function pickBorderColor(str) {
   return `hsl(${hashCode(str) % 360}, 100%, 80%)`;
 }
 
@@ -21,7 +24,12 @@ export const statusColumn = {
     return h(
       'div',
       {
-        style: 'padding:4px; border-radius:4px;' + 'background:' + pickColor(record.status),
+        style: {
+          fontSize: '14px',
+          padding: '2px 4px',
+          background: pickColor(record.status),
+          border: '1px solid ' + pickBorderColor(record.status),
+        },
       },
       record.status
     );

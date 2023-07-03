@@ -14,7 +14,6 @@ export interface NotifyModel extends BasicModel {
   planArriveDateTime: number;
   status: string;
   arriveDetail: ContainerArriveDetail | TrayArriveDetail | BoxArriveDetail;
-  sortingLabelCount: string;
   taskList: NotifyDetailModel[];
 }
 
@@ -62,7 +61,6 @@ export async function createNotify(notifyInfo: NotifyCreateDTO) {
       customerId: '',
       note: '',
       planArriveDateTime: 0,
-      sortingLabelCount: '',
       status: NotifyStatus.NotSubmit,
       totalCount: 0,
       taskList: [],

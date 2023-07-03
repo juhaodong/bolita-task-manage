@@ -1,6 +1,8 @@
 import { DataTableColumns } from 'naive-ui';
 import { h } from 'vue';
 import dayjs from 'dayjs';
+import { statusColumn } from '@/views/bolita-views/composable/useableColumns';
+import { TaskModel } from '@/api/task/task-types';
 
 export const columns: DataTableColumns<TaskModel> = [
   {
@@ -24,19 +26,13 @@ export const columns: DataTableColumns<TaskModel> = [
     key: 'taskType',
     width: 100,
   },
+  statusColumn,
   {
-    title: '状态',
-    key: 'status',
-  },
-  {
-    title: '操作日期',
-    key: 'operateTime',
+    title: '下单日期',
+    key: 'createTimestamp',
     width: 110,
     render(record) {
-      return h(
-        'div',
-        record.operateTime && dayjs(record.operateTime).format('YYYY-MM-DD HH:mm:ss')
-      );
+      return h('div', record.operateTime && dayjs(record.operateTime).format('YYYY-MM-DD'));
     },
   },
   {
@@ -49,9 +45,5 @@ export const columns: DataTableColumns<TaskModel> = [
     render(record) {
       return h('div', record.completionRate + '%');
     },
-  },
-  {
-    title: '备注',
-    key: 'note',
   },
 ];

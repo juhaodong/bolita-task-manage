@@ -5,8 +5,6 @@
 </template>
 <script setup lang="ts">
   import dayjs from 'dayjs';
-  import { generateOptionFromArray } from '@/utils/utils';
-  import { deliveryMethods } from '@/api/deliveryMethod';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
 
@@ -16,24 +14,6 @@
   defineProps<Props>();
 
   const schemas: FormField[] = [
-    {
-      field: 'deliveryMethod',
-      component: 'NSelect',
-      label: '物流渠道',
-      componentProps: {
-        options: generateOptionFromArray(deliveryMethods),
-      },
-    },
-    {
-      field: 'sortingLabelCount',
-      component: 'NInputNumber',
-      label: 'SKU分拣标签数量',
-      componentProps: {
-        type: 'number',
-        step: 1,
-        precision: 0,
-      },
-    },
     {
       field: 'planArriveDateTime',
       component: 'NDatePicker',

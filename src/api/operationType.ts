@@ -65,12 +65,17 @@ export type OperationRequirementModel = {
 
 export const laterFilledInOperationRequirement = [
   OperationType.ShouldChangeTray,
-  OperationType.OrderCancel,
-  OperationType.MakeBoxStrong,
-  OperationType.CoverLogo,
+  OperationType.OneUseTray,
+  OperationType.EuropeStandardTray,
   OperationType.PaperBox,
   OperationType.CourierBag,
   OperationType.OtherConsumables,
+  OperationType.MakeTray,
+  OperationType.TakePic,
+  OperationType.OrderCancel,
+  OperationType.MakeBoxStrong,
+  OperationType.CoverLogo,
+  OperationType.Destruction,
   OperationType.NoLogoSelect,
 ];
 

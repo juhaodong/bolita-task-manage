@@ -1,10 +1,5 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <BasicForm @register="register" @reset="handleReset" @submit="handleSubmit">
-      <template #statusSlot="{ model, field }">
-        <n-input v-model:value="model[field]" />
-      </template>
-    </BasicForm>
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
@@ -25,10 +20,6 @@
           新建
         </n-button>
       </template>
-
-      <template #toolbar>
-        <n-button type="primary" @click="reloadTable">刷新数据</n-button>
-      </template>
     </BasicTable>
 
     <n-modal v-model:show="showModal" :show-icon="false" preset="dialog" title="新建索赔">
@@ -38,10 +29,8 @@
 </template>
 
 <script lang="ts" setup>
-  import { h, reactive, ref } from 'vue';
-  // import { useMessage } from 'naive-ui';
+  import { h, reactive, ref } from 'vue'; // import { useMessage } from 'naive-ui';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { BasicForm } from '@/components/Form';
   import { columns } from './columns';
   import { PlusOutlined } from '@vicons/antd';
   import { useRouter } from 'vue-router';
@@ -56,16 +45,6 @@
 
   const showModal = ref(false);
   const formBtnLoading = ref(false);
-  const formParams = reactive({
-    name: '',
-    address: '',
-    date: null,
-  });
-
-  const params = ref({
-    pageSize: 5,
-    name: 'xiaoMa',
-  });
 
   const actionColumn = reactive({
     width: 220,
@@ -139,23 +118,6 @@
     });
   }
 
-  function confirmForm(e) {
-    e.preventDefault();
-    formBtnLoading.value = true;
-    formRef.value.validate((errors) => {
-      if (!errors) {
-        window['$message'].success('新建成功');
-        setTimeout(() => {
-          showModal.value = false;
-          reloadTable();
-        });
-      } else {
-        window['$message'].error('请填写完整信息');
-      }
-      formBtnLoading.value = false;
-    });
-  }
-
   function handleEdit(record: Recordable) {
     console.log('点击了编辑', record);
     router.push({ name: 'basic-info', params: { id: record.id } });
@@ -163,15 +125,6 @@
 
   function handleDelete() {
     window['$message'].info('点击了审核');
-  }
-
-  function handleSubmit(values: Recordable) {
-    console.log(values);
-    reloadTable();
-  }
-
-  function handleReset(values: Recordable) {
-    console.log(values);
   }
 </script>
 

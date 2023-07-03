@@ -10,7 +10,7 @@
 
   import { taskTypes } from '@/api/task/task-types';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
-  import { FormField } from '@/views/bolita-views/composable/form-field-type';
+  import { filesUpload, FormField } from '@/views/bolita-views/composable/form-field-type';
 
   interface Props {
     defaultBoxCount: number;
@@ -19,6 +19,19 @@
   const props = defineProps<Props>();
   let warehouseList = ref<any[]>([]);
   const schemas: FormField[] = [
+    {
+      field: 'notifyId',
+      label: '预报ID',
+      required: false,
+    },
+    {
+      field: 'taskDesc',
+      label: '任务描述',
+      required: false,
+      componentProps: {
+        type: 'textarea',
+      },
+    },
     {
       field: 'boxCount',
       labelMessage: '请在此填入本次预计到达的总箱数，如果是货柜，请填写货柜内的总箱数',
@@ -57,6 +70,7 @@
       label: '业务链接',
       required: false,
     },
+    filesUpload,
   ];
 
   const emit = defineEmits(['submit']);
