@@ -2,7 +2,7 @@ import { ComponentType, FormSchema } from '@/components/Form';
 import { generateOptionFromArray } from '@/utils/utils';
 import { canHaveLogisticMethods, DeliveryMethod, deliveryMethods } from '@/api/deliveryMethod';
 import { taskTypes } from '@/api/task/task-types';
-import { deliveryAddressDetail } from '@/api/model/common/addressGroup';
+import { BasicColumn } from '@/components/Table';
 
 export type FormField = {
   field: string;
@@ -13,6 +13,7 @@ export type FormField = {
   component?: ComponentType;
   defaultValue?: any;
   group?: string;
+  meta?: any;
   displayCondition?: (formValue: any) => boolean;
   disableCondition?: (formValue: any) => boolean;
   onFormUpdate?: (formValue: any) => void;
@@ -127,3 +128,10 @@ export const formFieldTaskTypeSelection: FormField = {
     options: generateOptionFromArray(taskTypes),
   },
 };
+
+export function convertFieldToColumn(field: FormField): BasicColumn {
+  return {
+    title: field.label,
+    key: field.field,
+  };
+}

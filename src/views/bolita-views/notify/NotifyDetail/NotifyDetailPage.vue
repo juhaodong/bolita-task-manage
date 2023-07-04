@@ -7,7 +7,7 @@
     @close="emit('close')"
     closable
   >
-    <n-tabs type="line" animated class="mt-4">
+    <n-tabs v-model:value="currentTab" type="line" animated class="mt-4">
       <n-tab-pane name="信息">
         <notify-detail-basic-info :notify-id="notifyId" />
       </n-tab-pane>
@@ -60,12 +60,17 @@
         </n-form>
       </n-card>
     </n-modal>
+    <template v-if="currentTab == '信息'" #action>
+      <n-space>
+        <n-button type="primary">打印任务单</n-button>
+      </n-space>
+    </template>
   </n-card>
 </template>
 
 <script setup lang="ts">
   import { getNotifyById } from '@/api/notify/notify-api';
-  import { computed, Ref, ref, watchEffect } from 'vue';
+  import { computed, Ref, ref, watch, watchEffect } from 'vue';
   import { NButton } from 'naive-ui';
   import { Archive } from '@vicons/ionicons5';
   import { handleRequest, toastSuccess } from '@/utils/utils';
@@ -82,6 +87,11 @@
     files: [],
   });
 
+  let currentTab = ref('信息');
+
+  watch(currentTab, () => {
+    console.log(currentTab);
+  });
   const rules = ref({
     arriveCount: {
       required: true,

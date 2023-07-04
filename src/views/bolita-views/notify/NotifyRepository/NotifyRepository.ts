@@ -1,18 +1,16 @@
 import {
+  convertFieldToColumn,
   FormField,
   formFieldTaskTypeSelection,
 } from '@/views/bolita-views/composable/form-field-type';
 import { formFieldUnitSelection } from '@/api/model/common/BoxOrTray';
-import { targetAddressSelectionGroup } from '@/api/model/common/addressGroup';
+import { getTargetAddressSelectionGroup } from '@/api/model/common/addressGroup';
 import { NotifyType } from '@/api/notify/notify-api';
 
 export function getNeededColumnByNotifyType(notifyType: NotifyType | null) {
-  return getNeededFieldByNotifyType(notifyType).map((it) => {
-    return {
-      title: it.label,
-      key: it.field,
-    };
-  });
+  return getNeededFieldByNotifyType(notifyType)
+    .filter((it) => it?.meta != 'detail')
+    .map(convertFieldToColumn);
 }
 
 export function getNeededFieldByNotifyType(notifyType: NotifyType | null): any[] {
@@ -61,7 +59,7 @@ export function getNeededFieldByNotifyType(notifyType: NotifyType | null): any[]
       field: 'sku',
     },
     formFieldTaskTypeSelection,
-    ...targetAddressSelectionGroup,
+    ...getTargetAddressSelectionGroup(),
     {
       label: '操作备注',
       field: 'operationNote',
@@ -101,5 +99,5 @@ export function getTaskColumns() {
     { label: '实际到货数量', field: 'arrivedCount' },
     { label: '备注', field: 'note' },
     { label: '库位', field: 'storagePosition' },
-  ];
+  ].map(convertFieldToColumn);
 }
