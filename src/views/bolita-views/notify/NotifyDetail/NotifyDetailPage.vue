@@ -3,16 +3,16 @@
     title="到货预报详情"
     v-if="notifyId"
     size="small"
-    style="max-width: 800px"
+    style="width: 90%; min-width: 600px; max-width: 1200px"
     @close="emit('close')"
     closable
   >
     <n-tabs v-model:value="currentTab" type="line" animated class="mt-4">
       <n-tab-pane name="信息">
-        <notify-detail-basic-info :notify-id="notifyId" />
+        <notify-detail-basic-info @task-update="updateTaskList" :notify-id="notifyId" />
       </n-tab-pane>
       <n-tab-pane name="到货详情列表">
-        <div class="bg-green-100" style="overflow-x: scroll">
+        <div style="overflow-x: scroll">
           <div style="width: fit-content">
             <n-data-table
               :row-class-name="(row) => (row.arrivedCount == row.count ? 'bg-green-100' : '')"
@@ -30,9 +30,6 @@
     <n-modal v-model:show="showNumberEditModal">
       <n-card style="width: 600px" title="修改到货数量">
         <n-form :rules="rules" :model="formValue" ref="formRef" :label-width="80">
-          <n-form-item label="实际到货数量" path="arriveCount">
-            <n-input-number v-model:value="formValue.arriveCount" placeholder="输入实际到货数量" />
-          </n-form-item>
           <n-form-item label="备注" path="note">
             <n-input v-model:value="formValue.note" placeholder="输入备注" />
           </n-form-item>
@@ -62,7 +59,18 @@
     </n-modal>
     <template v-if="currentTab == '信息'" #action>
       <n-space>
-        <n-button type="primary">打印任务单</n-button>
+        <n-button>
+          <template #icon>
+            <n-icon> <print16-filled /> </n-icon>
+          </template>
+          打印任务单
+        </n-button>
+        <n-button :disabled="currentTaskList.length == 0" type="primary" @click="submitEdit">
+          <template #icon>
+            <n-icon> <save /> </n-icon>
+          </template>
+          提交修改
+        </n-button>
       </n-space>
     </template>
   </n-card>
@@ -72,17 +80,17 @@
   import { getNotifyById } from '@/api/notify/notify-api';
   import { computed, Ref, ref, watch, watchEffect } from 'vue';
   import { NButton } from 'naive-ui';
-  import { Archive } from '@vicons/ionicons5';
-  import { handleRequest, toastSuccess } from '@/utils/utils';
+  import { toastSuccess } from '@/utils/utils';
   import { uploadFile } from '@/plugins/firebase';
   import ChangeLogTimeLine from '@/views/bolita-views/composable/ChangeLogTimeLine.vue';
   import { changeArriveCountForNotifyTask } from '@/api/notify/notify-detail';
   import NotifyDetailBasicInfo from '@/views/bolita-views/notify/NotifyDetail/Fragment/NotifyDetailBasicInfo.vue';
   import { getNeededColumnByNotifyType } from '@/views/bolita-views/notify/NotifyRepository/NotifyRepository';
   import { $ref } from 'vue/macros';
+  import { Print16Filled } from '@vicons/fluent';
+  import { Archive, Save } from '@vicons/ionicons5';
 
-  const formValue: Ref<{ arriveCount: number; note: string; files: any[] }> = ref({
-    arriveCount: 0,
+  const formValue: Ref<{ note: string; files: any[] }> = ref({
     note: '',
     files: [],
   });
@@ -93,44 +101,51 @@
     console.log(currentTab);
   });
   const rules = ref({
-    arriveCount: {
-      required: true,
-      message: '请输入将要修改的数量',
-      trigger: ['input', 'blur'],
-      type: 'number',
-    },
     note: {},
     files: {},
   });
 
   async function submitChange() {
     const files = formValue.value.files;
-    console.log(files, 'files');
     for (const key in files) {
       files[key] = await uploadFile(files[key].file);
     }
-    const res = await changeArriveCountForNotifyTask(
-      props.notifyId,
-      editingTaskId,
-      formValue.value.arriveCount,
-      formValue.value.note,
-      files
-    );
-    await handleRequest(res, () => {
-      reload();
-      editingTaskId = '';
-      showNumberEditModal = false;
+    for (const task of currentTaskList) {
+      await changeArriveCountForNotifyTask(
+        props.notifyId,
+        task.id,
+        task.arrivedCount,
+        formValue.value.note,
+        files
+      );
+    }
 
-      toastSuccess('更新成功');
-    });
+    await reload();
+
+    showNumberEditModal = false;
+    toastSuccess('更新成功');
   }
 
   let showNumberEditModal = $ref(false);
-  let editingTaskId = $ref('');
+  function submitEdit() {
+    formValue.value = {
+      note: '',
+      files: [],
+    };
+    showNumberEditModal = true;
+  }
+
+  let currentTaskList: any[] = $ref([]);
+  function updateTaskList(newTaskList) {
+    currentTaskList = newTaskList;
+  }
   const columns = computed(() => {
     return getNeededColumnByNotifyType(notifyDetail?.notifyType);
   });
-  const props = defineProps({ notifyId: String || null });
+  interface Props {
+    notifyId: string;
+  }
+  const props = defineProps<Props>();
   let notifyDetail: any | null = $ref(null);
   const emit = defineEmits(['close', 'refresh']);
   watchEffect(async () => {

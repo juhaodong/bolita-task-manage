@@ -1,8 +1,9 @@
 <script setup lang="ts">
-  import { computed, watchEffect } from 'vue';
+  import { computed, h, watchEffect } from 'vue';
   import { getNotifyById, NotifyType } from '@/api/notify/notify-api';
   import { getTaskColumns } from '@/views/bolita-views/notify/NotifyRepository/NotifyRepository';
   import dayjs from 'dayjs';
+  import { NInput, NInputNumber } from 'naive-ui';
 
   interface Props {
     notifyId: string;
@@ -17,8 +18,50 @@
       notifyDetail = await getNotifyById(props.notifyId);
     }
   }
+  const emit = defineEmits(['taskUpdate']);
   const columns = computed(() => {
-    return getTaskColumns();
+    return [
+      ...getTaskColumns(),
+      {
+        title: '实际到货数量',
+        key: 'arrivedCount',
+        render(row, index) {
+          return h(NInputNumber, {
+            value: row.arrivedCount,
+            onUpdateValue(v) {
+              notifyDetail.taskList[index].arrivedCount = v;
+              emit('taskUpdate', notifyDetail.taskList);
+            },
+          });
+        },
+      },
+      {
+        title: '备注',
+        key: 'note',
+        render(row, index) {
+          return h(NInput, {
+            value: row.note,
+            onUpdateValue(v) {
+              notifyDetail.taskList[index].note = v;
+              emit('taskUpdate', notifyDetail.taskList);
+            },
+          });
+        },
+      },
+      {
+        title: '库位',
+        key: 'storagePosition',
+        render(row, index) {
+          return h(NInput, {
+            value: row.storagePosition,
+            onUpdateValue(v) {
+              notifyDetail.taskList[index].storagePosition = v;
+              emit('taskUpdate', notifyDetail.taskList);
+            },
+          });
+        },
+      },
+    ];
   });
 </script>
 

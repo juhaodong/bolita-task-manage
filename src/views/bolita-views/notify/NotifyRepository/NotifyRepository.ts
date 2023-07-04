@@ -96,8 +96,5 @@ export function getTaskColumns() {
     },
     formFieldTaskTypeSelection,
     { label: 'FBA', field: 'fbaCode' },
-    { label: '实际到货数量', field: 'arrivedCount' },
-    { label: '备注', field: 'note' },
-    { label: '库位', field: 'storagePosition' },
   ].map(convertFieldToColumn);
 }
