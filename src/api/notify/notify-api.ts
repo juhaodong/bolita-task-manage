@@ -95,6 +95,7 @@ export async function changeNotifyStatus(
       note: '',
       toStatus: newStatus,
     });
+    return resultSuccess('');
   } catch (e: any) {
     return resultError(e?.message);
   }

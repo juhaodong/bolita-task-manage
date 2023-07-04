@@ -5,7 +5,6 @@
   import { NButton } from 'naive-ui';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { toastSuccess } from '@/utils/utils';
-  import { NotifyDetailModel } from '@/api/notify/notify-detail';
   import { Archive } from '@vicons/ionicons5';
   import dayjs from 'dayjs';
   import xlsx from 'json-as-xlsx';
@@ -105,25 +104,19 @@
     detailedTasks = [];
     step = 0;
   }
+
+  function submitMassImport() {
+    notifyStore.push(...detailedTasks);
+    detailedTasks = [];
+    showMassImport = false;
+  }
   function generateNotifyTaskModel(count) {
-    const res: NotifyDetailModel[] = [];
+    const res: any[] = [];
 
     for (let i = 1; i <= count; i++) {
       res.push({
-        arrivedCount: 0,
-        actualWeight: '',
         count: 0,
-        height: '',
-        length: '',
-        sku: '',
         sortCode: '分拣码:' + i,
-        trackingCode: '',
-        trayCode: '',
-        trayHeight: '',
-        trayLength: '',
-        trayWidth: '',
-        volume: '',
-        width: '',
       });
     }
     return res;
@@ -132,36 +125,16 @@
   let failReason = $ref('');
   let detailedTasks: any[] = $ref([]);
   async function readFile(file) {
-    const schema = {
-      分拣码: { prop: 'sortCode', type: String },
-      物流追踪号: { prop: 'trackingCode', type: String },
-      '托盘号（选填）': { prop: 'trayCode', type: String },
-      托盘长度: { prop: 'trayLength', type: String },
-      托盘宽度: { prop: 'trayWidth', type: String },
-      托盘高度: { prop: 'trayHeight', type: String },
-      件数: { prop: 'count', type: String },
-      实重: { prop: 'actualWeight', type: String },
-      体积: { prop: 'volume', type: String },
-      长: { prop: 'length', type: String },
-      宽: { prop: 'width', type: String },
-      高: { prop: 'height', type: String },
-      SKU: { prop: 'sku', type: String },
-      操作类型: { prop: 'operationType', type: String },
-      地址类型: { prop: 'addressType', type: String, oneOf: ['Amz', 'B2B', 'B2C'] },
-      目的地: { prop: 'targetCountry', type: String },
-      邮编: { prop: 'postCode', type: String },
-      'FBA Code': { prop: 'fbaCode', type: String },
-      FBA: { prop: 'fba', type: String },
-      PO: { prop: 'po', type: String },
-      地址: { prop: 'address', type: String },
-      物流渠道: {
-        prop: 'deliveryMethod',
-        type: String,
-      },
-    };
+    const schema = Object.fromEntries(
+      getNeededColumnByNotifyType(props.notifyType).map((it) => {
+        return [it.title, { prop: it.key, type: String }];
+      })
+    );
+    console.log(schema);
     try {
       const { rows, errors } = await readXlsxFile(file, { schema });
       console.log(rows, errors);
+
       if (rows.length > 0 && errors.length == 0) {
         uploadFailed = false;
         detailedTasks = rows.map((it) => ({ ...it, arrivedCount: 0 }));
@@ -179,6 +152,7 @@
       uploadFailed = true;
       failReason = '文件上传异常' + e?.message;
     } finally {
+      step = 1;
     }
   }
   function fileChanged(fileList) {
@@ -256,52 +230,29 @@
         </n-upload></template
       >
       <template v-else>
-        <template>
-          <template v-if="uploadFailed">
-            <div class="p-4 flex flex-col justify-center items-center">
-              <n-h4>上传失败</n-h4>
-              <n-text code>{{ failReason }}</n-text>
-              <n-button @click="step = 0" class="mt-2">重新上传 </n-button>
-            </div>
-          </template>
-          <template v-else>
-            <div class="flex items-center mt-4">
-              <div>您上传的任务</div>
-              <div class="flex-grow"></div>
-            </div>
-            <n-descriptions class="mt-4" column="2">
-              <n-descriptions-item label="应有总数">
-                {{ notifyDetail?.totalCount }}</n-descriptions-item
-              >
-              <n-descriptions-item label="实际总数">
-                <n-text :type="notifyDetail?.totalCount != totalRecordCount ? 'error' : 'default'"
-                  >{{ totalRecordCount }}
-                </n-text>
-              </n-descriptions-item>
-              <n-descriptions-item label="应有分拣码数量">
-                {{ notifyDetail?.sortingLabelCount }}
-              </n-descriptions-item>
-              <n-descriptions-item label="实际分拣码数量">
-                <n-text
-                  :type="
-                    notifyDetail?.taskList.length != notifyDetail?.sortingLabelCount
-                      ? 'error'
-                      : 'default'
-                  "
-                >
-                  {{ notifyDetail?.taskList.length }}
-                </n-text>
-              </n-descriptions-item>
-            </n-descriptions>
-            <div class="mt-8">
-              <n-space>
-                <n-button @click="step = 2" type="warning">重新上传 </n-button>
-                <n-button :disabled="!canUpload" @click="showMassImport" type="primary"
-                  >批量上传
-                </n-button>
-              </n-space>
-            </div>
-          </template>
+        <template v-if="uploadFailed">
+          <div class="p-4 flex flex-col justify-center items-center">
+            <n-h4>上传失败</n-h4>
+            <n-text code>{{ failReason }}</n-text>
+            <n-button @click="step = 0" class="mt-2">重新上传 </n-button>
+          </div>
+        </template>
+        <template v-else>
+          <div class="flex items-center mt-4">
+            <div>您上传的任务</div>
+            <div class="flex-grow"></div>
+          </div>
+          <n-descriptions class="mt-4" column="2">
+            <n-descriptions-item label="总数">
+              {{ detailedTasks?.length }}
+            </n-descriptions-item>
+          </n-descriptions>
+          <div class="mt-8">
+            <n-space>
+              <n-button @click="step = 0" type="warning">重新上传 </n-button>
+              <n-button @click="submitMassImport" type="primary">保存 </n-button>
+            </n-space>
+          </div>
         </template>
       </template>
     </n-card>
