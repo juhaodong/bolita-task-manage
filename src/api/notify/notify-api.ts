@@ -16,6 +16,7 @@ export interface NotifyModel extends BasicModel {
   totalCount: number;
   reserveTime: number;
   planArriveDateTime: number;
+  arriveTime: number;
   status: string;
   taskList: NotifyDetailModel[];
 }
@@ -38,6 +39,7 @@ export async function createNotify(notifyInfo: NotifyCreateDTO) {
       containerSize: '',
       containerType: '',
       arrivedCount: 0,
+      arriveTime: 0,
       note: '',
       status: NotifyStatus.NotSubmit,
       createTimestamp: dayjs().valueOf(),

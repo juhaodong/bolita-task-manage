@@ -22,7 +22,7 @@ const routes: Array<RouteRecordRaw> = [
           title: '货柜预报',
           activeMenu: 'notify_index',
         },
-        component: () => import('@/views/bolita-views/notify/list/NotifyList.vue'),
+        component: () => import('@/views/bolita-views/notify/list/Container/NotifyList.vue'),
       },
       {
         path: 'tray',
@@ -31,7 +31,7 @@ const routes: Array<RouteRecordRaw> = [
           title: '托盘/散货预报',
           activeMenu: 'notify_tray',
         },
-        component: () => import('@/views/bolita-views/notify/list/NotifyList.vue'),
+        component: () => import('@/views/bolita-views/notify/list/Tray/TrayList.vue'),
       },
     ],
   },

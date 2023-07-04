@@ -20,14 +20,6 @@
             </template>
             新建货柜预报
           </n-button>
-          <n-button @click="addTable(NotifyType.TrayOrBox)">
-            <template #icon>
-              <n-icon>
-                <TruckDelivery />
-              </n-icon>
-            </template>
-            新建托盘/散包裹预报
-          </n-button>
         </n-space>
       </template>
     </BasicTable>
@@ -57,7 +49,6 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns } from './columns';
   import { Box20Filled } from '@vicons/fluent';
-  import { TruckDelivery } from '@vicons/tabler';
   import {
     changeNotifyStatus,
     deleteNotify,
@@ -141,7 +132,7 @@
   }
 
   const loadDataTable = async () => {
-    return await getNotifyList({});
+    return (await getNotifyList({})).filter((it) => it.notifyType === NotifyType.Container);
   };
 
   function onCheckedRow(rowKeys) {
