@@ -8,7 +8,7 @@
   interface Prop {
     type: NotifyType;
   }
-  defineProps<Prop>();
+  const prop = defineProps<Prop>();
   const emit = defineEmits(['loading', 'stop', 'saved']);
   function loading() {
     emit('loading');
@@ -18,6 +18,7 @@
   }
   async function saveNotify(value: NotifyModel) {
     loading();
+    value.notifyType = prop.type;
 
     const res = await createNotify(value);
 

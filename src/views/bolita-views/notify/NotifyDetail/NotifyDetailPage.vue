@@ -11,7 +11,7 @@
       <n-tab-pane name="信息">
         <notify-detail-basic-info :notify-id="notifyId" />
       </n-tab-pane>
-      <n-tab-pane name="到货货品列表">
+      <n-tab-pane name="到货详情列表">
         <div class="bg-green-100" style="overflow-x: scroll">
           <div style="width: fit-content">
             <n-data-table
@@ -64,8 +64,8 @@
 </template>
 
 <script setup lang="ts">
-  import { getNotifyById, NotifyStatus, NotifyType } from '@/api/notify/notify-api';
-  import { computed, h, Ref, ref, watchEffect } from 'vue';
+  import { getNotifyById } from '@/api/notify/notify-api';
+  import { computed, Ref, ref, watchEffect } from 'vue';
   import { NButton } from 'naive-ui';
   import { Archive } from '@vicons/ionicons5';
   import { handleRequest, toastSuccess } from '@/utils/utils';
@@ -73,6 +73,8 @@
   import ChangeLogTimeLine from '@/views/bolita-views/composable/ChangeLogTimeLine.vue';
   import { changeArriveCountForNotifyTask } from '@/api/notify/notify-detail';
   import NotifyDetailBasicInfo from '@/views/bolita-views/notify/NotifyDetail/Fragment/NotifyDetailBasicInfo.vue';
+  import { getNeededColumnByNotifyType } from '@/views/bolita-views/notify/NotifyRepository/NotifyRepository';
+  import { $ref } from 'vue/macros';
 
   const formValue: Ref<{ arriveCount: number; note: string; files: any[] }> = ref({
     arriveCount: 0,
@@ -116,61 +118,7 @@
   let showNumberEditModal = $ref(false);
   let editingTaskId = $ref('');
   const columns = computed(() => {
-    const boxField =
-      arriveMedia == NotifyType.Box ? [{ title: '物流追踪号', key: 'trackingCode' }] : [];
-    const trayField =
-      arriveMedia == NotifyType.TrayOrBox
-        ? [
-            { title: '托盘号（选填）', key: 'trayCode' },
-            { title: '托盘长度', key: 'trayLength' },
-            { title: '托盘宽度', key: 'trayWidth' },
-            { title: '托盘高度', key: 'trayHeight' },
-          ]
-        : [];
-    return [
-      {
-        title: '到货状态',
-        key: 'arrived',
-        render(row) {
-          return h('div', [
-            h(
-              NButton,
-              {
-                type: (row.arrivedCount ?? 0) >= row.count ? 'success' : 'default',
-                disabled: notifyDetail?.status !== NotifyStatus.WaitFroArrive,
-                onClick() {
-                  showNumberEditModal = true;
-                  editingTaskId = row.id;
-                },
-              },
-              (row.arrivedCount ?? 0) + '/' + row.count
-            ),
-          ]);
-        },
-      },
-      { title: '分拣码', key: 'sortCode' },
-      ...boxField,
-      ...trayField,
-      { title: '实重', key: 'actualWeight' },
-      { title: '体积', key: 'volume' },
-      { title: '长', key: 'length' },
-      { title: '宽', key: 'width' },
-      { title: '高', key: 'height' },
-      { title: 'SKU', key: 'sku' },
-      { title: '操作类型', key: 'operationType' },
-      { title: '地址类型', key: 'addressType' },
-      { title: '目的地', key: 'targetCountry' },
-      { title: '邮编', key: 'postCode' },
-      { title: 'FBA Code', key: 'fbaCode' },
-      { title: 'FBA', key: 'fba' },
-      { title: 'PO', key: 'po' },
-      { title: '物流渠道', key: 'deliveryMethod' },
-      { title: '地址', key: 'address' },
-    ];
-  });
-
-  const arriveMedia: NotifyType | null = $computed(() => {
-    return notifyDetail?.arriveMedia;
+    return getNeededColumnByNotifyType(notifyDetail?.notifyType);
   });
   const props = defineProps({ notifyId: String || null });
   let notifyDetail: any | null = $ref(null);

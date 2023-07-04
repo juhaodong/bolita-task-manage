@@ -1,4 +1,7 @@
-import { FormField } from '@/views/bolita-views/composable/form-field-type';
+import {
+  FormField,
+  formFieldTaskTypeSelection,
+} from '@/views/bolita-views/composable/form-field-type';
 import { formFieldUnitSelection } from '@/api/model/common/BoxOrTray';
 import { targetAddressSelectionGroup } from '@/api/model/common/addressGroup';
 import { NotifyType } from '@/api/notify/notify-api';
@@ -57,11 +60,46 @@ export function getNeededFieldByNotifyType(notifyType: NotifyType | null): any[]
       label: 'SKU',
       field: 'sku',
     },
+    formFieldTaskTypeSelection,
     ...targetAddressSelectionGroup,
     {
       label: '操作备注',
       field: 'operationNote',
       required: false,
     },
+  ];
+}
+
+export function getTaskColumns() {
+  return [
+    {
+      label: '分拣标识',
+      field: 'sortCode',
+    },
+    {
+      label: '数量',
+      field: 'count',
+    },
+    {
+      label: '长',
+      field: 'length',
+    },
+    {
+      label: '宽',
+      field: 'width',
+    },
+    {
+      label: '高',
+      field: 'height',
+    },
+    {
+      label: '实重kg',
+      field: 'actualWeight',
+    },
+    formFieldTaskTypeSelection,
+    { label: 'FBA', field: 'fbaCode' },
+    { label: '实际到货数量', field: 'arrivedCount' },
+    { label: '备注', field: 'note' },
+    { label: '库位', field: 'storagePosition' },
   ];
 }
