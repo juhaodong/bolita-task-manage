@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, orderBy, query, setDoc } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, orderBy, query, setDoc } from 'firebase/firestore';
 import { db, executeQuery, getDocContent } from '@/plugins/firebase';
 import { resultError, resultSuccess } from '@/utils/request/_util';
 import { doLog } from '@/api/statusChangeLog';
@@ -71,6 +71,15 @@ async function updateNotify(info: NotifyCreateDTO, id) {
   const newData = Object.assign({}, currentInfo, info);
   try {
     await setDoc(doc(ref, id), newData);
+    return resultSuccess(id);
+  } catch (e: any) {
+    return resultError(e?.message);
+  }
+}
+
+export async function deleteNotify(id) {
+  try {
+    await deleteDoc(doc(ref, id));
     return resultSuccess(id);
   } catch (e: any) {
     return resultError(e?.message);

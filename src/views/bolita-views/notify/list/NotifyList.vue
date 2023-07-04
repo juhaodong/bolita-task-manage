@@ -60,6 +60,7 @@
   import { TruckDelivery } from '@vicons/tabler';
   import {
     changeNotifyStatus,
+    deleteNotify,
     getNotifyList,
     NotifyStatus,
     NotifyType,
@@ -90,6 +91,20 @@
           {
             label: '详情',
             onClick: goDetail.bind(null, record),
+          },
+          {
+            label: '删除',
+            popConfirm: {
+              title: '是否确定删除此预报？',
+              async confirm() {
+                await deleteNotify(record.id);
+                reloadTable();
+              },
+            },
+            ifShow: () => {
+              return record.status == NotifyStatus.NotSubmit;
+            },
+            auth: [PermissionEnums.Manager, PermissionEnums.Customer, PermissionEnums.Technical],
           },
           {
             label: '提交',
