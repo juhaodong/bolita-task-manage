@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { NotifyType } from '@/api/notify/notify-api';
   import NotifyContainerForm from '@/views/bolita-views/notify/NotifyFormPage/NotifyContainerForm.vue';
-  import TrayForm from '@/views/bolita-views/notify/NotifyFormPage/TrayForm.vue';
+  import TrayForm from '@/views/bolita-views/notify/NotifyFormPage/NotifyTrayForm.vue';
 
   interface Prop {
     type: NotifyType;

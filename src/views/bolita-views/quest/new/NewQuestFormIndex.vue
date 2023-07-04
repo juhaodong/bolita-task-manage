@@ -3,7 +3,7 @@
   import NewTaskStep1Form from '@/views/bolita-views/quest/new/step/NewQuestFormStep1.vue';
   import { QuestNotifyType } from '@/api/quest/quest-type';
   import BoxForm from '@/views/bolita-views/notify/NotifyFormPage/BoxForm.vue';
-  import TrayForm from '@/views/bolita-views/notify/NotifyFormPage/TrayForm.vue';
+  import TrayForm from '@/views/bolita-views/notify/NotifyFormPage/NotifyTrayForm.vue';
   import NotifyContainerForm from '@/views/bolita-views/notify/NotifyFormPage/NotifyContainerForm.vue';
   import NotifyTasksTable from '@/views/bolita-views/notify/NotifyDetail/NotifyTasksTable.vue';
   import { NotifyCreateDTO, saveNotify } from '@/api/notify/notify-api';

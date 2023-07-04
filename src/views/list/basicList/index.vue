@@ -31,9 +31,7 @@
       </template>
     </BasicTable>
 
-    <n-modal v-model:show="showModal" :show-icon="false" preset="dialog" title="新建">
-      <new-notify-form />
-    </n-modal>
+    <n-modal v-model:show="showModal" :show-icon="false" preset="dialog" title="新建" />
   </n-card>
 </template>
 
@@ -47,7 +45,6 @@
   import { PlusOutlined } from '@vicons/antd';
   import { useRouter } from 'vue-router';
   import { type FormRules } from 'naive-ui';
-  import NewNotifyForm from '@/views/bolita-views/notify/NotifyFormPage/NewNotifyForm.vue';
 
   const rules: FormRules = {
     name: {
