@@ -35,7 +35,7 @@
       <notify-container-form @submit="saveNotify" />
     </template>
     <template v-else-if="type == NotifyType.TrayOrBox">
-      <tray-form />
+      <tray-form @submit="saveNotify" />
     </template>
   </loading-frame>
 </template>
