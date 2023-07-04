@@ -2,72 +2,51 @@ import { addDoc, collection, doc, orderBy, query, setDoc } from 'firebase/firest
 import { db, executeQuery, getDocContent } from '@/plugins/firebase';
 import { resultError, resultSuccess } from '@/utils/request/_util';
 import { doLog } from '@/api/statusChangeLog';
-import { BasicModel } from '@/api/quest/quest-type';
+
 import dayjs from 'dayjs';
-import { getTasksForNotify, NotifyDetailModel } from '@/api/notify/notify-detail';
-import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { formFieldUnitSelection } from '@/api/model/common/BoxOrTray';
-import { targetAddressSelectionGroup } from '@/api/model/common/addressGroup';
+import { addNotifyDetail, getTasksForNotify, NotifyDetailModel } from '@/api/notify/notify-detail';
+import { BasicModel } from '@/api/model/common/BasicModel';
 
 export interface NotifyModel extends BasicModel {
-  arriveMedia: NotifyType;
+  notifyType: NotifyType;
+  containerNo: string;
+  containerSize: string;
+  containerType: string;
   arrivedCount: number;
   totalCount: number;
   reserveTime: number;
   planArriveDateTime: number;
   status: string;
-  arriveDetail: ContainerArriveDetail | TrayArriveDetail | BoxArriveDetail;
   taskList: NotifyDetailModel[];
 }
-
-export type ContainerArriveDetail = {
-  containerNo: string;
-  carNo: string;
-  containerSize: string;
-  containerType: string;
-};
-
-export type TrayArriveDetail = {
-  traySize: string;
-  trayCount: number;
-  trayType: string;
-  goodsType: string;
-  carNo: string;
-};
-
-export type BoxArriveDetail = {
-  deliveryMethod: string;
-};
 
 const notifyPath = 'notify';
 const ref = collection(db, notifyPath);
 
 export interface NotifyCreateDTO {
-  arriveMedia: NotifyType;
-  totalCount: number;
+  notifyType: NotifyType;
   planArriveDateTime: number;
-  arriveDetail: ContainerArriveDetail | TrayArriveDetail | BoxArriveDetail;
   customerId?: string;
   files?: string[];
+  taskList: NotifyDetailModel[];
 }
 
 export async function createNotify(notifyInfo: NotifyCreateDTO) {
   try {
     const info = {
-      files: [],
-      questId: '',
-      warehouseId: '',
+      containerNo: '',
+      containerSize: '',
+      containerType: '',
       arrivedCount: 0,
-      customerId: '',
       note: '',
-      planArriveDateTime: 0,
       status: NotifyStatus.NotSubmit,
-      totalCount: 0,
-      taskList: [],
       createTimestamp: dayjs().valueOf(),
+      totalCount: notifyInfo.taskList.reduce((sum, i) => sum + parseInt(i.count), 0),
     };
     const { id } = await addDoc(collection(db, notifyPath), Object.assign(info, notifyInfo));
-
+    for (const t of notifyInfo.taskList) {
+      await addNotifyDetail(t, id);
+    }
     await doLog({
       fromStatus: NotifyStatus.NotSubmit,
       toStatus: NotifyStatus.NotSubmit,
@@ -156,31 +135,3 @@ export enum NotifyType {
 }
 
 export const notifyType = Object.values(NotifyType);
-
-export function getNeededColumnByNotifyType(notifyType: NotifyType | null) {
-  return getNeededFieldByNotifyType(notifyType).map((it) => {
-    return {
-      title: it.label,
-      key: it.field,
-    };
-  });
-}
-
-export function getNeededFieldByNotifyType(notifyType: NotifyType | null): any[] {
-  const boxField: FormField[] =
-    notifyType == NotifyType.TrayOrBox ? [{ label: '快递单号', field: 'trackingCode' }] : [];
-  return [
-    { label: '分拣标识', field: 'sortCode' },
-    ...boxField,
-    formFieldUnitSelection,
-    { label: '数量', field: 'count' },
-    { label: '长', field: 'length' },
-    { label: '宽', field: 'width' },
-    { label: '高', field: 'height' },
-    { label: '实重kg', field: 'actualWeight' },
-    { label: '体积', field: 'volume' },
-    { label: 'SKU', field: 'sku' },
-    ...targetAddressSelectionGroup,
-    { label: '操作备注', field: 'operationNote', required: false },
-  ];
-}

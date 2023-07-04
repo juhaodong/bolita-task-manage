@@ -29,10 +29,6 @@ export async function getTasksForNotify(notifyId) {
 
 export async function addNotifyDetail(taskInfo: NotifyDetailModel, notifyId: string) {
   try {
-    const currentRecords = await getTasksForNotify(notifyId);
-    if (currentRecords.find((it) => it.sortCode === taskInfo.sortCode)) {
-      return resultError('分拣码重复');
-    }
     await addDoc(collection(db, notifyPath, notifyId, taskListPath), taskInfo);
     return resultSuccess('');
   } catch (e: any) {

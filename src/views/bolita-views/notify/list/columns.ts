@@ -1,8 +1,7 @@
 import { DataTableColumns } from 'naive-ui';
 import { h } from 'vue';
 import { NotifyModel } from '@/api/notify/notify-api';
-import dayjs from 'dayjs';
-import { statusColumn } from '@/views/bolita-views/composable/useableColumns';
+import { statusColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 
 export const columns: DataTableColumns<NotifyModel> = [
   {
@@ -17,27 +16,20 @@ export const columns: DataTableColumns<NotifyModel> = [
   },
   statusColumn,
   {
-    title: '到货类型',
-    key: 'arriveMedia',
+    title: '货柜号',
+    key: 'containerNo',
   },
+
+  timeColumn('planArriveDateTime', '预计到达时间'),
+  timeColumn('reserveTime', '预约仓位'),
   {
-    title: '到货仓库ID',
-    key: 'arriveWarehouseId',
-  },
-  {
-    title: '箱数',
+    title: '到货情况',
     key: 'totalCount',
     render(data) {
       return h('div', {}, [`${data.arrivedCount}/${data.totalCount}`]);
     },
   },
-  {
-    title: '预约仓位',
-    key: 'planArriveDateTime',
-    render(data) {
-      return h('div', {}, [dayjs(data.planArriveDateTime).format('YYYY-MM-DD HH:mm')]);
-    },
-  },
+
   {
     title: '备注',
     key: 'note',

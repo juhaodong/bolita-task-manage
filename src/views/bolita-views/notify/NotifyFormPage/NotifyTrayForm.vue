@@ -5,7 +5,11 @@
         <normal-form :form-fields="schemas" @submit="handleSubmit" :default-value-model="model" />
       </n-gi>
       <n-gi :span="2">
-        <notify-tasks-table :notify-type="NotifyType.TrayOrBox" :editable="true" notify-id="" />
+        <notify-tasks-table
+          @tasks-update="(t) => (task = t)"
+          :notify-type="NotifyType.TrayOrBox"
+          :editable="true"
+        />
       </n-gi>
     </n-grid>
   </n-card>
@@ -14,7 +18,7 @@
   import dayjs from 'dayjs';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
-  import { NotifyType } from '@/api/notify/notify-api';
+  import { NotifyModel, NotifyType } from '@/api/notify/notify-api';
   import NotifyTasksTable from '@/views/bolita-views/notify/NotifyDetail/NotifyTasksTable.vue';
   import { listUser, PermissionEnums } from '@/api/user/baseUser';
   import { ref } from 'vue';
@@ -24,6 +28,7 @@
     model?: any;
   }
   defineProps<Props>();
+  let task = [];
   let customerList = ref<any[]>([]);
   const { hasPermission } = usePermission();
   async function init() {
@@ -100,9 +105,9 @@
 
   const emit = defineEmits(['submit']);
 
-  function handleSubmit(values: Recordable) {
+  function handleSubmit(values: NotifyModel) {
+    values.taskList = task;
     emit('submit', values);
-    console.log(values);
   }
 </script>
 

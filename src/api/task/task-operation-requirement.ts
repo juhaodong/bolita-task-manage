@@ -126,6 +126,8 @@ export function getTaskTypeOperationKeys(taskType: TaskType) {
         OperationType.OrderCancel,
         OperationType.OtherSpecial,
       ]);
+    case TaskType.Reserve:
+      return getORListByNames([]);
   }
 }
 

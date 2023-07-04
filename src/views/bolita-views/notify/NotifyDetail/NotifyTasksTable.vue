@@ -1,11 +1,7 @@
 <script setup lang="ts">
   import { BasicTable, TableAction } from '@/components/Table';
   import { computed, h, reactive, ref } from 'vue';
-  import {
-    getNeededColumnByNotifyType,
-    getNeededFieldByNotifyType,
-    NotifyType,
-  } from '@/api/notify/notify-api';
+  import { NotifyType } from '@/api/notify/notify-api';
   import { NButton } from 'naive-ui';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { toastSuccess } from '@/utils/utils';
@@ -15,6 +11,10 @@
   import xlsx from 'json-as-xlsx';
   import readXlsxFile from 'read-excel-file';
   import { $ref } from 'vue/macros';
+  import {
+    getNeededColumnByNotifyType,
+    getNeededFieldByNotifyType,
+  } from '@/views/bolita-views/notify/NotifyRepository/NotifyRepository';
 
   const columns = computed(() => {
     const list = getNeededColumnByNotifyType(props.notifyType);
@@ -33,7 +33,7 @@
   const props = defineProps<Props>();
   const actionColumn = props.editable
     ? reactive({
-        width: 100,
+        width: 120,
         title: '操作',
         key: 'action',
         fixed: 'right',
@@ -48,6 +48,12 @@
                   async confirm() {
                     notifyStore.filter((it) => it.tempId != record.tempId);
                   },
+                },
+              },
+              {
+                label: '编辑',
+                onClick() {
+                  addNotify(record);
                 },
               },
             ],
@@ -66,18 +72,31 @@
 
   function tableReload() {
     actionRef.value?.reload();
+    emit('tasks-update', notifyStore);
+  }
+  let taskModel: any = $ref(null);
+  function addNotify(record = null) {
+    taskModel = record;
+    showAdd = true;
   }
 
-  let tempId = 0;
-  async function addNewDetailNotify(detailInfo) {
-    detailInfo.tempId = tempId++;
-    notifyStore.push(detailInfo);
+  let tempId = 1;
+  async function saveNotify(detailInfo) {
+    console.log(detailInfo.tempId);
+    if (!taskModel?.tempId) {
+      detailInfo.tempId = tempId++;
+      notifyStore.push(detailInfo);
+    } else {
+      const index = notifyStore.findIndex((it) => it.tempId == taskModel.tempId);
+      detailInfo.tempId = taskModel.tempId;
+      notifyStore[index] = detailInfo;
+    }
     toastSuccess('添加成功');
     showAdd = false;
     tableReload();
   }
 
-  const emit = defineEmits(['next']);
+  const emit = defineEmits(['tasks-update']);
 
   let showMassImport = $ref(false);
 
@@ -199,7 +218,7 @@
     >
       <template #tableTitle v-if="editable">
         <n-space>
-          <n-button @click="showAdd = true" type="primary"> 添加预报详情 </n-button>
+          <n-button @click="addNotify()" type="primary"> 添加预报详情 </n-button>
           <n-button @click="startMassImport"> 批量导入 </n-button>
         </n-space>
       </template>
@@ -209,7 +228,11 @@
 
   <n-modal preset="card" style="max-width: 700px" title="添加预报详情" v-model:show="showAdd">
     <n-card>
-      <normal-form :form-fields="addFormField" @submit="addNewDetailNotify" />
+      <normal-form
+        :form-fields="addFormField"
+        @submit="saveNotify"
+        :default-value-model="taskModel"
+      />
     </n-card>
   </n-modal>
   <n-modal preset="dialog" title="批量导入预报" v-model:show="showMassImport">

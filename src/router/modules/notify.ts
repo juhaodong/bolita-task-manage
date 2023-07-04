@@ -19,10 +19,19 @@ const routes: Array<RouteRecordRaw> = [
         path: 'index',
         name: `notify_index`,
         meta: {
-          title: '到货预报',
+          title: '货柜预报',
           activeMenu: 'notify_index',
         },
-        component: () => import('@/views/bolita-views/notify/list/index.vue'),
+        component: () => import('@/views/bolita-views/notify/list/NotifyList.vue'),
+      },
+      {
+        path: 'tray',
+        name: `notify_tray`,
+        meta: {
+          title: '托盘/散货预报',
+          activeMenu: 'notify_tray',
+        },
+        component: () => import('@/views/bolita-views/notify/list/NotifyList.vue'),
       },
     ],
   },

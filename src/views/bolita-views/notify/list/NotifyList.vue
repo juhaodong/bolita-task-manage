@@ -47,7 +47,7 @@
       title="新建到货预报"
       style="width: 90%; min-width: 600px; max-width: 1200px"
     >
-      <notify-form-index :type="notifyType" @submit="createNewNotify" />
+      <notify-form-index @saved="closeAddDialog" :type="notifyType" />
     </n-modal>
   </n-card>
 </template>
@@ -60,15 +60,11 @@
   import { TruckDelivery } from '@vicons/tabler';
   import {
     changeNotifyStatus,
-    createNotify,
     getNotifyList,
-    NotifyCreateDTO,
     NotifyStatus,
     NotifyType,
   } from '@/api/notify/notify-api';
   import NotifyFormIndex from '@/views/bolita-views/notify/NotifyFormPage/NotifyFormIndex.vue';
-  import { handleRequest } from '@/utils/utils';
-  import { useUserStore } from '@/store/modules/user';
   import NotifyDetailPage from '@/views/bolita-views/notify/NotifyDetail/NotifyDetailPage.vue';
   import { $ref } from 'vue/macros';
   import { PermissionEnums } from '@/api/user/baseUser';
@@ -144,21 +140,9 @@
   function reloadTable() {
     actionRef.value.reload();
   }
-  const user = useUserStore();
-  async function createNewNotify(notifyInfo) {
-    const info: NotifyCreateDTO = {
-      files: [],
-      arriveDetail: notifyInfo.arriveDetail,
-      arriveMedia: notifyInfo.arriveMedia,
-      customerId: user.info.id,
-      planArriveDateTime: notifyInfo.arriveDetail.planArriveDateTime,
-      totalCount: notifyInfo.totalCount,
-    };
-    const res = await createNotify(info);
-    await handleRequest(res, () => {
-      showModal.value = false;
-      reloadTable();
-    });
+  async function closeAddDialog() {
+    reloadTable();
+    showModal.value = false;
   }
 
   let currentNotifyId: string | null = $ref(null);

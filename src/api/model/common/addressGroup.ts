@@ -8,7 +8,7 @@ import { AddressType, formFieldAddressTypeSelection } from '@/api/model/common/A
 import { generateOptionFromArray } from '@/utils/utils';
 import { yesOrNo } from '@/api/operationType';
 
-const deliveryAddressDetail: FormField = [
+const deliveryAddressDetail: FormField[] = [
   { label: '收件人', field: 'contact' },
   { label: '电话／邮箱', field: 'email', required: false },
   { label: '街道', field: 'street' },
@@ -18,7 +18,7 @@ const deliveryAddressDetail: FormField = [
   { label: '城市', field: 'city' },
   { label: '州', field: 'state' },
   { label: '国家', field: 'country' },
-].map((it) => {
+].map((it: FormField) => {
   it.displayCondition = (value) => {
     return value?.addressType && value.addressType != AddressType.AMZ;
   };
@@ -41,6 +41,9 @@ export const commonDeliveryFields: FormField[] = [
         value['deliveryAddress'] = generateFbaAddress(fbaDict[value.fbaCode]);
       }
     },
+    displayCondition(model) {
+      return model?.addressType === AddressType.AMZ;
+    },
   },
   ...deliveryAddressDetail,
   {
@@ -54,11 +57,21 @@ export const commonDeliveryFields: FormField[] = [
 ];
 export const targetAddressSelectionGroup: FormField[] = [
   formFieldAddressTypeSelection,
-  formFieldTargetCountrySelection,
-  { label: '邮编', field: 'postCode' },
   formFieldFBACodeSelection,
+  formFieldTargetCountrySelection,
+  {
+    label: '邮编',
+    field: 'postCode',
+    disableCondition(model) {
+      return model?.addressType === AddressType.AMZ;
+    },
+    onFormUpdate(value) {
+      if (value?.fbaCode) {
+        value['postCode'] = fbaDict[value.fbaCode].postCode;
+      }
+    },
+  },
   { label: 'PO', field: 'po' },
-
   ...commonDeliveryFields,
   ...deliveryMethodSelection,
 ].map((it) => {

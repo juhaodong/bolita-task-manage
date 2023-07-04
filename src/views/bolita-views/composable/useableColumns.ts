@@ -1,7 +1,7 @@
 import { h } from 'vue';
 import dayjs from 'dayjs';
 
-const standardDateFormat = 'YYYY-MM-DD HH:mm';
+const standardDateFormat = 'YYYY-MM-DD/HH:mm';
 function hashCode(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {

@@ -1,4 +1,6 @@
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
+import { AddressType } from '@/api/model/common/AddressType';
+import { fbaDict } from '@/api/model/common/FBACode';
 
 export const targetCountry = [
   { name: '奥地利', code: 'AT' },
@@ -45,5 +47,13 @@ export const formFieldTargetCountrySelection: FormField = {
       label: it.name + '(' + it.code + ')',
       value: it.code,
     })),
+  },
+  disableCondition(model) {
+    return model?.addressType === AddressType.AMZ;
+  },
+  onFormUpdate(value) {
+    if (value?.fbaCode) {
+      value['targetCountry'] = fbaDict[value.fbaCode].countryCode;
+    }
   },
 };
