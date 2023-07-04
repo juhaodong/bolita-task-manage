@@ -5,6 +5,7 @@ import copy from '@/directives/copy';
 import debounce from '@/directives/debounce';
 import throttle from '@/directives/throttle';
 import draggable from '@/directives/draggable';
+import print from 'vue3-print-nb';
 
 /**
  * 注册全局自定义指令
@@ -13,6 +14,7 @@ import draggable from '@/directives/draggable';
 export function setupDirectives(app: App) {
   // 权限控制指令（演示）
   app.directive('permission', permission);
+  app.use(print);
   // 复制指令
   app.directive('copy', copy);
   // 防抖指令

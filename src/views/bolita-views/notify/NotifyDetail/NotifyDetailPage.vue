@@ -9,7 +9,9 @@
   >
     <n-tabs v-model:value="currentTab" type="line" animated class="mt-4">
       <n-tab-pane name="信息">
-        <notify-detail-basic-info @task-update="updateTaskList" :notify-id="notifyId" />
+        <div id="notifyDetail">
+          <notify-detail-basic-info @task-update="updateTaskList" :notify-id="notifyId" />
+        </div>
       </n-tab-pane>
       <n-tab-pane name="到货详情列表">
         <div style="overflow-x: scroll">
@@ -59,7 +61,7 @@
     </n-modal>
     <template v-if="currentTab == '信息'" #action>
       <n-space>
-        <n-button>
+        <n-button v-print="'#notifyDetail'">
           <template #icon>
             <n-icon> <print16-filled /> </n-icon>
           </template>
@@ -89,6 +91,7 @@
   import { $ref } from 'vue/macros';
   import { Print16Filled } from '@vicons/fluent';
   import { Archive, Save } from '@vicons/ionicons5';
+  import { Printd } from 'printd';
 
   const formValue: Ref<{ note: string; files: any[] }> = ref({
     note: '',
@@ -144,6 +147,10 @@
   });
   interface Props {
     notifyId: string;
+  }
+  function doPrint() {
+    const d = new Printd();
+    d.print(document.getElementById('notifyDetail'));
   }
   const props = defineProps<Props>();
   let notifyDetail: any | null = $ref(null);
