@@ -10,11 +10,7 @@
         :scroll-x="1090"
       >
         <template #tableTitle>
-          <n-popselect
-            placement="bottom-start"
-            @update:value="addTable"
-            :options="allSortingLabelAndCount"
-          >
+          <n-popselect placement="bottom-start" @update:value="addTable">
             <n-button type="primary" @click="addTable">
               <template #icon>
                 <n-icon>
@@ -29,12 +25,7 @@
           </n-popselect>
         </template>
       </BasicTable>
-      <n-space>
-        <n-tag size="large" :type="planedBoxCount == questDetail?.boxCount ? 'success' : 'warning'"
-          >总计划箱数 {{ planedBoxCount }}/{{ questDetail?.boxCount }}</n-tag
-        >
-        <n-button @click="emit('next')" type="success" :disabled="!canGoNext">保存并提交</n-button>
-      </n-space>
+      <n-space />
     </n-space>
 
     <n-modal v-model:show="showModal" :show-icon="false" preset="dialog" title="新建任务">
@@ -58,7 +49,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, h, reactive, ref, watchEffect } from 'vue';
+  import { h, reactive, ref, watchEffect } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns } from './columns';
   import { createTask, deleteTask, getTaskList, getTasksForQuest } from '@/api/task/task-api';
@@ -67,17 +58,12 @@
   import TaskDetailPage from '@/views/bolita-views/operation/OperationDetail/OperationDetailPage.vue';
   import { TaskModel, TaskStatus } from '@/api/task/task-types';
   import NewOperationFormIndex from '@/views/bolita-views/operation/new/NewOperationFormIndex.vue';
-  import { getQuestById } from '@/api/quest/quest-api';
-  import { QuestModel } from '@/api/quest/quest-type';
   import { PlusOutlined } from '@vicons/antd';
-  import { SelectOption } from 'naive-ui';
-  import { clamp } from 'lodash-es';
 
-  const emit = defineEmits(['next']);
   interface Props {
     questId?: string;
   }
-  let questDetail: QuestModel | null = $ref(null);
+
   const props = defineProps<Props>();
   watchEffect(async () => {
     await reload();
@@ -85,34 +71,8 @@
   async function reload() {
     if (props.questId != null) {
       console.log(props.questId);
-      questDetail = await getQuestById(props.questId);
     }
   }
-
-  const planedBoxCount = computed(() => {
-    return questDetail?.tasks.reduce((sum, i) => sum + parseInt(i.boxCount), 0) ?? 0;
-  });
-
-  const usedSortLabel = $computed(() => {
-    return questDetail?.tasks.map((it) => it.sortLabel) ?? [];
-  });
-
-  const allSortingLabelAndCount: SelectOption[] = $computed(() => {
-    return (
-      questDetail?.notifyInfo?.taskList
-        ?.filter((it) => !usedSortLabel.includes(it.sortCode))
-        ?.map((it) => {
-          return {
-            label: '分拣码：' + it.sortCode + '(' + it.count + '箱)',
-            value: it.sortCode,
-          };
-        }) ?? []
-    );
-  });
-
-  const canGoNext = computed(() => {
-    return planedBoxCount.value == questDetail?.boxCount;
-  });
 
   const actionRef = ref();
 
@@ -165,21 +125,7 @@
     },
   });
 
-  function addTable(presetSortLabel = '') {
-    const preset = questDetail?.notifyInfo?.taskList.find((it) => it.sortCode === presetSortLabel);
-    if (preset) {
-      useSortCode = presetSortLabel;
-      useBoxCount = parseInt(preset.count);
-      console.log(preset.count);
-    } else {
-      console.log(questDetail?.boxCount ?? 0, planedBoxCount.value, 0);
-      useBoxCount = clamp(
-        (questDetail?.boxCount ?? 0) - planedBoxCount.value,
-        0,
-        Number.MAX_SAFE_INTEGER
-      );
-      useSortCode = '';
-    }
+  function addTable() {
     showModal.value = true;
   }
 
@@ -196,10 +142,6 @@
   async function createNewTask(taskInfo: TaskModel) {
     taskInfo.questId = props.questId;
     taskInfo.status = TaskStatus.WaitForCheck;
-    if (questDetail?.notifyId) {
-      taskInfo.status = TaskStatus.WaitForArrive;
-    }
-
     const res = await createTask(taskInfo);
     await handleRequest(res, () => {
       showModal.value = false;
