@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, orderBy, query, setDoc } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, orderBy, query, setDoc } from 'firebase/firestore';
 import { db, executeQuery, getDocContent } from '@/plugins/firebase';
 import { resultError, resultSuccess } from '@/utils/request/_util';
 import { doLog } from '@/api/statusChangeLog';
@@ -16,6 +16,7 @@ export interface NotifyModel extends BasicModel {
   totalCount: number;
   reserveTime: number;
   planArriveDateTime: number;
+  arriveTime: number;
   status: string;
   taskList: NotifyDetailModel[];
 }
@@ -38,6 +39,7 @@ export async function createNotify(notifyInfo: NotifyCreateDTO) {
       containerSize: '',
       containerType: '',
       arrivedCount: 0,
+      arriveTime: 0,
       note: '',
       status: NotifyStatus.NotSubmit,
       createTimestamp: dayjs().valueOf(),
@@ -77,6 +79,15 @@ async function updateNotify(info: NotifyCreateDTO, id) {
   }
 }
 
+export async function deleteNotify(id) {
+  try {
+    await deleteDoc(doc(ref, id));
+    return resultSuccess(id);
+  } catch (e: any) {
+    return resultError(e?.message);
+  }
+}
+
 export async function changeNotifyStatus(
   id: string,
   newStatus: NotifyStatus,
@@ -95,6 +106,7 @@ export async function changeNotifyStatus(
       note: '',
       toStatus: newStatus,
     });
+    return resultSuccess('');
   } catch (e: any) {
     return resultError(e?.message);
   }

@@ -15,10 +15,6 @@ export const columns: DataTableColumns<NotifyModel> = [
     width: 100,
   },
   statusColumn,
-  {
-    title: '货柜号',
-    key: 'containerNo',
-  },
 
   timeColumn('planArriveDateTime', '预计到达时间'),
   timeColumn('reserveTime', '预约仓位'),
@@ -29,6 +25,7 @@ export const columns: DataTableColumns<NotifyModel> = [
       return h('div', {}, [`${data.arrivedCount}/${data.totalCount}`]);
     },
   },
+  timeColumn('arriveTime', '实际到达时间'),
 
   {
     title: '备注',

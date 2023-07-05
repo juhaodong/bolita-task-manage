@@ -21,6 +21,8 @@ export type NotifyDetailModel = {
   length: string;
   width: string;
   sku: string;
+  note: string;
+  storagePosition: string;
 };
 
 export async function getTasksForNotify(notifyId) {
@@ -29,6 +31,9 @@ export async function getTasksForNotify(notifyId) {
 
 export async function addNotifyDetail(taskInfo: NotifyDetailModel, notifyId: string) {
   try {
+    taskInfo.arrivedCount = 0;
+    taskInfo.note = '';
+    taskInfo.storagePosition = '';
     await addDoc(collection(db, notifyPath, notifyId, taskListPath), taskInfo);
     return resultSuccess('');
   } catch (e: any) {

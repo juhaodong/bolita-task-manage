@@ -1,15 +1,16 @@
-import { FormField } from '@/views/bolita-views/composable/form-field-type';
+import {
+  convertFieldToColumn,
+  FormField,
+  formFieldTaskTypeSelection,
+} from '@/views/bolita-views/composable/form-field-type';
 import { formFieldUnitSelection } from '@/api/model/common/BoxOrTray';
-import { targetAddressSelectionGroup } from '@/api/model/common/addressGroup';
+import { getTargetAddressSelectionGroup } from '@/api/model/common/addressGroup';
 import { NotifyType } from '@/api/notify/notify-api';
 
 export function getNeededColumnByNotifyType(notifyType: NotifyType | null) {
-  return getNeededFieldByNotifyType(notifyType).map((it) => {
-    return {
-      title: it.label,
-      key: it.field,
-    };
-  });
+  return getNeededFieldByNotifyType(notifyType)
+    .filter((it) => it?.meta != 'detail')
+    .map(convertFieldToColumn);
 }
 
 export function getNeededFieldByNotifyType(notifyType: NotifyType | null): any[] {
@@ -57,11 +58,43 @@ export function getNeededFieldByNotifyType(notifyType: NotifyType | null): any[]
       label: 'SKU',
       field: 'sku',
     },
-    ...targetAddressSelectionGroup,
+    formFieldTaskTypeSelection,
+    ...getTargetAddressSelectionGroup(),
     {
       label: '操作备注',
       field: 'operationNote',
       required: false,
     },
   ];
+}
+
+export function getTaskColumns() {
+  return [
+    {
+      label: '分拣标识',
+      field: 'sortCode',
+    },
+    {
+      label: '数量',
+      field: 'count',
+    },
+    {
+      label: '长',
+      field: 'length',
+    },
+    {
+      label: '宽',
+      field: 'width',
+    },
+    {
+      label: '高',
+      field: 'height',
+    },
+    {
+      label: '实重kg',
+      field: 'actualWeight',
+    },
+    formFieldTaskTypeSelection,
+    { label: 'FBA', field: 'fbaCode' },
+  ].map(convertFieldToColumn);
 }
