@@ -46,7 +46,7 @@
     console.log(values);
   }
   async function init() {
-    warehouseList.value = (await listUser(PermissionEnums.Operator)).result.map((it) => ({
+    warehouseList.value = (await listUser(PermissionEnums.Warehouse)).result.map((it) => ({
       label: it.realName,
       value: it.id,
     }));

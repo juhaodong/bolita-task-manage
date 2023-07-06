@@ -13,9 +13,10 @@ export type Permission = {
 const userPath = 'bolita-user';
 
 export enum PermissionEnums {
+  Operator = '操作员-新',
   Manager = '管理员',
   Sales = '业务员',
-  Operator = '操作员',
+  Warehouse = '操作员',
   Logistic = '物流',
   Customer = '客户',
   Technical = '技术部门',

@@ -35,6 +35,15 @@ const routes: Array<RouteRecordRaw> = [
           import('@/views/bolita-views/user/warehouseManage/list/WarehouseIndex.vue'),
       },
       {
+        path: 'operator',
+        name: `operator`,
+        meta: {
+          title: '操作员管理',
+          activeMenu: 'salesmanManage_index',
+        },
+        component: () => import('@/views/bolita-views/user/operatorManage/list/OperatorIndex.vue'),
+      },
+      {
         path: 'sales',
         name: `sales`,
         meta: {

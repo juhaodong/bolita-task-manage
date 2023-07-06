@@ -105,11 +105,8 @@
     showModal.value = true;
   }
 
-  const loadDataTable = async (res) => {
-    //{ ...formParams, ...params.value, ...res }
-    console.log(res);
-    const { result } = await listUser(PermissionEnums.Warehouse, searchCondition?.id);
-    console.log(result);
+  const loadDataTable = async () => {
+    const { result } = await listUser(PermissionEnums.Operator, searchCondition?.id);
     return result;
   };
 

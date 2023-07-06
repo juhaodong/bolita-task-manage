@@ -24,7 +24,7 @@ export const useCheckDialog = defineStore('checkDialog', {
   },
   actions: {
     async check(title = '请确定是否通过本审核'): Promise<CheckResult> {
-      this.warehouses = (await listUser(PermissionEnums.Operator)).result.map((it) => ({
+      this.warehouses = (await listUser(PermissionEnums.Warehouse)).result.map((it) => ({
         label: it.realName,
         value: it.id,
       }));
