@@ -1,5 +1,5 @@
 import { OperationRequirementModel } from '@/api/operationType';
-import { BasicModel } from '@/api/quest/quest-type';
+import { BasicModel } from '@/api/model/common/BasicModel';
 
 export enum TaskType {
   InBound = '入库',
