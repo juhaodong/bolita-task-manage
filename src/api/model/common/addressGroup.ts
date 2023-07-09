@@ -28,7 +28,7 @@ function getDeliveryAddressDetail(): FormField[] {
   });
 }
 
-function getCommonDeliveryField(): FormField[] {
+export function getCommonDeliveryField(): FormField[] {
   return [
     {
       field: 'deliveryAddress',
@@ -60,6 +60,8 @@ function getCommonDeliveryField(): FormField[] {
     },
   ];
 }
+
+export const commonDeliveryFields = getCommonDeliveryField();
 
 export function getTargetAddressSelectionGroup(): FormField[] {
   return [
