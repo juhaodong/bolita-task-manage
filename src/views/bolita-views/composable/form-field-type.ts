@@ -57,7 +57,7 @@ export function getDeliveryMethodSelection(onlyWithLogistic = false): FormField[
           onlyWithLogistic ? canHaveLogisticMethods : deliveryMethods
         ),
       },
-      required: true,
+      required: false,
     },
     {
       field: 'otherDeliveryName',

@@ -51,6 +51,9 @@ export const formFieldTargetCountrySelection: FormField = {
   disableCondition(model) {
     return model?.addressType === AddressType.AMZ;
   },
+  displayCondition(model) {
+    return model?.addressType && model?.addressType === AddressType.AMZ;
+  },
   onFormUpdate(value) {
     if (value?.fbaCode) {
       value['targetCountry'] = fbaDict[value.fbaCode].countryCode;

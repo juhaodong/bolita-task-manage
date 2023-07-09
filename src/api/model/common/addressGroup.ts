@@ -6,10 +6,11 @@ import { formFieldTargetCountrySelection } from '@/api/model/common/TargetCountr
 import { fbaDict, formFieldFBACodeSelection, generateFbaAddress } from '@/api/model/common/FBACode';
 import { AddressType, formFieldAddressTypeSelection } from '@/api/model/common/AddressType';
 import { generateOptionFromArray } from '@/utils/utils';
-import { yesOrNo } from '@/api/operationType';
+import { YesOrNo, yesOrNo } from '@/api/operationType';
 
 function getDeliveryAddressDetail(): FormField[] {
   return [
+    { label: '备注', field: 'addressNote' },
     { label: '收件人', field: 'contact' },
     { label: '电话／邮箱', field: 'email', required: false },
     { label: '街道', field: 'street' },
@@ -57,6 +58,8 @@ export function getCommonDeliveryField(): FormField[] {
       componentProps: {
         options: generateOptionFromArray(yesOrNo),
       },
+      required: true,
+      defaultValue: YesOrNo.No,
     },
   ];
 }
@@ -79,11 +82,21 @@ export function getTargetAddressSelectionGroup(): FormField[] {
           value['postCode'] = fbaDict[value.fbaCode].postCode;
         }
       },
+      displayCondition(model) {
+        return model?.addressType && model?.addressType === AddressType.AMZ;
+      },
     },
-    { label: 'PO', field: 'po' },
+    {
+      label: 'PO',
+      field: 'po',
+      required: false,
+      displayCondition(model) {
+        return model?.addressType && model?.addressType === AddressType.AMZ;
+      },
+    },
     ...getCommonDeliveryField(),
     ...deliveryMethodSelection,
-  ].map((it) => {
+  ].map((it: FormField) => {
     it.group = '收件人地址信息';
     return it;
   });
