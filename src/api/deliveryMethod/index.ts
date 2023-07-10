@@ -1,5 +1,7 @@
 import { LogisticType } from '@/api/deliveryMethod/logistic-type';
 import { TaskType } from '@/api/task/task-types';
+import { FormField } from '@/views/bolita-views/composable/form-field-type';
+import { generateOptionFromArray } from '@/utils/utils';
 
 export enum DeliveryMethod {
   DHL = 'DHL',
@@ -59,7 +61,6 @@ export function getLogisticTypeByDeliveryMethod(deliveryMethod: DeliveryMethod):
 
 export function getLogisticTypeByTaskType(taskType: TaskType) {
   switch (taskType) {
-    case TaskType.InBound:
     case TaskType.Return:
       return LogisticType.None;
     case TaskType.Transfer:
@@ -74,3 +75,23 @@ export function getLogisticTypeByTaskType(taskType: TaskType) {
 }
 
 export const deliveryMethods = Object.values(DeliveryMethod);
+
+export enum OutBoundDeliveryMethod {
+  DHL = 'DHL',
+  DPD = 'DPD',
+  UPS = 'UPS',
+  GLS = 'GLS',
+  TrayTransfer = '卡派',
+  Others = '其他',
+}
+
+export const outBoundDeliveryMethods = Object.values(OutBoundDeliveryMethod);
+
+export const outBoundFormField: FormField = {
+  field: 'deliveryMethod',
+  label: '配送方式',
+  component: 'NSelect',
+  componentProps: {
+    options: generateOptionFromArray(outBoundDeliveryMethods),
+  },
+};

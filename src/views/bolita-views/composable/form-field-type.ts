@@ -1,6 +1,6 @@
 import { ComponentType, FormSchema } from '@/components/Form';
 import { generateOptionFromArray } from '@/utils/utils';
-import { canHaveLogisticMethods, DeliveryMethod, deliveryMethods } from '@/api/deliveryMethod';
+import { DeliveryMethod, outBoundDeliveryMethods } from '@/api/deliveryMethod';
 import { taskTypes } from '@/api/task/task-types';
 import { BasicColumn } from '@/components/Table';
 
@@ -46,16 +46,14 @@ export function getCheckFormField(warehouseList): FormField[] {
     getFilesUploadFormField('files', false),
   ];
 }
-export function getDeliveryMethodSelection(onlyWithLogistic = false): FormField[] {
+export function getDeliveryMethodSelection(useDeliveryCode = false): FormField[] {
   return [
     {
       field: 'deliveryMethod',
       label: '配送方式',
       component: 'NSelect',
       componentProps: {
-        options: generateOptionFromArray(
-          onlyWithLogistic ? canHaveLogisticMethods : deliveryMethods
-        ),
+        options: generateOptionFromArray(outBoundDeliveryMethods),
       },
       required: true,
     },
@@ -63,18 +61,40 @@ export function getDeliveryMethodSelection(onlyWithLogistic = false): FormField[
       field: 'otherDeliveryName',
       label: '其他配送方式名称',
       component: 'NInput',
-      componentProps: {
-        options: generateOptionFromArray(deliveryMethods),
-      },
       displayCondition(value) {
         return value.deliveryMethod === DeliveryMethod.Others;
+      },
+      required: true,
+    },
+    {
+      field: 'deliveryCode',
+      label: '物流单号',
+      component: 'NInput',
+      displayCondition() {
+        return useDeliveryCode;
       },
       required: true,
     },
   ];
 }
 export const deliveryMethodSelection: FormField[] = getDeliveryMethodSelection();
-
+export function formFieldBuilder() {
+  const fieldForm: FormField[] = [];
+  const add = (field: FormField) => {
+    fieldForm.push(field);
+  };
+  const addAll = (fields: FormField[]) => {
+    fieldForm.push(...fields);
+  };
+  const build = () => {
+    return fieldForm;
+  };
+  return {
+    add,
+    addAll,
+    build,
+  };
+}
 export function convertFormFieldToSchema(formField: FormField): FormSchema {
   const type = formField?.component ?? 'NInput';
   const verb = ['NInput', 'NInputNumber'].includes(type) ? '输入' : '选择';
@@ -135,3 +155,19 @@ export function convertFieldToColumn(field: FormField): BasicColumn {
     key: field.field,
   };
 }
+export const formFieldSortLabel: FormField = {
+  field: 'sortLabel',
+  label: '分拣ID',
+};
+export const formFieldBoxNo: FormField = {
+  field: 'boxNo',
+  label: '箱号',
+};
+export const formFieldSku: FormField = {
+  field: 'SKU',
+  label: 'SKU',
+};
+export const formFieldContainerNo: FormField = {
+  field: 'containerNo',
+  label: '货柜号',
+};

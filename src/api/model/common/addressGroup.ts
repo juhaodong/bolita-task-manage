@@ -1,6 +1,6 @@
 import {
-  deliveryMethodSelection,
   FormField,
+  getDeliveryMethodSelection,
 } from '@/views/bolita-views/composable/form-field-type';
 import { formFieldTargetCountrySelection } from '@/api/model/common/TargetCountry';
 import { fbaDict, formFieldFBACodeSelection, generateFbaAddress } from '@/api/model/common/FBACode';
@@ -8,18 +8,18 @@ import { AddressType, formFieldAddressTypeSelection } from '@/api/model/common/A
 import { generateOptionFromArray } from '@/utils/utils';
 import { yesOrNo } from '@/api/operationType';
 
+export const deliveryAddressDetail: FormField[] = [
+  { label: '收件人', field: 'contact' },
+  { label: '电话／邮箱', field: 'email', required: false },
+  { label: '街道', field: 'street' },
+  { label: '门牌号', field: 'houseNo' },
+  { label: '地址附加', field: 'appendAddress', required: false },
+  { label: '城市', field: 'city' },
+  { label: '州', field: 'state' },
+];
+
 function getDeliveryAddressDetail(): FormField[] {
-  return [
-    { label: '收件人', field: 'contact' },
-    { label: '电话／邮箱', field: 'email', required: false },
-    { label: '街道', field: 'street' },
-    { label: '门牌号', field: 'houseNo' },
-    { label: '地址附加', field: 'appendAddress', required: false },
-    { label: '邮编', field: 'postCode' },
-    { label: '城市', field: 'city' },
-    { label: '州', field: 'state' },
-    { label: '国家', field: 'country' },
-  ].map((it: FormField) => {
+  return deliveryAddressDetail.map((it: FormField) => {
     it.displayCondition = (value) => {
       return value?.addressType && value.addressType != AddressType.AMZ;
     };
@@ -28,7 +28,7 @@ function getDeliveryAddressDetail(): FormField[] {
   });
 }
 
-function getCommonDeliveryField(): FormField[] {
+function getCommonDeliveryField(isAmazon = false): FormField[] {
   return [
     {
       field: 'deliveryAddress',
@@ -38,7 +38,7 @@ function getCommonDeliveryField(): FormField[] {
       },
       required: true,
       disableCondition(model) {
-        return model?.addressType === AddressType.AMZ;
+        return isAmazon || model?.addressType === AddressType.AMZ;
       },
       onFormUpdate(value) {
         if (value?.fbaCode) {
@@ -46,7 +46,7 @@ function getCommonDeliveryField(): FormField[] {
         }
       },
       displayCondition(model) {
-        return model?.addressType === AddressType.AMZ;
+        return isAmazon || model?.addressType === AddressType.AMZ;
       },
     },
     ...getDeliveryAddressDetail(),
@@ -61,7 +61,7 @@ function getCommonDeliveryField(): FormField[] {
   ];
 }
 
-export function getTargetAddressSelectionGroup(): FormField[] {
+export function getTargetAddressSelectionGroup(useDeliveryCode = false): FormField[] {
   return [
     formFieldAddressTypeSelection,
     formFieldFBACodeSelection,
@@ -80,7 +80,7 @@ export function getTargetAddressSelectionGroup(): FormField[] {
     },
     { label: 'PO', field: 'po' },
     ...getCommonDeliveryField(),
-    ...deliveryMethodSelection,
+    ...getDeliveryMethodSelection(useDeliveryCode),
   ].map((it) => {
     it.group = '收件人地址信息';
     return it;

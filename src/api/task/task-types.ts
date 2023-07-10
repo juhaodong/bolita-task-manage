@@ -1,9 +1,8 @@
 import { OperationRequirementModel } from '@/api/operationType';
-import { BasicModel } from '@/api/quest/quest-type';
+import { BasicModel } from '../model/common/BasicModel';
 
 export enum TaskType {
-  InBound = '入库',
-  Transfer = '中转/快转',
+  Transfer = '转运',
   AmazonTray = 'AMZ卡派',
   NormalTray = '普通卡派',
   OneForSend = '一件代发',
@@ -27,9 +26,9 @@ export enum TaskStatus {
 }
 
 export interface TaskModel extends BasicModel {
-  questId?: string;
-  logisticId?: string;
-  sortLabel?: string;
+  notifyId: string;
+  sortLabel: string;
+  boxNo?: string;
   boxCount: number;
   taskType: TaskType;
   deliveryMethod: string;
