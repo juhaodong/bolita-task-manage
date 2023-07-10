@@ -32,6 +32,7 @@ export function getFilesUploadFormField(key = 'files', required = true): FormFie
 }
 
 export const filesUpload: FormField = getFilesUploadFormField();
+
 export function getCheckFormField(warehouseList): FormField[] {
   return [
     {
@@ -46,6 +47,7 @@ export function getCheckFormField(warehouseList): FormField[] {
     getFilesUploadFormField('files', false),
   ];
 }
+
 export function getDeliveryMethodSelection(useDeliveryCode = false): FormField[] {
   return [
     {
@@ -77,24 +79,9 @@ export function getDeliveryMethodSelection(useDeliveryCode = false): FormField[]
     },
   ];
 }
+
 export const deliveryMethodSelection: FormField[] = getDeliveryMethodSelection();
-export function formFieldBuilder() {
-  const fieldForm: FormField[] = [];
-  const add = (field: FormField) => {
-    fieldForm.push(field);
-  };
-  const addAll = (fields: FormField[]) => {
-    fieldForm.push(...fields);
-  };
-  const build = () => {
-    return fieldForm;
-  };
-  return {
-    add,
-    addAll,
-    build,
-  };
-}
+
 export function convertFormFieldToSchema(formField: FormField): FormSchema {
   const type = formField?.component ?? 'NInput';
   const verb = ['NInput', 'NInputNumber'].includes(type) ? '输入' : '选择';
@@ -155,6 +142,7 @@ export function convertFieldToColumn(field: FormField): BasicColumn {
     key: field.field,
   };
 }
+
 export const formFieldSortLabel: FormField = {
   field: 'sortLabel',
   label: '分拣ID',
@@ -171,3 +159,27 @@ export const formFieldContainerNo: FormField = {
   field: 'containerNo',
   label: '货柜号',
 };
+
+export function formFieldBuilder() {
+  const fieldForm: FormField[] = [];
+  let group = '基本信息';
+  const add = (field: FormField) => {
+    field.group = group;
+    fieldForm.push(field);
+  };
+  const addAll = (fields: FormField[]) => {
+    fields.forEach(add);
+  };
+  const setGroup = (newGroup: string) => {
+    group = newGroup;
+  };
+  const build = () => {
+    return fieldForm;
+  };
+  return {
+    add,
+    addAll,
+    build,
+    setGroup,
+  };
+}

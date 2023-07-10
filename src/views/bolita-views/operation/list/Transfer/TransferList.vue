@@ -16,7 +16,7 @@
               <PlusOutlined />
             </n-icon>
           </template>
-          新建一件代发
+          新建转运
         </n-button>
       </template>
     </BasicTable>
@@ -26,9 +26,9 @@
       :show-icon="false"
       preset="card"
       style="max-width: 800px"
-      title="新建一件代发"
+      title="新建转运"
     >
-      <new-one-for-send-form-index />
+      <new-one-for-send-form-index :task-type="TaskType.Transfer" />
     </n-modal>
     <n-modal v-model:show="showDetailModel">
       <task-detail-page
@@ -52,8 +52,8 @@
   import { $ref } from 'vue/macros';
   import TaskDetailPage from '@/views/bolita-views/operation/OperationDetail/OperationDetailPage.vue';
   import { PermissionEnums } from '@/api/user/baseUser';
-  import { TaskStatus } from '@/api/task/task-types';
-  import NewOneForSendFormIndex from '@/views/bolita-views/operation/list/OneForSend/new/NewOperationList.vue';
+  import { TaskStatus, TaskType } from '@/api/task/task-types';
+  import NewOneForSendFormIndex from '@/views/bolita-views/operation/new/NewOperationList.vue';
 
   const actionRef = ref();
 

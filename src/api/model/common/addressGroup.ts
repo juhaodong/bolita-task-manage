@@ -28,7 +28,7 @@ function getDeliveryAddressDetail(): FormField[] {
   });
 }
 
-function getCommonDeliveryField(isAmazon = false): FormField[] {
+export function getCommonDeliveryField(isAmazon = false): FormField[] {
   return [
     {
       field: 'deliveryAddress',

@@ -9,7 +9,7 @@ interface FBAAddress {
   postCode: string;
   countryCode: string;
 }
-const fbaCode: FBAAddress[] = [
+export const fbaCode: FBAAddress[] = [
   {
     code: 'CZ-PRG2',
     state: 'Dobrovíz',

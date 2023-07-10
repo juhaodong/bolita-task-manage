@@ -15,7 +15,7 @@ import { sizeFormField } from '@/api/model/common/SizeFormField';
 import { outBoundFormField } from '@/api/deliveryMethod';
 import { formFieldTargetCountrySelection } from '@/api/model/common/TargetCountry';
 import { AddressType } from '@/api/model/common/AddressType';
-import { fbaDict, formFieldFBACodeSelection, generateFbaAddress } from '@/api/model/common/FBACode';
+import { fbaCode, fbaDict, generateFbaAddress } from '@/api/model/common/FBACode';
 import { deliveryAddressDetail } from '@/api/model/common/addressGroup';
 
 export function getFormFieldForTaskType(taskType: TaskType, customerField: FormField) {
@@ -31,22 +31,13 @@ export function getFormFieldForTaskType(taskType: TaskType, customerField: FormF
     formFieldBoxNo,
     formFieldSku,
   ]);
+
   if ([TaskType.Transfer, TaskType.AmazonTray, TaskType.NormalTray].includes(taskType)) {
     builder.add(formFieldContainerNo);
     builder.add(filesUpload);
   }
   if (taskType == TaskType.OneForSend) {
     builder.add(formFieldUnitSelection);
-  }
-  if ([TaskType.AmazonTray, TaskType.NormalTray].includes(taskType)) {
-    builder.add({
-      field: 'needPrice',
-      label: '需要确认报价',
-      component: 'NSelect',
-      componentProps: {
-        options: generateOptionFromArray(yesOrNo),
-      },
-    });
   }
   builder.addAll([
     {
@@ -71,6 +62,7 @@ export function getFormFieldForTaskType(taskType: TaskType, customerField: FormF
       },
     ]);
   }
+  builder.setGroup('物流信息');
   if ([TaskType.OneForSend, TaskType.Transfer, TaskType.Return].includes(taskType)) {
     builder.addAll([
       outBoundFormField,
@@ -96,7 +88,17 @@ export function getFormFieldForTaskType(taskType: TaskType, customerField: FormF
     },
   ]);
   if (TaskType.AmazonTray === taskType) {
-    builder.add(formFieldFBACodeSelection);
+    builder.add({
+      label: 'FBA Code',
+      field: 'fbaCode',
+      component: 'NSelect',
+      componentProps: {
+        options: fbaCode.map((it) => ({
+          label: it.code + '(' + it.countryCode + ')',
+          value: it.code,
+        })),
+      },
+    });
   }
   if ([TaskType.Transfer, TaskType.AmazonTray, TaskType.Return].includes(taskType)) {
     builder.addAll([
@@ -124,6 +126,17 @@ export function getFormFieldForTaskType(taskType: TaskType, customerField: FormF
   } else {
     builder.addAll(deliveryAddressDetail);
   }
+  if ([TaskType.AmazonTray, TaskType.NormalTray].includes(taskType)) {
+    builder.add({
+      field: 'needPrice',
+      label: '需要确认报价',
+      component: 'NSelect',
+      componentProps: {
+        options: generateOptionFromArray(yesOrNo),
+      },
+    });
+  }
+
   builder.add({
     field: 'note',
     label: '备注',
