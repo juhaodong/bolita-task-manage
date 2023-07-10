@@ -7,23 +7,8 @@ import { TaskType } from '@/api/task/task-types';
 
 export function getTaskTypeOperationKeys(taskType: TaskType) {
   switch (taskType) {
-    case TaskType.InBound:
-      return getORListByNames([
-        OperationType.Amount,
-        OperationType.Check,
-        OperationType.Unload,
-        OperationType.Sort,
-        OperationType.Load,
-        OperationType.TrayStorage,
-        OperationType.BoxStorage,
-        OperationType.OnShelf,
-        OperationType.TakePic,
-        OperationType.NoLogoSelect,
-        OperationType.OtherSpecial,
-      ]);
     case TaskType.NormalTray:
       return getORListByNames([
-        OperationType.Amount,
         OperationType.Load,
         OperationType.SelectBoxOnSku,
         OperationType.TrayOutBound,
@@ -45,7 +30,6 @@ export function getTaskTypeOperationKeys(taskType: TaskType) {
       ]);
     case TaskType.Transfer:
       return getORListByNames([
-        OperationType.Amount,
         OperationType.Load,
         OperationType.SelectBoxOnSku,
         OperationType.FastOutBound,
@@ -86,7 +70,6 @@ export function getTaskTypeOperationKeys(taskType: TaskType) {
 
     case TaskType.Return:
       return getORListByNames([
-        OperationType.Amount,
         OperationType.Sort,
         OperationType.TrayStorage,
         OperationType.BoxStorage,
@@ -111,7 +94,6 @@ export function getTaskTypeOperationKeys(taskType: TaskType) {
       ]);
     case TaskType.AmazonTray:
       return getORListByNames([
-        OperationType.Amount,
         OperationType.Load,
         OperationType.TrayOutBound,
         OperationType.ShouldChangeTray,

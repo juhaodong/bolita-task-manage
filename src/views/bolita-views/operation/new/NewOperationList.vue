@@ -12,6 +12,7 @@
   import { listUser, PermissionEnums } from '@/api/user/baseUser';
   import { getFormFieldForTaskType } from '@/api/task/taskRepo';
   import { TaskType } from '@/api/task/task-types';
+  import { createTask } from '@/api/task/task-api';
 
   interface Props {
     taskType: TaskType;
@@ -19,7 +20,6 @@
   }
 
   const props = defineProps<Props>();
-  let task = [];
 
   let customerList = ref<any[]>([]);
   const { hasPermission } = usePermission();
@@ -44,9 +44,9 @@
   const schemas: FormField[] = getFormFieldForTaskType(props.taskType, customerField);
 
   const emit = defineEmits(['submit']);
+  createTask();
 
   function handleSubmit(values: NotifyModel) {
-    values.taskList = task;
     emit('submit', values);
   }
 </script>

@@ -10,37 +10,28 @@ import {
   setDoc,
   where,
 } from 'firebase/firestore';
-import { TaskModel, TaskStatus, TaskType } from '@/api/task/task-types';
+import { TaskModel, TaskStatus } from '@/api/task/task-types';
 import { doLog } from '@/api/statusChangeLog';
 import { resultError, resultSuccess } from '@/utils/request/_util';
 import dayjs from 'dayjs';
 import { clamp, keyBy } from 'lodash-es';
+import { getTaskTypeOperationKeys } from '@/api/task/task-operation-requirement';
 
 const taskPath = 'task-NewQuestOperationList';
 const taskCollection = collection(db, taskPath);
 const operationRequirementsPath = 'operationRequirements';
+
 export async function getTasksForQuest(questId) {
   return await executeQuery(query(taskCollection, where('questId', '==', questId)));
 }
-export async function createTask(taskInfo: TaskModel) {
+
+export async function createTask(taskInfo: any) {
   try {
-    const info: TaskModel = {
-      boxCount: 0,
-      completionRate: 0,
-      customerId: '',
-      deliveryDate: '',
-      createTimestamp: dayjs().valueOf(),
-      deliveryMethod: '',
-      files: [],
-      note: '',
-      operateTime: '',
-      operationRequirements: [],
-      refLink: '',
-      status: TaskStatus.NotSubmit,
-      taskType: TaskType.AmazonTray,
-      warehouseId: '',
-    };
-    const realInfo = Object.assign(info, taskInfo);
+    const realInfo = Object.assign(taskInfo);
+    taskInfo.status = TaskStatus.NotSubmit;
+    taskInfo.createTimestamp = dayjs().valueOf();
+    taskInfo.finishTimestamp = '';
+    taskInfo.operationRequirements = getTaskTypeOperationKeys(taskInfo.taskType);
     const id = dayjs().valueOf().toString();
     await setDoc(doc(taskCollection, id), realInfo);
     await Promise.all(
@@ -88,6 +79,7 @@ export async function changeTaskWarehouse(id: string, warehouseId: string) {
     return resultError(e?.message);
   }
 }
+
 export async function changeTaskStatus(
   id: string,
   newStatus: TaskStatus,
