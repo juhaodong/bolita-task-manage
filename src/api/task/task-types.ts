@@ -1,5 +1,5 @@
 import { OperationRequirementModel } from '@/api/operationType';
-import { BasicModel } from '../model/common/BasicModel';
+import { BasicModel } from '@/api/model/common/BasicModel';
 
 export enum TaskType {
   Transfer = '转运',

@@ -6,7 +6,7 @@ import { formFieldTargetCountrySelection } from '@/api/model/common/TargetCountr
 import { fbaDict, formFieldFBACodeSelection, generateFbaAddress } from '@/api/model/common/FBACode';
 import { AddressType, formFieldAddressTypeSelection } from '@/api/model/common/AddressType';
 import { generateOptionFromArray } from '@/utils/utils';
-import { yesOrNo } from '@/api/operationType';
+import { YesOrNo, yesOrNo } from '@/api/operationType';
 
 export const deliveryAddressDetail: FormField[] = [
   { label: '收件人', field: 'contact' },
@@ -57,11 +57,15 @@ function getCommonDeliveryField(isAmazon = false): FormField[] {
       componentProps: {
         options: generateOptionFromArray(yesOrNo),
       },
+      required: true,
+      defaultValue: YesOrNo.No,
     },
   ];
 }
 
-export function getTargetAddressSelectionGroup(useDeliveryCode = false): FormField[] {
+export const commonDeliveryFields = getCommonDeliveryField();
+
+export function getTargetAddressSelectionGroup(): FormField[] {
   return [
     formFieldAddressTypeSelection,
     formFieldFBACodeSelection,
@@ -77,11 +81,21 @@ export function getTargetAddressSelectionGroup(useDeliveryCode = false): FormFie
           value['postCode'] = fbaDict[value.fbaCode].postCode;
         }
       },
+      displayCondition(model) {
+        return model?.addressType && model?.addressType === AddressType.AMZ;
+      },
     },
-    { label: 'PO', field: 'po' },
+    {
+      label: 'PO',
+      field: 'po',
+      required: false,
+      displayCondition(model) {
+        return model?.addressType && model?.addressType === AddressType.AMZ;
+      },
+    },
     ...getCommonDeliveryField(),
-    ...getDeliveryMethodSelection(useDeliveryCode),
-  ].map((it) => {
+    ...deliveryMethodSelection,
+  ].map((it: FormField) => {
     it.group = '收件人地址信息';
     return it;
   });

@@ -6,8 +6,7 @@
 <script setup lang="ts">
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
-
-  import { commonDeliveryFields } from '@/api/model/common/addressGroup';
+  import { getCommonDeliveryField } from '@/api/model/common/addressGroup';
 
   const schemas: FormField[] = [
     {
@@ -30,7 +29,7 @@
       label: '总重量',
       required: true,
     },
-    ...commonDeliveryFields,
+    ...getCommonDeliveryField(),
   ];
 
   const emit = defineEmits(['submit']);

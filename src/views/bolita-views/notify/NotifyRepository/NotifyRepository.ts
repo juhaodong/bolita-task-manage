@@ -57,6 +57,7 @@ export function getNeededFieldByNotifyType(notifyType: NotifyType | null): any[]
     {
       label: 'SKU',
       field: 'sku',
+      required: false,
     },
     formFieldTaskTypeSelection,
     ...getTargetAddressSelectionGroup(),

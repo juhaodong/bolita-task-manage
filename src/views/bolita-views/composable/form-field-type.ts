@@ -55,7 +55,7 @@ export function getDeliveryMethodSelection(useDeliveryCode = false): FormField[]
       componentProps: {
         options: generateOptionFromArray(outBoundDeliveryMethods),
       },
-      required: true,
+      required: false,
     },
     {
       field: 'otherDeliveryName',

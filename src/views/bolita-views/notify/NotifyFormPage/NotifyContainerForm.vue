@@ -44,6 +44,7 @@
     {
       field: 'customerId',
       label: '客户',
+      required: false,
       component: 'NSelect',
       componentProps: {
         options: customerList,
@@ -63,6 +64,7 @@
       field: 'reserveTime',
       component: 'NDatePicker',
       label: '预约仓位',
+      required: false,
       componentProps: {
         type: 'datetime',
         clearable: true,
