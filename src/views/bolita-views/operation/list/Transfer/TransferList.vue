@@ -53,7 +53,7 @@
   import TaskDetailPage from '@/views/bolita-views/operation/OperationDetail/OperationDetailPage.vue';
   import { PermissionEnums } from '@/api/user/baseUser';
   import { TaskStatus } from '@/api/task/task-types';
-  import NewOneForSendFormIndex from '@/views/bolita-views/operation/list/OneForSend/new/NewOneForSendFormIndex.vue';
+  import NewOneForSendFormIndex from '@/views/bolita-views/operation/list/OneForSend/new/NewOperationList.vue';
 
   const actionRef = ref();
 

@@ -10,16 +10,15 @@
   import { ref } from 'vue';
   import { usePermission } from '@/hooks/web/usePermission';
   import { listUser, PermissionEnums } from '@/api/user/baseUser';
-  import { formFieldUnitSelection } from '@/api/model/common/BoxOrTray';
-  import { sizeFormField } from '@/api/model/common/SizeFormField';
-  import { outBoundFormField } from '@/api/deliveryMethod';
-  import { deliveryAddressDetail } from '@/api/model/common/addressGroup';
+  import { getFormFieldForTaskType } from '@/api/task/taskRepo';
+  import { TaskType } from '@/api/task/task-types';
 
   interface Props {
+    taskType: TaskType;
     model?: any;
   }
 
-  defineProps<Props>();
+  const props = defineProps<Props>();
   let task = [];
 
   let customerList = ref<any[]>([]);
@@ -31,7 +30,7 @@
     }));
   }
   init();
-  const customerField = {
+  const customerField: FormField = {
     field: 'customerId',
     label: '客户',
     component: 'NSelect',
@@ -42,54 +41,7 @@
       return !hasPermission([PermissionEnums.Customer]);
     },
   };
-  const schemas: FormField[] = [
-    {
-      field: 'notifyId',
-      label: '入库ID',
-      required: false,
-    },
-    {
-      field: 'customerId',
-      label: '客户',
-      component: 'NSelect',
-      componentProps: {
-        options: customerList,
-      },
-      displayCondition() {
-        return !hasPermission([PermissionEnums.Customer]);
-      },
-    },
-    {
-      field: 'sortLabel',
-      label: '分拣ID',
-    },
-    {
-      field: 'boxNo',
-      label: '箱号',
-    },
-    {
-      field: 'SKU',
-      label: 'SKU',
-    },
-    formFieldUnitSelection,
-
-    {
-      field: 'boxCount',
-      label: '数量',
-    },
-    ...sizeFormField,
-    outBoundFormField,
-    ...deliveryAddressDetail.map((it) => {
-      it.group = '收货地址';
-      return it;
-    }),
-
-    {
-      field: 'note',
-      label: '备注',
-      required: false,
-    },
-  ];
+  const schemas: FormField[] = getFormFieldForTaskType(props.taskType, customerField);
 
   const emit = defineEmits(['submit']);
 

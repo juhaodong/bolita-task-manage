@@ -1,6 +1,6 @@
 import {
+  deliveryMethodSelection,
   FormField,
-  getDeliveryMethodSelection,
 } from '@/views/bolita-views/composable/form-field-type';
 import { formFieldTargetCountrySelection } from '@/api/model/common/TargetCountry';
 import { fbaDict, formFieldFBACodeSelection, generateFbaAddress } from '@/api/model/common/FBACode';

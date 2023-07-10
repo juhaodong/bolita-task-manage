@@ -2,8 +2,11 @@ import { TaskType } from '@/api/task/task-types';
 import {
   filesUpload,
   FormField,
+  formFieldBoxNo,
   formFieldBuilder,
   formFieldContainerNo,
+  formFieldSku,
+  formFieldSortLabel,
 } from '@/views/bolita-views/composable/form-field-type';
 import { formFieldUnitSelection } from '@/api/model/common/BoxOrTray';
 import { generateOptionFromArray } from '@/utils/utils';
@@ -24,18 +27,9 @@ export function getFormFieldForTaskType(taskType: TaskType, customerField: FormF
       required: false,
     },
     customerField,
-    {
-      field: 'sortLabel',
-      label: '分拣ID',
-    },
-    {
-      field: 'boxNo',
-      label: '箱号',
-    },
-    {
-      field: 'SKU',
-      label: 'SKU',
-    },
+    formFieldSortLabel,
+    formFieldBoxNo,
+    formFieldSku,
   ]);
   if ([TaskType.Transfer, TaskType.AmazonTray, TaskType.NormalTray].includes(taskType)) {
     builder.add(formFieldContainerNo);
@@ -134,4 +128,5 @@ export function getFormFieldForTaskType(taskType: TaskType, customerField: FormF
     field: 'note',
     label: '备注',
   });
+  return builder.build();
 }
