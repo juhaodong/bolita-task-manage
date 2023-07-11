@@ -176,10 +176,20 @@ export function formFieldBuilder() {
   const build = () => {
     return fieldForm;
   };
+
+  const toColumn = () => {
+    return fieldForm.map((it) => ({
+      render: it.render,
+      title: it.label,
+      key: it.field,
+    }));
+  };
+
   return {
     add,
     addAll,
     build,
     setGroup,
+    toColumn,
   };
 }

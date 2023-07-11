@@ -52,7 +52,7 @@ export const formFieldTargetCountrySelection: FormField = {
     return model?.addressType === AddressType.AMZ;
   },
   displayCondition(model) {
-    return model?.addressType && model?.addressType === AddressType.AMZ;
+    return !model?.addressType && model?.addressType === AddressType.AMZ;
   },
   onFormUpdate(value) {
     if (value?.fbaCode) {

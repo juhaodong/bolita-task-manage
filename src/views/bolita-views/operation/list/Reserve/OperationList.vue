@@ -146,8 +146,8 @@
     showModal.value = true;
   }
 
-  const loadDataTable = async (res) => {
-    return await getTaskList({ ...formParams, ...params.value, ...res });
+  const loadDataTable = async () => {
+    return await getTaskList(TaskType.Reserve);
   };
 
   function onCheckedRow(rowKeys) {

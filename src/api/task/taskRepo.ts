@@ -17,6 +17,7 @@ import { formFieldTargetCountrySelection } from '@/api/model/common/TargetCountr
 import { AddressType } from '@/api/model/common/AddressType';
 import { fbaCode, fbaDict, generateFbaAddress } from '@/api/model/common/FBACode';
 import { deliveryAddressDetail } from '@/api/model/common/addressGroup';
+import { statusColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 
 export function getFormFieldForTaskType(taskType: TaskType, customerField: FormField) {
   const builder = formFieldBuilder();
@@ -142,4 +143,122 @@ export function getFormFieldForTaskType(taskType: TaskType, customerField: FormF
     label: '备注',
   });
   return builder.build();
+}
+
+export function getFormColumnForTaskType(taskType: TaskType) {
+  const builder = formFieldBuilder();
+  builder.addAll([
+    {
+      field: 'id',
+      label: '出库ID',
+      required: false,
+    },
+    {
+      field: 'notifyId',
+      label: '入库ID',
+      required: false,
+    },
+    {
+      label: '仓库ID',
+      field: 'warehouseId',
+    },
+    { label: '客户', field: 'customerId' },
+    formFieldSortLabel,
+    formFieldBoxNo,
+    formFieldSku,
+  ]);
+
+  if ([TaskType.Transfer, TaskType.AmazonTray, TaskType.NormalTray].includes(taskType)) {
+    builder.add(formFieldContainerNo);
+    builder.add(filesUpload);
+  }
+  builder.addAll([
+    {
+      field: 'boxCount',
+      label: '数量',
+    },
+  ]);
+  if ([TaskType.NormalTray, TaskType.AmazonTray].includes(taskType)) {
+    builder.addAll([
+      {
+        field: 'trayCount',
+        label: '托数',
+      },
+    ]);
+  }
+  builder.setGroup('物流信息');
+  if ([TaskType.OneForSend, TaskType.Transfer, TaskType.Return].includes(taskType)) {
+    builder.addAll([
+      outBoundFormField,
+      {
+        field: 'deliveryNo',
+        label: '物流单号',
+      },
+    ]);
+  }
+  builder.addAll([
+    formFieldTargetCountrySelection,
+    {
+      label: '邮编',
+      field: 'postCode',
+      disableCondition(model) {
+        return model?.addressType === AddressType.AMZ;
+      },
+      onFormUpdate(value) {
+        if (value?.fbaCode) {
+          value['postCode'] = fbaDict[value.fbaCode].postCode;
+        }
+      },
+    },
+  ]);
+  if (TaskType.AmazonTray === taskType) {
+    builder.add({
+      label: 'FBA Code',
+      field: 'fbaCode',
+      component: 'NSelect',
+      componentProps: {
+        options: fbaCode.map((it) => ({
+          label: it.code + '(' + it.countryCode + ')',
+          value: it.code,
+        })),
+      },
+    });
+  }
+  if ([TaskType.Transfer, TaskType.AmazonTray, TaskType.Return].includes(taskType)) {
+    builder.addAll([
+      { label: 'FBA', field: 'fba' },
+      { label: 'PO', field: 'po' },
+    ]);
+  }
+  if (taskType === TaskType.AmazonTray) {
+    builder.add({
+      field: 'deliveryAddress',
+      label: '送货地址',
+    });
+  } else {
+    builder.add({
+      field: 'deliveryAddress',
+      label: '送货地址',
+    });
+  }
+  builder.add({
+    ...statusColumn,
+    field: 'status',
+    label: '状态',
+  });
+  builder.add({
+    ...timeColumn('createTimestamp'),
+    field: 'createTimestamp',
+    label: '创建时间',
+  });
+  builder.add({
+    ...timeColumn('finishTimestamp'),
+    field: 'finishTimestamp',
+    label: '完成时间',
+  });
+  builder.add({
+    field: 'note',
+    label: '备注',
+  });
+  return builder.toColumn();
 }

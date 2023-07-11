@@ -59,16 +59,6 @@
 
   const showModal = ref(false);
 
-  const formParams = reactive({
-    name: '',
-    address: '',
-    date: null,
-  });
-
-  const params = ref({
-    pageSize: 5,
-    name: 'xiaoMa',
-  });
   const actionColumn = reactive({
     width: 240,
     title: '操作',
@@ -146,8 +136,8 @@
     showModal.value = true;
   }
 
-  const loadDataTable = async (res) => {
-    return await getTaskList({ ...formParams, ...params.value, ...res });
+  const loadDataTable = async () => {
+    return await getTaskList(TaskType.Transfer);
   };
 
   function onCheckedRow(rowKeys) {

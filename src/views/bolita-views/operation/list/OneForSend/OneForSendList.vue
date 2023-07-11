@@ -7,7 +7,7 @@
       ref="actionRef"
       :actionColumn="actionColumn"
       @update:checked-row-keys="onCheckedRow"
-      :scroll-x="1090"
+      :scroll-x="3000"
     >
       <template #tableTitle>
         <n-button type="primary" @click="addTable">
@@ -28,7 +28,7 @@
       style="max-width: 800px"
       title="新建一件代发"
     >
-      <new-one-for-send-form-index :task-type="TaskType.OneForSend" />
+      <new-one-for-send-form-index @submit="submit" :task-type="TaskType.OneForSend" />
     </n-modal>
     <n-modal v-model:show="showDetailModel">
       <task-detail-page
@@ -59,21 +59,11 @@
 
   const showModal = ref(false);
 
-  const formParams = reactive({
-    name: '',
-    address: '',
-    date: null,
-  });
-
-  const params = ref({
-    pageSize: 5,
-    name: 'xiaoMa',
-  });
   const actionColumn = reactive({
-    width: 240,
+    width: 160,
     title: '操作',
     key: 'action',
-    fixed: 'right',
+    fixed: 'left',
     render(record) {
       return h(TableAction as any, {
         style: 'button',
@@ -146,8 +136,8 @@
     showModal.value = true;
   }
 
-  const loadDataTable = async (res) => {
-    return await getTaskList({ ...formParams, ...params.value, ...res });
+  const loadDataTable = async () => {
+    return await getTaskList(TaskType.OneForSend);
   };
 
   function onCheckedRow(rowKeys) {
@@ -161,6 +151,11 @@
   function handleEdit(record: Recordable) {
     showDetailModel = true;
     currentTaskId = record.id;
+  }
+
+  function submit() {
+    reloadTable();
+    showModal.value = false;
   }
 
   let showDetailModel = $ref(false);

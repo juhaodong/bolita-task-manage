@@ -10,7 +10,7 @@ import {
   setDoc,
   where,
 } from 'firebase/firestore';
-import { TaskModel, TaskStatus } from '@/api/task/task-types';
+import { TaskModel, TaskStatus, TaskType } from '@/api/task/task-types';
 import { doLog } from '@/api/statusChangeLog';
 import { resultError, resultSuccess } from '@/utils/request/_util';
 import dayjs from 'dayjs';
@@ -27,15 +27,16 @@ export async function getTasksForQuest(questId) {
 
 export async function createTask(taskInfo: any) {
   try {
-    const realInfo = Object.assign(taskInfo);
-    taskInfo.status = TaskStatus.NotSubmit;
-    taskInfo.createTimestamp = dayjs().valueOf();
-    taskInfo.finishTimestamp = '';
-    taskInfo.operationRequirements = getTaskTypeOperationKeys(taskInfo.taskType);
+    const realInfo = taskInfo;
+    realInfo.status = TaskStatus.NotSubmit;
+    realInfo.createTimestamp = dayjs().valueOf();
+    realInfo.finishTimestamp = '';
+    realInfo.operationRequirements = getTaskTypeOperationKeys(realInfo.taskType);
     const id = dayjs().valueOf().toString();
+    console.log(realInfo);
     await setDoc(doc(taskCollection, id), realInfo);
     await Promise.all(
-      taskInfo.operationRequirements.map((it) =>
+      realInfo.operationRequirements.map((it) =>
         addDoc(collection(db, taskPath, id, operationRequirementsPath), it)
       )
     );
@@ -43,7 +44,7 @@ export async function createTask(taskInfo: any) {
       fromStatus: '',
       toStatus: realInfo.status,
       note: '',
-      files: taskInfo.files,
+      files: realInfo.files,
       logRef: id,
     });
     return resultSuccess(id);
@@ -155,6 +156,8 @@ export async function getTaskById(id: string) {
   return mainInfo;
 }
 
-export async function getTaskList(params) {
-  return await executeQuery(query(taskCollection, orderBy('createTimestamp', 'desc')));
+export async function getTaskList(taskType: TaskType) {
+  return await executeQuery(
+    query(taskCollection, where('taskType', '==', taskType), orderBy('createTimestamp', 'desc'))
+  );
 }

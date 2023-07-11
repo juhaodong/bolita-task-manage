@@ -15,6 +15,7 @@
   import { TaskType } from '@/api/task/task-types';
   import { createTask } from '@/api/task/task-api';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
+  import { handleRequest } from '@/utils/utils';
 
   interface Props {
     taskType: TaskType;
@@ -49,9 +50,14 @@
 
   async function handleSubmit(values) {
     emit('loading');
-    await createTask(values);
+    values.taskType = props.taskType;
+    const res = await createTask(values);
+    console.log(res);
+    await handleRequest(res, () => {
+      emit('submit', values);
+    });
+
     emit('stop');
-    emit('submit', values);
   }
 </script>
 

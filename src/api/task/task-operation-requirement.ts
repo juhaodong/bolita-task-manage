@@ -67,7 +67,6 @@ export function getTaskTypeOperationKeys(taskType: TaskType) {
         OperationType.MultipleThingOneOrder,
         OperationType.TotalPackages,
       ]);
-
     case TaskType.Return:
       return getORListByNames([
         OperationType.Sort,

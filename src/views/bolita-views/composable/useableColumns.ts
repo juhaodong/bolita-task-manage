@@ -43,7 +43,8 @@ export function timeColumn(keyName = 'createTimestamp', title = '创建时间') 
     key: keyName,
     width: 160,
     render(record) {
-      return h('div', dayjs(record[keyName]).format(standardDateFormat));
+      const display = record[keyName] ? dayjs(record[keyName]).format(standardDateFormat) : '-';
+      return h('div', display);
     },
   };
 }

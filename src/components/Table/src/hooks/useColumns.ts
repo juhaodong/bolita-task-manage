@@ -78,6 +78,7 @@ export function useColumns(propsRef: ComputedRef<BasicTableProps>) {
           }
         }
         column.sorter = 'default';
+        console.log(column.fixed);
         return column;
       });
   });
@@ -94,8 +95,9 @@ export function useColumns(propsRef: ComputedRef<BasicTableProps>) {
     const { actionColumn } = unref(propsRef);
     if (!actionColumn) return;
     !columns.find((col) => col.key === 'action') &&
-      columns.push({
+      columns.unshift({
         ...(actionColumn as any),
+        fixed: 'left',
       });
   }
 
