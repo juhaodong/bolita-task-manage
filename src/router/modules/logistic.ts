@@ -45,11 +45,18 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/bolita-views/logistic/list/LogisticIndex.vue'),
       },
       {
+        path: 'detail',
+        name: `${name}_detail`,
+        meta: {
+          title: '卡派明细',
+        },
+        component: () => import('@/views/bolita-views/logistic/list/LogisticIndex.vue'),
+      },
+      {
         path: 'directSend',
         name: `${name}_amazon`,
         meta: {
-          title: '尾程直送',
-          activeMenu: `${name}_amazon`,
+          title: '快递直送',
         },
         component: () => import('@/views/bolita-views/logistic/list/LogisticIndex.vue'),
       },
@@ -58,7 +65,6 @@ const routes: Array<RouteRecordRaw> = [
         name: `${name}_amazon`,
         meta: {
           title: '其他',
-          activeMenu: `${name}_amazon`,
         },
         component: () => import('@/views/bolita-views/logistic/list/LogisticIndex.vue'),
       },

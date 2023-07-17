@@ -12,7 +12,7 @@ const routes: Array<RouteRecordRaw> = [
     component: Layout,
     meta: {
       title: '无主货管理',
-      sort: 5,
+      sort: 6,
       isRoot: true,
       icon: renderIcon(BoxSearch24Filled),
     },
