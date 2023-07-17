@@ -9,8 +9,8 @@ const routes: Array<RouteRecordRaw> = [
     name: 'user',
     component: Layout,
     meta: {
-      title: '用户管理',
-      sort: 1,
+      title: '系统设置',
+      sort: 9,
       isRoot: true,
       icon: renderIcon(Person),
     },

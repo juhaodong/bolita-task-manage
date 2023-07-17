@@ -9,7 +9,7 @@ const routes: Array<RouteRecordRaw> = [
     name: 'notify',
     component: Layout,
     meta: {
-      title: '到货计划',
+      title: '入库管理',
       sort: 2,
       isRoot: true,
       icon: renderIcon(BellOutlined),
@@ -19,17 +19,34 @@ const routes: Array<RouteRecordRaw> = [
         path: 'index',
         name: `notify_index`,
         meta: {
-          title: '货柜预报',
+          title: '入库计划',
           activeMenu: 'notify_index',
         },
         component: () => import('@/views/bolita-views/notify/list/Container/NotifyList.vue'),
       },
       {
+        path: 'detail',
+        name: `notify_detail`,
+        meta: {
+          title: '入库明细',
+        },
+        component: () => import('@/views/bolita-views/notify/list/Tray/TrayList.vue'),
+      },
+      {
+        path: 'container',
+        name: `container`,
+        meta: {
+          title: '货柜预报',
+          activeMenu: 'container',
+        },
+        component: () => import('@/views/bolita-views/notify/list/Container/NotifyList.vue'),
+      },
+      {
         path: 'tray',
-        name: `notify_tray`,
+        name: `tray`,
         meta: {
           title: '托盘/散货预报',
-          activeMenu: 'notify_tray',
+          activeMenu: 'tray',
         },
         component: () => import('@/views/bolita-views/notify/list/Tray/TrayList.vue'),
       },

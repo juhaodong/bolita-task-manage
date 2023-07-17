@@ -11,12 +11,30 @@ const routes: Array<RouteRecordRaw> = [
     name: name,
     component: Layout,
     meta: {
-      title: '操作管理',
+      title: '出库管理',
       sort: 3,
       isRoot: true,
       icon: renderIcon(Box),
     },
     children: [
+      {
+        path: 'index',
+        name: `${name}_index`,
+        meta: {
+          title: '出库计划',
+        },
+        component: () =>
+          import('@/views/bolita-views/operation/list/OneForSend/OneForSendList.vue'),
+      },
+      {
+        path: 'detail',
+        name: `${name}_detail`,
+        meta: {
+          title: '出库明细',
+        },
+        component: () =>
+          import('@/views/bolita-views/operation/list/OneForSend/OneForSendList.vue'),
+      },
       {
         path: 'oneForSend',
         name: `${name}_oneForSend`,
@@ -37,15 +55,6 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/bolita-views/operation/list/Transfer/TransferList.vue'),
       },
       {
-        path: 'return',
-        name: `${name}_return`,
-        meta: {
-          title: '移仓退货',
-          activeMenu: `${name}_return`,
-        },
-        component: () => import('@/views/bolita-views/operation/list/Return/OperationList.vue'),
-      },
-      {
         path: 'amazonTray',
         name: `${name}_amazonTray`,
         meta: {
@@ -62,6 +71,24 @@ const routes: Array<RouteRecordRaw> = [
           activeMenu: `${name}_otherTray`,
         },
         component: () => import('@/views/bolita-views/operation/list/OtherTray/OperationList.vue'),
+      },
+      {
+        path: 'return',
+        name: `${name}_return`,
+        meta: {
+          title: '移仓退货',
+          activeMenu: `${name}_return`,
+        },
+        component: () => import('@/views/bolita-views/operation/list/Return/OperationList.vue'),
+      },
+      {
+        path: 'stay',
+        name: `${name}_stay`,
+        meta: {
+          title: '留仓明细',
+        },
+        component: () =>
+          import('@/views/bolita-views/operation/list/OneForSend/OneForSendList.vue'),
       },
     ],
   },
