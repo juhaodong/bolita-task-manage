@@ -8,7 +8,7 @@
       ref="actionRef"
       :actionColumn="actionColumn"
       @update:checked-row-keys="onCheckedRow"
-      :scroll-x="1090"
+      :scroll-x="3000"
     >
       <template #tableTitle>
         <n-space>
@@ -37,14 +37,12 @@
 </template>
 
 <script lang="ts" setup>
-  import { h, reactive, ref } from 'vue';
+  import { computed, h, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { columns } from './columns';
   import { Box20Filled } from '@vicons/fluent';
   import {
     changeNotifyStatus,
     deleteNotify,
-    getNotifyList,
     NotifyStatus,
     NotifyType,
   } from '@/api/notify/notify-api';
@@ -53,11 +51,16 @@
   import { PermissionEnums } from '@/api/user/baseUser';
   import { useCheckDialog } from '@/store/modules/checkDialogState';
   import { handleRequest } from '@/utils/utils';
+  import { getNeededColumnByNotifyType } from '@/views/bolita-views/notify/NotifyRepository/NotifyRepository';
+  import { getNotifyTasks } from '@/api/notify/notify-detail';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
 
   const actionRef = ref();
-  let showDetailModal = $ref(false);
+  const columns = computed(() => {
+    const list = getNeededColumnByNotifyType(NotifyType.TrayOrBox);
+    return [...list];
+  });
 
   const showModal = ref(false);
 
@@ -72,7 +75,6 @@
         actions: [
           {
             label: '详情',
-            onClick: goDetail.bind(null, record),
           },
           {
             label: '删除',
@@ -123,7 +125,7 @@
   }
 
   const loadDataTable = async () => {
-    return (await getNotifyList({})).filter((it) => it.notifyType === NotifyType.Container);
+    return await getNotifyTasks();
   };
 
   function onCheckedRow(rowKeys) {
@@ -135,12 +137,6 @@
   async function closeAddDialog() {
     reloadTable();
     showModal.value = false;
-  }
-
-  let currentNotifyId: string | null = $ref(null);
-  function goDetail(record: Recordable) {
-    currentNotifyId = record.id;
-    showDetailModal = true;
   }
 
   async function check(record) {

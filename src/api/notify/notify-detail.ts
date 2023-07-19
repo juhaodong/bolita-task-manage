@@ -1,5 +1,13 @@
 import { db, executeQuery } from '@/plugins/firebase';
-import { addDoc, collection, deleteDoc, doc, query, setDoc } from 'firebase/firestore';
+import {
+  addDoc,
+  collection,
+  collectionGroup,
+  deleteDoc,
+  doc,
+  query,
+  setDoc,
+} from 'firebase/firestore';
 import { resultError, resultSuccess } from '@/utils/request/_util';
 import { doLog } from '@/api/statusChangeLog';
 import { getNotifyById, NotifyStatus } from '@/api/notify/notify-api';
@@ -24,7 +32,9 @@ export type NotifyDetailModel = {
   note: string;
   storagePosition: string;
 };
-
+export async function getNotifyTasks() {
+  return await executeQuery(query(collectionGroup(db, taskListPath)));
+}
 export async function getTasksForNotify(notifyId) {
   return await executeQuery(query(collection(db, notifyPath, notifyId, taskListPath)));
 }
