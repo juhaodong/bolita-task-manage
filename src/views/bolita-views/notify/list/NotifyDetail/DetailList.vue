@@ -18,19 +18,11 @@
                 <Box20Filled />
               </n-icon>
             </template>
-            新建货柜预报
+            批量导入
           </n-button>
         </n-space>
       </template>
     </BasicTable>
-    <n-modal v-model:show="showDetailModal">
-      <notify-detail-page
-        @refresh="reloadTable"
-        v-if="currentNotifyId != null"
-        @close="showDetailModal = false"
-        :notify-id="currentNotifyId"
-      />
-    </n-modal>
 
     <n-modal
       v-model:show="showModal"
@@ -57,7 +49,6 @@
     NotifyType,
   } from '@/api/notify/notify-api';
   import NotifyFormIndex from '@/views/bolita-views/notify/NotifyFormPage/NotifyFormIndex.vue';
-  import NotifyDetailPage from '@/views/bolita-views/notify/NotifyDetail/NotifyDetailPage.vue';
   import { $ref } from 'vue/macros';
   import { PermissionEnums } from '@/api/user/baseUser';
   import { useCheckDialog } from '@/store/modules/checkDialogState';

@@ -30,7 +30,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           title: '入库明细',
         },
-        component: () => import('@/views/bolita-views/notify/list/Tray/TrayList.vue'),
+        component: () => import('@/views/bolita-views/notify/list/NotifyDetail/DetailList.vue'),
       },
       {
         path: 'container',
