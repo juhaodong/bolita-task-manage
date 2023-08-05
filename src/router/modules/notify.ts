@@ -33,22 +33,13 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/bolita-views/notify/list/NotifyDetail/DetailList.vue'),
       },
       {
-        path: 'container',
-        name: `container`,
+        path: 'claimGoods',
+        name: `claimGoods`,
         meta: {
-          title: '货柜预报',
-          activeMenu: 'container',
+          title: '无主货管理',
+          activeMenu: 'claimGoods',
         },
         component: () => import('@/views/bolita-views/notify/list/Container/NotifyList.vue'),
-      },
-      {
-        path: 'tray',
-        name: `tray`,
-        meta: {
-          title: '托盘/散货预报',
-          activeMenu: 'tray',
-        },
-        component: () => import('@/views/bolita-views/notify/list/Tray/TrayList.vue'),
       },
     ],
   },

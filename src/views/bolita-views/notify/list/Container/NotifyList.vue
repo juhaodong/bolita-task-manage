@@ -20,6 +20,14 @@
             </template>
             新建货柜预报
           </n-button>
+          <n-button @click="addTable(NotifyType.Container)">
+            <template #icon>
+              <n-icon>
+                <Box20Filled />
+              </n-icon>
+            </template>
+            新建托盘散货预报
+          </n-button>
         </n-space>
       </template>
     </BasicTable>
