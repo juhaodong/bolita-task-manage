@@ -5,7 +5,7 @@ import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
 export const columns: DataTableColumns<NotifyModel> = [
   {
     title: '入库ID',
-    key: 'id',
+    key: 'inboundId',
   },
   {
     title: '创建时间',

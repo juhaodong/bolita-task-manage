@@ -18,55 +18,20 @@ const routes: Array<RouteRecordRaw> = [
     },
     children: [
       {
-        path: 'index',
-        name: `${name}_index`,
+        path: 'logisticDetail',
+        name: `${name}logisticDetail`,
         meta: {
-          title: '物流管理',
-          activeMenu: `${name}_index`,
+          title: '物流明细',
         },
-        component: () => import('@/views/bolita-views/logistic/list/LogisticIndex.vue'),
+        component: () => import('@/views/newViews/LogisticsDetails/LogisticsDetails.vue'),
       },
       {
-        path: 'amazon',
-        name: `${name}_amazon`,
+        path: 'logisticService',
+        name: `${name}logisticService`,
         meta: {
-          title: '亚马逊卡派',
-          activeMenu: `${name}_amazon`,
+          title: '物流售后',
         },
-        component: () => import('@/views/bolita-views/logistic/list/LogisticIndex.vue'),
-      },
-      {
-        path: 'amazon',
-        name: `${name}_amazon`,
-        meta: {
-          title: '其他卡派',
-          activeMenu: `${name}_amazon`,
-        },
-        component: () => import('@/views/bolita-views/logistic/list/LogisticIndex.vue'),
-      },
-      {
-        path: 'detail',
-        name: `${name}_detail`,
-        meta: {
-          title: '卡派明细',
-        },
-        component: () => import('@/views/bolita-views/logistic/list/LogisticIndex.vue'),
-      },
-      {
-        path: 'directSend',
-        name: `${name}_amazon`,
-        meta: {
-          title: '快递直送',
-        },
-        component: () => import('@/views/bolita-views/logistic/list/LogisticIndex.vue'),
-      },
-      {
-        path: 'other',
-        name: `${name}_amazon`,
-        meta: {
-          title: '其他',
-        },
-        component: () => import('@/views/bolita-views/logistic/list/LogisticIndex.vue'),
+        component: () => import('@/views/newViews/LogisticsService/LogisticsService.vue'),
       },
     ],
   },
