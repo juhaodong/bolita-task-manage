@@ -93,6 +93,10 @@
             onClick: goDetail.bind(null, record),
           },
           {
+            label: '详情',
+            onClick: goDetail.bind(null, record),
+          },
+          {
             label: '删除',
             popConfirm: {
               title: '是否确定删除此预报？',
