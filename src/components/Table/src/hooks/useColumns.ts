@@ -51,9 +51,11 @@ export function useColumns(propsRef: ComputedRef<BasicTableProps>) {
         return hasPermission(column.auth as string[]) && isIfShow(column);
       })
       .map((column) => {
-        //默认 ellipsis 为true
-        column.ellipsis = typeof column.ellipsis === 'undefined' ? { tooltip: true } : false;
         const { edit } = column;
+        if (!column.width) {
+          column.width = 100;
+        }
+        column.className = column.className + ' text-center';
         if (edit) {
           column.render = renderEditCell(column);
           if (edit) {

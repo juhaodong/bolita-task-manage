@@ -60,12 +60,21 @@
             </template>
 
             <template v-else-if="schema.component === 'NUpload'">
-              <n-upload
-                v-model:file-list="formModel[schema.field]"
-                v-bind="getComponentProps(schema)"
-              >
-                <n-button> 上传文件 </n-button>
-              </n-upload>
+              <n-space>
+                <n-upload
+                  v-model:file-list="formModel[schema.field]"
+                  v-bind="getComponentProps(schema)"
+                >
+                  <n-button> 上传文件 </n-button>
+                </n-upload>
+                <n-button
+                  type="info"
+                  dashed
+                  v-if="getComponentProps(schema).uploadTemplate"
+                  @click="getComponentProps(schema).uploadTemplate"
+                  >下载上传模板</n-button
+                >
+              </n-space>
             </template>
             <!--动态渲染表单组件-->
             <component

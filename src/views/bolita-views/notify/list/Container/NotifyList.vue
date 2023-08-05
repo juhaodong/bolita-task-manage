@@ -20,13 +20,13 @@
             </template>
             新建货柜预报
           </n-button>
-          <n-button @click="addTable(NotifyType.Container)">
+          <n-button @click="addTable(NotifyType.TrayOrBox)">
             <template #icon>
               <n-icon>
                 <Box20Filled />
               </n-icon>
             </template>
-            新建托盘散货预报
+            新建散货/托盘预报
           </n-button>
         </n-space>
       </template>

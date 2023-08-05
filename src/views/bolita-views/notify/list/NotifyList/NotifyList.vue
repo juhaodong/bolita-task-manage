@@ -26,7 +26,7 @@
                 <TruckDelivery />
               </n-icon>
             </template>
-            新建托盘/散包裹预报
+            新建散货/托盘预报
           </n-button>
         </n-space>
       </template>
@@ -45,7 +45,7 @@
       :show-icon="false"
       preset="card"
       title="新建到货预报"
-      style="width: 90%; min-width: 600px; max-width: 1200px"
+      style="width: 90%; min-width: 600px; max-width: 800px"
     >
       <notify-form-index @saved="closeAddDialog" :type="notifyType" />
     </n-modal>

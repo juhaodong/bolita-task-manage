@@ -7,6 +7,7 @@
   import { ref } from 'vue';
 
   const form = ref<any>(null);
+
   interface NormalFormProps {
     formFields: FormField[];
     showButtons?: boolean;
@@ -55,9 +56,7 @@
 
 <template>
   <BasicForm ref="form" @register="register" @submit="handleSubmit" @reset="handleReset">
-    <template #extraContent>
-      <slot name="extraContent"></slot>
-    </template>
+    <slot name="extraContent"></slot>
     <slot name="extraSubmitButton" :submit="submit"></slot>
     <slot name="extraCancelButton" :cancel="cancel"></slot>
   </BasicForm>

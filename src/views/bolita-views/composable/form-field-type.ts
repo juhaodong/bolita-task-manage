@@ -19,13 +19,18 @@ export type FormField = {
   onFormUpdate?: (formValue: any) => void;
 };
 
-export function getFilesUploadFormField(key = 'files', required = true): FormField {
+export function getFilesUploadFormField(
+  key = 'files',
+  required = true,
+  uploadTemplate: any = null
+): FormField {
   return {
     field: key,
     label: '附件',
     component: 'NUpload',
     componentProps: {
       multiple: true,
+      uploadTemplate,
     },
     required: required,
   };

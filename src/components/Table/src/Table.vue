@@ -21,7 +21,7 @@
     <div class="flex items-center table-toolbar-right">
       <!--顶部右侧区域-->
       <slot name="toolbar"></slot>
-      <n-tag> 共计 {{ getBindValues.data.length }} 条数据 </n-tag>
+      <n-tag> 共计 {{ getBindValues.data.length }} 条数据</n-tag>
       <!--斑马纹-->
       <n-tooltip trigger="hover">
         <template #trigger>
@@ -75,8 +75,9 @@
           <template #[item]="data" v-for="item in Object.keys($slots)" :key="item">
             <slot :name="item" v-bind="data"></slot>
           </template>
-        </n-data-table> </div
-    ></div>
+        </n-data-table>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -228,6 +229,7 @@
         showSizePicker: true,
         pageSizes: [10, 30, 100],
       });
+
       //获取分页信息
 
       function setProps(props: Partial<BasicTableProps>) {
