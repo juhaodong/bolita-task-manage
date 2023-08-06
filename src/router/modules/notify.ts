@@ -22,7 +22,7 @@ const routes: Array<RouteRecordRaw> = [
           title: '入库计划',
           activeMenu: 'notify_index',
         },
-        component: () => import('@/views/bolita-views/notify/list/NotifyList/NotifyList.vue'),
+        component: () => import('@/views/newViews/NotifyList/NotifyList.vue'),
       },
       {
         path: 'detail',
