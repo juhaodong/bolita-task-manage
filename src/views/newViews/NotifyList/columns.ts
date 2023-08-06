@@ -1,13 +1,11 @@
 import { DataTableColumns } from 'naive-ui';
-import {
-  deleteNotify,
-  InBoundStatus,
-  NotifyModel,
-} from '@/views/newViews/NotifyList/api/notify-api';
+import { deleteNotify, NotifyModel } from '@/views/newViews/NotifyList/api/notify-api';
 import { standardDateFormat, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { h, reactive } from 'vue';
 import { TableAction } from '@/components/Table';
-import { PermissionEnums } from '@/api/user/baseUser';
+import Delete28Filled from '@vicons/fluent/es/Delete28Filled';
+import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
+import { Folder32Filled } from '@vicons/fluent';
 
 export const columns: DataTableColumns<NotifyModel> = [
   {
@@ -33,13 +31,17 @@ export const columns: DataTableColumns<NotifyModel> = [
   },
   {
     title: '总数量',
-    key: 'boxCount',
+    key: 'totalCount',
   },
   timeColumn('planArriveDateTime', '预计到达时间'),
   timeColumn('reserveTime', '预约仓位', standardDateFormat),
   {
     title: '入库数量',
-    key: 'totalCount',
+    key: 'arrivedCount',
+    render(record) {
+      const display = record.arrivedCount + '/' + record.totalCount;
+      return h('div', display);
+    },
   },
   {
     title: '入库状态',
@@ -75,12 +77,14 @@ export function getActionColumn(reload) {
   return reactive({
     title: '可用动作',
     key: 'action',
+    width: 120,
     render(record) {
       return h(TableAction as any, {
         style: 'button',
         actions: [
           {
             label: '删除',
+            icon: Delete28Filled,
             popConfirm: {
               title: '是否确定删除此预报？',
               async confirm() {
@@ -88,10 +92,28 @@ export function getActionColumn(reload) {
                 reload();
               },
             },
-            ifShow: () => {
-              return record.inStatus == InBoundStatus.Wait;
+          },
+          {
+            label: '修改',
+            icon: DocumentEdit16Filled,
+            popConfirm: {
+              title: '是否确定删除此预报？',
+              async confirm() {
+                await deleteNotify(record.id);
+                reload();
+              },
             },
-            auth: [PermissionEnums.Manager, PermissionEnums.Customer, PermissionEnums.Technical],
+          },
+          {
+            label: '附件',
+            icon: Folder32Filled,
+            popConfirm: {
+              title: '是否确定删除此预报？',
+              async confirm() {
+                await deleteNotify(record.id);
+                reload();
+              },
+            },
           },
         ],
       });

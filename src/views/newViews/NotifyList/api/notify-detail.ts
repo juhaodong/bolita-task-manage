@@ -32,28 +32,31 @@ export type NotifyDetailModel = {
   note: string;
   storagePosition: string;
 };
+
 export async function getNotifyTasks() {
   return await executeQuery(query(collectionGroup(db, taskListPath)));
 }
+
 export async function getTasksForNotify(notifyId) {
   return await executeQuery(query(collection(db, notifyPath, notifyId, taskListPath)));
 }
 
-export async function addNotifyDetail(taskInfo: NotifyDetailModel, notifyId: string) {
+export async function addInDetail(taskInfo: any, notifyId: string) {
   try {
     taskInfo.arrivedCount = 0;
     taskInfo.note = '';
     taskInfo.storagePosition = '';
-    await addDoc(collection(db, notifyPath, notifyId, taskListPath), taskInfo);
+    taskInfo.notifyId = notifyId;
+    await addDoc(collection(db, taskListPath), taskInfo);
     return resultSuccess('');
   } catch (e: any) {
     return resultError(e?.message);
   }
 }
 
-export async function deleteDetailForNotify(detailId, notifyId) {
+export async function deleteInDetail(detailId) {
   try {
-    await deleteDoc(doc(db, notifyPath, notifyId, taskListPath, detailId));
+    await deleteDoc(doc(db, taskListPath, detailId));
     return resultSuccess('');
   } catch (e: any) {
     return resultError(e?.message);

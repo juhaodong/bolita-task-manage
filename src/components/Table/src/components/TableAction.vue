@@ -1,28 +1,31 @@
 <template>
   <div class="tableAction">
-    <n-space :wrap="false">
+    <n-space>
       <template v-for="(action, index) in getActions" :key="`${index}-${action.label}`">
-        <n-popconfirm
-          :show-icon="false"
-          @positive-click="action.popConfirm.confirm"
-          v-if="action.popConfirm"
-        >
+        <n-tooltip trigger="hover">
           <template #trigger>
-            <n-button v-bind="action" class="mx-2">
-              {{ action.label }}
-              <template #icon v-if="action.hasOwnProperty('icon')">
+            <n-popconfirm
+              :show-icon="false"
+              @positive-click="action.popConfirm.confirm"
+              v-if="action.popConfirm"
+            >
+              <template #trigger>
+                <n-button style="font-size: 18px" text v-bind="action">
+                  <template v-if="action.hasOwnProperty('icon')">
+                    <n-icon :component="action.icon" />
+                  </template>
+                </n-button>
+              </template>
+              {{ action.popConfirm.title }}
+            </n-popconfirm>
+            <n-button text style="font-size: 18px" v-else v-bind="action">
+              <template v-if="action.hasOwnProperty('icon')">
                 <n-icon :component="action.icon" />
               </template>
             </n-button>
           </template>
-          {{ action.popConfirm.title }}
-        </n-popconfirm>
-        <n-button v-else v-bind="action" class="mx-2">
           {{ action.label }}
-          <template #icon v-if="action.hasOwnProperty('icon')">
-            <n-icon :component="action.icon" />
-          </template>
-        </n-button>
+        </n-tooltip>
       </template>
       <n-dropdown
         v-if="dropDownActions && getDropdownList.length"

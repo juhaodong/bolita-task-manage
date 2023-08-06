@@ -99,7 +99,6 @@ export function useColumns(propsRef: ComputedRef<BasicTableProps>) {
     !columns.find((col) => col.key === 'action') &&
       columns.unshift({
         ...(actionColumn as any),
-        fixed: 'left',
       });
   }
 

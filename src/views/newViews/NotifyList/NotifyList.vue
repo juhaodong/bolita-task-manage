@@ -7,8 +7,6 @@
       :row-key="(row) => row.id"
       ref="actionRef"
       :actionColumn="actionColumn"
-      @update:checked-row-keys="onCheckedRow"
-      :scroll-x="1090"
     >
       <template #tableTitle>
         <n-space>

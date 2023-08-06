@@ -5,7 +5,6 @@ import { doLog } from '@/api/statusChangeLog';
 
 import dayjs from 'dayjs';
 import {
-  addNotifyDetail,
   getTasksForNotify,
   NotifyDetailModel,
 } from '@/views/newViews/NotifyList/api/notify-detail';
@@ -33,7 +32,8 @@ export interface NotifyCreateDTO {
   planArriveDateTime: number;
   customerId?: string;
   files?: string[];
-  taskList: NotifyDetailModel[];
+  boxCount: number;
+  trayCount: number;
 }
 
 export async function createNotify(notifyInfo: NotifyCreateDTO) {
@@ -41,18 +41,16 @@ export async function createNotify(notifyInfo: NotifyCreateDTO) {
     const info = {
       containerNo: '',
       containerType: '',
+      arrivedCount: 0,
       note: '',
       createTimestamp: dayjs().valueOf(),
       inStatus: InBoundStatus.Wait,
       outStatus: OutStatus.Wait,
       cashStatus: CashStatus.NotFinish,
       warehouseNote: '',
-      totalCount: notifyInfo.taskList.reduce((sum, i) => sum + parseInt(i.count), 0),
+      totalCount: notifyInfo.boxCount + notifyInfo.trayCount,
     };
     const { id } = await addDoc(collection(db, notifyPath), Object.assign(info, notifyInfo));
-    for (const t of notifyInfo.taskList) {
-      await addNotifyDetail(t, id);
-    }
     await doLog({
       fromStatus: NotifyStatus.NotSubmit,
       toStatus: NotifyStatus.NotSubmit,
