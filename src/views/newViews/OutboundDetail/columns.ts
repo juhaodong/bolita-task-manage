@@ -61,7 +61,7 @@ export const columns: DataTableColumns<OutboundDetailModel> = [
   timeColumn('reservationOutboundDate', '预约出库日期'),
   {
     title: '出库状态',
-    key: 'outState',
+    key: 'outStatus',
   },
   {
     title: '运单号',
@@ -121,7 +121,7 @@ export type OutboundDetailModel = {
   wareHouse: string;
   checkStatus: string;
   reservationOutboundDate: string;
-  outState: string;
+  outStatus: string;
   waybillId: number;
   REF: string;
   ISA: string;
