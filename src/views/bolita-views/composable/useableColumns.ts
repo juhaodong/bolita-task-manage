@@ -61,7 +61,7 @@ export function idColumn(title = 'ID', targetPage, keyName = 'id') {
       return h(
         RouterLink,
         {
-          to: targetPage + '/' + record[keyName],
+          to: targetPage + '?' + keyName + '=' + record[keyName],
         },
         h(
           NText,

@@ -25,12 +25,12 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/newViews/NotifyList/NotifyList.vue'),
       },
       {
-        path: 'detail/:id',
-        props: true,
+        path: 'detail',
         name: `notify_detail`,
         meta: {
           title: '入库明细',
         },
+        props: (route) => ({ notifyId: route.query.id }),
         component: () => import('@/views/newViews/NotifyDetail/NotifyDetail.vue'),
       },
       {
@@ -38,7 +38,6 @@ const routes: Array<RouteRecordRaw> = [
         name: `claimManage`,
         meta: {
           title: '待认领管理',
-          activeMenu: 'claimGoods',
         },
         component: () => import('@/views/newViews/ToBeClaimed/ToBeClaimed.vue'),
       },

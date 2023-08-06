@@ -1,15 +1,8 @@
 import { DataTableColumns } from 'naive-ui';
-import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { idColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 
 export const columns: DataTableColumns<OutboundPlanModel> = [
-  {
-    title: '出库ID',
-    key: 'OutboundId',
-  },
-  {
-    title: '操作',
-    key: 'operate',
-  },
+  idColumn('出库ID', '/notify/detail'),
   {
     title: '客户ID',
     key: 'customerId',
@@ -17,10 +10,6 @@ export const columns: DataTableColumns<OutboundPlanModel> = [
   {
     title: '业务员',
     key: 'salesName',
-  },
-  {
-    title: '审核',
-    key: 'toExamine',
   },
   {
     title: '仓库',
@@ -51,7 +40,10 @@ export const columns: DataTableColumns<OutboundPlanModel> = [
     key: 'shippingAddress',
   },
   timeColumn('createTime', '创建日期'),
-  timeColumn('endTime', '完成时间'),
+  {
+    title: '订车状态',
+    key: 'carStatus',
+  },
   timeColumn('reservationOutboundDate', '预约出库日期'),
   {
     title: '时效',
@@ -63,15 +55,11 @@ export const columns: DataTableColumns<OutboundPlanModel> = [
   },
   {
     title: '出库状态',
-    key: 'outboundStatus',
+    key: 'outStatus',
   },
   {
     title: '托盘置换',
     key: 'trayChange',
-  },
-  {
-    title: '凭证附件',
-    key: 'voucherAttachment',
   },
   {
     title: '仓库备注',
@@ -87,7 +75,7 @@ export const columns: DataTableColumns<OutboundPlanModel> = [
   },
   {
     title: '结算情况',
-    key: 'settlementSituation',
+    key: 'cashStatus',
   },
 ];
 
@@ -109,11 +97,16 @@ export type OutboundPlanModel = {
   reservationOutboundDate: string;
   ageing: string;
   outboundNum: number;
-  outboundStatus: string;
+  outStatus: string;
   trayChange: string;
   voucherAttachment: string;
   warehouseNote: string;
   operateRequired: string;
   exchange: string;
-  settlementSituation: string;
+  cashStatus: string;
 };
+
+export enum CarStatus {
+  Able = '可订车',
+  UnAble = '待订车',
+}
