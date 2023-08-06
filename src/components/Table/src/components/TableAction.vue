@@ -10,7 +10,7 @@
               v-if="action.popConfirm"
             >
               <template #trigger>
-                <n-button style="font-size: 18px" text v-bind="action">
+                <n-button style="font-size: 18px; padding: 4px !important" text v-bind="action">
                   <template v-if="action.hasOwnProperty('icon')">
                     <n-icon :component="action.icon" />
                   </template>
@@ -18,7 +18,7 @@
               </template>
               {{ action.popConfirm.title }}
             </n-popconfirm>
-            <n-button text style="font-size: 18px" v-else v-bind="action">
+            <n-button text style="font-size: 18px; padding: 4px !important" v-else v-bind="action">
               <template v-if="action.hasOwnProperty('icon')">
                 <n-icon :component="action.icon" />
               </template>

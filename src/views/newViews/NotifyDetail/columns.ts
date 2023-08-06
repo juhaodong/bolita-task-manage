@@ -3,7 +3,7 @@ import { DataTableColumns } from 'naive-ui';
 export const columns: DataTableColumns<NotifyDetailInfoModel> = [
   {
     title: '入库ID',
-    key: 'inboundId',
+    key: 'notifyId',
     width: 100,
   },
   {
@@ -13,7 +13,7 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
   },
   {
     title: '票号',
-    key: 'ticketId',
+    key: 'id',
   },
   {
     title: '箱号',
@@ -101,6 +101,9 @@ export type NotifyDetailInfoModel = {
   productSKU: string;
   trayNum: number;
   containerNum: number;
+  length: string;
+  width: string;
+  height: string;
   containerStandards: string;
   weightKg: string;
   volume: string;

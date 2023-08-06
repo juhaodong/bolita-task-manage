@@ -1,16 +1,9 @@
 import { db, executeQuery } from '@/plugins/firebase';
-import {
-  addDoc,
-  collection,
-  collectionGroup,
-  deleteDoc,
-  doc,
-  query,
-  setDoc,
-} from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, orderBy, query, setDoc } from 'firebase/firestore';
 import { resultError, resultSuccess } from '@/utils/request/_util';
 import { doLog } from '@/api/statusChangeLog';
 import { getNotifyById, NotifyStatus } from '@/views/newViews/NotifyList/api/notify-api';
+import dayjs from 'dayjs';
 
 const notifyPath = 'notify';
 const taskListPath = 'taskList';
@@ -34,7 +27,9 @@ export type NotifyDetailModel = {
 };
 
 export async function getNotifyTasks() {
-  return await executeQuery(query(collectionGroup(db, taskListPath)));
+  return await executeQuery(
+    query(collection(db, taskListPath), orderBy('createTimestamp', 'desc'))
+  );
 }
 
 export async function getTasksForNotify(notifyId) {
@@ -47,6 +42,7 @@ export async function addInDetail(taskInfo: any, notifyId: string) {
     taskInfo.note = '';
     taskInfo.storagePosition = '';
     taskInfo.notifyId = notifyId;
+    taskInfo.createTimestamp = dayjs().valueOf();
     await addDoc(collection(db, taskListPath), taskInfo);
     return resultSuccess('');
   } catch (e: any) {

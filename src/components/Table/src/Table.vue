@@ -23,16 +23,7 @@
       <slot name="toolbar"></slot>
       <n-tag> 共计 {{ getBindValues.data.length }} 条数据</n-tag>
       <!--斑马纹-->
-      <n-tooltip trigger="hover">
-        <template #trigger>
-          <div class="mr-2 table-toolbar-right-icon">
-            <n-switch v-model:value="isStriped" @update:value="setStriped" />
-          </div>
-        </template>
-        <span>表格斑马纹</span>
-      </n-tooltip>
       <n-divider vertical />
-
       <!--刷新-->
       <n-tooltip trigger="hover">
         <template #trigger>
@@ -44,7 +35,6 @@
         </template>
         <span>刷新</span>
       </n-tooltip>
-
       <!--表格设置单独抽离成组件-->
       <ColumnSetting />
     </div>

@@ -1,29 +1,51 @@
 <script setup lang="ts">
-  import {
-    createNotify,
-    NotifyModel,
-    NotifyType,
-  } from '@/views/newViews/NotifyList/api/notify-api';
+  import { createNotify, NotifyType } from '@/views/newViews/NotifyList/api/notify-api';
   import NotifyContainerForm from '@/views/newViews/NotifyList/form/NotifyContainerForm.vue';
   import TrayForm from '@/views/newViews/NotifyList/form/NotifyTrayForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { handleRequest } from '@/utils/utils';
+  import { getNeededColumnByNotifyType } from '@/views/bolita-views/notify/NotifyRepository/NotifyRepository';
+  import readXlsxFile from 'read-excel-file';
 
   interface Prop {
     type: NotifyType;
   }
+
   const prop = defineProps<Prop>();
   const emit = defineEmits(['loading', 'stop', 'saved']);
+
   function loading() {
     emit('loading');
   }
+
   function stop() {
     emit('stop');
   }
-  async function saveNotify(value: NotifyModel) {
+
+  async function readFile(file, notifyType) {
+    const schema = Object.fromEntries(
+      getNeededColumnByNotifyType(notifyType).map((it) => {
+        return [it.title, { prop: it.key, type: String }];
+      })
+    );
+    try {
+      const { rows, errors } = await readXlsxFile(file, { schema });
+      console.log(rows, errors);
+      if (rows.length > 0 && errors.length == 0) {
+        return rows.map((it) => ({ ...it, arrivedCount: 0 }));
+      }
+    } catch (e: any) {
+      console.log(e?.message);
+    }
+    return [];
+  }
+
+  async function saveNotify(value: any) {
     loading();
     value.notifyType = prop.type;
-
+    value.taskList = await readFile(value.uploadFile[0].file, value.notifyType);
+    delete value.uploadFile;
+    console.log(value.taskList);
     const res = await createNotify(value);
 
     await handleRequest(res, () => {

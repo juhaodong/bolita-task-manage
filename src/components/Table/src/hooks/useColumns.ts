@@ -80,7 +80,6 @@ export function useColumns(propsRef: ComputedRef<BasicTableProps>) {
           }
         }
         column.sorter = 'default';
-        console.log(column.fixed);
         return column;
       });
   });

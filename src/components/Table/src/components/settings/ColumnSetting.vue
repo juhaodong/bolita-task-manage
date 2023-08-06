@@ -226,7 +226,10 @@
       function onSelection(e) {
         let checkList = table.getCacheColumns();
         if (e) {
-          checkList.unshift({ type: 'selection', key: 'selection' });
+          if (!checkList.find((it) => it.type === 'selection')) {
+            checkList.unshift({ type: 'selection', key: 'selection' });
+          }
+
           setColumns(checkList);
         } else {
           checkList.splice(0, 1);

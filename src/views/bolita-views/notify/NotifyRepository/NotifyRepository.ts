@@ -1,35 +1,40 @@
-import { convertFieldToColumn, FormField } from '@/views/bolita-views/composable/form-field-type';
-import { formFieldUnitSelection } from '@/api/model/common/BoxOrTray';
-import { getTargetAddressSelectionGroup } from '@/api/model/common/addressGroup';
+import { convertFieldToColumn } from '@/views/bolita-views/composable/form-field-type';
 import { NotifyType } from '@/views/newViews/NotifyList/api/notify-api';
-import { formFieldTaskTypeSelection } from '@/api/dataLayer/fieldDefination/form-field-sort-label';
+import {
+  formFieldBuilder,
+  formFieldTaskTypeSelection,
+} from '@/api/dataLayer/fieldDefination/form-field-sort-label';
 
 export function getNeededColumnByNotifyType(notifyType: NotifyType | null) {
-  return getNeededFieldByNotifyType(notifyType)
-    .filter((it) => it?.meta != 'detail')
-    .map(convertFieldToColumn);
+  return getNeededFieldBuilder(notifyType)
+    .toColumn()
+    .filter((it) => it?.meta != 'detail');
 }
 
-export function getNeededFieldByNotifyType(notifyType: NotifyType | null): any[] {
-  const boxField: FormField[] =
-    notifyType == NotifyType.TrayOrBox
-      ? [
-          {
-            label: '快递单号',
-            field: 'trackingCode',
-          },
-        ]
-      : [];
-  return [
+function getNeededFieldBuilder(notifyType: NotifyType | null) {
+  const builder = formFieldBuilder();
+  builder.add({
+    label: '票号',
+    field: 'id',
+  });
+  builder.add({
+    label: '箱号',
+    field: 'containerId',
+  });
+  if (notifyType == NotifyType.TrayOrBox) {
+  }
+  builder.addAll([
     {
-      label: '分拣标识',
-      field: 'sortCode',
+      label: '产品SKU',
+      field: 'productSKU',
     },
-    ...boxField,
-    formFieldUnitSelection,
     {
-      label: '数量',
-      field: 'count',
+      label: '托数',
+      field: 'trayNum',
+    },
+    {
+      label: '箱数',
+      field: 'containerNum',
     },
     {
       label: '长',
@@ -44,26 +49,103 @@ export function getNeededFieldByNotifyType(notifyType: NotifyType | null): any[]
       field: 'height',
     },
     {
-      label: '实重kg',
-      field: 'actualWeight',
+      label: '重量kg',
+      field: 'weightKg',
     },
-    {
+  ]);
+  if (notifyType == NotifyType.Container) {
+    builder.add({
       label: '体积',
       field: 'volume',
-    },
-    {
-      label: 'SKU',
-      field: 'sku',
-      required: false,
-    },
-    formFieldTaskTypeSelection,
-    ...getTargetAddressSelectionGroup(),
-    {
-      label: '操作备注',
-      field: 'operationNote',
-      required: false,
-    },
-  ];
+    });
+  }
+  builder.add({
+    label: '运单号',
+    field: 'waybillId',
+  });
+  if (notifyType == NotifyType.Container) {
+    builder.addAll([
+      {
+        label: '目的国',
+        field: 'targetCountry',
+      },
+      {
+        label: 'FBACode',
+        field: 'FBACode',
+      },
+      {
+        label: 'PO',
+        field: 'po',
+      },
+      {
+        label: 'FBA号',
+        field: 'FBANo',
+      },
+      {
+        label: '收件人',
+        field: 'name',
+      },
+      {
+        label: '电话/邮箱',
+        field: 'email',
+      },
+      {
+        label: '街道',
+        field: 'street',
+      },
+      {
+        label: '门牌号',
+        field: 'houseNo',
+      },
+      {
+        label: '地址附加',
+        field: 'address2',
+      },
+      {
+        label: '邮编',
+        field: 'postCode',
+      },
+      {
+        label: '城市',
+        field: 'city',
+      },
+      {
+        label: '州',
+        field: 'state',
+      },
+    ]);
+    builder.add({
+      label: '物流方式',
+      field: 'logisticsMethods',
+    });
+    builder.add({
+      label: '包装',
+      field: 'package',
+    });
+    builder.add({
+      label: '装柜位置',
+      field: 'storeAddress',
+    });
+  } else {
+    builder.add({
+      label: '发货日期',
+      field: 'deliveryDate',
+    });
+  }
+  builder.add({
+    label: '备注',
+    field: 'note',
+  });
+  builder.add({
+    label: '产品名称',
+    field: 'productName',
+  });
+  return builder;
+}
+
+export function getNeededFieldByNotifyType(notifyType: NotifyType | null): any[] {
+  const builder = getNeededFieldBuilder(notifyType);
+  return builder.build();
 }
 
 export function getTaskColumns() {
@@ -76,22 +158,7 @@ export function getTaskColumns() {
       label: '数量',
       field: 'count',
     },
-    {
-      label: '长',
-      field: 'length',
-    },
-    {
-      label: '宽',
-      field: 'width',
-    },
-    {
-      label: '高',
-      field: 'height',
-    },
-    {
-      label: '实重kg',
-      field: 'actualWeight',
-    },
+
     formFieldTaskTypeSelection,
     { label: 'FBA', field: 'fbaCode' },
   ].map(convertFieldToColumn);

@@ -145,7 +145,7 @@
   const emit = defineEmits(['submit']);
 
   function handleSubmit(values: NotifyModel) {
-    values.taskList = task;
+    console.log(values);
     emit('submit', values);
   }
 </script>
