@@ -10,7 +10,7 @@ import {
 } from 'firebase/firestore';
 import { resultError, resultSuccess } from '@/utils/request/_util';
 import { doLog } from '@/api/statusChangeLog';
-import { getNotifyById, NotifyStatus } from '@/api/notify/notify-api';
+import { getNotifyById, NotifyStatus } from '@/views/newViews/NotifyList/api/notify-api';
 
 const notifyPath = 'notify';
 const taskListPath = 'taskList';

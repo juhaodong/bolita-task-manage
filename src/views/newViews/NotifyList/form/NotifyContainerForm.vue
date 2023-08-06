@@ -7,7 +7,7 @@
   import dayjs from 'dayjs';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
-  import { NotifyModel } from '@/api/notify/notify-api';
+  import { NotifyModel } from '@/views/newViews/NotifyList/api/notify-api';
   import { ref } from 'vue';
   import { usePermission } from '@/hooks/web/usePermission';
   import { listUser, PermissionEnums } from '@/api/user/baseUser';

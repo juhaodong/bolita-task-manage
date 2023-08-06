@@ -63,7 +63,7 @@
     getNotifyList,
     NotifyStatus,
     NotifyType,
-  } from '@/api/notify/notify-api';
+  } from '@/views/newViews/NotifyList/api/notify-api';
   import NotifyFormIndex from '@/views/newViews/NotifyList/form/NotifyFormIndex.vue';
   import NotifyDetailPage from '@/views/bolita-views/notify/NotifyDetail/NotifyDetailPage.vue';
   import { $ref } from 'vue/macros';

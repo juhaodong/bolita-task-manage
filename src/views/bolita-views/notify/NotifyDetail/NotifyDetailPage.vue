@@ -79,13 +79,13 @@
 </template>
 
 <script setup lang="ts">
-  import { getNotifyById } from '@/api/notify/notify-api';
+  import { getNotifyById } from '@/views/newViews/NotifyList/api/notify-api';
   import { computed, Ref, ref, watch, watchEffect } from 'vue';
   import { NButton } from 'naive-ui';
   import { toastSuccess } from '@/utils/utils';
   import { uploadFile } from '@/plugins/firebase';
   import ChangeLogTimeLine from '@/views/bolita-views/composable/ChangeLogTimeLine.vue';
-  import { changeArriveCountForNotifyTask } from '@/api/notify/notify-detail';
+  import { changeArriveCountForNotifyTask } from '@/views/newViews/NotifyList/api/notify-detail';
   import NotifyDetailBasicInfo from '@/views/bolita-views/notify/NotifyDetail/Fragment/NotifyDetailBasicInfo.vue';
   import { getNeededColumnByNotifyType } from '@/views/bolita-views/notify/NotifyRepository/NotifyRepository';
   import { $ref } from 'vue/macros';

@@ -4,7 +4,11 @@ import { resultError, resultSuccess } from '@/utils/request/_util';
 import { doLog } from '@/api/statusChangeLog';
 
 import dayjs from 'dayjs';
-import { addNotifyDetail, getTasksForNotify, NotifyDetailModel } from '@/api/notify/notify-detail';
+import {
+  addNotifyDetail,
+  getTasksForNotify,
+  NotifyDetailModel,
+} from '@/views/newViews/NotifyList/api/notify-detail';
 import { BasicModel } from '@/api/model/common/BasicModel';
 
 export interface NotifyModel extends BasicModel {

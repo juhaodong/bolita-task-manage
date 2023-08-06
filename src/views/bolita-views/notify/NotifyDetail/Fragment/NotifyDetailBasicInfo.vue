@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { computed, h, watchEffect } from 'vue';
-  import { getNotifyById, NotifyType } from '@/api/notify/notify-api';
+  import { getNotifyById, NotifyType } from '@/views/newViews/NotifyList/api/notify-api';
   import { getTaskColumns } from '@/views/bolita-views/notify/NotifyRepository/NotifyRepository';
   import dayjs from 'dayjs';
   import { NInput, NInputNumber } from 'naive-ui';

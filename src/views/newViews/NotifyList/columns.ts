@@ -1,5 +1,5 @@
 import { DataTableColumns } from 'naive-ui';
-import { NotifyModel } from '@/api/notify/notify-api';
+import { NotifyModel } from '@/views/newViews/NotifyList/api/notify-api';
 import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
 
 export const columns: DataTableColumns<NotifyModel> = [

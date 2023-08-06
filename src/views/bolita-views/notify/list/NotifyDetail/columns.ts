@@ -1,6 +1,6 @@
 import { DataTableColumns } from 'naive-ui';
 import { h } from 'vue';
-import { NotifyModel } from '@/api/notify/notify-api';
+import { NotifyModel } from '@/views/newViews/NotifyList/api/notify-api';
 import { statusColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 
 export const columns: DataTableColumns<NotifyModel> = [

@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { BasicTable, TableAction } from '@/components/Table';
   import { computed, h, reactive, ref } from 'vue';
-  import { NotifyType } from '@/api/notify/notify-api';
+  import { NotifyType } from '@/views/newViews/NotifyList/api/notify-api';
   import { NButton } from 'naive-ui';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { toastSuccess } from '@/utils/utils';

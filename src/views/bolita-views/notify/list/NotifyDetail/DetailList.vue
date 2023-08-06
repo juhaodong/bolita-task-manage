@@ -45,14 +45,14 @@
     deleteNotify,
     NotifyStatus,
     NotifyType,
-  } from '@/api/notify/notify-api';
+  } from '@/views/newViews/NotifyList/api/notify-api';
   import NotifyFormIndex from '@/views/newViews/NotifyList/form/NotifyFormIndex.vue';
   import { $ref } from 'vue/macros';
   import { PermissionEnums } from '@/api/user/baseUser';
   import { useCheckDialog } from '@/store/modules/checkDialogState';
   import { handleRequest } from '@/utils/utils';
   import { getNeededColumnByNotifyType } from '@/views/bolita-views/notify/NotifyRepository/NotifyRepository';
-  import { getNotifyTasks } from '@/api/notify/notify-detail';
+  import { getNotifyTasks } from '@/views/newViews/NotifyList/api/notify-detail';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
 

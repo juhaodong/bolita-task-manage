@@ -41,7 +41,11 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns } from './columns';
   import { Box20Filled } from '@vicons/fluent';
-  import { deleteNotify, NotifyStatus, NotifyType } from '@/api/notify/notify-api';
+  import {
+    deleteNotify,
+    NotifyStatus,
+    NotifyType,
+  } from '@/views/newViews/NotifyList/api/notify-api';
   import NotifyFormIndex from '@/views/newViews/NotifyList/form/NotifyFormIndex.vue';
   import { $ref } from 'vue/macros';
   import { PermissionEnums } from '@/api/user/baseUser';
