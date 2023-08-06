@@ -19,7 +19,7 @@ export interface NotifyModel extends BasicModel {
   taskList: NotifyDetailModel[];
 }
 
-const notifyPath = 'notify';
+export const notifyPath = 'notify';
 const ref = collection(db, notifyPath);
 
 export interface NotifyCreateDTO {

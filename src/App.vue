@@ -9,6 +9,7 @@
     <AppProvider>
       <RouterView />
       <check-dialog />
+      <upload-file-dialog />
     </AppProvider>
   </NConfigProvider>
 
@@ -27,6 +28,7 @@
   import { useDesignSettingStore } from '@/store/modules/designSetting';
   import { lighten } from '@/utils/index';
   import CheckDialog from '@/views/bolita-views/composable/CheckDialog.vue';
+  import UploadFileDialog from '@/views/bolita-views/composable/UploadFileDialog.vue';
 
   const route = useRoute();
   const useScreenLock = useScreenLockStore();

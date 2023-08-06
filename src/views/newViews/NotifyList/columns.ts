@@ -1,13 +1,7 @@
 import { DataTableColumns } from 'naive-ui';
-import { deleteNotify, NotifyModel } from '@/views/newViews/NotifyList/api/notify-api';
+import { NotifyModel } from '@/views/newViews/NotifyList/api/notify-api';
 import { standardDateFormat, timeColumn } from '@/views/bolita-views/composable/useableColumns';
-import { h, reactive } from 'vue';
-import { TableAction } from '@/components/Table';
-import Delete28Filled from '@vicons/fluent/es/Delete28Filled';
-import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
-import { Folder32Filled } from '@vicons/fluent';
-import { Hammer, Home } from '@vicons/ionicons5';
-import { CurrencyEuro } from '@vicons/carbon';
+import { h } from 'vue';
 
 export const columns: DataTableColumns<NotifyModel> = [
   {
@@ -74,69 +68,3 @@ export const columns: DataTableColumns<NotifyModel> = [
     key: 'cashStatus',
   },
 ];
-
-export function getActionColumn(reload: any) {
-  return reactive({
-    title: '可用动作',
-    key: 'action',
-    width: 120,
-    render(record) {
-      return h(TableAction as any, {
-        style: 'button',
-        actions: [
-          {
-            label: '删除',
-            icon: Delete28Filled,
-            popConfirm: {
-              title: '是否确定删除此预报？',
-              async confirm() {
-                await deleteNotify(record.id);
-                reload();
-              },
-            },
-          },
-          {
-            label: '修改',
-            icon: DocumentEdit16Filled,
-            popConfirm: {
-              title: '是否确定删除此预报？',
-              async confirm() {
-                await deleteNotify(record.id);
-                reload();
-              },
-            },
-          },
-          {
-            label: '附件',
-            icon: Folder32Filled,
-            popConfirm: {
-              title: '是否确定删除此预报？',
-              async confirm() {
-                await deleteNotify(record.id);
-                reload();
-              },
-            },
-          },
-          {
-            label: 'CMR',
-          },
-          {
-            label: '问题图片',
-          },
-          {
-            label: '操作',
-            icon: Hammer,
-          },
-          {
-            label: '查看仓库信息',
-            icon: Home,
-          },
-          {
-            label: '费用',
-            icon: CurrencyEuro,
-          },
-        ],
-      });
-    },
-  });
-}

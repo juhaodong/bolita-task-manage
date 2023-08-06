@@ -43,14 +43,25 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref } from 'vue';
-  import { BasicTable } from '@/components/Table';
-  import { columns, getActionColumn } from './columns';
-  import { Box20Filled } from '@vicons/fluent';
-  import { getNotifyList, NotifyType } from '@/views/newViews/NotifyList/api/notify-api';
+  import { Component, h, reactive, ref } from 'vue';
+  import { BasicTable, TableAction } from '@/components/Table';
+  import { columns } from './columns';
+  import { Box20Filled, Folder32Filled } from '@vicons/fluent';
+  import {
+    deleteNotify,
+    getNotifyList,
+    NotifyModel,
+    notifyPath,
+    NotifyType,
+  } from '@/views/newViews/NotifyList/api/notify-api';
   import NotifyFormIndex from '@/views/newViews/NotifyList/form/NotifyFormIndex.vue';
   import { $ref } from 'vue/macros';
   import { TruckDelivery } from '@vicons/tabler';
+  import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
+  import Delete28Filled from '@vicons/fluent/es/Delete28Filled';
+  import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
+  import { Hammer, Home } from '@vicons/ionicons5';
+  import { CurrencyEuro } from '@vicons/carbon';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
 
@@ -75,7 +86,58 @@
     showModal.value = false;
   }
 
-  const actionColumn = getActionColumn(reloadTable);
+  const actionColumn = reactive({
+    title: '可用动作',
+    key: 'action',
+    width: 120,
+    render(record: NotifyModel) {
+      const fileAction = (label, key, icon?: Component) => {
+        return getFileActionButton(label, key, notifyPath, reloadTable, record, icon);
+      };
+      return h(TableAction as any, {
+        style: 'button',
+        actions: [
+          {
+            label: '删除',
+            icon: Delete28Filled,
+            popConfirm: {
+              title: '是否确定删除此预报？',
+              async confirm() {
+                await deleteNotify(record.id);
+                reloadTable();
+              },
+            },
+          },
+          {
+            label: '修改',
+            icon: DocumentEdit16Filled,
+            popConfirm: {
+              title: '是否确定删除此预报？',
+              async confirm() {
+                await deleteNotify(record.id);
+                reloadTable();
+              },
+            },
+          },
+          fileAction('附件', 'files', Folder32Filled),
+          fileAction('CMR', 'CMRFiles'),
+          fileAction('问题图片', 'problemFiles'),
+          {
+            label: '操作',
+            icon: Hammer,
+          },
+          {
+            label: '查看仓库信息',
+            icon: Home,
+          },
+          {
+            label: '费用',
+            icon: CurrencyEuro,
+          },
+        ],
+      });
+    },
+  });
 </script>
 
 <style lang="less" scoped></style>

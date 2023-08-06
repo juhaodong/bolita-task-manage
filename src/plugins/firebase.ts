@@ -34,8 +34,8 @@ export const storage = getStorage(app);
 
 export const storageRef = ref(storage, 'bolita');
 
-export async function uploadFile(file, type: string | null = 'image') {
-  const name = dayjs().valueOf() + '-' + (type ?? 'no-type') + '/' + file.name;
+export async function uploadFile(file) {
+  const name = dayjs().valueOf() + '-' + file.name;
   console.log(name, '将要上传的文件名字');
   const res = await uploadBytes(ref(storageRef, name), file);
   console.log(res, 'Image Result');
@@ -43,7 +43,7 @@ export async function uploadFile(file, type: string | null = 'image') {
 }
 
 export async function getFileUrlFromFileUpload(file: UploadFileInfo) {
-  return await uploadFile(file.file, file.type?.split('/')[1]);
+  return await uploadFile(file.file);
 }
 
 export async function getFileListUrl(files?: UploadFileInfo[]) {
@@ -106,6 +106,17 @@ export async function generalAdd(value: any, collectionName: string, statusKey =
   await setDoc(doc(collection(db, collectionName), id), value);
   await doLog({
     toStatus: value?.[statusKey] ?? '',
+    note: value?.note ?? '',
+    files: [],
+    logRef: id,
+  });
+  return id;
+}
+
+export async function generalUpdate(value: any, collectionName: string, id: string) {
+  await setDoc(doc(collection(db, collectionName), id), value, { merge: true });
+  await doLog({
+    toStatus: '更新状态',
     note: value?.note ?? '',
     files: [],
     logRef: id,

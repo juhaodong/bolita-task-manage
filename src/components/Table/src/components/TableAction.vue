@@ -10,8 +10,13 @@
               v-if="action.popConfirm"
             >
               <template #trigger>
-                <n-button style="font-size: 18px; padding: 4px !important" text v-bind="action">
-                  <template v-if="action.hasOwnProperty('icon')">
+                <n-button
+                  style="font-size: 18px; padding: 4px !important"
+                  text
+                  v-bind="action"
+                  :type="(action.highlight ? action.highlight() : false) ? 'warning' : 'default'"
+                >
+                  <template v-if="action.icon">
                     <n-icon :component="action.icon" />
                   </template>
                   <template v-else>
@@ -23,8 +28,14 @@
               </template>
               {{ action.popConfirm.title }}
             </n-popconfirm>
-            <n-button text style="font-size: 18px; padding: 4px !important" v-else v-bind="action">
-              <template v-if="action.hasOwnProperty('icon')">
+            <n-button
+              text
+              style="font-size: 18px; padding: 4px !important"
+              v-else
+              v-bind="action"
+              :type="(action.highlight ? action.highlight() : false) ? 'success' : 'default'"
+            >
+              <template v-if="action.icon">
                 <n-icon :component="action.icon" />
               </template>
               <template v-else>

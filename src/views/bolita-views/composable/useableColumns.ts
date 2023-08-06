@@ -1,5 +1,7 @@
-import { h } from 'vue';
+import { Component, h } from 'vue';
 import dayjs from 'dayjs';
+import { useUploadDialog } from '@/store/modules/uploadFileState';
+import { generalUpdate } from '@/plugins/firebase';
 
 export const standardDateFormat = 'YYYY-MM-DD/HH:mm';
 export const dateFormat = 'DD/MM/YYYY';
@@ -97,6 +99,34 @@ export function communicateColumn(keyName = 'createTimestamp', title = '创建�
     render(record) {
       const display = record[keyName] ? dayjs(record[keyName]).format(standardDateFormat) : '-';
       return h('div', display);
+    },
+  };
+}
+
+export function getFileActionButton(
+  label: string,
+  key: string,
+  collection: string,
+  reload: any,
+  record: any,
+  icon?: Component
+) {
+  return {
+    label,
+    icon: icon ?? null,
+    highlight: () => {
+      return record?.[key]?.length > 0;
+    },
+    async onClick() {
+      const upload = useUploadDialog();
+      const files = await upload.upload(record[key]);
+      if (files.checkPassed) {
+        const obj = {};
+        obj[key] = files.files;
+        await generalUpdate(obj, collection, record.id);
+      }
+
+      reload();
     },
   };
 }
