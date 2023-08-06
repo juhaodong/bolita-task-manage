@@ -40,13 +40,13 @@ export async function createNotify(notifyInfo: NotifyCreateDTO) {
   try {
     const info = {
       containerNo: '',
-      containerSize: '',
       containerType: '',
-      arrivedCount: 0,
-      arriveTime: 0,
       note: '',
-      status: NotifyStatus.NotSubmit,
       createTimestamp: dayjs().valueOf(),
+      inStatus: InBoundStatus.Wait,
+      outStatus: OutStatus.Wait,
+      cashStatus: CashStatus.NotFinish,
+      warehouseNote: '',
       totalCount: notifyInfo.taskList.reduce((sum, i) => sum + parseInt(i.count), 0),
     };
     const { id } = await addDoc(collection(db, notifyPath), Object.assign(info, notifyInfo));
@@ -65,6 +65,7 @@ export async function createNotify(notifyInfo: NotifyCreateDTO) {
     return resultError(e?.message);
   }
 }
+
 export async function saveNotify(info: NotifyCreateDTO, id: string | null = null) {
   if (!id) {
     return await createNotify(info);
@@ -72,6 +73,7 @@ export async function saveNotify(info: NotifyCreateDTO, id: string | null = null
     return await updateNotify(info, id);
   }
 }
+
 async function updateNotify(info: NotifyCreateDTO, id) {
   const currentInfo = await getNotifyById(id);
   const newData = Object.assign({}, currentInfo, info);
@@ -128,8 +130,7 @@ export async function getNotifyById(id?: string) {
 }
 
 //获取table
-export async function getNotifyList(params) {
-  console.log(params);
+export async function getNotifyList() {
   return await executeQuery(query(collection(db, notifyPath), orderBy('createTimestamp', 'desc')));
 }
 
@@ -141,6 +142,25 @@ export enum NotifyStatus {
   AlreadyArrived = '已经到货',
   Warning = '异常',
   Canceled = '已取消',
+}
+
+export enum InBoundStatus {
+  All = '全部入库',
+  Partial = '部分入库',
+  Wait = '等待入库',
+}
+
+export enum OutStatus {
+  All = '全部出库',
+  Partial = '部分出库',
+  Wait = '等待出库',
+  Stay = '留仓',
+}
+
+export enum CashStatus {
+  Done = '已结算',
+  WaitConfirm = '待确认',
+  NotFinish = '未结算',
 }
 
 export const notifyStatusList = Object.values(NotifyStatus);

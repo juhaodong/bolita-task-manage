@@ -1,16 +1,20 @@
 import { DataTableColumns } from 'naive-ui';
-import { NotifyModel } from '@/views/newViews/NotifyList/api/notify-api';
-import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import {
+  deleteNotify,
+  InBoundStatus,
+  NotifyModel,
+} from '@/views/newViews/NotifyList/api/notify-api';
+import { standardDateFormat, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { h, reactive } from 'vue';
+import { TableAction } from '@/components/Table';
+import { PermissionEnums } from '@/api/user/baseUser';
 
 export const columns: DataTableColumns<NotifyModel> = [
   {
     title: '入库ID',
-    key: 'inboundId',
-  },
-  {
-    title: '创建时间',
     key: 'id',
   },
+  timeColumn(),
   {
     title: '客户ID',
     key: 'customerId',
@@ -32,18 +36,18 @@ export const columns: DataTableColumns<NotifyModel> = [
     key: 'boxCount',
   },
   timeColumn('planArriveDateTime', '预计到达时间'),
-  timeColumn('reserveTime', '预约仓位'),
+  timeColumn('reserveTime', '预约仓位', standardDateFormat),
   {
     title: '入库数量',
     key: 'totalCount',
   },
   {
     title: '入库状态',
-    key: 'inboundStatus',
+    key: 'inStatus',
   },
   {
     title: '入库类型',
-    key: 'inType',
+    key: 'notifyType',
   },
   {
     title: '货柜类型',
@@ -51,7 +55,7 @@ export const columns: DataTableColumns<NotifyModel> = [
   },
   {
     title: '出库状态',
-    key: 'outState',
+    key: 'outStatus',
   },
   {
     title: '备注',
@@ -59,10 +63,38 @@ export const columns: DataTableColumns<NotifyModel> = [
   },
   {
     title: '交流',
-    key: 'communicate',
+    key: 'warehouseNote',
   },
   {
     title: '结算情况',
-    key: 'compute',
+    key: 'cashStatus',
   },
 ];
+
+export function getActionColumn(reload) {
+  return reactive({
+    title: '可用动作',
+    key: 'action',
+    render(record) {
+      return h(TableAction as any, {
+        style: 'button',
+        actions: [
+          {
+            label: '删除',
+            popConfirm: {
+              title: '是否确定删除此预报？',
+              async confirm() {
+                await deleteNotify(record.id);
+                reload();
+              },
+            },
+            ifShow: () => {
+              return record.inStatus == InBoundStatus.Wait;
+            },
+            auth: [PermissionEnums.Manager, PermissionEnums.Customer, PermissionEnums.Technical],
+          },
+        ],
+      });
+    },
+  });
+}

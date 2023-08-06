@@ -44,6 +44,7 @@
         return !hasPermission([PermissionEnums.Customer]);
       },
     },
+
     {
       field: 'containerNo',
       label: '货柜号',
@@ -120,12 +121,17 @@
       field: 'totalWeight',
       label: '总重量',
     },
-    getFilesUploadFormField('uploadFile', true, () => {
+    getFilesUploadFormField('uploadFile', false, () => {
       console.log('download');
     }),
     {
       field: 'note',
       label: '备注',
+      required: false,
+    },
+    {
+      field: 'salesName',
+      label: '业务员',
       required: false,
     },
   ];

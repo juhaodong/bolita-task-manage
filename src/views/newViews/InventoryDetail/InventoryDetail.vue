@@ -64,12 +64,6 @@
         style: 'button',
         actions: [
           {
-            label: '详情',
-          },
-          {
-            label: '详情',
-          },
-          {
             label: '删除',
             popConfirm: {
               title: '是否确定删除此预报？',

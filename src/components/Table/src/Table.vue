@@ -45,25 +45,6 @@
         <span>刷新</span>
       </n-tooltip>
 
-      <!--密度-->
-      <n-tooltip trigger="hover">
-        <template #trigger>
-          <div class="table-toolbar-right-icon">
-            <n-dropdown
-              @select="densitySelect"
-              trigger="click"
-              :options="densityOptions"
-              v-model:value="tableSize"
-            >
-              <n-icon size="18">
-                <ColumnHeightOutlined />
-              </n-icon>
-            </n-dropdown>
-          </div>
-        </template>
-        <span>密度</span>
-      </n-tooltip>
-
       <!--表格设置单独抽离成组件-->
       <ColumnSetting />
     </div>
@@ -153,7 +134,7 @@
       const tableElRef = ref<ComponentRef>(null);
       const wrapRef = ref<Nullable<HTMLDivElement>>(null);
       let paginationEl: HTMLElement | null;
-      const isStriped = ref(false);
+      const isStriped = ref(true);
       const tableData = ref<Recordable[]>([]);
       const innerPropsRef = ref<Partial<BasicTableProps>>();
 
@@ -180,31 +161,11 @@
         useColumns(getProps);
 
       const state = reactive({
-        tableSize: unref(getProps as any).size || 'medium',
+        tableSize: 'small',
         isColumnSetting: false,
       });
 
       //页码切换
-      function updatePage(page) {
-        setPagination({ page: page });
-        reload();
-      }
-
-      //分页数量切换
-      function updatePageSize(size) {
-        setPagination({ page: 1, pageSize: size });
-        reload();
-      }
-
-      //密度切换
-      function densitySelect(e) {
-        state.tableSize = e;
-      }
-
-      //选中行
-      function updateCheckedRowKeys(rowKeys) {
-        emit('update:checked-row-keys', rowKeys);
-      }
 
       //获取表格大小
       const getTableSize = computed(() => state.tableSize);
@@ -242,7 +203,6 @@
         reload,
         setColumns,
         setLoading,
-        setProps,
         getColumns,
         getPageColumns,
         getCacheColumns,
@@ -298,9 +258,6 @@
         getDataSource,
         densityOptions,
         reload,
-        densitySelect,
-        updatePage,
-        updatePageSize,
         pagination: paginationReactive,
         tableAction,
         setStriped,

@@ -1,7 +1,9 @@
 import { h } from 'vue';
 import dayjs from 'dayjs';
 
-const standardDateFormat = 'YYYY-MM-DD/HH:mm';
+export const standardDateFormat = 'YYYY-MM-DD/HH:mm';
+export const dateFormat = 'DD/MM/YYYY';
+
 function hashCode(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -13,6 +15,7 @@ function hashCode(str) {
 function pickColor(str) {
   return `hsl(${hashCode(str) % 360}, 100%, 95%)`;
 }
+
 function pickBorderColor(str) {
   return `hsl(${hashCode(str) % 360}, 100%, 80%)`;
 }
@@ -37,7 +40,23 @@ export const statusColumn = {
   width: 140,
 };
 
-export function timeColumn(keyName = 'createTimestamp', title = '创建时间') {
+export function timeColumn(
+  keyName = 'createTimestamp',
+  title = '创建时间',
+  timeFormat = dateFormat
+) {
+  return {
+    title: title,
+    key: keyName,
+    width: 110,
+    render(record) {
+      const display = record[keyName] ? dayjs(record[keyName]).format(timeFormat) : '-';
+      return h('div', display);
+    },
+  };
+}
+
+export function communicateColumn(keyName = 'createTimestamp', title = '创建时间') {
   return {
     title: title,
     key: keyName,

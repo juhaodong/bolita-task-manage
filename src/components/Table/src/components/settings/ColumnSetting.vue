@@ -12,14 +12,14 @@
             <div class="table-toolbar-inner-popover-title">
               <n-space>
                 <n-checkbox v-model:checked="checkAll" @update:checked="onCheckAll"
-                  >列展示</n-checkbox
-                >
+                  >列展示
+                </n-checkbox>
                 <n-checkbox v-model:checked="selection" @update:checked="onSelection"
-                  >勾选列</n-checkbox
-                >
+                  >勾选列
+                </n-checkbox>
                 <n-button text type="info" size="small" class="mt-1" @click="resetColumns"
-                  >重置</n-button
-                >
+                  >重置
+                </n-button>
               </n-space>
             </div>
           </template>
@@ -92,14 +92,24 @@
 </template>
 
 <script lang="ts">
-  import { ref, defineComponent, reactive, unref, toRaw, computed, toRefs, watchEffect } from 'vue';
+  import {
+    computed,
+    defineComponent,
+    onMounted,
+    reactive,
+    ref,
+    toRaw,
+    toRefs,
+    unref,
+    watchEffect,
+  } from 'vue';
   import { useTableContext } from '../../hooks/useTableContext';
   import { cloneDeep } from 'lodash-es';
   import {
-    SettingOutlined,
     DragOutlined,
-    VerticalRightOutlined,
+    SettingOutlined,
     VerticalLeftOutlined,
+    VerticalRightOutlined,
   } from '@vicons/antd';
   import Draggable from 'vuedraggable';
   import { useDesignSetting } from '@/hooks/setting/useDesignSetting';
@@ -126,7 +136,7 @@
       const cacheColumnsList = ref<Options[]>([]);
 
       const state = reactive({
-        selection: false,
+        selection: true,
         checkAll: true,
         checkList: [],
         defaultCheckList: [],
@@ -243,6 +253,10 @@
         setColumns(columns);
       }
 
+      onMounted(() => {
+        onSelection(true);
+      });
+
       return {
         ...toRefs(state),
         columnsList,
@@ -294,6 +308,7 @@
         display: inline-flex;
         margin-right: 8px;
         cursor: move;
+
         &-hidden {
           visibility: hidden;
           cursor: default;
