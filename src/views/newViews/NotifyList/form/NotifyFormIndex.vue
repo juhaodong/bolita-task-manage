@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { createNotify, NotifyModel, NotifyType } from '@/api/notify/notify-api';
-  import NotifyContainerForm from '@/views/bolita-views/notify/NotifyFormPage/NotifyContainerForm.vue';
-  import TrayForm from '@/views/bolita-views/notify/NotifyFormPage/NotifyTrayForm.vue';
+  import NotifyContainerForm from '@/views/newViews/NotifyList/form/NotifyContainerForm.vue';
+  import TrayForm from '@/views/newViews/NotifyList/form/NotifyTrayForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { handleRequest } from '@/utils/utils';
 

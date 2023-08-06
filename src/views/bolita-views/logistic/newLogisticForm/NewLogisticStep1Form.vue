@@ -5,10 +5,8 @@
   import { listUser, PermissionEnums } from '@/api/user/baseUser';
   import { Ref, ref, UnwrapRef } from 'vue';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
-  import {
-    FormField,
-    getDeliveryMethodSelection,
-  } from '@/views/bolita-views/composable/form-field-type';
+  import { FormField } from '@/views/bolita-views/composable/form-field-type';
+  import { getDeliveryMethodSelection } from '@/api/dataLayer/fieldDefination/form-field-sort-label';
 
   let warehouseList: Ref<UnwrapRef<Array<any>>> = ref([]);
   const schemas: FormField[] = [

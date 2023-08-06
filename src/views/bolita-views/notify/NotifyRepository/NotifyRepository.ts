@@ -1,11 +1,8 @@
-import {
-  convertFieldToColumn,
-  FormField,
-  formFieldTaskTypeSelection,
-} from '@/views/bolita-views/composable/form-field-type';
+import { convertFieldToColumn, FormField } from '@/views/bolita-views/composable/form-field-type';
 import { formFieldUnitSelection } from '@/api/model/common/BoxOrTray';
 import { getTargetAddressSelectionGroup } from '@/api/model/common/addressGroup';
 import { NotifyType } from '@/api/notify/notify-api';
+import { formFieldTaskTypeSelection } from '@/api/dataLayer/fieldDefination/form-field-sort-label';
 
 export function getNeededColumnByNotifyType(notifyType: NotifyType | null) {
   return getNeededFieldByNotifyType(notifyType)

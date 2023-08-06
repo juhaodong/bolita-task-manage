@@ -44,7 +44,7 @@
       v-model:show="showModal"
       :show-icon="false"
       preset="card"
-      title="新建到货预报"
+      title="新建入库计划"
       style="width: 90%; min-width: 600px; max-width: 800px"
     >
       <notify-form-index @saved="closeAddDialog" :type="notifyType" />
@@ -64,7 +64,7 @@
     NotifyStatus,
     NotifyType,
   } from '@/api/notify/notify-api';
-  import NotifyFormIndex from '@/views/bolita-views/notify/NotifyFormPage/NotifyFormIndex.vue';
+  import NotifyFormIndex from '@/views/newViews/NotifyList/form/NotifyFormIndex.vue';
   import NotifyDetailPage from '@/views/bolita-views/notify/NotifyDetail/NotifyDetailPage.vue';
   import { $ref } from 'vue/macros';
   import { PermissionEnums } from '@/api/user/baseUser';

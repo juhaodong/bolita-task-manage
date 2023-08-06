@@ -1,13 +1,5 @@
 import { TaskType } from '@/api/task/task-types';
-import {
-  filesUpload,
-  FormField,
-  formFieldBoxNo,
-  formFieldBuilder,
-  formFieldContainerNo,
-  formFieldSku,
-  formFieldSortLabel,
-} from '@/views/bolita-views/composable/form-field-type';
+import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { formFieldUnitSelection } from '@/api/model/common/BoxOrTray';
 import { generateOptionFromArray } from '@/utils/utils';
 import { yesOrNo } from '@/api/operationType';
@@ -18,6 +10,14 @@ import { AddressType } from '@/api/model/common/AddressType';
 import { fbaCode, fbaDict, generateFbaAddress } from '@/api/model/common/FBACode';
 import { deliveryAddressDetail } from '@/api/model/common/addressGroup';
 import { statusColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import {
+  filesUpload,
+  formFieldBoxNo,
+  formFieldBuilder,
+  formFieldContainerNo,
+  formFieldSku,
+  formFieldSortLabel,
+} from '@/api/dataLayer/fieldDefination/form-field-sort-label';
 
 export function getFormFieldForTaskType(taskType: TaskType, customerField: FormField) {
   const builder = formFieldBuilder();

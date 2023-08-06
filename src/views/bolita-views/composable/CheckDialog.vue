@@ -2,7 +2,8 @@
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { useCheckDialog } from '@/store/modules/checkDialogState';
   import { computed } from 'vue';
-  import { getCheckFormField } from '@/views/bolita-views/composable/form-field-type';
+
+  import { getCheckFormField } from '@/api/dataLayer/fieldDefination/form-field-sort-label';
 
   const checkDialog = useCheckDialog();
   const field = computed(() => getCheckFormField(checkDialog.warehouses));

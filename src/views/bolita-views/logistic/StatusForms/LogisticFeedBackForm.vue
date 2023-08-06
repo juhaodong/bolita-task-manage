@@ -4,12 +4,10 @@
   </n-card>
 </template>
 <script setup lang="ts">
-  import {
-    FormField,
-    getFilesUploadFormField,
-  } from '@/views/bolita-views/composable/form-field-type';
+  import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { LogisticType } from '@/api/deliveryMethod/logistic-type';
+  import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/form-field-sort-label';
 
   interface Props {
     logisticType: LogisticType;

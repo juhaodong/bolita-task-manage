@@ -1,12 +1,10 @@
-import {
-  deliveryMethodSelection,
-  FormField,
-} from '@/views/bolita-views/composable/form-field-type';
+import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { formFieldTargetCountrySelection } from '@/api/model/common/TargetCountry';
 import { fbaDict, formFieldFBACodeSelection, generateFbaAddress } from '@/api/model/common/FBACode';
 import { AddressType, formFieldAddressTypeSelection } from '@/api/model/common/AddressType';
 import { generateOptionFromArray } from '@/utils/utils';
 import { YesOrNo, yesOrNo } from '@/api/operationType';
+import { deliveryMethodSelection } from '@/api/dataLayer/fieldDefination/form-field-sort-label';
 
 export const deliveryAddressDetail: FormField[] = [
   { label: '收件人', field: 'contact' },
