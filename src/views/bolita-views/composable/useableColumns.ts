@@ -2,6 +2,8 @@ import { Component, h } from 'vue';
 import dayjs from 'dayjs';
 import { useUploadDialog } from '@/store/modules/uploadFileState';
 import { generalUpdate } from '@/plugins/firebase';
+import { RouterLink } from 'vue-router';
+import { NText } from 'naive-ui';
 
 export const standardDateFormat = 'YYYY-MM-DD/HH:mm';
 export const dateFormat = 'DD/MM/YYYY';
@@ -49,6 +51,30 @@ export const statusColumn = {
   },
   width: 140,
 };
+
+export function idColumn(title = 'ID', targetPage, keyName = 'id') {
+  return {
+    title: title,
+    key: keyName,
+    width: 110,
+    render(record) {
+      return h(
+        RouterLink,
+        {
+          to: targetPage + '/' + record[keyName],
+        },
+        h(
+          NText,
+          {
+            underline: true,
+            type: 'info',
+          },
+          record[keyName]
+        )
+      );
+    },
+  };
+}
 
 export function timeColumn(
   keyName = 'createTimestamp',

@@ -5,16 +5,17 @@ import {
   notifyType,
   OutStatus,
 } from '@/views/newViews/NotifyList/api/notify-api';
-import { standardDateFormat, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import {
+  idColumn,
+  standardDateFormat,
+  timeColumn,
+} from '@/views/bolita-views/composable/useableColumns';
 import { h } from 'vue';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { generateOptionFromArray } from '@/utils/utils';
 
 export const columns: DataTableColumns<NotifyModel> = [
-  {
-    title: '入库ID',
-    key: 'id',
-  },
+  idColumn('入库ID', '/notify/detail'),
   timeColumn(),
   {
     title: '客户ID',

@@ -25,7 +25,8 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/newViews/NotifyList/NotifyList.vue'),
       },
       {
-        path: 'detail',
+        path: 'detail/:id',
+        props: true,
         name: `notify_detail`,
         meta: {
           title: '入库明细',
