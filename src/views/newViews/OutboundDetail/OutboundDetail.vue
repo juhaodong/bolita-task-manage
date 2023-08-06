@@ -12,7 +12,7 @@
     >
       <template #tableTitle>
         <n-space>
-          <n-button @click="addTable(NotifyType.Container)">
+          <n-button @click="addTable()">
             <template #icon>
               <n-icon>
                 <Box20Filled />

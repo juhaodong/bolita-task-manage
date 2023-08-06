@@ -20,6 +20,22 @@
             </template>
             新建入库明细
           </n-button>
+          <n-button>
+            <template #icon>
+              <n-icon>
+                <Box20Filled />
+              </n-icon>
+            </template>
+            转出库计划
+          </n-button>
+          <n-button>
+            <template #icon>
+              <n-icon>
+                <Box20Filled />
+              </n-icon>
+            </template>
+            查询
+          </n-button>
         </n-space>
       </template>
     </BasicTable>

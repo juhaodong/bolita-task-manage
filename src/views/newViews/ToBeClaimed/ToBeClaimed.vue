@@ -20,6 +20,22 @@
             </template>
             新建待认领
           </n-button>
+          <n-button>
+            <template #icon>
+              <n-icon>
+                <Box20Filled />
+              </n-icon>
+            </template>
+            扫描
+          </n-button>
+          <n-button>
+            <template #icon>
+              <n-icon>
+                <Box20Filled />
+              </n-icon>
+            </template>
+            查询
+          </n-button>
         </n-space>
       </template>
     </BasicTable>

@@ -33,6 +33,14 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('@/views/newViews/OutboundDetail/OutboundDetail.vue'),
       },
+      {
+        path: 'inventory',
+        name: `${name}_inventory`,
+        meta: {
+          title: '库存明细',
+        },
+        component: () => import('@/views/newViews/InventoryDetail/InventoryDetail.vue'),
+      },
     ],
   },
 ];

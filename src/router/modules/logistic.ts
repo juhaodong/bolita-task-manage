@@ -33,6 +33,14 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('@/views/newViews/LogisticsService/LogisticsService.vue'),
       },
+      {
+        path: 'carpoolManage',
+        name: `${name}carpoolManage`,
+        meta: {
+          title: '拼车管理',
+        },
+        component: () => import('@/views/newViews/CarpoolManagement/CarpoolManagement.vue'),
+      },
     ],
   },
 ];

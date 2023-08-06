@@ -12,13 +12,21 @@
     >
       <template #tableTitle>
         <n-space>
-          <n-button @click="addTable(NotifyType.Container)">
+          <n-button @click="addTable()">
             <template #icon>
               <n-icon>
                 <Box20Filled />
               </n-icon>
             </template>
             新建物流售后
+          </n-button>
+          <n-button>
+            <template #icon>
+              <n-icon>
+                <Box20Filled />
+              </n-icon>
+            </template>
+            下载指导文件
           </n-button>
         </n-space>
       </template>
