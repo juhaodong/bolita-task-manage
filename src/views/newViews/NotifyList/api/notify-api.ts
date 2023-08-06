@@ -1,14 +1,8 @@
-import { addDoc, collection, deleteDoc, doc, orderBy, query, setDoc } from 'firebase/firestore';
-import { db, executeQuery, getDocContent } from '@/plugins/firebase';
+import { collection, deleteDoc, doc, orderBy, query, setDoc } from 'firebase/firestore';
+import { db, executeQuery, generalAdd, getDocContent } from '@/plugins/firebase';
 import { resultError, resultSuccess } from '@/utils/request/_util';
 import { doLog } from '@/api/statusChangeLog';
-
-import dayjs from 'dayjs';
-import {
-  addInDetail,
-  getTasksForNotify,
-  NotifyDetailModel,
-} from '@/views/newViews/NotifyList/api/notify-detail';
+import { addInDetail, NotifyDetailModel } from '@/views/newViews/NotifyList/api/notify-detail';
 import { BasicModel } from '@/api/model/common/BasicModel';
 
 export interface NotifyModel extends BasicModel {
@@ -45,24 +39,17 @@ export async function createNotify(notifyInfo: NotifyCreateDTO) {
       containerType: '',
       arrivedCount: 0,
       note: '',
-      createTimestamp: dayjs().valueOf(),
       inStatus: InBoundStatus.Wait,
       outStatus: OutStatus.Wait,
       cashStatus: CashStatus.NotFinish,
       warehouseNote: '',
       totalCount: notifyInfo.boxCount + notifyInfo.trayCount,
     };
-    const { id } = await addDoc(collection(db, notifyPath), Object.assign(info, notifyInfo));
+    const id = await generalAdd(Object.assign(info, notifyInfo), notifyPath, 'inStatus');
     for (const task of notifyInfo.taskList) {
       await addInDetail(task, id);
     }
-    await doLog({
-      fromStatus: NotifyStatus.NotSubmit,
-      toStatus: NotifyStatus.NotSubmit,
-      note: '',
-      files: [],
-      logRef: id,
-    });
+
     return resultSuccess(id);
   } catch (e: any) {
     return resultError(e?.message);
@@ -103,14 +90,12 @@ export async function changeNotifyStatus(
   warehouseId: string | null = null
 ) {
   try {
-    const currentModel = await getNotifyById(id);
     await setDoc(doc(ref, id), { status: newStatus }, { merge: true });
     if (warehouseId) {
       await setDoc(doc(ref, id), { warehouseId }, { merge: true });
     }
     await doLog({
       files: [],
-      fromStatus: currentModel.status,
       logRef: id,
       note: '',
       toStatus: newStatus,
@@ -128,7 +113,6 @@ export async function getNotifyById(id?: string) {
   const mainInfo = await getDocContent(doc(db, notifyPath, id));
   return {
     ...mainInfo,
-    taskList: await getTasksForNotify(id),
   };
 }
 

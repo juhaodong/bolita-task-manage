@@ -55,7 +55,7 @@
   import { columns } from './columns';
   import { Box20Filled } from '@vicons/fluent';
   import NewNotifyDetailForm from '@/views/newViews/NotifyDetail/NewNotifyDetailForm.vue';
-  import { getNotifyTasks } from '@/views/newViews/NotifyList/api/notify-detail';
+  import { getNotifyDetailList } from '@/views/newViews/NotifyList/api/notify-detail';
 
   const showModal = ref(false);
 
@@ -64,7 +64,7 @@
   }
 
   const loadDataTable = async () => {
-    return await getNotifyTasks();
+    return await getNotifyDetailList();
   };
 
   function reloadTable() {

@@ -1,17 +1,21 @@
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
 import {
+  collection,
   doc,
   DocumentData,
   getDoc,
   getDocs,
   getFirestore,
+  query,
   Query,
   QuerySnapshot,
+  setDoc,
 } from 'firebase/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import dayjs from 'dayjs';
 import { UploadFileInfo } from 'naive-ui';
+import { doLog } from '@/api/statusChangeLog';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyChABcKKZVM1BZTvky3xkVl0b3pCLZaTuQ',
@@ -73,7 +77,9 @@ export function docContent(doc) {
 export function downloadFile(url) {
   window.open(url, '_blank');
 }
+
 const cache: any = {};
+
 export async function getNameById(
   id: string,
   collection: string,
@@ -87,4 +93,22 @@ export async function getNameById(
     cache[cacheKey] = res;
     return res;
   }
+}
+
+export async function getCollectionNextId(collectionName: string) {
+  const currentMaxId = await getDocs(query(collection(db, collectionName)));
+  return (currentMaxId.size + 1).toString().padStart(4, '0');
+}
+
+export async function generalAdd(value: any, collectionName: string, statusKey = 'status') {
+  const id = await getCollectionNextId(collectionName);
+  value.createTimestamp = dayjs().valueOf();
+  await setDoc(doc(collection(db, collectionName), id), value);
+  await doLog({
+    toStatus: value?.[statusKey] ?? '',
+    note: value?.note ?? '',
+    files: [],
+    logRef: id,
+  });
+  return id;
 }

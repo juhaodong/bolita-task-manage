@@ -1,8 +1,13 @@
-import { DataTableColumns } from 'naive-ui';
+import { DataTableColumns, NImage, NSpace } from 'naive-ui';
 import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import dayjs from 'dayjs';
+import { addDoc, collection, orderBy, query } from 'firebase/firestore';
+import { db, executeQuery, getFileListUrl } from '@/plugins/firebase';
+import { resultError, resultSuccess } from '@/utils/request/_util';
+import { h } from 'vue';
 
 export const columns: DataTableColumns<ToBeClaimedModel> = [
-  timeColumn('warehousingTime', '入库时间'),
+  timeColumn(),
   {
     title: '物流渠道',
     key: 'deliveryMethod',
@@ -26,6 +31,17 @@ export const columns: DataTableColumns<ToBeClaimedModel> = [
   {
     title: '图片',
     key: 'img',
+    render(record) {
+      return h(NSpace, [
+        ...record?.['img'].map((it) => {
+          return h(NImage, {
+            src: it,
+            width: 36,
+            height: 36,
+          });
+        }),
+      ]);
+    },
   },
   {
     title: '认领状态',
@@ -51,11 +67,35 @@ export type ToBeClaimedModel = {
   deliveryMethod: string;
   deliveryId: number;
   receivingWarehouse: string;
-  containerLogo: string;
-  img: string;
+  containerMark: string;
+  img: string[];
   claimStatus: string;
   claimCustomId: number;
   storageDays: number;
   discardTime: string;
   storeAddress: string;
 };
+
+export enum ClaimStatus {
+  Waiting = '待认领',
+  Claimed = '已认领',
+  Destroyed = '废弃',
+}
+
+const path = 'claimedGoods';
+
+export async function createNewClaim(model) {
+  try {
+    model.img = await getFileListUrl(model.img);
+    model.createTimestamp = dayjs().valueOf();
+    model.claimStatus = ClaimStatus.Waiting;
+    await addDoc(collection(db, path), model);
+    return resultSuccess('');
+  } catch (e: any) {
+    return resultError(e?.message);
+  }
+}
+
+export async function loadAllClaim() {
+  return await executeQuery(query(collection(db, path), orderBy('createTimestamp', 'desc')));
+}

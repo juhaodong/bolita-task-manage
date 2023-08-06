@@ -7,7 +7,6 @@
       :columns="columns"
       :request="loadDataTable"
       :row-key="(row) => row.id"
-      :scroll-x="3000"
       @update:checked-row-keys="onCheckedRow"
     >
       <template #tableTitle>
@@ -44,10 +43,10 @@
       v-model:show="showModal"
       :show-icon="false"
       preset="card"
-      style="width: 90%; min-width: 600px; max-width: 1200px"
+      style="width: 90%; min-width: 600px; max-width: 800px"
       title="新建待认领"
     >
-      <new-to-be-claimed-from />
+      <new-to-be-claimed-from @submit="createClaim" />
     </n-modal>
   </n-card>
 </template>
@@ -55,11 +54,28 @@
 <script lang="ts" setup>
   import { ref } from 'vue';
   import { BasicTable } from '@/components/Table';
-  import { columns } from './columns';
+  import { columns, createNewClaim, loadAllClaim } from './columns';
   import { Box20Filled } from '@vicons/fluent';
   import NewToBeClaimedFrom from '@/views/newViews/ToBeClaimed/NewToBeClaimedFrom.vue';
+  import { handleRequest } from '@/utils/utils';
 
   const showModal = ref(false);
+
+  async function createClaim(model) {
+    const res = await createNewClaim(model);
+    await handleRequest(res, () => {
+      reloadTable();
+      showModal.value = false;
+    });
+  }
+
+  const actionRef = ref();
+  function reloadTable() {
+    actionRef.value.reload();
+  }
+  async function loadDataTable() {
+    return await loadAllClaim();
+  }
 
   function addTable() {
     showModal.value = true;

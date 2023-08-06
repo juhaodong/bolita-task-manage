@@ -56,6 +56,39 @@ export function timeColumn(
   };
 }
 
+export function formatColumn(keyName: string, title: string, formatter: (record: any) => string) {
+  return {
+    title: title,
+    key: keyName,
+    render(record) {
+      const display = formatter(record);
+      if (!display) {
+        return h('div', ' - ');
+      }
+      return h('div', display);
+    },
+  };
+}
+
+export function joinDisplayColumn(
+  keyName: string,
+  title: string,
+  joinedKeys: string[],
+  joinString = ','
+) {
+  return {
+    title: title,
+    key: keyName,
+    render(record) {
+      const display = joinedKeys.map((it) => record[it]);
+      if (display.some((it) => !it)) {
+        return h('div', ' - ');
+      }
+      return h('div', display.join(joinString));
+    },
+  };
+}
+
 export function communicateColumn(keyName = 'createTimestamp', title = '创建时间') {
   return {
     title: title,

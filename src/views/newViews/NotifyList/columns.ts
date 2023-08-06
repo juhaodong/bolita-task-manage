@@ -6,6 +6,8 @@ import { TableAction } from '@/components/Table';
 import Delete28Filled from '@vicons/fluent/es/Delete28Filled';
 import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
 import { Folder32Filled } from '@vicons/fluent';
+import { Hammer, Home } from '@vicons/ionicons5';
+import { CurrencyEuro } from '@vicons/carbon';
 
 export const columns: DataTableColumns<NotifyModel> = [
   {
@@ -73,7 +75,7 @@ export const columns: DataTableColumns<NotifyModel> = [
   },
 ];
 
-export function getActionColumn(reload) {
+export function getActionColumn(reload: any) {
   return reactive({
     title: '可用动作',
     key: 'action',
@@ -114,6 +116,24 @@ export function getActionColumn(reload) {
                 reload();
               },
             },
+          },
+          {
+            label: 'CMR',
+          },
+          {
+            label: '问题图片',
+          },
+          {
+            label: '操作',
+            icon: Hammer,
+          },
+          {
+            label: '查看仓库信息',
+            icon: Home,
+          },
+          {
+            label: '费用',
+            icon: CurrencyEuro,
           },
         ],
       });

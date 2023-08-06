@@ -1,9 +1,13 @@
-import { db, executeQuery } from '@/plugins/firebase';
-import { addDoc, collection, deleteDoc, doc, orderBy, query, setDoc } from 'firebase/firestore';
+import { db, executeQuery, generalAdd } from '@/plugins/firebase';
+import { collection, deleteDoc, doc, orderBy, query, setDoc } from 'firebase/firestore';
 import { resultError, resultSuccess } from '@/utils/request/_util';
 import { doLog } from '@/api/statusChangeLog';
-import { getNotifyById, NotifyStatus } from '@/views/newViews/NotifyList/api/notify-api';
-import dayjs from 'dayjs';
+import {
+  getNotifyById,
+  getNotifyList,
+  NotifyStatus,
+} from '@/views/newViews/NotifyList/api/notify-api';
+import { keyBy } from 'lodash-es';
 
 const notifyPath = 'notify';
 const taskListPath = 'taskList';
@@ -26,14 +30,17 @@ export type NotifyDetailModel = {
   storagePosition: string;
 };
 
-export async function getNotifyTasks() {
-  return await executeQuery(
-    query(collection(db, taskListPath), orderBy('createTimestamp', 'desc'))
-  );
-}
-
-export async function getTasksForNotify(notifyId) {
-  return await executeQuery(query(collection(db, notifyPath, notifyId, taskListPath)));
+export async function getNotifyDetailList() {
+  const notifyDict = keyBy(await getNotifyList(), 'id');
+  return (
+    await executeQuery(query(collection(db, taskListPath), orderBy('createTimestamp', 'desc')))
+  ).map((it) => {
+    const n = notifyDict[it.notifyId];
+    return {
+      ...n,
+      ...it,
+    };
+  });
 }
 
 export async function addInDetail(taskInfo: any, notifyId: string) {
@@ -42,8 +49,8 @@ export async function addInDetail(taskInfo: any, notifyId: string) {
     taskInfo.note = '';
     taskInfo.storagePosition = '';
     taskInfo.notifyId = notifyId;
-    taskInfo.createTimestamp = dayjs().valueOf();
-    await addDoc(collection(db, taskListPath), taskInfo);
+    taskInfo.customerId = (await getNotifyById(notifyId)).customerId;
+    await generalAdd(taskInfo, taskListPath);
     return resultSuccess('');
   } catch (e: any) {
     return resultError(e?.message);
@@ -94,7 +101,6 @@ export async function changeArriveCountForNotifyTask(
     }
     await doLog({
       files: files,
-      fromStatus: statusNow,
       logRef: notifyId,
       note: '修改' + taskId + '到货数量为' + newArriveCount + '.备注:' + note,
       toStatus: statusLater,

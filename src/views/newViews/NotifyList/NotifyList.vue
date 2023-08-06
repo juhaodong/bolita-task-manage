@@ -54,8 +54,6 @@
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
 
-  const actionRef = ref();
-
   const showModal = ref(false);
 
   function addTable(type: NotifyType) {
@@ -67,6 +65,7 @@
     return await getNotifyList();
   };
 
+  const actionRef = ref();
   function reloadTable() {
     actionRef.value.reload();
   }

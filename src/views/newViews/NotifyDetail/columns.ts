@@ -1,4 +1,5 @@
 import { DataTableColumns } from 'naive-ui';
+import { joinDisplayColumn } from '@/views/bolita-views/composable/useableColumns';
 
 export const columns: DataTableColumns<NotifyDetailInfoModel> = [
   {
@@ -31,10 +32,7 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
     title: '箱数',
     key: 'containerNum',
   },
-  {
-    title: '外箱规格',
-    key: 'containerStandards',
-  },
+  joinDisplayColumn('containerStandards', '外箱规格', ['length', 'width', 'height'], '*'),
   {
     title: '重量kg',
     key: 'weightKg',
@@ -45,7 +43,7 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
   },
   {
     title: '入库状态',
-    key: 'inboundStatus',
+    key: 'inStatus',
   },
   {
     title: '出库状态',

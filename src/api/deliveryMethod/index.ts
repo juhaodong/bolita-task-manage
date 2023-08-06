@@ -81,7 +81,6 @@ export enum OutBoundDeliveryMethod {
   DPD = 'DPD',
   UPS = 'UPS',
   GLS = 'GLS',
-  TrayTransfer = '卡派',
   Others = '其他',
 }
 

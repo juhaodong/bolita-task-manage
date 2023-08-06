@@ -5,7 +5,6 @@ import { useUser } from '@/store/modules/user';
 import dayjs from 'dayjs';
 
 export type StatusChangeLogModel = {
-  fromStatus: string;
   toStatus: string;
   timestamp: number;
   note: string;
@@ -15,7 +14,6 @@ export type StatusChangeLogModel = {
 };
 
 export type ChangeLogDTO = {
-  fromStatus: string;
   toStatus: string;
   note: string;
   files: string[];

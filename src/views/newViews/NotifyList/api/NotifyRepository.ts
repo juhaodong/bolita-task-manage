@@ -70,7 +70,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
         field: 'targetCountry',
       },
       {
-        label: 'FBACode',
+        label: 'FBAcode',
         field: 'FBACode',
       },
       {

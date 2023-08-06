@@ -4,7 +4,7 @@
   import TrayForm from '@/views/newViews/NotifyList/form/NotifyTrayForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { handleRequest } from '@/utils/utils';
-  import { getNeededColumnByNotifyType } from '@/views/bolita-views/notify/NotifyRepository/NotifyRepository';
+  import { getNeededColumnByNotifyType } from '@/views/newViews/NotifyList/api/NotifyRepository';
   import readXlsxFile from 'read-excel-file';
 
   interface Prop {
@@ -45,9 +45,7 @@
     value.notifyType = prop.type;
     value.taskList = await readFile(value.uploadFile[0].file, value.notifyType);
     delete value.uploadFile;
-    console.log(value.taskList);
     const res = await createNotify(value);
-
     await handleRequest(res, () => {
       emit('saved');
     });
