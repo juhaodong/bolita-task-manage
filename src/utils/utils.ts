@@ -48,3 +48,11 @@ export function getFileNameAndTypeForFirebaseLink(firebaseLink: string) {
     type: '',
   };
 }
+
+export function safeParseInt(string: string | null) {
+  return parseInt(string ?? 0) || 0;
+}
+
+export function safeParseFloat(string: string | null) {
+  return parseFloat(string ?? 0) || 0;
+}

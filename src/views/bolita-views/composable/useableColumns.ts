@@ -6,6 +6,14 @@ import { generalUpdate } from '@/plugins/firebase';
 export const standardDateFormat = 'YYYY-MM-DD/HH:mm';
 export const dateFormat = 'DD/MM/YYYY';
 
+export function getDateNow() {
+  return dayjs().format(dateFormat);
+}
+
+export function timeDisplay(time) {
+  return dayjs(time).format(standardDateFormat);
+}
+
 function hashCode(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {

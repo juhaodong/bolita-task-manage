@@ -1,5 +1,5 @@
 import { db, executeQuery, generalAdd } from '@/plugins/firebase';
-import { collection, deleteDoc, doc, orderBy, query, setDoc } from 'firebase/firestore';
+import { collection, deleteDoc, doc, orderBy, query, setDoc, where } from 'firebase/firestore';
 import { resultError, resultSuccess } from '@/utils/request/_util';
 import { doLog } from '@/api/statusChangeLog';
 import {
@@ -8,6 +8,7 @@ import {
   NotifyStatus,
 } from '@/views/newViews/NotifyList/api/notify-api';
 import { keyBy } from 'lodash-es';
+import { safeParseInt } from '@/utils/utils';
 
 const notifyPath = 'notify';
 const taskListPath = 'taskList';
@@ -43,9 +44,20 @@ export async function getNotifyDetailList() {
   });
 }
 
+export async function getNotifyDetailListByNotify(id) {
+  return await executeQuery(
+    query(
+      collection(db, taskListPath),
+      where('notifyId', '==', id),
+      orderBy('createTimestamp', 'desc')
+    )
+  );
+}
+
 export async function addInDetail(taskInfo: any, notifyId: string) {
   try {
-    taskInfo.arrivedCount = 0;
+    taskInfo.arrivedContainerNum = 0;
+    taskInfo.arrivedTrayNum = 0;
     taskInfo.note = '';
     taskInfo.storagePosition = '';
     taskInfo.notifyId = notifyId;
@@ -82,7 +94,7 @@ export async function changeArriveCountForNotifyTask(
     const notifyNow = await getNotifyById(notifyId);
     const statusNow = notifyNow.status;
     const arrivedTotalCount = notifyNow.taskList.reduce(
-      (sum, i) => sum + parseInt(i.arrivedCount ?? '0'),
+      (sum, i) => sum + safeParseInt(i.arrivedCount ?? '0'),
       0
     );
     await setDoc(

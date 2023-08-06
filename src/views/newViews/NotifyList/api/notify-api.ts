@@ -4,6 +4,7 @@ import { resultError, resultSuccess } from '@/utils/request/_util';
 import { doLog } from '@/api/statusChangeLog';
 import { addInDetail, NotifyDetailModel } from '@/views/newViews/NotifyList/api/notify-detail';
 import { BasicModel } from '@/api/model/common/BasicModel';
+import { safeParseInt } from '@/utils/utils';
 
 export interface NotifyModel extends BasicModel {
   notifyType: NotifyType;
@@ -27,8 +28,8 @@ export interface NotifyCreateDTO {
   planArriveDateTime: number;
   customerId?: string;
   files?: string[];
-  boxCount: number;
-  trayCount: number;
+  boxCount: string;
+  trayCount: string;
   taskList: any[];
 }
 
@@ -43,7 +44,7 @@ export async function createNotify(notifyInfo: NotifyCreateDTO) {
       outStatus: OutStatus.Wait,
       cashStatus: CashStatus.NotFinish,
       warehouseNote: '',
-      totalCount: notifyInfo.boxCount + notifyInfo.trayCount,
+      totalCount: safeParseInt(notifyInfo.boxCount) + safeParseInt(notifyInfo.trayCount),
     };
     const id = await generalAdd(Object.assign(info, notifyInfo), notifyPath, 'inStatus');
     for (const task of notifyInfo.taskList) {

@@ -23,9 +23,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
   const root = process.cwd();
   const env = loadEnv(mode, root);
   const viteEnv = wrapperEnv(env);
-  const { VITE_PUBLIC_PATH, VITE_DROP_CONSOLE, VITE_PORT, VITE_GLOB_PROD_MOCK, VITE_PROXY } =
-    viteEnv;
-  const prodMock = VITE_GLOB_PROD_MOCK;
+  const { VITE_PUBLIC_PATH, VITE_DROP_CONSOLE, VITE_PORT, VITE_PROXY } = viteEnv;
   const isBuild = command === 'build';
   return {
     base: VITE_PUBLIC_PATH,
@@ -43,7 +41,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       ],
       dedupe: ['vue'],
     },
-    plugins: createVitePlugins(viteEnv, isBuild, prodMock),
+    plugins: createVitePlugins(viteEnv, isBuild),
     define: {
       __APP_INFO__: JSON.stringify(__APP_INFO__),
     },

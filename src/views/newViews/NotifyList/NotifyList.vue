@@ -39,6 +39,15 @@
     >
       <notify-form-index @saved="closeAddDialog" :type="notifyType" />
     </n-modal>
+    <n-modal
+      v-model:show="showOperationTable"
+      :show-icon="false"
+      preset="dialog"
+      title="卸柜表"
+      style="width: 90%; min-width: 600px; max-width: 800px"
+    >
+      <notify-unload-form :notify-id="currentNotifyId!" />
+    </n-modal>
   </n-card>
 </template>
 
@@ -62,10 +71,14 @@
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { Hammer, Home } from '@vicons/ionicons5';
   import { CurrencyEuro } from '@vicons/carbon';
+  import NotifyUnloadForm from '@/views/newViews/NotifyList/form/NotifyUnloadForm.vue';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
 
   const showModal = ref(false);
+
+  let showOperationTable = $ref(false);
+  let currentNotifyId: string | null = $ref(null);
 
   function addTable(type: NotifyType) {
     notifyType = type;
@@ -77,6 +90,7 @@
   };
 
   const actionRef = ref();
+
   function reloadTable() {
     actionRef.value.reload();
   }
@@ -125,6 +139,10 @@
           {
             label: '操作',
             icon: Hammer,
+            onClick() {
+              currentNotifyId = record.id!;
+              showOperationTable = true;
+            },
           },
           {
             label: '查看仓库信息',
