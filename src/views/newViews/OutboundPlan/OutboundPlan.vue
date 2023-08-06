@@ -45,46 +45,70 @@
 </template>
 
 <script lang="ts" setup>
-  import { h, reactive, ref } from 'vue';
+  import { Component, h, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns } from './columns';
-  import { Box20Filled } from '@vicons/fluent';
+  import { Box20Filled, Folder32Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
+  import { getNotifyList, notifyPath } from '@/views/newViews/NotifyList/api/notify-api';
+  import Delete28Filled from '@vicons/fluent/es/Delete28Filled';
+  import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
+  import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
+  import { Hammer } from '@vicons/ionicons5';
+  import { CurrencyEuro } from '@vicons/carbon';
+  import { $ref } from 'vue/macros';
 
   const showModal = ref(false);
+  const loadDataTable = async () => {
+    return await getNotifyList();
+  };
+  let showOperationTable = $ref(false);
+  let currentId: string | null = $ref(null);
+  let showWarehouseDialog = $ref(false);
+  let showFeeDialog = $ref(false);
+  const actionRef = ref();
 
+  function reloadTable() {
+    actionRef.value.reload();
+  }
   const actionColumn = reactive({
-    width: 220,
     title: '可用动作',
     key: 'action',
-    fixed: 'right',
-    render() {
+    width: 110,
+    render(record) {
+      const fileAction = (label, key, icon?: Component) => {
+        return getFileActionButton(label, key, notifyPath, reloadTable, record, icon);
+      };
       return h(TableAction as any, {
         style: 'button',
         actions: [
           {
             label: '修改',
+            icon: DocumentEdit16Filled,
           },
           {
             label: '取消',
+            icon: Delete28Filled,
           },
-          {
-            label: '上传附件',
-          },
-          {
-            label: 'CMR',
-          },
-          {
-            label: 'POD',
-          },
-          {
-            label: 'REF',
-          },
+          fileAction('附件', 'files', Folder32Filled),
+          fileAction('CMR', 'CMR'),
+          fileAction('POD', 'POD'),
+          fileAction('REF', 'REF'),
           {
             label: '操作',
+            icon: Hammer,
+            onClick() {
+              currentId = record.id!;
+              showOperationTable = true;
+            },
           },
           {
             label: '费用',
+            icon: CurrencyEuro,
+            onClick() {
+              currentId = record.id!;
+              showFeeDialog = true;
+            },
           },
         ],
         select: (key) => {

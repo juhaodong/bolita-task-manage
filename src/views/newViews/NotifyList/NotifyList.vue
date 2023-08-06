@@ -29,7 +29,6 @@
         </n-space>
       </template>
     </BasicTable>
-
     <n-modal
       v-model:show="showModal"
       :show-icon="false"
