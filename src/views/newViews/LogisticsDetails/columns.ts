@@ -41,7 +41,7 @@ export const columns: DataTableColumns<LogisticsDetailModel> = [
   },
   {
     title: '出库状态',
-    key: 'outState',
+    key: 'outStatus',
   },
   {
     title: '目的国',
@@ -117,7 +117,7 @@ export type LogisticsDetailModel = {
   getProductWarehouse: string;
   trayNum: number;
   containerNum: number;
-  outState: string;
+  outStatus: string;
   targetCountry: string;
   FBACode: string;
   address: string;

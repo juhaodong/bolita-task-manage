@@ -37,7 +37,7 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
   },
   {
     title: '出库状态',
-    key: 'outState',
+    key: 'outStatus',
   },
   {
     title: '目的国',
@@ -68,7 +68,7 @@ export type CarpoolManagementModel = {
   warehouseId: string;
   trayNum: number;
   containerNum: string;
-  outState: string;
+  outStatus: string;
   targetCountry: string;
   FBACode: string;
   quotation: string;

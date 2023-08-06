@@ -49,7 +49,7 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
   },
   {
     title: '出库状态',
-    key: 'outState',
+    key: 'outStatus',
   },
   {
     title: '运单号',
@@ -105,7 +105,7 @@ export type NotifyDetailInfoModel = {
   weightKg: string;
   volume: string;
   inboundStatus: string;
-  outState: string;
+  outStatus: string;
   waybillId: number;
   targetCountry: string;
   FBACode: string;

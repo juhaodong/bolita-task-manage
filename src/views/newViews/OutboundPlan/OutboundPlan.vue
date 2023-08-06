@@ -18,7 +18,7 @@
                 <Box20Filled />
               </n-icon>
             </template>
-            批量导入
+            新建出库计划
           </n-button>
         </n-space>
       </template>
@@ -29,9 +29,9 @@
       :show-icon="false"
       preset="card"
       style="width: 90%; min-width: 600px; max-width: 1200px"
-      title="新建到货预报"
+      title="出库计划"
     >
-      <notify-form-index :type="notifyType" @saved="closeAddDialog" />
+      <new-outbound-plan />
     </n-modal>
   </n-card>
 </template>
@@ -41,16 +41,7 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns } from './columns';
   import { Box20Filled } from '@vicons/fluent';
-  import {
-    deleteNotify,
-    NotifyStatus,
-    NotifyType,
-  } from '@/views/newViews/NotifyList/api/notify-api';
-  import NotifyFormIndex from '@/views/newViews/NotifyList/form/NotifyFormIndex.vue';
-  import { $ref } from 'vue/macros';
-  import { PermissionEnums } from '@/api/user/baseUser';
-
-  let notifyType: NotifyType = $ref(NotifyType.Container);
+  import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
 
   const showModal = ref(false);
 
@@ -59,45 +50,33 @@
     title: '可用动作',
     key: 'action',
     fixed: 'right',
-    render(record) {
+    render() {
       return h(TableAction as any, {
         style: 'button',
         actions: [
           {
-            label: '详情',
+            label: '修改',
           },
           {
-            label: '详情',
+            label: '取消',
           },
           {
-            label: '删除',
-            popConfirm: {
-              title: '是否确定删除此预报？',
-              async confirm() {
-                await deleteNotify(record.id);
-              },
-            },
-            ifShow: () => {
-              return record.status == NotifyStatus.NotSubmit;
-            },
-            auth: [PermissionEnums.Manager, PermissionEnums.Customer, PermissionEnums.Technical],
+            label: '上传附件',
           },
           {
-            label: '提交',
-            popConfirm: {
-              title: '是否确定提交到审核？',
-            },
-            ifShow: () => {
-              return record.status == NotifyStatus.NotSubmit;
-            },
-            auth: [PermissionEnums.Manager, PermissionEnums.Customer, PermissionEnums.Technical],
+            label: 'CMR',
           },
           {
-            label: '审核',
-            ifShow: () => {
-              return record.status == NotifyStatus.WaitForCheck;
-            },
-            auth: [PermissionEnums.Manager, PermissionEnums.Sales, PermissionEnums.Technical],
+            label: 'POD',
+          },
+          {
+            label: 'REF',
+          },
+          {
+            label: '操作',
+          },
+          {
+            label: '费用',
           },
         ],
         select: (key) => {
@@ -106,6 +85,10 @@
       });
     },
   });
+
+  function addTable() {
+    showModal.value = true;
+  }
 </script>
 
 <style lang="less" scoped></style>
