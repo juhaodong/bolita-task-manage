@@ -12,6 +12,7 @@
   import { usePermission } from '@/hooks/web/usePermission';
   import { listUser, PermissionEnums } from '@/api/user/baseUser';
   import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/form-field-sort-label';
+  import template from '@/assets/template/container.xlsx';
 
   interface Props {
     model?: any;
@@ -121,8 +122,10 @@
       field: 'totalWeight',
       label: '总重量',
     },
-    getFilesUploadFormField('uploadFile', false, () => {
-      console.log('download');
+    getFilesUploadFormField('uploadFile', true, () => {
+      window.open(
+        'https://firebasestorage.googleapis.com/v0/b/bolita-task-manage.appspot.com/o/%E8%B4%A7%E6%9F%9C%E6%A8%A1%E6%9D%BF.xlsx?alt=media&token=a5cfed10-917c-41dd-806d-5d9addd5156d'
+      );
     }),
     {
       field: 'note',

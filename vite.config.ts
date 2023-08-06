@@ -1,4 +1,4 @@
-import type { UserConfig, ConfigEnv } from 'vite';
+import type { ConfigEnv, UserConfig } from 'vite';
 import { loadEnv } from 'vite';
 import { resolve } from 'path';
 import { wrapperEnv } from './build/utils';
@@ -7,6 +7,7 @@ import { OUTPUT_DIR } from './build/constant';
 import { createProxy } from './build/vite/proxy';
 import pkg from './package.json';
 import { format } from 'date-fns';
+
 const { dependencies, devDependencies, name, version } = pkg;
 
 const __APP_INFO__ = {
@@ -84,5 +85,6 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       reportCompressedSize: false,
       chunkSizeWarningLimit: 2000,
     },
+    assetsInclude: ['**/*.xlsx'],
   };
 };
