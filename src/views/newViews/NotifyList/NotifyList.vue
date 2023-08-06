@@ -48,6 +48,24 @@
     >
       <notify-unload-form :notify-id="currentNotifyId!" />
     </n-modal>
+    <n-modal
+      v-model:show="showFeeDialog"
+      :show-icon="false"
+      preset="dialog"
+      title="费用表"
+      style="width: 90%; min-width: 600px; max-width: 800px"
+    >
+      <notify-fee-dialog :notify-id="currentNotifyId!" />
+    </n-modal>
+    <n-modal
+      v-model:show="showWarehouseDialog"
+      :show-icon="false"
+      preset="dialog"
+      title="仓库信息"
+      style="width: 90%; min-width: 600px; max-width: 800px"
+    >
+      <warehouse-info-dialog />
+    </n-modal>
   </n-card>
 </template>
 
@@ -72,6 +90,8 @@
   import { Hammer, Home } from '@vicons/ionicons5';
   import { CurrencyEuro } from '@vicons/carbon';
   import NotifyUnloadForm from '@/views/newViews/NotifyList/form/NotifyUnloadForm.vue';
+  import WarehouseInfoDialog from '@/views/newViews/NotifyList/form/WarehouseInfoDialog.vue';
+  import NotifyFeeDialog from '@/views/newViews/NotifyList/form/NotifyFeeDialog.vue';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
 
@@ -79,6 +99,8 @@
 
   let showOperationTable = $ref(false);
   let currentNotifyId: string | null = $ref(null);
+  let showWarehouseDialog = $ref(false);
+  let showFeeDialog = $ref(false);
 
   function addTable(type: NotifyType) {
     notifyType = type;
@@ -147,10 +169,17 @@
           {
             label: '查看仓库信息',
             icon: Home,
+            onClick() {
+              showWarehouseDialog = true;
+            },
           },
           {
             label: '费用',
             icon: CurrencyEuro,
+            onClick() {
+              currentNotifyId = record.id!;
+              showFeeDialog = true;
+            },
           },
         ],
       });
