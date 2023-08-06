@@ -1,6 +1,6 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <filter-bar :form-fields="filters" />
+    <filter-bar @submit="updateFilter" :form-fields="filters" @clear="updateFilter(null)" />
     <div class="my-2"></div>
     <BasicTable
       :columns="columns"
@@ -102,6 +102,7 @@
   let currentNotifyId: string | null = $ref(null);
   let showWarehouseDialog = $ref(false);
   let showFeeDialog = $ref(false);
+  let filterObj: any | null = $ref(null);
 
   function addTable(type: NotifyType) {
     notifyType = type;
@@ -109,10 +110,21 @@
   }
 
   const loadDataTable = async () => {
-    return await getNotifyList();
+    return (await getNotifyList()).filter((it) => {
+      if (!filterObj) {
+        return it;
+      } else {
+        return Object.keys(filterObj).some((k) => filterObj[k] == it[k]);
+      }
+    });
   };
 
   const actionRef = ref();
+
+  function updateFilter(value) {
+    filterObj = value;
+    reloadTable();
+  }
 
   function reloadTable() {
     actionRef.value.reload();

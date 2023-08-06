@@ -37,7 +37,7 @@
     showActionButtonGroup: props.showButtons,
     schemas,
   });
-  const emit = defineEmits(['submit', 'cancel']);
+  const emit = defineEmits(['submit', 'cancel', 'clear']);
 
   function handleSubmit(values: Recordable) {
     emit('submit', values);
@@ -50,6 +50,7 @@
 
   function handleReset(value: Recordable) {
     console.log(value);
+    emit('clear');
   }
 </script>
 
