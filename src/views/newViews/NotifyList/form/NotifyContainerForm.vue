@@ -70,20 +70,6 @@
       componentProps: {
         type: 'date',
         clearable: true,
-        timePickerProps: {
-          hours: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
-          minutes: [0, 15, 30, 45],
-          seconds: [0],
-        },
-        isDateDisabled: (current) => {
-          return !(
-            dayjs(current).isAfter(dayjs().startOf('d')) &&
-            dayjs(current).isBefore(dayjs().add(3, 'month'))
-          );
-        },
-        onUpdateValue: (e: any) => {
-          console.log(e);
-        },
       },
     },
     {

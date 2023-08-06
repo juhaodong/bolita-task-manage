@@ -1,5 +1,6 @@
 <template>
   <n-card :bordered="false" class="proCard">
+    <filter-bar :form-fields="filters" />
     <div class="my-2"></div>
     <BasicTable
       :columns="columns"
@@ -71,7 +72,7 @@
 <script lang="ts" setup>
   import { Component, h, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { columns } from './columns';
+  import { columns, filters } from './columns';
   import { Box20Filled, Folder32Filled } from '@vicons/fluent';
   import {
     deleteNotify,
@@ -91,6 +92,7 @@
   import NotifyUnloadForm from '@/views/newViews/NotifyList/form/NotifyUnloadForm.vue';
   import WarehouseInfoDialog from '@/views/newViews/NotifyList/form/WarehouseInfoDialog.vue';
   import NotifyFeeDialog from '@/views/newViews/NotifyList/form/NotifyFeeDialog.vue';
+  import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
 

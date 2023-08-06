@@ -21,7 +21,7 @@
     <div class="flex items-center table-toolbar-right">
       <!--顶部右侧区域-->
       <slot name="toolbar"></slot>
-      <n-tag> 共计 {{ getBindValues.data.length }} 条数据</n-tag>
+      <n-tag class="ml-2"> 共计 {{ getBindValues.data.length }} 条数据</n-tag>
       <!--斑马纹-->
       <n-divider vertical />
       <!--刷新-->

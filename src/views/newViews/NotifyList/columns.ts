@@ -1,7 +1,14 @@
 import { DataTableColumns } from 'naive-ui';
-import { NotifyModel } from '@/views/newViews/NotifyList/api/notify-api';
+import {
+  InBoundStatus,
+  NotifyModel,
+  notifyType,
+  OutStatus,
+} from '@/views/newViews/NotifyList/api/notify-api';
 import { standardDateFormat, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { h } from 'vue';
+import { FormField } from '@/views/bolita-views/composable/form-field-type';
+import { generateOptionFromArray } from '@/utils/utils';
 
 export const columns: DataTableColumns<NotifyModel> = [
   {
@@ -66,5 +73,70 @@ export const columns: DataTableColumns<NotifyModel> = [
   {
     title: '结算情况',
     key: 'cashStatus',
+  },
+];
+
+export const filters: FormField[] = [
+  {
+    label: '入库ID',
+    field: 'id',
+  },
+  {
+    label: '客户ID',
+    field: 'customerId',
+  },
+  {
+    label: '业务员',
+    field: 'salesName',
+  },
+  {
+    label: '仓库',
+    field: 'warehouseName',
+  },
+  {
+    label: '入库状态',
+    field: 'inStatus',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(Object.values(InBoundStatus)),
+    },
+  },
+  {
+    label: '货柜号',
+    field: 'containerNo',
+  },
+  {
+    label: '出库状态',
+    field: 'outStatus',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(Object.values(OutStatus)),
+    },
+  },
+  {
+    label: '入库类型',
+    field: 'notifyType',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(notifyType),
+    },
+  },
+  {
+    field: 'planArriveStartDateTime',
+    component: 'NDatePicker',
+    label: '预计到仓开始时间',
+    componentProps: {
+      type: 'date',
+      clearable: true,
+    },
+  },
+  {
+    field: 'planArriveEndDateTime',
+    component: 'NDatePicker',
+    label: '预计到仓结束时间',
+    componentProps: {
+      type: 'date',
+      clearable: true,
+    },
   },
 ];
