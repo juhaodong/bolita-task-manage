@@ -65,7 +65,14 @@
         },
       },
     },
-    getFilesUploadFormField('uploadFile', true, () => {}),
+    getFilesUploadFormField('uploadFile', true, () => {
+      window.open(
+        'https://firebasestorage.googleapis.com/' +
+          'v0/b/bolita-task-manage.appspot.com/o/' +
+          'template%2F%E6%95%A3%E8%B4%A7%E6%A8%A1%E6%9D%BF.xlsx?' +
+          'alt=media&token=ae08fd2d-8977-451d-9d2f-22b404480e5b'
+      );
+    }),
     {
       field: 'note',
       label: '备注',
