@@ -1,5 +1,6 @@
 import { DataTableColumns } from 'naive-ui';
 import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
 export const columns: DataTableColumns<OutboundDetailModel> = [
   {
@@ -133,3 +134,64 @@ export type OutboundDetailModel = {
   storeAddress: string;
   storageDays: string;
 };
+
+export const filters: FormField[] = [
+  {
+    label: '明细ID',
+    field: 'outboundDetailId',
+  },
+  {
+    label: '出库ID',
+    field: 'OutboundId',
+  },
+  {
+    label: '入库ID',
+    field: 'notifyId',
+  },
+  {
+    label: '票号',
+    field: 'ticketId',
+  },
+  {
+    label: '仓库',
+    field: 'warehouseName',
+  },
+  {
+    label: '出库状态',
+    field: 'outStatus',
+  },
+  {
+    field: 'containerId',
+    label: '箱号',
+  },
+  {
+    field: 'checkStatus',
+    label: '审核状态',
+  },
+  {
+    field: 'containerNo',
+    label: '货柜号',
+  },
+  {
+    field: 'deliveryWay',
+    label: '物流方式',
+  },
+  {
+    field: 'NotifyStartDateTime',
+    component: 'NDatePicker',
+    label: '出库开始时间',
+    componentProps: {
+      type: 'date',
+      clearable: true,
+    },
+  },
+  {
+    field: 'NotifyEndDateTime',
+    component: 'NDatePicker',
+    label: '出库结束时间',
+    componentProps: {
+      type: 'date',
+      clearable: true,
+    },
+  },
+];

@@ -1,5 +1,6 @@
 import { DataTableColumns } from 'naive-ui';
 import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
 export const columns: DataTableColumns<InventoryDetailModel> = [
   {
@@ -16,7 +17,7 @@ export const columns: DataTableColumns<InventoryDetailModel> = [
   },
   {
     title: '货柜号',
-    key: 'containerNumber',
+    key: 'containerNo',
   },
   {
     title: '状态',
@@ -69,7 +70,7 @@ export type InventoryDetailModel = {
   ticketId: number;
   inboundId: number;
   customerId: string;
-  containerNumber: string;
+  containerNo: string;
   status: string;
   trayNum: number;
   containerNum: number;
@@ -83,3 +84,38 @@ export type InventoryDetailModel = {
   warehousingTime: number;
   storageDays: string;
 };
+
+export const filters: FormField[] = [
+  {
+    label: '票号',
+    field: 'ticketId',
+  },
+  {
+    label: '入库ID',
+    field: 'notifyId',
+  },
+  {
+    label: '客户ID',
+    field: 'customerId',
+  },
+  {
+    field: 'containerId',
+    label: '箱号',
+  },
+  {
+    field: 'containerNo',
+    label: '货柜号',
+  },
+  {
+    label: '仓库',
+    field: 'warehouseName',
+  },
+  {
+    field: 'waybillId',
+    label: '运单号',
+  },
+  {
+    label: '状态',
+    field: 'status',
+  },
+];

@@ -1,5 +1,6 @@
 <template>
   <n-card :bordered="false" class="proCard">
+    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter" />
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
@@ -47,7 +48,7 @@
 <script lang="ts" setup>
   import { Component, h, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { columns } from './columns';
+  import { columns, filters } from './columns';
   import { Box20Filled, Folder32Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import { getNotifyList, notifyPath } from '@/views/newViews/NotifyList/api/notify-api';
@@ -57,6 +58,7 @@
   import { Hammer } from '@vicons/ionicons5';
   import { CurrencyEuro } from '@vicons/carbon';
   import { $ref } from 'vue/macros';
+  import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
 
   const showModal = ref(false);
   const loadDataTable = async () => {

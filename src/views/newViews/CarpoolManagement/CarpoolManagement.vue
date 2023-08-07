@@ -1,5 +1,6 @@
 <template>
   <n-card :bordered="false" class="proCard">
+    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter" />
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
@@ -47,9 +48,10 @@
 <script lang="ts" setup>
   import { ref } from 'vue';
   import { BasicTable } from '@/components/Table';
-  import { columns } from './columns';
+  import { columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/NewCarpoolManagement.vue';
+  import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
 
   const showModal = ref(false);
 

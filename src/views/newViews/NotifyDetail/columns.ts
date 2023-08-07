@@ -1,20 +1,21 @@
 import { DataTableColumns } from 'naive-ui';
 import { joinDisplayColumn } from '@/views/bolita-views/composable/useableColumns';
+import { FormField } from '@/views/bolita-views/composable/form-field-type';
+import { generateOptionFromArray } from '@/utils/utils';
+import { InBoundStatus, notifyType } from '@/views/newViews/NotifyList/api/notify-api';
 
 export const columns: DataTableColumns<NotifyDetailInfoModel> = [
   {
     title: '入库ID',
     key: 'notifyId',
-    width: 100,
   },
   {
     title: '客户ID',
     key: 'customerId',
-    width: 100,
   },
   {
     title: '票号',
-    key: 'id',
+    key: 'ticketId',
   },
   {
     title: '箱号',
@@ -121,3 +122,68 @@ export type NotifyDetailInfoModel = {
   productName: string;
   package: string;
 };
+
+export const filters: FormField[] = [
+  {
+    label: '入库ID',
+    field: 'notifyId',
+  },
+  {
+    label: '票号',
+    field: 'ticketId',
+  },
+  {
+    label: '仓库',
+    field: 'warehouseName',
+  },
+  {
+    label: '入库状态',
+    field: 'inStatus',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(Object.values(InBoundStatus)),
+    },
+  },
+  {
+    label: '入库类型',
+    field: 'notifyType',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(notifyType),
+    },
+  },
+  {
+    label: 'FBACode',
+    field: 'FBACode',
+  },
+  {
+    label: '箱号',
+    field: 'containerId',
+  },
+  {
+    label: '产品SKU',
+    field: 'productSKU',
+  },
+  {
+    field: 'NotifyStartDateTime',
+    component: 'NDatePicker',
+    label: '入库开始时间',
+    componentProps: {
+      type: 'date',
+      clearable: true,
+    },
+  },
+  {
+    field: 'NotifyEndDateTime',
+    component: 'NDatePicker',
+    label: '入库结束时间',
+    componentProps: {
+      type: 'date',
+      clearable: true,
+    },
+  },
+  {
+    label: '物流方式',
+    field: 'deliveryWay',
+  },
+];

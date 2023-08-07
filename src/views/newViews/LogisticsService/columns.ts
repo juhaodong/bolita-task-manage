@@ -1,5 +1,6 @@
 import { DataTableColumns } from 'naive-ui';
 import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
 export const columns: DataTableColumns<LogisticsServiceModel> = [
   {
@@ -100,3 +101,30 @@ export type LogisticsServiceModel = {
   claimAmount: string;
   settlementStatus: string;
 };
+
+export const filters: FormField[] = [
+  {
+    label: '票号',
+    field: 'ticketId',
+  },
+  {
+    label: '客户ID',
+    field: 'customerId',
+  },
+  {
+    label: '出库ID',
+    field: 'OutboundId',
+  },
+  {
+    field: 'waybillId',
+    label: '运单号',
+  },
+  {
+    field: 'ISA',
+    label: 'ISA',
+  },
+  {
+    label: '处理状态',
+    field: 'handlingStatus',
+  },
+];

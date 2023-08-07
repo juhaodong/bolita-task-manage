@@ -43,7 +43,7 @@
       label: '客户ID',
     },
     {
-      field: 'containerNumber',
+      field: 'containerNo',
       label: '货柜号',
     },
     {

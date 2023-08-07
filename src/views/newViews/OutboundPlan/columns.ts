@@ -1,5 +1,7 @@
 import { DataTableColumns } from 'naive-ui';
 import { idColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { FormField } from '@/views/bolita-views/composable/form-field-type';
+import { deliveryMethods } from '@/api/deliveryMethod';
 
 export const columns: DataTableColumns<OutboundPlanModel> = [
   idColumn('出库ID', '/notify/detail'),
@@ -110,3 +112,86 @@ export enum CarStatus {
   Able = '可订车',
   UnAble = '待订车',
 }
+
+export const filters: FormField[] = [
+  {
+    label: '票号',
+    field: 'ticketId',
+  },
+  {
+    label: '客户ID',
+    field: 'customerId',
+  },
+  {
+    label: '出库ID',
+    field: 'OutboundId',
+  },
+  {
+    label: '入库ID',
+    field: 'notifyId',
+  },
+  {
+    label: '业务员',
+    field: 'salesName',
+  },
+  {
+    label: '仓库',
+    field: 'warehouseName',
+  },
+  {
+    label: '出库状态',
+    field: 'outStatus',
+  },
+  {
+    field: 'NotifyStartDateTime',
+    component: 'NDatePicker',
+    label: '起始日期',
+    componentProps: {
+      type: 'date',
+      clearable: true,
+    },
+  },
+  {
+    field: 'NotifyEndDateTime',
+    component: 'NDatePicker',
+    label: '结束日期',
+    componentProps: {
+      type: 'date',
+      clearable: true,
+    },
+  },
+  {
+    field: 'deliveryMethod',
+    component: 'NSelect',
+    label: '物流渠道',
+    componentProps: {
+      placeholder: '请选择物流渠道',
+      options: deliveryMethods.map((it) => {
+        return {
+          value: it,
+          label: it,
+        };
+      }),
+      onUpdateValue: (e: any) => {
+        console.log(e);
+      },
+    },
+  },
+  {
+    label: 'FBACode',
+    field: 'FBACode',
+  },
+  {
+    label: '结算情况',
+    field: 'settlementSituation',
+  },
+  {
+    field: 'NotifyEndDateTime',
+    component: 'NDatePicker',
+    label: '预约出库日期',
+    componentProps: {
+      type: 'date',
+      clearable: true,
+    },
+  },
+];

@@ -5,6 +5,8 @@ import { addDoc, collection, orderBy, query } from 'firebase/firestore';
 import { db, executeQuery, getFileListUrl } from '@/plugins/firebase';
 import { resultError, resultSuccess } from '@/utils/request/_util';
 import { h } from 'vue';
+import { FormField } from '@/views/bolita-views/composable/form-field-type';
+import { deliveryMethods } from '@/api/deliveryMethod';
 
 export const columns: DataTableColumns<ToBeClaimedModel> = [
   timeColumn(),
@@ -99,3 +101,57 @@ export async function createNewClaim(model) {
 export async function loadAllClaim() {
   return await executeQuery(query(collection(db, path), orderBy('createTimestamp', 'desc')));
 }
+
+export const filters: FormField[] = [
+  {
+    field: 'deliveryMethod',
+    component: 'NSelect',
+    label: '物流渠道',
+    componentProps: {
+      placeholder: '请选择物流渠道',
+      options: deliveryMethods.map((it) => {
+        return {
+          value: it,
+          label: it,
+        };
+      }),
+      onUpdateValue: (e: any) => {
+        console.log(e);
+      },
+    },
+  },
+  {
+    label: '物流单号',
+    field: 'deliveryId',
+  },
+  {
+    label: '认领客户ID',
+    field: 'claimCustomId',
+  },
+  {
+    label: '外箱标识',
+    field: 'containerLogo',
+  },
+  {
+    field: 'NotifyStartDateTime',
+    component: 'NDatePicker',
+    label: '入库开始时间',
+    componentProps: {
+      type: 'date',
+      clearable: true,
+    },
+  },
+  {
+    field: 'NotifyEndDateTime',
+    component: 'NDatePicker',
+    label: '入库结束时间',
+    componentProps: {
+      type: 'date',
+      clearable: true,
+    },
+  },
+  {
+    label: '认领状态',
+    field: 'claimStatus',
+  },
+];
