@@ -13,7 +13,10 @@
   <n-modal :show="checkDialog.show" @close="checkDialog.close()">
     <n-card :title="checkDialog.title" style="max-width: 700px">
       <append-file-list-display :files-url="checkDialog.currentFileUrls" />
+      <n-divider class="my-8" />
       <normal-form
+        class="mt-4"
+        :show-group-header="false"
         :form-fields="field"
         @cancel="checkDialog.cancel"
         @submit="checkDialog.confirm"

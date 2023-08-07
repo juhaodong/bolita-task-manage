@@ -11,12 +11,14 @@
   interface NormalFormProps {
     formFields: FormField[];
     showButtons?: boolean;
+    showGroupHeader?: boolean;
     schemas?: FormSchema[];
     defaultValueModel?: any;
   }
 
   const props = withDefaults(defineProps<NormalFormProps>(), {
     showButtons: true,
+    showGroupHeader: true,
   });
 
   const schemas = $computed(() => {
@@ -55,7 +57,13 @@
 </script>
 
 <template>
-  <BasicForm ref="form" @register="register" @submit="handleSubmit" @reset="handleReset">
+  <BasicForm
+    :show-group-header="showGroupHeader"
+    ref="form"
+    @register="register"
+    @submit="handleSubmit"
+    @reset="handleReset"
+  >
     <slot name="extraContent"></slot>
     <slot name="extraSubmitButton" :submit="submit"></slot>
     <slot name="extraCancelButton" :cancel="cancel"></slot>

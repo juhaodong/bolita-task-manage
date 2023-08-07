@@ -4,12 +4,10 @@
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
-      :actionColumn="actionColumn"
       :columns="columns"
       :request="loadDataTable"
       :row-key="(row) => row.id"
       :scroll-x="3000"
-      @update:checked-row-keys="onCheckedRow"
     >
       <template #tableTitle>
         <n-space>
@@ -44,12 +42,29 @@
   import { Box20Filled } from '@vicons/fluent';
   import NewOutboundDetail from '@/views/newViews/OutboundDetail/NewOutboundDetail.vue';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
+  import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+  import { $ref } from 'vue/macros';
 
   const showModal = ref(false);
-
+  const loadDataTable = async () => {
+    const res = await OutBoundDetailManager.load();
+    console.log(res);
+    return res;
+  };
   function addTable() {
     showModal.value = true;
+  }
+  let filterObj: any | null = $ref(null);
+  function updateFilter(value) {
+    filterObj = value;
+    reloadTable();
+  }
+  const actionRef = ref();
+  function reloadTable() {
+    actionRef.value.reload();
+    showModal.value = false;
   }
 </script>
 
 <style lang="less" scoped></style>
+import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';

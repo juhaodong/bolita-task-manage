@@ -11,7 +11,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
   const builder = formFieldBuilder();
   builder.add({
     label: '票号',
-    field: 'id',
+    field: 'ticketId',
   });
   builder.add({
     label: '箱号',

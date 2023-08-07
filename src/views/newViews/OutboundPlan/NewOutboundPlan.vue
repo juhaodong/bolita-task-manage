@@ -18,7 +18,7 @@
           align="center"
           justify="space-between"
         >
-          <div>已经选择{{ checkedRowKeys.length }}条记录 </div>
+          <div>已经选择{{ checkedRowKeys.length }}条记录</div>
           <n-button @click="confirmSelection" :disabled="checkedRowKeys.length == 0" type="primary"
             >确定
           </n-button>
@@ -83,6 +83,7 @@
       });
     }
   }
+
   async function init() {
     addressFormFields.unshift(await asyncCustomerFormField());
     await updateFilter(null);
@@ -96,7 +97,7 @@
   async function saveOutboundPlan(value) {
     loading = true;
     value.planList = allNotifyDetail;
-    const res = await OutBoundPlanManager.add(value);
+    const res = await OutBoundPlanManager.add(value, allNotifyDetail);
     await handleRequest(res, () => {
       emit('saved');
     });
@@ -109,7 +110,7 @@
       key: 'selection',
     },
     { title: '入库ID', key: 'notifyId' },
-    { title: '票号', key: 'id' },
+    { title: '票号', key: 'ticketId' },
     editableColumn({ title: '箱号', key: 'containerId' }, allNotifyDetail),
     editableColumn({ title: '产品SKU', key: 'productSKU' }, allNotifyDetail),
     editableColumn({ title: '托数', key: 'trayNum' }, allNotifyDetail),
@@ -128,7 +129,7 @@
       key: 'selection',
     },
     { title: '入库ID', key: 'notifyId' },
-    { title: '票号', key: 'id' },
+    { title: '票号', key: 'ticketId' },
     { title: '箱号', key: 'containerId' },
     { title: '产品SKU', key: 'productSKU' },
     { title: '托数', key: 'trayNum' },
@@ -141,17 +142,16 @@
     { title: 'FBA号', key: 'FBANo' },
     { title: '备注', key: 'note' },
   ]);
-
   const searchSchema: FormField[] = [
     { label: '入库ID', field: 'notifyId' },
-    { label: '票号', field: 'id' },
+    { label: '票号', field: 'ticketId' },
     { label: '货柜号', field: 'containerNo' },
   ];
 
   const addressFormFields: FormField[] = [
     getDatePickerFormField('reservationOutboundDate', '预约出库日期'),
     salesFormField,
-    getFilesUploadFormField(),
+    getFilesUploadFormField('files', false),
     {
       field: 'operationRequirement',
       label: '操作要求',

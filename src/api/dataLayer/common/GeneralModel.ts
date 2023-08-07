@@ -9,7 +9,7 @@ import { UploadFileInfo } from 'naive-ui';
 export interface GeneralModel {
   collectionName: string;
   init: (value, ...args) => any;
-  afterAddHook?: (id: string, value: any) => Promise<any>;
+  afterAddHook?: (id: string, value: any, ...args) => Promise<any>;
   joinManager?: { loader: () => Promise<any[]>; key: string };
 }
 
@@ -52,6 +52,7 @@ export function initModel(g: GeneralModel): Model {
     try {
       return resultSuccess(await func());
     } catch (e: any) {
+      console.error(e);
       return resultError(e?.message);
     }
   };
@@ -60,7 +61,7 @@ export function initModel(g: GeneralModel): Model {
       const t = await g.init(value, ...args);
       const id = await generalAdd(t, g.collectionName);
       if (g.afterAddHook) {
-        await g.afterAddHook(id, t);
+        await g.afterAddHook(id, t, ...args);
       }
       return id;
     },
@@ -77,7 +78,7 @@ export function initModel(g: GeneralModel): Model {
     async getById(id): Promise<any> {
       return await getDocContent(doc(db, g.collectionName, id));
     },
-    async load(filterObj: any): Promise<any[]> {
+    async load(filterObj?: any): Promise<any[]> {
       const list = await executeQuery(
         query(collection(db, g.collectionName), orderBy('createTimestamp', 'desc'))
       );
@@ -89,7 +90,6 @@ export function initModel(g: GeneralModel): Model {
             ...n,
             ...it,
           };
-          console.log(it);
         });
       }
       if (!filterObj) {
@@ -109,7 +109,7 @@ export function initModel(g: GeneralModel): Model {
 }
 
 export interface Model {
-  load: (filterObj: any) => Promise<any[]>;
+  load: (filterObj?: any) => Promise<any[]>;
   getById: (id: string) => Promise<any>;
   add: (value, ...args) => Promise<Result<string>>;
   addInternal: (value, ...args) => Promise<string>;

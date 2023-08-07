@@ -31,11 +31,15 @@ export const storage = getStorage(app);
 export const storageRef = ref(storage, 'bolita');
 
 export async function uploadFile(file) {
-  const name = dayjs().valueOf() + '-' + file.name;
-  console.log(name, '将要上传的文件名字');
-  const res = await uploadBytes(ref(storageRef, name), file);
-  console.log(res, 'Image Result');
-  return await getDownloadURL(ref(storageRef, name));
+  if (file?.name) {
+    const name = dayjs().valueOf() + '-' + file.name;
+    console.log(name, '将要上传的文件名字');
+    const res = await uploadBytes(ref(storageRef, name), file);
+    console.log(res, 'Image Result');
+    return await getDownloadURL(ref(storageRef, name));
+  } else {
+    return '';
+  }
 }
 
 export async function getFileUrlFromFileUpload(file: UploadFileInfo) {
@@ -46,7 +50,7 @@ export async function getFileListUrl(files?: UploadFileInfo[]) {
   if (!files) {
     return [];
   }
-  return await Promise.all(files.map(getFileUrlFromFileUpload));
+  return (await Promise.all(files.map(getFileUrlFromFileUpload))).filter((it) => it);
 }
 
 export const analytics = getAnalytics(app);

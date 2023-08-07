@@ -1,8 +1,9 @@
 import type { CSSProperties, PropType } from 'vue';
 import { FormSchema } from './types/form';
-import type { GridProps, GridItemProps } from 'naive-ui/lib/grid';
+import type { GridItemProps, GridProps } from 'naive-ui/lib/grid';
 import type { ButtonProps } from 'naive-ui/lib/button';
 import { propTypes } from '@/store/utils/propTypes';
+
 export const basicProps = {
   // 标签宽度  固定宽度
   labelWidth: {
@@ -79,4 +80,5 @@ export const basicProps = {
     type: Number,
     default: 1,
   },
+  showGroupHeader: propTypes.bool.def(true),
 };

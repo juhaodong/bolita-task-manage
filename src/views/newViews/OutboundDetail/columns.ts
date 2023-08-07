@@ -5,15 +5,15 @@ import { FormField } from '@/views/bolita-views/composable/form-field-type';
 export const columns: DataTableColumns<OutboundDetailModel> = [
   {
     title: '明细ID',
-    key: 'outboundDetailId',
+    key: 'id',
   },
   {
     title: '出库ID',
-    key: 'OutboundId',
+    key: 'outId',
   },
   {
     title: '入库ID',
-    key: 'inboundId',
+    key: 'notifyId',
   },
   {
     title: '客户ID',
@@ -195,3 +195,10 @@ export const filters: FormField[] = [
     },
   },
 ];
+
+export enum CheckStatus {
+  NotPassed = '未通过',
+  Checked = '已通过',
+  Wait = '等待审核',
+  Cancel = '取消',
+}

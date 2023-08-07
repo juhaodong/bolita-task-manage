@@ -44,9 +44,9 @@
   async function saveNotify(value: any) {
     startLoading();
     value.notifyType = prop.type;
-    value.taskList = await readFile(value.uploadFile[0].file, value.notifyType);
+    const taskList = await readFile(value.uploadFile[0].file, value.notifyType);
     delete value.uploadFile;
-    const res = await NotifyManager.add(value);
+    const res = await NotifyManager.add(value, taskList);
     await handleRequest(res, async () => {
       emit('saved');
     });

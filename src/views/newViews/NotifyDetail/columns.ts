@@ -15,7 +15,7 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
   },
   {
     title: '票号',
-    key: 'id',
+    key: 'ticketId',
   },
   {
     title: '箱号',

@@ -37,8 +37,8 @@ export const NotifyManager = initModel({
     };
     return Object.assign(info, value);
   },
-  async afterAddHook(id, value) {
-    for (const task of value.taskList) {
+  async afterAddHook(id, _, taskList) {
+    for (const task of taskList) {
       await NotifyDetailManager.addInternal(task, id);
     }
   },

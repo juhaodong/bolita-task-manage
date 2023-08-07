@@ -2,7 +2,7 @@
   <n-form v-bind="getBindValue" :model="formModel" ref="formElRef">
     <n-grid v-bind="getGrid" x-gap="8">
       <template v-for="g in groupedSchema" :key="g.group">
-        <n-gi :span="24">
+        <n-gi :span="24" v-if="showGroupHeader">
           <n-h4>{{ g.group }}</n-h4>
         </n-gi>
         <n-gi v-bind="schema.giProps" v-for="schema in g.schema" :key="schema.field">
