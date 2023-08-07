@@ -46,7 +46,7 @@
       title="卸柜表"
       style="width: 90%; min-width: 600px; max-width: 800px"
     >
-      <notify-unload-form :notify-id="currentNotifyId!" />
+      <notify-unload-form @save="reloadTable" :notify-id="currentNotifyId!" />
     </n-modal>
     <n-modal
       v-model:show="showFeeDialog"
@@ -121,6 +121,7 @@
 
   function reloadTable() {
     actionRef.value.reload();
+    showOperationTable = false;
   }
 
   async function closeAddDialog() {

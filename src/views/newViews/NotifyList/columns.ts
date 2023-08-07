@@ -8,6 +8,7 @@ import {
 import {
   idColumn,
   standardDateFormat,
+  statusColumn,
   timeColumn,
 } from '@/views/bolita-views/composable/useableColumns';
 import { h } from 'vue';
@@ -47,10 +48,7 @@ export const columns: DataTableColumns<NotifyModel> = [
       return h('div', display);
     },
   },
-  {
-    title: '入库状态',
-    key: 'inStatus',
-  },
+  statusColumn('入库状态', 'inStatus'),
   {
     title: '入库类型',
     key: 'notifyType',

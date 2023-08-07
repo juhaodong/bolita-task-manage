@@ -38,7 +38,10 @@ export const NotifyDetailManager = initModel({
   async init(taskInfo, notifyId) {
     taskInfo.arrivedContainerNum = 0;
     taskInfo.arrivedTrayNum = 0;
+    taskInfo.instorageContainerNum = 0;
+    taskInfo.instorageTrayNum = 0;
     taskInfo.note = '';
+    taskInfo.arriveTime = 0;
     taskInfo.storagePosition = '';
     taskInfo.notifyId = notifyId;
     taskInfo.customerId = (await NotifyManager.getById(notifyId)).customerId;

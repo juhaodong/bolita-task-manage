@@ -22,7 +22,6 @@
   const schemas = $computed(() => {
     return [...(props?.schemas ?? []), ...props.formFields.map(convertFormFieldToSchema)].map(
       (it) => {
-        console.log(props.defaultValueModel);
         if (props?.defaultValueModel?.[it.field]) {
           it.defaultValue = props?.defaultValueModel?.[it.field];
         }

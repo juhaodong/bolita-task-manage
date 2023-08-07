@@ -12,6 +12,8 @@ import {
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import dayjs from 'dayjs';
 import { UploadFileInfo } from 'naive-ui';
+import zh from 'dayjs/locale/zh';
+import relativeTime from 'dayjs/plugin/relativeTime';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyChABcKKZVM1BZTvky3xkVl0b3pCLZaTuQ',
@@ -94,3 +96,5 @@ export async function getNameById(
     return res;
   }
 }
+dayjs.locale(zh);
+dayjs.extend(relativeTime);

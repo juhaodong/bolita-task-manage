@@ -1,8 +1,13 @@
 import { DataTableColumns } from 'naive-ui';
-import { joinDisplayColumn } from '@/views/bolita-views/composable/useableColumns';
+import {
+  colorColumn,
+  formatColumn,
+  joinDisplayColumn,
+} from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { generateOptionFromArray } from '@/store/utils/utils';
+import { generateOptionFromArray, safeParseInt } from '@/store/utils/utils';
 import { InBoundStatus, notifyType } from '@/api/dataLayer/modules/notify/notify-api';
+import dayjs from 'dayjs';
 
 export const columns: DataTableColumns<NotifyDetailInfoModel> = [
   {
@@ -42,10 +47,15 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
     title: '体积',
     key: 'volume',
   },
-  {
-    title: '入库状态',
-    key: 'inStatus',
-  },
+  colorColumn('inStatus', '入库状态', (record) => {
+    const sumCount = safeParseInt(record.trayNum) + safeParseInt(record.containerNum);
+    const arrivedCount =
+      safeParseInt(record.arrivedTrayNum) + safeParseInt(record.arrivedContainerNum);
+    if (arrivedCount == 0) {
+      return InBoundStatus.Wait;
+    }
+    return sumCount == arrivedCount ? InBoundStatus.All : InBoundStatus.Partial;
+  }),
   {
     title: '出库状态',
     key: 'outStatus',
@@ -82,10 +92,14 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
     title: '库位',
     key: 'storeAddress',
   },
-  {
-    title: '存放天数',
-    key: 'storageDays',
-  },
+  formatColumn('arriveTime', '存放天数', (record) => {
+    const time = record['arriveTime'];
+    if (!time) {
+      return '等待入库中';
+    } else {
+      return dayjs(time).toNow(true);
+    }
+  }),
   {
     title: '货物名称',
     key: 'productName',

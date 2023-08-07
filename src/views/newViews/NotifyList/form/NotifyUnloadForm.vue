@@ -1,9 +1,22 @@
 <script setup lang="ts">
   import { computed, watchEffect } from 'vue';
-  import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
-  import { getNotifyDetailListByNotify } from '@/api/dataLayer/modules/notify/notify-detail';
-  import { safeParseInt } from '@/store/utils/utils';
+  import { InBoundStatus, NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
+  import {
+    getNotifyDetailListByNotify,
+    NotifyDetailManager,
+  } from '@/api/dataLayer/modules/notify/notify-detail';
+  import {
+    handleRequest,
+    safeParseInt,
+    safeSumInt,
+    toastError,
+    toastSuccess,
+  } from '@/store/utils/utils';
   import { getDateNow, timeDisplay } from '@/views/bolita-views/composable/useableColumns';
+  import { ResultEnum } from '@/store/enums/httpEnum';
+  import dayjs from 'dayjs';
+
+  console.log(getDateNow, timeDisplay);
 
   interface Props {
     notifyId: string;
@@ -13,7 +26,7 @@
   let notifyDetail: any | null = $ref(null);
   let currentTaskList: any[] = $ref([]);
 
-  const emit = defineEmits(['close', 'refresh']);
+  const emit = defineEmits(['close', 'refresh', 'save']);
   watchEffect(async () => {
     await reload();
   });
@@ -26,10 +39,10 @@
     return currentTaskList.reduce((sum, i) => sum + safeParseInt(i?.trayCount), 0);
   });
   const totalArrivedContainerCount = computed(() => {
-    return currentTaskList.reduce((sum, i) => sum + safeParseInt(i?.arrivedContainerNum) || 0, 0);
+    return safeSumInt(currentTaskList, 'arrivedContainerNumEdit');
   });
   const totalArrivedTrayCount = computed(() => {
-    return currentTaskList.reduce((sum, i) => sum + safeParseInt(i?.arrivedTrayNum), 0);
+    return safeSumInt(currentTaskList, 'arrivedTrayNumEdit');
   });
 
   async function reload() {
@@ -37,18 +50,66 @@
       notifyDetail = await NotifyManager.getById(props.notifyId);
       currentTaskList = await getNotifyDetailListByNotify(props.notifyId);
       emit('refresh');
+      loadAll();
     }
   }
 
-  let unloadPerson = $ref('');
+  let unloadPerson: string = $ref('');
 
   const canConfirm = computed(() => {
-    return (
-      totalTrayCount.value == totalArrivedTrayCount.value &&
-      totalContainerCount.value == totalArrivedContainerCount.value &&
-      unloadPerson
-    );
+    return unloadPerson;
   });
+
+  function loadAll() {
+    currentTaskList.forEach((it) => {
+      it.arrivedTrayNumEdit = it.arrivedTrayNum ?? 0;
+      it.arrivedContainerNumEdit = it.arrivedContainerNum ?? 0;
+    });
+  }
+
+  async function save() {
+    for (const listElement of currentTaskList) {
+      if (
+        listElement.arrivedTrayNumEdit != listElement.arrivedTrayNum ||
+        listElement.arrivedContainerNumEdit != listElement.arrivedContainerNum
+      ) {
+        const editInfo: any = {
+          arrivedTrayNum: listElement.arrivedTrayNumEdit,
+          arrivedContainerNum: listElement.arrivedContainerNumEdit,
+          note: listElement.note,
+        };
+        if (listElement.arrivedTrayNumEdit == listElement.trayNum) {
+          editInfo.instorageTrayNum = listElement.arrivedTrayNumEdit;
+        }
+        if (listElement.arrivedContainerNumEdit == listElement.containerNum) {
+          editInfo.instorageContainerNum = listElement.arrivedContainerNumEdit;
+        }
+        editInfo.arriveTime = dayjs().valueOf();
+        const res = await NotifyDetailManager.edit(editInfo, listElement.id);
+        if (res.code != ResultEnum.SUCCESS) {
+          toastError(res.message);
+          break;
+        }
+      }
+    }
+    const newInStatus =
+      totalContainerCount.value + totalTrayCount.value ==
+      totalArrivedTrayCount.value + totalArrivedContainerCount.value
+        ? InBoundStatus.All
+        : InBoundStatus.Partial;
+    const res = await NotifyManager.edit(
+      {
+        arrivedCount: totalArrivedTrayCount.value + totalArrivedContainerCount.value,
+        inStatus: newInStatus,
+        totalCount: totalTrayCount.value + totalContainerCount.value,
+      },
+      props.notifyId
+    );
+    await handleRequest(res, () => {
+      toastSuccess('sucees');
+      emit('save');
+    });
+  }
 </script>
 
 <template>
@@ -86,15 +147,15 @@
             <td>{{ item?.containerNum ?? 0 }}</td>
             <td>
               <n-input
-                v-model:value="item.arrivedTrayNum"
+                v-model:value="item.arrivedTrayNumEdit"
                 placeholder=""
-                @focus="item.arrivedTrayNum = ''"
+                @focus="item.arrivedTrayNumEdit = ''"
               />
             </td>
             <td>
               <n-input
-                @focus="item.arrivedContainerNum = ''"
-                v-model:value="item.arrivedContainerNum"
+                @focus="item.arrivedContainerNumEdit = ''"
+                v-model:value="item.arrivedContainerNumEdit"
                 placeholder=""
               />
             </td>
@@ -118,8 +179,8 @@
         </tr>
       </table>
 
-      <n-input placeholder="卸柜人员" v-model="unloadPerson" />
-      <n-button type="primary" :disabled="!canConfirm">确认</n-button>
+      <n-input placeholder="卸柜人员" v-model:value="unloadPerson" />
+      <n-button @click="save" type="primary" :disabled="!canConfirm">确认</n-button>
     </n-space>
   </div>
 </template>

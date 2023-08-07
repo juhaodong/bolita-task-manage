@@ -32,6 +32,7 @@
               text
               style="font-size: 18px; padding: 4px !important"
               v-else
+              secondary
               v-bind="action"
               :type="(action.highlight ? action.highlight() : false) ? 'success' : 'default'"
             >

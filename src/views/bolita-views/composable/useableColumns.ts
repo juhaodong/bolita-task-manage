@@ -32,25 +32,43 @@ function pickBorderColor(str) {
   return `hsl(${hashCode(str) % 360}, 100%, 80%)`;
 }
 
-export const statusColumn = {
-  title: '状态',
-  key: 'status',
-  render(record) {
-    return h(
-      'div',
-      {
-        style: {
-          fontSize: '14px',
-          padding: '2px 4px',
-          background: pickColor(record.status),
-          border: '1px solid ' + pickBorderColor(record.status),
-        },
+export function colorColumn(
+  key = 'inStatus',
+  title = '入库状态',
+  formatter: (record: any) => string
+) {
+  return {
+    title: title,
+    key: key,
+    render(record) {
+      const display = formatter(record);
+      return colorfulRender(display);
+    },
+  };
+}
+export function statusColumn(title = '状态', key = 'status') {
+  return {
+    title: title,
+    key: key,
+    render(record) {
+      return colorfulRender(record[key]);
+    },
+  };
+}
+
+const colorfulRender = (text) =>
+  h(
+    'div',
+    {
+      style: {
+        fontSize: '14px',
+        padding: '2px 4px',
+        background: pickColor(text),
+        border: '1px solid ' + pickBorderColor(text),
       },
-      record.status
-    );
-  },
-  width: 140,
-};
+    },
+    text
+  );
 
 export function idColumn(title = 'ID', targetPage, keyName = 'id') {
   return {
