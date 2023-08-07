@@ -4,7 +4,7 @@ import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { deliveryMethodSelection } from '@/api/dataLayer/fieldDefination/common';
 
 export const columns: DataTableColumns<OutboundPlanModel> = [
-  idColumn('出库ID', '/notify/detail'),
+  idColumn('出库ID', '/operation/detail'),
   {
     title: '客户ID',
     key: 'customerId',

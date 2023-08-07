@@ -1,5 +1,4 @@
-import { db, executeQuery } from '@/store/plugins/firebase';
-import { collection, orderBy, query, where } from 'firebase/firestore';
+import { orderBy, where } from 'firebase/firestore';
 import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 
@@ -24,12 +23,14 @@ export type NotifyDetailModel = {
 };
 
 export async function getNotifyDetailListByNotify(id) {
-  return await executeQuery(
-    query(
-      collection(db, taskListPath),
-      where('notifyId', '==', id),
-      orderBy('createTimestamp', 'desc')
-    )
+  return await NotifyDetailManager.load(null, where('notifyId', '==', id));
+}
+
+export async function getReserveItems(filterObj?: any) {
+  return await NotifyDetailManager.load(
+    filterObj,
+    orderBy('arriveTime', 'desc'),
+    where('arriveTime', '!=', 0)
   );
 }
 

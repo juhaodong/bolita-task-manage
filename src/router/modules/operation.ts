@@ -31,6 +31,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           title: '出库明细',
         },
+        props: (route) => ({ outId: route.query.id }),
         component: () => import('@/views/newViews/OutboundDetail/OutboundDetail.vue'),
       },
       {

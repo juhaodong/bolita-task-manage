@@ -199,3 +199,10 @@ export function getFileActionButton(
     },
   };
 }
+
+export const sizeColumn = joinDisplayColumn(
+  'containerStandards',
+  '外箱规格',
+  ['length', 'width', 'height'],
+  '*'
+);

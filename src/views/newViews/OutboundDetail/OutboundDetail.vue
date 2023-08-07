@@ -1,13 +1,18 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter" />
+    <filter-bar
+      v-if="finished"
+      :form-fields="filters"
+      :default-value-model="filterObj"
+      @clear="updateFilter(null)"
+      @submit="updateFilter"
+    />
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
       :columns="columns"
       :request="loadDataTable"
       :row-key="(row) => row.id"
-      :scroll-x="3000"
     >
       <template #tableTitle>
         <n-space>
@@ -18,6 +23,22 @@
               </n-icon>
             </template>
             新建出库明细
+          </n-button>
+          <n-button @click="addTable()">
+            <template #icon>
+              <n-icon>
+                <Box20Filled />
+              </n-icon>
+            </template>
+            审核
+          </n-button>
+          <n-button @click="addTable()">
+            <template #icon>
+              <n-icon>
+                <Box20Filled />
+              </n-icon>
+            </template>
+            明细
           </n-button>
         </n-space>
       </template>
@@ -36,7 +57,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref } from 'vue';
+  import { onMounted, ref } from 'vue';
   import { BasicTable } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
@@ -45,9 +66,20 @@
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { $ref } from 'vue/macros';
 
+  interface Prop {
+    outId?: string;
+  }
+  let finished = $ref(false);
+  const props = defineProps<Prop>();
+  onMounted(() => {
+    if (props.outId) {
+      filterObj = { outId: props.outId };
+    }
+    finished = true;
+  });
   const showModal = ref(false);
   const loadDataTable = async () => {
-    const res = await OutBoundDetailManager.load();
+    const res = await OutBoundDetailManager.load(filterObj);
     console.log(res);
     return res;
   };

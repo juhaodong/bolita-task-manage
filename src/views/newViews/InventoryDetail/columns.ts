@@ -1,6 +1,7 @@
 import { DataTableColumns } from 'naive-ui';
-import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { sizeColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
+import { stayDaysColumn } from '@/views/newViews/NotifyDetail/columns';
 
 export const columns: DataTableColumns<InventoryDetailModel> = [
   {
@@ -9,7 +10,7 @@ export const columns: DataTableColumns<InventoryDetailModel> = [
   },
   {
     title: '入库ID',
-    key: 'inboundId',
+    key: 'notifyId',
   },
   {
     title: '客户ID',
@@ -20,10 +21,6 @@ export const columns: DataTableColumns<InventoryDetailModel> = [
     key: 'containerNo',
   },
   {
-    title: '状态',
-    key: 'status',
-  },
-  {
     title: '托',
     key: 'trayNum',
   },
@@ -31,10 +28,7 @@ export const columns: DataTableColumns<InventoryDetailModel> = [
     title: '数量',
     key: 'containerNum',
   },
-  {
-    title: '规格',
-    key: 'containerStandards',
-  },
+  sizeColumn,
   {
     title: '重量kg',
     key: 'weightKg',
@@ -60,10 +54,7 @@ export const columns: DataTableColumns<InventoryDetailModel> = [
     key: 'storeAddress',
   },
   timeColumn('warehousingTime', '入库时间'),
-  {
-    title: '存放天数',
-    key: 'storageDays',
-  },
+  stayDaysColumn,
 ];
 
 export type InventoryDetailModel = {

@@ -142,7 +142,7 @@ export const filters: FormField[] = [
   },
   {
     label: '出库ID',
-    field: 'OutboundId',
+    field: 'outId',
   },
   {
     label: '入库ID',

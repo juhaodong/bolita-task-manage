@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import { doLog } from '@/api/dataLayer/modules/statusChangeLog';
 import { keyBy } from 'lodash-es';
 import { UploadFileInfo } from 'naive-ui';
+import { QueryConstraint } from '@firebase/firestore';
 
 export interface GeneralModel {
   collectionName: string;
@@ -83,10 +84,13 @@ export function initModel(g: GeneralModel): Model {
       }
       return info;
     },
-    async load(filterObj?: any): Promise<any[]> {
-      const list = await executeQuery(
-        query(collection(db, g.collectionName), orderBy('createTimestamp', 'desc'))
-      );
+    async load(filterObj?: any, ...extraCondition: QueryConstraint[]): Promise<any[]> {
+      let q = query(collection(db, g.collectionName));
+      if (extraCondition) {
+        q = query(q, ...extraCondition);
+      }
+      q = query(q, orderBy('createTimestamp', 'desc'));
+      const list = await executeQuery(q);
       if (g?.joinManager) {
         const dict = keyBy(await g.joinManager?.loader(), 'id');
         list.forEach((it, index) => {
@@ -114,7 +118,7 @@ export function initModel(g: GeneralModel): Model {
 }
 
 export interface Model {
-  load: (filterObj?: any) => Promise<any[]>;
+  load: (filterObj?: any, ...extraCondition: QueryConstraint[]) => Promise<any[]>;
   getById: (id: string) => Promise<any>;
   add: (value, ...args) => Promise<Result<string>>;
   addInternal: (value, ...args) => Promise<string>;

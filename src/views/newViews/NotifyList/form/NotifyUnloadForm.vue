@@ -14,7 +14,6 @@
   } from '@/store/utils/utils';
   import { getDateNow, timeDisplay } from '@/views/bolita-views/composable/useableColumns';
   import { ResultEnum } from '@/store/enums/httpEnum';
-  import dayjs from 'dayjs';
 
   console.log(getDateNow, timeDisplay);
 
@@ -84,7 +83,6 @@
         if (listElement.arrivedContainerNumEdit == listElement.containerNum) {
           editInfo.instorageContainerNum = listElement.arrivedContainerNumEdit;
         }
-        editInfo.arriveTime = dayjs().valueOf();
         const res = await NotifyDetailManager.edit(editInfo, listElement.id);
         if (res.code != ResultEnum.SUCCESS) {
           toastError(res.message);
