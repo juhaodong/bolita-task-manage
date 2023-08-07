@@ -91,6 +91,7 @@
   function reloadTable() {
     actionRef.value.reload();
     showModal.value = false;
+    checkedRows = [];
   }
 </script>
 
