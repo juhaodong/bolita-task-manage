@@ -60,7 +60,6 @@
   let finished = $ref(false);
   let currentModel: any | null = $ref(null);
   onMounted(() => {
-    console.log(props.notifyId);
     if (props.notifyId) {
       filterObj = { notifyId: props.notifyId };
     }
@@ -73,6 +72,7 @@
   async function startEdit() {
     const key = checkedRows[0];
     currentModel = await NotifyDetailManager.getById(key);
+    console.log(currentModel);
     showModal.value = true;
   }
 

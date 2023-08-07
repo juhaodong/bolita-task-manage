@@ -13,6 +13,9 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
   import { handleRequest } from '@/store/utils/utils';
+  import { formFieldBuilder, noteFormField } from '@/api/dataLayer/fieldDefination/common';
+  import { NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
+  import { boxDeliveryMethodField } from '@/api/dataLayer/modules/deliveryMethod';
 
   interface Props {
     model: any;
@@ -20,8 +23,8 @@
 
   const props = defineProps<Props>();
   let loading: boolean = $ref(false);
-
-  const schemas: FormField[] = [
+  const builder = formFieldBuilder();
+  builder.addAll([
     {
       field: 'containerId',
       label: '箱号',
@@ -61,30 +64,38 @@
       label: '运单号',
       required: false,
     },
-    {
-      field: 'FBA号',
-      label: 'FBANo',
-    },
-    {
-      field: 'productName',
-      label: '货物名称',
-      required: false,
-    },
-    {
-      field: 'package',
-      label: '包装',
-      required: false,
-    },
-    {
-      field: 'operationRequirement',
-      label: '操作要求',
-      required: false,
-      componentProps: {
-        type: 'textarea',
+  ]);
+  if (props.model.notifyType === NotifyType.Container) {
+    builder.addAll([
+      {
+        field: 'FBA号',
+        label: 'FBANo',
       },
-    },
-    ...getTargetAddressSelectionGroup(),
-  ];
+      {
+        field: 'productName',
+        label: '货物名称',
+        required: false,
+      },
+      {
+        field: 'package',
+        label: '包装',
+        required: false,
+      },
+      {
+        field: 'operationRequirement',
+        label: '操作要求',
+        required: false,
+        componentProps: {
+          type: 'textarea',
+        },
+      },
+      ...getTargetAddressSelectionGroup(),
+    ]);
+  } else {
+    builder.addAll([boxDeliveryMethodField, noteFormField]);
+  }
+
+  const schemas: FormField[] = builder.build();
 
   const emit = defineEmits(['saved']);
 

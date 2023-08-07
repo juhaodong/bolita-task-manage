@@ -76,7 +76,12 @@ export function initModel(g: GeneralModel): Model {
       });
     },
     async getById(id): Promise<any> {
-      return await getDocContent(doc(db, g.collectionName, id));
+      const info = await getDocContent(doc(db, g.collectionName, id));
+      if (g?.joinManager) {
+        const dict = keyBy(await g.joinManager?.loader(), 'id');
+        return Object.assign(dict[info[g.joinManager.key]], info);
+      }
+      return info;
     },
     async load(filterObj?: any): Promise<any[]> {
       const list = await executeQuery(

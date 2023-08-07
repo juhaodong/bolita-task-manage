@@ -135,3 +135,8 @@ export const salesFormField = {
   label: '业务员',
   required: false,
 };
+export const noteFormField = {
+  field: 'note',
+  label: '备注',
+  required: false,
+};
