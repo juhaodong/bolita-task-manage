@@ -1,8 +1,8 @@
 <script setup lang="ts">
   import { computed, watchEffect } from 'vue';
-  import { getNotifyById } from '@/views/newViews/NotifyList/api/notify-api';
-  import { getNotifyDetailListByNotify } from '@/views/newViews/NotifyList/api/notify-detail';
-  import { safeParseFloat, safeParseInt } from '@/utils/utils';
+  import { getNotifyById } from '@/api/dataLayer/modules/notify/notify-api';
+  import { getNotifyDetailListByNotify } from '@/api/dataLayer/modules/notify/notify-detail';
+  import { safeParseFloat, safeParseInt } from '@/store/utils/utils';
 
   interface Props {
     notifyId: string;

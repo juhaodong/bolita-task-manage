@@ -126,11 +126,11 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import { ref, unref, reactive, onMounted, computed } from 'vue';
+  import { computed, onMounted, reactive, ref, unref } from 'vue';
   import { useDialog, useMessage } from 'naive-ui';
-  import { DownOutlined, AlignLeftOutlined, SearchOutlined, FormOutlined } from '@vicons/antd';
-  import { getMenuList } from '@/api/system/menu';
-  import { getTreeItem } from '@/utils';
+  import { AlignLeftOutlined, DownOutlined, FormOutlined, SearchOutlined } from '@vicons/antd';
+  import { getMenuList } from '@/api/dataLayer/modules/system/menu';
+  import { getTreeItem } from '@/store/utils';
   import CreateDrawer from './CreateDrawer.vue';
 
   const rules = {

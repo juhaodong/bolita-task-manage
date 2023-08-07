@@ -75,7 +75,7 @@
   import { computed, defineComponent, PropType, toRaw } from 'vue';
   import { ActionItem } from '@/components/Table';
   import { usePermission } from '@/hooks/web/usePermission';
-  import { isBoolean, isFunction } from '@/utils/is';
+  import { isBoolean, isFunction } from '@/store/is';
   import { DownOutlined } from '@vicons/antd';
 
   export default defineComponent({

@@ -4,7 +4,7 @@ import {
   NotifyModel,
   notifyType,
   OutStatus,
-} from '@/views/newViews/NotifyList/api/notify-api';
+} from '@/api/dataLayer/modules/notify/notify-api';
 import {
   idColumn,
   standardDateFormat,
@@ -12,7 +12,7 @@ import {
 } from '@/views/bolita-views/composable/useableColumns';
 import { h } from 'vue';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { generateOptionFromArray } from '@/utils/utils';
+import { generateOptionFromArray } from '@/store/utils/utils';
 
 export const columns: DataTableColumns<NotifyModel> = [
   idColumn('入库ID', '/notify/detail'),

@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-  import { TrayInfoModel } from '@/api/deliveryMethod/logistic-type';
+  import { TrayInfoModel } from '@/api/dataLayer/modules/deliveryMethod/logistic-type';
 
   interface Props {
     info: TrayInfoModel;

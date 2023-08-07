@@ -1,6 +1,5 @@
-import { generateOptionFromArray } from '@/utils/utils';
-import { DeliveryMethod, outBoundDeliveryMethods } from '@/api/deliveryMethod';
-import { taskTypes } from '@/api/task/task-types';
+import { generateOptionFromArray } from '@/store/utils/utils';
+import { DeliveryMethod, outBoundDeliveryMethods } from '@/api/dataLayer/modules/deliveryMethod';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
 export function getFilesUploadFormField(
@@ -70,14 +69,7 @@ export function getDeliveryMethodSelection(useDeliveryCode = false): FormField[]
 }
 
 export const deliveryMethodSelection: FormField[] = getDeliveryMethodSelection();
-export const formFieldTaskTypeSelection: FormField = {
-  label: '操作类型',
-  field: 'taskType',
-  component: 'NSelect',
-  componentProps: {
-    options: generateOptionFromArray(taskTypes),
-  },
-};
+
 export const formFieldSortLabel: FormField = {
   field: 'sortLabel',
   label: '分拣ID',
@@ -117,6 +109,7 @@ export function formFieldBuilder() {
       render: it.render,
       title: it.label,
       key: it.field,
+      meta: it.meta,
     }));
   };
 

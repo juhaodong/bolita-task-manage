@@ -7,7 +7,7 @@
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
 
-  import { commonDeliveryFields } from '@/api/model/common/addressGroup';
+  import { commonDeliveryFields } from '@/api/dataLayer/fieldDefination/addressGroup';
 
   const schemas: FormField[] = [
     {

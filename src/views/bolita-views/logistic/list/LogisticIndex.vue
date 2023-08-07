@@ -61,7 +61,7 @@
   import { BasicForm, useForm } from '@/components/Form';
   import { columns } from './columns';
   import { PlusOutlined } from '@vicons/antd';
-  import { handleRequest } from '@/utils/utils';
+  import { handleRequest } from '@/store/utils/utils';
   import {
     changeLogisticPrice,
     changeLogisticStatus,
@@ -70,15 +70,18 @@
     getLogisticList,
     sendOutLogistic,
     submitLogisticFeedBack,
-  } from '@/api/deliveryMethod/logistic-api';
+  } from '@/api/dataLayer/modules/deliveryMethod/logistic-api';
   import { searchField } from '@/views/bolita-views/logistic/list/SearchField';
   import NewLogisticFromIndex from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticFromIndex.vue';
-  import { getFileListUrl } from '@/plugins/firebase';
+  import { getFileListUrl } from '@/store/plugins/firebase';
   import LogisticDetail from '@/views/bolita-views/logistic/logisticDetail/LogisticDetail.vue';
-  import { LogisticModel, LogisticStatus } from '@/api/deliveryMethod/logistic-type';
-  import { PermissionEnums } from '@/api/user/baseUser';
+  import {
+    LogisticModel,
+    LogisticStatus,
+  } from '@/api/dataLayer/modules/deliveryMethod/logistic-type';
+  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import LogisticStatusFormIndex from '@/views/bolita-views/logistic/StatusForms/LogisticStatusFormIndex.vue';
-  import { resultError } from '@/utils/request/_util';
+  import { resultError } from '@/store/request/_util';
 
   const actionRef = ref();
   const [register, {}] = useForm({

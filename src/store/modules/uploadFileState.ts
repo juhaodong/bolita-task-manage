@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { getFileListUrl } from '@/plugins/firebase';
+import { getFileListUrl } from '@/store/plugins/firebase';
 
 export interface UploadResult {
   checkPassed: boolean;

@@ -4,8 +4,11 @@
   import ChangeLogTimeLine from '@/views/bolita-views/composable/ChangeLogTimeLine.vue';
   import AppendFileListDisplay from '@/views/bolita-views/composable/AppendFileListDisplay.vue';
   import dayjs from 'dayjs';
-  import { LogisticModel, LogisticType } from '@/api/deliveryMethod/logistic-type';
-  import { getLogisticInfoById } from '@/api/deliveryMethod/logistic-api';
+  import {
+    LogisticModel,
+    LogisticType,
+  } from '@/api/dataLayer/modules/deliveryMethod/logistic-type';
+  import { getLogisticInfoById } from '@/api/dataLayer/modules/deliveryMethod/logistic-api';
   import TrayInfoDisplay from '@/views/bolita-views/composable/TrayInfoDisplay.vue';
   import DeliveryMethodDisplay from '@/views/bolita-views/composable/DeliveryMethodDisplay.vue';
 

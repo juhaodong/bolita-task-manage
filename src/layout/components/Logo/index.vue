@@ -6,7 +6,8 @@
 </template>
 
 <script lang="ts">
-  import { websiteConfig } from '@/config/website.config';
+  import { websiteConfig } from '@/store/config/website.config';
+
   export default {
     name: 'Index',
     props: {

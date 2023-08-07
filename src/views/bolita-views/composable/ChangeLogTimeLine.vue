@@ -1,12 +1,11 @@
 <script setup lang="ts">
-  import { checkLog } from '@/api/statusChangeLog';
+  import { checkLog } from '@/api/dataLayer/modules/statusChangeLog';
   import { watchEffect } from 'vue';
   import dayjs from 'dayjs';
   import { $computed } from 'vue/macros';
   import { FileTextOutlined } from '@vicons/antd';
-  import { getFileNameAndTypeForFirebaseLink } from '../../../utils/utils';
-  import { downloadByUrl } from '@/utils/downloadFile';
-  import { downloadFile } from '@/plugins/firebase';
+  import { getFileNameAndTypeForFirebaseLink } from '@/store/utils/utils';
+  import { downloadFile } from '@/store/plugins/firebase';
 
   const props = defineProps({ logRef: String });
   let logData: any[] = $ref([]);

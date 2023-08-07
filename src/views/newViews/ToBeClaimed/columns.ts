@@ -2,11 +2,11 @@ import { DataTableColumns, NImage, NSpace } from 'naive-ui';
 import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import dayjs from 'dayjs';
 import { addDoc, collection, orderBy, query } from 'firebase/firestore';
-import { db, executeQuery, getFileListUrl } from '@/plugins/firebase';
-import { resultError, resultSuccess } from '@/utils/request/_util';
+import { db, executeQuery, getFileListUrl } from '@/store/plugins/firebase';
+import { resultError, resultSuccess } from '@/store/request/_util';
 import { h } from 'vue';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { deliveryMethods } from '@/api/deliveryMethod';
+import { deliveryMethods } from '@/api/dataLayer/modules/deliveryMethod';
 
 export const columns: DataTableColumns<ToBeClaimedModel> = [
   timeColumn(),

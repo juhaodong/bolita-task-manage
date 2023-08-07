@@ -11,6 +11,7 @@ export type FormField = {
   defaultValue?: any;
   group?: string;
   meta?: any;
+  render?: (record: any) => void;
   displayCondition?: (formValue: any) => boolean;
   disableCondition?: (formValue: any) => boolean;
   onFormUpdate?: (formValue: any) => void;

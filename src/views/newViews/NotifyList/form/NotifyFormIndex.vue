@@ -1,10 +1,10 @@
 <script setup lang="ts">
-  import { createNotify, NotifyType } from '@/views/newViews/NotifyList/api/notify-api';
+  import { NotifyManager, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
   import NotifyContainerForm from '@/views/newViews/NotifyList/form/NotifyContainerForm.vue';
   import TrayForm from '@/views/newViews/NotifyList/form/NotifyTrayForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { handleRequest } from '@/utils/utils';
-  import { getNeededColumnByNotifyType } from '@/views/newViews/NotifyList/api/NotifyRepository';
+  import { handleRequest } from '@/store/utils/utils';
+  import { getNeededColumnByNotifyType } from '@/api/dataLayer/modules/notify/NotifyRepository';
   import readXlsxFile from 'read-excel-file';
 
   interface Prop {
@@ -45,8 +45,8 @@
     value.notifyType = prop.type;
     value.taskList = await readFile(value.uploadFile[0].file, value.notifyType);
     delete value.uploadFile;
-    const res = await createNotify(value);
-    await handleRequest(res, () => {
+    const res = await NotifyManager.add(value);
+    await handleRequest(res, async () => {
       emit('saved');
     });
     stop();

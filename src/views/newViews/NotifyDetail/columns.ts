@@ -1,8 +1,8 @@
 import { DataTableColumns } from 'naive-ui';
 import { joinDisplayColumn } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { generateOptionFromArray } from '@/utils/utils';
-import { InBoundStatus, notifyType } from '@/views/newViews/NotifyList/api/notify-api';
+import { generateOptionFromArray } from '@/store/utils/utils';
+import { InBoundStatus, notifyType } from '@/api/dataLayer/modules/notify/notify-api';
 
 export const columns: DataTableColumns<NotifyDetailInfoModel> = [
   {

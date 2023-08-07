@@ -1,7 +1,7 @@
 import { RouteRecordRaw } from 'vue-router';
 import { Layout, ParentLayout } from '@/router/constant';
 import { WalletOutlined } from '@vicons/antd';
-import { renderIcon, renderNew } from '@/utils';
+import { renderIcon, renderNew } from '@/store/utils';
 
 const routeName = 'comp';
 

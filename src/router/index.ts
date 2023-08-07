@@ -1,7 +1,7 @@
 import { App } from 'vue';
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import { RedirectRoute } from '@/router/base';
-import { PageEnum } from '@/enums/pageEnum';
+import { PageEnum } from '@/store/enums/pageEnum';
 import { createRouterGuards } from './guards';
 import type { IModuleType } from './types';
 

@@ -7,10 +7,10 @@
   import dayjs from 'dayjs';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
-  import { NotifyModel } from '@/views/newViews/NotifyList/api/notify-api';
+  import { NotifyModel } from '@/api/dataLayer/modules/notify/notify-api';
   import { ref } from 'vue';
   import { usePermission } from '@/hooks/web/usePermission';
-  import { listUser, PermissionEnums } from '@/api/user/baseUser';
+  import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/form-field-sort-label';
   import template from '@/assets/template/container.xlsx';
 

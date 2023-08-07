@@ -77,40 +77,38 @@
 
 <script lang="ts">
   import {
-    defineComponent,
-    reactive,
     computed,
+    defineComponent,
+    nextTick,
+    onMounted,
+    provide,
+    reactive,
     ref,
     toRefs,
-    provide,
     watch,
-    onMounted,
-    nextTick,
   } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
-  import { storage } from '@/utils/Storage';
+  import { storage } from '@/store/utils/Storage';
   import { TABS_ROUTES } from '@/store/mutation-types';
-  import { useTabsViewStore } from '@/store/modules/tabsView';
+  import { RouteItem, useTabsViewStore } from '@/store/modules/tabsView';
   import { useAsyncRouteStore } from '@/store/modules/asyncRoute';
-  import { RouteItem } from '@/store/modules/tabsView';
   import { useProjectSetting } from '@/hooks/setting/useProjectSetting';
-  import { useMessage } from 'naive-ui';
+  import { useMessage, useThemeVars } from 'naive-ui';
   import Draggable from 'vuedraggable';
-  import { PageEnum } from '@/enums/pageEnum';
+  import { PageEnum } from '@/store/enums/pageEnum';
   import {
-    DownOutlined,
-    ReloadOutlined,
     CloseOutlined,
     ColumnWidthOutlined,
-    MinusOutlined,
+    DownOutlined,
     LeftOutlined,
+    MinusOutlined,
+    ReloadOutlined,
     RightOutlined,
   } from '@vicons/antd';
-  import { renderIcon } from '@/utils';
+  import { renderIcon } from '@/store/utils';
   import elementResizeDetectorMaker from 'element-resize-detector';
   import { useDesignSetting } from '@/hooks/setting/useDesignSetting';
   import { useProjectSettingStore } from '@/store/modules/projectSetting';
-  import { useThemeVars } from 'naive-ui';
   import { useGo } from '@/hooks/web/usePage';
 
   export default defineComponent({

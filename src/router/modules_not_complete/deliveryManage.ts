@@ -1,7 +1,8 @@
 import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
-import { renderIcon } from '@/utils';
+import { renderIcon } from '@/store/utils';
 import { BellOutlined } from '@vicons/antd';
+
 const name = 'deliveryManage';
 
 const routes: Array<RouteRecordRaw> = [

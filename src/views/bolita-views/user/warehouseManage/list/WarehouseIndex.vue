@@ -48,9 +48,14 @@
   import { BasicForm, FormSchema, useForm } from '@/components/Form';
   import { columns } from './columns';
   import { PlusOutlined } from '@vicons/antd';
-  import { createUser, listUser, PermissionEnums, updateUser } from '@/api/user/baseUser';
+  import {
+    createUser,
+    listUser,
+    PermissionEnums,
+    updateUser,
+  } from '@/api/dataLayer/modules/system/user/baseUser';
   import NewUserForm from '@/views/bolita-views/user/newUserForm/NewUserForm.vue';
-  import { handleRequest } from '@/utils/utils';
+  import { handleRequest } from '@/store/utils/utils';
   import { $ref } from 'vue/macros';
 
   const schemas: FormSchema[] = [

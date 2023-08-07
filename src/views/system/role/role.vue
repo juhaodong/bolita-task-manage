@@ -63,14 +63,14 @@
 </template>
 
 <script lang="ts" setup>
-  import { reactive, ref, unref, h, onMounted } from 'vue';
+  import { h, onMounted, reactive, ref, unref } from 'vue';
   import { useMessage } from 'naive-ui';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { getRoleList } from '@/api/system/role';
-  import { getMenuList } from '@/api/system/menu';
+  import { getRoleList } from '@/api/dataLayer/modules/system/role';
+  import { getMenuList } from '@/api/dataLayer/modules/system/menu';
   import { columns } from './columns';
   import { PlusOutlined } from '@vicons/antd';
-  import { getTreeAll } from '@/utils';
+  import { getTreeAll } from '@/store/utils';
   import { useRouter } from 'vue-router';
 
   const router = useRouter();

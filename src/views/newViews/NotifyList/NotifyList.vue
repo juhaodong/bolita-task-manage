@@ -80,7 +80,7 @@
     NotifyModel,
     notifyPath,
     NotifyType,
-  } from '@/views/newViews/NotifyList/api/notify-api';
+  } from '@/api/dataLayer/modules/notify/notify-api';
   import NotifyFormIndex from '@/views/newViews/NotifyList/form/NotifyFormIndex.vue';
   import { $ref } from 'vue/macros';
   import { TruckDelivery } from '@vicons/tabler';

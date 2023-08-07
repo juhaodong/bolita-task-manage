@@ -17,7 +17,10 @@
 </template>
 
 <script setup lang="ts">
-  import { LogisticStatus, LogisticType } from '@/api/deliveryMethod/logistic-type';
+  import {
+    LogisticStatus,
+    LogisticType,
+  } from '@/api/dataLayer/modules/deliveryMethod/logistic-type';
   import LogisticFeedBackForm from '@/views/bolita-views/logistic/StatusForms/LogisticFeedBackForm.vue';
   import LogisticOutDeliveryForm from '@/views/bolita-views/logistic/StatusForms/LogisticOutDeliveryForm.vue';
   import LogisticFinishForm from '@/views/bolita-views/logistic/StatusForms/LogisticFinishForm.vue';

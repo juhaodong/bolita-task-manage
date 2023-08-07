@@ -1,11 +1,11 @@
 <script setup lang="ts">
   import { $ref } from 'vue/macros';
   import NewLogisticStep1Form from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticStep1Form.vue';
-  import { LogisticType } from '@/api/deliveryMethod/logistic-type';
+  import { LogisticType } from '@/api/dataLayer/modules/deliveryMethod/logistic-type';
   import LogisticAmazonForm from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticStep2Form/LogisticAmazonForm.vue';
   import LogisticBoxForm from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticStep2Form/LogisticBoxForm.vue';
   import LogisitcOthersForm from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticStep2Form/LogisitcOthersForm.vue';
-  import { getLogisticTypeByDeliveryMethod } from '@/api/deliveryMethod';
+  import { getLogisticTypeByDeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 
   let currentStep = $ref(0);
   let logisticType: LogisticType | null = $ref(null);

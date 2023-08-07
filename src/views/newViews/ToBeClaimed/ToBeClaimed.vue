@@ -58,7 +58,7 @@
   import { columns, createNewClaim, filters, loadAllClaim } from './columns';
   import { Box20Filled } from '@vicons/fluent';
   import NewToBeClaimedFrom from '@/views/newViews/ToBeClaimed/NewToBeClaimedFrom.vue';
-  import { handleRequest } from '@/utils/utils';
+  import { handleRequest } from '@/store/utils/utils';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
 
   const showModal = ref(false);

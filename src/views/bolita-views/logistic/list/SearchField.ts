@@ -1,9 +1,9 @@
 import { FormSchema } from '@/components/Form';
 import { salesNameList } from '@/api/sales';
 import dayjs from 'dayjs';
-import { deliveryMethods } from '@/api/deliveryMethod';
-import { generateOptionFromArray } from '@/utils/utils';
-import { notifyStatusList, notifyType } from '@/views/newViews/NotifyList/api/notify-api';
+import { deliveryMethods } from '@/api/dataLayer/modules/deliveryMethod';
+import { generateOptionFromArray } from '@/store/utils/utils';
+import { notifyStatusList, notifyType } from '@/api/dataLayer/modules/notify/notify-api';
 import { warehouseList } from '@/api/warehouse';
 
 export const searchField: FormSchema[] = [

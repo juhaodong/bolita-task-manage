@@ -1,4 +1,4 @@
-import { adminMenus } from '@/api/system/menu';
+import { adminMenus } from '@/api/dataLayer/modules/system/menu';
 import { constantRouterIcon } from './icons';
 import { RouteRecordRaw } from 'vue-router';
 import { Layout, ParentLayout } from '@/router/constant';

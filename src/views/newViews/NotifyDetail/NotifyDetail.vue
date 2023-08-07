@@ -56,7 +56,7 @@
   import { columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
   import NewNotifyDetailForm from '@/views/newViews/NotifyDetail/NewNotifyDetailForm.vue';
-  import { getNotifyDetailList } from '@/views/newViews/NotifyList/api/notify-detail';
+  import { getNotifyDetailList } from '@/api/dataLayer/modules/notify/notify-detail';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
 
   const showModal = ref(false);

@@ -4,9 +4,9 @@
   </span>
 </template>
 <script lang="ts">
-  import { defineComponent, ref, computed, watchEffect, unref, onMounted, watch } from 'vue';
-  import { useTransition, TransitionPresets } from '@vueuse/core';
-  import { isNumber } from '@/utils/is';
+  import { computed, defineComponent, onMounted, ref, unref, watch, watchEffect } from 'vue';
+  import { TransitionPresets, useTransition } from '@vueuse/core';
+  import { isNumber } from '@/store/is';
 
   const props = {
     startVal: { type: Number, default: 0 },
@@ -46,7 +46,7 @@
       const source = ref(props.startVal);
       const disabled = ref(false);
       let outputValue = useTransition(source);
-  
+
       const value = computed(() => formatNumber(unref(outputValue)));
 
       watchEffect(() => {

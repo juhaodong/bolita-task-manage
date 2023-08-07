@@ -8,7 +8,7 @@ import { useDebounceFn } from '@vueuse/core';
 import { useEventListener } from '@/hooks/event/useEventListener';
 import { useBreakpoint } from '@/hooks/event/useBreakpoint';
 
-import echarts from '@/utils/lib/echarts';
+import echarts from '@/store/lib/echarts';
 
 import { useDesignSetting } from '@/hooks/setting/useDesignSetting';
 

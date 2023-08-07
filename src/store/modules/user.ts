@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia';
 import { store } from '@/store';
 import { ACCESS_TOKEN, CURRENT_USER, IS_SCREENLOCKED } from '@/store/mutation-types';
-import { ResultEnum } from '@/enums/httpEnum';
+import { ResultEnum } from '@/store/enums/httpEnum';
 
-import { getUserInfo as getUserInfoApi, login } from '@/api/user/baseUser';
-import { storage } from '@/utils/Storage';
-import { generateOptionFromArray } from '@/utils/utils';
+import { getUserInfo as getUserInfoApi, login } from '@/api/dataLayer/modules/system/user/baseUser';
+import { storage } from '@/store/utils/Storage';
+import { generateOptionFromArray } from '@/store/utils/utils';
 
 export type UserInfoType = {
   username: string;

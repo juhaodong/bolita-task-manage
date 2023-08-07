@@ -5,10 +5,10 @@
 </template>
 <script setup lang="ts">
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
-  import { generateOptionFromArray } from '@/utils/utils';
-  import { trayTypes } from '@/api/deliveryMethod/logistic-type';
+  import { generateOptionFromArray } from '@/store/utils/utils';
+  import { trayTypes } from '@/api/dataLayer/modules/deliveryMethod/logistic-type';
 
-  import { commonDeliveryFields } from '@/api/model/common/addressGroup';
+  import { commonDeliveryFields } from '@/api/dataLayer/fieldDefination/addressGroup';
 
   const schemas = [
     {

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
-import { listUser, PermissionEnums } from '@/api/user/baseUser';
-import { getFileListUrl } from '@/plugins/firebase';
+import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
+import { getFileListUrl } from '@/store/plugins/firebase';
 
 export interface CheckResult {
   warehouseId: string;

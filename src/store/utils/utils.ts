@@ -1,0 +1,58 @@
+import { ResultEnum } from '@/store/enums/httpEnum';
+
+export function generateOptionFromArray(arr?: any[]) {
+  return (
+    arr?.map((it) => ({
+      label: it,
+      value: it,
+    })) ?? []
+  );
+}
+
+export function toastError(message: string) {
+  const $message = window['$message'];
+  $message.error(message);
+}
+export function toastSuccess(message: string) {
+  const $message = window['$message'];
+  $message.success(message);
+}
+
+export function showErrorDialog(message: string) {
+  const $dialog = window['$dialog'];
+  $dialog.info({
+    title: '出问题了！',
+    content: message,
+    positiveText: '确定',
+    //negativeText: '取消',
+    closable: false,
+    maskClosable: false,
+    onPositiveClick: () => {},
+    onNegativeClick: () => {},
+  });
+}
+
+export async function handleRequest(res, action) {
+  if (res.code == ResultEnum.SUCCESS) {
+    return await action(res.result);
+  } else {
+    toastError(res.message);
+  }
+}
+
+export function getFileNameAndTypeForFirebaseLink(firebaseLink: string) {
+  const res = firebaseLink.split('?')[0];
+  const name = res.split('%2F').pop();
+  return {
+    name: name,
+    type: '',
+  };
+}
+
+export function safeParseInt(string: string | null) {
+  return parseInt(string ?? 0) || 0;
+}
+
+export function safeParseFloat(string: string | null) {
+  return parseFloat(string ?? 0) || 0;
+}

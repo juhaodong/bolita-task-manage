@@ -1,7 +1,7 @@
 import { DataTableColumns } from 'naive-ui';
 import { idColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { deliveryMethods } from '@/api/deliveryMethod';
+import { deliveryMethods } from '@/api/dataLayer/modules/deliveryMethod';
 
 export const columns: DataTableColumns<OutboundPlanModel> = [
   idColumn('出库ID', '/notify/detail'),

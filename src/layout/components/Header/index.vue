@@ -128,8 +128,8 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, reactive, toRefs, ref, computed, unref } from 'vue';
-  import { useRouter, useRoute } from 'vue-router';
+  import { computed, defineComponent, reactive, ref, toRefs, unref } from 'vue';
+  import { useRoute, useRouter } from 'vue-router';
   import components from './components';
   import { NDialogProvider, useDialog, useMessage } from 'naive-ui';
   import { TABS_ROUTES } from '@/store/mutation-types';
@@ -138,7 +138,7 @@
   import ProjectSetting from './ProjectSetting.vue';
   import { AsideMenu } from '@/layout/components/Menu';
   import { useProjectSetting } from '@/hooks/setting/useProjectSetting';
-  import { websiteConfig } from '@/config/website.config';
+  import { websiteConfig } from '@/store/config/website.config';
 
   export default defineComponent({
     name: 'PageHeader',

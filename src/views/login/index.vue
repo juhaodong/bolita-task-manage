@@ -89,10 +89,11 @@
   import { useRoute, useRouter } from 'vue-router';
   import { useUserStore } from '@/store/modules/user';
   import { useMessage } from 'naive-ui';
-  import { ResultEnum } from '@/enums/httpEnum';
-  import { PersonOutline, LockClosedOutline, LogoGithub, LogoFacebook } from '@vicons/ionicons5';
-  import { PageEnum } from '@/enums/pageEnum';
-  import { websiteConfig } from '@/config/website.config';
+  import { ResultEnum } from '@/store/enums/httpEnum';
+  import { LockClosedOutline, LogoFacebook, LogoGithub, PersonOutline } from '@vicons/ionicons5';
+  import { PageEnum } from '@/store/enums/pageEnum';
+  import { websiteConfig } from '@/store/config/website.config';
+
   interface FormState {
     username: string;
     password: string;

@@ -1,5 +1,5 @@
 import { DataTableColumns } from 'naive-ui';
-import { LogisticModel } from '@/api/deliveryMethod/logistic-type';
+import { LogisticModel } from '@/api/dataLayer/modules/deliveryMethod/logistic-type';
 import { getTimeColumn } from '@/views/bolita-views/composable/dataTableUtils';
 
 export const columns: DataTableColumns<LogisticModel> = [

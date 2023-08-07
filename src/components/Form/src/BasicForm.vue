@@ -154,8 +154,8 @@
   import type { GridProps } from 'naive-ui/lib/grid';
   import type { FormActionType, FormProps, FormSchema } from './types/form';
 
-  import { isArray } from '@/utils/is';
-  import { deepMerge } from '@/utils';
+  import { isArray } from '@/store/is';
+  import { deepMerge } from '@/store/utils';
   import { groupBy } from 'lodash-es';
 
   export default defineComponent({

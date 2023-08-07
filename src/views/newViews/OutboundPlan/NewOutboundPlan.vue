@@ -7,10 +7,10 @@
 <script lang="ts" setup>
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { onMounted, ref } from 'vue';
-  import { listUser, PermissionEnums } from '@/api/user/baseUser';
+  import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { DataTableColumns } from 'naive-ui';
-  import { getNotifyDetailList } from '@/views/newViews/NotifyList/api/notify-detail';
+  import { getNotifyDetailList } from '@/api/dataLayer/modules/notify/notify-detail';
 
   interface Props {
     model?: any;

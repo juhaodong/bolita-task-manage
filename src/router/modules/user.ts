@@ -1,6 +1,6 @@
 import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
-import { renderIcon } from '@/utils';
+import { renderIcon } from '@/store/utils';
 import { Person } from '@vicons/ionicons5';
 
 const routes: Array<RouteRecordRaw> = [

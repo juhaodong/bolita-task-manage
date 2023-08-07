@@ -33,24 +33,23 @@
 </template>
 <script lang="ts">
   import type { PropType } from 'vue';
+  import { computed, defineComponent, nextTick, ref, toRaw, unref, watchEffect } from 'vue';
   import type { BasicColumn } from '../../types/table';
   import type { EditRecordRow } from './index';
-
-  import { defineComponent, ref, unref, nextTick, computed, watchEffect, toRaw } from 'vue';
-  import { FormOutlined, CloseOutlined, CheckOutlined } from '@vicons/antd';
+  import { CheckOutlined, CloseOutlined, FormOutlined } from '@vicons/antd';
   import { CellComponent } from './CellComponent';
 
   import { useTableContext } from '../../hooks/useTableContext';
 
-  import clickOutside from '@/directives/clickOutside';
+  import clickOutside from '@/store/directives/clickOutside';
 
-  import { propTypes } from '@/utils/propTypes';
-  import { isString, isBoolean, isFunction, isNumber, isArray } from '@/utils/is';
+  import { propTypes } from '@/store/utils/propTypes';
+  import { isArray, isBoolean, isFunction, isNumber, isString } from '@/store/is';
   import { createPlaceholderMessage } from './helper';
-  import { set, omit } from 'lodash-es';
+  import { omit, set } from 'lodash-es';
   import { EventEnum } from '@/components/Table/src/componentMap';
 
-  import { parseISO, format } from 'date-fns';
+  import { format, parseISO } from 'date-fns';
 
   export default defineComponent({
     name: 'EditableCell',

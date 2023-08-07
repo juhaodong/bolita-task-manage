@@ -15,10 +15,10 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref, onMounted, reactive, computed, watch, toRefs, unref } from 'vue';
+  import { computed, defineComponent, onMounted, reactive, ref, toRefs, unref, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { useAsyncRouteStore } from '@/store/modules/asyncRoute';
-  import { generatorMenu, generatorMenuMix } from '@/utils';
+  import { generatorMenu, generatorMenuMix } from '@/store/utils';
   import { useProjectSettingStore } from '@/store/modules/projectSetting';
   import { useProjectSetting } from '@/hooks/setting/useProjectSetting';
 

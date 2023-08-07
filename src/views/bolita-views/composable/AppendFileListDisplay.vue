@@ -1,7 +1,7 @@
 <script setup lang="ts">
-  import { getFileNameAndTypeForFirebaseLink } from '@/utils/utils';
+  import { getFileNameAndTypeForFirebaseLink } from '@/store/utils/utils';
   import { FileTextOutlined, LinkOutlined } from '@vicons/antd';
-  import { downloadFile } from '@/plugins/firebase';
+  import { downloadFile } from '@/store/plugins/firebase';
   defineProps({ filesUrl: Array });
 </script>
 

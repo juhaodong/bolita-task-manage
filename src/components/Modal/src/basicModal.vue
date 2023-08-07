@@ -22,20 +22,20 @@
 
 <script lang="ts" setup>
   import {
-    getCurrentInstance,
-    ref,
-    nextTick,
-    unref,
     computed,
-    useAttrs,
     defineEmits,
     defineProps,
+    getCurrentInstance,
+    nextTick,
+    ref,
+    unref,
+    useAttrs,
   } from 'vue';
   import { basicProps } from './props';
-  import startDrag from '@/utils/Drag';
-  import { deepMerge } from '@/utils';
+  import startDrag from '@/store/utils/Drag';
+  import { deepMerge } from '@/store/utils';
   import { FormProps } from '@/components/Form';
-  import { ModalProps, ModalMethods } from './type';
+  import { ModalMethods, ModalProps } from './type';
 
   const attrs = useAttrs();
   const props = defineProps({ ...basicProps });

@@ -51,7 +51,7 @@
   import { columns, filters } from './columns';
   import { Box20Filled, Folder32Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
-  import { getNotifyList, notifyPath } from '@/views/newViews/NotifyList/api/notify-api';
+  import { getNotifyList, notifyPath } from '@/api/dataLayer/modules/notify/notify-api';
   import Delete28Filled from '@vicons/fluent/es/Delete28Filled';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';

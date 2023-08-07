@@ -68,14 +68,14 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, toRefs, reactive, computed, watch } from 'vue';
-  import { EyeOutlined, DeleteOutlined, PlusOutlined } from '@vicons/antd';
+  import { computed, defineComponent, reactive, toRefs, watch } from 'vue';
+  import { DeleteOutlined, EyeOutlined, PlusOutlined } from '@vicons/antd';
   import { basicProps } from './props';
-  import { useMessage, useDialog } from 'naive-ui';
-  import { ResultEnum } from '@/enums/httpEnum';
-  import componentSetting from '@/settings/componentSetting';
+  import { useDialog, useMessage } from 'naive-ui';
+  import { ResultEnum } from '@/store/enums/httpEnum';
+  import componentSetting from '@/store/settings/componentSetting';
   import { useGlobSetting } from '@/hooks/setting';
-  import { isString } from '@/utils/is';
+  import { isString } from '@/store/is';
 
   const globSetting = useGlobSetting();
 

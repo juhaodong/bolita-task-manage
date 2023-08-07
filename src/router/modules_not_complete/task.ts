@@ -1,6 +1,6 @@
 import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
-import { renderIcon } from '@/utils';
+import { renderIcon } from '@/store/utils';
 import { FlagOutlined } from '@vicons/antd';
 
 const name = 'task';

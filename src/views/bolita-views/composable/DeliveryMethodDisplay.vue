@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-  import { DeliveryMethod } from '@/api/deliveryMethod';
+  import { DeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 
   interface Props {
     deliveryMethod?: DeliveryMethod;

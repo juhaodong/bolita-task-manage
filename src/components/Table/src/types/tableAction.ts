@@ -1,6 +1,6 @@
 import { NButton } from 'naive-ui';
 import type { Component } from 'vue';
-import { PermissionsEnum } from '@/enums/permissionsEnum';
+import { PermissionsEnum } from '@/store/enums/permissionsEnum';
 export interface ActionItem extends Partial<InstanceType<typeof NButton>> {
   onClick?: Fn;
   label?: string;

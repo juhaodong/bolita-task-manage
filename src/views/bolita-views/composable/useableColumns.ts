@@ -1,9 +1,9 @@
 import { Component, h } from 'vue';
 import dayjs from 'dayjs';
 import { useUploadDialog } from '@/store/modules/uploadFileState';
-import { generalUpdate } from '@/plugins/firebase';
 import { RouterLink } from 'vue-router';
 import { NText } from 'naive-ui';
+import { generalUpdate } from '@/api/dataLayer/common/GeneralModel';
 
 export const standardDateFormat = 'YYYY-MM-DD/HH:mm';
 export const dateFormat = 'DD/MM/YYYY';

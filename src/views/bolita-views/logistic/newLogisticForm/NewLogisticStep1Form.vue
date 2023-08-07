@@ -2,7 +2,7 @@
   <n-card class="proCard"> <normal-form :form-fields="schemas" @submit="handleSubmit" /></n-card>
 </template>
 <script setup lang="ts">
-  import { listUser, PermissionEnums } from '@/api/user/baseUser';
+  import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import { Ref, ref, UnwrapRef } from 'vue';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';

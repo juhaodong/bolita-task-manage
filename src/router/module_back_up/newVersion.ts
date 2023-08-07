@@ -1,7 +1,7 @@
 import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
 import { SketchOutlined } from '@vicons/antd';
-import { renderIcon, renderNew } from '@/utils';
+import { renderIcon, renderNew } from '@/store/utils';
 
 const routes: Array<RouteRecordRaw> = [
   {

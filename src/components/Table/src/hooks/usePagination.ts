@@ -1,8 +1,8 @@
 import type { PaginationProps } from '../types/pagination';
 import type { BasicTableProps } from '../types/table';
-import { computed, unref, ref, ComputedRef } from 'vue';
+import { computed, ComputedRef, ref, unref } from 'vue';
 
-import { isBoolean } from '@/utils/is';
+import { isBoolean } from '@/store/is';
 import { APISETTING, DEFAULTPAGESIZE, PAGESIZES } from '../const';
 
 export function usePagination(refProps: ComputedRef<BasicTableProps>) {

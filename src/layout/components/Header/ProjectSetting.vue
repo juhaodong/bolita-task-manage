@@ -155,7 +155,7 @@
         <!--            固定侧边栏-->
         <!--          </div>-->
         <!--          <div class="drawer-setting-item-action">-->
-        <!--            <n-switch v-model:value="settingStore.menuSetting.fixed" />-->
+        <!--            <n-switch v-common:value="settingStore.menuSetting.fixed" />-->
         <!--          </div>-->
         <!--        </div>-->
 
@@ -199,7 +199,7 @@
         <!--        <div class="drawer-setting-item">-->
         <!--          <div class="drawer-setting-item-title"> 显示页脚 </div>-->
         <!--          <div class="drawer-setting-item-action">-->
-        <!--            <n-switch v-model:value="settingStore.showFooter" />-->
+        <!--            <n-switch v-common:value="settingStore.showFooter" />-->
         <!--          </div>-->
         <!--        </div>-->
 
@@ -236,7 +236,7 @@
   import { CheckOutlined } from '@vicons/antd';
   import { Moon, SunnySharp } from '@vicons/ionicons5';
   import { darkTheme } from 'naive-ui';
-  import { animates as animateOptions } from '@/settings/animateSetting';
+  import { animates as animateOptions } from '@/store/settings/animateSetting';
 
   export default defineComponent({
     name: 'ProjectSetting',
