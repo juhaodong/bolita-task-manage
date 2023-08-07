@@ -20,14 +20,6 @@
             </template>
             新建出库计划
           </n-button>
-          <n-button>
-            <template #icon>
-              <n-icon>
-                <Box20Filled />
-              </n-icon>
-            </template>
-            审核
-          </n-button>
         </n-space>
       </template>
     </BasicTable>
@@ -61,6 +53,7 @@
     outboundPath,
     OutBoundPlanManager,
   } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+  import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
 
   const showModal = ref(false);
   const loadDataTable = async () => {
@@ -95,6 +88,13 @@
           {
             label: '取消',
             icon: Delete28Filled,
+            popConfirm: {
+              title: '是否取消此出库计划？',
+              async confirm() {
+                await OutBoundPlanManager.edit({ outStatus: OutStatus.Cancel }, record.id);
+                reloadTable();
+              },
+            },
           },
           fileAction('附件', 'files', Folder32Filled),
           fileAction('CMR', 'CMR'),

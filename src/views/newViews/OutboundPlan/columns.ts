@@ -1,5 +1,5 @@
 import { DataTableColumns } from 'naive-ui';
-import { idColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { idColumn, statusColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { deliveryMethodSelection } from '@/api/dataLayer/fieldDefination/common';
 
@@ -59,10 +59,7 @@ export const columns: DataTableColumns<OutboundPlanModel> = [
     title: '出库数量',
     key: 'outboundNum',
   },
-  {
-    title: '出库状态',
-    key: 'outStatus',
-  },
+  statusColumn('出库状态', 'outStatus'),
   {
     title: '托盘置换',
     key: 'trayChange',
