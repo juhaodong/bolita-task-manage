@@ -3,6 +3,7 @@ import { DeliveryMethod, deliveryMethod } from '@/api/dataLayer/modules/delivery
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
 import { usePermission } from '@/hooks/web/usePermission';
+import dayjs from 'dayjs';
 
 export function getFilesUploadFormField(
   key = 'files',
@@ -116,3 +117,21 @@ export function formFieldBuilder() {
     toColumn,
   };
 }
+
+export function getDatePickerFormField(key = 'date', title = '日期'): FormField {
+  return {
+    field: key,
+    component: 'NDatePicker',
+    label: title,
+    defaultValue: dayjs().valueOf(),
+    componentProps: {
+      type: 'date',
+      clearable: true,
+    },
+  };
+}
+export const salesFormField = {
+  field: 'salesName',
+  label: '业务员',
+  required: false,
+};

@@ -6,13 +6,14 @@ import { safeSumInt } from '@/store/utils/utils';
 export const outboundPath = 'outbound';
 export const OutBoundPlanManager = initModel({
   init(value): any {
-    console.log(value.planList);
     value.trayNum = safeSumInt(value.planList, 'trayNum');
     value.containerNum = safeSumInt(value.planList, 'containerNum');
     value.outboundNum = value.trayNum + value.containerNum;
     value.outStatus = OutStatus.WaitForCheck;
     value.carStatus = CarStatus.UnAble;
     value.cashStatus = CashStatus.NotFinish;
+    delete value.planList;
+    console.log(value);
     return value;
   },
   collectionName: outboundPath,

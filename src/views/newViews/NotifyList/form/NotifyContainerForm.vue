@@ -11,7 +11,7 @@
   import { ref } from 'vue';
   import { usePermission } from '@/hooks/web/usePermission';
   import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
-  import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/common';
+  import { getFilesUploadFormField, salesFormField } from '@/api/dataLayer/fieldDefination/common';
   import template from '@/assets/template/container.xlsx';
 
   interface Props {
@@ -121,11 +121,7 @@
       label: '备注',
       required: false,
     },
-    {
-      field: 'salesName',
-      label: '业务员',
-      required: false,
-    },
+    salesFormField,
   ];
 
   const emit = defineEmits(['submit']);

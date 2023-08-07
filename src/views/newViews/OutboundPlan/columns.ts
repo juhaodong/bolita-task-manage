@@ -24,22 +24,26 @@ export const columns: DataTableColumns<OutboundPlanModel> = [
   {
     title: '托数',
     key: 'trayNum',
+    width: 60,
   },
   {
     title: '箱数',
     key: 'containerNum',
+    width: 60,
   },
   {
     title: '目的国',
     key: 'targetCountry',
+    width: 60,
   },
   {
     title: 'FBACode',
-    key: 'FBACode',
+    key: 'fbaCode',
+    width: 60,
   },
   {
     title: '收货地址',
-    key: 'shippingAddress',
+    key: 'deliveryAddress',
   },
   timeColumn(),
   {

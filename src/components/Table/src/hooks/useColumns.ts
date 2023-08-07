@@ -53,7 +53,7 @@ export function useColumns(propsRef: ComputedRef<BasicTableProps>) {
       .map((column) => {
         const { edit } = column;
         if (!column.width) {
-          column.width = 100;
+          column.width = 80;
         }
         column.className = column.className + ' text-center';
         if (edit) {

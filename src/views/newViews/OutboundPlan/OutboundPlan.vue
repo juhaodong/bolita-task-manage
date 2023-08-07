@@ -8,7 +8,6 @@
       :columns="columns"
       :request="loadDataTable"
       :row-key="(row) => row.id"
-      :scroll-x="3000"
       @update:checked-row-keys="onCheckedRow"
     >
       <template #tableTitle>
@@ -81,7 +80,7 @@
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
-    width: 110,
+    width: 120,
     render(record) {
       const fileAction = (label, key, icon?: Component) => {
         return getFileActionButton(label, key, outboundPath, reloadTable, record, icon);
