@@ -11,8 +11,9 @@
             >
               <template #trigger>
                 <n-button
-                  style="font-size: 18px; padding: 4px !important"
+                  style="font-size: 14px; padding: 2px !important"
                   text
+                  secondary
                   v-bind="action"
                   :type="(action.highlight ? action.highlight() : false) ? 'warning' : 'default'"
                 >
@@ -20,7 +21,7 @@
                     <n-icon :component="action.icon" />
                   </template>
                   <template v-else>
-                    <div style="font-size: xx-small" class="font-bold">
+                    <div style="font-size: 10px" class="font-bold">
                       {{ action.label }}
                     </div>
                   </template>
@@ -30,7 +31,7 @@
             </n-popconfirm>
             <n-button
               text
-              style="font-size: 18px; padding: 4px !important"
+              style="font-size: 14px; padding: 2px !important"
               v-else
               secondary
               v-bind="action"
