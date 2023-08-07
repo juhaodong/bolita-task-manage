@@ -62,6 +62,10 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
     key: 'FBACode',
   },
   {
+    title: 'FBA号',
+    key: 'FBANo',
+  },
+  {
     title: 'PO',
     key: 'PO',
   },

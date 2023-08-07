@@ -114,7 +114,6 @@
       if (!filterObj) {
         return it;
       } else {
-        console.log(filterObj);
         return Object.keys(filterObj).every((k) => !filterObj[k] || filterObj[k] == it[k]);
       }
     });

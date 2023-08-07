@@ -1,25 +1,24 @@
 <template>
   <n-card class="proCard">
-    <normal-form :default-value-model="model" :form-fields="schemas" @submit="handleSubmit" />
+    <filter-bar :form-fields="searchSchema" />
+    <n-data-table :columns="columns" />
   </n-card>
 </template>
 <script lang="ts" setup>
-  import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
-  import { NotifyModel } from '@/api/notify/notify-api';
-  import { ref } from 'vue';
-  import { usePermission } from '@/hooks/web/usePermission';
+  import { onMounted, ref } from 'vue';
   import { listUser, PermissionEnums } from '@/api/user/baseUser';
+  import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
+  import { DataTableColumns } from 'naive-ui';
+  import { getNotifyDetailList } from '@/views/newViews/NotifyList/api/notify-detail';
 
   interface Props {
     model?: any;
   }
 
   defineProps<Props>();
-  let task = [];
 
   let customerList = ref<any[]>([]);
-  const { hasPermission } = usePermission();
 
   async function init() {
     customerList.value = (await listUser(PermissionEnums.Customer)).result.map((it) => ({
@@ -128,12 +127,36 @@
     },
   ];
 
+  const columns: DataTableColumns<any> = [
+    { title: '入库ID', key: 'notifyId' },
+    { title: '票号', key: 'id' },
+    { title: '箱号', key: 'containerId' },
+    { title: '产品SKU', key: 'productSKU' },
+    { title: '托数', key: 'trayNum' },
+    { title: '箱数', key: 'containerNum' },
+    { title: '长', key: 'length' },
+    { title: '宽', key: 'width' },
+    { title: '高', key: 'height' },
+    { title: '重量', key: 'weightKg' },
+    { title: '体积', key: 'volume' },
+    { title: 'FBA号', key: 'FBANo' },
+    { title: '操作要求', key: 'operationRequirement' },
+    { title: '备注', key: 'note' },
+  ];
+
+  const searchSchema: FormField[] = [
+    { label: '入库ID', field: 'notifyId' },
+    { label: '票号', field: 'id' },
+    { label: '货柜号', field: 'containerNo' },
+  ];
+
   const emit = defineEmits(['submit']);
 
-  function handleSubmit(values: NotifyModel) {
-    values.taskList = task;
-    emit('submit', values);
-  }
+  let allNotifyDetail = $ref([]);
+
+  onMounted(async () => {
+    allNotifyDetail = await getNotifyDetailList();
+  });
 </script>
 
 <style lang="less" scoped></style>
