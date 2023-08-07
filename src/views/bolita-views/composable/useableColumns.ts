@@ -63,14 +63,15 @@ export function idColumn(title = 'ID', targetPage, keyName = 'id') {
         {
           to: targetPage + '?' + keyName + '=' + record[keyName],
         },
-        h(
-          NText,
-          {
-            underline: true,
-            type: 'info',
-          },
-          record[keyName]
-        )
+        () =>
+          h(
+            NText,
+            {
+              underline: true,
+              type: 'info',
+            },
+            () => record[keyName]
+          )
       );
     },
   };

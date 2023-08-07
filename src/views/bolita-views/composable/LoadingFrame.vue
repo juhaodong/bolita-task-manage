@@ -1,13 +1,13 @@
 <script setup lang="ts">
-  let loading = $ref(false);
-  function startLoading() {
-    loading = true;
+  interface Prop {
+    loading: boolean;
   }
+  defineProps<Prop>();
 </script>
 
 <template>
   <div>
-    <slot @loading="startLoading" @stop="loading = false" v-if="!loading"></slot>
+    <slot v-if="!loading"></slot>
     <div
       v-else
       style="min-height: 300px; width: 100%"

@@ -12,14 +12,15 @@
   }
 
   const prop = defineProps<Prop>();
-  const emit = defineEmits(['loading', 'stop', 'saved']);
+  const emit = defineEmits(['saved']);
+  let loading: boolean = $ref(false);
 
-  function loading() {
-    emit('loading');
+  function startLoading() {
+    loading = true;
   }
 
   function stop() {
-    emit('stop');
+    loading = false;
   }
 
   async function readFile(file, notifyType) {
@@ -41,7 +42,7 @@
   }
 
   async function saveNotify(value: any) {
-    loading();
+    startLoading();
     value.notifyType = prop.type;
     value.taskList = await readFile(value.uploadFile[0].file, value.notifyType);
     delete value.uploadFile;
@@ -54,7 +55,7 @@
 </script>
 
 <template>
-  <loading-frame>
+  <loading-frame :loading="loading">
     <template v-if="type == NotifyType.Container">
       <notify-container-form @submit="saveNotify" />
     </template>

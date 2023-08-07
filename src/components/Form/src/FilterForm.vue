@@ -219,7 +219,6 @@
       const groupedSchema = computed(() => {
         return Object.entries(groupBy(getSchema.value, 'group')).map((it) => {
           const [index, t] = it;
-          console.log(it);
           return {
             group: index === 'undefined' ? '基本信息' : index,
             schema: t,

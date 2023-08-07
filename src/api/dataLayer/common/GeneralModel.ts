@@ -3,11 +3,13 @@ import { db, executeQuery, getDocContent } from '@/store/plugins/firebase';
 import { collection, deleteDoc, doc, getDocs, orderBy, query, setDoc } from 'firebase/firestore';
 import dayjs from 'dayjs';
 import { doLog } from '@/api/dataLayer/modules/statusChangeLog';
+import { keyBy } from 'lodash-es';
 
 export interface GeneralModel {
   collectionName: string;
   init: (value, ...args) => any;
-  afterAddHook?: (id, value) => void;
+  afterAddHook?: (id: string, value: any) => Promise<any>;
+  joinManager?: { loader: () => Promise<any[]>; key: string };
 }
 
 export async function getCollectionNextId(collectionName: string) {
@@ -16,7 +18,7 @@ export async function getCollectionNextId(collectionName: string) {
 }
 
 export async function generalAdd(value: any, collectionName: string) {
-  const id = await getCollectionNextId(collectionName);
+  const id = value?.id ?? (await getCollectionNextId(collectionName));
   value.createTimestamp = dayjs().valueOf();
   await setDoc(doc(collection(db, collectionName), id), value);
   await doLog({
@@ -48,13 +50,17 @@ export function initModel(g: GeneralModel): Model {
     }
   };
   return {
+    async addInternal(value, ...args): Promise<string> {
+      const t = await g.init(value, ...args);
+      const id = await generalAdd(t, g.collectionName);
+      if (g.afterAddHook) {
+        await g.afterAddHook(id, t);
+      }
+      return id;
+    },
     async add(value, ...args): Promise<Result<string>> {
       return await scope(async () => {
-        const t = g.init(value, ...args);
-        const id = await generalAdd(t, g.collectionName);
-        if (g.afterAddHook) {
-          g.afterAddHook(id, t);
-        }
+        return await this.addInternal(value, ...args);
       });
     },
     async edit(value, id): Promise<Result<string>> {
@@ -71,6 +77,17 @@ export function initModel(g: GeneralModel): Model {
       const list = await executeQuery(
         query(collection(db, g.collectionName), orderBy('createTimestamp', 'desc'))
       );
+      if (g?.joinManager) {
+        const dict = keyBy(await g.joinManager?.loader(), 'id');
+        list.forEach((it, index) => {
+          const n = dict[it[g?.joinManager?.key ?? '']];
+          list[index] = {
+            ...n,
+            ...it,
+          };
+          console.log(it);
+        });
+      }
       if (!filterObj) {
         return list;
       } else {
@@ -90,7 +107,8 @@ export function initModel(g: GeneralModel): Model {
 export interface Model {
   load: (filterObj: any) => Promise<any[]>;
   getById: (id: string) => Promise<any>;
-  add: (value) => Promise<Result<string>>;
+  add: (value, ...args) => Promise<Result<string>>;
+  addInternal: (value, ...args) => Promise<string>;
   remove: (id) => Promise<Result<any>>;
   edit: (value, id: string) => Promise<Result<string>>;
 }

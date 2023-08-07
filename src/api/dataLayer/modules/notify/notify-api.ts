@@ -1,7 +1,10 @@
 import { collection, deleteDoc, doc, orderBy, query } from 'firebase/firestore';
 import { db, executeQuery, getDocContent } from '@/store/plugins/firebase';
 import { resultError, resultSuccess } from '@/store/request/_util';
-import { addInDetail, NotifyDetailModel } from '@/api/dataLayer/modules/notify/notify-detail';
+import {
+  NotifyDetailManager,
+  NotifyDetailModel,
+} from '@/api/dataLayer/modules/notify/notify-detail';
 import { BasicModel } from '@/api/dataLayer/fieldDefination/BasicModel';
 import { safeParseInt } from '@/store/utils/utils';
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
@@ -40,7 +43,7 @@ export const NotifyManager = initModel({
   },
   async afterAddHook(id, value) {
     for (const task of value.taskList) {
-      await addInDetail(task, id);
+      await NotifyDetailManager.addInternal(task, id);
     }
   },
 });

@@ -56,19 +56,24 @@
   import { columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
   import NewNotifyDetailForm from '@/views/newViews/NotifyDetail/NewNotifyDetailForm.vue';
-  import { getNotifyDetailList } from '@/api/dataLayer/modules/notify/notify-detail';
+  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
+  import { $ref } from 'vue/macros';
 
   const showModal = ref(false);
-
+  let filterObj: any | null = $ref(null);
   function addTable() {
     showModal.value = true;
   }
 
   const loadDataTable = async () => {
-    return await getNotifyDetailList();
+    return await NotifyDetailManager.load(filterObj);
   };
-
+  function updateFilter(value) {
+    filterObj = value;
+    reloadTable();
+  }
+  const actionRef = ref();
   function reloadTable() {
     actionRef.value.reload();
   }
