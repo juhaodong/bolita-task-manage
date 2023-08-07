@@ -18,6 +18,9 @@
       <template #tableTitle>
         <n-space>
           <n-button :disabled="checkedRows?.length != 1" @click="startEdit()"> 编辑 </n-button>
+          <n-button :disabled="checkedRows?.length == 0" @click="startEditStoreAddress()">
+            批量设置库位
+          </n-button>
           <n-button>
             <template #icon>
               <n-icon>
@@ -29,6 +32,10 @@
         </n-space>
       </template>
     </BasicTable>
+    <n-modal :preset="'dialog'" title="请输入新的库位">
+      <n-input v-model:value="storeAddress" />
+      <n-button type="primary"> 保存 </n-button>
+    </n-modal>
 
     <n-modal
       v-model:show="showModal"
@@ -88,6 +95,12 @@
   let checkedRows = $ref([]);
   const actionRef = ref();
 
+  let storeAddress: string = $ref('');
+  let storeAddressDialog: boolean = $ref(false);
+  function startEditStoreAddress() {
+    storeAddress = '';
+    storeAddressDialog = true;
+  }
   function reloadTable() {
     actionRef.value.reload();
     showModal.value = false;

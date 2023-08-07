@@ -50,9 +50,7 @@
   import { getTargetAddressSelectionGroup } from '@/api/dataLayer/fieldDefination/addressGroup';
   import {
     asyncCustomerFormField,
-    getDatePickerFormField,
     getFilesUploadFormField,
-    salesFormField,
   } from '@/api/dataLayer/fieldDefination/common';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
@@ -149,8 +147,6 @@
   ];
 
   const addressFormFields: FormField[] = [
-    getDatePickerFormField('reservationOutboundDate', '预约出库日期'),
-    salesFormField,
     getFilesUploadFormField('files', false),
     {
       field: 'operationRequirement',
