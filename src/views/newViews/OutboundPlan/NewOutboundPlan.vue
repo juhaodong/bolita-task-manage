@@ -158,7 +158,6 @@
       componentProps: {
         type: 'textarea',
       },
-      required: true,
     },
     ...getTargetAddressSelectionGroup(),
   ];

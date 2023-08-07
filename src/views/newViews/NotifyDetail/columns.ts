@@ -60,7 +60,7 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
   },
   {
     title: 'FBACode',
-    key: 'FBACode',
+    key: 'fbaCode',
   },
   {
     title: 'FBA号',
@@ -72,11 +72,11 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
   },
   {
     title: '收件地址',
-    key: 'shippingAddress',
+    key: 'deliveryAddress',
   },
   {
     title: '物流方式',
-    key: 'logisticsMethods',
+    key: 'deliveryMethod',
   },
   {
     title: '库位',
