@@ -61,11 +61,17 @@
 
   function loadAll() {
     currentTaskList.forEach((it) => {
-      it.arrivedTrayNumEdit = it.arrivedTrayNum ?? 0;
-      it.arrivedContainerNumEdit = it.arrivedContainerNum ?? 0;
+      it.arrivedTrayNumEdit = it.arrivedTrayNum == 0 ? '' : it.arrivedTrayNum;
+      it.arrivedContainerNumEdit = it.arrivedContainerNum == 0 ? '' : it.arrivedContainerNum;
     });
   }
-
+  function compareStatus(currentValue: string, limitValue: number) {
+    if (safeParseInt(currentValue) == safeParseInt(limitValue)) {
+      return 'success';
+    } else {
+      return safeParseInt(currentValue) > safeParseInt(limitValue) ? 'error' : 'warning';
+    }
+  }
   async function save() {
     for (const listElement of currentTaskList) {
       if (
@@ -111,7 +117,7 @@
 </script>
 
 <template>
-  <div class="mt-8">
+  <div class="mt-8" id="print">
     <n-descriptions v-if="notifyDetail" :columns="3" label-placement="left" bordered>
       <n-descriptions-item :span="2" label="卸柜人" />
       <n-descriptions-item label="日期"> {{ getDateNow() }}</n-descriptions-item>
@@ -126,7 +132,7 @@
       </n-descriptions-item>
       <n-descriptions-item label="卸柜起止时间" />
     </n-descriptions>
-    <div class="mt-4" style="max-height: 800px; overflow-y: scroll">
+    <div class="mt-4 noMaxHeight" style="max-height: 800px; overflow-y: scroll">
       <n-table class="mt-4" :single-line="false">
         <thead>
           <tr>
@@ -147,11 +153,13 @@
               <n-input
                 v-model:value="item.arrivedTrayNumEdit"
                 placeholder=""
+                :status="compareStatus(item.arrivedTrayNumEdit, item.trayNum)"
                 @focus="item.arrivedTrayNumEdit = ''"
               />
             </td>
             <td>
               <n-input
+                :status="compareStatus(item.arrivedContainerNumEdit, item.containerNum)"
                 @focus="item.arrivedContainerNumEdit = ''"
                 v-model:value="item.arrivedContainerNumEdit"
                 placeholder=""
@@ -166,7 +174,7 @@
     </div>
 
     <n-space class="mt-4">
-      <n-button type="default">打印</n-button>
+      <n-button v-print="'#print'" type="default">打印</n-button>
       <table class="grow" style="width: 400px">
         <tr class="!bg-gray-100" style="height: 32px">
           <td>总计</td>
@@ -183,4 +191,11 @@
   </div>
 </template>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+  @media print {
+    .noMaxHeight {
+      max-height: unset !important;
+      overflow: hidden;
+    }
+  }
+</style>

@@ -15,6 +15,7 @@ export function setupDirectives(app: App) {
   // 权限控制指令（演示）
   app.directive('permission', permission);
   app.use(print);
+  app.directive('print', print);
   // 复制指令
   app.directive('copy', copy);
   // 防抖指令
