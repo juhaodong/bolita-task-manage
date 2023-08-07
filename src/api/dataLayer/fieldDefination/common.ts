@@ -1,6 +1,8 @@
 import { generateOptionFromArray } from '@/store/utils/utils';
 import { DeliveryMethod, deliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
+import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
+import { usePermission } from '@/hooks/web/usePermission';
 
 export function getFilesUploadFormField(
   key = 'files',
@@ -57,6 +59,25 @@ export function getDeliveryMethodSelection(): FormField[] {
       required: false,
     },
   ];
+}
+
+export async function asyncCustomerFormField(): Promise<FormField> {
+  const { hasPermission } = usePermission();
+  const customerList = (await listUser(PermissionEnums.Customer)).result.map((it) => ({
+    label: it.realName,
+    value: it.id,
+  }));
+  return {
+    field: 'customerId',
+    label: '客户',
+    component: 'NSelect',
+    componentProps: {
+      options: customerList,
+    },
+    displayCondition() {
+      return !hasPermission([PermissionEnums.Customer]);
+    },
+  };
 }
 
 export const deliveryMethodSelection: FormField[] = getDeliveryMethodSelection();

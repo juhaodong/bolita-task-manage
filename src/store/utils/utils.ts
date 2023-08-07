@@ -1,4 +1,5 @@
 import { ResultEnum } from '@/store/enums/httpEnum';
+import { sumBy } from 'lodash-es';
 
 export function generateOptionFromArray(arr?: any[]) {
   return (
@@ -55,4 +56,16 @@ export function safeParseInt(string: string | null) {
 
 export function safeParseFloat(string: string | null) {
   return parseFloat(string ?? 0) || 0;
+}
+
+export function safeSumBy(arr, key) {
+  return sumBy(arr, (item: any) => {
+    return safeParseFloat(item[key]);
+  });
+}
+
+export function safeSumInt(arr, key) {
+  return sumBy(arr, (item: any) => {
+    return safeParseInt(item[key]);
+  });
 }

@@ -40,7 +40,7 @@
       style="width: 90%; min-width: 600px; max-width: 1200px"
       title="出库计划"
     >
-      <new-outbound-plan />
+      <new-outbound-plan @saved="reloadTable" />
     </n-modal>
   </n-card>
 </template>
@@ -51,7 +51,6 @@
   import { columns, filters } from './columns';
   import { Box20Filled, Folder32Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
-  import { getNotifyList, notifyPath } from '@/api/dataLayer/modules/notify/notify-api';
   import Delete28Filled from '@vicons/fluent/es/Delete28Filled';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
@@ -59,19 +58,25 @@
   import { CurrencyEuro } from '@vicons/carbon';
   import { $ref } from 'vue/macros';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
+  import {
+    outboundPath,
+    OutBoundPlanManager,
+  } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
 
   const showModal = ref(false);
   const loadDataTable = async () => {
-    return await getNotifyList();
+    const res = await OutBoundPlanManager.load(null);
+    console.log(res);
+    return res;
   };
   let showOperationTable = $ref(false);
   let currentId: string | null = $ref(null);
-  let showWarehouseDialog = $ref(false);
   let showFeeDialog = $ref(false);
   const actionRef = ref();
 
   function reloadTable() {
     actionRef.value.reload();
+    showModal.value = false;
   }
   const actionColumn = reactive({
     title: '可用动作',
@@ -79,7 +84,7 @@
     width: 110,
     render(record) {
       const fileAction = (label, key, icon?: Component) => {
-        return getFileActionButton(label, key, notifyPath, reloadTable, record, icon);
+        return getFileActionButton(label, key, outboundPath, reloadTable, record, icon);
       };
       return h(TableAction as any, {
         style: 'button',

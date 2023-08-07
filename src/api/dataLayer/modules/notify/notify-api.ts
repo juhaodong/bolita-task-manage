@@ -1,6 +1,3 @@
-import { collection, deleteDoc, doc, orderBy, query } from 'firebase/firestore';
-import { db, executeQuery, getDocContent } from '@/store/plugins/firebase';
-import { resultError, resultSuccess } from '@/store/request/_util';
 import {
   NotifyDetailManager,
   NotifyDetailModel,
@@ -24,7 +21,6 @@ export interface NotifyModel extends BasicModel {
 }
 
 export const notifyPath = 'notify';
-const ref = collection(db, notifyPath);
 export const NotifyManager = initModel({
   collectionName: notifyPath,
   init(value) {
@@ -48,40 +44,6 @@ export const NotifyManager = initModel({
   },
 });
 
-export async function deleteNotify(id) {
-  try {
-    await deleteDoc(doc(ref, id));
-    return resultSuccess(id);
-  } catch (e: any) {
-    return resultError(e?.message);
-  }
-}
-
-export async function getNotifyById(id?: string) {
-  if (id == null) {
-    return null;
-  }
-  const mainInfo = await getDocContent(doc(db, notifyPath, id));
-  return {
-    ...mainInfo,
-  };
-}
-
-//获取table
-export async function getNotifyList() {
-  return await executeQuery(query(collection(db, notifyPath), orderBy('createTimestamp', 'desc')));
-}
-
-export enum NotifyStatus {
-  NotSubmit = '未提交',
-  WaitForCheck = '审核中',
-  Refused = '未通过审核',
-  WaitFroArrive = '等待到货',
-  AlreadyArrived = '已经到货',
-  Warning = '异常',
-  Canceled = '已取消',
-}
-
 export enum InBoundStatus {
   All = '全部入库',
   Partial = '部分入库',
@@ -103,8 +65,6 @@ export enum CashStatus {
   WaitConfirm = '待确认',
   NotFinish = '未结算',
 }
-
-export const notifyStatusList = Object.values(NotifyStatus);
 
 export enum NotifyType {
   Container = '货柜',

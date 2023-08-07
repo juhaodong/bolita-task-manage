@@ -1,11 +1,6 @@
 import { db, executeQuery } from '@/store/plugins/firebase';
 import { collection, orderBy, query, where } from 'firebase/firestore';
-import {
-  getNotifyById,
-  getNotifyList,
-  NotifyManager,
-} from '@/api/dataLayer/modules/notify/notify-api';
-import { keyBy } from 'lodash-es';
+import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 
 const taskListPath = 'taskList';
@@ -28,19 +23,6 @@ export type NotifyDetailModel = {
   storagePosition: string;
 };
 
-export async function getNotifyDetailList() {
-  const notifyDict = keyBy(await getNotifyList(), 'id');
-  return (
-    await executeQuery(query(collection(db, taskListPath), orderBy('createTimestamp', 'desc')))
-  ).map((it) => {
-    const n = notifyDict[it.notifyId];
-    return {
-      ...n,
-      ...it,
-    };
-  });
-}
-
 export async function getNotifyDetailListByNotify(id) {
   return await executeQuery(
     query(
@@ -59,7 +41,7 @@ export const NotifyDetailManager = initModel({
     taskInfo.note = '';
     taskInfo.storagePosition = '';
     taskInfo.notifyId = notifyId;
-    taskInfo.customerId = (await getNotifyById(notifyId)).customerId;
+    taskInfo.customerId = (await NotifyManager.getById(notifyId)).customerId;
     return taskInfo;
   },
   joinManager: {

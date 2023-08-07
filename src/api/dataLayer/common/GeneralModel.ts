@@ -1,9 +1,10 @@
 import { Result, resultError, resultSuccess } from '@/store/request/_util';
-import { db, executeQuery, getDocContent } from '@/store/plugins/firebase';
+import { db, executeQuery, getDocContent, getFileListUrl } from '@/store/plugins/firebase';
 import { collection, deleteDoc, doc, getDocs, orderBy, query, setDoc } from 'firebase/firestore';
 import dayjs from 'dayjs';
 import { doLog } from '@/api/dataLayer/modules/statusChangeLog';
 import { keyBy } from 'lodash-es';
+import { UploadFileInfo } from 'naive-ui';
 
 export interface GeneralModel {
   collectionName: string;
@@ -20,6 +21,11 @@ export async function getCollectionNextId(collectionName: string) {
 export async function generalAdd(value: any, collectionName: string) {
   const id = value?.id ?? (await getCollectionNextId(collectionName));
   value.createTimestamp = dayjs().valueOf();
+  for (const k of Object.keys(value)) {
+    if (value[k] instanceof Array<UploadFileInfo>) {
+      value[k] = await getFileListUrl(value[k]);
+    }
+  }
   await setDoc(doc(collection(db, collectionName), id), value);
   await doLog({
     toStatus: '创建',
@@ -69,9 +75,7 @@ export function initModel(g: GeneralModel): Model {
       });
     },
     async getById(id): Promise<any> {
-      return await scope(async () => {
-        return await getDocContent(doc(db, g.collectionName, id));
-      });
+      return await getDocContent(doc(db, g.collectionName, id));
     },
     async load(filterObj: any): Promise<any[]> {
       const list = await executeQuery(

@@ -2,7 +2,7 @@ import { FormSchema } from '@/components/Form';
 import { salesNameList } from '@/api/sales';
 import dayjs from 'dayjs';
 import { generateOptionFromArray } from '@/store/utils/utils';
-import { notifyStatusList, notifyType } from '@/api/dataLayer/modules/notify/notify-api';
+import { notifyType } from '@/api/dataLayer/modules/notify/notify-api';
 import { warehouseList } from '@/api/warehouse';
 
 export const searchField: FormSchema[] = [
@@ -64,23 +64,6 @@ export const searchField: FormSchema[] = [
     componentProps: {
       placeholder: '请选择到货仓库',
       options: warehouseList.map((it) => {
-        return {
-          value: it,
-          label: it,
-        };
-      }),
-      onUpdateValue: (e: any) => {
-        console.log(e);
-      },
-    },
-  },
-  {
-    field: 'status',
-    component: 'NSelect',
-    label: '状态',
-    componentProps: {
-      placeholder: '状态',
-      options: notifyStatusList.map((it) => {
         return {
           value: it,
           label: it,

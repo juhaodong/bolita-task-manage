@@ -1,57 +1,74 @@
 <template>
   <n-card class="proCard">
-    <template v-if="step == 0">
-      <filter-bar :form-fields="searchSchema" @submit="updateFilter" @clear="updateFilter" />
-      <n-data-table
-        class="mt-4"
-        v-model:checked-row-keys="checkedRowKeys"
-        virtual-scroll
-        max-height="450"
-        v-if="allNotifyDetail.length > 0"
-        :columns="columns"
-        :data="allNotifyDetail"
-      />
-      <n-space v-if="checkedRowKeys.length > 0" class="mt-4" align="center" justify="space-between">
-        <div>已经选择{{ checkedRowKeys.length }}条记录 </div>
-        <n-button @click="confirmSelection" :disabled="checkedRowKeys.length == 0" type="primary"
-          >确定
-        </n-button>
-      </n-space>
-    </template>
-    <template v-else>
-      <n-data-table
-        class="mt-4"
-        v-model:checked-row-keys="checkedRowKeys"
-        virtual-scroll
-        max-height="450"
-        v-if="allNotifyDetail.length > 0"
-        :columns="displayColumns"
-        :data="allNotifyDetail"
-      />
-      <normal-form class="mt-8" :form-fields="addressFormFields" />
-    </template>
+    <loading-frame :loading="loading">
+      <template v-if="step == 0">
+        <filter-bar :form-fields="searchSchema" @submit="updateFilter" @clear="updateFilter" />
+        <n-data-table
+          class="mt-4"
+          v-model:checked-row-keys="checkedRowKeys"
+          virtual-scroll
+          max-height="450"
+          v-if="allNotifyDetail.length > 0"
+          :columns="columns"
+          :data="allNotifyDetail"
+        />
+        <n-space
+          v-if="checkedRowKeys.length > 0"
+          class="mt-4"
+          align="center"
+          justify="space-between"
+        >
+          <div>已经选择{{ checkedRowKeys.length }}条记录 </div>
+          <n-button @click="confirmSelection" :disabled="checkedRowKeys.length == 0" type="primary"
+            >确定
+          </n-button>
+        </n-space>
+      </template>
+      <template v-else>
+        <n-data-table
+          class="mt-4"
+          v-model:checked-row-keys="checkedRowKeys"
+          virtual-scroll
+          max-height="450"
+          v-if="allNotifyDetail.length > 0"
+          :columns="displayColumns"
+          :data="allNotifyDetail"
+        />
+        <normal-form class="mt-8" :form-fields="addressFormFields" @submit="saveOutboundPlan" />
+      </template>
+    </loading-frame>
   </n-card>
 </template>
 <script lang="ts" setup>
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { onMounted, ref } from 'vue';
-  import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { DataTableColumns } from 'naive-ui';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
   import { editableColumn } from '@/views/bolita-views/composable/useableColumns';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { getTargetAddressSelectionGroup } from '@/api/dataLayer/fieldDefination/addressGroup';
-  import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/common';
+  import {
+    asyncCustomerFormField,
+    getFilesUploadFormField,
+  } from '@/api/dataLayer/fieldDefination/common';
+  import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
+  import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+  import { handleRequest } from '@/store/utils/utils';
 
   interface Props {
     model?: any;
   }
 
   defineProps<Props>();
-
-  let customerList = ref<any[]>([]);
+  const emit = defineEmits(['saved']);
+  onMounted(async () => {
+    await init();
+  });
   let allNotifyDetail: any[] = $ref([]);
+  let loading: boolean = $ref(false);
+  const checkedRowKeys = ref([]);
+  let step = $ref(0);
 
   async function updateFilter(filterObj) {
     checkedRowKeys.value = [];
@@ -64,24 +81,24 @@
       });
     }
   }
-
-  const emit = defineEmits(['submit']);
-
   async function init() {
-    customerList.value = (await listUser(PermissionEnums.Customer)).result.map((it) => ({
-      label: it.realName,
-      value: it.id,
-    }));
+    addressFormFields.unshift(await asyncCustomerFormField());
     await updateFilter(null);
   }
-  onMounted(async () => {
-    await init();
-  });
-  const checkedRowKeys = ref([]);
-  let step = $ref(0);
+
   function confirmSelection() {
     allNotifyDetail = allNotifyDetail.filter((it) => checkedRowKeys.value.includes(it.key));
     step = 1;
+  }
+
+  async function saveOutboundPlan(value) {
+    loading = true;
+    value.planList = allNotifyDetail;
+    const res = await OutBoundPlanManager.add(value);
+    await handleRequest(res, () => {
+      emit('saved');
+    });
+    loading = false;
   }
 
   const columns: DataTableColumns<any> = $computed(() => [

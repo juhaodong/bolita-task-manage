@@ -19,7 +19,7 @@ export const columns: DataTableColumns<OutboundPlanModel> = [
   },
   {
     title: '物流方式',
-    key: 'deliveryWay',
+    key: 'deliveryMethod',
   },
   {
     title: '托数',
@@ -41,7 +41,7 @@ export const columns: DataTableColumns<OutboundPlanModel> = [
     title: '收货地址',
     key: 'shippingAddress',
   },
-  timeColumn('createTime', '创建日期'),
+  timeColumn(),
   {
     title: '订车状态',
     key: 'carStatus',
@@ -69,7 +69,7 @@ export const columns: DataTableColumns<OutboundPlanModel> = [
   },
   {
     title: '操作要求',
-    key: 'operateRequired',
+    key: 'operationRequirement',
   },
   {
     title: '交流',
@@ -88,7 +88,7 @@ export type OutboundPlanModel = {
   salesName: string;
   toExamine: string;
   wareHouse: string;
-  deliveryWay: string;
+  deliveryMethod: string;
   trayNum: number;
   containerNum: number;
   targetCountry: string;
@@ -125,10 +125,6 @@ export const filters: FormField[] = [
   {
     label: '出库ID',
     field: 'OutboundId',
-  },
-  {
-    label: '入库ID',
-    field: 'notifyId',
   },
   {
     label: '业务员',

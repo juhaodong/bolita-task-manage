@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { computed, watchEffect } from 'vue';
-  import { getNotifyById } from '@/api/dataLayer/modules/notify/notify-api';
+  import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
   import { getNotifyDetailListByNotify } from '@/api/dataLayer/modules/notify/notify-detail';
   import { safeParseInt } from '@/store/utils/utils';
   import { getDateNow, timeDisplay } from '@/views/bolita-views/composable/useableColumns';
@@ -34,7 +34,7 @@
 
   async function reload() {
     if (props.notifyId != null) {
-      notifyDetail = await getNotifyById(props.notifyId);
+      notifyDetail = await NotifyManager.getById(props.notifyId);
       currentTaskList = await getNotifyDetailListByNotify(props.notifyId);
       emit('refresh');
     }

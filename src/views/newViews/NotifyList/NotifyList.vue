@@ -75,8 +75,7 @@
   import { columns, filters } from './columns';
   import { Box20Filled, Folder32Filled } from '@vicons/fluent';
   import {
-    deleteNotify,
-    getNotifyList,
+    NotifyManager,
     NotifyModel,
     notifyPath,
     NotifyType,
@@ -110,13 +109,7 @@
   }
 
   const loadDataTable = async () => {
-    return (await getNotifyList()).filter((it) => {
-      if (!filterObj) {
-        return it;
-      } else {
-        return Object.keys(filterObj).every((k) => !filterObj[k] || filterObj[k] == it[k]);
-      }
-    });
+    return await NotifyManager.load(filterObj);
   };
 
   const actionRef = ref();
@@ -152,7 +145,7 @@
             popConfirm: {
               title: '是否确定删除此预报？',
               async confirm() {
-                await deleteNotify(record.id);
+                await NotifyManager.remove(record.id);
                 reloadTable();
               },
             },
@@ -163,7 +156,7 @@
             popConfirm: {
               title: '是否确定删除此预报？',
               async confirm() {
-                await deleteNotify(record.id);
+                await NotifyManager.remove(record.id);
                 reloadTable();
               },
             },
