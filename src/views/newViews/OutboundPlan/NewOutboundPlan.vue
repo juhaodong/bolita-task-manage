@@ -42,6 +42,7 @@
   import { editableColumn } from '@/views/bolita-views/composable/useableColumns';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { getTargetAddressSelectionGroup } from '@/api/dataLayer/fieldDefination/addressGroup';
+  import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/common';
 
   interface Props {
     model?: any;
@@ -100,7 +101,6 @@
     editableColumn({ title: '重量', key: 'weightKg' }, allNotifyDetail),
     editableColumn({ title: '体积', key: 'volume' }, allNotifyDetail),
     editableColumn({ title: 'FBA号', key: 'FBANo' }, allNotifyDetail),
-    editableColumn({ title: '操作要求', key: 'operationRequirement' }, allNotifyDetail),
     editableColumn({ title: '备注', key: 'note' }, allNotifyDetail),
   ]);
   const displayColumns: DataTableColumns<any> = $computed(() => [
@@ -120,7 +120,6 @@
     { title: '重量', key: 'weightKg' },
     { title: '体积', key: 'volume' },
     { title: 'FBA号', key: 'FBANo' },
-    { title: '操作要求', key: 'operationRequirement' },
     { title: '备注', key: 'note' },
   ]);
 
@@ -130,7 +129,18 @@
     { label: '货柜号', field: 'containerNo' },
   ];
 
-  const addressFormFields: FormField[] = [...getTargetAddressSelectionGroup()];
+  const addressFormFields: FormField[] = [
+    {
+      field: 'operationRequirement',
+      label: '操作要求',
+      componentProps: {
+        type: 'textarea',
+      },
+      required: true,
+    },
+    getFilesUploadFormField(),
+    ...getTargetAddressSelectionGroup(),
+  ];
 </script>
 
 <style lang="less" scoped></style>
