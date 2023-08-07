@@ -6,7 +6,7 @@
 <script setup lang="ts">
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
-  import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/form-field-sort-label';
+  import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/common';
 
   const schemas: FormField[] = [
     {

@@ -1,7 +1,7 @@
 import { DataTableColumns } from 'naive-ui';
 import { idColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { deliveryMethods } from '@/api/dataLayer/modules/deliveryMethod';
+import { deliveryMethodSelection } from '@/api/dataLayer/fieldDefination/common';
 
 export const columns: DataTableColumns<OutboundPlanModel> = [
   idColumn('出库ID', '/notify/detail'),
@@ -160,23 +160,7 @@ export const filters: FormField[] = [
       clearable: true,
     },
   },
-  {
-    field: 'deliveryMethod',
-    component: 'NSelect',
-    label: '物流渠道',
-    componentProps: {
-      placeholder: '请选择物流渠道',
-      options: deliveryMethods.map((it) => {
-        return {
-          value: it,
-          label: it,
-        };
-      }),
-      onUpdateValue: (e: any) => {
-        console.log(e);
-      },
-    },
-  },
+  ...deliveryMethodSelection,
   {
     label: 'FBACode',
     field: 'FBACode',

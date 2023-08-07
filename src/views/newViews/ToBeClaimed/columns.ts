@@ -6,7 +6,7 @@ import { db, executeQuery, getFileListUrl } from '@/store/plugins/firebase';
 import { resultError, resultSuccess } from '@/store/request/_util';
 import { h } from 'vue';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { deliveryMethods } from '@/api/dataLayer/modules/deliveryMethod';
+import { deliveryMethodSelection } from '@/api/dataLayer/fieldDefination/common';
 
 export const columns: DataTableColumns<ToBeClaimedModel> = [
   timeColumn(),
@@ -103,27 +103,7 @@ export async function loadAllClaim() {
 }
 
 export const filters: FormField[] = [
-  {
-    field: 'deliveryMethod',
-    component: 'NSelect',
-    label: '物流渠道',
-    componentProps: {
-      placeholder: '请选择物流渠道',
-      options: deliveryMethods.map((it) => {
-        return {
-          value: it,
-          label: it,
-        };
-      }),
-      onUpdateValue: (e: any) => {
-        console.log(e);
-      },
-    },
-  },
-  {
-    label: '物流单号',
-    field: 'deliveryId',
-  },
+  ...deliveryMethodSelection,
   {
     label: '认领客户ID',
     field: 'claimCustomId',

@@ -1,5 +1,5 @@
 import { generateOptionFromArray } from '@/store/utils/utils';
-import { DeliveryMethod, outBoundDeliveryMethods } from '@/api/dataLayer/modules/deliveryMethod';
+import { DeliveryMethod, deliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
 export function getFilesUploadFormField(
@@ -19,8 +19,6 @@ export function getFilesUploadFormField(
   };
 }
 
-export const filesUpload: FormField = getFilesUploadFormField();
-
 export function getCheckFormField(warehouseList): FormField[] {
   return [
     {
@@ -36,56 +34,32 @@ export function getCheckFormField(warehouseList): FormField[] {
   ];
 }
 
-export function getDeliveryMethodSelection(useDeliveryCode = false): FormField[] {
+export function getDeliveryMethodSelection(): FormField[] {
   return [
     {
       field: 'deliveryMethod',
       label: '配送方式',
       component: 'NSelect',
       componentProps: {
-        options: generateOptionFromArray(outBoundDeliveryMethods),
+        options: generateOptionFromArray(deliveryMethod),
       },
-      required: false,
     },
     {
       field: 'otherDeliveryName',
       label: '其他配送方式名称',
-      component: 'NInput',
       displayCondition(value) {
         return value.deliveryMethod === DeliveryMethod.Others;
       },
-      required: true,
     },
     {
       field: 'deliveryCode',
       label: '物流单号',
-      component: 'NInput',
-      displayCondition() {
-        return useDeliveryCode;
-      },
-      required: true,
+      required: false,
     },
   ];
 }
 
 export const deliveryMethodSelection: FormField[] = getDeliveryMethodSelection();
-
-export const formFieldSortLabel: FormField = {
-  field: 'sortLabel',
-  label: '分拣ID',
-};
-export const formFieldBoxNo: FormField = {
-  field: 'boxNo',
-  label: '箱号',
-};
-export const formFieldSku: FormField = {
-  field: 'SKU',
-  label: 'SKU',
-};
-export const formFieldContainerNo: FormField = {
-  field: 'containerNo',
-  label: '货柜号',
-};
 
 export function formFieldBuilder() {
   const fieldForm: FormField[] = [];

@@ -6,7 +6,7 @@
   import { Ref, ref, UnwrapRef } from 'vue';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
-  import { getDeliveryMethodSelection } from '@/api/dataLayer/fieldDefination/form-field-sort-label';
+  import { getDeliveryMethodSelection } from '@/api/dataLayer/fieldDefination/common';
 
   let warehouseList: Ref<UnwrapRef<Array<any>>> = ref([]);
   const schemas: FormField[] = [

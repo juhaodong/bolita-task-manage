@@ -2,7 +2,7 @@ import { Component, h } from 'vue';
 import dayjs from 'dayjs';
 import { useUploadDialog } from '@/store/modules/uploadFileState';
 import { RouterLink } from 'vue-router';
-import { NText } from 'naive-ui';
+import { NInput, NText } from 'naive-ui';
 import { generalUpdate } from '@/api/dataLayer/common/GeneralModel';
 
 export const standardDateFormat = 'YYYY-MM-DD/HH:mm';
@@ -134,6 +134,22 @@ export function communicateColumn(keyName = 'createTimestamp', title = '创建�
     render(record) {
       const display = record[keyName] ? dayjs(record[keyName]).format(standardDateFormat) : '-';
       return h('div', display);
+    },
+  };
+}
+
+export function editableColumn(colInfo: { title: string; key: string }, data) {
+  const { title, key } = colInfo;
+  return {
+    title,
+    key,
+    render(row, index) {
+      return h(NInput, {
+        value: row[key],
+        onUpdateValue(v) {
+          data[index][key] = v;
+        },
+      });
     },
   };
 }

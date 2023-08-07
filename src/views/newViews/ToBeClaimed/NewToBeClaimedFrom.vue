@@ -8,8 +8,7 @@
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { ref } from 'vue';
   import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
-  import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/form-field-sort-label';
-  import { outBoundFormField } from '@/api/dataLayer/modules/deliveryMethod';
+  import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/common';
 
   interface Props {
     model?: any;
@@ -28,7 +27,6 @@
 
   init();
   const schemas: FormField[] = [
-    outBoundFormField,
     {
       field: 'deliveryId',
       label: '物流单号',

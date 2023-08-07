@@ -5,13 +5,8 @@ import {
   formFieldFBACodeSelection,
   generateFbaAddress,
 } from '@/api/dataLayer/fieldDefination/FBACode';
-import {
-  AddressType,
-  formFieldAddressTypeSelection,
-} from '@/api/dataLayer/fieldDefination/AddressType';
-import { generateOptionFromArray } from '@/store/utils/utils';
-import { YesOrNo, yesOrNo } from '@/api/dataLayer/modules/operationType';
-import { deliveryMethodSelection } from '@/api/dataLayer/fieldDefination/form-field-sort-label';
+import { deliveryMethodSelection } from '@/api/dataLayer/fieldDefination/common';
+import { DeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 
 export const deliveryAddressDetail: FormField[] = [
   { label: '收件人', field: 'contact' },
@@ -23,17 +18,24 @@ export const deliveryAddressDetail: FormField[] = [
   { label: '州', field: 'state' },
 ];
 
+export function isAmazon(value) {
+  return (
+    value['deliveryMethod'] == DeliveryMethod.AMZ ||
+    value['deliveryMethod'] == DeliveryMethod.TrailAmz
+  );
+}
+
 function getDeliveryAddressDetail(): FormField[] {
   return deliveryAddressDetail.map((it: FormField) => {
     it.displayCondition = (value) => {
-      return value?.addressType && value.addressType != AddressType.AMZ;
+      return value['deliveryMethod'] == DeliveryMethod.Truck;
     };
     it.meta = 'detail';
     return it;
   });
 }
 
-export function getCommonDeliveryField(isAmazon = false): FormField[] {
+export function getCommonDeliveryField(): FormField[] {
   return [
     {
       field: 'deliveryAddress',
@@ -43,7 +45,7 @@ export function getCommonDeliveryField(isAmazon = false): FormField[] {
       },
       required: true,
       disableCondition(model) {
-        return isAmazon || model?.addressType === AddressType.AMZ;
+        return isAmazon(model);
       },
       onFormUpdate(value) {
         if (value?.fbaCode) {
@@ -51,20 +53,10 @@ export function getCommonDeliveryField(isAmazon = false): FormField[] {
         }
       },
       displayCondition(model) {
-        return isAmazon || model?.addressType === AddressType.AMZ;
+        return isAmazon(model);
       },
     },
     ...getDeliveryAddressDetail(),
-    {
-      field: 'needPrice',
-      label: '需要确认报价',
-      component: 'NSelect',
-      componentProps: {
-        options: generateOptionFromArray(yesOrNo),
-      },
-      required: true,
-      defaultValue: YesOrNo.No,
-    },
   ];
 }
 
@@ -72,14 +64,14 @@ export const commonDeliveryFields = getCommonDeliveryField();
 
 export function getTargetAddressSelectionGroup(): FormField[] {
   return [
-    formFieldAddressTypeSelection,
+    ...deliveryMethodSelection,
     formFieldFBACodeSelection,
     formFieldTargetCountrySelection,
     {
       label: '邮编',
       field: 'postCode',
       disableCondition(model) {
-        return model?.addressType === AddressType.AMZ;
+        return isAmazon(model);
       },
       onFormUpdate(value) {
         if (value?.fbaCode) {
@@ -87,19 +79,15 @@ export function getTargetAddressSelectionGroup(): FormField[] {
         }
       },
       displayCondition(model) {
-        return model?.addressType && model?.addressType === AddressType.AMZ;
+        return isAmazon(model);
       },
     },
     {
       label: 'PO',
       field: 'po',
       required: false,
-      displayCondition(model) {
-        return model?.addressType && model?.addressType === AddressType.AMZ;
-      },
     },
     ...getCommonDeliveryField(),
-    ...deliveryMethodSelection,
   ].map((it: FormField) => {
     it.group = '收件人地址信息';
     return it;

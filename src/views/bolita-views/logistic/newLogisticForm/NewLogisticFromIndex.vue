@@ -5,7 +5,6 @@
   import LogisticAmazonForm from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticStep2Form/LogisticAmazonForm.vue';
   import LogisticBoxForm from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticStep2Form/LogisticBoxForm.vue';
   import LogisitcOthersForm from '@/views/bolita-views/logistic/newLogisticForm/NewLogisticStep2Form/LogisitcOthersForm.vue';
-  import { getLogisticTypeByDeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 
   let currentStep = $ref(0);
   let logisticType: LogisticType | null = $ref(null);
@@ -15,7 +14,6 @@
 
   function firstFormResult(result) {
     basicInfo = result;
-    basicInfo.logisticType = getLogisticTypeByDeliveryMethod(basicInfo.deliveryMethod);
     logisticType = basicInfo.logisticType;
     currentStep++;
   }

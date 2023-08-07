@@ -24,11 +24,9 @@ export async function getLogisticList(params) {
 
 export async function changeLogisticStatus(id: string, newStatus: LogisticStatus) {
   try {
-    const currentModel = await getLogisticInfoById(id);
     await setDoc(doc(ref, id), { status: newStatus }, { merge: true });
     await doLog({
       files: [],
-      fromStatus: currentModel.status,
       logRef: id,
       note: '',
       toStatus: newStatus,
@@ -40,7 +38,6 @@ export async function changeLogisticStatus(id: string, newStatus: LogisticStatus
 
 export async function changeLogisticPrice(id: string, price: string) {
   try {
-    const currentModel = await getLogisticInfoById(id);
     await setDoc(
       doc(ref, id),
       { status: LogisticStatus.WaitForPriceConfirm, price },
@@ -48,7 +45,6 @@ export async function changeLogisticPrice(id: string, price: string) {
     );
     await doLog({
       files: [],
-      fromStatus: currentModel.status,
       logRef: id,
       note: '报价变更为' + price,
       toStatus: LogisticStatus.WaitForPriceConfirm,
@@ -86,7 +82,6 @@ export async function submitLogisticFeedBack(id: string, info: LogisticFeedBackD
     );
     await doLog({
       files: feedBackFiles,
-      fromStatus: currentModel.status,
       logRef: id,
       note: '物流人员提交了反馈。',
       toStatus: LogisticStatus.WaitForPriceConfirm,
@@ -122,7 +117,6 @@ export async function sendOutLogistic(
     );
     await doLog({
       files: pickupFile,
-      fromStatus: currentModel.status,
       logRef: id,
       note: '物流已上传提货单。',
       toStatus: LogisticStatus.WaitForPriceConfirm,
@@ -138,7 +132,6 @@ export async function finishLogistic(
   info: { deliveryCompany: string; podFile: UploadFileInfo[] }
 ) {
   try {
-    const currentModel = await getLogisticInfoById(id);
     const podFile = await getFileListUrl(info.podFile);
     await setDoc(
       doc(ref, id),
@@ -151,7 +144,6 @@ export async function finishLogistic(
     );
     await doLog({
       files: podFile,
-      fromStatus: currentModel.status,
       logRef: id,
       note: '物流已上传POD。',
       toStatus: LogisticStatus.WaitForPriceConfirm,
@@ -196,7 +188,6 @@ export async function createLogistic(model: CreateLogisticDTO) {
     const { id } = await addDoc(ref, Object.assign(info, model));
 
     await doLog({
-      fromStatus: '',
       toStatus: LogisticStatus.NotSubmit,
       note: '',
       files: [],

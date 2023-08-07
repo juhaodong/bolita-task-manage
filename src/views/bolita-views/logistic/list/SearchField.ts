@@ -1,7 +1,6 @@
 import { FormSchema } from '@/components/Form';
 import { salesNameList } from '@/api/sales';
 import dayjs from 'dayjs';
-import { deliveryMethods } from '@/api/dataLayer/modules/deliveryMethod';
 import { generateOptionFromArray } from '@/store/utils/utils';
 import { notifyStatusList, notifyType } from '@/api/dataLayer/modules/notify/notify-api';
 import { warehouseList } from '@/api/warehouse';
@@ -32,23 +31,6 @@ export const searchField: FormSchema[] = [
     componentProps: {
       type: 'date',
       clearable: true,
-      onUpdateValue: (e: any) => {
-        console.log(e);
-      },
-    },
-  },
-  {
-    field: 'deliveryMethod',
-    component: 'NSelect',
-    label: '物流渠道',
-    componentProps: {
-      placeholder: '请选择物流渠道',
-      options: deliveryMethods.map((it) => {
-        return {
-          value: it,
-          label: it,
-        };
-      }),
       onUpdateValue: (e: any) => {
         console.log(e);
       },

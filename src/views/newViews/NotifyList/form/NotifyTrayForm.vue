@@ -11,7 +11,7 @@
   import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import { ref } from 'vue';
   import { usePermission } from '@/hooks/web/usePermission';
-  import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/form-field-sort-label';
+  import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/common';
 
   interface Props {
     model?: any;

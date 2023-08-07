@@ -1,6 +1,6 @@
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { AddressType } from '@/api/dataLayer/fieldDefination/AddressType';
 import { fbaDict } from '@/api/dataLayer/fieldDefination/FBACode';
+import { isAmazon } from '@/api/dataLayer/fieldDefination/addressGroup';
 
 export const targetCountry = [
   { name: '奥地利', code: 'AT' },
@@ -49,10 +49,10 @@ export const formFieldTargetCountrySelection: FormField = {
     })),
   },
   disableCondition(model) {
-    return model?.addressType === AddressType.AMZ;
+    return isAmazon(model);
   },
   displayCondition(model) {
-    return !model?.addressType && model?.addressType === AddressType.AMZ;
+    return isAmazon(model);
   },
   onFormUpdate(value) {
     if (value?.fbaCode) {

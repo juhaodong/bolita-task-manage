@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
 
-  import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/form-field-sort-label';
+  import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/common';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
   import AppendFileListDisplay from '@/views/bolita-views/composable/AppendFileListDisplay.vue';
 

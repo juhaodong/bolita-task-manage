@@ -1,6 +1,6 @@
 import { keyBy } from 'lodash-es';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { AddressType } from '@/api/dataLayer/fieldDefination/AddressType';
+import { isAmazon } from '@/api/dataLayer/fieldDefination/addressGroup';
 
 interface FBAAddress {
   code: string;
@@ -9,6 +9,7 @@ interface FBAAddress {
   postCode: string;
   countryCode: string;
 }
+
 export const fbaCode: FBAAddress[] = [
   {
     code: 'CZ-PRG2',
@@ -1093,7 +1094,7 @@ export const formFieldFBACodeSelection: FormField = {
     })),
   },
   displayCondition(value) {
-    return value['addressType'] == AddressType.AMZ;
+    return isAmazon(value);
   },
 };
 
