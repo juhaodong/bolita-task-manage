@@ -32,9 +32,11 @@
         </n-space>
       </template>
     </BasicTable>
-    <n-modal :preset="'dialog'" title="请输入新的库位">
-      <n-input v-model:value="storeAddress" />
-      <n-button type="primary"> 保存 </n-button>
+    <n-modal v-model:show="storeAddressDialog" :preset="'dialog'" title="请输入新的库位">
+      <loading-frame :loading="loading">
+        <n-input class="my-4" placeholder="请输入新的库位" v-model:value="storeAddress" />
+        <n-button @click="realEditStoreAddress" type="primary"> 保存 </n-button>
+      </loading-frame>
     </n-modal>
 
     <n-modal
@@ -58,6 +60,7 @@
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
+  import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
 
   interface Prop {
     notifyId?: string;
@@ -75,6 +78,7 @@
 
   const showModal = ref(false);
   let filterObj: any | null = $ref(null);
+  let loading: boolean = $ref(false);
 
   async function startEdit() {
     const key = checkedRows[0];
@@ -97,6 +101,16 @@
 
   let storeAddress: string = $ref('');
   let storeAddressDialog: boolean = $ref(false);
+
+  async function realEditStoreAddress() {
+    loading = true;
+    for (const it of checkedRows) {
+      await NotifyDetailManager.edit({ storeAddress: storeAddress }, it);
+    }
+    storeAddressDialog = false;
+    reloadTable();
+    loading = false;
+  }
   function startEditStoreAddress() {
     storeAddress = '';
     storeAddressDialog = true;

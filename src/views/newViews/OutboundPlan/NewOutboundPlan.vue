@@ -25,6 +25,7 @@
         </n-space>
       </template>
       <template v-else>
+        <n-button @click="step = 0">返回上一步</n-button>
         <n-data-table
           class="mt-4"
           v-model:checked-row-keys="checkedRowKeys"
