@@ -82,7 +82,7 @@ export const columns: DataTableColumns<OutboundDetailModel> = [
   },
   {
     title: 'FBACode',
-    key: 'FBACode',
+    key: 'fbaCode',
   },
   {
     title: 'PO',
@@ -127,7 +127,7 @@ export type OutboundDetailModel = {
   REF: string;
   ISA: string;
   targetCountry: string;
-  FBACode: string;
+  fbaCode: string;
   PO: string;
   shippingAddress: string;
   logisticsMethods: string;

@@ -55,7 +55,7 @@ export function getDeliveryMethodSelection(): FormField[] {
       },
     },
     {
-      field: 'deliveryCode',
+      field: 'waybillId',
       label: '物流单号',
       required: false,
     },

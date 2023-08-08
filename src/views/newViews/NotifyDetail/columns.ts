@@ -129,7 +129,7 @@ export type NotifyDetailInfoModel = {
   outStatus: string;
   waybillId: number;
   targetCountry: string;
-  FBACode: string;
+  fbaCode: string;
   shippingAddress: string;
   logisticsMethods: string;
   storeAddress: string;
@@ -169,7 +169,7 @@ export const filters: FormField[] = [
   },
   {
     label: 'FBACode',
-    field: 'FBACode',
+    field: 'fbaCode',
   },
   {
     label: '箱号',

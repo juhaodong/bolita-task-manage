@@ -50,7 +50,7 @@ export const columns: DataTableColumns<LogisticsDetailModel> = [
   },
   {
     title: 'FBACode',
-    key: 'FBACode',
+    key: 'fbaCode',
   },
   {
     title: '地址',
@@ -120,7 +120,7 @@ export type LogisticsDetailModel = {
   containerNum: number;
   outStatus: string;
   targetCountry: string;
-  FBACode: string;
+  fbaCode: string;
   address: string;
   reservationOutboundDate: string;
   waybillId: string;
@@ -178,7 +178,7 @@ export const filters: FormField[] = [
     label: 'REF.',
   },
   {
-    field: 'FBACode',
+    field: 'fbaCode',
     label: 'FBACode',
   },
   {

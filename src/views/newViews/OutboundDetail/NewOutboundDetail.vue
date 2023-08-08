@@ -6,50 +6,19 @@
 <script lang="ts" setup>
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
-  import { NotifyModel } from '@/api/notify/notify-api';
-  import { ref } from 'vue';
-  import { usePermission } from '@/hooks/web/usePermission';
-  import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
+  import { sizeFormField } from '@/api/dataLayer/fieldDefination/SizeFormField';
+  import {
+    formatItemAddress,
+    getTargetAddressSelectionGroup,
+  } from '@/api/dataLayer/fieldDefination/addressGroup';
 
   interface Props {
     model?: any;
   }
 
   defineProps<Props>();
-  let task = [];
 
-  let customerList = ref<any[]>([]);
-  const { hasPermission } = usePermission();
-
-  async function init() {
-    customerList.value = (await listUser(PermissionEnums.Customer)).result.map((it) => ({
-      label: it.realName,
-      value: it.id,
-    }));
-  }
-
-  init();
   const schemas: FormField[] = [
-    {
-      field: 'outboundDetailId',
-      label: '明细ID',
-    },
-    {
-      field: 'OutboundId',
-      label: '出库ID',
-    },
-    {
-      field: 'inboundId',
-      label: '入库ID',
-    },
-    {
-      field: 'customerId',
-      label: '客户ID',
-    },
-    {
-      field: 'ticketId',
-      label: '票号',
-    },
     {
       field: 'containerId',
       label: '箱号',
@@ -60,16 +29,13 @@
     },
     {
       field: 'trayNum',
-      label: '托',
+      label: '托数',
     },
     {
       field: 'containerNum',
       label: '数量(箱/件)',
     },
-    {
-      field: 'containerStandards',
-      label: '规格',
-    },
+    ...sizeFormField,
     {
       field: 'weightKg',
       label: '重量kg',
@@ -82,64 +48,17 @@
       field: 'wareHouse',
       label: '仓库',
     },
-    {
-      field: 'checkStatus',
-      label: '审核状态',
-    },
-    {
-      field: 'reservationOutboundDate',
-      label: '预约出库日期',
-    },
-    {
-      field: 'outStatus',
-      label: '出库状态',
-    },
-    {
-      field: 'waybillId',
-      label: '运单号',
-    },
-    {
-      field: 'REF',
-      label: 'REF.',
-    },
-    {
-      field: 'ISA',
-      label: 'ISA',
-    },
-    {
-      field: 'targetCountry',
-      label: '目的国',
-    },
-    {
-      field: 'FBACode',
-      label: 'FBACode',
-    },
-    {
-      field: 'PO',
-      label: 'PO',
-    },
-    {
-      field: 'shippingAddress',
-      label: '收件地址',
-    },
-    {
-      field: 'logisticsMethods',
-      label: '物流方式',
-    },
-    {
-      field: 'storeAddress',
-      label: '库位',
-    },
-    {
-      field: 'storageDays',
-      label: '存放天数',
-    },
-  ];
+    ...getTargetAddressSelectionGroup(),
+  ].map((it) => {
+    it.required = false;
+    return it;
+  });
 
   const emit = defineEmits(['submit']);
 
-  function handleSubmit(values: NotifyModel) {
-    values.taskList = task;
+  function handleSubmit(values: any) {
+    formatItemAddress(values);
+    console.log(values);
     emit('submit', values);
   }
 </script>

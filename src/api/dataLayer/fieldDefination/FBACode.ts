@@ -1098,6 +1098,10 @@ export const formFieldFBACodeSelection: FormField = {
   },
 };
 
+export function getAddressByCode(fbaCode) {
+  return generateFbaAddress(fbaDict[fbaCode]);
+}
+
 export function generateFbaAddress(fbaObj: FBAAddress) {
   return `${fbaObj.address}
 ${fbaObj.state} ${fbaObj.postCode}

@@ -3,10 +3,15 @@ import { formFieldTargetCountrySelection } from '@/api/dataLayer/fieldDefination
 import {
   fbaDict,
   formFieldFBACodeSelection,
-  generateFbaAddress,
+  getAddressByCode,
 } from '@/api/dataLayer/fieldDefination/FBACode';
 import { deliveryMethodSelection } from '@/api/dataLayer/fieldDefination/common';
-import { DeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
+import {
+  boxDeliveryMethod,
+  DeliveryMethod,
+  fbaBasedDeliveryMethod,
+  truckDeliveryMethod,
+} from '@/api/dataLayer/modules/deliveryMethod';
 
 export const deliveryAddressDetail: FormField[] = [
   { label: '收件人', field: 'contact' },
@@ -50,7 +55,7 @@ export function getCommonDeliveryField(): FormField[] {
       },
       onFormUpdate(value) {
         if (value?.fbaCode) {
-          value['deliveryAddress'] = generateFbaAddress(fbaDict[value.fbaCode]);
+          value['deliveryAddress'] = getAddressByCode(value.fbaCode);
         }
       },
       displayCondition(model) {
@@ -80,7 +85,7 @@ export function getTargetAddressSelectionGroup(): FormField[] {
         }
       },
       displayCondition(model) {
-        return isAmazon(model);
+        return truckDeliveryMethod.includes(model?.deliveryMethod);
       },
     },
     {
@@ -95,4 +100,31 @@ export function getTargetAddressSelectionGroup(): FormField[] {
   });
 }
 
-export function generateShippingAddress(item) {}
+export function generateAddress(value: any) {
+  return `${value.street} ${value.houseNo}
+  ${value.appendAddress}
+${value.city} ${value.postCode}
+${value.state}/${value.countryCode}
+`;
+}
+
+export function formatItemAddress(item) {
+  const clean = () => {
+    deliveryAddressDetail.forEach((key) => {
+      item[key.field] = '';
+    });
+  };
+  item.deliveryAddress = '';
+  if (boxDeliveryMethod.includes(item.deliveryMethod)) {
+    clean();
+  } else if (fbaBasedDeliveryMethod.includes(item.deliveryMethod)) {
+    clean();
+    item.deliveryAddress = getAddressByCode(item.fbaCode);
+    item.targetCountry = fbaDict[item.fbaCode].countryCode;
+    item.postCode = fbaDict[item.fbaCode].postCode;
+  } else if (item.deliveryMethod == DeliveryMethod.Truck) {
+    item.deliveryAddress = generateAddress(item);
+  } else {
+    clean();
+  }
+}

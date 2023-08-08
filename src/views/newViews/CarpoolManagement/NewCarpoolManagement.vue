@@ -75,7 +75,7 @@
       label: '目的国',
     },
     {
-      field: 'FBACode',
+      field: 'fbaCode',
       label: 'FBACode',
     },
     {

@@ -79,7 +79,7 @@ export type OutboundPlanModel = {
   trayNum: number;
   containerNum: number;
   targetCountry: string;
-  FBACode: number;
+  fbaCode: number;
   shippingAddress: string;
   createTime: string;
   endTime: string;
@@ -146,7 +146,7 @@ export const filters: FormField[] = [
   ...deliveryMethodSelection,
   {
     label: 'FBACode',
-    field: 'FBACode',
+    field: 'fbaCode',
   },
   {
     label: '结算情况',

@@ -46,7 +46,7 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
   },
   {
     title: 'FBACode',
-    key: 'FBACode',
+    key: 'fbaCode',
   },
   {
     title: '报价',
@@ -71,7 +71,7 @@ export type CarpoolManagementModel = {
   containerNum: string;
   outStatus: string;
   targetCountry: string;
-  FBACode: string;
+  fbaCode: string;
   quotation: string;
   address: number;
   reservationGetProductTime: string;
@@ -119,7 +119,7 @@ export const filters: FormField[] = [
     label: 'REF.',
   },
   {
-    field: 'FBACode',
+    field: 'fbaCode',
     label: 'FBACode',
   },
   {

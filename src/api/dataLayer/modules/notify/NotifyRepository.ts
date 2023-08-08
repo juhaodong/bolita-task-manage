@@ -67,7 +67,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       },
       {
         label: 'FBAcode',
-        field: 'FBACode',
+        field: 'fbaCode',
       },
       {
         label: 'PO',
