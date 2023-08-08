@@ -54,7 +54,7 @@ export const columns: DataTableColumns<LogisticsDetailModel> = [
   },
   {
     title: '地址',
-    key: 'address',
+    key: 'deliveryAddress',
   },
   timeColumn('reservationOutboundDate', '预约取货时间'),
   {

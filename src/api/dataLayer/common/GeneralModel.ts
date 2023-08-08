@@ -10,18 +10,19 @@ import { toastError } from '@/store/utils/utils';
 
 export interface GeneralModel {
   collectionName: string;
+  idPrefix?: string;
   init: (value, ...args) => any;
   afterAddHook?: (id: string, value: any, ...args) => Promise<any>;
   joinManager?: { loader: () => Promise<any[]>; key: string };
 }
 
-export async function getCollectionNextId(collectionName: string) {
+export async function getCollectionNextId(collectionName: string, prefix = '') {
   const currentMaxId = await getDocs(query(collection(db, collectionName)));
-  return (currentMaxId.size + 1).toString().padStart(4, '0');
+  return prefix + (currentMaxId.size + 1).toString().padStart(4, '0');
 }
 
-export async function generalAdd(value: any, collectionName: string) {
-  const id = value?.id ?? (await getCollectionNextId(collectionName));
+export async function generalAdd(value: any, collectionName: string, prefix = '') {
+  const id = value?.id ?? (await getCollectionNextId(collectionName, prefix));
   value.createTimestamp = dayjs().valueOf();
   for (const k of Object.keys(value)) {
     if (value[k] instanceof Array<UploadFileInfo>) {
@@ -70,7 +71,7 @@ export function initModel(g: GeneralModel): Model {
   return {
     async addInternal(value, ...args): Promise<string> {
       const t = await g.init(value, ...args);
-      const id = await generalAdd(t, g.collectionName);
+      const id = await generalAdd(t, g.collectionName, g?.idPrefix);
       if (g.afterAddHook) {
         await g.afterAddHook(id, t, ...args);
       }
