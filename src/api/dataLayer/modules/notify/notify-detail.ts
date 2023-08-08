@@ -37,7 +37,7 @@ export async function getReserveItems(filterObj?: any) {
 
 export const NotifyDetailManager = initModel({
   collectionName: taskListPath,
-  async init(taskInfo, notifyId) {
+  async init(taskInfo, notifyId, customerId) {
     taskInfo.arrivedContainerNum = 0;
     taskInfo.arrivedTrayNum = 0;
     taskInfo.instorageContainerNum = 0;
@@ -46,7 +46,7 @@ export const NotifyDetailManager = initModel({
     taskInfo.arriveTime = 0;
     taskInfo.storagePosition = '';
     taskInfo.notifyId = notifyId;
-    taskInfo.customerId = (await NotifyManager.getById(notifyId)).customerId;
+    taskInfo.customerId = customerId;
     return taskInfo;
   },
   joinManager: {

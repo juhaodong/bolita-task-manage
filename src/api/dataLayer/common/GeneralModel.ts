@@ -1,17 +1,27 @@
 import { Result, resultError, resultSuccess } from '@/store/request/_util';
 import { db, executeQuery, getDocContent, getFileListUrl } from '@/store/plugins/firebase';
-import { collection, deleteDoc, doc, getDocs, orderBy, query, setDoc } from 'firebase/firestore';
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  orderBy,
+  query,
+  setDoc,
+  writeBatch,
+} from 'firebase/firestore';
 import dayjs from 'dayjs';
 import { doLog } from '@/api/dataLayer/modules/statusChangeLog';
 import { keyBy } from 'lodash-es';
 import { UploadFileInfo } from 'naive-ui';
 import { QueryCompositeFilterConstraint, QueryConstraint } from '@firebase/firestore';
-import { toastError } from '@/store/utils/utils';
+import { safeParseInt, toastError } from '@/store/utils/utils';
 
 interface JoinManager {
   loader: () => Promise<any[]>;
   key: string;
 }
+
 export interface GeneralModel {
   collectionName: string;
   idPrefix?: string;
@@ -71,6 +81,26 @@ export function initModel(g: GeneralModel): Model {
       console.error(e);
       return resultError(e?.message);
     }
+  };
+  const massiveAdd = async (list: any[], collectionName: string, prefix = '', ...args) => {
+    let currentMaxId = safeParseInt(await getCollectionNextId(collectionName));
+    const batch = writeBatch(db);
+    const ids: any = [];
+    for (let value of list) {
+      value = await g.init(value, ...args);
+      value.createTimestamp = dayjs().valueOf();
+      for (const k of Object.keys(value)) {
+        if (value[k] instanceof Array<UploadFileInfo>) {
+          value[k] = await getFileListUrl(value[k]);
+        }
+      }
+      console.log(value);
+      ids.push(currentMaxId);
+      batch.set(doc(collection(db, collectionName), prefix + currentMaxId), value);
+      currentMaxId++;
+    }
+    await batch.commit();
+    return ids;
   };
   return {
     async addInternal(value, ...args): Promise<string> {
@@ -133,6 +163,9 @@ export function initModel(g: GeneralModel): Model {
         return await deleteDoc(doc(db, g.collectionName, id));
       });
     },
+    async massiveAdd(list, ...args) {
+      return await massiveAdd(list, g.collectionName, g.idPrefix, ...args);
+    },
   };
 }
 
@@ -144,6 +177,7 @@ export interface Model {
   getById: (id: string) => Promise<any>;
   add: (value, ...args) => Promise<Result<string>>;
   addInternal: (value, ...args) => Promise<string>;
+  massiveAdd: (list: any[], ...args) => Promise<any>;
   remove: (id) => Promise<Result<any>>;
   edit: (value, id: string) => Promise<Result<string>>;
   editInternal: (value, id: string) => Promise<string>;
