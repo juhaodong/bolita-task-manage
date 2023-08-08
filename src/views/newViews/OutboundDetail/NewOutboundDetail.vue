@@ -63,11 +63,13 @@
   const emit = defineEmits(['saved']);
 
   async function handleSubmit(values: any) {
+    loading = true;
     formatItemAddress(values);
-    await safeScope(() => {
-      OutBoundDetailManager.edit(values, prop.model.id);
+    await safeScope(async () => {
+      await OutBoundDetailManager.edit(values, prop.model.id);
       emit('saved', values);
     });
+    loading = false;
   }
 </script>
 

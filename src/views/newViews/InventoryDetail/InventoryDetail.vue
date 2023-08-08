@@ -17,14 +17,6 @@
                 <Box20Filled />
               </n-icon>
             </template>
-            编辑
-          </n-button>
-          <n-button>
-            <template #icon>
-              <n-icon>
-                <Box20Filled />
-              </n-icon>
-            </template>
             导出
           </n-button>
         </n-space>
@@ -35,10 +27,10 @@
       v-model:show="showModal"
       :show-icon="false"
       preset="card"
-      style="width: 90%; min-width: 600px; max-width: 1200px"
+      style="width: 90%; min-width: 600px; max-width: 800px"
       title="新建库存明细"
     >
-      <new-inventory-detail />
+      <new-inventory-detail :model="currentModel" @saved="reloadTable" />
     </n-modal>
   </n-card>
 </template>
@@ -50,8 +42,10 @@
   import { Box20Filled } from '@vicons/fluent';
   import NewInventoryDetail from '@/views/newViews/InventoryDetail/NewInventoryDetail.vue';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import { getReserveItems } from '@/api/dataLayer/modules/notify/notify-detail';
-  import { NotifyManager, NotifyModel } from '@/api/dataLayer/modules/notify/notify-api';
+  import {
+    getReserveItems,
+    NotifyDetailManager,
+  } from '@/api/dataLayer/modules/notify/notify-detail';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { $ref } from 'vue/macros';
 
@@ -60,6 +54,11 @@
     return await getReserveItems(filterObj);
   };
   let filterObj: any | null = $ref(null);
+  let currentModel: any | null = $ref(null);
+  async function startEdit(id) {
+    currentModel = await NotifyDetailManager.getById(id);
+    showModal.value = true;
+  }
 
   function updateFilter(value) {
     filterObj = value;
@@ -70,35 +69,28 @@
 
   function reloadTable() {
     actionRef.value.reload();
+    showModal.value = false;
   }
 
   const actionColumn = reactive({
     title: '动作',
     key: 'action',
     width: 60,
-    render(record: NotifyModel) {
+    render(record: any) {
       return h(TableAction as any, {
         style: 'button',
         actions: [
           {
             label: '修改',
             icon: DocumentEdit16Filled,
-            popConfirm: {
-              title: '是否确定删除此预报？',
-              async confirm() {
-                await NotifyManager.remove(record.id);
-                reloadTable();
-              },
+            onClick() {
+              startEdit(record.id);
             },
           },
         ],
       });
     },
   });
-
-  function addTable() {
-    showModal.value = true;
-  }
 </script>
 
 <style lang="less" scoped></style>
