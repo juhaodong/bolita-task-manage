@@ -79,7 +79,9 @@ export function useColumns(propsRef: ComputedRef<BasicTableProps>) {
             };
           }
         }
+
         column.sorter = 'default';
+
         return column;
       });
   });

@@ -8,12 +8,16 @@ import { UploadFileInfo } from 'naive-ui';
 import { QueryCompositeFilterConstraint, QueryConstraint } from '@firebase/firestore';
 import { toastError } from '@/store/utils/utils';
 
+interface JoinManager {
+  loader: () => Promise<any[]>;
+  key: string;
+}
 export interface GeneralModel {
   collectionName: string;
   idPrefix?: string;
   init: (value, ...args) => any;
   afterAddHook?: (id: string, value: any, ...args) => Promise<any>;
-  joinManager?: { loader: () => Promise<any[]>; key: string };
+  joinManager?: JoinManager;
 }
 
 export async function getCollectionNextId(collectionName: string, prefix = '') {
@@ -95,7 +99,6 @@ export function initModel(g: GeneralModel): Model {
       const info = await getDocContent(doc(db, g.collectionName, id));
       if (g?.joinManager) {
         const dict = keyBy(await g.joinManager?.loader(), 'id');
-        console.log(dict, info[g.joinManager.key]);
         return Object.assign(dict[info[g.joinManager.key]], info);
       }
       return info;
@@ -106,7 +109,7 @@ export function initModel(g: GeneralModel): Model {
         q = query(q, ...extraCondition);
       }
       q = query(q, orderBy('createTimestamp', 'desc'));
-      const list = await executeQuery(q);
+      const list = (await executeQuery(q)).filter((it) => it.createTimestamp);
       if (g?.joinManager) {
         const dict = keyBy(await g.joinManager?.loader(), 'id');
         list.forEach((it, index) => {

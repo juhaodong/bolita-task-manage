@@ -1,7 +1,7 @@
 import { safeParseInt } from '@/store/utils/utils';
 import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
-import { DeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
+import { truckDeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 import { LogisticDetailManager } from '@/api/dataLayer/modules/logistic/logistic';
 
 export async function afterPlanDetailAdded(planDetails, plan) {
@@ -22,14 +22,11 @@ export async function afterPlanDetailAdded(planDetails, plan) {
       },
       detail.originId
     );
-    if (
-      [DeliveryMethod.TrailAmz, DeliveryMethod.Truck, DeliveryMethod.AMZ].includes(
-        plan.deliveryMethod
-      )
-    ) {
+    if (truckDeliveryMethod.includes(plan.deliveryMethod)) {
       const outDetailId = detail.id;
       delete detail.id;
-      await LogisticDetailManager.addInternal(detail, outDetailId);
+      console.log(detail);
+      await LogisticDetailManager.addInternal({}, outDetailId);
     }
   }
 }

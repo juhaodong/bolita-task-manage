@@ -13,7 +13,7 @@ export const columns: DataTableColumns<LogisticsDetailModel> = [
   },
   {
     title: '拼车ID',
-    key: 'carPoolID',
+    key: 'carpoolId',
   },
   timeColumn(),
   {
@@ -62,14 +62,6 @@ export const columns: DataTableColumns<LogisticsDetailModel> = [
     key: 'waybillId',
   },
   {
-    title: 'ISA',
-    key: 'ISA',
-  },
-  {
-    title: 'REF.',
-    key: 'REF',
-  },
-  {
     title: '备注',
     key: 'note',
   },
@@ -77,6 +69,7 @@ export const columns: DataTableColumns<LogisticsDetailModel> = [
     title: '库位',
     key: 'storeAddress',
   },
+  { title: '报价', key: 'price' },
   {
     title: '运输公司',
     key: 'transportationCompany',
@@ -152,10 +145,6 @@ export const filters: FormField[] = [
   {
     label: '运输公司',
     field: 'transportationCompany',
-  },
-  {
-    label: '出库状态',
-    field: 'outStatus',
   },
   {
     label: '仓库',

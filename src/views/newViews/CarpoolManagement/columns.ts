@@ -5,25 +5,9 @@ import { FormField } from '@/views/bolita-views/composable/form-field-type';
 export const columns: DataTableColumns<CarpoolManagementModel> = [
   {
     title: '拼车ID',
-    key: 'carPoolID',
+    key: 'id',
   },
-  {
-    title: '客户ID',
-    key: 'customerId',
-  },
-  {
-    title: '物流ID',
-    key: 'LogisticId',
-  },
-  timeColumn('date', '日期'),
-  {
-    title: '出库明细ID',
-    key: 'outboundDetailId',
-  },
-  {
-    title: '出库ID',
-    key: 'OutboundId',
-  },
+  timeColumn(),
   {
     title: '仓库',
     key: 'warehouseId',
@@ -31,32 +15,38 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
   {
     title: '托盘',
     key: 'trayNum',
+    width: 60,
   },
   {
     title: '箱数',
     key: 'containerNum',
+    width: 60,
   },
   {
-    title: '出库状态',
-    key: 'outStatus',
+    title: 'ISA',
+    key: 'ISA',
   },
   {
-    title: '目的国',
-    key: 'targetCountry',
-  },
-  {
-    title: 'FBACode',
-    key: 'fbaCode',
-  },
-  {
-    title: '报价',
-    key: 'quotation',
-  },
-  {
-    title: '地址',
-    key: 'address',
+    title: 'REF.',
+    key: 'REF',
   },
   timeColumn('reservationGetProductTime', '预约取货日期'),
+  {
+    title: '总报价',
+    key: 'totalPrice',
+  },
+  {
+    title: '运输公司',
+    key: 'deliveryCompany',
+  },
+  {
+    title: '总开销',
+    key: 'totalCost',
+  },
+  {
+    title: '结算情况',
+    key: 'cashStatus',
+  },
 ];
 
 export type CarpoolManagementModel = {

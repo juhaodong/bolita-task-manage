@@ -2,7 +2,7 @@
   <n-card class="proCard">
     <loading-frame :loading="loading">
       <normal-form :default-value-model="model" :form-fields="schemas" @submit="handleSubmit" />
-    </loading-frame>
+
   </n-card>
 </template>
 <script lang="ts" setup>
