@@ -1,6 +1,8 @@
 <template>
   <n-card class="proCard">
-    <normal-form :default-value-model="model" :form-fields="schemas" @submit="handleSubmit" />
+    <loading-frame :loading="loading">
+      <normal-form :default-value-model="model" :form-fields="schemas" @submit="handleSubmit" />
+    </loading-frame>
   </n-card>
 </template>
 <script lang="ts" setup>
@@ -11,12 +13,14 @@
     formatItemAddress,
     getTargetAddressSelectionGroup,
   } from '@/api/dataLayer/fieldDefination/addressGroup';
+  import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
 
   interface Props {
     model?: any;
   }
 
-  defineProps<Props>();
+  let loading: boolean = $ref(false);
+  const prop = defineProps<Props>();
 
   const schemas: FormField[] = [
     {
