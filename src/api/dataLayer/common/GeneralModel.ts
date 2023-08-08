@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import { doLog } from '@/api/dataLayer/modules/statusChangeLog';
 import { keyBy } from 'lodash-es';
 import { UploadFileInfo } from 'naive-ui';
-import { QueryConstraint } from '@firebase/firestore';
+import { QueryCompositeFilterConstraint, QueryConstraint } from '@firebase/firestore';
 
 export interface GeneralModel {
   collectionName: string;
@@ -71,11 +71,15 @@ export function initModel(g: GeneralModel): Model {
         return await this.addInternal(value, ...args);
       });
     },
+    async editInternal(value, id): Promise<string> {
+      return await generalUpdate(value, g.collectionName, id);
+    },
     async edit(value, id): Promise<Result<string>> {
       return await scope(async () => {
-        return await generalUpdate(value, g.collectionName, id);
+        return await this.editInternal(value, id);
       });
     },
+
     async getById(id): Promise<any> {
       const info = await getDocContent(doc(db, g.collectionName, id));
       if (g?.joinManager) {
@@ -118,10 +122,14 @@ export function initModel(g: GeneralModel): Model {
 }
 
 export interface Model {
-  load: (filterObj?: any, ...extraCondition: QueryConstraint[]) => Promise<any[]>;
+  load: (
+    filterObj?: any,
+    ...extraCondition: (QueryConstraint | QueryCompositeFilterConstraint)[]
+  ) => Promise<any[]>;
   getById: (id: string) => Promise<any>;
   add: (value, ...args) => Promise<Result<string>>;
   addInternal: (value, ...args) => Promise<string>;
   remove: (id) => Promise<Result<any>>;
   edit: (value, id: string) => Promise<Result<string>>;
+  editInternal: (value, id: string) => Promise<string>;
 }

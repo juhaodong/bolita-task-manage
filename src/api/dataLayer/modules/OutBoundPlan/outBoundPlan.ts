@@ -14,13 +14,11 @@ export const OutBoundPlanManager = initModel({
     value.carStatus = CarStatus.UnAble;
     value.cashStatus = CashStatus.NotFinish;
     delete value.planList;
-    console.log(value);
     return value;
   },
   async afterAddHook(id, _, planList) {
     for (const plan of planList) {
-      console.log(plan, 'plan');
-      await OutBoundDetailManager.addInternal(plan, id);
+      plan.id = await OutBoundDetailManager.addInternal(plan, id);
     }
   },
   collectionName: outboundPath,

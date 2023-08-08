@@ -46,7 +46,7 @@
   import { onMounted, ref } from 'vue';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { DataTableColumns } from 'naive-ui';
-  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
+  import { getReserveItems } from '@/api/dataLayer/modules/notify/notify-detail';
   import { editableColumn } from '@/views/bolita-views/composable/useableColumns';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { getTargetAddressSelectionGroup } from '@/api/dataLayer/fieldDefination/addressGroup';
@@ -57,7 +57,7 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { handleRequest, safeParseInt, toastError } from '@/store/utils/utils';
-  import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import { afterPlanDetailAdded } from '@/api/dataLayer/modules/OutBoundPlan/outAddHook';
 
   interface Props {
     model?: any;
@@ -78,12 +78,14 @@
     if (!filterObj) {
       allNotifyDetail = [];
     } else {
-      allNotifyDetail = (await NotifyDetailManager.load(filterObj)).map((it) => {
-        it.outBoundTrayNum = it.instorageTrayNum;
-        it.outBoundContainerNum = it.instorageContainerNum;
-        it.originId = it.id;
-        return it;
-      });
+      allNotifyDetail = (await getReserveItems(filterObj))
+        .filter((it) => it.instorageContainerNum > 0 || it.instorageTrayNum > 0)
+        .map((it) => {
+          it.outBoundTrayNum = it.instorageTrayNum;
+          it.outBoundContainerNum = it.instorageContainerNum;
+          it.originId = it.id;
+          return it;
+        });
     }
   }
 
@@ -111,25 +113,7 @@
     loading = true;
     value.planList = allNotifyDetail;
     const res = await OutBoundPlanManager.add(value, allNotifyDetail);
-    for (const detail of allNotifyDetail) {
-      const instorageTrayNum =
-        safeParseInt(detail.instorageTrayNum) - safeParseInt(detail.outBoundTrayNum);
-      const instorageContainerNum =
-        safeParseInt(detail.instorageContainerNum) - safeParseInt(detail.outBoundContainerNum);
-      let status = OutStatus.Partial;
-      if (instorageContainerNum == 0 && instorageTrayNum == 0) {
-        status = OutStatus.All;
-      }
-      console.log(instorageTrayNum, instorageContainerNum, detail);
-      await NotifyDetailManager.edit(
-        {
-          instorageTrayNum,
-          instorageContainerNum,
-          outStatus: status,
-        },
-        detail.originId
-      );
-    }
+    await afterPlanDetailAdded(allNotifyDetail, value);
     await handleRequest(res, () => {
       emit('saved');
     });

@@ -30,6 +30,7 @@ export async function getReserveItems(filterObj?: any) {
   return await NotifyDetailManager.load(
     filterObj,
     orderBy('arriveTime', 'desc'),
+
     where('arriveTime', '!=', 0)
   );
 }

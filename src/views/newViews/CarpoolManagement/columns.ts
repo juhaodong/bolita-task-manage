@@ -60,9 +60,9 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
 ];
 
 export type CarpoolManagementModel = {
-  carPoolID: number;
+  carPoolId: string;
   customerId: string;
-  LogisticId: string;
+  logisticId: string;
   date: string;
   outboundDetailId: number;
   OutboundId: number;
