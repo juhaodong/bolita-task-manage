@@ -221,7 +221,7 @@
         </tr>
       </table>
     </div>
-    <n-space class="mt-4" :wrap-item="false">
+    <n-space v-if="notifyDetail" class="mt-4" :wrap-item="false">
       <n-button v-print="'#print'" type="default">打印</n-button>
       <n-button @click="allArrived" secondary>全部到齐</n-button>
       <div class="flex-grow"></div>
