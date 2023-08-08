@@ -23,7 +23,7 @@
 
   let loading: boolean = $ref(false);
   const prop = defineProps<Props>();
-
+  console.log(prop.model);
   const schemas: FormField[] = [
     {
       field: 'containerId',

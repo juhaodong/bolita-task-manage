@@ -114,14 +114,19 @@ export function formatItemAddress(item) {
       item[key.field] = '';
     });
   };
+  const fbaCode = item.fbaCode;
+  item.fbaCode = '';
   item.deliveryAddress = '';
   if (boxDeliveryMethod.includes(item.deliveryMethod)) {
     clean();
   } else if (fbaBasedDeliveryMethod.includes(item.deliveryMethod)) {
     clean();
-    item.deliveryAddress = getAddressByCode(item.fbaCode);
-    item.targetCountry = fbaDict[item.fbaCode].countryCode;
-    item.postCode = fbaDict[item.fbaCode].postCode;
+    if (fbaDict[fbaCode]) {
+      item.deliveryAddress = getAddressByCode(fbaCode);
+      item.targetCountry = fbaDict[fbaCode].countryCode;
+      item.postCode = fbaDict[fbaCode].postCode;
+      item.fbaCode = fbaCode;
+    }
   } else if (item.deliveryMethod == DeliveryMethod.Truck) {
     item.deliveryAddress = generateAddress(item);
   } else {

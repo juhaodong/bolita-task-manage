@@ -6,6 +6,7 @@
   import { handleRequest } from '@/store/utils/utils';
   import { getNeededColumnByNotifyType } from '@/api/dataLayer/modules/notify/NotifyRepository';
   import readXlsxFile from 'read-excel-file';
+  import { formatItemAddress } from '@/api/dataLayer/fieldDefination/addressGroup';
 
   interface Prop {
     type: NotifyType;
@@ -44,7 +45,10 @@
   async function saveNotify(value: any) {
     startLoading();
     value.notifyType = prop.type;
-    const taskList = await readFile(value.uploadFile[0].file, value.notifyType);
+    const taskList = (await readFile(value.uploadFile[0].file, value.notifyType)).map(
+      formatItemAddress
+    );
+
     delete value.uploadFile;
     const res = await NotifyManager.add(value, taskList);
     await handleRequest(res, async () => {

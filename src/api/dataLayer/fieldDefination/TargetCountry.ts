@@ -56,7 +56,7 @@ export const formFieldTargetCountrySelection: FormField = {
   },
   onFormUpdate(value) {
     if (value?.fbaCode) {
-      value['targetCountry'] = fbaDict[value.fbaCode].countryCode;
+      value['targetCountry'] = fbaDict[value?.fbaCode]?.countryCode;
     }
   },
 };

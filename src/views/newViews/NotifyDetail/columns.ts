@@ -38,14 +38,16 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
     title: '产品SKU',
     key: 'productSKU',
   },
-  {
-    title: '托数',
-    key: 'trayNum',
-  },
-  {
-    title: '箱数',
-    key: 'containerNum',
-  },
+  formatColumn(
+    'trayNum',
+    '托数',
+    (record) => record['instorageTrayNum'] + '/' + safeParseInt(record['trayNum'])
+  ),
+  formatColumn(
+    'containerNum',
+    '箱数',
+    (record) => record['instorageContainerNum'] + '/' + safeParseInt(record['containerNum'])
+  ),
   joinDisplayColumn('containerStandards', '外箱规格', ['length', 'width', 'height'], '*'),
   {
     title: '重量kg',
