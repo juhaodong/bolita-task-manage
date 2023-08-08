@@ -1,28 +1,10 @@
 import { FormSchema } from '@/components/Form';
-import { salesNameList } from '@/api/sales';
+
 import dayjs from 'dayjs';
 import { generateOptionFromArray } from '@/store/utils/utils';
 import { notifyType } from '@/api/dataLayer/modules/notify/notify-api';
-import { warehouseList } from '@/api/warehouse';
 
 export const searchField: FormSchema[] = [
-  {
-    field: 'salesName',
-    component: 'NSelect',
-    label: '负责人',
-    componentProps: {
-      placeholder: '请选择负责人',
-      options: salesNameList.map((it) => {
-        return {
-          value: it,
-          label: it,
-        };
-      }),
-      onUpdateValue: (e: any) => {
-        console.log(e);
-      },
-    },
-  },
   {
     field: 'planArriveDate',
     component: 'NDatePicker',
@@ -55,23 +37,6 @@ export const searchField: FormSchema[] = [
     label: '客户代码',
     componentProps: {
       placeholder: '请输入客户代码',
-    },
-  },
-  {
-    field: 'arriveWarehouseName',
-    component: 'NSelect',
-    label: '到货仓库',
-    componentProps: {
-      placeholder: '请选择到货仓库',
-      options: warehouseList.map((it) => {
-        return {
-          value: it,
-          label: it,
-        };
-      }),
-      onUpdateValue: (e: any) => {
-        console.log(e);
-      },
     },
   },
 ];
