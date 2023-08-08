@@ -3,10 +3,9 @@ import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outB
 
 export const LogisticDetailManager = initModel({
   collectionName: 'logistic',
-  init(value, outBoundDetailId): any {
+  init(value): any {
     value.pickupDate = '';
     value.ISA = '';
-    value.outboundDetailId = outBoundDetailId;
     value.carPoolId = '';
     return value;
   },

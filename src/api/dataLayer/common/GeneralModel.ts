@@ -101,6 +101,7 @@ export function initModel(g: GeneralModel): Model {
     await batch.commit();
     return ids;
   };
+
   return {
     async addInternal(value, ...args): Promise<string> {
       const t = await g.init(value, ...args);
@@ -165,6 +166,15 @@ export function initModel(g: GeneralModel): Model {
     async massiveAdd(list, ...args) {
       return await massiveAdd(list, g.collectionName, g.idPrefix, ...args);
     },
+    async massiveUpdate(listWithId: any[]) {
+      const batch = writeBatch(db);
+      for (const value of listWithId) {
+        const id = value.id;
+        delete value.id;
+        batch.set(doc(collection(db, g.collectionName), id), value);
+      }
+      await batch.commit();
+    },
   };
 }
 
@@ -177,6 +187,7 @@ export interface Model {
   add: (value, ...args) => Promise<Result<string>>;
   addInternal: (value, ...args) => Promise<string>;
   massiveAdd: (list: any[], ...args) => Promise<any>;
+  massiveUpdate: (listWithId: any[]) => Promise<any>;
   remove: (id) => Promise<Result<any>>;
   edit: (value, id: string) => Promise<Result<string>>;
   editInternal: (value, id: string) => Promise<string>;
