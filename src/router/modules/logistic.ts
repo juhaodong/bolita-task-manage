@@ -23,6 +23,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           title: '物流明细',
         },
+        props: (route) => ({ carpoolId: route.query.id }),
         component: () => import('@/views/newViews/LogisticsDetails/LogisticsDetails.vue'),
       },
 

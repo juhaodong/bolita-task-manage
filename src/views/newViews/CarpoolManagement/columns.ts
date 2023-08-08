@@ -1,12 +1,9 @@
 import { DataTableColumns } from 'naive-ui';
-import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { idColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
 export const columns: DataTableColumns<CarpoolManagementModel> = [
-  {
-    title: '拼车ID',
-    key: 'id',
-  },
+  idColumn('拼车ID', '/logistic/logisticDetail'),
   timeColumn(),
   {
     title: '仓库',

@@ -129,7 +129,7 @@ export type LogisticsDetailModel = {
 export const filters: FormField[] = [
   {
     label: '拼车ID',
-    field: 'carPoolID',
+    field: 'carpoolId',
   },
   {
     label: '客户ID',

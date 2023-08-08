@@ -2,6 +2,7 @@
   <n-card :bordered="false" class="proCard">
     <filter-bar
       v-if="finished"
+      :default-value-model="filterObj"
       :form-fields="filters"
       @clear="updateFilter(null)"
       @submit="updateFilter"
