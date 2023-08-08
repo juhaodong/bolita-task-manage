@@ -22,11 +22,11 @@ export const columns: DataTableColumns<InventoryDetailModel> = [
   },
   {
     title: '托',
-    key: 'trayNum',
+    key: 'instorageTrayNum',
   },
   {
     title: '数量',
-    key: 'containerNum',
+    key: 'instorageContainerNum',
   },
   sizeColumn,
   {

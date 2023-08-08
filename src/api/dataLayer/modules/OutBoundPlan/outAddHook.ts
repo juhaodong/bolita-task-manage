@@ -6,10 +6,9 @@ import { LogisticDetailManager } from '@/api/dataLayer/modules/logistic/logistic
 
 export async function afterPlanDetailAdded(planDetails, plan) {
   for (const detail of planDetails) {
-    const instorageTrayNum =
-      safeParseInt(detail.instorageTrayNum) - safeParseInt(detail.outBoundTrayNum);
+    const instorageTrayNum = safeParseInt(detail.instorageTrayNum) - safeParseInt(detail.trayNum);
     const instorageContainerNum =
-      safeParseInt(detail.instorageContainerNum) - safeParseInt(detail.outBoundContainerNum);
+      safeParseInt(detail.instorageContainerNum) - safeParseInt(detail.containerNum);
     let status = OutStatus.Partial;
     if (instorageContainerNum == 0 && instorageTrayNum == 0) {
       status = OutStatus.All;

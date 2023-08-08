@@ -61,16 +61,19 @@
 
   interface Props {
     model?: any;
+    initialKey?: any[];
   }
 
-  defineProps<Props>();
+  const prop = defineProps<Props>();
   const emit = defineEmits(['saved']);
+  const checkedRowKeys = ref<any[]>([]);
   onMounted(async () => {
     await init();
+    checkedRowKeys.value = prop?.initialKey ?? [];
   });
   let allNotifyDetail: any[] = $ref([]);
   let loading: boolean = $ref(false);
-  const checkedRowKeys = ref<any[]>([]);
+
   let step = $ref(0);
 
   async function updateFilter(filterObj) {

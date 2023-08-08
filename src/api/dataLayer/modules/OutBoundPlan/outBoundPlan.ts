@@ -33,11 +33,9 @@ export const OutBoundDetailManager = initModel({
   init(value, outId: string): any {
     value.outId = outId;
     value.checkStatus = CheckStatus.Wait;
-    value.ticketId = value.id;
     delete value.id;
     return value;
   },
-
   joinManager: {
     key: 'outId',
     loader: function () {

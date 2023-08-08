@@ -45,7 +45,7 @@
       style="width: 90%; min-width: 600px; max-width: 1200px"
       title="出库计划"
     >
-      <new-outbound-plan @saved="reloadTable" />
+      <new-outbound-plan :initial-key="checkedRows" @saved="reloadTable" />
     </n-modal>
     <n-modal
       v-model:show="showModal"
@@ -98,6 +98,7 @@
   });
 
   function transferToOutBoundPlan() {
+    console.log(checkedRows);
     showOutBoundPlan = true;
   }
 
@@ -129,6 +130,7 @@
   }
   function reloadTable() {
     actionRef.value.reload();
+    showOutBoundPlan = false;
     showModal.value = false;
     checkedRows = [];
   }
