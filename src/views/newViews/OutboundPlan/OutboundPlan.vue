@@ -8,7 +8,6 @@
       :columns="columns"
       :request="loadDataTable"
       :row-key="(row) => row.id"
-      @update:checked-row-keys="onCheckedRow"
     >
       <template #tableTitle>
         <n-space>

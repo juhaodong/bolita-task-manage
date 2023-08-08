@@ -74,19 +74,14 @@
   let step = $ref(0);
 
   async function updateFilter(filterObj) {
-    checkedRowKeys.value = [];
-    if (!filterObj) {
-      allNotifyDetail = [];
-    } else {
-      allNotifyDetail = (await getReserveItems(filterObj))
-        .filter((it) => it.instorageContainerNum > 0 || it.instorageTrayNum > 0)
-        .map((it) => {
-          it.outBoundTrayNum = it.instorageTrayNum;
-          it.outBoundContainerNum = it.instorageContainerNum;
-          it.originId = it.id;
-          return it;
-        });
-    }
+    allNotifyDetail = (await getReserveItems(filterObj))
+      .filter((it) => it.instorageContainerNum > 0 || it.instorageTrayNum > 0)
+      .map((it) => {
+        it.outBoundTrayNum = it.instorageTrayNum;
+        it.outBoundContainerNum = it.instorageContainerNum;
+        it.originId = it.id;
+        return it;
+      });
   }
 
   async function init() {
@@ -148,8 +143,8 @@
     { title: '票号', key: 'ticketId' },
     { title: '箱号', key: 'containerId' },
     { title: '产品SKU', key: 'productSKU' },
-    { title: '托数', key: 'trayNum' },
-    { title: '箱数', key: 'containerNum' },
+    { title: '托数', key: 'outBoundTrayNum' },
+    { title: '箱数', key: 'outBoundContainerNum' },
     { title: '长', key: 'length' },
     { title: '宽', key: 'width' },
     { title: '高', key: 'height' },

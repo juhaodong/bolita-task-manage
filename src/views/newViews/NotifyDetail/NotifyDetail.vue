@@ -18,11 +18,10 @@
     >
       <template #tableTitle>
         <n-space>
-          <n-button :disabled="checkedRows?.length != 1" @click="startEdit()"> 编辑 </n-button>
           <n-button :disabled="checkedRows?.length == 0" @click="startEditStoreAddress()">
             批量设置库位
           </n-button>
-          <n-button>
+          <n-button @click="transferToOutBoundPlan">
             <template #icon>
               <n-icon>
                 <Box20Filled />
@@ -39,7 +38,15 @@
         <n-button @click="realEditStoreAddress" type="primary"> 保存 </n-button>
       </loading-frame>
     </n-modal>
-
+    <n-modal
+      v-model:show="showOutBoundPlan"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 600px; max-width: 1200px"
+      title="出库计划"
+    >
+      <new-outbound-plan @saved="reloadTable" />
+    </n-modal>
     <n-modal
       v-model:show="showModal"
       :show-icon="false"
@@ -64,6 +71,7 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
 
   interface Prop {
     notifyId?: string;
@@ -72,6 +80,16 @@
   const props = defineProps<Prop>();
   let finished = $ref(false);
   let currentModel: any | null = $ref(null);
+  const showModal = ref(false);
+  let filterObj: any | null = $ref(null);
+  let loading: boolean = $ref(false);
+  let checkedRows = $ref([]);
+  let showOutBoundPlan = $ref(false);
+  const actionRef = ref();
+
+  let storeAddress: string = $ref('');
+  let storeAddressDialog: boolean = $ref(false);
+
   onMounted(() => {
     if (props.notifyId) {
       filterObj = { notifyId: props.notifyId };
@@ -79,9 +97,9 @@
     finished = true;
   });
 
-  const showModal = ref(false);
-  let filterObj: any | null = $ref(null);
-  let loading: boolean = $ref(false);
+  function transferToOutBoundPlan() {
+    showOutBoundPlan = true;
+  }
 
   async function startEdit(id) {
     currentModel = await NotifyDetailManager.getById(id);
@@ -96,13 +114,6 @@
     filterObj = value;
     reloadTable();
   }
-
-  let checkedRows = $ref([]);
-  const actionRef = ref();
-
-  let storeAddress: string = $ref('');
-  let storeAddressDialog: boolean = $ref(false);
-
   async function realEditStoreAddress() {
     loading = true;
     for (const it of checkedRows) {
@@ -133,7 +144,6 @@
             label: '修改',
             icon: DocumentEdit16Filled,
             ifShow() {
-              console.log(record.inStatus);
               return record.inStatus === InBoundStatus.Wait;
             },
             onClick() {

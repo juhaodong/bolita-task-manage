@@ -7,8 +7,8 @@ import { CheckStatus } from '@/views/newViews/OutboundDetail/columns';
 export const outboundPath = 'outbound';
 export const OutBoundPlanManager = initModel({
   init(value): any {
-    value.trayNum = safeSumInt(value.planList, 'trayNum');
-    value.containerNum = safeSumInt(value.planList, 'containerNum');
+    value.trayNum = safeSumInt(value.planList, 'outBoundTrayNum');
+    value.containerNum = safeSumInt(value.planList, 'outBoundContainerNum');
     value.outboundNum = value.trayNum + value.containerNum;
     value.outStatus = OutStatus.WaitForCheck;
     value.carStatus = CarStatus.UnAble;
@@ -18,6 +18,10 @@ export const OutBoundPlanManager = initModel({
   },
   async afterAddHook(id, _, planList) {
     for (const plan of planList) {
+      plan.trayNum = plan.outBoundTrayNum;
+      plan.containerNum = plan.outBoundContainerNum;
+      delete plan.outBoundTrayNum;
+      delete plan.outBoundContainerNum;
       plan.id = await OutBoundDetailManager.addInternal(plan, id);
     }
   },
