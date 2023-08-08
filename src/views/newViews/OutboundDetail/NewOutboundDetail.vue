@@ -2,7 +2,7 @@
   <n-card class="proCard">
     <loading-frame :loading="loading">
       <normal-form :default-value-model="model" :form-fields="schemas" @submit="handleSubmit" />
-
+    </loading-frame>
   </n-card>
 </template>
 <script lang="ts" setup>
@@ -51,8 +51,8 @@
       label: '体积',
     },
     {
-      field: 'wareHouse',
-      label: '仓库',
+      field: 'note',
+      label: '备注',
     },
     ...getTargetAddressSelectionGroup(),
   ].map((it) => {

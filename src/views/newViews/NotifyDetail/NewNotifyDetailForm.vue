@@ -89,8 +89,9 @@
           type: 'textarea',
         },
       },
-      ...getTargetAddressSelectionGroup(),
     ]);
+    builder.setGroup('地址信息');
+    builder.addAll(getTargetAddressSelectionGroup());
   } else {
     builder.addAll([boxDeliveryMethodField, noteFormField]);
   }

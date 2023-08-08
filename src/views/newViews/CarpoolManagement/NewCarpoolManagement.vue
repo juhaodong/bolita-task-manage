@@ -45,7 +45,7 @@
     loading = true;
     await safeScope(async () => {
       await CarpoolManager.editInternal(values, prop.model.id);
-      await updatePickupTime(values.reservationGetProductTime);
+      await updatePickupTime(values.reservationGetProductTime, prop.model.id);
       emit('saved', values);
     });
     loading = false;

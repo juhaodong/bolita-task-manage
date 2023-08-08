@@ -3,7 +3,10 @@ import { safeSumBy, safeSumInt } from '@/store/utils/utils';
 import { CashStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import { LogisticDetailManager } from '@/api/dataLayer/modules/logistic/logistic';
 import { where } from 'firebase/firestore';
-import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+import {
+  OutBoundDetailManager,
+  OutBoundPlanManager,
+} from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
 
 function initCarpool(value, logisticDetailList) {
   value.trayNum = safeSumInt(logisticDetailList, 'trayNum');
@@ -26,7 +29,7 @@ export const CarpoolManager = initModel({
 export async function carpoolSelfCheck(id: string) {
   if (id) {
     const carpool = await CarpoolManager.getById(id);
-    const details = await LogisticDetailManager.load(null, where('carpoolId', '==', 'id'));
+    const details = await LogisticDetailManager.load(null, where('carpoolId', '==', id));
     if (details.length == 0) {
       carpool.createTimestamp = '';
     } else {
@@ -36,14 +39,20 @@ export async function carpoolSelfCheck(id: string) {
   }
 }
 
-export async function updatePickupTime(newTime) {
-  const details = await LogisticDetailManager.load(null, where('carpoolId', '==', 'id'));
+export async function updatePickupTime(newTime: number, id) {
+  const details = await LogisticDetailManager.load(null, where('carpoolId', '==', id));
   for (const detail of details) {
     await LogisticDetailManager.editInternal(
       {
         reservationOutboundDate: newTime,
       },
       detail.id
+    );
+    await OutBoundPlanManager.editInternal(
+      {
+        reservationOutboundDate: newTime,
+      },
+      detail.outId
     );
     await OutBoundDetailManager.editInternal(
       {

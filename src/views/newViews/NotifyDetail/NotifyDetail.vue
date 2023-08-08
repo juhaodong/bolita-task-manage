@@ -12,6 +12,7 @@
       ref="actionRef"
       :columns="columns"
       :request="loadDataTable"
+      :action-column="actionColumn"
       :row-key="(row) => row.id"
       v-model:checked-row-keys="checkedRows"
     >
@@ -52,8 +53,8 @@
 </template>
 
 <script lang="ts" setup>
-  import { onMounted, ref } from 'vue';
-  import { BasicTable } from '@/components/Table';
+  import { h, onMounted, reactive, ref } from 'vue';
+  import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
   import NewNotifyDetailForm from '@/views/newViews/NotifyDetail/NewNotifyDetailForm.vue';
@@ -61,6 +62,8 @@
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
+  import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
+  import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
 
   interface Prop {
     notifyId?: string;
@@ -80,9 +83,8 @@
   let filterObj: any | null = $ref(null);
   let loading: boolean = $ref(false);
 
-  async function startEdit() {
-    const key = checkedRows[0];
-    currentModel = await NotifyDetailManager.getById(key);
+  async function startEdit(id) {
+    currentModel = await NotifyDetailManager.getById(id);
     showModal.value = true;
   }
 
@@ -119,6 +121,29 @@
     showModal.value = false;
     checkedRows = [];
   }
+  const actionColumn = reactive({
+    title: '操作',
+    key: 'action',
+    width: 60,
+    render(record: any) {
+      return h(TableAction as any, {
+        style: 'button',
+        actions: [
+          {
+            label: '修改',
+            icon: DocumentEdit16Filled,
+            ifShow() {
+              console.log(record.inStatus);
+              return record.inStatus === InBoundStatus.Wait;
+            },
+            onClick() {
+              startEdit(record.id);
+            },
+          },
+        ],
+      });
+    },
+  });
 </script>
 
 <style lang="less" scoped></style>
