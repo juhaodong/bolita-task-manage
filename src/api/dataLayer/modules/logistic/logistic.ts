@@ -12,6 +12,6 @@ export const LogisticDetailManager = initModel({
   },
   joinManager: {
     loader: OutBoundDetailManager.load,
-    key: 'outBoundDetailId',
+    key: 'outboundDetailId',
   },
 });

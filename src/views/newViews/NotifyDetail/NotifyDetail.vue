@@ -83,7 +83,6 @@
   async function startEdit() {
     const key = checkedRows[0];
     currentModel = await NotifyDetailManager.getById(key);
-    console.log(currentModel);
     showModal.value = true;
   }
 

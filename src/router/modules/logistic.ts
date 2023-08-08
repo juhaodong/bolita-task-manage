@@ -25,14 +25,7 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('@/views/newViews/LogisticsDetails/LogisticsDetails.vue'),
       },
-      {
-        path: 'logisticService',
-        name: `${name}logisticService`,
-        meta: {
-          title: '物流售后',
-        },
-        component: () => import('@/views/newViews/LogisticsService/LogisticsService.vue'),
-      },
+
       {
         path: 'carpoolManage',
         name: `${name}carpoolManage`,
@@ -40,6 +33,14 @@ const routes: Array<RouteRecordRaw> = [
           title: '拼车管理',
         },
         component: () => import('@/views/newViews/CarpoolManagement/CarpoolManagement.vue'),
+      },
+      {
+        path: 'logisticService',
+        name: `${name}logisticService`,
+        meta: {
+          title: '物流售后',
+        },
+        component: () => import('@/views/newViews/LogisticsService/LogisticsService.vue'),
       },
     ],
   },

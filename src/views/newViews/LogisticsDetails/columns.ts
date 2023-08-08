@@ -56,7 +56,7 @@ export const columns: DataTableColumns<LogisticsDetailModel> = [
     title: '地址',
     key: 'address',
   },
-  timeColumn('reservationGetProductTime', '预约取货时间'),
+  timeColumn('reservationOutboundDate', '预约取货时间'),
   {
     title: '运单号',
     key: 'waybillId',
@@ -122,7 +122,7 @@ export type LogisticsDetailModel = {
   targetCountry: string;
   FBACode: string;
   address: string;
-  reservationGetProductTime: string;
+  reservationOutboundDate: string;
   waybillId: string;
   ISA: string;
   REF: string;
@@ -182,7 +182,7 @@ export const filters: FormField[] = [
     label: 'FBACode',
   },
   {
-    field: 'NotifyStartDateTime',
+    field: 'reservationOutboundDate',
     component: 'NDatePicker',
     label: '预约出库日期',
     componentProps: {

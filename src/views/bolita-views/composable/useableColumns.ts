@@ -61,11 +61,13 @@ const colorfulRender = (text) =>
     'div',
     {
       style: {
+        width: 'min-content',
         fontSize: '14px',
         padding: '2px 4px',
         background: pickColor(text),
         border: '1px solid ' + pickBorderColor(text),
       },
+      class: 'whitespace-nowrap',
     },
     text
   );

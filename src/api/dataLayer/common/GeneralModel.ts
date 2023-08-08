@@ -6,6 +6,7 @@ import { doLog } from '@/api/dataLayer/modules/statusChangeLog';
 import { keyBy } from 'lodash-es';
 import { UploadFileInfo } from 'naive-ui';
 import { QueryCompositeFilterConstraint, QueryConstraint } from '@firebase/firestore';
+import { toastError } from '@/store/utils/utils';
 
 export interface GeneralModel {
   collectionName: string;
@@ -48,6 +49,15 @@ export async function generalUpdate(value: any, collectionName: string, id: stri
   return id;
 }
 
+export async function safeScope(func): Promise<any> {
+  try {
+    return await func();
+  } catch (e: any) {
+    console.error(e);
+    toastError(e?.message);
+  }
+}
+
 export function initModel(g: GeneralModel): Model {
   const scope = async (func) => {
     try {
@@ -84,6 +94,7 @@ export function initModel(g: GeneralModel): Model {
       const info = await getDocContent(doc(db, g.collectionName, id));
       if (g?.joinManager) {
         const dict = keyBy(await g.joinManager?.loader(), 'id');
+        console.log(dict, info[g.joinManager.key]);
         return Object.assign(dict[info[g.joinManager.key]], info);
       }
       return info;
