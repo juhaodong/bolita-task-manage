@@ -94,7 +94,6 @@ export function initModel(g: GeneralModel): Model {
           value[k] = await getFileListUrl(value[k]);
         }
       }
-      console.log(value);
       ids.push(currentMaxId);
       batch.set(doc(collection(db, collectionName), prefix + currentMaxId), value);
       currentMaxId++;

@@ -17,13 +17,10 @@ export const OutBoundPlanManager = initModel({
     return value;
   },
   async afterAddHook(id, _, planList) {
-    for (const plan of planList) {
-      plan.trayNum = plan.outBoundTrayNum;
-      plan.containerNum = plan.outBoundContainerNum;
-      delete plan.outBoundTrayNum;
-      delete plan.outBoundContainerNum;
-      plan.id = await OutBoundDetailManager.addInternal(plan, id);
-    }
+    const ids = await OutBoundDetailManager.massiveAdd(planList, id);
+    planList.map((plan, index) => {
+      plan.id = ids[index];
+    });
   },
   collectionName: outboundPath,
 });
@@ -33,6 +30,10 @@ export const OutBoundDetailManager = initModel({
   init(value, outId: string): any {
     value.outId = outId;
     value.checkStatus = CheckStatus.Wait;
+    value.trayNum = value.outBoundTrayNum;
+    value.containerNum = value.outBoundContainerNum;
+    delete value.outBoundTrayNum;
+    delete value.outBoundContainerNum;
     delete value.id;
     return value;
   },
