@@ -10,6 +10,7 @@
           max-height="450"
           v-if="allNotifyDetail.length > 0"
           :columns="columns"
+          :row-key="(row) => row.id"
           :data="allNotifyDetail"
         />
         <n-space
@@ -55,7 +56,8 @@
   } from '@/api/dataLayer/fieldDefination/common';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
-  import { handleRequest } from '@/store/utils/utils';
+  import { handleRequest, safeParseInt, toastError } from '@/store/utils/utils';
+  import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
 
   interface Props {
     model?: any;
@@ -68,7 +70,7 @@
   });
   let allNotifyDetail: any[] = $ref([]);
   let loading: boolean = $ref(false);
-  const checkedRowKeys = ref([]);
+  const checkedRowKeys = ref<any[]>([]);
   let step = $ref(0);
 
   async function updateFilter(filterObj) {
@@ -77,7 +79,9 @@
       allNotifyDetail = [];
     } else {
       allNotifyDetail = (await NotifyDetailManager.load(filterObj)).map((it) => {
-        it.key = it.notifyId + it.id;
+        it.outBoundTrayNum = it.instorageTrayNum;
+        it.outBoundContainerNum = it.instorageContainerNum;
+        it.originId = it.id;
         return it;
       });
     }
@@ -89,7 +93,17 @@
   }
 
   function confirmSelection() {
-    allNotifyDetail = allNotifyDetail.filter((it) => checkedRowKeys.value.includes(it.key));
+    allNotifyDetail = allNotifyDetail.filter((it: any) => checkedRowKeys.value.includes(it.id));
+    const notEnough = allNotifyDetail.find((it) => {
+      return (
+        safeParseInt(it.outBoundTrayNum) > safeParseInt(it.instorageTrayNum) ||
+        safeParseInt(it.outBoundContainerNum) > safeParseInt(it.instorageContainerNum)
+      );
+    });
+    if (notEnough) {
+      toastError('票号' + notEnough.ticketId + '剩余数量不足');
+      return;
+    }
     step = 1;
   }
 
@@ -97,6 +111,25 @@
     loading = true;
     value.planList = allNotifyDetail;
     const res = await OutBoundPlanManager.add(value, allNotifyDetail);
+    for (const detail of allNotifyDetail) {
+      const instorageTrayNum =
+        safeParseInt(detail.instorageTrayNum) - safeParseInt(detail.outBoundTrayNum);
+      const instorageContainerNum =
+        safeParseInt(detail.instorageContainerNum) - safeParseInt(detail.outBoundContainerNum);
+      let status = OutStatus.Partial;
+      if (instorageContainerNum == 0 && instorageTrayNum == 0) {
+        status = OutStatus.All;
+      }
+      console.log(instorageTrayNum, instorageContainerNum, detail);
+      await NotifyDetailManager.edit(
+        {
+          instorageTrayNum,
+          instorageContainerNum,
+          outStatus: status,
+        },
+        detail.originId
+      );
+    }
     await handleRequest(res, () => {
       emit('saved');
     });
@@ -112,8 +145,8 @@
     { title: '票号', key: 'ticketId' },
     editableColumn({ title: '箱号', key: 'containerId' }, allNotifyDetail),
     editableColumn({ title: '产品SKU', key: 'productSKU' }, allNotifyDetail),
-    editableColumn({ title: '托数', key: 'trayNum' }, allNotifyDetail),
-    editableColumn({ title: '箱数', key: 'containerNum' }, allNotifyDetail),
+    editableColumn({ title: '托数', key: 'outBoundTrayNum' }, allNotifyDetail),
+    editableColumn({ title: '箱数', key: 'outBoundContainerNum' }, allNotifyDetail),
     editableColumn({ title: '长', key: 'length' }, allNotifyDetail),
     editableColumn({ title: '宽', key: 'width' }, allNotifyDetail),
     editableColumn({ title: '高', key: 'height' }, allNotifyDetail),

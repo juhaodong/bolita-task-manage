@@ -53,7 +53,7 @@ export const columns: DataTableColumns<InventoryDetailModel> = [
     title: '库位',
     key: 'storeAddress',
   },
-  timeColumn('warehousingTime', '入库时间'),
+  timeColumn('arriveTime', '入库时间'),
   stayDaysColumn,
 ];
 

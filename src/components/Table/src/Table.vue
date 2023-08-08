@@ -64,7 +64,7 @@
     toRefs,
     unref,
   } from 'vue';
-  import { ColumnHeightOutlined, QuestionCircleOutlined, ReloadOutlined } from '@vicons/antd';
+  import { QuestionCircleOutlined, ReloadOutlined } from '@vicons/antd';
   import { createTableContext } from './hooks/useTableContext';
 
   import ColumnSetting from './components/settings/ColumnSetting.vue';
@@ -103,7 +103,6 @@
   export default defineComponent({
     components: {
       ReloadOutlined,
-      ColumnHeightOutlined,
       ColumnSetting,
       QuestionCircleOutlined,
     },
