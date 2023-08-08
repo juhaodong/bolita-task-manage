@@ -14,6 +14,7 @@
   } from '@/store/utils/utils';
   import { getDateNow, timeDisplay } from '@/views/bolita-views/composable/useableColumns';
   import { ResultEnum } from '@/store/enums/httpEnum';
+  import dayjs from 'dayjs';
 
   console.log(getDateNow, timeDisplay);
 
@@ -58,19 +59,55 @@
   const canConfirm = computed(() => {
     return unloadPerson;
   });
-
+  function allArrived() {
+    currentTaskList.forEach((it) => {
+      it.arrivedTrayNumEdit = it.trayNum;
+      it.arrivedContainerNumEdit = it.containerNum;
+    });
+  }
   function loadAll() {
     currentTaskList.forEach((it) => {
       it.arrivedTrayNumEdit = it.arrivedTrayNum == 0 ? '' : it.arrivedTrayNum;
       it.arrivedContainerNumEdit = it.arrivedContainerNum == 0 ? '' : it.arrivedContainerNum;
     });
   }
-  function compareStatus(currentValue: string, limitValue: number) {
+  function compareStatus(currentValue: string, limitValue: string) {
     if (safeParseInt(currentValue) == safeParseInt(limitValue)) {
       return 'success';
     } else {
       return safeParseInt(currentValue) > safeParseInt(limitValue) ? 'error' : 'warning';
     }
+  }
+  async function confirm() {
+    for (const listElement of currentTaskList) {
+      const editInfo: any = {
+        arrivedTrayNum: listElement.arrivedTrayNumEdit ?? 0,
+        arrivedContainerNum: listElement.arrivedContainerNumEdit ?? 0,
+        note: listElement.note,
+      };
+      editInfo.instorageTrayNum = listElement.arrivedTrayNumEdit ?? 0;
+      editInfo.instorageContainerNum = listElement.arrivedContainerNumEdit ?? 0;
+      editInfo.arriveTime = dayjs().valueOf();
+      const res = await NotifyDetailManager.edit(editInfo, listElement.id);
+      if (res.code != ResultEnum.SUCCESS) {
+        toastError(res.message);
+        break;
+      }
+    }
+    const newInStatus = InBoundStatus.All;
+
+    const res = await NotifyManager.edit(
+      {
+        arrivedCount: totalArrivedTrayCount.value + totalArrivedContainerCount.value,
+        inStatus: newInStatus,
+        totalCount: totalTrayCount.value + totalContainerCount.value,
+      },
+      props.notifyId
+    );
+    await handleRequest(res, () => {
+      toastSuccess('sucees');
+      emit('save');
+    });
   }
   async function save() {
     for (const listElement of currentTaskList) {
@@ -106,6 +143,7 @@
         arrivedCount: totalArrivedTrayCount.value + totalArrivedContainerCount.value,
         inStatus: newInStatus,
         totalCount: totalTrayCount.value + totalContainerCount.value,
+        unloadPerson: unloadPerson,
       },
       props.notifyId
     );
@@ -172,10 +210,8 @@
         </tbody>
       </n-table>
     </div>
-
-    <n-space class="mt-4">
-      <n-button v-print="'#print'" type="default">打印</n-button>
-      <table class="grow" style="width: 400px">
+    <div class="mt-4">
+      <table>
         <tr class="!bg-gray-100" style="height: 32px">
           <td>总计</td>
           <td>预报 托 {{ totalTrayCount }}</td>
@@ -184,9 +220,27 @@
           <td>到达 箱 {{ totalArrivedContainerCount }}</td>
         </tr>
       </table>
-
-      <n-input placeholder="卸柜人员" v-model:value="unloadPerson" />
-      <n-button @click="save" type="primary" :disabled="!canConfirm">确认</n-button>
+    </div>
+    <n-space class="mt-4" :wrap-item="false">
+      <n-button v-print="'#print'" type="default">打印</n-button>
+      <n-button @click="allArrived" secondary>全部到齐</n-button>
+      <div class="flex-grow"></div>
+      <div>
+        <n-input placeholder="卸柜人员" v-model:value="unloadPerson" />
+      </div>
+      <n-button
+        @click="save"
+        type="warning"
+        secondary
+        :disabled="notifyDetail.inStatus === InBoundStatus.All"
+        >保存</n-button
+      >
+      <n-button
+        @click="confirm"
+        type="primary"
+        :disabled="!canConfirm || notifyDetail.inStatus === InBoundStatus.All"
+        >确认全部到货</n-button
+      >
     </n-space>
   </div>
 </template>
