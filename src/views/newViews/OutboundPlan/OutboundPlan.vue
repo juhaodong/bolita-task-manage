@@ -22,7 +22,15 @@
         </n-space>
       </template>
     </BasicTable>
-
+    <n-modal
+      v-model:show="showOperationTable"
+      :show-icon="false"
+      preset="dialog"
+      :title="'出库计划' + currentId"
+      style="width: 90%; min-width: 600px; max-width: 800px"
+    >
+      <out-bound-operation-table @save="reloadTable" :out-id="currentId!" />
+    </n-modal>
     <n-modal
       v-model:show="showModal"
       :show-icon="false"
@@ -42,7 +50,6 @@
   import { Box20Filled, Folder32Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import Delete28Filled from '@vicons/fluent/es/Delete28Filled';
-  import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import { Hammer } from '@vicons/ionicons5';
   import { CurrencyEuro } from '@vicons/carbon';
@@ -53,6 +60,7 @@
     OutBoundPlanManager,
   } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import OutBoundOperationTable from '@/views/newViews/OutboundPlan/dialog/OutBoundOperationTable.vue';
 
   const showModal = ref(false);
   const loadDataTable = async () => {
@@ -81,10 +89,6 @@
         style: 'button',
         actions: [
           {
-            label: '修改',
-            icon: DocumentEdit16Filled,
-          },
-          {
             label: '取消',
             icon: Delete28Filled,
             popConfirm: {
@@ -98,7 +102,7 @@
           fileAction('附件', 'files', Folder32Filled),
           fileAction('CMR', 'CMR'),
           fileAction('POD', 'POD'),
-          fileAction('REF', 'REF'),
+          fileAction('提单', '提单'),
           {
             label: '操作',
             icon: Hammer,

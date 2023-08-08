@@ -4,6 +4,7 @@ import { useUploadDialog } from '@/store/modules/uploadFileState';
 import { RouterLink } from 'vue-router';
 import { NInput, NText } from 'naive-ui';
 import { generalUpdate } from '@/api/dataLayer/common/GeneralModel';
+import { safeParseInt } from '@/store/utils/utils';
 
 export const standardDateFormat = 'YYYY-MM-DD/HH:mm';
 export const dateFormat = 'DD/MM/YYYY';
@@ -208,3 +209,11 @@ export const sizeColumn = joinDisplayColumn(
   ['length', 'width', 'height'],
   '*'
 );
+
+function compareStatus(currentValue: string, limitValue: string) {
+  if (safeParseInt(currentValue) == safeParseInt(limitValue)) {
+    return 'success';
+  } else {
+    return safeParseInt(currentValue) > safeParseInt(limitValue) ? 'error' : 'warning';
+  }
+}

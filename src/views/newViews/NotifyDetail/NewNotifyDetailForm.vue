@@ -9,7 +9,10 @@
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { sizeFormField } from '@/api/dataLayer/fieldDefination/SizeFormField';
-  import { getTargetAddressSelectionGroup } from '@/api/dataLayer/fieldDefination/addressGroup';
+  import {
+    formatItemAddress,
+    getTargetAddressSelectionGroup,
+  } from '@/api/dataLayer/fieldDefination/addressGroup';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
   import { handleRequest } from '@/store/utils/utils';
@@ -70,6 +73,7 @@
       {
         field: 'FBA号',
         label: 'FBANo',
+        required: false,
       },
       {
         field: 'productName',
@@ -102,6 +106,7 @@
 
   async function handleSubmit(values: any) {
     loading = true;
+    formatItemAddress(values);
     const res = await NotifyDetailManager.edit(values, props.model.id);
     await handleRequest(res, () => {
       emit('saved');

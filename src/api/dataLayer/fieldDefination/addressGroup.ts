@@ -132,4 +132,5 @@ export function formatItemAddress(item) {
   } else {
     clean();
   }
+  return item;
 }
