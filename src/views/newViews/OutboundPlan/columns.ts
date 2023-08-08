@@ -31,20 +31,6 @@ export const columns: DataTableColumns<OutboundPlanModel> = [
     key: 'containerNum',
     width: 60,
   },
-  {
-    title: '目的国',
-    key: 'targetCountry',
-    width: 60,
-  },
-  {
-    title: 'FBACode',
-    key: 'fbaCode',
-    width: 60,
-  },
-  {
-    title: '收货地址',
-    key: 'deliveryAddress',
-  },
   timeColumn(),
   {
     title: '订车状态',

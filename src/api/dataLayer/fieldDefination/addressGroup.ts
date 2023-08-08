@@ -94,3 +94,5 @@ export function getTargetAddressSelectionGroup(): FormField[] {
     return it;
   });
 }
+
+export function generateShippingAddress(item) {}

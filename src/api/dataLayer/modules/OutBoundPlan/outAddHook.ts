@@ -22,10 +22,14 @@ export async function afterPlanDetailAdded(planDetails, plan) {
       },
       detail.originId
     );
-    if ([DeliveryMethod.TrailAmz, DeliveryMethod.Truck].includes(plan.deliveryMethod)) {
+    if (
+      [DeliveryMethod.TrailAmz, DeliveryMethod.Truck, DeliveryMethod.AMZ].includes(
+        plan.deliveryMethod
+      )
+    ) {
       const outDetailId = detail.id;
       delete detail.id;
-      const id = await LogisticDetailManager.addInternal(detail, outDetailId);
+      await LogisticDetailManager.addInternal(detail, outDetailId);
     }
   }
 }
