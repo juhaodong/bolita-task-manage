@@ -6,7 +6,7 @@
   import { getCheckFormField } from '@/api/dataLayer/fieldDefination/common';
 
   const checkDialog = useCheckDialog();
-  const field = computed(() => getCheckFormField(checkDialog.warehouses));
+  const field = computed(() => getCheckFormField());
 </script>
 
 <template>

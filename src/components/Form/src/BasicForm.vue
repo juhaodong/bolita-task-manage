@@ -239,10 +239,11 @@
 
       const getSchema = computed((): FormSchema[] => {
         const schemas: FormSchema[] = unref(schemaRef) || (unref(getProps).schemas as any);
-        for (const schema of schemas) {
+        const displaySchemas = (schemas as FormSchema[]).filter(
+          (it) => !it?.displayCondition || it.displayCondition(formModel)
+        );
+        for (const schema of displaySchemas) {
           const { defaultValue } = schema;
-          // handle date type
-          // dateItemType.includes(component as string)
           if (defaultValue) {
             schema.defaultValue = defaultValue;
           }
@@ -250,9 +251,7 @@
             span: 1,
           };
         }
-        return (schemas as FormSchema[]).filter(
-          (it) => !it?.displayCondition || it.displayCondition(formModel)
-        );
+        return displaySchemas;
       });
 
       const groupedSchema = computed(() => {

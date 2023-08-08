@@ -14,6 +14,8 @@
     getTargetAddressSelectionGroup,
   } from '@/api/dataLayer/fieldDefination/addressGroup';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
+  import { safeScope } from '@/api/dataLayer/common/GeneralModel';
+  import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
 
   interface Props {
     model?: any;
@@ -58,12 +60,14 @@
     return it;
   });
 
-  const emit = defineEmits(['submit']);
+  const emit = defineEmits(['saved']);
 
-  function handleSubmit(values: any) {
+  async function handleSubmit(values: any) {
     formatItemAddress(values);
-    console.log(values);
-    emit('submit', values);
+    await safeScope(() => {
+      OutBoundDetailManager.edit(values, prop.model.id);
+      emit('saved', values);
+    });
   }
 </script>
 

@@ -22,16 +22,8 @@ export function getFilesUploadFormField(
   };
 }
 
-export function getCheckFormField(warehouseList): FormField[] {
+export function getCheckFormField(): FormField[] {
   return [
-    {
-      field: 'warehouseId',
-      label: '执行仓库',
-      component: 'NSelect',
-      componentProps: {
-        options: warehouseList,
-      },
-    },
     { field: 'note', label: '备注', required: false },
     getFilesUploadFormField('files', false),
   ];

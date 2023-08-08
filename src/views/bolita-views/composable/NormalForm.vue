@@ -12,7 +12,6 @@
     formFields: FormField[];
     showButtons?: boolean;
     showGroupHeader?: boolean;
-    schemas?: FormSchema[];
     defaultValueModel?: any;
   }
 
@@ -21,19 +20,16 @@
     showGroupHeader: true,
   });
 
-  const schemas = $computed(() => {
-    return [...(props?.schemas ?? []), ...props.formFields.map(convertFormFieldToSchema)].map(
-      (it) => {
-        if (props?.defaultValueModel?.[it.field]) {
-          it.defaultValue = props?.defaultValueModel?.[it.field];
-        }
-        return it;
+  const schemas: FormSchema[] = $computed(() => {
+    return props.formFields.map(convertFormFieldToSchema).map((it) => {
+      if (props?.defaultValueModel?.[it.field]) {
+        it.defaultValue = props?.defaultValueModel?.[it.field];
       }
-    );
+      return it;
+    });
   });
 
   const [register, { submit }] = useForm({
-    gridProps: { cols: schemas.length > 8 ? 2 : 1 },
     labelWidth: 80,
     layout: 'Horizontal',
     submitButtonText: '保存',
@@ -60,7 +56,13 @@
   <BasicForm
     :show-group-header="showGroupHeader"
     ref="form"
+    :show-action-button-group="showButtons"
+    :submit-button-text="'保存'"
+    :schemas="schemas"
+    :label-width="80"
+    :layout="'Horizontal'"
     @register="register"
+    :grid-props="{ cols: schemas.length > 8 ? 2 : 1 }"
     @submit="handleSubmit"
     @reset="handleReset"
   >
