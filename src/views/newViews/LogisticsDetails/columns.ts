@@ -46,6 +46,10 @@ export const columns: DataTableColumns<LogisticsDetailModel> = [
     key: 'targetCountry',
   },
   {
+    title: '邮编',
+    key: 'postCode',
+  },
+  {
     title: 'FBACode',
     key: 'fbaCode',
   },
@@ -61,10 +65,6 @@ export const columns: DataTableColumns<LogisticsDetailModel> = [
   {
     title: '备注',
     key: 'note',
-  },
-  {
-    title: '库位',
-    key: 'storeAddress',
   },
   { title: '报价', key: 'price' },
   {

@@ -1,5 +1,5 @@
 import { DataTableColumns } from 'naive-ui';
-import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { colorColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
 export const columns: DataTableColumns<OutboundDetailModel> = [
@@ -55,10 +55,8 @@ export const columns: DataTableColumns<OutboundDetailModel> = [
     title: '仓库',
     key: 'wareHouse',
   },
-  {
-    title: '审核状态',
-    key: 'checkStatus',
-  },
+  colorColumn('checkStatus', '审核状态', (record) => record['checkStatus']),
+
   timeColumn('reservationOutboundDate', '预约出库日期'),
   {
     title: '出库状态',
