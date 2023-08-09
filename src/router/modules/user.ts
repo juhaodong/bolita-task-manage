@@ -16,13 +16,22 @@ const routes: Array<RouteRecordRaw> = [
     },
     children: [
       {
+        path: 'userManage',
+        name: `userManage`,
+        meta: {
+          title: '用户管理',
+          activeMenu: 'userManage_index',
+        },
+        component: () => import('@/views/newViews/UserManage/UserManage.vue'),
+      },
+      {
         path: 'customer',
         name: `customer`,
         meta: {
           title: '客户管理',
           activeMenu: 'customerManage_index',
         },
-        component: () => import('@/views/bolita-views/user/customerManage/list/CustomerIndex.vue'),
+        component: () => import('@/views/newViews/CustomerManage/CustomerManage.vue'),
       },
       {
         path: 'warehouse',
@@ -31,27 +40,26 @@ const routes: Array<RouteRecordRaw> = [
           title: '仓库管理',
           activeMenu: 'warehouse_index',
         },
-        component: () =>
-          import('@/views/bolita-views/user/warehouseManage/list/WarehouseIndex.vue'),
+        component: () => import('@/views/newViews/InventoryManage/InventoryManage.vue'),
       },
-      {
-        path: 'operator',
-        name: `operator`,
-        meta: {
-          title: '操作员管理',
-          activeMenu: 'salesmanManage_index',
-        },
-        component: () => import('@/views/bolita-views/user/operatorManage/list/OperatorIndex.vue'),
-      },
-      {
-        path: 'sales',
-        name: `sales`,
-        meta: {
-          title: '业务员管理',
-          activeMenu: 'salesmanManage_index',
-        },
-        component: () => import('@/views/bolita-views/user/salesmanManage/list/SalesIndex.vue'),
-      },
+      // {
+      //   path: 'operator',
+      //   name: `operator`,
+      //   meta: {
+      //     title: '操作员管理',
+      //     activeMenu: 'salesmanManage_index',
+      //   },
+      //   component: () => import('@/views/bolita-views/user/operatorManage/list/OperatorIndex.vue'),
+      // },
+      // {
+      //   path: 'sales',
+      //   name: `sales`,
+      //   meta: {
+      //     title: '业务员管理',
+      //     activeMenu: 'salesmanManage_index',
+      //   },
+      //   component: () => import('@/views/bolita-views/user/salesmanManage/list/SalesIndex.vue'),
+      // },
     ],
   },
 ];
