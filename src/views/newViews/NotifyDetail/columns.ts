@@ -41,12 +41,12 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
   formatColumn(
     'trayNum',
     '托数',
-    (record) => record['instorageTrayNum'] + '/' + safeParseInt(record['trayNum'])
+    (record) => record['arrivedTrayNum'] + '/' + safeParseInt(record['trayNum'])
   ),
   formatColumn(
     'containerNum',
     '箱数',
-    (record) => record['instorageContainerNum'] + '/' + safeParseInt(record['containerNum'])
+    (record) => record['arrivedContainerNum'] + '/' + safeParseInt(record['containerNum'])
   ),
   joinDisplayColumn('containerStandards', '外箱规格', ['length', 'width', 'height'], '*'),
   {
@@ -132,6 +132,7 @@ export type NotifyDetailInfoModel = {
   waybillId: number;
   targetCountry: string;
   fbaCode: string;
+
   shippingAddress: string;
   logisticsMethods: string;
   storeAddress: string;
