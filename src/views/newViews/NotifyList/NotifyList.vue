@@ -85,7 +85,6 @@
   import { TruckDelivery } from '@vicons/tabler';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import Delete28Filled from '@vicons/fluent/es/Delete28Filled';
-  import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { Hammer, Home } from '@vicons/ionicons5';
   import { CurrencyEuro } from '@vicons/carbon';
   import NotifyUnloadForm from '@/views/newViews/NotifyList/form/NotifyUnloadForm.vue';
@@ -143,17 +142,6 @@
           {
             label: '删除',
             icon: Delete28Filled,
-            popConfirm: {
-              title: '是否确定删除此预报？',
-              async confirm() {
-                await NotifyManager.remove(record.id);
-                reloadTable();
-              },
-            },
-          },
-          {
-            label: '修改',
-            icon: DocumentEdit16Filled,
             popConfirm: {
               title: '是否确定删除此预报？',
               async confirm() {
