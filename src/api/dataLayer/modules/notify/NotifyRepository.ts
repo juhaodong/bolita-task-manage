@@ -111,7 +111,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       },
     ]);
     builder.add({
-      label: '物流方式',
+      label: '出库方式',
       field: 'logisticsMethods',
     });
     builder.add({

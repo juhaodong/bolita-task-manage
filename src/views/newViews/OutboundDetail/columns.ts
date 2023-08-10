@@ -91,7 +91,7 @@ export const columns: DataTableColumns<OutboundDetailModel> = [
     key: 'deliveryAddress',
   },
   {
-    title: '物流方式',
+    title: '出库方式',
     key: 'deliveryMethod',
   },
   {
@@ -172,7 +172,7 @@ export const filters: FormField[] = [
   },
   {
     field: 'deliveryWay',
-    label: '物流方式',
+    label: '出库方式',
   },
   {
     field: 'NotifyStartDateTime',

@@ -95,7 +95,7 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
     key: 'deliveryAddress',
   },
   {
-    title: '物流方式',
+    title: '出库方式',
     key: 'deliveryMethod',
   },
   {
@@ -200,7 +200,7 @@ export const filters: FormField[] = [
     },
   },
   {
-    label: '物流方式',
+    label: '出库方式',
     field: 'deliveryWay',
   },
 ];

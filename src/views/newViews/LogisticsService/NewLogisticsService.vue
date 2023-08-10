@@ -48,7 +48,7 @@
     },
     {
       field: 'deliveryWay',
-      label: '物流方式',
+      label: '出库方式',
     },
     {
       field: 'deliveryMethod',

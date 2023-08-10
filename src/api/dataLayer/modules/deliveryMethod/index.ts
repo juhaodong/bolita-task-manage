@@ -39,7 +39,7 @@ export const boxDeliveryMethod = Object.values(BoxDeliveryMethod);
 
 export const boxDeliveryMethodField: FormField = {
   field: 'deliveryMethod',
-  label: '配送方式',
+  label: '出库方式',
   component: 'NSelect',
   componentProps: {
     options: generateOptionFromArray(boxDeliveryMethod),

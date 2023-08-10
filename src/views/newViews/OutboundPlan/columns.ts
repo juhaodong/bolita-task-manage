@@ -18,7 +18,7 @@ export const columns: DataTableColumns<OutboundPlanModel> = [
     key: 'wareHouse',
   },
   {
-    title: '物流方式',
+    title: '出库方式',
     key: 'deliveryMethod',
   },
   {

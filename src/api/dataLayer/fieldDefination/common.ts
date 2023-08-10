@@ -33,7 +33,7 @@ export function getDeliveryMethodSelection(): FormField[] {
   return [
     {
       field: 'deliveryMethod',
-      label: '配送方式',
+      label: '出库方式',
       component: 'NSelect',
       componentProps: {
         options: generateOptionFromArray(deliveryMethod),
@@ -41,7 +41,7 @@ export function getDeliveryMethodSelection(): FormField[] {
     },
     {
       field: 'otherDeliveryName',
-      label: '其他配送方式名称',
+      label: '其他出库方式名称',
       displayCondition(value) {
         return value.deliveryMethod === DeliveryMethod.Others;
       },
