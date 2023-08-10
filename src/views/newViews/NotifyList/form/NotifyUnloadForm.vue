@@ -191,7 +191,7 @@
           </thead>
           <tbody v-if="currentTaskList">
             <tr :key="item.id" v-for="item in currentTaskList">
-              <td>{{ item.id }}</td>
+              <td>{{ item?.ticketId }}</td>
               <td>{{ item?.trayNum ?? 0 }}</td>
               <td>{{ item?.containerNum ?? 0 }}</td>
               <td>

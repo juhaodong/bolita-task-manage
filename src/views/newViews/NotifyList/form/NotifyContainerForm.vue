@@ -99,6 +99,7 @@
     {
       field: 'trayCount',
       label: '托数',
+      required: false,
     },
     {
       field: 'boxCount',
@@ -107,6 +108,7 @@
     {
       field: 'totalWeight',
       label: '总重量',
+      required: false,
     },
     getFilesUploadFormField('uploadFile', true, () => {
       window.open(
