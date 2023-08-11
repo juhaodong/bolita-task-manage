@@ -65,7 +65,7 @@
         },
       },
     },
-    getFilesUploadFormField('uploadFile', true, () => {
+    getFilesUploadFormField('uploadFile', false, () => {
       window.open(
         'https://firebasestorage.googleapis.com/' +
           'v0/b/bolita-task-manage.appspot.com/o/' +
