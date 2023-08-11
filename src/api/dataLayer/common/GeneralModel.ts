@@ -8,6 +8,7 @@ import {
   orderBy,
   query,
   setDoc,
+  where,
   writeBatch,
 } from 'firebase/firestore';
 import dayjs from 'dayjs';
@@ -35,14 +36,20 @@ export async function getCollectionNextId(collectionName: string, prefix = '') {
   return prefix + (currentMaxId.size + 1).toString().padStart(4, '0');
 }
 
-export async function generalAdd(value: any, collectionName: string, prefix = '') {
-  const id = value?.id ?? (await getCollectionNextId(collectionName, prefix));
+async function generalInit(value) {
   value.createTimestamp = dayjs().valueOf();
+  value.deleteAt = 0;
   for (const k of Object.keys(value)) {
     if (value[k] instanceof Array<UploadFileInfo>) {
       value[k] = await getFileListUrl(value[k]);
     }
   }
+  return value;
+}
+
+export async function generalAdd(value: any, collectionName: string, prefix = '') {
+  const id = value?.id ?? (await getCollectionNextId(collectionName, prefix));
+  await generalInit(value);
   await setDoc(doc(collection(db, collectionName), id), value);
   await doLog({
     toStatus: '创建',
@@ -88,12 +95,7 @@ export function initModel(g: GeneralModel): Model {
     const ids: any = [];
     for (let value of list) {
       value = await g.init(value, ...args);
-      value.createTimestamp = dayjs().valueOf();
-      for (const k of Object.keys(value)) {
-        if (value[k] instanceof Array<UploadFileInfo>) {
-          value[k] = await getFileListUrl(value[k]);
-        }
-      }
+      await generalInit(value);
       ids.push(currentMaxId);
       batch.set(doc(collection(db, collectionName), prefix + currentMaxId), value);
       currentMaxId++;
@@ -138,7 +140,7 @@ export function initModel(g: GeneralModel): Model {
       if (extraCondition) {
         q = query(q, ...extraCondition);
       }
-      q = query(q, orderBy('createTimestamp', 'desc'));
+      q = query(q, orderBy('createTimestamp', 'desc'), where('deletedAt', '==', 0));
       const list = (await executeQuery(q)).filter((it) => it.createTimestamp);
       if (g?.joinManager) {
         const dict = keyBy(await g.joinManager?.loader(), 'id');
