@@ -1,7 +1,7 @@
 import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
 import { renderIcon } from '@/store/utils';
-import { BellOutlined } from '@vicons/antd';
+import { CheckSquareOutlined } from '@vicons/antd';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -12,7 +12,7 @@ const routes: Array<RouteRecordRaw> = [
       title: '结算管理',
       sort: 2,
       isRoot: true,
-      icon: renderIcon(BellOutlined),
+      icon: renderIcon(CheckSquareOutlined),
     },
     children: [
       {
@@ -23,6 +23,24 @@ const routes: Array<RouteRecordRaw> = [
           activeMenu: 'settlement_index',
         },
         component: () => import('@/views/newViews/SettlementManage/SettlementManage.vue'),
+      },
+      {
+        path: 'reconciliation',
+        name: `reconciliation`,
+        meta: {
+          title: '对账管理',
+          activeMenu: 'reconciliation',
+        },
+        component: () => import('@/views/newViews/ReconciliationManage/ReconciliationManage.vue'),
+      },
+      {
+        path: 'tray',
+        name: `tray`,
+        meta: {
+          title: '托盘管理',
+          activeMenu: 'tray',
+        },
+        component: () => import('@/views/newViews/TrayManage/TrayManage.vue'),
       },
     ],
   },

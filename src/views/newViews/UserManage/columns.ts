@@ -53,3 +53,12 @@ export type UserModel = {
   password: string;
   creatTime: string;
 };
+
+export enum UserType {
+  manager = '管理',
+  warehouse = '仓库',
+  customer = '客户',
+  operator = '操作员',
+  salesName = '业务员',
+  settlement = '结算',
+}

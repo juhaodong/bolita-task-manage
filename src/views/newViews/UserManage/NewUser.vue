@@ -12,6 +12,8 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+  import { generateOptionFromArray } from '@/store/utils/utils';
+  import { UserType } from '@/views/newViews/UserManage/columns';
 
   interface Props {
     model?: any;
@@ -40,6 +42,10 @@
     {
       label: '用户类型',
       field: 'userType',
+      component: 'NSelect',
+      componentProps: {
+        options: generateOptionFromArray(Object.values(UserType)),
+      },
     },
     {
       label: '操作',
