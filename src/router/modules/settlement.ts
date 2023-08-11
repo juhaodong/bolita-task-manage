@@ -10,7 +10,7 @@ const routes: Array<RouteRecordRaw> = [
     component: Layout,
     meta: {
       title: '结算管理',
-      sort: 2,
+      sort: 8,
       isRoot: true,
       icon: renderIcon(CheckSquareOutlined),
     },
