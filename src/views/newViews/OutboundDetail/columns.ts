@@ -87,7 +87,7 @@ export const columns: DataTableColumns<OutboundDetailModel> = [
     key: 'PO',
   },
   {
-    title: '收件地址',
+    title: '收货地址',
     key: 'deliveryAddress',
   },
   {

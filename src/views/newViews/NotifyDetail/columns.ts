@@ -91,7 +91,7 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
     key: 'PO',
   },
   {
-    title: '收件地址',
+    title: '收货地址',
     key: 'deliveryAddress',
   },
   {

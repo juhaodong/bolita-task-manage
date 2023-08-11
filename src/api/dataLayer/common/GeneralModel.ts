@@ -38,7 +38,7 @@ export async function getCollectionNextId(collectionName: string, prefix = '') {
 
 async function generalInit(value) {
   value.createTimestamp = dayjs().valueOf();
-  value.deleteAt = 0;
+  value.deletedAt = 0;
   for (const k of Object.keys(value)) {
     if (value[k] instanceof Array<UploadFileInfo>) {
       value[k] = await getFileListUrl(value[k]);
