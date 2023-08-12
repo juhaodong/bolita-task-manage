@@ -1,10 +1,11 @@
 import { DataTableColumns } from 'naive-ui';
 import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
 export const columns: DataTableColumns<CustomerModel> = [
   {
     title: '客户ID',
-    key: 'customerId',
+    key: 'id',
   },
   {
     title: '客户名称',
@@ -63,3 +64,9 @@ export type CustomerModel = {
   note: string;
   creatTime: string;
 };
+export const filters: FormField[] = [
+  {
+    label: '客户ID',
+    field: 'id',
+  },
+];

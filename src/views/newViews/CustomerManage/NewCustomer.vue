@@ -41,10 +41,6 @@
       label: '所属业务员',
       field: 'belongSalesName',
     },
-    // {
-    //   label: '操作',
-    //   field: 'action',
-    // },
     {
       label: '子客户ID',
       field: 'childrenCustomerId',

@@ -8,10 +8,9 @@
 <script lang="ts" setup>
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
-  import { formatItemAddress } from '@/api/dataLayer/fieldDefination/addressGroup';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+  import { InventoryManager } from '@/api/dataLayer/modules/user/user';
 
   interface Props {
     model?: any;
@@ -19,12 +18,7 @@
 
   let loading: boolean = $ref(false);
   const prop = defineProps<Props>();
-  console.log(prop.model);
   const schemas: FormField[] = [
-    {
-      label: '仓库ID',
-      field: 'warehouseId',
-    },
     {
       label: '公司名称',
       field: 'companyName',
@@ -32,22 +26,22 @@
     {
       label: '国家',
       field: 'country',
+      required: false,
     },
     {
       label: '地址',
       field: 'address',
+      required: false,
     },
     {
       label: '面积',
       field: 'area',
+      required: false,
     },
-    // {
-    //   label: '操作',
-    //   field: 'action',
-    // },
     {
       label: '结算方式',
       field: 'settlementMethod',
+      required: false,
     },
     {
       label: '所属操作员',
@@ -60,14 +54,17 @@
     {
       label: '使用系统',
       field: 'useSystem',
+      required: false,
     },
     {
       label: '快递账号',
       field: 'courierAccount',
+      required: false,
     },
     {
       label: '备注',
       field: 'note',
+      required: false,
     },
   ];
 
@@ -75,9 +72,12 @@
 
   async function handleSubmit(values: any) {
     loading = true;
-    formatItemAddress(values);
     await safeScope(async () => {
-      await OutBoundDetailManager.edit(values, prop.model.id);
+      if (prop?.model?.id) {
+        await InventoryManager.editInternal(values, prop.model.id);
+      } else {
+        await InventoryManager.addInternal(values);
+      }
       emit('saved', values);
     });
     loading = false;

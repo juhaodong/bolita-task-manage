@@ -7,7 +7,7 @@
       @clear="updateFilter(null)"
       @submit="updateFilter"
     >
-      <n-button @click="showAdd">新建用户</n-button>
+      <n-button @click="showAdd">新建仓库</n-button>
     </filter-bar>
     <div class="my-2"></div>
     <BasicTable
@@ -24,9 +24,9 @@
       :show-icon="false"
       preset="card"
       style="width: 90%; min-width: 600px; max-width: 600px"
-      title="新建/编辑用户"
+      title="新建/编辑仓库"
     >
-      <new-user :model="currentModel" @saved="reloadTable" />
+      <new-inventory :model="currentModel" @saved="reloadTable" />
     </n-modal>
   </n-card>
 </template>
@@ -38,8 +38,8 @@
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
-  import { UserManager } from '@/api/dataLayer/modules/user/user';
-  import NewUser from '@/views/newViews/UserManage/NewUser.vue';
+  import { InventoryManager } from '@/api/dataLayer/modules/user/user';
+  import NewInventory from '@/views/newViews/InventoryManage/NewInventory.vue';
 
   interface Prop {
     outId?: string;
@@ -58,12 +58,12 @@
   let currentModel: any | null = $ref(null);
 
   async function startEdit(id) {
-    currentModel = await UserManager.getById(id);
+    currentModel = await InventoryManager.getById(id);
     showModal.value = true;
   }
 
   const loadDataTable = async () => {
-    return await UserManager.load(filterObj);
+    return await InventoryManager.load(filterObj);
   };
 
   let filterObj: any | null = $ref(null);

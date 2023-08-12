@@ -1,10 +1,11 @@
 import { DataTableColumns } from 'naive-ui';
 import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
 export const columns: DataTableColumns<InventoryManage> = [
   {
     title: '仓库ID',
-    key: 'warehouseId',
+    key: 'id',
   },
   {
     title: '公司名称',
@@ -51,6 +52,13 @@ export const columns: DataTableColumns<InventoryManage> = [
     key: 'note',
   },
   timeColumn('creatTime', '创建日期'),
+];
+
+export const filters: FormField[] = [
+  {
+    label: '仓库ID',
+    field: 'id',
+  },
 ];
 
 export type InventoryManage = {
