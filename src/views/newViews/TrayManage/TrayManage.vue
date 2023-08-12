@@ -40,7 +40,7 @@
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { orderBy, where } from 'firebase/firestore';
-  import NewTray from '@/views/newViews/TrayManage/NewTray.vue';
+  import NewTray from '@/views/newViews/TrayManage/TrayForm.vue';
 
   interface Prop {
     outId?: string;
