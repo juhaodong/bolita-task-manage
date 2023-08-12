@@ -76,7 +76,9 @@
   function reloadTable() {
     actionRef.value.reload();
     showModal.value = false;
+    showOperationTable = false;
   }
+
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',

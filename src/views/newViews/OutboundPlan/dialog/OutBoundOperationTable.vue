@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { reactive, watchEffect } from 'vue';
+  import { computed, reactive, watchEffect } from 'vue';
   import {
     editableColumn,
     getDateNow,
@@ -15,6 +15,10 @@
     operationInfos,
     OperationType,
   } from '@/api/dataLayer/modules/OutBoundPlan/outboundOperations';
+  import { cloneDeep } from 'lodash-es';
+  import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import { safeScope } from '@/api/dataLayer/common/GeneralModel';
+  import { safeParseInt, safeSumInt } from '@/store/utils/utils';
 
   console.log(getDateNow, timeDisplay);
 
@@ -24,7 +28,7 @@
 
   const props = defineProps<Props>();
   let outDetail: any | null = $ref(null);
-  const extraInfo = reactive({
+  const defaultExtraInfo = {
     containerNo: '',
     oldLabel: '',
     newLabel: '',
@@ -33,7 +37,8 @@
     wasteNote: '',
     loadCount: '',
     operationPerson: '',
-  });
+  };
+  const extraInfo = reactive(defaultExtraInfo);
   let currentDetailList: any[] = $ref([]);
 
   const emit = defineEmits(['close', 'refresh', 'save']);
@@ -41,22 +46,56 @@
     await reload();
   });
 
-  const normalOperationInfos = operationInfos.filter((it) => it.category == OperationType.Normal);
-  const specialOperationInfos = operationInfos.filter((it) => it.category == OperationType.Special);
-  const wasteOperationInfos = operationInfos.filter((it) => it.category == OperationType.Waste);
+  const normalOperationInfos = computed(() => {
+    return localOperationInfo.filter((it) => it.category == OperationType.Normal);
+  });
+  const specialOperationInfos = computed(() => {
+    return localOperationInfo.filter((it) => it.category == OperationType.Special);
+  });
+  const wasteOperationInfos = computed(() => {
+    return localOperationInfo.filter((it) => it.category == OperationType.Waste);
+  });
+  const localOperationInfo = reactive(cloneDeep(operationInfos));
 
   async function reload() {
     if (props.outId != null) {
       outDetail = await OutBoundPlanManager.getById(props.outId);
       currentDetailList = await OutBoundDetailManager.load(null, where('outId', '==', props.outId));
-      operationInfos.forEach((it) => {
-        it.amount = '';
-      });
+      localOperationInfo.length = 0;
+      localOperationInfo.push(...cloneDeep(outDetail?.operationInfo ?? operationInfos));
+      Object.assign(extraInfo, cloneDeep(outDetail?.extraInfo ?? defaultExtraInfo));
       emit('refresh');
     }
   }
 
-  async function save() {}
+  async function save() {
+    const completeNumber = safeSumInt(currentDetailList, 'completeNum');
+    const editValue = {
+      operationInfo: localOperationInfo,
+      extraInfo: extraInfo,
+      outStatus: OutStatus.Wait,
+    };
+    if (completeNumber > 0) {
+      editValue.outStatus = OutStatus.Partial;
+      const targetNumber = safeParseInt(outDetail?.outboundNum);
+      if (completeNumber >= targetNumber) {
+        editValue.outStatus = OutStatus.All;
+      }
+    }
+    await safeScope(async () => {
+      await OutBoundPlanManager.edit(editValue, props.outId);
+      await OutBoundDetailManager.massiveUpdate(
+        currentDetailList.map((it) => {
+          return {
+            id: it.id,
+            completeNum: it.completeNum,
+            note: it.note,
+          };
+        })
+      );
+      emit('save');
+    });
+  }
 
   const columns: DataTableColumns<any> = $computed(() => [
     { title: '客户ID', key: 'customerId' },
@@ -110,13 +149,13 @@
           <n-input placeholder="" v-model:value="extraInfo.newLabel" />
         </div>
       </n-descriptions-item>
-      <n-descriptions-item label="操作" content-style="width:100px"> 数量 </n-descriptions-item>
+      <n-descriptions-item label="操作" content-style="width:100px"> 数量</n-descriptions-item>
       <n-descriptions-item v-for="item in normalOperationInfos" :key="item.name" :label="item.name">
         <div>
           <n-input placeholder="" v-model:value="item.amount" />
         </div>
       </n-descriptions-item>
-      <n-descriptions-item label="特殊操作" content-style="width:60px"> 数量 </n-descriptions-item>
+      <n-descriptions-item label="特殊操作" content-style="width:60px"> 数量</n-descriptions-item>
       <n-descriptions-item
         v-for="item in specialOperationInfos"
         :key="item.name"
@@ -126,7 +165,7 @@
           <n-input placeholder="" v-model:value="item.amount" />
         </div>
       </n-descriptions-item>
-      <n-descriptions-item label="耗材" content-style="width:60px"> 数量 </n-descriptions-item>
+      <n-descriptions-item label="耗材" content-style="width:60px"> 数量</n-descriptions-item>
       <n-descriptions-item v-for="item in wasteOperationInfos" :key="item.name" :label="item.name">
         <div>
           <n-input placeholder="" v-model:value="item.amount" />
@@ -153,7 +192,7 @@
       <div>
         <n-input placeholder="操作人:" v-model:value="extraInfo.operationPerson" />
       </div>
-      <n-button @click="save" type="warning" secondary>确认 </n-button>
+      <n-button @click="save" type="warning" secondary>确认</n-button>
     </n-space>
   </div>
 </template>

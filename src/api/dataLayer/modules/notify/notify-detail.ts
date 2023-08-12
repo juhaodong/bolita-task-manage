@@ -1,8 +1,7 @@
 import { orderBy, where } from 'firebase/firestore';
-import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
+import { NotifyManager, taskListPath } from '@/api/dataLayer/modules/notify/notify-api';
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 
-export const taskListPath = 'taskList';
 export type NotifyDetailModel = {
   arrivedCount: number;
   sortCode: string;

@@ -2,7 +2,6 @@ import {
   getNotifyDetailListByNotify,
   NotifyDetailManager,
   NotifyDetailModel,
-  taskListPath,
 } from '@/api/dataLayer/modules/notify/notify-detail';
 import { BasicModel } from '@/api/dataLayer/fieldDefination/BasicModel';
 import { safeParseInt, safeSumInt } from '@/store/utils/utils';
@@ -21,7 +20,7 @@ export interface NotifyModel extends BasicModel {
   status: string;
   taskList: NotifyDetailModel[];
 }
-
+export const taskListPath = 'taskList';
 export const notifyPath = 'notify';
 export const NotifyManager = initModel({
   collectionName: notifyPath,
