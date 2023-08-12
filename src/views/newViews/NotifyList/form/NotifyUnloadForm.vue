@@ -23,6 +23,10 @@
     notifyId: string;
   }
 
+  const canEdit = $computed(() => {
+    return notifyDetail?.inStatus !== InBoundStatus.All;
+  });
+
   const props = defineProps<Props>();
   let notifyDetail: any | null = $ref(null);
   let currentTaskList: any[] = $ref([]);
@@ -51,6 +55,8 @@
       notifyDetail = await NotifyManager.getById(props.notifyId);
       currentTaskList = await getNotifyDetailListByNotify(props.notifyId);
       emit('refresh');
+      console.log(notifyDetail.unloadPerson);
+      unloadPerson = notifyDetail?.unloadPerson ?? '';
       loadAll();
     }
   }
@@ -58,20 +64,23 @@
   let unloadPerson: string = $ref('');
 
   const canConfirm = computed(() => {
-    return unloadPerson;
+    return unloadPerson && canEdit;
   });
+
   function allArrived() {
     currentTaskList.forEach((it) => {
       it.arrivedTrayNumEdit = it.trayNum;
       it.arrivedContainerNumEdit = it.containerNum;
     });
   }
+
   function loadAll() {
     currentTaskList.forEach((it) => {
       it.arrivedTrayNumEdit = it.arrivedTrayNum == 0 ? '' : it.arrivedTrayNum;
       it.arrivedContainerNumEdit = it.arrivedContainerNum == 0 ? '' : it.arrivedContainerNum;
     });
   }
+
   function compareStatus(currentValue: string, limitValue: string) {
     if (safeParseInt(currentValue) == safeParseInt(limitValue)) {
       return 'success';
@@ -79,7 +88,9 @@
       return safeParseInt(currentValue) > safeParseInt(limitValue) ? 'error' : 'warning';
     }
   }
+
   let loading: boolean = $ref(false);
+
   async function confirm() {
     loading = true;
     for (const listElement of currentTaskList) {
@@ -104,6 +115,7 @@
         arrivedCount: totalArrivedTrayCount.value + totalArrivedContainerCount.value,
         inStatus: newInStatus,
         totalCount: totalTrayCount.value + totalContainerCount.value,
+        unloadPerson: unloadPerson,
       },
       props.notifyId
     );
@@ -113,6 +125,7 @@
     });
     loading = false;
   }
+
   async function save() {
     loading = true;
     for (const listElement of currentTaskList) {
@@ -198,12 +211,14 @@
                 <n-input
                   v-model:value="item.arrivedTrayNumEdit"
                   placeholder=""
+                  :disabled="!canEdit"
                   :status="compareStatus(item.arrivedTrayNumEdit, item.trayNum)"
                   @focus="item.arrivedTrayNumEdit = ''"
                 />
               </td>
               <td>
                 <n-input
+                  :disabled="!canEdit"
                   :status="compareStatus(item.arrivedContainerNumEdit, item.containerNum)"
                   @focus="item.arrivedContainerNumEdit = ''"
                   v-model:value="item.arrivedContainerNumEdit"
@@ -211,7 +226,7 @@
                 />
               </td>
               <td>
-                <n-input v-model:value="item.note" placeholder="" />
+                <n-input v-model:value="item.note" :disabled="!canEdit" placeholder="" />
               </td>
             </tr>
           </tbody>
@@ -235,19 +250,8 @@
         <div>
           <n-input placeholder="卸柜人员" v-model:value="unloadPerson" />
         </div>
-        <n-button
-          @click="save"
-          type="warning"
-          secondary
-          :disabled="notifyDetail.inStatus === InBoundStatus.All"
-          >保存</n-button
-        >
-        <n-button
-          @click="confirm"
-          type="primary"
-          :disabled="!canConfirm || notifyDetail.inStatus === InBoundStatus.All"
-          >确认全部到货</n-button
-        >
+        <n-button @click="save" type="warning" secondary :disabled="!canEdit">保存</n-button>
+        <n-button @click="confirm" type="primary" :disabled="!canConfirm">确认全部到货</n-button>
       </n-space>
     </loading-frame>
   </div>
