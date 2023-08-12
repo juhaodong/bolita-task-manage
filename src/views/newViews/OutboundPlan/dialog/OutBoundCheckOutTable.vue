@@ -73,7 +73,7 @@
       await saveCash(
         {
           customerId: outDetail?.customerId,
-          containerNo: outDetail?.containerNo,
+          containerNo: outDetail?.containerNo ?? '',
           operationId: props.outId,
           operationType: OperationType.Out,
           amount: summary.value.sum,
@@ -97,7 +97,7 @@
       editValue.cashId = await saveCash(
         {
           customerId: outDetail?.customerId,
-          containerNo: outDetail?.containerNo,
+          containerNo: outDetail?.containerNo ?? '',
           operationId: props.outId,
           operationType: OperationType.Out,
           amount: summary.value.sum,

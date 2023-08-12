@@ -1,5 +1,5 @@
 import { DataTableColumns } from 'naive-ui';
-import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
@@ -37,10 +37,10 @@ export const columns: DataTableColumns = [
     title: '操作ID',
     key: 'operationId',
   },
-  {
+  statusColumnEasy({
     title: '操作类型',
     key: 'operationType',
-  },
+  }),
   {
     title: '其他费用',
     key: 'otherPrice',
