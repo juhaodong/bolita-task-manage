@@ -28,12 +28,8 @@
       label: '备注',
     },
     {
-      field: 'billNumber',
-      label: '账单号',
-    },
-    {
-      field: 'priceNetto',
-      label: '价格netto',
+      field: 'settlementPrice',
+      label: '结算金额',
     },
     {
       field: 'specialCharges',
@@ -41,15 +37,7 @@
     },
     {
       field: 'cashNote',
-      label: '备注',
-    },
-    {
-      field: 'settlementPrice',
-      label: '结算金额',
-    },
-    {
-      field: 'settlementSituation',
-      label: '结算情况',
+      label: '结算备注',
     },
   ].map((it: FormField) => {
     it.required = false;

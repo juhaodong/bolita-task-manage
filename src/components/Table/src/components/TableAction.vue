@@ -15,7 +15,7 @@
                   text
                   secondary
                   v-bind="action"
-                  :type="(action.highlight ? action.highlight() : false) ? 'warning' : 'default'"
+                  :type="action.highlight ? action.highlight() : 'default'"
                 >
                   <template v-if="action.icon">
                     <n-icon :component="action.icon" />
@@ -35,7 +35,7 @@
               v-else
               secondary
               v-bind="action"
-              :type="(action.highlight ? action.highlight() : false) ? 'success' : 'default'"
+              :type="action.highlight ? action.highlight() : 'default'"
             >
               <template v-if="action.icon">
                 <n-icon :component="action.icon" />

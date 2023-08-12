@@ -1,8 +1,13 @@
 import { DataTableColumns } from 'naive-ui';
-import { idColumn, statusColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import {
+  idColumn,
+  statusColumn,
+  statusColumnEasy,
+  timeColumn,
+} from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
-export const columns: DataTableColumns<LogisticsDetailModel> = [
+export const columns: DataTableColumns = [
   {
     title: '物流ID',
     key: 'id',
@@ -34,10 +39,10 @@ export const columns: DataTableColumns<LogisticsDetailModel> = [
     title: '箱数',
     key: 'containerNum',
   },
-  {
+  statusColumnEasy({
     title: '出库状态',
     key: 'outStatus',
-  },
+  }),
   {
     title: '目的国',
     key: 'targetCountry',
@@ -74,7 +79,7 @@ export const columns: DataTableColumns<LogisticsDetailModel> = [
   },
   {
     title: '价格netto',
-    key: 'priceNetto',
+    key: 'totalCost',
   },
   {
     title: '特殊收费',
@@ -88,40 +93,8 @@ export const columns: DataTableColumns<LogisticsDetailModel> = [
     title: '结算金额',
     key: 'settlementPrice',
   },
-  {
-    title: '结算情况',
-    key: 'settlementSituation',
-  },
+  statusColumn('结算状态', 'cashStatus'),
 ];
-
-export type LogisticsDetailModel = {
-  LogisticId: number;
-  customerId: number;
-  carPoolID: number;
-  date: string;
-  outboundDetailId: number;
-  OutboundId: number;
-  warehouseId: number;
-  getProductWarehouse: string;
-  trayNum: number;
-  containerNum: number;
-  outStatus: string;
-  targetCountry: string;
-  fbaCode: string;
-  address: string;
-  reservationOutboundDate: string;
-  waybillId: string;
-  ISA: string;
-  REF: string;
-  note: string;
-  storeAddress: string;
-  transportationCompany: string;
-  billNumber: string;
-  priceNetto: string;
-  specialCharges: string;
-  settlementPrice: string;
-  settlementSituation: string;
-};
 
 export const filters: FormField[] = [
   {

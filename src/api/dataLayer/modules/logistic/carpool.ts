@@ -1,6 +1,5 @@
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 import { safeSumBy, safeSumInt } from '@/store/utils/utils';
-import { CashStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import { LogisticDetailManager } from '@/api/dataLayer/modules/logistic/logistic';
 import { where } from 'firebase/firestore';
 import {
@@ -12,7 +11,6 @@ function initCarpool(value, logisticDetailList) {
   value.trayNum = safeSumInt(logisticDetailList, 'trayNum');
   value.containerNum = safeSumInt(logisticDetailList, 'containerNum');
   value.totalPrice = safeSumBy(logisticDetailList, 'price');
-  value.cashStatus = CashStatus.NotFinish;
   value.totalCost = value?.totalCost ?? 0;
   return value;
 }

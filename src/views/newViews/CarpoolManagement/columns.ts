@@ -27,6 +27,7 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
     title: 'REF.',
     key: 'REF',
   },
+
   timeColumn('reservationGetProductTime', '预约取货日期'),
   {
     title: '总报价',
@@ -39,10 +40,6 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
   {
     title: '总开销',
     key: 'totalCost',
-  },
-  {
-    title: '结算情况',
-    key: 'cashStatus',
   },
 ];
 

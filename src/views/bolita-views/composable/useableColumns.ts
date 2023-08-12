@@ -57,6 +57,10 @@ export function statusColumn(title = '状态', key = 'status') {
   };
 }
 
+export function statusColumnEasy(params: { title: string; key: string }) {
+  return statusColumn(params.title, params.key);
+}
+
 const colorfulRender = (text) =>
   text
     ? h(
@@ -206,11 +210,11 @@ export function getFileActionButton(
     label,
     icon: icon ?? null,
     highlight: () => {
-      return record?.[key]?.length > 0;
+      return record?.[key]?.length > 0 ? 'success' : 'default';
     },
     async onClick() {
       const upload = useUploadDialog();
-      const files = await upload.upload(record[key], null, editable);
+      const files = await upload.upload(record[key], undefined, editable);
       if (files.checkPassed) {
         const obj = {};
         obj[key] = files.files;

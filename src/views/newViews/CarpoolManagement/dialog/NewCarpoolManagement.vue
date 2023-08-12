@@ -25,6 +25,14 @@
       field: 'ISA',
       label: 'ISA',
     },
+    {
+      field: 'totalCost',
+      label: '订车价格',
+    },
+    {
+      field: 'billNumber',
+      label: '账单号',
+    },
     getDatePickerFormField('reservationGetProductTime', '预约取货时间'),
     {
       field: 'REF',

@@ -106,7 +106,6 @@
           :justify="isInline ? 'end' : 'start'"
           :style="{ 'margin-left': `${isInline ? 12 : getProps.labelWidth}px` }"
         >
-          <slot></slot>
           <n-button
             v-if="getProps.showActionButtonGroup && getProps.showSubmitButton"
             v-bind="getSubmitBtnOptions"
@@ -120,6 +119,7 @@
             @click="resetFields"
             >{{ getProps.resetButtonText }}
           </n-button>
+          <slot></slot>
           <n-button
             type="primary"
             text

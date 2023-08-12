@@ -13,6 +13,15 @@
     </BasicTable>
 
     <n-modal
+      v-model:show="paymentDialogShow"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 600px; max-width: 600px"
+      title="费用支付情况管理"
+    >
+      <car-payment-dialog :model="currentModel" @saved="reloadTable" />
+    </n-modal>
+    <n-modal
       v-model:show="showModal"
       :show-icon="false"
       preset="card"
@@ -36,15 +45,16 @@
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { CurrencyEuro } from '@vicons/carbon';
+  import CarPaymentDialog from '@/views/newViews/CarpoolManagement/dialog/CarPaymentDialog.vue';
 
   const showModal = ref(false);
 
   let filterObj: any | null = $ref(null);
   let currentModel: any | null = $ref(null);
+  let paymentDialogShow: boolean = $ref(false);
   const loadDataTable = async () => {
     return await CarpoolManager.load(filterObj);
   };
-
   const actionRef = ref();
 
   function updateFilter(value) {
@@ -55,13 +65,16 @@
   function reloadTable() {
     actionRef.value.reload();
     showModal.value = false;
+    paymentDialogShow = false;
   }
   async function startEdit(id) {
     currentModel = await CarpoolManager.getById(id);
     showModal.value = true;
   }
-  function addTable() {
-    showModal.value = true;
+
+  async function doPayment(id) {
+    currentModel = await CarpoolManager.getById(id);
+    paymentDialogShow = true;
   }
 
   const actionColumn = reactive({
@@ -88,7 +101,18 @@
           {
             label: '费用',
             icon: CurrencyEuro,
-            onClick() {},
+            highlight: () => {
+              if (record?.paymentSubmit) {
+                return 'success';
+              } else if (record?.billedCompany) {
+                return 'warning';
+              } else {
+                return 'error';
+              }
+            },
+            onClick() {
+              doPayment(record.id);
+            },
           },
         ],
       });

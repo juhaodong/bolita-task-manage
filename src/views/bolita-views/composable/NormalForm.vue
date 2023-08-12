@@ -29,13 +29,7 @@
     });
   });
 
-  const [register, { submit }] = useForm({
-    labelWidth: 80,
-    layout: 'Horizontal',
-    submitButtonText: '保存',
-    showActionButtonGroup: props.showButtons,
-    schemas,
-  });
+  const [register, { submit }] = useForm({});
   const emit = defineEmits(['submit', 'cancel']);
 
   function handleSubmit(values: Recordable) {
@@ -59,9 +53,9 @@
     :show-action-button-group="showButtons"
     :submit-button-text="'保存'"
     :schemas="schemas"
+    @register="register"
     :label-width="80"
     :layout="'Horizontal'"
-    @register="register"
     :grid-props="{ cols: schemas.length > 8 ? 2 : 1 }"
     @submit="handleSubmit"
     @reset="handleReset"
@@ -69,9 +63,9 @@
     <template #extra>
       <slot></slot>
     </template>
-    <slot name="extraContent"></slot>
     <slot name="extraSubmitButton" :submit="submit"></slot>
     <slot name="extraCancelButton" :cancel="cancel"></slot>
+    <slot name="extraContent"></slot>
   </BasicForm>
 </template>
 

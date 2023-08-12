@@ -28,7 +28,7 @@ export const useUploadDialog = defineStore('uploadFileDialog', {
       title = '请选择要上传的文件',
       editable = true
     ): Promise<UploadResult> {
-      this.title = title;
+      this.title = title ?? '请选择要上传的文件';
       this.editable = editable;
       this.currentFileUrls = currentFileUrls;
       this.show = true;

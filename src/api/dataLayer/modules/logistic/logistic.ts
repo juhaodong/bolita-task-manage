@@ -1,5 +1,6 @@
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+import { CashStatus } from '@/api/dataLayer/modules/notify/notify-api';
 
 export const logisticPath = 'logistic';
 export const LogisticDetailManager = initModel({
@@ -8,6 +9,7 @@ export const LogisticDetailManager = initModel({
     value.pickupDate = '';
     value.ISA = '';
     value.carPoolId = '';
+    value.cashStatus = CashStatus.NotFinish;
     return value;
   },
   joinManager: {
