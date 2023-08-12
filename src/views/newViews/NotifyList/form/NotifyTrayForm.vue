@@ -18,14 +18,17 @@
 <script setup lang="ts">
   import dayjs from 'dayjs';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
-  import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
   import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import { reactive, ref } from 'vue';
   import { usePermission } from '@/hooks/web/usePermission';
-  import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/common';
+  import {
+    asyncCustomerFormField,
+    getFilesUploadFormField,
+  } from '@/api/dataLayer/fieldDefination/common';
   import { getNeededColumnByNotifyType } from '@/api/dataLayer/modules/notify/NotifyRepository';
   import { editableColumn } from '@/views/bolita-views/composable/useableColumns';
+  import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 
   interface Props {
     model?: any;
@@ -51,18 +54,8 @@
   }
 
   init();
-  const schemas: FormField[] = [
-    {
-      field: 'customerId',
-      label: '客户',
-      component: 'NSelect',
-      componentProps: {
-        options: customerList,
-      },
-      displayCondition() {
-        return !hasPermission([PermissionEnums.Customer]);
-      },
-    },
+  const schemas: FormFields = [
+    asyncCustomerFormField(),
     {
       field: 'planArriveDateTime',
       component: 'NDatePicker',
