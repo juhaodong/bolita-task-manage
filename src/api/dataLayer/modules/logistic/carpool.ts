@@ -24,6 +24,14 @@ export const CarpoolManager = initModel({
   init(value, logisticDetailList): any {
     return initCarpool(value, logisticDetailList);
   },
+  async afterEditHook(id, value) {
+    if (value.reservationGetProductTime) {
+      await updatePickupInfo(
+        { reservationOutboundDate: value.reservationGetProductTime, ...value },
+        id
+      );
+    }
+  },
 });
 
 export async function carpoolSelfCheck(id: string) {

@@ -33,6 +33,7 @@ export interface GeneralModel {
   idPrefix?: string;
   init: (value, ...args) => any;
   afterAddHook?: (id: string, value: any, ...args) => Promise<any>;
+  afterEditHook?: (id: string, value: any, ...args) => Promise<any>;
   joinManager?: JoinManager;
   cascadeManager?: CascadeManager;
 }
@@ -131,7 +132,11 @@ export function initModel(g: GeneralModel): Model {
       });
     },
     async editInternal(value, id): Promise<string> {
-      return await generalUpdate(value, g.collectionName, id);
+      const res = await generalUpdate(value, g.collectionName, id);
+      if (g.afterEditHook) {
+        await g.afterEditHook(id, value);
+      }
+      return res;
     },
     async edit(value, id): Promise<Result<string>> {
       return await scope(async () => {
@@ -194,7 +199,6 @@ export function initModel(g: GeneralModel): Model {
       for (const value of listWithId) {
         const id = value.id.toString();
         delete value.id;
-        console.log(value);
         batch.set(doc(collection(db, g.collectionName), id), value, { merge: true });
       }
       await batch.commit();

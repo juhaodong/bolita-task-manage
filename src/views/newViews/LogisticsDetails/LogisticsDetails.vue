@@ -69,11 +69,7 @@
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { LogisticDetailManager } from '@/api/dataLayer/modules/logistic/logistic';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import {
-    CarpoolManager,
-    carpoolSelfCheck,
-    updatePickupInfo,
-  } from '@/api/dataLayer/modules/logistic/carpool';
+  import { CarpoolManager, carpoolSelfCheck } from '@/api/dataLayer/modules/logistic/carpool';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/NewCarpoolManagement.vue';
 
   interface Prop {
@@ -134,23 +130,11 @@
         await LogisticDetailManager.editInternal(
           {
             carpoolId: id,
-            reservationOutboundDate: value.reservationGetProductTime,
-            deliveryCompany: value.deliveryCompany,
           },
           checkedRow
         );
       }
       await CarpoolManager.editInternal(value, id);
-      await updatePickupInfo(
-        {
-          reservationOutboundDate: value.reservationGetProductTime,
-          deliveryCompany: value.deliveryCompany,
-          ISA: value.ISA,
-          REF: value.REF,
-        },
-        id
-      );
-
       reloadTable();
       checkedRows = [];
     });
