@@ -39,6 +39,7 @@ export interface CashDTO {
   operationType: OperationType;
   amount: string;
   note?: string;
+  cashStatus?: CashStatus;
 }
 
 export async function addCash(cash: CashDTO) {

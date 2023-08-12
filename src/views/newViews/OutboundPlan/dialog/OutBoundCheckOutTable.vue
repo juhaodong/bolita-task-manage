@@ -20,6 +20,7 @@
   import { CashStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { safeParseFloat, safeParseInt, safeSumInt } from '@/store/utils/utils';
+  import { OperationType, saveCash } from '@/api/dataLayer/modules/cash/cash';
 
   console.log(getDateNow, timeDisplay);
 
@@ -69,6 +70,17 @@
       cashStatus: CashStatus.Done,
     };
     await safeScope(async () => {
+      await saveCash(
+        {
+          containerNo: outDetail?.containerNo,
+          operationId: props.outId,
+          operationType: OperationType.Out,
+          amount: extraInfo.finalPrice,
+          note: extraInfo.explain,
+          cashStatus: CashStatus.Done,
+        },
+        outDetail?.cashId
+      );
       await OutBoundPlanManager.edit(editValue, props.outId);
       emit('save');
     });
@@ -81,6 +93,16 @@
     };
 
     await safeScope(async () => {
+      await saveCash(
+        {
+          containerNo: outDetail?.containerNo,
+          operationId: props.outId,
+          operationType: OperationType.Out,
+          amount: extraInfo.finalPrice,
+          note: extraInfo.explain,
+        },
+        outDetail?.cashId
+      );
       await OutBoundPlanManager.edit(editValue, props.outId);
       emit('save');
     });

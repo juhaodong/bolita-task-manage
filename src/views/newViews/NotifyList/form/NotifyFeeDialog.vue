@@ -65,6 +65,7 @@
           operationType: OperationType.In,
           amount: extraInfo.finalPrice,
           note: extraInfo.explain,
+          cashStatus: CashStatus.Done,
         },
         notifyDetail?.cashId
       );
@@ -79,13 +80,16 @@
     };
 
     await safeScope(async () => {
-      editValue.cashId = await saveCash({
-        containerNo: notifyDetail?.containerNo,
-        operationId: props.notifyId,
-        operationType: OperationType.In,
-        amount: extraInfo.finalPrice,
-        note: extraInfo.explain,
-      });
+      editValue.cashId = await saveCash(
+        {
+          containerNo: notifyDetail?.containerNo,
+          operationId: props.notifyId,
+          operationType: OperationType.In,
+          amount: extraInfo.finalPrice,
+          note: extraInfo.explain,
+        },
+        notifyDetail?.cashId
+      );
       await NotifyManager.edit(editValue, props.notifyId);
       emit('save');
     });

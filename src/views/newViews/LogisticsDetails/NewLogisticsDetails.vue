@@ -12,6 +12,8 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { carpoolSelfCheck } from '@/api/dataLayer/modules/logistic/carpool';
+  import { OperationType, saveCash } from '@/api/dataLayer/modules/cash/cash';
+  import { CashStatus } from '@/api/dataLayer/modules/notify/notify-api';
 
   interface Props {
     model?: any;
@@ -50,6 +52,17 @@
     loading = true;
     await safeScope(async () => {
       await LogisticDetailManager.editInternal(values, props.model.id);
+      await saveCash(
+        {
+          containerNo: props.model?.containerNo,
+          operationId: props.model.id,
+          operationType: OperationType.Delivery,
+          amount: values.settlementPrice,
+          note: values.note,
+          cashStatus: CashStatus.WaitConfirm,
+        },
+        props.model.id
+      );
       const info = await LogisticDetailManager.getById(props.model.id);
       if (info.carpoolId) {
         await carpoolSelfCheck(info.carpoolId);
