@@ -32,6 +32,15 @@
       <out-bound-operation-table @save="reloadTable" :out-id="currentId!" />
     </n-modal>
     <n-modal
+      v-model:show="showFeeDialog"
+      :show-icon="false"
+      preset="dialog"
+      :title="'出库计划' + currentId"
+      style="width: 90%; min-width: 600px; max-width: 800px"
+    >
+      <out-bound-check-out-table @save="reloadTable" :out-id="currentId!" />
+    </n-modal>
+    <n-modal
       v-model:show="showModal"
       :show-icon="false"
       preset="card"
@@ -61,6 +70,7 @@
   } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import OutBoundOperationTable from '@/views/newViews/OutboundPlan/dialog/OutBoundOperationTable.vue';
+  import OutBoundCheckOutTable from '@/views/newViews/OutboundPlan/dialog/OutBoundCheckOutTable.vue';
 
   const showModal = ref(false);
   const loadDataTable = async () => {
@@ -76,6 +86,7 @@
   function reloadTable() {
     actionRef.value.reload();
     showModal.value = false;
+    showFeeDialog = false;
     showOperationTable = false;
   }
 

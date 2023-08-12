@@ -73,6 +73,18 @@ const colorfulRender = (text) =>
     text
   );
 
+export const textRender = (text) =>
+  h(
+    'div',
+    {
+      style: {
+        width: 'min-content',
+      },
+      class: 'whitespace-nowrap',
+    },
+    text
+  );
+
 export function idColumn(title = 'ID', targetPage, keyName = 'id') {
   return {
     title: title,
@@ -164,9 +176,13 @@ export function editableColumn(colInfo: { title: string; key: string }, data) {
   return {
     title,
     key,
+    width: 140,
     render(row, index) {
       return h(NInput, {
         value: row[key],
+        onClick() {
+          row[key] = '';
+        },
         onUpdateValue(v) {
           data[index][key] = v;
         },
