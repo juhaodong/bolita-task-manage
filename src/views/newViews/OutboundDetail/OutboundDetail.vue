@@ -6,7 +6,16 @@
       :default-value-model="filterObj"
       @clear="updateFilter(null)"
       @submit="updateFilter"
-    />
+    >
+      <n-button :disabled="checkedRows.length == 0" @click="showCheck()">
+        <template #icon>
+          <n-icon>
+            <Box20Filled />
+          </n-icon>
+        </template>
+        审核
+      </n-button>
+    </filter-bar>
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
@@ -15,20 +24,7 @@
       :request="loadDataTable"
       :row-key="(row) => row.id"
       v-model:checked-row-keys="checkedRows"
-    >
-      <template #tableTitle>
-        <n-space>
-          <n-button :disabled="checkedRows.length == 0" @click="showCheck()">
-            <template #icon>
-              <n-icon>
-                <Box20Filled />
-              </n-icon>
-            </template>
-            审核
-          </n-button>
-        </n-space>
-      </template>
-    </BasicTable>
+    />
 
     <n-modal
       v-model:show="showModal"
@@ -43,7 +39,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { h, onMounted, reactive, ref } from 'vue';
+  import { Component, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { CheckStatus, columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
@@ -54,6 +50,7 @@
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { useCheckDialog } from '@/store/modules/checkDialogState';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
+  import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
 
   interface Prop {
     outId?: string;
@@ -95,7 +92,6 @@
   }
 
   const loadDataTable = async () => {
-    console.log(await OutBoundDetailManager.load());
     return await OutBoundDetailManager.load(filterObj);
   };
 
@@ -120,8 +116,19 @@
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
-    width: 60,
+    width: 120,
     render(record: any) {
+      const fileAction = (label, key, icon?: Component, editable = false) => {
+        return getFileActionButton(
+          label,
+          key,
+          OutBoundDetailManager,
+          reloadTable,
+          record,
+          icon,
+          editable
+        );
+      };
       return h(TableAction as any, {
         style: 'button',
         actions: [
@@ -132,6 +139,8 @@
               startEdit(record.id);
             },
           },
+          fileAction('POD', 'PODFiles'),
+          fileAction('提单', 'pickupFiles'),
         ],
       });
     },

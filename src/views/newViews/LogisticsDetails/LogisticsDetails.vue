@@ -184,9 +184,9 @@
               startEdit(record.id);
             },
           },
-          fileAction('提单', 'files'),
+          fileAction('提单', 'pickupFiles'),
           fileAction('POD', 'PODFiles'),
-          fileAction('客户账单', 'billsForCustomer', null, true),
+          fileAction('客户账单', 'billsForCustomer', undefined, true),
         ],
       });
     },

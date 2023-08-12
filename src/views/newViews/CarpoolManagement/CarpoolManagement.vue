@@ -82,7 +82,7 @@
               startEdit(record.id);
             },
           },
-          fileAction('提单', 'files'),
+          fileAction('提单', 'pickupFiles'),
           fileAction('POD', 'PODFiles'),
           fileAction('账单', 'bills'),
           {

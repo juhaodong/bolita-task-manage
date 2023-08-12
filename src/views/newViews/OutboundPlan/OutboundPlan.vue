@@ -1,6 +1,15 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter" />
+    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
+      <n-button @click="addTable()">
+        <template #icon>
+          <n-icon>
+            <Box20Filled />
+          </n-icon>
+        </template>
+        新建出库计划
+      </n-button>
+    </filter-bar>
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
@@ -8,20 +17,7 @@
       :columns="columns"
       :request="loadDataTable"
       :row-key="(row) => row.id"
-    >
-      <template #tableTitle>
-        <n-space>
-          <n-button @click="addTable()">
-            <template #icon>
-              <n-icon>
-                <Box20Filled />
-              </n-icon>
-            </template>
-            新建出库计划
-          </n-button>
-        </n-space>
-      </template>
-    </BasicTable>
+    />
     <n-modal
       v-model:show="showOperationTable"
       :show-icon="false"
@@ -90,7 +86,7 @@
   let currentId: string | null = $ref(null);
   let showFeeDialog = $ref(false);
   const actionRef = ref();
-
+  let filterObj: any | null = $ref(null);
   function reloadTable() {
     actionRef.value.reload();
     showModal.value = false;
@@ -98,14 +94,26 @@
     showOperationTable = false;
     showEditInfoDialog = false;
   }
+  function updateFilter(value) {
+    filterObj = value;
+    reloadTable();
+  }
 
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
     width: 120,
     render(record) {
-      const fileAction = (label, key, icon?: Component) => {
-        return getFileActionButton(label, key, OutBoundPlanManager, reloadTable, record, icon);
+      const fileAction = (label, key, icon?: Component, editable = false) => {
+        return getFileActionButton(
+          label,
+          key,
+          OutBoundPlanManager,
+          reloadTable,
+          record,
+          icon,
+          editable
+        );
       };
       return h(TableAction as any, {
         style: 'button',
@@ -121,10 +129,10 @@
               },
             },
           },
-          fileAction('附件', 'files', Folder32Filled),
-          fileAction('CMR', 'CMR'),
-          fileAction('POD', 'POD'),
-          fileAction('提单', '提单'),
+          fileAction('附件', 'files', Folder32Filled, true),
+          fileAction('CMR', 'CMR', undefined, true),
+          fileAction('POD', 'PODFiles'),
+          fileAction('提单', 'pickupFiles'),
           {
             label: '编辑信息',
             icon: Edit24Filled,

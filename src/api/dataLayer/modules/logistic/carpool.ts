@@ -53,6 +53,8 @@ export async function updatePickupInfo(
     deliveryCompany?: string;
     ISA?: string;
     REF?: string;
+    PODFiles?: string[];
+    pickupFiles?: string[];
   },
   id
 ) {
@@ -72,4 +74,17 @@ export async function updatePickupInfo(
   await LogisticDetailManager.massiveUpdate(logisticUpdate);
   await OutBoundPlanManager.massiveUpdate(outPlan);
   await OutBoundDetailManager.massiveUpdate(outDetail);
+  if (params.PODFiles || params.pickupFiles) {
+    for (const d of details) {
+      if (!d.outId) {
+        continue;
+      }
+      const info = await OutBoundPlanManager.getById(d.outId);
+      const value = {
+        PODFiles: [...(info?.PODFiles ?? []), ...(params?.PODFiles ?? [])],
+        pickupFiles: [...(info?.pickupFiles ?? []), ...(params?.pickupFiles ?? [])],
+      };
+      await OutBoundPlanManager.editInternal(value, d.outId);
+    }
+  }
 }
