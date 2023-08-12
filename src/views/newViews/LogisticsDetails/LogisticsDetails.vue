@@ -93,6 +93,7 @@
   let filterObj: any | null = $ref(null);
 
   const loadDataTable = async () => {
+    console.log(await LogisticDetailManager.load());
     return await LogisticDetailManager.load(filterObj);
   };
 

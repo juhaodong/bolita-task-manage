@@ -1,6 +1,7 @@
 import { DataTableColumns } from 'naive-ui';
 import { colorColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
+import { stayDaysColumn } from '@/views/newViews/NotifyDetail/columns';
 
 export const columns: DataTableColumns<OutboundDetailModel> = [
   {
@@ -98,10 +99,7 @@ export const columns: DataTableColumns<OutboundDetailModel> = [
     title: '库位',
     key: 'storeAddress',
   },
-  {
-    title: '存放天数',
-    key: 'storageDays',
-  },
+  stayDaysColumn,
 ];
 
 export type OutboundDetailModel = {

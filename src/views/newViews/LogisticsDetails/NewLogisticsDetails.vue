@@ -11,6 +11,7 @@
   import { LogisticDetailManager } from '@/api/dataLayer/modules/logistic/logistic';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
+  import { carpoolSelfCheck } from '@/api/dataLayer/modules/logistic/carpool';
 
   interface Props {
     model?: any;
@@ -25,10 +26,6 @@
     {
       field: 'note',
       label: '备注',
-    },
-    {
-      field: 'deliveryCompany',
-      label: '运输公司',
     },
     {
       field: 'billNumber',
@@ -65,6 +62,11 @@
     loading = true;
     await safeScope(async () => {
       await LogisticDetailManager.editInternal(values, props.model.id);
+      const info = await LogisticDetailManager.getById(props.model.id);
+      if (info.carpoolId) {
+        await carpoolSelfCheck(info.carpoolId);
+      }
+
       emit('saved');
     });
     loading = false;

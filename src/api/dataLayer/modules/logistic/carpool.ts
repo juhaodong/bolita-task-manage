@@ -31,7 +31,7 @@ export async function carpoolSelfCheck(id: string) {
     const carpool = await CarpoolManager.getById(id);
     const details = await LogisticDetailManager.load(null, where('carpoolId', '==', id));
     if (details.length == 0) {
-      carpool.createTimestamp = '';
+      await CarpoolManager.remove(id);
     } else {
       initCarpool(carpool, details);
     }

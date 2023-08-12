@@ -13,11 +13,12 @@ export async function afterPlanDetailAdded(planDetails, plan) {
     if (instorageContainerNum == 0 && instorageTrayNum == 0) {
       status = OutStatus.All;
     }
+
     return {
       instorageTrayNum,
       instorageContainerNum,
       outStatus: status,
-      id: detail.originId,
+      id: detail.id.toString(),
     };
   });
   await NotifyDetailManager.massiveUpdate(updateValue);

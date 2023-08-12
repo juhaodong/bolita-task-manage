@@ -95,6 +95,7 @@
   }
 
   const loadDataTable = async () => {
+    console.log(await OutBoundDetailManager.load());
     return await OutBoundDetailManager.load(filterObj);
   };
 

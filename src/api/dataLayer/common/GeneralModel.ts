@@ -194,6 +194,7 @@ export function initModel(g: GeneralModel): Model {
       for (const value of listWithId) {
         const id = value.id;
         delete value.id;
+        console.log(value);
         batch.set(doc(collection(db, g.collectionName), id), value, { merge: true });
       }
       await batch.commit();

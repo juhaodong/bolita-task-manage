@@ -178,7 +178,7 @@ export function editableColumn(colInfo: { title: string; key: string }, data) {
   return {
     title,
     key,
-    width: 140,
+    maxWidth: 140,
     render(row, index) {
       return h(NInput, {
         value: row[key],
@@ -228,7 +228,7 @@ export const sizeColumn = joinDisplayColumn(
   '*'
 );
 
-function compareStatus(currentValue: string, limitValue: string) {
+export function compareStatus(currentValue: string, limitValue: string) {
   if (safeParseInt(currentValue) == safeParseInt(limitValue)) {
     return 'success';
   } else {
