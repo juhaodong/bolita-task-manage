@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { useUploadDialog } from '@/store/modules/uploadFileState';
 import { RouterLink } from 'vue-router';
 import { NInput, NText } from 'naive-ui';
-import { generalUpdate } from '@/api/dataLayer/common/GeneralModel';
+import { Model } from '@/api/dataLayer/common/GeneralModel';
 import { safeParseInt } from '@/store/utils/utils';
 
 export const standardDateFormat = 'YYYY-MM-DD/HH:mm';
@@ -196,10 +196,11 @@ export function editableColumn(colInfo: { title: string; key: string }, data) {
 export function getFileActionButton(
   label: string,
   key: string,
-  collection: string,
+  manager: Model,
   reload: any,
   record: any,
-  icon?: Component
+  icon?: Component,
+  editable = true
 ) {
   return {
     label,
@@ -209,11 +210,11 @@ export function getFileActionButton(
     },
     async onClick() {
       const upload = useUploadDialog();
-      const files = await upload.upload(record[key]);
+      const files = await upload.upload(record[key], null, editable);
       if (files.checkPassed) {
         const obj = {};
         obj[key] = files.files;
-        await generalUpdate(obj, collection, record.id);
+        await manager.edit(obj, record.id);
       }
 
       reload();

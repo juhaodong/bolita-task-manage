@@ -10,6 +10,7 @@ export const useUploadDialog = defineStore('uploadFileDialog', {
   state(): {
     resolve: ((value: UploadResult) => void) | null;
     show: boolean;
+    editable: boolean;
     currentFileUrls: string[];
     title: string;
   } {
@@ -18,11 +19,17 @@ export const useUploadDialog = defineStore('uploadFileDialog', {
       show: false,
       title: '请选择要上传的文件？',
       currentFileUrls: [],
+      editable: true,
     };
   },
   actions: {
-    async upload(currentFileUrls: string[], title = '请选择要上传的文件'): Promise<UploadResult> {
+    async upload(
+      currentFileUrls: string[],
+      title = '请选择要上传的文件',
+      editable = true
+    ): Promise<UploadResult> {
       this.title = title;
+      this.editable = editable;
       this.currentFileUrls = currentFileUrls;
       this.show = true;
       return new Promise((resolve) => {

@@ -23,10 +23,10 @@
         :show-buttons="false"
       >
         <template #extraSubmitButton="{ submit }">
-          <n-button @click="submit" type="success">上传</n-button>
+          <n-button v-if="checkDialog.editable" @click="submit" type="success">上传</n-button>
         </template>
         <template #extraCancelButton="{ cancel }">
-          <n-button @click="cancel" type="error">取消</n-button>
+          <n-button @click="cancel" type="error">关闭</n-button>
         </template>
       </normal-form>
     </n-card>

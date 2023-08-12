@@ -25,12 +25,12 @@ export const CarpoolManager = initModel({
     return initCarpool(value, logisticDetailList);
   },
   async afterEditHook(id, value) {
+    const updateValue = value;
+    console.log(value);
     if (value.reservationGetProductTime) {
-      await updatePickupInfo(
-        { reservationOutboundDate: value.reservationGetProductTime, ...value },
-        id
-      );
+      updateValue.reservationOutboundDate = value.reservationGetProductTime;
     }
+    await updatePickupInfo(updateValue, id);
   },
 });
 

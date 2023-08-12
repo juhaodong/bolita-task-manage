@@ -1,8 +1,9 @@
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
 
+export const logisticPath = 'logistic';
 export const LogisticDetailManager = initModel({
-  collectionName: 'logistic',
+  collectionName: logisticPath,
   init(value): any {
     value.pickupDate = '';
     value.ISA = '';

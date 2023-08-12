@@ -59,7 +59,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { h, onMounted, reactive, ref } from 'vue';
+  import { Component, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
@@ -71,6 +71,7 @@
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { CarpoolManager, carpoolSelfCheck } from '@/api/dataLayer/modules/logistic/carpool';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/NewCarpoolManagement.vue';
+  import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
 
   interface Prop {
     carpoolId?: string;
@@ -93,7 +94,6 @@
   let filterObj: any | null = $ref(null);
 
   const loadDataTable = async () => {
-    console.log(await LogisticDetailManager.load());
     return await LogisticDetailManager.load(filterObj);
   };
 
@@ -161,8 +161,19 @@
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
-    width: 60,
+    width: 120,
     render(record: any) {
+      const fileAction = (label, key, icon?: Component, editable = false) => {
+        return getFileActionButton(
+          label,
+          key,
+          LogisticDetailManager,
+          reloadTable,
+          record,
+          icon,
+          editable
+        );
+      };
       return h(TableAction as any, {
         style: 'button',
         actions: [
@@ -173,6 +184,9 @@
               startEdit(record.id);
             },
           },
+          fileAction('提单', 'files'),
+          fileAction('POD', 'PODFiles'),
+          fileAction('客户账单', 'billsForCustomer', null, true),
         ],
       });
     },

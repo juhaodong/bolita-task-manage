@@ -73,10 +73,7 @@
   import { CurrencyEuro } from '@vicons/carbon';
   import { $ref } from 'vue/macros';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import {
-    outboundPath,
-    OutBoundPlanManager,
-  } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+  import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import OutBoundOperationTable from '@/views/newViews/OutboundPlan/dialog/OutBoundOperationTable.vue';
   import OutBoundCheckOutTable from '@/views/newViews/OutboundPlan/dialog/OutBoundCheckOutTable.vue';
@@ -108,7 +105,7 @@
     width: 120,
     render(record) {
       const fileAction = (label, key, icon?: Component) => {
-        return getFileActionButton(label, key, outboundPath, reloadTable, record, icon);
+        return getFileActionButton(label, key, OutBoundPlanManager, reloadTable, record, icon);
       };
       return h(TableAction as any, {
         style: 'button',

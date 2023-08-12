@@ -91,7 +91,6 @@
   import WarehouseInfoDialog from '@/views/newViews/NotifyList/form/WarehouseInfoDialog.vue';
   import NotifyFeeDialog from '@/views/newViews/NotifyList/form/NotifyFeeDialog.vue';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import { notifyPath } from '@/api/dataLayer/modules/notify/path';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
 
@@ -135,7 +134,7 @@
     width: 120,
     render(record: NotifyModel) {
       const fileAction = (label, key, icon?: Component) => {
-        return getFileActionButton(label, key, notifyPath, reloadTable, record, icon);
+        return getFileActionButton(label, key, NotifyManager, reloadTable, record, icon);
       };
       return h(TableAction as any, {
         style: 'button',

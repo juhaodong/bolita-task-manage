@@ -31,7 +31,7 @@
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/NewCarpoolManagement.vue';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
-  import { CarpoolManager, carpoolPath } from '@/api/dataLayer/modules/logistic/carpool';
+  import { CarpoolManager } from '@/api/dataLayer/modules/logistic/carpool';
   import { NotifyModel } from '@/api/dataLayer/modules/notify/notify-api';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
@@ -70,7 +70,7 @@
     width: 120,
     render(record: NotifyModel) {
       const fileAction = (label, key, icon?: Component) => {
-        return getFileActionButton(label, key, carpoolPath, reloadTable, record, icon);
+        return getFileActionButton(label, key, CarpoolManager, reloadTable, record, icon);
       };
       return h(TableAction as any, {
         style: 'button',
