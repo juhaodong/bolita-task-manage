@@ -2,8 +2,8 @@ import { Result, resultError, resultSuccess } from '@/store/request/_util';
 import { db, executeQuery, getDocContent, getFileListUrl } from '@/store/plugins/firebase';
 import {
   collection,
-  deleteDoc,
   doc,
+  getDoc,
   getDocs,
   orderBy,
   query,
@@ -33,7 +33,13 @@ export interface GeneralModel {
 
 export async function getCollectionNextId(collectionName: string, prefix = '') {
   const currentMaxId = await getDocs(query(collection(db, collectionName)));
-  return prefix + (currentMaxId.size + 1).toString().padStart(4, '0');
+  let id = currentMaxId.size + 1;
+  let record = await getDoc(doc(db, collectionName, id.toString().padStart(4, '0')));
+  while (record.exists() && id < currentMaxId.size + 2000) {
+    record = await getDoc(doc(db, collectionName, id.toString().padStart(4, '0')));
+    id++;
+  }
+  return prefix + id.toString().padStart(4, '0');
 }
 
 async function generalInit(value) {
@@ -162,7 +168,7 @@ export function initModel(g: GeneralModel): Model {
     },
     async remove(id): Promise<Result<any>> {
       return await scope(async () => {
-        return await deleteDoc(doc(db, g.collectionName, id));
+        return await this.editInternal({ deletedAt: dayjs().valueOf() }, id);
       });
     },
     async massiveAdd(list, ...args) {

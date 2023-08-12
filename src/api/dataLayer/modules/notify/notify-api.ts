@@ -3,7 +3,7 @@ import {
   NotifyDetailModel,
 } from '@/api/dataLayer/modules/notify/notify-detail';
 import { BasicModel } from '@/api/dataLayer/fieldDefination/BasicModel';
-import { safeParseInt } from '@/store/utils/utils';
+import { safeParseInt, safeSumInt } from '@/store/utils/utils';
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 
 export interface NotifyModel extends BasicModel {
@@ -23,7 +23,10 @@ export interface NotifyModel extends BasicModel {
 export const notifyPath = 'notify';
 export const NotifyManager = initModel({
   collectionName: notifyPath,
-  init(value) {
+  init(value, taskList) {
+    console.log(taskList);
+    value.boxCount = safeSumInt(taskList, 'containerNum');
+    value.trayCount = safeSumInt(taskList, 'trayNum');
     const info = {
       containerNo: '',
       containerType: '',

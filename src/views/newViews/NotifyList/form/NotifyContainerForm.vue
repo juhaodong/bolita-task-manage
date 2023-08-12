@@ -12,14 +12,12 @@
   import { usePermission } from '@/hooks/web/usePermission';
   import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import { getFilesUploadFormField, salesFormField } from '@/api/dataLayer/fieldDefination/common';
-  import template from '@/assets/template/container.xlsx';
 
   interface Props {
     model?: any;
   }
 
   defineProps<Props>();
-  let task = [];
 
   let customerList = ref<any[]>([]);
   const { hasPermission } = usePermission();
@@ -95,15 +93,6 @@
           console.log(e);
         },
       },
-    },
-    {
-      field: 'trayCount',
-      label: '托数',
-      required: false,
-    },
-    {
-      field: 'boxCount',
-      label: '箱数',
     },
     {
       field: 'totalWeight',
