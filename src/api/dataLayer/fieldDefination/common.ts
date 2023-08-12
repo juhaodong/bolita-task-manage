@@ -6,7 +6,6 @@ import { usePermission } from '@/hooks/web/usePermission';
 import dayjs from 'dayjs';
 import { CustomerManager } from '@/api/dataLayer/modules/user/user';
 import { keyBy } from 'lodash-es';
-import { fbaDict } from '@/api/dataLayer/fieldDefination/FBACode';
 
 export function getFilesUploadFormField(
   key = 'files',
@@ -74,7 +73,7 @@ export async function asyncCustomerFormField(): Promise<FormField> {
     },
     onFormUpdate(value) {
       if (value?.customerId) {
-        value['targetCountry'] = fbaDict[value?.fbaCode]?.countryCode;
+        value['warehouseId'] = customerDict[value?.customerId]?.warehouseId;
       }
     },
     displayCondition() {
