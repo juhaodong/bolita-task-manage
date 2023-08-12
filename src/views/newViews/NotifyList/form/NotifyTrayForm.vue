@@ -33,12 +33,11 @@
   interface Props {
     model?: any;
   }
-
+  let keyCounter = 0;
   defineProps<Props>();
   let task = reactive([generateDefaultColumn()]);
   let customerList = ref<any[]>([]);
   const { hasPermission } = usePermission();
-  let keyCounter = 0;
 
   function generateDefaultColumn() {
     return {
