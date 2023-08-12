@@ -4,7 +4,7 @@ import { BasicColumn } from '@/components/Table';
 export type FormField = {
   field: string;
   label: string;
-  componentProps?: object;
+  componentProps?: any;
   labelMessage?: string;
   required?: boolean;
   component?: ComponentType;

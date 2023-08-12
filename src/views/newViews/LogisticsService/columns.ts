@@ -1,19 +1,21 @@
 import { DataTableColumns } from 'naive-ui';
-import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
 export const columns: DataTableColumns<LogisticsServiceModel> = [
   {
     title: '查单ID',
-    key: 'LogisticId',
+    key: 'id',
   },
+  timeColumn(),
   {
     title: '票号/订单号',
     key: 'ticketId',
   },
+
   {
     title: '出库ID',
-    key: 'OutboundId',
+    key: 'outId',
   },
   {
     title: '客户ID',
@@ -21,10 +23,6 @@ export const columns: DataTableColumns<LogisticsServiceModel> = [
   },
   {
     title: '出库方式',
-    key: 'deliveryWay',
-  },
-  {
-    title: '物流渠道',
     key: 'deliveryMethod',
   },
   {
@@ -38,10 +36,6 @@ export const columns: DataTableColumns<LogisticsServiceModel> = [
   {
     title: '异常描述',
     key: 'wrongDescribe',
-  },
-  {
-    title: '上传附件',
-    key: 'uploadFile',
   },
   {
     title: '仓库反馈',
@@ -61,10 +55,10 @@ export const columns: DataTableColumns<LogisticsServiceModel> = [
     title: '索赔号',
     key: 'claimantID',
   },
-  {
+  statusColumnEasy({
     title: '处理状态',
-    key: 'handlingStatus',
-  },
+    key: 'handleStatus',
+  }),
   {
     title: '申请金额',
     key: 'applicationsAmount',
@@ -73,10 +67,10 @@ export const columns: DataTableColumns<LogisticsServiceModel> = [
     title: '索赔金额',
     key: 'claimAmount',
   },
-  {
+  statusColumnEasy({
     title: '结算状态',
-    key: 'settlementStatus',
-  },
+    key: 'cashStatus',
+  }),
 ];
 
 export type LogisticsServiceModel = {

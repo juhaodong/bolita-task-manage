@@ -1,7 +1,8 @@
 import { DataTableColumns } from 'naive-ui';
 import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
-export const columns: DataTableColumns<UserModel> = [
+export const columns: DataTableColumns = [
   {
     title: '用户名',
     key: 'userName',
@@ -22,10 +23,6 @@ export const columns: DataTableColumns<UserModel> = [
     title: '用户类型',
     key: 'userType',
   },
-  // {
-  //   title: '操作',
-  //   key: 'action',
-  // },
   {
     title: '备注',
     key: 'note',
@@ -38,27 +35,29 @@ export const columns: DataTableColumns<UserModel> = [
     title: '密码',
     key: 'password',
   },
-  timeColumn('creatTime', '创建日期'),
+  timeColumn(),
 ];
 
-export type UserModel = {
-  userName: string;
-  realName: string;
-  company: string;
-  department: string;
-  userType: string;
-  action: string;
-  note: string;
-  loginName: string;
-  password: string;
-  creatTime: string;
-};
-
 export enum UserType {
-  manager = '管理',
-  warehouse = '仓库',
-  customer = '客户',
-  operator = '操作员',
-  salesName = '业务员',
-  settlement = '结算',
+  Manager = '管理',
+  Warehouse = '仓库',
+  Customer = '客户',
+  Operator = '操作员',
+  Sales = '业务员',
+  Cash = '结算',
 }
+
+export const filters: FormField[] = [
+  {
+    label: '名称',
+    field: 'realName',
+  },
+  {
+    label: '公司',
+    field: 'company',
+  },
+  {
+    label: '部门',
+    field: 'department',
+  },
+];

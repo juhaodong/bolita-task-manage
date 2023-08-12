@@ -36,6 +36,7 @@ export interface GeneralModel {
   afterEditHook?: (id: string, value: any, ...args) => Promise<any>;
   joinManager?: JoinManager;
   cascadeManager?: CascadeManager;
+  uniqKeys?: string[];
 }
 
 export async function getCollectionNextId(collectionName: string, prefix = '') {
@@ -119,6 +120,16 @@ export function initModel(g: GeneralModel): Model {
 
   return {
     async addInternal(value, ...args): Promise<string> {
+      if (g.uniqKeys) {
+        for (const uniqKey of g.uniqKeys) {
+          const exist = await executeQuery(
+            query(collection(db, g.collectionName), where(uniqKey, '==', value[uniqKey]))
+          );
+          if (exist.length > 0) {
+            throw Error(uniqKey + '重复了');
+          }
+        }
+      }
       const t = await g.init(value, ...args);
       const id = await generalAdd(t, g.collectionName, g?.idPrefix);
       if (g.afterAddHook) {

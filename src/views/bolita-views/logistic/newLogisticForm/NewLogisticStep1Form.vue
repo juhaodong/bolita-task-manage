@@ -16,7 +16,7 @@
       label: '箱数',
       required: true,
     },
-    ...getDeliveryMethodSelection(true),
+    ...getDeliveryMethodSelection(),
     {
       field: 'warehouseId',
       component: 'NSelect',

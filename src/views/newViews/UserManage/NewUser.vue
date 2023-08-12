@@ -8,12 +8,11 @@
 <script lang="ts" setup>
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
-  import { formatItemAddress } from '@/api/dataLayer/fieldDefination/addressGroup';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { generateOptionFromArray } from '@/store/utils/utils';
   import { UserType } from '@/views/newViews/UserManage/columns';
+  import { UserManager } from '@/api/dataLayer/modules/user/user';
 
   interface Props {
     model?: any;
@@ -21,7 +20,6 @@
 
   let loading: boolean = $ref(false);
   const prop = defineProps<Props>();
-  console.log(prop.model);
   const schemas: FormField[] = [
     {
       label: '用户名',
@@ -30,14 +28,17 @@
     {
       label: '名称',
       field: 'realName',
+      required: false,
     },
     {
       label: '公司',
       field: 'company',
+      required: false,
     },
     {
       label: '部门',
       field: 'department',
+      required: false,
     },
     {
       label: '用户类型',
@@ -48,12 +49,9 @@
       },
     },
     {
-      label: '操作',
-      field: 'action',
-    },
-    {
       label: '备注',
       field: 'note',
+      required: false,
     },
     {
       label: '登录名',
@@ -69,9 +67,12 @@
 
   async function handleSubmit(values: any) {
     loading = true;
-    formatItemAddress(values);
     await safeScope(async () => {
-      await OutBoundDetailManager.edit(values, prop.model.id);
+      if (prop?.model?.id) {
+        await UserManager.editInternal(values, prop.model.id);
+      } else {
+        await UserManager.addInternal(values);
+      }
       emit('saved', values);
     });
     loading = false;
