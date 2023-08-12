@@ -314,13 +314,13 @@
         }
       );
 
-      watch(formModel, (value) => {
+      watch(formModel, async (value) => {
         const notify = getSchema.value.filter((it) => it?.onFormUpdate);
-        notify.forEach((it) => {
+        for (const it of notify) {
           if (it) {
-            it?.onFormUpdate(value);
+            await it?.onFormUpdate(value);
           }
-        });
+        }
       });
       onMounted(() => {
         initDefault();

@@ -7,10 +7,10 @@
 </template>
 <script lang="ts" setup>
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
-  import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { InventoryManager } from '@/api/dataLayer/modules/user/user';
+  import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
+  import { asyncUserTypeFormField, InventoryManager } from '@/api/dataLayer/modules/user/user';
+  import { UserType } from '@/views/newViews/UserManage/columns';
 
   interface Props {
     model?: any;
@@ -18,7 +18,7 @@
 
   let loading: boolean = $ref(false);
   const prop = defineProps<Props>();
-  const schemas: FormField[] = [
+  const schemas: FormFields = [
     {
       label: '公司名称',
       field: 'companyName',
@@ -43,14 +43,16 @@
       field: 'settlementMethod',
       required: false,
     },
-    {
+    asyncUserTypeFormField({
       label: '所属操作员',
       field: 'belongOperator',
-    },
-    {
+      userType: UserType.Operator,
+    }),
+    asyncUserTypeFormField({
       label: '所属业务员',
       field: 'belongSalesName',
-    },
+      userType: UserType.Sales,
+    }),
     {
       label: '使用系统',
       field: 'useSystem',

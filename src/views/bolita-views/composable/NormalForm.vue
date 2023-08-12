@@ -4,12 +4,12 @@
     FormField,
   } from '@/views/bolita-views/composable/form-field-type';
   import { FormSchema, useForm } from '@/components/Form';
-  import { ref } from 'vue';
+  import { reactive, ref, watchEffect } from 'vue';
 
   const form = ref<any>(null);
 
   interface NormalFormProps {
-    formFields: FormField[];
+    formFields: (Promise<FormField> | FormField)[];
     showButtons?: boolean;
     showGroupHeader?: boolean;
     defaultValueModel?: any;
@@ -19,9 +19,19 @@
     showButtons: true,
     showGroupHeader: true,
   });
+  const realSchemas: any[] = reactive([]);
+  watchEffect(async () => {
+    realSchemas.length = 0;
+    const res = [];
+    for (const it of props.formFields) {
+      res.push(await it);
+    }
+    realSchemas.push(...res);
+  });
 
   const schemas: FormSchema[] = $computed(() => {
-    return props.formFields.map(convertFormFieldToSchema).map((it) => {
+    console.log(props.defaultValueModel);
+    return realSchemas.map(convertFormFieldToSchema).map((it) => {
       if (props?.defaultValueModel?.[it.field]) {
         it.defaultValue = props?.defaultValueModel?.[it.field];
       }

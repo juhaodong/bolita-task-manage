@@ -1,26 +1,11 @@
 import {
   getNotifyDetailListByNotify,
   NotifyDetailManager,
-  NotifyDetailModel,
 } from '@/api/dataLayer/modules/notify/notify-detail';
-import { BasicModel } from '@/api/dataLayer/fieldDefination/BasicModel';
 import { safeParseInt, safeSumInt } from '@/store/utils/utils';
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 import { notifyPath, taskListPath } from '@/api/dataLayer/modules/notify/path';
 
-export interface NotifyModel extends BasicModel {
-  notifyType: NotifyType;
-  containerNo: string;
-  containerSize: string;
-  containerType: string;
-  arrivedCount: number;
-  totalCount: number;
-  reserveTime: number;
-  planArriveDateTime: number;
-  arriveTime: number;
-  status: string;
-  taskList: NotifyDetailModel[];
-}
 export const NotifyManager = initModel({
   collectionName: notifyPath,
   init(value, taskList) {

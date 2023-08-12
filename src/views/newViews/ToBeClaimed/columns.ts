@@ -22,7 +22,7 @@ export const columns: DataTableColumns<ToBeClaimedModel> = [
   },
   {
     title: '收货仓库',
-    key: 'receivingWarehouse',
+    key: 'warehouseId',
     width: 100,
   },
   {

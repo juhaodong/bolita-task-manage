@@ -1,10 +1,5 @@
 import { DataTableColumns } from 'naive-ui';
-import {
-  InBoundStatus,
-  NotifyModel,
-  notifyType,
-  OutStatus,
-} from '@/api/dataLayer/modules/notify/notify-api';
+import { InBoundStatus, notifyType, OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import {
   idColumn,
   standardDateFormat,
@@ -15,7 +10,7 @@ import { h } from 'vue';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { generateOptionFromArray } from '@/store/utils/utils';
 
-export const columns: DataTableColumns<NotifyModel> = [
+export const columns: DataTableColumns<any> = [
   idColumn('入库ID', '/notify/detail'),
   timeColumn(),
   {
@@ -28,7 +23,7 @@ export const columns: DataTableColumns<NotifyModel> = [
   },
   {
     title: '仓库',
-    key: 'warehouseName',
+    key: 'warehouseId',
   },
   {
     title: '货柜号',
@@ -90,7 +85,7 @@ export const filters: FormField[] = [
   },
   {
     label: '仓库',
-    field: 'warehouseName',
+    field: 'warehouseId',
   },
   {
     label: '入库状态',

@@ -186,7 +186,7 @@
         </n-descriptions-item>
         <n-descriptions-item label="预报总数"> {{ notifyDetail?.totalCount }}</n-descriptions-item>
         <n-descriptions-item label="仓库ID">
-          {{ notifyDetail?.warehouse ?? '-' }}
+          {{ notifyDetail?.warehouseId ?? '-' }}
         </n-descriptions-item>
         <n-descriptions-item label="卸柜起止时间" />
       </n-descriptions>

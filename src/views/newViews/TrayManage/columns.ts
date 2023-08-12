@@ -14,7 +14,7 @@ export const columns: DataTableColumns<TrayModel> = [
   timeColumn('date', '日期'),
   {
     title: '仓库',
-    key: 'warehouseName',
+    key: 'warehouseId',
   },
   {
     title: '托盘',

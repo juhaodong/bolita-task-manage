@@ -41,7 +41,6 @@
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import { CarpoolManager } from '@/api/dataLayer/modules/logistic/carpool';
-  import { NotifyModel } from '@/api/dataLayer/modules/notify/notify-api';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { CurrencyEuro } from '@vicons/carbon';
@@ -81,7 +80,7 @@
     title: '可用动作',
     key: 'action',
     width: 120,
-    render(record: NotifyModel) {
+    render(record: any) {
       const fileAction = (label, key, icon?: Component) => {
         return getFileActionButton(label, key, CarpoolManager, reloadTable, record, icon);
       };

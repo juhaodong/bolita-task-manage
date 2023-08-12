@@ -74,7 +74,7 @@
         {{ notifyDetail?.totalCount }}
       </n-descriptions-item>
       <n-descriptions-item label="仓库ID">
-        {{ notifyDetail?.warehouse ?? '-' }}
+        {{ notifyDetail?.warehouseId ?? '-' }}
       </n-descriptions-item>
     </n-descriptions>
     <div class="mt-4">

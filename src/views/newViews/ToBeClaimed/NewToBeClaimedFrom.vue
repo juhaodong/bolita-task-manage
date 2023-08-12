@@ -5,10 +5,11 @@
 </template>
 <script lang="ts" setup>
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
-  import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { ref } from 'vue';
   import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/common';
+  import { FormFields } from '@/api/dataLayer/common/GeneralModel';
+  import { asyncInventoryFormField } from '@/api/dataLayer/modules/user/user';
 
   interface Props {
     model?: any;
@@ -26,15 +27,12 @@
   }
 
   init();
-  const schemas: FormField[] = [
+  const schemas: FormFields = [
     {
       field: 'deliveryId',
       label: '物流单号',
     },
-    {
-      field: 'receivingWarehouse',
-      label: '收货仓库',
-    },
+    asyncInventoryFormField(),
     {
       field: 'containerMark',
       label: '外箱标识',

@@ -15,7 +15,7 @@ export const columns: DataTableColumns<OutboundPlanModel> = [
   },
   {
     title: '仓库',
-    key: 'wareHouse',
+    key: 'warehouseId',
   },
   {
     title: '出库方式',
@@ -71,7 +71,7 @@ export type OutboundPlanModel = {
   customerId: number;
   salesName: string;
   toExamine: string;
-  wareHouse: string;
+  warehouseId: string;
   deliveryMethod: string;
   trayNum: number;
   containerNum: number;
@@ -116,7 +116,7 @@ export const filters: FormField[] = [
   },
   {
     label: '仓库',
-    field: 'warehouseName',
+    field: 'warehouseId',
   },
   {
     label: '出库状态',

@@ -39,7 +39,7 @@ export const columns: DataTableColumns<InventoryDetailModel> = [
   },
   {
     title: '仓库',
-    key: 'wareHouse',
+    key: 'warehouseId',
   },
   {
     title: '运单号',
@@ -68,7 +68,7 @@ export type InventoryDetailModel = {
   containerStandards: string;
   weightKg: number;
   volume: string;
-  wareHouse: string;
+  warehouseId: string;
   waybillId: string;
   note: string;
   storeAddress: string;
@@ -99,7 +99,7 @@ export const filters: FormField[] = [
   },
   {
     label: '仓库',
-    field: 'warehouseName',
+    field: 'warehouseId',
   },
   {
     field: 'waybillId',

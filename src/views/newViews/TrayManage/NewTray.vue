@@ -5,9 +5,10 @@
 </template>
 <script lang="ts" setup>
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
-  import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { ref } from 'vue';
   import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
+  import { asyncInventoryFormField } from '@/api/dataLayer/modules/user/user';
+  import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 
   interface Props {
     model?: any;
@@ -25,7 +26,7 @@
   }
 
   init();
-  const schemas: FormField[] = [
+  const schemas: FormFields = [
     {
       label: '结算ID',
       field: 'id',
@@ -47,10 +48,7 @@
         clearable: true,
       },
     },
-    {
-      label: '仓库',
-      field: 'warehouseName',
-    },
+    asyncInventoryFormField(),
     {
       label: '托盘',
       field: 'tray',

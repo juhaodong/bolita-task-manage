@@ -75,11 +75,7 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled, Folder32Filled } from '@vicons/fluent';
-  import {
-    NotifyManager,
-    NotifyModel,
-    NotifyType,
-  } from '@/api/dataLayer/modules/notify/notify-api';
+  import { NotifyManager, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
   import NotifyFormIndex from '@/views/newViews/NotifyList/form/NotifyFormIndex.vue';
   import { $ref } from 'vue/macros';
   import { TruckDelivery } from '@vicons/tabler';
@@ -132,7 +128,7 @@
     title: '可用动作',
     key: 'action',
     width: 120,
-    render(record: NotifyModel) {
+    render(record: any) {
       const fileAction = (label, key, icon?: Component) => {
         return getFileActionButton(label, key, NotifyManager, reloadTable, record, icon);
       };

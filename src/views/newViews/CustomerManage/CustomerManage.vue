@@ -26,7 +26,7 @@
       style="width: 90%; min-width: 600px; max-width: 600px"
       title="新建/编辑客户"
     >
-      <new-inventory :model="currentModel" @saved="reloadTable" />
+      <new-customer :model="currentModel" @saved="reloadTable" />
     </n-modal>
   </n-card>
 </template>
@@ -39,7 +39,7 @@
   import { $ref } from 'vue/macros';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { CustomerManager } from '@/api/dataLayer/modules/user/user';
-  import NewInventory from '@/views/newViews/InventoryManage/NewInventory.vue';
+  import NewCustomer from '@/views/newViews/CustomerManage/NewCustomer.vue';
 
   interface Prop {
     outId?: string;
@@ -59,6 +59,7 @@
 
   async function startEdit(id) {
     currentModel = await CustomerManager.getById(id);
+    console.log(currentModel);
     showModal.value = true;
   }
 

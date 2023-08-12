@@ -54,7 +54,7 @@ export const columns: DataTableColumns<OutboundDetailModel> = [
   },
   {
     title: '仓库',
-    key: 'wareHouse',
+    key: 'warehouseId',
   },
   colorColumn('checkStatus', '审核状态', (record) => record['checkStatus']),
 
@@ -115,7 +115,7 @@ export type OutboundDetailModel = {
   containerStandards: string;
   weightKg: number;
   volume: string;
-  wareHouse: string;
+  warehouseId: string;
   checkStatus: string;
   reservationOutboundDate: string;
   outStatus: string;
@@ -150,7 +150,7 @@ export const filters: FormField[] = [
   },
   {
     label: '仓库',
-    field: 'warehouseName',
+    field: 'warehouseId',
   },
   {
     label: '出库状态',

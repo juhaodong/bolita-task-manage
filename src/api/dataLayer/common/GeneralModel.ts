@@ -17,6 +17,9 @@ import { keyBy } from 'lodash-es';
 import { UploadFileInfo } from 'naive-ui';
 import { QueryCompositeFilterConstraint, QueryConstraint } from '@firebase/firestore';
 import { safeParseInt, toastError } from '@/store/utils/utils';
+import { FormField } from '@/views/bolita-views/composable/form-field-type';
+
+export type FormFields = (Promise<FormField> | FormField)[];
 
 interface JoinManager {
   loader: () => Promise<any[]>;

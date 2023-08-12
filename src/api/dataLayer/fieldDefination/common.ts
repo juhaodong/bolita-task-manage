@@ -1,9 +1,12 @@
 import { generateOptionFromArray } from '@/store/utils/utils';
 import { DeliveryMethod, deliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
+import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
 import { usePermission } from '@/hooks/web/usePermission';
 import dayjs from 'dayjs';
+import { CustomerManager } from '@/api/dataLayer/modules/user/user';
+import { keyBy } from 'lodash-es';
+import { fbaDict } from '@/api/dataLayer/fieldDefination/FBACode';
 
 export function getFilesUploadFormField(
   key = 'files',
@@ -56,8 +59,10 @@ export function getDeliveryMethodSelection(): FormField[] {
 
 export async function asyncCustomerFormField(): Promise<FormField> {
   const { hasPermission } = usePermission();
-  const customerList = (await listUser(PermissionEnums.Customer)).result.map((it) => ({
-    label: it.realName,
+  const customers = await CustomerManager.load();
+  const customerDict = keyBy(customers, 'id');
+  const customerList = customers.map((it) => ({
+    label: it.customerName,
     value: it.id,
   }));
   return {
@@ -66,6 +71,11 @@ export async function asyncCustomerFormField(): Promise<FormField> {
     component: 'NSelect',
     componentProps: {
       options: customerList,
+    },
+    onFormUpdate(value) {
+      if (value?.customerId) {
+        value['targetCountry'] = fbaDict[value?.fbaCode]?.countryCode;
+      }
     },
     displayCondition() {
       return !hasPermission([PermissionEnums.Customer]);

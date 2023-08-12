@@ -17,19 +17,11 @@ export const columns: DataTableColumns<CustomerModel> = [
   },
   {
     title: '所属仓库',
-    key: 'belongWarehouse',
+    key: 'warehouseId',
   },
   {
     title: '所属业务员',
     key: 'belongSalesName',
-  },
-  // {
-  //   title: '操作',
-  //   key: 'action',
-  // },
-  {
-    title: '子客户ID',
-    key: 'childrenCustomerId',
   },
   {
     title: '使用系统',
@@ -54,7 +46,7 @@ export type CustomerModel = {
   customerId: number;
   customerName: string;
   businessParty: string;
-  belongWarehouse: string;
+  warehouseId: string;
   belongSalesName: string;
   action: string;
   childrenCustomerId: number;
