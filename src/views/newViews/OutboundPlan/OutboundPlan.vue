@@ -41,6 +41,15 @@
       <out-bound-check-out-table @save="reloadTable" :out-id="currentId!" />
     </n-modal>
     <n-modal
+      v-model:show="showEditInfoDialog"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 600px; max-width: 600px"
+      title="编辑信息"
+    >
+      <out-bound-edit-dialog :model="currentId" @saved="reloadTable" />
+    </n-modal>
+    <n-modal
       v-model:show="showModal"
       :show-icon="false"
       preset="card"
@@ -56,7 +65,7 @@
   import { Component, h, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
-  import { Box20Filled, Folder32Filled } from '@vicons/fluent';
+  import { Box20Filled, Edit24Filled, Folder32Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import Delete28Filled from '@vicons/fluent/es/Delete28Filled';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
@@ -71,6 +80,7 @@
   import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import OutBoundOperationTable from '@/views/newViews/OutboundPlan/dialog/OutBoundOperationTable.vue';
   import OutBoundCheckOutTable from '@/views/newViews/OutboundPlan/dialog/OutBoundCheckOutTable.vue';
+  import OutBoundEditDialog from '@/views/newViews/OutboundPlan/dialog/OutBoundEditDialog.vue';
 
   const showModal = ref(false);
   const loadDataTable = async () => {
@@ -79,6 +89,7 @@
     return res;
   };
   let showOperationTable = $ref(false);
+  let showEditInfoDialog = $ref(false);
   let currentId: string | null = $ref(null);
   let showFeeDialog = $ref(false);
   const actionRef = ref();
@@ -88,6 +99,7 @@
     showModal.value = false;
     showFeeDialog = false;
     showOperationTable = false;
+    showEditInfoDialog = false;
   }
 
   const actionColumn = reactive({
@@ -116,6 +128,14 @@
           fileAction('CMR', 'CMR'),
           fileAction('POD', 'POD'),
           fileAction('提单', '提单'),
+          {
+            label: '编辑信息',
+            icon: Edit24Filled,
+            onClick() {
+              currentId = record.id!;
+              showEditInfoDialog = true;
+            },
+          },
           {
             label: '操作',
             icon: Hammer,
