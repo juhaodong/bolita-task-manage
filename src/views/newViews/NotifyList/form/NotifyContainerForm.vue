@@ -6,11 +6,15 @@
 <script setup lang="ts">
   import dayjs from 'dayjs';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
-  import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { ref } from 'vue';
   import { usePermission } from '@/hooks/web/usePermission';
   import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
-  import { getFilesUploadFormField, salesFormField } from '@/api/dataLayer/fieldDefination/common';
+  import {
+    asyncCustomerFormField,
+    getFilesUploadFormField,
+    salesFormField,
+  } from '@/api/dataLayer/fieldDefination/common';
+  import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 
   interface Props {
     model?: any;
@@ -29,20 +33,8 @@
   }
 
   init();
-  const schemas: FormField[] = [
-    {
-      field: 'customerId',
-      label: '客户',
-      required: false,
-      component: 'NSelect',
-      componentProps: {
-        options: customerList,
-      },
-      displayCondition() {
-        return !hasPermission([PermissionEnums.Customer]);
-      },
-    },
-
+  const schemas: FormFields = [
+    asyncCustomerFormField(),
     {
       field: 'containerNo',
       label: '货柜号',
