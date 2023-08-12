@@ -11,7 +11,7 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
-  import { CarpoolManager, updatePickupTime } from '@/api/dataLayer/modules/logistic/carpool';
+  import { CarpoolManager, updatePickupInfo } from '@/api/dataLayer/modules/logistic/carpool';
 
   interface Props {
     model?: any;
@@ -46,7 +46,15 @@
     if (prop.model) {
       await safeScope(async () => {
         await CarpoolManager.editInternal(values, prop.model.id);
-        await updatePickupTime(values.reservationGetProductTime, prop.model.id);
+        await updatePickupInfo(
+          {
+            reservationOutboundDate: values.reservationGetProductTime,
+            deliveryCompany: values.deliveryCompany,
+            ISA: values.ISA,
+            REF: values.REF,
+          },
+          prop.model.id
+        );
         emit('saved', values);
       });
     } else {

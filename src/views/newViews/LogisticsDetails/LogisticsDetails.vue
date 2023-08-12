@@ -72,7 +72,7 @@
   import {
     CarpoolManager,
     carpoolSelfCheck,
-    updatePickupTime,
+    updatePickupInfo,
   } from '@/api/dataLayer/modules/logistic/carpool';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/NewCarpoolManagement.vue';
 
@@ -141,7 +141,15 @@
         );
       }
       await CarpoolManager.editInternal(value, id);
-      await updatePickupTime(value.reservationGetProductTime, id);
+      await updatePickupInfo(
+        {
+          reservationOutboundDate: value.reservationGetProductTime,
+          deliveryCompany: value.deliveryCompany,
+          ISA: value.ISA,
+          REF: value.REF,
+        },
+        id
+      );
 
       reloadTable();
       checkedRows = [];

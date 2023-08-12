@@ -192,7 +192,7 @@ export function initModel(g: GeneralModel): Model {
     async massiveUpdate(listWithId: any[]) {
       const batch = writeBatch(db);
       for (const value of listWithId) {
-        const id = value.id;
+        const id = value.id.toString();
         delete value.id;
         console.log(value);
         batch.set(doc(collection(db, g.collectionName), id), value, { merge: true });

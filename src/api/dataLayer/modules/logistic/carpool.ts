@@ -39,18 +39,26 @@ export async function carpoolSelfCheck(id: string) {
   }
 }
 
-export async function updatePickupTime(newTime: number, id) {
+export async function updatePickupInfo(
+  params: {
+    reservationOutboundDate?: string;
+    deliveryCompany?: string;
+    ISA?: string;
+    REF?: string;
+  },
+  id
+) {
   const details = await LogisticDetailManager.load(null, where('carpoolId', '==', id));
   const logisticUpdate = details.map((it) => ({
-    reservationOutboundDate: newTime,
+    ...params,
     id: it.id,
   }));
   const outPlan = details.map((it) => ({
-    reservationOutboundDate: newTime,
+    ...params,
     id: it.outId,
   }));
   const outDetail = details.map((it) => ({
-    reservationOutboundDate: newTime,
+    ...params,
     id: it.outboundDetailId,
   }));
   await LogisticDetailManager.massiveUpdate(logisticUpdate);
