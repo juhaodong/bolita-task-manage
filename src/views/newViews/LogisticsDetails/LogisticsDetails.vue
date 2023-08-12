@@ -70,7 +70,7 @@
   import { LogisticDetailManager } from '@/api/dataLayer/modules/logistic/logistic';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { CarpoolManager, carpoolSelfCheck } from '@/api/dataLayer/modules/logistic/carpool';
-  import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/NewCarpoolManagement.vue';
+  import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
 
   interface Prop {
