@@ -16,27 +16,12 @@
         </div>
       </template>
       <slot name="tableTitle"></slot>
-    </div>
-
-    <div class="flex items-center table-toolbar-right">
       <!--顶部右侧区域-->
       <slot name="toolbar"></slot>
-      <n-tag class="ml-2"> 共计 {{ getBindValues.data.length }} 条数据</n-tag>
+
       <!--斑马纹-->
-      <n-divider vertical />
+
       <!--刷新-->
-      <n-tooltip trigger="hover">
-        <template #trigger>
-          <div class="table-toolbar-right-icon" @click="reload">
-            <n-icon size="18">
-              <ReloadOutlined />
-            </n-icon>
-          </div>
-        </template>
-        <span>刷新</span>
-      </n-tooltip>
-      <!--表格设置单独抽离成组件-->
-      <ColumnSetting />
     </div>
   </div>
   <div class="s-table">
@@ -50,6 +35,22 @@
       </div>
     </div>
   </div>
+  <n-space class="mt-2" align="center">
+    <n-tag class="ml-2"> 共计 {{ getBindValues.data.length }} 条数据</n-tag>
+    <n-divider vertical />
+    <n-tooltip trigger="hover">
+      <template #trigger>
+        <div class="table-toolbar-right-icon" @click="reload">
+          <n-icon size="18">
+            <ReloadOutlined />
+          </n-icon>
+        </div>
+      </template>
+      <span>刷新</span>
+    </n-tooltip>
+    <!--表格设置单独抽离成组件-->
+    <ColumnSetting />
+  </n-space>
 </template>
 
 <script lang="ts">

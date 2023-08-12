@@ -23,12 +23,18 @@ interface JoinManager {
   key: string;
 }
 
+interface CascadeManager {
+  collectionName: string;
+  loader: (id) => Promise<any[]>;
+}
+
 export interface GeneralModel {
   collectionName: string;
   idPrefix?: string;
   init: (value, ...args) => any;
   afterAddHook?: (id: string, value: any, ...args) => Promise<any>;
   joinManager?: JoinManager;
+  cascadeManager?: CascadeManager;
 }
 
 export async function getCollectionNextId(collectionName: string, prefix = '') {
@@ -168,7 +174,16 @@ export function initModel(g: GeneralModel): Model {
     },
     async remove(id): Promise<Result<any>> {
       return await scope(async () => {
-        return await this.editInternal({ deletedAt: dayjs().valueOf() }, id);
+        await this.editInternal({ deletedAt: dayjs().valueOf() }, id);
+        if (g?.cascadeManager) {
+          const manager = g?.cascadeManager;
+          const target = ((await manager?.loader(id)) ?? []).map((it) => it.id);
+          const batch = writeBatch(db);
+          target.forEach((id) => {
+            batch.set(doc(db, manager?.collectionName, id), { deletedAt: dayjs().valueOf() });
+          });
+          await batch.commit();
+        }
       });
     },
     async massiveAdd(list, ...args) {

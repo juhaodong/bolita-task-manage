@@ -6,7 +6,19 @@
       :form-fields="filters"
       @clear="updateFilter(null)"
       @submit="updateFilter"
-    />
+    >
+      <n-button :disabled="checkedRows?.length == 0" @click="startEditStoreAddress()">
+        批量设置库位
+      </n-button>
+      <n-button @click="transferToOutBoundPlan">
+        <template #icon>
+          <n-icon>
+            <Box20Filled />
+          </n-icon>
+        </template>
+        转出库计划
+      </n-button>
+    </filter-bar>
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
@@ -15,23 +27,7 @@
       :action-column="actionColumn"
       :row-key="(row) => row.id"
       v-model:checked-row-keys="checkedRows"
-    >
-      <template #tableTitle>
-        <n-space>
-          <n-button :disabled="checkedRows?.length == 0" @click="startEditStoreAddress()">
-            批量设置库位
-          </n-button>
-          <n-button @click="transferToOutBoundPlan">
-            <template #icon>
-              <n-icon>
-                <Box20Filled />
-              </n-icon>
-            </template>
-            转出库计划
-          </n-button>
-        </n-space>
-      </template>
-    </BasicTable>
+    />
     <n-modal v-model:show="storeAddressDialog" :preset="'dialog'" title="请输入新的库位">
       <loading-frame :loading="loading">
         <n-input class="my-4" placeholder="请输入新的库位" v-model:value="storeAddress" />

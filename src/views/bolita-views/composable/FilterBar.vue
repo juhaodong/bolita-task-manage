@@ -56,7 +56,7 @@
 
 <template>
   <filter-form ref="form" @register="register" @submit="handleSubmit" @reset="handleReset">
-    <slot name="extraContent"></slot>
+    <slot></slot>
     <slot name="extraSubmitButton" :submit="submit"></slot>
     <slot name="extraCancelButton" :cancel="cancel"></slot>
   </filter-form>

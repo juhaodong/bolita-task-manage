@@ -1,6 +1,23 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <filter-bar @submit="updateFilter" :form-fields="filters" @clear="updateFilter(null)" />
+    <filter-bar @submit="updateFilter" :form-fields="filters" @clear="updateFilter(null)">
+      <n-button @click="addTable(NotifyType.Container)">
+        <template #icon>
+          <n-icon>
+            <Box20Filled />
+          </n-icon>
+        </template>
+        新建货柜预报
+      </n-button>
+      <n-button @click="addTable(NotifyType.TrayOrBox)">
+        <template #icon>
+          <n-icon>
+            <TruckDelivery />
+          </n-icon>
+        </template>
+        新建散货/托盘预报
+      </n-button>
+    </filter-bar>
     <div class="my-2"></div>
     <BasicTable
       :columns="columns"
@@ -10,24 +27,7 @@
       :actionColumn="actionColumn"
     >
       <template #tableTitle>
-        <n-space>
-          <n-button @click="addTable(NotifyType.Container)">
-            <template #icon>
-              <n-icon>
-                <Box20Filled />
-              </n-icon>
-            </template>
-            新建货柜预报
-          </n-button>
-          <n-button @click="addTable(NotifyType.TrayOrBox)">
-            <template #icon>
-              <n-icon>
-                <TruckDelivery />
-              </n-icon>
-            </template>
-            新建散货/托盘预报
-          </n-button>
-        </n-space>
+        <n-space />
       </template>
     </BasicTable>
     <n-modal

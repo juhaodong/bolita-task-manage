@@ -2,9 +2,10 @@
   <n-form v-bind="getBindValue" :model="formModel" ref="formElRef">
     <div class="flex">
       <n-space wrap>
+        <slot></slot>
         <template v-for="g in groupedSchema" :key="g.group">
           <template v-for="schema in g.schema" :key="schema.field">
-            <div style="width: 140px">
+            <div style="width: 120px">
               <template v-if="schema.slot">
                 <slot
                   :name="schema.slot"
@@ -83,7 +84,6 @@
       </n-space>
 
       <div class="flex-grow"></div>
-      <slot></slot>
       <n-space :wrap="false">
         <n-button
           v-if="getProps.showActionButtonGroup && getProps.showSubmitButton"
@@ -309,6 +309,7 @@
   });
 </script>
 
+<script setup lang="ts"></script>
 <style lang="less" scoped>
   .isFull {
     width: 100%;

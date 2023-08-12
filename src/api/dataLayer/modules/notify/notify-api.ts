@@ -1,6 +1,8 @@
 import {
+  getNotifyDetailListByNotify,
   NotifyDetailManager,
   NotifyDetailModel,
+  taskListPath,
 } from '@/api/dataLayer/modules/notify/notify-detail';
 import { BasicModel } from '@/api/dataLayer/fieldDefination/BasicModel';
 import { safeParseInt, safeSumInt } from '@/store/utils/utils';
@@ -39,6 +41,10 @@ export const NotifyManager = initModel({
       totalCount: safeParseInt(value.boxCount) + safeParseInt(value.trayCount),
     };
     return Object.assign(info, value);
+  },
+  cascadeManager: {
+    collectionName: taskListPath,
+    loader: getNotifyDetailListByNotify,
   },
   async afterAddHook(id, value, taskList) {
     await NotifyDetailManager.massiveAdd(taskList, id, value.customerId);
