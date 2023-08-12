@@ -40,7 +40,7 @@ const routes: Array<RouteRecordRaw> = [
           title: '仓库管理',
           activeMenu: 'warehouse_index',
         },
-        component: () => import('@/views/newViews/InventoryManage/InventoryManage.vue'),
+        component: () => import('@/views/newViews/WarehouseManage/WarehouseManage.vue'),
       },
       // {
       //   path: 'operator',

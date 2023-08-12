@@ -7,8 +7,8 @@
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { ref } from 'vue';
   import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
-  import { asyncInventoryFormField } from '@/api/dataLayer/modules/user/user';
   import { FormFields } from '@/api/dataLayer/common/GeneralModel';
+  import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
 
   interface Props {
     model?: any;
@@ -28,51 +28,14 @@
   init();
   const schemas: FormFields = [
     {
-      label: '结算ID',
-      field: 'id',
-    },
-    {
-      label: '拼车ID',
-      field: 'id',
-    },
-    {
-      label: '物流ID',
-      field: 'logisticId',
-    },
-    {
-      field: 'date',
-      component: 'NDatePicker',
-      label: '日期',
-      componentProps: {
-        type: 'date',
-        clearable: true,
-      },
-    },
-    asyncInventoryFormField(),
-    {
-      label: '托盘',
-      field: 'tray',
-    },
-    {
-      label: '运输公司',
-      field: 'deliveryCompany',
-    },
-    {
       label: '退回托盘数量',
       field: 'backTrayNumber',
     },
-    {
-      field: 'time',
-      component: 'NDatePicker',
-      label: '时间',
-      componentProps: {
-        type: 'date',
-        clearable: true,
-      },
-    },
+    getDatePickerFormField('returnTime', '退回时间'),
     {
       label: '备注',
       field: 'note',
+      required: false,
     },
   ];
 

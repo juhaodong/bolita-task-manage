@@ -39,7 +39,7 @@
   import { $ref } from 'vue/macros';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { InventoryManager } from '@/api/dataLayer/modules/user/user';
-  import NewInventory from '@/views/newViews/InventoryManage/NewInventory.vue';
+  import NewInventory from '@/views/newViews/WarehouseManage/WarehouseForm.vue';
 
   interface Prop {
     outId?: string;
