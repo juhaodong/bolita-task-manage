@@ -62,10 +62,7 @@ export const columns: DataTableColumns<OutboundPlanModel> = [
     title: '交流',
     key: 'exchange',
   },
-  {
-    title: '结算情况',
-    key: 'cashStatus',
-  },
+  statusColumn('结算情况', 'cashStatus'),
 ];
 
 export type OutboundPlanModel = {
