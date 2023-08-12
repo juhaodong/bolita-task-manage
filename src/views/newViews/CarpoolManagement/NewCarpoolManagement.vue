@@ -43,11 +43,16 @@
 
   async function handleSubmit(values) {
     loading = true;
-    await safeScope(async () => {
-      await CarpoolManager.editInternal(values, prop.model.id);
-      await updatePickupTime(values.reservationGetProductTime, prop.model.id);
+    if (prop.model) {
+      await safeScope(async () => {
+        await CarpoolManager.editInternal(values, prop.model.id);
+        await updatePickupTime(values.reservationGetProductTime, prop.model.id);
+        emit('saved', values);
+      });
+    } else {
       emit('saved', values);
-    });
+    }
+
     loading = false;
   }
 </script>

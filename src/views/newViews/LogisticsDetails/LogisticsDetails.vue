@@ -18,7 +18,7 @@
     >
       <template #tableTitle>
         <n-space>
-          <n-button :disabled="checkedRows.length == 0" @click="shareCar()">
+          <n-button :disabled="checkedRows.length == 0" @click="startShareCar()">
             <template #icon>
               <n-icon>
                 <Box20Filled />
@@ -37,7 +37,15 @@
         </n-space>
       </template>
     </BasicTable>
-
+    <n-modal
+      v-model:show="showShareCarModel"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 600px; max-width: 600px"
+      title="新建拼车"
+    >
+      <new-carpool-management @saved="saveShareCar" />
+    </n-modal>
     <n-modal
       v-model:show="showModal"
       :show-icon="false"
@@ -62,6 +70,7 @@
   import { LogisticDetailManager } from '@/api/dataLayer/modules/logistic/logistic';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { CarpoolManager, carpoolSelfCheck } from '@/api/dataLayer/modules/logistic/carpool';
+  import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/NewCarpoolManagement.vue';
 
   interface Prop {
     carpoolId?: string;
@@ -70,6 +79,7 @@
   const props = defineProps<Prop>();
   let finished = $ref(false);
   let currentModel: any | null = $ref(null);
+  let showShareCarModel = $ref(false);
   let checkedRows = $ref([]);
   onMounted(() => {
     if (props.carpoolId) {
@@ -79,10 +89,6 @@
   });
 
   const showModal = ref(false);
-
-  function addTable() {
-    showModal.value = true;
-  }
 
   let filterObj: any | null = $ref(null);
 
@@ -105,9 +111,14 @@
   function reloadTable() {
     actionRef.value.reload();
     showModal.value = false;
+    showShareCarModel = false;
   }
 
-  async function shareCar() {
+  function startShareCar() {
+    showShareCarModel = true;
+  }
+
+  async function saveShareCar(value) {
     await safeScope(async () => {
       const currentList: any[] = [];
       for (const checkedRow of checkedRows) {
@@ -115,8 +126,16 @@
       }
       const id = await CarpoolManager.addInternal({}, currentList);
       for (const checkedRow of checkedRows) {
-        await LogisticDetailManager.editInternal({ carpoolId: id }, checkedRow);
+        await LogisticDetailManager.editInternal(
+          {
+            carpoolId: id,
+            reservationOutboundDate: value.reservationGetProductTime,
+            deliveryCompany: value.deliveryCompany,
+          },
+          checkedRow
+        );
       }
+      await CarpoolManager.editInternal(value, id);
 
       reloadTable();
       checkedRows = [];

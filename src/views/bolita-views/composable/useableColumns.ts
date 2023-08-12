@@ -52,26 +52,28 @@ export function statusColumn(title = '状态', key = 'status') {
     title: title,
     key: key,
     render(record) {
-      return colorfulRender(record[key]);
+      return colorfulRender(record?.[key] ?? '');
     },
   };
 }
 
 const colorfulRender = (text) =>
-  h(
-    'div',
-    {
-      style: {
-        width: 'min-content',
-        fontSize: '14px',
-        padding: '2px 4px',
-        background: pickColor(text),
-        border: '1px solid ' + pickBorderColor(text),
-      },
-      class: 'whitespace-nowrap',
-    },
-    text
-  );
+  text
+    ? h(
+        'div',
+        {
+          style: {
+            width: 'min-content',
+            fontSize: '14px',
+            padding: '2px 4px',
+            background: pickColor(text),
+            border: '1px solid ' + pickBorderColor(text),
+          },
+          class: 'whitespace-nowrap',
+        },
+        text
+      )
+    : h('div');
 
 export const textRender = (text) =>
   h(

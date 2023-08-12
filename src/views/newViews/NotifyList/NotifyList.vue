@@ -78,7 +78,6 @@
   import {
     NotifyManager,
     NotifyModel,
-    notifyPath,
     NotifyType,
   } from '@/api/dataLayer/modules/notify/notify-api';
   import NotifyFormIndex from '@/views/newViews/NotifyList/form/NotifyFormIndex.vue';
@@ -92,6 +91,7 @@
   import WarehouseInfoDialog from '@/views/newViews/NotifyList/form/WarehouseInfoDialog.vue';
   import NotifyFeeDialog from '@/views/newViews/NotifyList/form/NotifyFeeDialog.vue';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
+  import { notifyPath } from '@/api/dataLayer/modules/notify/path';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
 

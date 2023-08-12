@@ -27,7 +27,7 @@
       label: '备注',
     },
     {
-      field: 'transportationCompany',
+      field: 'deliveryCompany',
       label: '运输公司',
     },
     {

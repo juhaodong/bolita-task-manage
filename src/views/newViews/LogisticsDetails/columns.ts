@@ -1,5 +1,5 @@
 import { DataTableColumns } from 'naive-ui';
-import { idColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { idColumn, statusColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
 export const columns: DataTableColumns<LogisticsDetailModel> = [
@@ -11,10 +11,7 @@ export const columns: DataTableColumns<LogisticsDetailModel> = [
     title: '客户ID',
     key: 'customerId',
   },
-  {
-    title: '拼车ID',
-    key: 'carpoolId',
-  },
+  statusColumn('拼车ID', 'carpoolId'),
   timeColumn(),
   {
     title: '出库明细ID',
@@ -69,7 +66,7 @@ export const columns: DataTableColumns<LogisticsDetailModel> = [
   { title: '报价', key: 'price' },
   {
     title: '运输公司',
-    key: 'transportationCompany',
+    key: 'deliveryCompany',
   },
   {
     title: '账单号',
