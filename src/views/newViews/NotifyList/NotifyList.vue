@@ -35,7 +35,8 @@
       :show-icon="false"
       preset="card"
       title="新建入库计划"
-      style="width: 90%; min-width: 600px; max-width: 800px"
+      :style="{ maxWidth: notifyType === NotifyType.TrayOrBox ? '1600px' : '800px' }"
+      style="width: 90%; min-width: 600px"
     >
       <notify-form-index @saved="closeAddDialog" :type="notifyType" />
     </n-modal>

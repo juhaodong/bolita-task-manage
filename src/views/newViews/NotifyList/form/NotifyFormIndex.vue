@@ -25,6 +25,9 @@
   }
 
   async function readFile(file, notifyType) {
+    if (!file) {
+      return [];
+    }
     const schema = Object.fromEntries(
       getNeededColumnByNotifyType(notifyType).map((it) => {
         return [it.title, { prop: it.key, type: String }];
@@ -45,9 +48,10 @@
   async function saveNotify(value: any) {
     startLoading();
     value.notifyType = prop.type;
-    const taskList = (await readFile(value.uploadFile[0].file, value.notifyType)).map(
-      formatItemAddress
-    );
+    const taskList = [
+      ...(await readFile(value.uploadFile?.[0].file, value.notifyType)).map(formatItemAddress),
+      ...(value?.trayTaskList ?? []),
+    ];
 
     delete value.uploadFile;
     const res = await NotifyManager.add(value, taskList);

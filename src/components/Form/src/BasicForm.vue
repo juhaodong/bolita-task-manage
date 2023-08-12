@@ -65,15 +65,15 @@
                   v-model:file-list="formModel[schema.field]"
                   v-bind="getComponentProps(schema)"
                 >
-                  <n-button> 上传文件 </n-button>
+                  <n-button> 上传文件</n-button>
                 </n-upload>
                 <n-button
                   type="info"
                   dashed
                   v-if="getComponentProps(schema).uploadTemplate"
                   @click="getComponentProps(schema).uploadTemplate"
-                  >下载上传模板</n-button
-                >
+                  >下载上传模板
+                </n-button>
               </n-space>
             </template>
             <!--动态渲染表单组件-->
@@ -100,6 +100,7 @@
 
       <!--提交 重置 展开 收起 按钮-->
       <n-gi :span="isInline ? '' : 24" :suffix="isInline ? true : false" #="{ overflow }">
+        <slot name="extra"></slot>
         <n-space
           align="center"
           :justify="isInline ? 'end' : 'start'"
@@ -111,14 +112,14 @@
             v-bind="getSubmitBtnOptions"
             @click="handleSubmit"
             :loading="loadingSub"
-            >{{ getProps.submitButtonText }}</n-button
-          >
+            >{{ getProps.submitButtonText }}
+          </n-button>
           <n-button
             v-if="getProps.showActionButtonGroup && getProps.showResetButton"
             v-bind="getResetBtnOptions"
             @click="resetFields"
-            >{{ getProps.resetButtonText }}</n-button
-          >
+            >{{ getProps.resetButtonText }}
+          </n-button>
           <n-button
             type="primary"
             text

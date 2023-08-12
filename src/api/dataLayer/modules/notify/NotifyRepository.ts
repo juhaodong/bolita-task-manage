@@ -124,8 +124,8 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
     });
   } else {
     builder.add({
-      label: '发货日期',
-      field: 'deliveryDate',
+      label: '出库方式',
+      field: 'logisticsMethods',
     });
   }
   builder.add({

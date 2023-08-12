@@ -66,6 +66,9 @@
     @submit="handleSubmit"
     @reset="handleReset"
   >
+    <template #extra>
+      <slot></slot>
+    </template>
     <slot name="extraContent"></slot>
     <slot name="extraSubmitButton" :submit="submit"></slot>
     <slot name="extraCancelButton" :cancel="cancel"></slot>
