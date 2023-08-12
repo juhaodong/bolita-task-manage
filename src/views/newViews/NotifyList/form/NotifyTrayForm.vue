@@ -6,7 +6,9 @@
         <div>
           <n-data-table :columns="columns" :data="task" />
           <div class="mt-4">
-            <n-button @click="task.push({})" class="mt-4" type="info" secondary>添加</n-button>
+            <n-button @click="task.push(generateDefaultColumn())" class="mt-4" type="info" secondary
+              >添加</n-button
+            >
           </div>
         </div>
       </div>
@@ -30,9 +32,16 @@
   }
 
   defineProps<Props>();
-  let task = reactive([{}]);
+  let task = reactive([generateDefaultColumn()]);
   let customerList = ref<any[]>([]);
   const { hasPermission } = usePermission();
+  let keyCounter = 0;
+
+  function generateDefaultColumn() {
+    return {
+      key: keyCounter++,
+    };
+  }
 
   async function init() {
     customerList.value = (await listUser(PermissionEnums.Customer)).result.map((it) => ({
@@ -98,7 +107,8 @@
   );
 
   function handleSubmit(values: any) {
-    values.trayTaskList = task.filter((it) => {
+    values.trayTaskList = task.filter((it: any) => {
+      delete it.key;
       return Object.values(it).join();
     });
     emit('submit', values);

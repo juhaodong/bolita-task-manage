@@ -19,6 +19,13 @@ export const stayDaysColumn = formatColumn('arriveTime', '存放天数', (record
 });
 export const columns: DataTableColumns<NotifyDetailInfoModel> = [
   {
+    type: 'selection',
+    disabled(row: any) {
+      console.log(row);
+      return safeParseInt(row.instorageTrayNum) + safeParseInt(row.instorageContainerNum) == 0;
+    },
+  },
+  {
     title: '入库ID',
     key: 'notifyId',
   },

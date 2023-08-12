@@ -70,6 +70,9 @@
   onMounted(async () => {
     await init();
     checkedRowKeys.value = prop?.initialKey ?? [];
+    if (checkedRowKeys.value.length > 0) {
+      allNotifyDetail = allNotifyDetail.filter((it: any) => checkedRowKeys.value.includes(it.id));
+    }
   });
   let allNotifyDetail: any[] = $ref([]);
   let loading: boolean = $ref(false);
@@ -138,10 +141,6 @@
     editableColumn({ title: '备注', key: 'note' }, allNotifyDetail),
   ]);
   const displayColumns: DataTableColumns<any> = $computed(() => [
-    {
-      type: 'selection',
-      key: 'selection',
-    },
     { title: '入库ID', key: 'notifyId' },
     { title: '票号', key: 'ticketId' },
     { title: '箱号', key: 'containerId' },
