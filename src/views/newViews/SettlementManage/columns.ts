@@ -4,14 +4,20 @@ import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
 
-export const columns: DataTableColumns<SettlementManageModel> = [
+export const columns: DataTableColumns = [
+  {
+    type: 'selection',
+    disabled(row: any) {
+      return row?.financeId;
+    },
+  },
   {
     title: '结算ID',
     key: 'id',
   },
   {
     title: '财务ID',
-    key: 'financeID',
+    key: 'financeId',
   },
   timeColumn('finishTime', '完成日期'),
   {
@@ -56,29 +62,6 @@ export const columns: DataTableColumns<SettlementManageModel> = [
     key: 'timeLine',
   },
 ];
-
-export type SettlementManageModel = {
-  id: string;
-  financeID: string;
-  finishTime: number;
-  containerNo: string;
-  outStatus: string;
-  customerId: string[];
-  notifyId: string;
-  notifyPrice: number;
-  OutboundId: number;
-  outboundPrice: string;
-  logisticId: string;
-  logisticPrice: string;
-  otherPriceName: number;
-  otherPrice: string;
-  totalPrice: string;
-  note: string[];
-  LogisticId: string;
-  claimMoney: number;
-  settlementStatus: number;
-  timeLine: string;
-};
 
 export const filters: FormField[] = [
   {

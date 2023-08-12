@@ -6,7 +6,16 @@
       :default-value-model="filterObj"
       @clear="updateFilter(null)"
       @submit="updateFilter"
-    />
+    >
+      <n-button :disabled="checkedRows.length == 0" @click="merge()">
+        <template #icon>
+          <n-icon>
+            <Box20Filled />
+          </n-icon>
+        </template>
+        合并对账
+      </n-button>
+    </filter-bar>
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
@@ -30,14 +39,18 @@
 </template>
 
 <script lang="ts" setup>
-  import { h, onMounted, reactive, ref } from 'vue';
+  import { Component, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
-  import { CashManager } from '@/api/dataLayer/modules/cash/cash';
+  import { CashManager, FinanceManager } from '@/api/dataLayer/modules/cash/cash';
   import NewSettlement from '@/views/newViews/SettlementManage/NewSettlement.vue';
+  import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
+  import { Box20Filled, Folder32Filled } from '@vicons/fluent';
+  import { safeScope } from '@/api/dataLayer/common/GeneralModel';
+  import { safeSumBy } from '@/store/utils/utils';
 
   interface Prop {
     outId?: string;
@@ -71,10 +84,6 @@
     reloadTable();
   }
 
-  function showAdd() {
-    currentModel = null;
-    showModal.value = true;
-  }
   const actionRef = ref();
 
   function reloadTable() {
@@ -82,11 +91,37 @@
     showModal.value = false;
   }
 
+  async function merge() {
+    await safeScope(async () => {
+      const currentList: any[] = [];
+      for (const checkedRow of checkedRows) {
+        currentList.push(await CashManager.getById(checkedRow));
+      }
+      const totalPrice = safeSumBy(currentList, 'subtotal');
+      console.log(currentList);
+      const id = await FinanceManager.addInternal({
+        systemSettlementPrice: totalPrice,
+        customerId: currentList[0].customerId,
+      });
+      await CashManager.massiveUpdate(
+        checkedRows.map((it) => ({
+          id: it,
+          financeId: id,
+        }))
+      );
+      reloadTable();
+      checkedRows = [];
+    });
+  }
+
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
     width: 60,
     render(record: any) {
+      const fileAction = (label, key, icon?: Component, editable = false) => {
+        return getFileActionButton(label, key, CashManager, reloadTable, record, icon, editable);
+      };
       return h(TableAction as any, {
         style: 'button',
         actions: [
@@ -97,6 +132,7 @@
               startEdit(record.id);
             },
           },
+          fileAction('附件', 'files', Folder32Filled, true),
         ],
       });
     },

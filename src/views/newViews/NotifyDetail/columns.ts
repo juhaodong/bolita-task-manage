@@ -21,7 +21,6 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
   {
     type: 'selection',
     disabled(row: any) {
-      console.log(row);
       return safeParseInt(row.instorageTrayNum) + safeParseInt(row.instorageContainerNum) == 0;
     },
   },

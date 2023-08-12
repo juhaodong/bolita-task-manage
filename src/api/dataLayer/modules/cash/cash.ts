@@ -1,7 +1,6 @@
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 import { CashStatus } from '@/api/dataLayer/modules/notify/notify-api';
-
-export const cashPath = 'cash';
+import { CashCollectionStatus } from '@/views/newViews/ReconciliationManage/columns';
 
 export interface CashModel {
   id: string;
@@ -23,6 +22,9 @@ export enum OperationType {
   Delivery = '物流',
   Refund = '索赔',
 }
+
+export const cashPath = 'cash';
+
 export const CashManager = initModel({
   collectionName: cashPath,
   init(value: CashModel): any {
@@ -56,3 +58,14 @@ export async function saveCash(cash: CashDTO, cashId?: string) {
     return await addCash(cash);
   }
 }
+
+export const financePath = 'finance';
+
+export const FinanceManager = initModel({
+  collectionName: financePath,
+  init(value: any): any {
+    value.collectionStatus = CashCollectionStatus.NotCollect;
+    return value;
+  },
+  idPrefix: 'F',
+});
