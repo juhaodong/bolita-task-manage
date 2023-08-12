@@ -1,6 +1,8 @@
 import { DataTableColumns } from 'naive-ui';
 import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
+import { FormFields } from '@/api/dataLayer/common/GeneralModel';
+import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
 
 export const columns: DataTableColumns<SettlementManageModel> = [
   {
@@ -17,43 +19,24 @@ export const columns: DataTableColumns<SettlementManageModel> = [
     key: 'containerNo',
   },
   {
-    title: '出库状态',
-    key: 'outStatus',
-  },
-  {
     title: '客户ID',
     key: 'customerId',
   },
-  {
-    title: '入库ID',
-    key: 'notifyId',
-  },
+
   {
     title: '金额',
-    key: 'notifyPrice',
+    key: 'amount',
   },
   {
-    title: '出库ID',
-    key: 'OutboundId',
+    title: '操作ID',
+    key: 'operationId',
   },
   {
-    title: '金额',
-    key: 'outboundPrice',
-  },
-  {
-    title: '物流ID',
-    key: 'logisticId',
-  },
-  {
-    title: '金额',
-    key: 'logisticPrice',
+    title: '操作类型',
+    key: 'operationType',
   },
   {
     title: '其他费用',
-    key: 'otherPriceName',
-  },
-  {
-    title: '金额',
     key: 'otherPrice',
   },
   {
@@ -65,16 +48,8 @@ export const columns: DataTableColumns<SettlementManageModel> = [
     key: 'note',
   },
   {
-    title: '查单ID',
-    key: 'checkId',
-  },
-  {
-    title: '索赔退款',
-    key: 'claimMoney',
-  },
-  {
     title: '结算状态',
-    key: 'settlementStatus',
+    key: 'cashStatus',
   },
   {
     title: '时间线',
@@ -133,5 +108,24 @@ export const filters: FormField[] = [
   {
     label: '结算状态',
     field: 'settlementStatus',
+  },
+];
+
+export const schemas: FormFields = [
+  getDatePickerFormField('finishTime', '完成日期'),
+  {
+    label: '其他费用',
+    field: 'otherPrice',
+    required: false,
+  },
+  {
+    label: '合计',
+    field: 'totalPrice',
+    required: false,
+  },
+  {
+    label: '备注',
+    field: 'note',
+    required: false,
   },
 ];

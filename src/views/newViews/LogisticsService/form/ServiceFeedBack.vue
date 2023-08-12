@@ -17,6 +17,7 @@
   } from '@/api/dataLayer/modules/logistic/logistcService';
   import { generateOptionFromArray } from '@/store/utils/utils';
   import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
+  import { OperationType, saveCash } from '@/api/dataLayer/modules/cash/cash';
 
   interface Props {
     model?: any;
@@ -69,6 +70,19 @@
     loading = true;
 
     await safeScope(async () => {
+      if (values.claimAmount) {
+        values.cashId = await saveCash(
+          {
+            customerId: prop.model?.customerId,
+            containerNo: prop.model?.containerNo,
+            operationId: prop.model?.id,
+            operationType: OperationType.Refund,
+            amount: values.claimAmount,
+            note: values.note,
+          },
+          prop.model?.cashId
+        );
+      }
       await LogisticServiceManager.editInternal(values, prop.model.id);
       emit('saved', values);
     });

@@ -24,7 +24,7 @@
       style="width: 90%; min-width: 600px; max-width: 600px"
       title="新建/编辑用户"
     >
-      <new-user :model="currentModel" @saved="reloadTable" />
+      <new-settlement :model="currentModel" @saved="reloadTable" />
     </n-modal>
   </n-card>
 </template>
@@ -36,8 +36,8 @@
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
-  import NewUser from '@/views/newViews/UserManage/NewUser.vue';
   import { CashManager } from '@/api/dataLayer/modules/cash/cash';
+  import NewSettlement from '@/views/newViews/SettlementManage/NewSettlement.vue';
 
   interface Prop {
     outId?: string;

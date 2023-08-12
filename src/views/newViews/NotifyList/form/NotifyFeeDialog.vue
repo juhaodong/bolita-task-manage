@@ -60,6 +60,7 @@
       await NotifyManager.edit(editValue, props.notifyId);
       await saveCash(
         {
+          customerId: notifyDetail?.customerId,
           containerNo: notifyDetail?.containerNo,
           operationId: props.notifyId,
           operationType: OperationType.In,
@@ -82,6 +83,7 @@
     await safeScope(async () => {
       editValue.cashId = await saveCash(
         {
+          customerId: notifyDetail?.customerId,
           containerNo: notifyDetail?.containerNo,
           operationId: props.notifyId,
           operationType: OperationType.In,

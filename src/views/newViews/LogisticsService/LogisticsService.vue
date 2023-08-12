@@ -51,7 +51,6 @@
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import NewLogisticsService from '@/views/newViews/LogisticsService/form/NewLogisticsService.vue';
   import { LogisticServiceManager } from '@/api/dataLayer/modules/logistic/logistcService';
-  import { CurrencyEuro } from '@vicons/carbon';
   import ServiceFeedBack from '@/views/newViews/LogisticsService/form/ServiceFeedBack.vue';
 
   interface Prop {
@@ -134,13 +133,6 @@
             label: '反馈',
             onClick() {
               startFeedBack(record.id);
-            },
-          },
-          {
-            label: '费用',
-            icon: CurrencyEuro,
-            onClick() {
-              doPayment(record.id);
             },
           },
           fileAction('附件', 'files'),

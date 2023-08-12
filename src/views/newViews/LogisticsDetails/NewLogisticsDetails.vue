@@ -18,6 +18,7 @@
   interface Props {
     model?: any;
   }
+
   const props = defineProps<Props>();
   let loading: boolean = $ref(false);
   const schemas: FormField[] = [
@@ -51,9 +52,9 @@
   async function handleSubmit(values: any) {
     loading = true;
     await safeScope(async () => {
-      await LogisticDetailManager.editInternal(values, props.model.id);
-      await saveCash(
+      values.cashId = await saveCash(
         {
+          customerId: props.model?.customerId,
           containerNo: props.model?.containerNo,
           operationId: props.model.id,
           operationType: OperationType.Delivery,
@@ -61,8 +62,9 @@
           note: values.note,
           cashStatus: CashStatus.WaitConfirm,
         },
-        props.model.id
+        props.model.cashId
       );
+      await LogisticDetailManager.editInternal(values, props.model.id);
       const info = await LogisticDetailManager.getById(props.model.id);
       if (info.carpoolId) {
         await carpoolSelfCheck(info.carpoolId);

@@ -7,6 +7,7 @@ export interface CashModel {
   id: string;
   financeId?: string;
   containerNo: string;
+  customerId: string;
   operationId: string;
   operationType: OperationType;
   amount: number;
@@ -36,8 +37,9 @@ export const CashManager = initModel({
 export interface CashDTO {
   containerNo?: string;
   operationId: string;
+  customerId: string;
   operationType: OperationType;
-  amount: string;
+  amount: any;
   note?: string;
   cashStatus?: CashStatus;
 }

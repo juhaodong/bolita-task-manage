@@ -72,11 +72,12 @@
     await safeScope(async () => {
       await saveCash(
         {
+          customerId: outDetail?.customerId,
           containerNo: outDetail?.containerNo,
           operationId: props.outId,
           operationType: OperationType.Out,
-          amount: extraInfo.finalPrice,
-          note: extraInfo.explain,
+          amount: summary.value.sum,
+          note: extraInfo.operationNote,
           cashStatus: CashStatus.Done,
         },
         outDetail?.cashId
@@ -93,13 +94,14 @@
     };
 
     await safeScope(async () => {
-      await saveCash(
+      editValue.cashId = await saveCash(
         {
+          customerId: outDetail?.customerId,
           containerNo: outDetail?.containerNo,
           operationId: props.outId,
           operationType: OperationType.Out,
-          amount: extraInfo.finalPrice,
-          note: extraInfo.explain,
+          amount: summary.value.sum,
+          note: extraInfo.operationNote,
         },
         outDetail?.cashId
       );
