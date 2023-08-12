@@ -1,8 +1,11 @@
 <script setup lang="ts">
-  import { computed, watchEffect } from 'vue';
-  import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
+  import { computed, reactive, watchEffect } from 'vue';
+  import { CashStatus, NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
   import { getNotifyDetailListByNotify } from '@/api/dataLayer/modules/notify/notify-detail';
   import { safeParseFloat, safeParseInt } from '@/store/utils/utils';
+  import { cloneDeep } from 'lodash-es';
+  import { safeScope } from '@/api/dataLayer/common/GeneralModel';
+  import { OperationType, saveCash } from '@/api/dataLayer/modules/cash/cash';
 
   interface Props {
     notifyId: string;
@@ -11,19 +14,22 @@
   const props = defineProps<Props>();
   let notifyDetail: any | null = $ref(null);
   let currentTaskList: any[] = $ref([]);
+  const defaultExtraInfo = {
+    explain: '',
+    traySinglePrice: '',
+    containerSinglePrice: '',
+    trayNote: '',
+    containerNote: '',
+    feeNote: '',
+    finalPrice: '',
+  };
+  const extraInfo = reactive(defaultExtraInfo);
 
-  const emit = defineEmits(['close', 'refresh']);
+  const emit = defineEmits(['close', 'refresh', 'save']);
   watchEffect(async () => {
     await reload();
   });
 
-  const totalContainerCount = computed(() => {
-    return currentTaskList.reduce((sum, i) => sum + safeParseInt(i?.containerNum), 0);
-  });
-
-  const totalTrayCount = computed(() => {
-    return currentTaskList.reduce((sum, i) => sum + safeParseInt(i?.trayCount), 0);
-  });
   const totalArrivedContainerCount = computed(() => {
     return currentTaskList.reduce((sum, i) => sum + safeParseInt(i?.arrivedContainerNum) || 0, 0);
   });
@@ -33,8 +39,8 @@
 
   const totalPrice = computed(() => {
     return (
-      safeParseFloat(containerSinglePrice) * totalArrivedContainerCount.value +
-      safeParseFloat(traySinglePrice) * totalArrivedTrayCount.value
+      safeParseFloat(extraInfo.containerSinglePrice) * totalArrivedContainerCount.value +
+      safeParseFloat(extraInfo.traySinglePrice) * totalArrivedTrayCount.value
     );
   });
 
@@ -42,25 +48,48 @@
     if (props.notifyId != null) {
       notifyDetail = await NotifyManager.getById(props.notifyId);
       currentTaskList = await getNotifyDetailListByNotify(props.notifyId);
+      Object.assign(extraInfo, cloneDeep(notifyDetail?.extraInfo ?? defaultExtraInfo));
       emit('refresh');
     }
   }
+  async function confirm() {
+    const editValue = {
+      cashStatus: CashStatus.Done,
+    };
+    await safeScope(async () => {
+      await NotifyManager.edit(editValue, props.notifyId);
+      await saveCash(
+        {
+          containerNo: notifyDetail?.containerNo,
+          operationId: props.notifyId,
+          operationType: OperationType.In,
+          amount: extraInfo.finalPrice,
+          note: extraInfo.explain,
+        },
+        notifyDetail?.cashId
+      );
+      emit('save');
+    });
+  }
 
-  let explain = $ref('');
+  async function save() {
+    const editValue: any = {
+      extraInfo,
+      cashStatus: CashStatus.WaitConfirm,
+    };
 
-  let traySinglePrice: string = $ref('');
-  let containerSinglePrice: string = $ref('');
-  let trayNote: string = $ref('');
-  let containerNote: string = $ref('');
-  let finalPrice: string = $ref('');
-  let feeNote: string = $ref('');
-  const canConfirm = computed(() => {
-    return (
-      totalTrayCount.value == totalArrivedTrayCount.value &&
-      totalContainerCount.value == totalArrivedContainerCount.value &&
-      explain
-    );
-  });
+    await safeScope(async () => {
+      editValue.cashId = await saveCash({
+        containerNo: notifyDetail?.containerNo,
+        operationId: props.notifyId,
+        operationType: OperationType.In,
+        amount: extraInfo.finalPrice,
+        note: extraInfo.explain,
+      });
+      await NotifyManager.edit(editValue, props.notifyId);
+      emit('save');
+    });
+  }
 </script>
 
 <template>
@@ -94,16 +123,16 @@
             <td>-</td>
             <td>
               <n-input
-                v-model:value="traySinglePrice"
+                v-model:value="extraInfo.traySinglePrice"
                 placeholder=""
-                @focus="traySinglePrice = ''"
+                @focus="extraInfo.traySinglePrice = ''"
               />
             </td>
             <td>
-              {{ safeParseFloat(traySinglePrice) * totalArrivedTrayCount }}
+              {{ safeParseFloat(extraInfo.traySinglePrice) * totalArrivedTrayCount }}
             </td>
             <td>
-              <n-input v-model:value="trayNote" placeholder="" />
+              <n-input v-model:value="extraInfo.trayNote" placeholder="" />
             </td>
           </tr>
           <tr>
@@ -111,16 +140,16 @@
             <td>{{ totalArrivedContainerCount }}</td>
             <td>
               <n-input
-                v-model:value="containerSinglePrice"
+                v-model:value="extraInfo.containerSinglePrice"
                 placeholder=""
-                @focus="containerSinglePrice = ''"
+                @focus="extraInfo.containerSinglePrice = ''"
               />
             </td>
             <td>
-              {{ safeParseFloat(containerSinglePrice) * totalArrivedContainerCount }}
+              {{ safeParseFloat(extraInfo.containerSinglePrice) * totalArrivedContainerCount }}
             </td>
             <td>
-              <n-input v-model:value="containerNote" placeholder="" />
+              <n-input v-model:value="extraInfo.containerNote" placeholder="" />
             </td>
           </tr>
           <tr>
@@ -137,19 +166,27 @@
             <td> -</td>
             <td> -</td>
             <td>
-              <n-input v-model:value="finalPrice" placeholder="" />
+              <n-input v-model:value="extraInfo.finalPrice" placeholder="" />
             </td>
-            <td> <n-input v-model:value="feeNote" placeholder="" /> </td>
+            <td> <n-input v-model:value="extraInfo.feeNote" placeholder="" /> </td>
           </tr>
         </tbody>
       </n-table>
     </div>
     <div class="mt-4">
-      <n-input placeholder="说明" v-model="explain" />
+      <n-input placeholder="说明" v-model:value="extraInfo.explain" />
     </div>
     <n-space class="mt-4">
-      <n-button type="primary" :disabled="!canConfirm">保存</n-button>
-      <n-button type="primary" :disabled="!canConfirm">确认</n-button>
+      <n-button @click="save" :disabled="!extraInfo.finalPrice" type="warning" secondary
+        >保存结算</n-button
+      >
+      <n-button
+        @click="confirm"
+        :disabled="notifyDetail?.cashStatus != CashStatus.WaitConfirm"
+        type="primary"
+        secondary
+        >确认结算</n-button
+      >
     </n-space>
   </div>
 </template>

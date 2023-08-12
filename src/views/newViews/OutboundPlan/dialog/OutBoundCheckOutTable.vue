@@ -66,7 +66,6 @@
 
   async function confirm() {
     const editValue = {
-      //operationInfo: localOperationInfo,
       cashStatus: CashStatus.Done,
     };
     await safeScope(async () => {

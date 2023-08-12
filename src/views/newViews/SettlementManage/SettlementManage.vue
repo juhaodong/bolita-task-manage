@@ -1,69 +1,106 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter" />
+    <filter-bar
+      v-if="finished"
+      :form-fields="filters"
+      :default-value-model="filterObj"
+      @clear="updateFilter(null)"
+      @submit="updateFilter"
+    />
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
-      :actionColumn="actionColumn"
+      :action-column="actionColumn"
       :columns="columns"
       :request="loadDataTable"
       :row-key="(row) => row.id"
-      @update:checked-row-keys="onCheckedRow"
-    >
-      <template #tableTitle>
-        <n-space>
-          <n-button @click="addTable()">
-            <template #icon>
-              <n-icon>
-                <Box20Filled />
-              </n-icon>
-            </template>
-            新建
-          </n-button>
-          <n-button>
-            <template #icon>
-              <n-icon>
-                <Box20Filled />
-              </n-icon>
-            </template>
-            结算
-          </n-button>
-        </n-space>
-      </template>
-    </BasicTable>
+      v-model:checked-row-keys="checkedRows"
+    />
 
     <n-modal
       v-model:show="showModal"
       :show-icon="false"
       preset="card"
-      style="width: 90%; min-width: 600px; max-width: 800px"
-      title="新建待认领"
+      style="width: 90%; min-width: 600px; max-width: 600px"
+      title="新建/编辑用户"
     >
-      <new-settlement @submit="createClaim" />
+      <new-user :model="currentModel" @saved="reloadTable" />
     </n-modal>
   </n-card>
 </template>
 
 <script lang="ts" setup>
-  import { ref } from 'vue';
-  import { BasicTable } from '@/components/Table';
+  import { h, onMounted, reactive, ref } from 'vue';
+  import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
-  import { Box20Filled } from '@vicons/fluent';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import NewSettlement from '@/views/newViews/SettlementManage/NewSettlement.vue';
+  import { $ref } from 'vue/macros';
+  import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
+  import NewUser from '@/views/newViews/UserManage/NewUser.vue';
+  import { CashManager } from '@/api/dataLayer/modules/cash/cash';
 
+  interface Prop {
+    outId?: string;
+  }
+
+  let finished = $ref(false);
+  const props = defineProps<Prop>();
+  onMounted(() => {
+    if (props.outId) {
+      filterObj = { outId: props.outId };
+    }
+    finished = true;
+  });
   const showModal = ref(false);
-  const actionRef = ref();
-  function reloadTable() {
-    actionRef.value.reload();
-  }
-  async function loadDataTable() {
-    return await loadAllClaim();
-  }
+  let checkedRows = $ref([]);
+  let currentModel: any | null = $ref(null);
 
-  function addTable() {
+  async function startEdit(id) {
+    currentModel = await CashManager.getById(id);
     showModal.value = true;
   }
+
+  const loadDataTable = async () => {
+    return await CashManager.load(filterObj);
+  };
+
+  let filterObj: any | null = $ref(null);
+
+  function updateFilter(value) {
+    filterObj = value;
+    reloadTable();
+  }
+
+  function showAdd() {
+    currentModel = null;
+    showModal.value = true;
+  }
+  const actionRef = ref();
+
+  function reloadTable() {
+    actionRef.value.reload();
+    showModal.value = false;
+  }
+
+  const actionColumn = reactive({
+    title: '可用动作',
+    key: 'action',
+    width: 60,
+    render(record: any) {
+      return h(TableAction as any, {
+        style: 'button',
+        actions: [
+          {
+            label: '修改',
+            icon: DocumentEdit16Filled,
+            onClick() {
+              startEdit(record.id);
+            },
+          },
+        ],
+      });
+    },
+  });
 </script>
 
 <style lang="less" scoped></style>

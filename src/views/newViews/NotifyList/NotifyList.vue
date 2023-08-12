@@ -56,7 +56,7 @@
       title="费用表"
       style="width: 90%; min-width: 600px; max-width: 800px"
     >
-      <notify-fee-dialog :notify-id="currentNotifyId!" />
+      <notify-fee-dialog :notify-id="currentNotifyId!" @save="reloadTable" />
     </n-modal>
     <n-modal
       v-model:show="showWarehouseDialog"
@@ -117,6 +117,7 @@
   function reloadTable() {
     actionRef.value.reload();
     showOperationTable = false;
+    showFeeDialog = false;
   }
 
   async function closeAddDialog() {
