@@ -55,7 +55,7 @@
       values.cashId = await saveCash(
         {
           customerId: props.model?.customerId,
-          containerNo: props.model?.containerNo,
+          containerNo: props.model?.containerNo ?? '',
           operationId: props.model.id,
           operationType: OperationType.Delivery,
           amount: values.settlementPrice,

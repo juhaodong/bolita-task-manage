@@ -24,7 +24,7 @@
       :show-icon="false"
       preset="card"
       style="width: 90%; min-width: 600px; max-width: 1200px"
-      title="编辑出库明细"
+      title="编辑售后信息"
     >
       <new-logistics-service :model="currentModel" @saved="reloadTable" />
     </n-modal>
@@ -33,7 +33,7 @@
       :show-icon="false"
       preset="card"
       style="width: 90%; min-width: 600px; max-width: 1200px"
-      title="编辑出库明细"
+      title="编辑售后信息"
     >
       <service-feed-back :model="currentModel" @saved="reloadTable" />
     </n-modal>

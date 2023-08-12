@@ -20,6 +20,10 @@
   const prop = defineProps<Props>();
   const schemas: FormFields = [
     {
+      label: '仓库ID',
+      field: 'id',
+    },
+    {
       label: '公司名称',
       field: 'companyName',
     },

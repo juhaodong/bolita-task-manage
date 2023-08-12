@@ -74,7 +74,7 @@
         values.cashId = await saveCash(
           {
             customerId: prop.model?.customerId,
-            containerNo: prop.model?.containerNo,
+            containerNo: prop.model?.containerNo ?? '',
             operationId: prop.model?.id,
             operationType: OperationType.Refund,
             amount: values.claimAmount,
