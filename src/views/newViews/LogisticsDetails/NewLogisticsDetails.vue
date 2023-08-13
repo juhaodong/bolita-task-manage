@@ -8,12 +8,12 @@
 <script lang="ts" setup>
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
-  import { LogisticDetailManager } from '@/api/dataLayer/modules/logistic/logistic';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { carpoolSelfCheck } from '@/api/dataLayer/modules/logistic/carpool';
   import { OperationType, saveCash } from '@/api/dataLayer/modules/cash/cash';
   import { CashStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import { LogisticDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
 
   interface Props {
     model?: any;

@@ -45,12 +45,12 @@
   import { Box20Filled } from '@vicons/fluent';
   import NewOutboundDetail from '@/views/newViews/OutboundDetail/NewOutboundDetail.vue';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { $ref } from 'vue/macros';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { useCheckDialog } from '@/store/modules/checkDialogState';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
+  import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
 
   interface Prop {
     outId?: string;

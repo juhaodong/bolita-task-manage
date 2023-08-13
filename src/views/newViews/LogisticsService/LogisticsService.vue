@@ -45,13 +45,13 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { $ref } from 'vue/macros';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import NewLogisticsService from '@/views/newViews/LogisticsService/form/NewLogisticsService.vue';
   import { LogisticServiceManager } from '@/api/dataLayer/modules/logistic/logistcService';
   import ServiceFeedBack from '@/views/newViews/LogisticsService/form/ServiceFeedBack.vue';
+  import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
 
   interface Prop {
     outId?: string;

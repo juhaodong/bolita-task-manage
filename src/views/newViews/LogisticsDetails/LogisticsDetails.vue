@@ -67,11 +67,11 @@
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
-  import { LogisticDetailManager } from '@/api/dataLayer/modules/logistic/logistic';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { CarpoolManager, carpoolSelfCheck } from '@/api/dataLayer/modules/logistic/carpool';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
+  import { LogisticDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
 
   interface Prop {
     carpoolId?: string;

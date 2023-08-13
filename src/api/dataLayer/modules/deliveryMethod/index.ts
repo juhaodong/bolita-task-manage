@@ -10,6 +10,7 @@ export enum DeliveryMethod {
   Truck = '卡派',
   TrailAmz = '尾程直送',
   SelfPick = '自提',
+  PrivateTruck = '私人卡派',
   Others = '其他',
 }
 
@@ -19,6 +20,7 @@ export enum TruckDeliveryMethod {
   AMZ = 'AMZ卡派',
   Truck = '卡派',
   TrailAmz = '尾程直送',
+  PrivateTruck = '私人卡派',
 }
 export const truckDeliveryMethod = Object.values(TruckDeliveryMethod);
 

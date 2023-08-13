@@ -1,11 +1,11 @@
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 import { safeSumBy, safeSumInt } from '@/store/utils/utils';
-import { LogisticDetailManager } from '@/api/dataLayer/modules/logistic/logistic';
 import { where } from 'firebase/firestore';
 import {
-  OutBoundDetailManager,
+  LogisticDetailManager,
   OutBoundPlanManager,
 } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
 
 function initCarpool(value, logisticDetailList) {
   value.trayNum = safeSumInt(logisticDetailList, 'trayNum');

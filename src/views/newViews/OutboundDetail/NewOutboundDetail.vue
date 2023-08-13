@@ -15,7 +15,8 @@
   } from '@/api/dataLayer/fieldDefination/addressGroup';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+
+  import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
 
   interface Props {
     model?: any;

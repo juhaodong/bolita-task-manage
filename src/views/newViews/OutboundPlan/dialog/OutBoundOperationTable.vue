@@ -5,10 +5,7 @@
     getDateNow,
     timeDisplay,
   } from '@/views/bolita-views/composable/useableColumns';
-  import {
-    OutBoundDetailManager,
-    OutBoundPlanManager,
-  } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+  import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { DataTableColumns } from 'naive-ui';
   import { where } from 'firebase/firestore';
   import {
@@ -20,6 +17,7 @@
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { safeParseInt, safeSumInt } from '@/store/utils/utils';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
+  import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
 
   console.log(getDateNow, timeDisplay);
 

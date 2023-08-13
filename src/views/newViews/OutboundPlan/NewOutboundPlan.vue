@@ -114,7 +114,7 @@
     loading = true;
     value.planList = allNotifyDetail;
     const res = await OutBoundPlanManager.add(value, allNotifyDetail);
-    await afterPlanDetailAdded(allNotifyDetail, value);
+    await afterPlanDetailAdded(allNotifyDetail);
     await handleRequest(res, () => {
       emit('saved');
     });
