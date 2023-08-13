@@ -88,6 +88,7 @@
         <n-button
           v-if="getProps.showActionButtonGroup && getProps.showSubmitButton"
           v-bind="getSubmitBtnOptions"
+          size="small"
           @click="handleSubmit"
           :loading="loadingSub"
           >{{ getProps.submitButtonText }}
@@ -95,6 +96,7 @@
         <n-button
           v-if="getProps.showActionButtonGroup && getProps.showResetButton"
           v-bind="getResetBtnOptions"
+          size="small"
           @click="resetFields"
           >{{ getProps.resetButtonText }}
         </n-button>
