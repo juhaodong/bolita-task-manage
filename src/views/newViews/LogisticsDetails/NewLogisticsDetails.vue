@@ -13,7 +13,7 @@
   import { carpoolSelfCheck } from '@/api/dataLayer/modules/logistic/carpool';
   import { OperationType, saveCash } from '@/api/dataLayer/modules/cash/cash';
   import { CashStatus } from '@/api/dataLayer/modules/notify/notify-api';
-  import { LogisticDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+  import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
 
   interface Props {
     model?: any;
@@ -64,8 +64,8 @@
         },
         props.model.cashId
       );
-      await LogisticDetailManager.editInternal(values, props.model.id);
-      const info = await LogisticDetailManager.getById(props.model.id);
+      await OutBoundPlanManager.editInternal(values, props.model.id);
+      const info = await OutBoundPlanManager.getById(props.model.id);
       if (info.carpoolId) {
         await carpoolSelfCheck(info.carpoolId);
       }

@@ -1,10 +1,7 @@
 import { getCollectionNextId, initModel } from '@/api/dataLayer/common/GeneralModel';
 import { safeSumBy, safeSumInt } from '@/store/utils/utils';
 import { where } from 'firebase/firestore';
-import {
-  LogisticDetailManager,
-  OutBoundPlanManager,
-} from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
 
 function initCarpool(value, logisticDetailList) {
   value.trayNum = safeSumInt(logisticDetailList, 'trayNum');
@@ -18,11 +15,11 @@ export const carpoolPath = 'carpool';
 export const CarpoolManager = initModel({
   collectionName: carpoolPath,
   idPrefix: 'P',
-  async init(value, logisticDetailList): any {
-    if (logisticDetailList.length > 1) {
+  async init(value, outboundPlanList): any {
+    if (outboundPlanList.length > 1) {
       value.id = await getCollectionNextId(carpoolPath, 'CP');
     }
-    return initCarpool(value, logisticDetailList);
+    return initCarpool(value, outboundPlanList);
   },
   async afterEditHook(id, value) {
     const updateValue = value;
@@ -36,7 +33,7 @@ export const CarpoolManager = initModel({
 export async function carpoolSelfCheck(id: string) {
   if (id) {
     const carpool = await CarpoolManager.getById(id);
-    const details = await LogisticDetailManager.load(null, where('carpoolId', '==', id));
+    const details = await OutBoundPlanManager.load(null, where('carpoolId', '==', id));
     if (details.length == 0) {
       await CarpoolManager.remove(id);
     } else {
@@ -57,17 +54,14 @@ export async function updatePickupInfo(
   },
   id
 ) {
-  const details = await LogisticDetailManager.load(null, where('carpoolId', '==', id));
+  const details = await OutBoundPlanManager.load(null, where('carpoolId', '==', id));
   const logisticUpdate = details.map((it) => ({
     ...params,
     id: it.id,
   }));
-  const outPlan = details.map((it) => ({
-    ...params,
-    id: it.outId,
-  }));
-  await LogisticDetailManager.massiveUpdate(logisticUpdate);
-  await OutBoundPlanManager.massiveUpdate(outPlan);
+
+  await OutBoundPlanManager.massiveUpdate(logisticUpdate);
+
   if (params.PODFiles || params.pickupFiles) {
     for (const d of details) {
       if (!d.outId) {

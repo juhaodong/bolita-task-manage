@@ -8,17 +8,13 @@ import {
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
 export const columns: DataTableColumns = [
-  {
-    title: '物流ID',
-    key: 'id',
-  },
+  idColumn('出库ID', '/operation/detail', 'id'),
   {
     title: '客户ID',
     key: 'customerId',
   },
   statusColumn('订车ID', 'carpoolId'),
   timeColumn(),
-  idColumn('出库ID', '/operation/detail', 'outId'),
   {
     title: '仓库',
     key: 'warehouseId',

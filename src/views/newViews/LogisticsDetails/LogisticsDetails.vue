@@ -71,7 +71,9 @@
   import { CarpoolManager, carpoolSelfCheck } from '@/api/dataLayer/modules/logistic/carpool';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
-  import { LogisticDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+  import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+  import { where } from 'firebase/firestore';
+  import { truckDeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 
   interface Prop {
     carpoolId?: string;
@@ -94,13 +96,16 @@
   let filterObj: any | null = $ref(null);
 
   const loadDataTable = async () => {
-    return await LogisticDetailManager.load(filterObj);
+    return await OutBoundPlanManager.load(
+      filterObj,
+      where('deliveryMethod', 'in', truckDeliveryMethod)
+    );
   };
 
   const actionRef = ref();
 
   async function startEdit(id) {
-    currentModel = await LogisticDetailManager.getById(id);
+    currentModel = await OutBoundPlanManager.getById(id);
     showModal.value = true;
   }
 
@@ -123,11 +128,11 @@
     await safeScope(async () => {
       const currentList: any[] = [];
       for (const checkedRow of checkedRows) {
-        currentList.push(await LogisticDetailManager.getById(checkedRow));
+        currentList.push(await OutBoundPlanManager.getById(checkedRow));
       }
       const id = await CarpoolManager.addInternal({}, currentList);
       for (const checkedRow of checkedRows) {
-        await LogisticDetailManager.editInternal(
+        await OutBoundPlanManager.editInternal(
           {
             carpoolId: id,
           },
@@ -144,11 +149,11 @@
     await safeScope(async () => {
       const currentList: any[] = [];
       for (const checkedRow of checkedRows) {
-        currentList.push(await LogisticDetailManager.getById(checkedRow));
+        currentList.push(await OutBoundPlanManager.getById(checkedRow));
       }
       const affectIds = currentList.map((it) => it.carpoolId);
       for (const checkedRow of checkedRows) {
-        await LogisticDetailManager.editInternal({ carpoolId: '' }, checkedRow);
+        await OutBoundPlanManager.editInternal({ carpoolId: '' }, checkedRow);
       }
       for (const affectId of affectIds) {
         await carpoolSelfCheck(affectId);
@@ -167,7 +172,7 @@
         return getFileActionButton(
           label,
           key,
-          LogisticDetailManager,
+          OutBoundPlanManager,
           reloadTable,
           record,
           icon,
