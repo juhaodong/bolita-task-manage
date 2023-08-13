@@ -18,10 +18,6 @@ export const columns: DataTableColumns = [
   },
   statusColumn('拼车ID', 'carpoolId'),
   timeColumn(),
-  {
-    title: '出库明细ID',
-    key: 'outboundDetailId',
-  },
   idColumn('出库ID', '/operation/detail', 'outId'),
   {
     title: '仓库',

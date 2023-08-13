@@ -3,6 +3,7 @@ import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import { truckDeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 import { LogisticDetailManager } from '@/api/dataLayer/modules/logistic/logistic';
 import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
+import { groupBy } from 'lodash-es';
 
 export async function afterPlanDetailAdded(planDetails, plan) {
   const updateValue = planDetails.map((detail) => {
@@ -23,6 +24,8 @@ export async function afterPlanDetailAdded(planDetails, plan) {
   });
   await NotifyDetailManager.massiveUpdate(updateValue);
   if (truckDeliveryMethod.includes(plan.deliveryMethod)) {
+    const groupedInfo = groupBy(planDetails, 'deliveryAddress');
+    console.log(groupedInfo);
     await LogisticDetailManager.massiveAdd(
       planDetails.map((it) => ({
         outboundDetailId: it.id,
