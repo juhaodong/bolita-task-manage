@@ -7,10 +7,10 @@
       @clear="updateFilter(null)"
       @submit="updateFilter"
     >
-      <n-button :disabled="checkedRows?.length == 0" @click="startEditStoreAddress()">
+      <n-button type="info" :disabled="checkedRows?.length == 0" @click="startEditStoreAddress()">
         批量设置库位
       </n-button>
-      <n-button @click="transferToOutBoundPlan">
+      <n-button type="warning" @click="transferToOutBoundPlan">
         <template #icon>
           <n-icon>
             <Box20Filled />

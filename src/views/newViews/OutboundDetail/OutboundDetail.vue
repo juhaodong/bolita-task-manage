@@ -117,7 +117,7 @@
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
-    width: 120,
+    width: 40,
     render(record: any) {
       const fileAction = (label, key, icon?: Component, editable = false) => {
         return getFileActionButton(

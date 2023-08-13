@@ -1,7 +1,7 @@
 <template>
   <n-card :bordered="false" class="proCard">
     <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
-      <n-button @click="addTable()">
+      <n-button type="primary" @click="addTable()">
         <template #icon>
           <n-icon>
             <Box20Filled />
@@ -70,7 +70,7 @@
   import { $ref } from 'vue/macros';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
-  import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import { CashStatus, OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import OutBoundOperationTable from '@/views/newViews/OutboundPlan/dialog/OutBoundOperationTable.vue';
   import OutBoundCheckOutTable from '@/views/newViews/OutboundPlan/dialog/OutBoundCheckOutTable.vue';
   import OutBoundEditDialog from '@/views/newViews/OutboundPlan/dialog/OutBoundEditDialog.vue';
@@ -162,6 +162,15 @@
             onClick() {
               currentId = record.id!;
               showFeeDialog = true;
+            },
+            highlight: () => {
+              if (record?.cashStatus == CashStatus.Done) {
+                return 'success';
+              } else if (record?.cashStatus == CashStatus.WaitConfirm) {
+                return 'warning';
+              } else {
+                return 'error';
+              }
             },
             ifShow() {
               return record.outStatus == OutStatus.All;

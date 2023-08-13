@@ -44,7 +44,7 @@
       style="width: 90%; min-width: 600px; max-width: 600px"
       title="新建订车"
     >
-      <new-carpool-management @saved="saveShareCar" />
+      <new-carpool-management @saved="saveShareCar" :merged-out-ids="checkedRows" />
     </n-modal>
     <n-modal
       v-model:show="showModal"
@@ -68,7 +68,7 @@
   import { $ref } from 'vue/macros';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { CarpoolManager, carpoolSelfCheck } from '@/api/dataLayer/modules/logistic/carpool';
+  import { carpoolSelfCheck } from '@/api/dataLayer/modules/logistic/carpool';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
@@ -124,25 +124,9 @@
     showShareCarModel = true;
   }
 
-  async function saveShareCar(value) {
-    await safeScope(async () => {
-      const currentList: any[] = [];
-      for (const checkedRow of checkedRows) {
-        currentList.push(await OutBoundPlanManager.getById(checkedRow));
-      }
-      const id = await CarpoolManager.addInternal({}, currentList);
-      for (const checkedRow of checkedRows) {
-        await OutBoundPlanManager.editInternal(
-          {
-            carpoolId: id,
-          },
-          checkedRow
-        );
-      }
-      await CarpoolManager.editInternal(value, id);
-      reloadTable();
-      checkedRows = [];
-    });
+  async function saveShareCar() {
+    reloadTable();
+    checkedRows = [];
   }
 
   async function cancelCar() {

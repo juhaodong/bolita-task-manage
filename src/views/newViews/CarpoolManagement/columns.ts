@@ -1,7 +1,11 @@
 import { DataTableColumns } from 'naive-ui';
 import { idColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
-import { asyncCustomerFormField } from '@/api/dataLayer/fieldDefination/common';
+import {
+  asyncCustomerFormField,
+  getDatePickerFormField,
+} from '@/api/dataLayer/fieldDefination/common';
 import { FormFields } from '@/api/dataLayer/common/GeneralModel';
+import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
 export const columns: DataTableColumns<CarpoolManagementModel> = [
   idColumn('订车ID', '/logistic/logisticDetail'),
@@ -114,3 +118,30 @@ export const filters: FormFields = [
     },
   },
 ];
+
+export const schemas: FormField[] = [
+  {
+    field: 'ISA',
+    label: 'ISA',
+  },
+  {
+    field: 'totalCost',
+    label: '订车价格',
+  },
+  {
+    field: 'billNumber',
+    label: '账单号',
+  },
+  getDatePickerFormField('reservationGetProductTime', '预约取货时间'),
+  {
+    field: 'REF',
+    label: 'REF.',
+  },
+  {
+    field: 'deliveryCompany',
+    label: '运输公司',
+  },
+].map((it) => {
+  it.required = false;
+  return it;
+});

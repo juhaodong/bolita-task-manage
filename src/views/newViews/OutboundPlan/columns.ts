@@ -99,7 +99,7 @@ export type OutboundPlanModel = {
 
 export enum CarStatus {
   Able = '可订车',
-  UnAble = '待订车',
+  UnAble = '待打托',
   Booked = '已订车',
 }
 

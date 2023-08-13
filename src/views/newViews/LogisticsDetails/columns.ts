@@ -6,8 +6,15 @@ import {
   timeColumn,
 } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
+import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 
 export const columns: DataTableColumns = [
+  {
+    type: 'selection',
+    disabled(row: any) {
+      return row?.carStatus == CarStatus.UnAble;
+    },
+  },
   idColumn('出库ID', '/operation/detail', 'id'),
   {
     title: '客户ID',
@@ -32,8 +39,8 @@ export const columns: DataTableColumns = [
     key: 'containerNum',
   },
   statusColumnEasy({
-    title: '出库状态',
-    key: 'outStatus',
+    title: '订车状态',
+    key: 'carStatus',
   }),
   {
     title: '目的国',
