@@ -68,7 +68,7 @@ const colorfulRender = (text) =>
         {
           style: {
             width: 'min-content',
-            fontSize: '14px',
+            fontSize: '10px',
             padding: '2px 4px',
             background: pickColor(text),
             border: '1px solid ' + pickBorderColor(text),
@@ -95,7 +95,7 @@ export function idColumn(title = 'ID', targetPage, keyName = 'id') {
   return {
     title: title,
     key: keyName,
-    width: 110,
+    width: 60,
     render(record) {
       return h(
         RouterLink,
@@ -177,18 +177,18 @@ export function communicateColumn(keyName = 'createTimestamp', title = '创建�
   };
 }
 
-export function editableColumn(colInfo: { title: string; key: string }, data) {
-  const { title, key } = colInfo;
+export function editableColumn(colInfo: { title: string; key: string; width?: number }, data) {
+  const { title, key, width } = colInfo;
   return {
     title,
     key,
+    width,
     maxWidth: 140,
     render(row, index) {
       return h(NInput, {
         value: row[key],
-        onClick() {
-          row[key] = '';
-        },
+        size: 'small',
+        style: 'font-size:10px !important',
         onUpdateValue(v) {
           data[index][key] = v;
         },

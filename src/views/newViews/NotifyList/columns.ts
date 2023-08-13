@@ -24,10 +24,12 @@ export const columns: DataTableColumns<any> = [
   {
     title: '仓库',
     key: 'warehouseId',
+    width: 60,
   },
   {
     title: '货柜号',
     key: 'containerNo',
+    width: 140,
   },
   {
     title: '总数量',

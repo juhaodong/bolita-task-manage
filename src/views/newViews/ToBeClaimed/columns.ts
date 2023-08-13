@@ -1,14 +1,24 @@
 import { DataTableColumns, NImage, NSpace } from 'naive-ui';
-import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
-import dayjs from 'dayjs';
-import { addDoc, collection, orderBy, query } from 'firebase/firestore';
-import { db, executeQuery, getFileListUrl } from '@/store/plugins/firebase';
-import { resultError, resultSuccess } from '@/store/request/_util';
+import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { h } from 'vue';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { deliveryMethodSelection } from '@/api/dataLayer/fieldDefination/common';
+import {
+  asyncCustomerFormField,
+  deliveryMethodSelection,
+  getFilesUploadFormField,
+} from '@/api/dataLayer/fieldDefination/common';
+import { FormFields, initModel } from '@/api/dataLayer/common/GeneralModel';
+import { asyncInventoryFormField } from '@/api/dataLayer/modules/user/user';
+import { stayDaysColumn } from '@/views/newViews/NotifyDetail/columns';
+import dayjs from 'dayjs';
 
 export const columns: DataTableColumns<ToBeClaimedModel> = [
+  {
+    type: 'selection',
+    disabled(row: any) {
+      return row?.claimStatus != ClaimStatus.Waiting;
+    },
+  },
   timeColumn(),
   {
     title: '物流渠道',
@@ -23,41 +33,40 @@ export const columns: DataTableColumns<ToBeClaimedModel> = [
   {
     title: '收货仓库',
     key: 'warehouseId',
-    width: 100,
   },
   {
     title: '外箱标识',
     key: 'containerLogo',
-    width: 100,
   },
   {
     title: '图片',
     key: 'img',
     render(record) {
       return h(NSpace, [
-        ...record?.['img'].map((it) => {
+        ...(record?.['img']?.map((it) => {
           return h(NImage, {
             src: it,
             width: 36,
             height: 36,
           });
-        }),
+        }) ?? []),
       ]);
     },
   },
-  {
+  statusColumnEasy({
     title: '认领状态',
     key: 'claimStatus',
-  },
+  }),
   {
     title: '认领客户ID',
-    key: 'claimCustomId',
+    key: 'customerId',
   },
-  {
-    title: '在库天数',
-    key: 'storageDays',
-  },
+  stayDaysColumn,
   timeColumn('discardTime', '废弃时间点'),
+  {
+    title: '处理结果',
+    key: 'result',
+  },
   {
     title: '库位',
     key: 'storeAddress',
@@ -86,21 +95,14 @@ export enum ClaimStatus {
 
 const path = 'claimedGoods';
 
-export async function createNewClaim(model) {
-  try {
-    model.img = await getFileListUrl(model.img);
-    model.createTimestamp = dayjs().valueOf();
-    model.claimStatus = ClaimStatus.Waiting;
-    await addDoc(collection(db, path), model);
-    return resultSuccess('');
-  } catch (e: any) {
-    return resultError(e?.message);
-  }
-}
-
-export async function loadAllClaim() {
-  return await executeQuery(query(collection(db, path), orderBy('createTimestamp', 'desc')));
-}
+export const ClaimManager = initModel({
+  collectionName: path,
+  init(value): any {
+    value.arriveTime = dayjs().valueOf();
+    value.claimStatus = ClaimStatus.Waiting;
+    return value;
+  },
+});
 
 export const filters: FormField[] = [
   ...deliveryMethodSelection,
@@ -135,3 +137,27 @@ export const filters: FormField[] = [
     field: 'claimStatus',
   },
 ];
+
+export const schemas: FormFields = [
+  {
+    field: 'deliveryId',
+    label: '物流单号',
+  },
+  asyncInventoryFormField(),
+  {
+    field: 'containerMark',
+    label: '外箱标识',
+    required: false,
+  },
+  getFilesUploadFormField('img', false),
+  {
+    label: '处理结果',
+    field: 'result',
+  },
+  {
+    field: 'storeAddress',
+    label: '库位',
+    required: false,
+  },
+];
+export const claimSchemas: FormFields = [asyncCustomerFormField()];

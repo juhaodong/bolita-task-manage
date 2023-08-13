@@ -146,6 +146,11 @@ export function initModel(g: GeneralModel): Model {
       });
     },
     async editInternal(value, id): Promise<string> {
+      for (const k of Object.keys(value)) {
+        if (value[k] instanceof Array<UploadFileInfo>) {
+          value[k] = await getFileListUrl(value[k]);
+        }
+      }
       const res = await generalUpdate(value, g.collectionName, id);
       if (g.afterEditHook) {
         await g.afterEditHook(id, value);
