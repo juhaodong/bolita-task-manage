@@ -4,6 +4,8 @@ import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 import { safeSumInt } from '@/store/utils/utils';
 import { CheckStatus } from '@/views/newViews/OutboundDetail/columns';
 import { formatItemAddress } from '@/api/dataLayer/fieldDefination/addressGroup';
+import { where } from 'firebase/firestore';
+import { uniq } from 'lodash-es';
 
 export const outboundPath = 'outbound';
 export const OutBoundPlanManager = initModel({
@@ -59,4 +61,15 @@ export const OutBoundDetailManager = initModel({
     },
   },
   collectionName: outboundDetailPath,
+  async afterEditHook(id, value) {
+    if (value.checkStatus) {
+      const currentInfo = await OutBoundDetailManager.getById(id);
+      const outId = currentInfo.outId;
+      const list = await OutBoundDetailManager.load(null, where('outId', '==', outId));
+      const status = uniq(list.map((it) => it.checkStatus));
+      if (status.length == 1 && status[0] == CheckStatus.Checked) {
+        await OutBoundPlanManager.editInternal({ outStatus: OutStatus.Wait }, outId);
+      }
+    }
+  },
 });

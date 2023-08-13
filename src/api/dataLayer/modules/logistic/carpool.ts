@@ -24,7 +24,6 @@ export const CarpoolManager = initModel({
   },
   async afterEditHook(id, value) {
     const updateValue = value;
-    console.log(value);
     if (value.reservationGetProductTime) {
       updateValue.reservationOutboundDate = value.reservationGetProductTime;
     }
