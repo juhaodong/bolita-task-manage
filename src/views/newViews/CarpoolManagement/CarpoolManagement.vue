@@ -26,7 +26,7 @@
       :show-icon="false"
       preset="card"
       style="width: 90%; min-width: 600px; max-width: 600px"
-      title="新建拼车管理"
+      title="新建订车管理"
     >
       <new-carpool-management :model="currentModel" @saved="reloadTable" />
     </n-modal>

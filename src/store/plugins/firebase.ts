@@ -50,7 +50,7 @@ export async function getFileUrlFromFileUpload(file: UploadFileInfo) {
 
 export async function getFileListUrl(files?: UploadFileInfo[]) {
   if (!files) {
-    return [];
+    return files ?? [];
   }
   return (await Promise.all(files.map(getFileUrlFromFileUpload))).filter((it) => it);
 }

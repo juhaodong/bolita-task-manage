@@ -47,6 +47,7 @@ export function colorColumn(
     },
   };
 }
+
 export function statusColumn(title = '状态', key = 'status') {
   return {
     title: title,
@@ -218,7 +219,8 @@ export function getFileActionButton(
       if (files.checkPassed) {
         const obj = {};
         obj[key] = files.files;
-        await manager.edit(obj, record.id);
+        console.log(files.files[0]);
+        await manager.editInternal(obj, record.id);
       }
 
       reload();

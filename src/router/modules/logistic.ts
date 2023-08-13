@@ -31,7 +31,7 @@ const routes: Array<RouteRecordRaw> = [
         path: 'carpoolManage',
         name: `${name}carpoolManage`,
         meta: {
-          title: '拼车管理',
+          title: '订车管理',
         },
         component: () => import('@/views/newViews/CarpoolManagement/CarpoolManagement.vue'),
       },

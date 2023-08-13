@@ -1,11 +1,10 @@
-import { initModel } from '@/api/dataLayer/common/GeneralModel';
+import { getCollectionNextId, initModel } from '@/api/dataLayer/common/GeneralModel';
 import { safeSumBy, safeSumInt } from '@/store/utils/utils';
 import { where } from 'firebase/firestore';
 import {
   LogisticDetailManager,
   OutBoundPlanManager,
 } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
-import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
 
 function initCarpool(value, logisticDetailList) {
   value.trayNum = safeSumInt(logisticDetailList, 'trayNum');
@@ -19,7 +18,10 @@ export const carpoolPath = 'carpool';
 export const CarpoolManager = initModel({
   collectionName: carpoolPath,
   idPrefix: 'P',
-  init(value, logisticDetailList): any {
+  async init(value, logisticDetailList): any {
+    if (logisticDetailList.length > 1) {
+      value.id = await getCollectionNextId(carpoolPath, 'CP');
+    }
     return initCarpool(value, logisticDetailList);
   },
   async afterEditHook(id, value) {
@@ -64,13 +66,8 @@ export async function updatePickupInfo(
     ...params,
     id: it.outId,
   }));
-  const outDetail = details.map((it) => ({
-    ...params,
-    id: it.outboundDetailId,
-  }));
   await LogisticDetailManager.massiveUpdate(logisticUpdate);
   await OutBoundPlanManager.massiveUpdate(outPlan);
-  await OutBoundDetailManager.massiveUpdate(outDetail);
   if (params.PODFiles || params.pickupFiles) {
     for (const d of details) {
       if (!d.outId) {

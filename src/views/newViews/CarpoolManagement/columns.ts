@@ -4,7 +4,7 @@ import { asyncCustomerFormField } from '@/api/dataLayer/fieldDefination/common';
 import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 
 export const columns: DataTableColumns<CarpoolManagementModel> = [
-  idColumn('拼车ID', '/logistic/logisticDetail'),
+  idColumn('订车ID', '/logistic/logisticDetail'),
   timeColumn(),
   {
     title: '仓库',
@@ -64,7 +64,7 @@ export type CarpoolManagementModel = {
 
 export const filters: FormFields = [
   {
-    label: '拼车ID',
+    label: '订车ID',
     field: 'carPoolID',
   },
   asyncCustomerFormField(),

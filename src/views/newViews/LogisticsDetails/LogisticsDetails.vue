@@ -24,7 +24,7 @@
                 <Box20Filled />
               </n-icon>
             </template>
-            拼车
+            订车
           </n-button>
           <n-button :disabled="checkedRows.length == 0" @click="cancelCar()">
             <template #icon>
@@ -32,7 +32,7 @@
                 <Box20Filled />
               </n-icon>
             </template>
-            取消拼车
+            取消订车
           </n-button>
         </n-space>
       </template>
@@ -42,7 +42,7 @@
       :show-icon="false"
       preset="card"
       style="width: 90%; min-width: 600px; max-width: 600px"
-      title="新建拼车"
+      title="新建订车"
     >
       <new-carpool-management @saved="saveShareCar" />
     </n-modal>
@@ -184,6 +184,7 @@
               startEdit(record.id);
             },
           },
+          fileAction('附件', 'files', undefined, false),
           fileAction('提单', 'pickupFiles'),
           fileAction('POD', 'PODFiles'),
           fileAction('客户账单', 'billsForCustomer', undefined, true),

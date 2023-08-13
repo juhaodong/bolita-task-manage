@@ -140,8 +140,6 @@
               startEdit(record.id);
             },
           },
-          fileAction('POD', 'PODFiles'),
-          fileAction('提单', 'pickupFiles'),
         ],
       });
     },
