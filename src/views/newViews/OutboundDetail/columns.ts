@@ -29,15 +29,11 @@ export const columns: DataTableColumns<OutboundDetailModel> = [
     key: 'containerId',
   },
   {
-    title: '产品SKU',
-    key: 'productSKU',
-  },
-  {
     title: '托',
     key: 'trayNum',
   },
   {
-    title: '数量(箱/件)',
+    title: '箱数',
     key: 'containerNum',
   },
   {

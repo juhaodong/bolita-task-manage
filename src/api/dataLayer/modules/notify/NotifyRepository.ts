@@ -21,10 +21,6 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
   }
   builder.addAll([
     {
-      label: '产品SKU',
-      field: 'productSKU',
-    },
-    {
       label: '托数',
       field: 'trayNum',
     },

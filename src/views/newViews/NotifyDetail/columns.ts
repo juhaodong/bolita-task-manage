@@ -40,10 +40,6 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
     title: '箱号',
     key: 'containerId',
   },
-  {
-    title: '产品SKU',
-    key: 'productSKU',
-  },
   formatColumn(
     'trayNum',
     '托数',
@@ -183,10 +179,6 @@ export const filters: FormField[] = [
   {
     label: '箱号',
     field: 'containerId',
-  },
-  {
-    label: '产品SKU',
-    field: 'productSKU',
   },
   {
     field: 'NotifyStartDateTime',

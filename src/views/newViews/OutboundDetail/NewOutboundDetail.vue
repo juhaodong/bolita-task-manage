@@ -30,10 +30,6 @@
       label: '箱号',
     },
     {
-      field: 'productSKU',
-      label: '产品SKU',
-    },
-    {
       field: 'trayNum',
       label: '托数',
     },

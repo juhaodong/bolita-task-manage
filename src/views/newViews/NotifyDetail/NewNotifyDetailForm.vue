@@ -34,11 +34,6 @@
       required: false,
     },
     {
-      field: 'productSKU',
-      label: '产品SKU',
-      required: false,
-    },
-    {
       field: 'trayNum',
       label: '托数',
       required: false,
