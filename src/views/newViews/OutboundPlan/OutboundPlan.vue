@@ -76,17 +76,16 @@
   import OutBoundEditDialog from '@/views/newViews/OutboundPlan/dialog/OutBoundEditDialog.vue';
 
   const showModal = ref(false);
-  const loadDataTable = async () => {
-    const res = await OutBoundPlanManager.load(null);
-    console.log(res);
-    return res;
-  };
+
   let showOperationTable = $ref(false);
   let showEditInfoDialog = $ref(false);
   let currentId: string | null = $ref(null);
   let showFeeDialog = $ref(false);
   const actionRef = ref();
   let filterObj: any | null = $ref(null);
+  const loadDataTable = async () => {
+    return await OutBoundPlanManager.load(filterObj);
+  };
   function reloadTable() {
     actionRef.value.reload();
     showModal.value = false;
