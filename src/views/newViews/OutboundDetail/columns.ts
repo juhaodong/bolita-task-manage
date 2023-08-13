@@ -5,6 +5,12 @@ import { stayDaysColumn } from '@/views/newViews/NotifyDetail/columns';
 
 export const columns: DataTableColumns<OutboundDetailModel> = [
   {
+    type: 'selection',
+    disabled(row: any) {
+      return row.checkStatus == CheckStatus.Checked;
+    },
+  },
+  {
     title: '明细ID',
     key: 'id',
   },

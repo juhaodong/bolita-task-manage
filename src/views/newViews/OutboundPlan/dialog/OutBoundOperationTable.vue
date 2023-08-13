@@ -19,6 +19,7 @@
   import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { safeParseInt, safeSumInt } from '@/store/utils/utils';
+  import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 
   console.log(getDateNow, timeDisplay);
 
@@ -37,6 +38,7 @@
     wasteNote: '',
     loadCount: '',
     operationPerson: '',
+    trayNum: '',
   };
   const extraInfo = reactive(defaultExtraInfo);
   let currentDetailList: any[] = $ref([]);
@@ -89,6 +91,38 @@
           return {
             id: it.id,
             completeNum: it.completeNum,
+            note: it.note,
+          };
+        })
+      );
+      emit('save');
+    });
+  }
+
+  async function confirm() {
+    const completeNumber = safeSumInt(currentDetailList, 'completeNum');
+    console.log(extraInfo.trayNum);
+    const editValue = {
+      operationInfo: localOperationInfo,
+      extraInfo: extraInfo,
+      trayNum: extraInfo?.trayNum ?? '',
+      outStatus: OutStatus.Wait,
+      carStatus: CarStatus.Able,
+    };
+    if (completeNumber > 0) {
+      editValue.outStatus = OutStatus.Partial;
+      const targetNumber = safeParseInt(outDetail?.outboundNum);
+      if (completeNumber >= targetNumber) {
+        editValue.outStatus = OutStatus.All;
+      }
+    }
+    await safeScope(async () => {
+      await OutBoundPlanManager.edit(editValue, props.outId);
+      await OutBoundDetailManager.massiveUpdate(
+        currentDetailList.map((it) => {
+          return {
+            id: it.id,
+            completeNum: it?.completeNum ?? 0,
             note: it.note,
           };
         })
@@ -185,14 +219,24 @@
     </n-descriptions>
     <n-space v-if="outDetail" class="mt-4" :wrap-item="false">
       <div>
-        <n-input placeholder="装车数量" v-model:value="extraInfo.loadCount" />
+        <n-form-item label="装车数量">
+          <n-input placeholder="装车数量" v-model:value="extraInfo.loadCount" />
+        </n-form-item>
       </div>
 
       <div class="flex-grow"></div>
       <div>
-        <n-input placeholder="操作人:" v-model:value="extraInfo.operationPerson" />
+        <n-form-item label="操作人">
+          <n-input placeholder="操作人:" v-model:value="extraInfo.operationPerson" />
+        </n-form-item>
       </div>
-      <n-button @click="save" type="warning" secondary>确认</n-button>
+      <div>
+        <n-form-item label="打托数量">
+          <n-input placeholder="操作人:" v-model:value="extraInfo.trayNum" />
+        </n-form-item>
+      </div>
+      <n-button @click="save" type="warning" secondary>保存</n-button>
+      <n-button @click="confirm" type="primary">打托完成</n-button>
     </n-space>
   </div>
 </template>

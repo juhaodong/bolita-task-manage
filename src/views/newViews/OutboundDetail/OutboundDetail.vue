@@ -79,6 +79,10 @@
     const res = await checkDialog.check('请审核该明细');
 
     await safeScope(async () => {
+      const currentList = (await OutBoundDetailManager.load()).filter((it) =>
+        checkedRows.includes(it.id)
+      );
+      const affectOutPlan = currentList.map((it) => it.outId);
       for (const id of checkedRows) {
         await OutBoundDetailManager.editInternal(
           {
@@ -87,6 +91,7 @@
           id
         );
       }
+      checkedRows.length = 0;
       reloadTable();
     });
   }

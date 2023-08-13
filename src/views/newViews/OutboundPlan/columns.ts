@@ -1,5 +1,10 @@
 import { DataTableColumns } from 'naive-ui';
-import { idColumn, statusColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import {
+  idColumn,
+  statusColumn,
+  statusColumnEasy,
+  timeColumn,
+} from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { deliveryMethodSelection } from '@/api/dataLayer/fieldDefination/common';
 
@@ -32,10 +37,10 @@ export const columns: DataTableColumns<OutboundPlanModel> = [
     width: 60,
   },
   timeColumn(),
-  {
+  statusColumnEasy({
     title: '订车状态',
     key: 'carStatus',
-  },
+  }),
   timeColumn('reservationOutboundDate', '预约出库日期'),
   {
     title: '时效',
