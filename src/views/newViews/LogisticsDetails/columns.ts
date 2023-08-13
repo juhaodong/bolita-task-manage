@@ -39,6 +39,10 @@ export const columns: DataTableColumns = [
     key: 'containerNum',
   },
   statusColumnEasy({
+    title: '出库状态',
+    key: 'outStatus',
+  }),
+  statusColumnEasy({
     title: '订车状态',
     key: 'carStatus',
   }),

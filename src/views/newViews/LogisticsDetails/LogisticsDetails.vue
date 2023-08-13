@@ -47,11 +47,20 @@
       <new-carpool-management @saved="saveShareCar" :merged-out-ids="checkedRows" />
     </n-modal>
     <n-modal
+      v-model:show="showFeeDialog"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 600px; max-width: 600px"
+      title="报价确认"
+    >
+      <logistic-fee-dialog :model="currentModel" @saved="reloadTable" />
+    </n-modal>
+    <n-modal
       v-model:show="showModal"
       :show-icon="false"
       preset="card"
       style="width: 90%; min-width: 600px; max-width: 1200px"
-      title="新增物流明细"
+      title="编辑物流明细"
     >
       <new-logistics-details :model="currentModel" @saved="reloadTable" />
     </n-modal>
@@ -63,10 +72,9 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
-  import NewLogisticsDetails from '@/views/newViews/LogisticsDetails/LogisticForm.vue';
+  import NewLogisticsDetails from '@/views/newViews/LogisticsDetails/form/LogisticForm.vue';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
-  import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { carpoolSelfCheck } from '@/api/dataLayer/modules/logistic/carpool';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
@@ -74,6 +82,9 @@
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { where } from 'firebase/firestore';
   import { truckDeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
+  import { CurrencyEuro } from '@vicons/carbon';
+  import { CashStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import LogisticFeeDialog from '@/views/newViews/LogisticsDetails/form/LogisticFeeDialog.vue';
 
   interface Prop {
     carpoolId?: string;
@@ -83,6 +94,7 @@
   let finished = $ref(false);
   let currentModel: any | null = $ref(null);
   let showShareCarModel = $ref(false);
+  let showFeeDialog = $ref(false);
   let checkedRows = $ref([]);
   onMounted(() => {
     if (props.carpoolId) {
@@ -109,6 +121,11 @@
     showModal.value = true;
   }
 
+  async function startFee(id) {
+    currentModel = await OutBoundPlanManager.getById(id);
+    showFeeDialog = true;
+  }
+
   function updateFilter(value) {
     filterObj = value;
     reloadTable();
@@ -118,6 +135,7 @@
     actionRef.value.reload();
     showModal.value = false;
     showShareCarModel = false;
+    showFeeDialog = false;
   }
 
   function startShareCar() {
@@ -167,10 +185,34 @@
         style: 'button',
         actions: [
           {
-            label: '修改',
-            icon: DocumentEdit16Filled,
+            label: '费用',
+            icon: CurrencyEuro,
             onClick() {
               startEdit(record.id);
+            },
+            highlight: () => {
+              if (record?.logisticCashStatus == CashStatus.Done) {
+                return 'success';
+              } else if (record?.logisticCashStatus == CashStatus.WaitConfirm) {
+                return 'warning';
+              } else {
+                return 'error';
+              }
+            },
+          },
+          {
+            label: '报价',
+            highlight: () => {
+              if (!record?.price) {
+                return 'error';
+              } else if (!record?.priceConfirmed) {
+                return 'warning';
+              } else {
+                return 'success';
+              }
+            },
+            onClick() {
+              startFee(record.id);
             },
           },
           fileAction('附件', 'files', undefined, false),

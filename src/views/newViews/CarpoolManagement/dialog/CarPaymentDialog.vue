@@ -56,7 +56,6 @@
   async function init() {
     const res = await getDocContent(docRef);
     Object.assign(systemConfig, res);
-    console.log(systemConfig);
   }
 
   async function saveSystemConfig(value: any) {

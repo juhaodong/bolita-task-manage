@@ -1,0 +1,74 @@
+<template>
+  <n-card class="proCard">
+    <loading-frame :loading="loading">
+      <normal-form
+        :default-value-model="model"
+        :form-fields="schemas"
+        @submit="handleSubmit"
+        :show-buttons="false"
+      >
+        <template #extraSubmitButton="{ submit }">
+          <n-button :disabled="model.priceConfirmed" @click="submit" type="info">提交报价</n-button>
+        </template>
+        <template #extraContent>
+          <n-popconfirm
+            v-if="!model?.priceConfirmed"
+            @positive-click="handleSubmit({ priceConfirmed: true, outStatus: OutStatus.Wait })"
+          >
+            <template #trigger>
+              <n-button type="success">确认报价</n-button>
+            </template>
+            我确认接受此报价
+          </n-popconfirm>
+          <template v-else> 已经确认</template>
+        </template>
+      </normal-form>
+    </loading-frame>
+  </n-card>
+</template>
+<script lang="ts" setup>
+  import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
+  import { FormField } from '@/views/bolita-views/composable/form-field-type';
+  import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
+  import { safeScope } from '@/api/dataLayer/common/GeneralModel';
+  import { carpoolSelfCheck } from '@/api/dataLayer/modules/logistic/carpool';
+  import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+  import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
+
+  interface Props {
+    model?: any;
+  }
+
+  const props = defineProps<Props>();
+  let loading: boolean = $ref(false);
+  const schemas: FormField[] = [
+    {
+      field: 'price',
+      label: '报价',
+    },
+    {
+      field: 'note',
+      label: '备注',
+    },
+  ].map((it: FormField) => {
+    it.required = false;
+    return it;
+  });
+
+  const emit = defineEmits(['saved']);
+
+  async function handleSubmit(values: any) {
+    loading = true;
+    await safeScope(async () => {
+      await OutBoundPlanManager.editInternal(values, props.model.id);
+      const info = await OutBoundPlanManager.getById(props.model.id);
+      if (info.carpoolId) {
+        await carpoolSelfCheck(info.carpoolId);
+      }
+      emit('saved');
+    });
+    loading = false;
+  }
+</script>
+
+<style lang="less" scoped></style>

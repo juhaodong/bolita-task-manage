@@ -47,11 +47,12 @@ export const OutBoundDetailManager = initModel({
       const list = await OutBoundDetailManager.load(null, where('outId', '==', outId));
       const status = uniq(list.map((it) => it.checkStatus));
       if (status.length == 1 && status[0] == CheckStatus.Checked) {
-        const outInfo = await OutBoundPlanManager.getById(id);
+        const outInfo = await OutBoundPlanManager.getById(outId);
         let newOutStatus = OutStatus.Wait;
         if (truckDeliveryMethod.includes(outInfo.deliveryMethod)) {
           newOutStatus = OutStatus.WaitForPriceConfirm;
         }
+        console.log(newOutStatus, outInfo);
         await OutBoundPlanManager.editInternal({ outStatus: newOutStatus }, outId);
       }
     }
