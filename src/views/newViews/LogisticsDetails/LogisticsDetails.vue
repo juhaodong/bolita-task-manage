@@ -63,7 +63,7 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
-  import NewLogisticsDetails from '@/views/newViews/LogisticsDetails/NewLogisticsDetails.vue';
+  import NewLogisticsDetails from '@/views/newViews/LogisticsDetails/LogisticForm.vue';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';

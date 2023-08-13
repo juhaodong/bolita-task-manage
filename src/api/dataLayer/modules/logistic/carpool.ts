@@ -15,7 +15,7 @@ export const carpoolPath = 'carpool';
 export const CarpoolManager = initModel({
   collectionName: carpoolPath,
   idPrefix: 'P',
-  async init(value, outboundPlanList): any {
+  async init(value, outboundPlanList): Promise<any> {
     if (outboundPlanList.length > 1) {
       value.id = await getCollectionNextId(carpoolPath, 'CP');
     }

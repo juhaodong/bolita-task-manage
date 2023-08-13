@@ -85,7 +85,7 @@ export const columns: DataTableColumns = [
     title: '结算金额',
     key: 'settlementPrice',
   },
-  statusColumn('结算状态', 'cashStatus'),
+  statusColumn('结算状态', 'logisticCashStatus'),
 ];
 
 export const filters: FormField[] = [

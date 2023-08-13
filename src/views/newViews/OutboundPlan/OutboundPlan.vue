@@ -86,6 +86,7 @@
   const loadDataTable = async () => {
     return await OutBoundPlanManager.load(filterObj);
   };
+
   function reloadTable() {
     actionRef.value.reload();
     showModal.value = false;
@@ -93,6 +94,7 @@
     showOperationTable = false;
     showEditInfoDialog = false;
   }
+
   function updateFilter(value) {
     filterObj = value;
     reloadTable();
@@ -120,6 +122,9 @@
           {
             label: '取消',
             icon: Delete28Filled,
+            ifShow() {
+              return record.outStatus == OutStatus.WaitForCheck;
+            },
             popConfirm: {
               title: '是否取消此出库计划？',
               async confirm() {
@@ -147,6 +152,9 @@
               currentId = record.id!;
               showOperationTable = true;
             },
+            ifShow() {
+              return record.outStatus == OutStatus.Wait || record.outStatus == OutStatus.Partial;
+            },
           },
           {
             label: '费用',
@@ -154,6 +162,9 @@
             onClick() {
               currentId = record.id!;
               showFeeDialog = true;
+            },
+            ifShow() {
+              return record.outStatus == OutStatus.All;
             },
           },
         ],

@@ -52,18 +52,21 @@
   async function handleSubmit(values: any) {
     loading = true;
     await safeScope(async () => {
-      values.cashId = await saveCash(
-        {
-          customerId: props.model?.customerId,
-          containerNo: props.model?.containerNo ?? '',
-          operationId: props.model.id,
-          operationType: OperationType.Delivery,
-          amount: values.settlementPrice,
-          note: values.note,
-          cashStatus: CashStatus.WaitConfirm,
-        },
-        props.model.cashId
-      );
+      if (values.settlementPrice) {
+        values.cashId = await saveCash(
+          {
+            customerId: props.model?.customerId,
+            containerNo: props.model?.containerNo ?? '',
+            operationId: props.model.id,
+            operationType: OperationType.Delivery,
+            amount: values.settlementPrice,
+            note: values.note,
+            cashStatus: CashStatus.WaitConfirm,
+          },
+          props.model.cashId
+        );
+      }
+
       await OutBoundPlanManager.editInternal(values, props.model.id);
       const info = await OutBoundPlanManager.getById(props.model.id);
       if (info.carpoolId) {

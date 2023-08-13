@@ -41,10 +41,11 @@ export enum InBoundStatus {
 }
 
 export enum OutStatus {
+  WaitForCheck = '等待审核',
+  WaitForPriceConfirm = '等待确认报价',
   All = '全部出库',
   Partial = '部分出库',
   Wait = '等待出库',
-  WaitForCheck = '等待审核',
   Cancel = '取消',
   Transfer = '转其他系统',
   Stay = '留仓',
