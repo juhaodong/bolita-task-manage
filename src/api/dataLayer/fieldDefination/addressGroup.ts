@@ -85,7 +85,10 @@ export function getTargetAddressSelectionGroup(): FormField[] {
         }
       },
       displayCondition(model) {
-        return truckDeliveryMethod.includes(model?.deliveryMethod);
+        return (
+          truckDeliveryMethod.includes(model?.deliveryMethod) &&
+          model?.deliveryMethod != DeliveryMethod.PrivateTruck
+        );
       },
     },
     {
@@ -113,10 +116,12 @@ export function formatItemAddress(item) {
     deliveryAddressDetail.forEach((key) => {
       item[key.field] = '';
     });
+    item.postCode = '';
   };
   const fbaCode = item.fbaCode;
   item.fbaCode = '';
   item.deliveryAddress = '';
+  item.targetCountry = '';
   if (boxDeliveryMethod.includes(item.deliveryMethod)) {
     clean();
   } else if (fbaBasedDeliveryMethod.includes(item.deliveryMethod)) {
