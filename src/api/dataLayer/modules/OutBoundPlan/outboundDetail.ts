@@ -5,6 +5,7 @@ import { where } from 'firebase/firestore';
 import { uniq } from 'lodash-es';
 import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+import { truckDeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 
 export const outboundDetailPath = 'outboundDetail';
 export const OutBoundDetailManager = initModel({
@@ -46,7 +47,12 @@ export const OutBoundDetailManager = initModel({
       const list = await OutBoundDetailManager.load(null, where('outId', '==', outId));
       const status = uniq(list.map((it) => it.checkStatus));
       if (status.length == 1 && status[0] == CheckStatus.Checked) {
-        await OutBoundPlanManager.editInternal({ outStatus: OutStatus.Wait }, outId);
+        const outInfo = await OutBoundPlanManager.getById(id);
+        let newOutStatus = OutStatus.Wait;
+        if (truckDeliveryMethod.includes(outInfo.deliveryMethod)) {
+          newOutStatus = OutStatus.WaitForPriceConfirm;
+        }
+        await OutBoundPlanManager.editInternal({ outStatus: newOutStatus }, outId);
       }
     }
   },
