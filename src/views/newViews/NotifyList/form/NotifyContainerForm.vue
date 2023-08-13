@@ -6,9 +6,6 @@
 <script setup lang="ts">
   import dayjs from 'dayjs';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
-  import { ref } from 'vue';
-  import { usePermission } from '@/hooks/web/usePermission';
-  import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import {
     asyncCustomerFormField,
     getFilesUploadFormField,
@@ -22,17 +19,6 @@
 
   defineProps<Props>();
 
-  let customerList = ref<any[]>([]);
-  const { hasPermission } = usePermission();
-
-  async function init() {
-    customerList.value = (await listUser(PermissionEnums.Customer)).result.map((it) => ({
-      label: it.realName,
-      value: it.id,
-    }));
-  }
-
-  init();
   const schemas: FormFields = [
     asyncCustomerFormField(),
     {

@@ -39,11 +39,12 @@ export const columns: DataTableColumns = [
 ];
 
 export enum UserType {
-  Manager = '管理',
+  Manager = '管理员',
   Warehouse = '仓库',
   Customer = '客户',
   Operator = '操作员',
   Sales = '业务员',
+  Logistic = '物流',
   Cash = '结算',
 }
 

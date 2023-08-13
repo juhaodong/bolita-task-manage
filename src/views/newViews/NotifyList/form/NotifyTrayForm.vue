@@ -19,9 +19,7 @@
   import dayjs from 'dayjs';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
-  import { listUser, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
-  import { reactive, ref } from 'vue';
-  import { usePermission } from '@/hooks/web/usePermission';
+  import { reactive } from 'vue';
   import {
     asyncCustomerFormField,
     getFilesUploadFormField,
@@ -36,23 +34,12 @@
   let keyCounter = 0;
   defineProps<Props>();
   let task = reactive([generateDefaultColumn()]);
-  let customerList = ref<any[]>([]);
-  const { hasPermission } = usePermission();
-
   function generateDefaultColumn() {
     return {
       key: keyCounter++,
     };
   }
 
-  async function init() {
-    customerList.value = (await listUser(PermissionEnums.Customer)).result.map((it) => ({
-      label: it.realName,
-      value: it.id,
-    }));
-  }
-
-  init();
   const schemas: FormFields = [
     asyncCustomerFormField(),
     {

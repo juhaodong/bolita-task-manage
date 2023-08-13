@@ -1,9 +1,9 @@
-import { addDoc, collection, doc, query, setDoc, where } from 'firebase/firestore';
-import { db, executeQuery, getNameById } from '@/store/plugins/firebase';
-import { Random } from 'mockjs';
+import { where } from 'firebase/firestore';
+import { getNameById } from '@/store/plugins/firebase';
 import { Result, resultError, resultSuccess } from '@/store/request/_util';
 import { ACCESS_TOKEN } from '@/store/mutation-types';
 import { storage } from '@/store/utils/Storage';
+import { UserManager } from '@/api/dataLayer/modules/user/user';
 
 export type Permission = {
   label: string;
@@ -13,13 +13,13 @@ export type Permission = {
 const userPath = 'bolita-user';
 
 export enum PermissionEnums {
-  Operator = '操作员-新',
   Manager = '管理员',
-  Sales = '业务员',
-  Warehouse = '操作员',
-  Logistic = '物流',
+  Warehouse = '仓库',
   Customer = '客户',
-  Technical = '技术部门',
+  Operator = '操作员',
+  Sales = '业务员',
+  Logistic = '物流',
+  Cash = '结算',
 }
 
 export type BaseUser = {
@@ -31,42 +31,6 @@ export type BaseUser = {
   token: string;
   permissions: PermissionEnums[];
 };
-
-export async function createUser(username, realName, password, permission: PermissionEnums) {
-  if (await userExist(username)) {
-    return resultError('用户已经存在');
-  }
-  const token = Random.string('upper', 32, 32);
-  const doc = await addDoc(collection(db, userPath), {
-    username,
-    realName,
-    password,
-    permissions: [permission],
-    token,
-  });
-  return resultSuccess(doc.id);
-}
-
-export async function updateUser(userInfo) {
-  try {
-    await setDoc(doc(db, userPath, userInfo.id), {
-      username: userInfo.username,
-      realName: userInfo.realName,
-      password: userInfo.password,
-      permissions: userInfo.permissions,
-      token: userInfo.token,
-    });
-    return resultSuccess('');
-  } catch (e) {
-    // @ts-ignore
-    return resultError(e?.message);
-  }
-}
-
-export async function listUser(permission: PermissionEnums, userId = '') {
-  const q = query(collection(db, userPath), where('permissions', 'array-contains', permission));
-  return resultSuccess((await executeQuery(q)).filter((it) => !userId || it.id.includes(userId)));
-}
 
 export async function login(params: { username: string; password: string }) {
   const exist = (await findUserWithUsername(params.username)).find(
@@ -80,20 +44,16 @@ export async function login(params: { username: string; password: string }) {
 }
 
 async function findUserWithUsername(username) {
-  return await executeQuery(query(collection(db, userPath), where('username', '==', username)));
-}
-
-async function userExist(username) {
-  return (await findUserWithUsername(username)).length > 0;
+  return await UserManager.load(null, where('userName', '==', username));
 }
 
 export async function getUserInfo(): Promise<Result<BaseUser>> {
   const currentToken = storage.get(ACCESS_TOKEN, '');
-  const exist = await executeQuery(
-    query(collection(db, userPath), where('token', '==', currentToken))
-  );
+  const exist = await UserManager.load(null, where('token', '==', currentToken));
   if (exist[0]) {
-    return resultSuccess(exist[0]);
+    const info = exist[0];
+    info.permissions = [info.userType];
+    return resultSuccess(info);
   } else {
     return resultError('用户不存在');
   }

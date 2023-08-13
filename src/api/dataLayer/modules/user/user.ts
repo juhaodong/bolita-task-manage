@@ -5,11 +5,14 @@ import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { usePermission } from '@/hooks/web/usePermission';
 import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
 import { generateOptionFromArray } from '@/store/utils/utils';
+import { Random } from 'mockjs';
 
 export const userPath = 'user';
 export const UserManager = initModel({
   collectionName: userPath,
   init(value): any {
+    value.token = Random.string('upper', 32, 32);
+    value.permissions = [value.userType];
     return value;
   },
   uniqKeys: ['loginName'],
