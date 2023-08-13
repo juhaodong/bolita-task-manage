@@ -177,12 +177,15 @@
   <div class="mt-8" id="print">
     <loading-frame :loading="loading">
       <n-descriptions v-if="notifyDetail" :columns="3" label-placement="left" bordered>
-        <n-descriptions-item :span="2" label="卸柜人" />
+        <n-descriptions-item :span="2" label="货柜号">
+          {{ notifyDetail?.containerNo }}</n-descriptions-item
+        >
+        <n-descriptions-item label="卸柜人" />
         <n-descriptions-item label="日期"> {{ getDateNow() }}</n-descriptions-item>
-        <n-descriptions-item label="货柜号"> {{ notifyDetail?.containerNo }}</n-descriptions-item>
+
         <n-descriptions-item label="客户ID"> {{ notifyDetail?.customerId }}</n-descriptions-item>
         <n-descriptions-item label="预约日期时间">
-          {{ timeDisplay(notifyDetail?.planArriveDateTime) }}
+          {{ timeDisplay(notifyDetail?.reserveTime) }}
         </n-descriptions-item>
         <n-descriptions-item label="预报总数"> {{ notifyDetail?.totalCount }}</n-descriptions-item>
         <n-descriptions-item label="仓库ID">

@@ -25,6 +25,10 @@
         if (props?.defaultValueModel?.[it.field]) {
           it.defaultValue = props?.defaultValueModel?.[it.field];
         }
+        it.componentProps.placeholder = it.componentProps.placeholder
+          .replace('请输入', '')
+          .replace('请选择', '');
+        it.componentProps.size = 'small';
         return it;
       }
     );

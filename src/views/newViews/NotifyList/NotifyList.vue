@@ -1,7 +1,7 @@
 <template>
   <n-card :bordered="false" class="proCard">
     <filter-bar @submit="updateFilter" :form-fields="filters" @clear="updateFilter(null)">
-      <n-button @click="addTable(NotifyType.Container)">
+      <n-button size="small" type="info" @click="addTable(NotifyType.Container)">
         <template #icon>
           <n-icon>
             <Box20Filled />
@@ -9,7 +9,7 @@
         </template>
         新建货柜预报
       </n-button>
-      <n-button @click="addTable(NotifyType.TrayOrBox)">
+      <n-button size="small" type="warning" @click="addTable(NotifyType.TrayOrBox)">
         <template #icon>
           <n-icon>
             <TruckDelivery />
@@ -75,7 +75,7 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled, Folder32Filled } from '@vicons/fluent';
-  import { NotifyManager, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
+  import { CashStatus, NotifyManager, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
   import NotifyFormIndex from '@/views/newViews/NotifyList/form/NotifyFormIndex.vue';
   import { $ref } from 'vue/macros';
   import { TruckDelivery } from '@vicons/tabler';
@@ -168,6 +168,15 @@
           {
             label: '费用',
             icon: CurrencyEuro,
+            highlight: () => {
+              if (record?.cashStatus == CashStatus.Done) {
+                return 'success';
+              } else if (record?.cashStatus == CashStatus.WaitConfirm) {
+                return 'warning';
+              } else {
+                return 'error';
+              }
+            },
             onClick() {
               currentNotifyId = record.id!;
               showFeeDialog = true;

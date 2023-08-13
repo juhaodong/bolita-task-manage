@@ -97,7 +97,7 @@
     });
   }
 </script>
-
+5a
 <template>
   <div class="mt-8">
     <n-descriptions v-if="notifyDetail" :columns="3" label-placement="left" bordered>
@@ -105,8 +105,11 @@
         {{ notifyDetail?.containerNo }}
       </n-descriptions-item>
       <n-descriptions-item label="客户ID"> {{ notifyDetail?.customerId }}</n-descriptions-item>
-      <n-descriptions-item label="预报总数" :span="2">
+      <n-descriptions-item label="入库总数" :span="2">
         {{ notifyDetail?.totalCount }}
+      </n-descriptions-item>
+      <n-descriptions-item label="入库ID">
+        {{ notifyDetail?.id }}
       </n-descriptions-item>
       <n-descriptions-item label="仓库ID">
         {{ notifyDetail?.warehouseId ?? '-' }}
