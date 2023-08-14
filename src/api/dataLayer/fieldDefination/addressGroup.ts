@@ -5,13 +5,15 @@ import {
   formFieldFBACodeSelection,
   getAddressByCode,
 } from '@/api/dataLayer/fieldDefination/FBACode';
-import { deliveryMethodSelection } from '@/api/dataLayer/fieldDefination/common';
+import { getDeliveryMethodSelection } from '@/api/dataLayer/fieldDefination/common';
 import {
   boxDeliveryMethod,
+  deliveryMethod,
   DeliveryMethod,
   fbaBasedDeliveryMethod,
   truckDeliveryMethod,
 } from '@/api/dataLayer/modules/deliveryMethod';
+import { cloneDeep } from 'lodash-es';
 
 export const deliveryAddressDetail: FormField[] = [
   { label: '收件人', field: 'contact' },
@@ -32,7 +34,7 @@ export function isAmazon(value) {
 }
 
 function getDeliveryAddressDetail(): FormField[] {
-  return deliveryAddressDetail.map((it: FormField) => {
+  return cloneDeep(deliveryAddressDetail).map((it: FormField) => {
     it.displayCondition = (value) => {
       return value['deliveryMethod'] == DeliveryMethod.Truck;
     };
@@ -66,11 +68,9 @@ export function getCommonDeliveryField(): FormField[] {
   ];
 }
 
-export const commonDeliveryFields = getCommonDeliveryField();
-
-export function getTargetAddressSelectionGroup(): FormField[] {
+export function getTargetAddressSelectionGroup(dm = deliveryMethod): FormField[] {
   return [
-    ...deliveryMethodSelection,
+    ...getDeliveryMethodSelection(dm),
     formFieldFBACodeSelection,
     formFieldTargetCountrySelection,
     {
@@ -103,11 +103,46 @@ export function getTargetAddressSelectionGroup(): FormField[] {
   });
 }
 
+export function getPickUpAddressSelectionGroup(): FormField[] {
+  return [
+    ...getDeliveryMethodSelection(truckDeliveryMethod),
+    formFieldFBACodeSelection,
+    formFieldTargetCountrySelection,
+    {
+      label: '邮编',
+      field: 'postCode',
+      disableCondition(model) {
+        return isAmazon(model);
+      },
+      onFormUpdate(value) {
+        if (value?.fbaCode) {
+          value['postCode'] = fbaDict[value.fbaCode].postCode;
+        }
+      },
+      displayCondition(model) {
+        return (
+          truckDeliveryMethod.includes(model?.deliveryMethod) &&
+          model?.deliveryMethod != DeliveryMethod.PrivateTruck
+        );
+      },
+    },
+    {
+      label: 'PO',
+      field: 'po',
+      required: false,
+    },
+    ...getCommonDeliveryField(),
+  ].map((it: FormField) => {
+    it.group = '取货地址';
+    return it;
+  });
+}
+
 export function generateAddress(value: any) {
   return `${value.street} ${value.houseNo}
   ${value.appendAddress}
 ${value.city} ${value.postCode}
-${value.state}/${value.countryCode}
+${value.state}/${value.countryCode ?? value.country}
 `;
 }
 

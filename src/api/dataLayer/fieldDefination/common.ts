@@ -31,14 +31,14 @@ export function getCheckFormField(): FormField[] {
   ];
 }
 
-export function getDeliveryMethodSelection(): FormField[] {
+export function getDeliveryMethodSelection(dm = deliveryMethod): FormField[] {
   return [
     {
       field: 'deliveryMethod',
       label: '出库方式',
       component: 'NSelect',
       componentProps: {
-        options: generateOptionFromArray(deliveryMethod),
+        options: generateOptionFromArray(dm),
       },
     },
     {
@@ -132,6 +132,7 @@ export function getDatePickerFormField(key = 'date', title = '日期'): FormFiel
     },
   };
 }
+
 export const salesFormField = {
   field: 'salesName',
   label: '业务员',

@@ -6,7 +6,22 @@
       :form-fields="filters"
       @clear="updateFilter(null)"
       @submit="updateFilter"
-    />
+    >
+      <n-button type="primary" @click="showOutStorageDeliveryDialog = true">
+        <template #icon>
+          <n-icon>
+            <Box20Filled />
+          </n-icon>
+        </template>
+        新建仓外物流
+      </n-button>
+      <n-button type="warning" :disabled="checkedRows.length == 0" @click="startShareCar()">
+        订车
+      </n-button>
+      <n-button type="error" :disabled="checkedRows.length == 0" @click="cancelCar()">
+        取消订车
+      </n-button>
+    </filter-bar>
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
@@ -15,28 +30,15 @@
       :request="loadDataTable"
       :row-key="(row) => row.id"
       v-model:checked-row-keys="checkedRows"
-    >
-      <template #tableTitle>
-        <n-space>
-          <n-button :disabled="checkedRows.length == 0" @click="startShareCar()">
-            <template #icon>
-              <n-icon>
-                <Box20Filled />
-              </n-icon>
-            </template>
-            订车
-          </n-button>
-          <n-button :disabled="checkedRows.length == 0" @click="cancelCar()">
-            <template #icon>
-              <n-icon>
-                <Box20Filled />
-              </n-icon>
-            </template>
-            取消订车
-          </n-button>
-        </n-space>
-      </template>
-    </BasicTable>
+    />
+    <n-modal
+      v-model:show="showOutStorageDeliveryDialog"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 600px; max-width: 600px"
+      title="新建订车"
+      ><new-logistic-detail @saved="reloadTable" />
+    </n-modal>
     <n-modal
       v-model:show="showShareCarModel"
       :show-icon="false"
@@ -62,7 +64,7 @@
       style="width: 90%; min-width: 600px; max-width: 1200px"
       title="编辑物流明细"
     >
-      <new-logistics-details :model="currentModel" @saved="reloadTable" />
+      <logistic-form :model="currentModel" @saved="reloadTable" />
     </n-modal>
   </n-card>
 </template>
@@ -72,7 +74,7 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
-  import NewLogisticsDetails from '@/views/newViews/LogisticsDetails/form/LogisticForm.vue';
+  import LogisticForm from '@/views/newViews/LogisticsDetails/form/LogisticForm.vue';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
@@ -85,6 +87,7 @@
   import { CurrencyEuro } from '@vicons/carbon';
   import { CashStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import LogisticFeeDialog from '@/views/newViews/LogisticsDetails/form/LogisticFeeDialog.vue';
+  import NewLogisticDetail from '@/views/newViews/LogisticsDetails/form/NewLogisticDetail.vue';
 
   interface Prop {
     carpoolId?: string;
@@ -94,6 +97,7 @@
   let finished = $ref(false);
   let currentModel: any | null = $ref(null);
   let showShareCarModel = $ref(false);
+  let showOutStorageDeliveryDialog = $ref(false);
   let showFeeDialog = $ref(false);
   let checkedRows = $ref([]);
   onMounted(() => {
@@ -136,6 +140,7 @@
     showModal.value = false;
     showShareCarModel = false;
     showFeeDialog = false;
+    showOutStorageDeliveryDialog = false;
   }
 
   function startShareCar() {

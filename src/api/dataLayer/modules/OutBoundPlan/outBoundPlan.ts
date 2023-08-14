@@ -1,4 +1,4 @@
-import { initModel } from '@/api/dataLayer/common/GeneralModel';
+import { getCollectionNextId, initModel } from '@/api/dataLayer/common/GeneralModel';
 import { CashStatus, OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 import { safeSumInt } from '@/store/utils/utils';
@@ -7,7 +7,7 @@ import { truckDeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 
 export const outboundPath = 'outbound';
 export const OutBoundPlanManager = initModel({
-  init(value): any {
+  async init(value): any {
     value.trayNum = safeSumInt(value.planList, 'outBoundTrayNum');
     value.containerNum = safeSumInt(value.planList, 'outBoundContainerNum');
     const isTruck = truckDeliveryMethod.includes(value.deliveryMethod);
@@ -18,6 +18,9 @@ export const OutBoundPlanManager = initModel({
     value.ISA = '';
     value.carPoolId = '';
     value.logisticCashStatus = CashStatus.NotFinish;
+    if (value.onlyDelivery) {
+      value.id = await getCollectionNextId(outboundPath, 'W');
+    }
     delete value.planList;
     return value;
   },

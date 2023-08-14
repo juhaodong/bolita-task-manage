@@ -74,6 +74,7 @@
   import OutBoundOperationTable from '@/views/newViews/OutboundPlan/dialog/OutBoundOperationTable.vue';
   import OutBoundCheckOutTable from '@/views/newViews/OutboundPlan/dialog/OutBoundCheckOutTable.vue';
   import OutBoundEditDialog from '@/views/newViews/OutboundPlan/dialog/OutBoundEditDialog.vue';
+  import { where } from 'firebase/firestore';
 
   const showModal = ref(false);
 
@@ -84,7 +85,7 @@
   const actionRef = ref();
   let filterObj: any | null = $ref(null);
   const loadDataTable = async () => {
-    return await OutBoundPlanManager.load(filterObj);
+    return await OutBoundPlanManager.load(filterObj, where('onlyDelivery', '==', false));
   };
 
   function reloadTable() {
