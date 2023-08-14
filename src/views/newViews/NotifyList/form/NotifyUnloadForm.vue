@@ -75,9 +75,10 @@
   }
 
   function loadAll() {
-    currentTaskList.forEach((it) => {
-      it.arrivedTrayNumEdit = it.arrivedTrayNum == 0 ? '' : it.arrivedTrayNum;
-      it.arrivedContainerNumEdit = it.arrivedContainerNum == 0 ? '' : it.arrivedContainerNum;
+    currentTaskList.forEach((it, index) => {
+      currentTaskList[index].arrivedTrayNumEdit = it.arrivedTrayNum == 0 ? '' : it.arrivedTrayNum;
+      currentTaskList[index].arrivedContainerNumEdit =
+        it.arrivedContainerNum == 0 ? '' : it.arrivedContainerNum;
     });
   }
 
@@ -144,6 +145,7 @@
         if (listElement.arrivedContainerNumEdit == listElement.containerNum) {
           editInfo.instorageContainerNum = listElement?.arrivedContainerNumEdit ?? 0;
         }
+
         const res = await NotifyDetailManager.edit(editInfo, listElement.id);
         if (res.code != ResultEnum.SUCCESS) {
           toastError(res.message);
