@@ -28,6 +28,7 @@ export const OutBoundDetailManager = initModel({
     value.state = plan.state;
     value.country = plan.country;
     value.notifyDetailId = value.id;
+    delete value.outStatus;
     formatItemAddress(value);
     delete value.outBoundTrayNum;
     delete value.outBoundContainerNum;
@@ -53,7 +54,6 @@ export const OutBoundDetailManager = initModel({
         if (truckDeliveryMethod.includes(outInfo.deliveryMethod)) {
           newOutStatus = OutStatus.WaitForPriceConfirm;
         }
-        console.log(newOutStatus, outInfo);
         await OutBoundPlanManager.editInternal({ outStatus: newOutStatus }, outId);
       }
     }

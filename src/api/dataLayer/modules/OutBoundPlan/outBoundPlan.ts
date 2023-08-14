@@ -27,5 +27,10 @@ export const OutBoundPlanManager = initModel({
       plan.id = ids[index];
     });
   },
+  async afterEditHook(id, value) {
+    if (value.CMR && value?.outStatus != OutStatus.All) {
+      await OutBoundPlanManager.editInternal({ outStatus: OutStatus.All }, id);
+    }
+  },
   collectionName: outboundPath,
 });
