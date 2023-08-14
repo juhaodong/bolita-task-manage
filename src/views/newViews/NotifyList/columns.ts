@@ -32,10 +32,6 @@ export const columns: DataTableColumns<any> = [
     key: 'containerNo',
     width: 140,
   },
-  {
-    title: '总数量',
-    key: 'totalCount',
-  },
   timeColumn('planArriveDateTime', '预计到达时间'),
   timeColumn('reserveTime', '预约仓位', standardDateFormat),
   {

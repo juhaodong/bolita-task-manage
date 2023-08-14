@@ -15,7 +15,7 @@ export const columns: DataTableColumns = [
       return row?.carStatus == CarStatus.UnAble;
     },
   },
-  idColumn('出库ID', '/operation/detail', 'id'),
+  idColumn('出库ID', '/operation/index', 'id'),
   {
     title: '客户ID',
     key: 'customerId',
