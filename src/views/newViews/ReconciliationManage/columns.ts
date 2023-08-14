@@ -117,9 +117,11 @@ export const filters: FormField[] = [
 ];
 
 export enum CashCollectionStatus {
-  NotCollect = '未收款',
+  NotCollect = '未开票',
+  BillCreate = '已开票',
   Collected = '已收款',
 }
+
 export const schemas: FormFields = [
   {
     label: '其他系统结算',
