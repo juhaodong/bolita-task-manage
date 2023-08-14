@@ -29,7 +29,7 @@ export function createRouterGuards(router: Router) {
     }
 
     const token = storage.get(ACCESS_TOKEN);
-
+    console.log(token);
     if (!token) {
       // You can access without permissions. You need to set the routing meta.ignoreAuth to true
       if (to.meta.ignoreAuth) {

@@ -37,7 +37,7 @@ export async function login(params: { username: string; password: string }) {
   );
   if (exist) {
     const res = await getUserInfo(exist.token);
-    return resultSuccess(res);
+    return resultSuccess(res.result);
   } else {
     return resultError('用户不存在');
   }
