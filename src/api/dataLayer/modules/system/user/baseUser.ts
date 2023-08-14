@@ -1,16 +1,14 @@
-import { where } from 'firebase/firestore';
-import { getNameById } from '@/store/plugins/firebase';
+import { collection, query, where } from 'firebase/firestore';
+import { db, executeQuery } from '@/store/plugins/firebase';
 import { Result, resultError, resultSuccess } from '@/store/request/_util';
 import { ACCESS_TOKEN } from '@/store/mutation-types';
 import { storage } from '@/store/utils/Storage';
-import { UserManager } from '@/api/dataLayer/modules/user/user';
+import { userPath } from '@/api/dataLayer/modules/user/user';
 
 export type Permission = {
   label: string;
   value: PermissionEnums;
 };
-
-const userPath = 'bolita-user';
 
 export enum PermissionEnums {
   Manager = '管理员',
@@ -38,19 +36,22 @@ export async function login(params: { username: string; password: string }) {
     (it) => it.password === params.password
   );
   if (exist) {
-    return resultSuccess({ token: exist.token });
+    const res = await getUserInfo(exist.token);
+    return resultSuccess(res);
   } else {
     return resultError('用户不存在');
   }
 }
 
 async function findUserWithUsername(username) {
-  return await UserManager.load(null, where('userName', '==', username));
+  return await executeQuery(query(collection(db, userPath), where('userName', '==', username)));
 }
 
-export async function getUserInfo(): Promise<Result<BaseUser>> {
-  const currentToken = storage.get(ACCESS_TOKEN, '');
-  const exist = await UserManager.load(null, where('token', '==', currentToken));
+export async function getUserInfo(token?): Promise<Result<BaseUser>> {
+  const currentToken = token ?? storage.get(ACCESS_TOKEN, '');
+  const exist = await executeQuery(
+    query(collection(db, userPath), where('token', '==', currentToken))
+  );
   if (exist[0]) {
     const info = exist[0];
     info.permissions = [info.userType];
@@ -58,8 +59,4 @@ export async function getUserInfo(): Promise<Result<BaseUser>> {
   } else {
     return resultError('用户不存在');
   }
-}
-
-export async function getUserNameById(id) {
-  return await getNameById(id, userPath, 'realName');
 }

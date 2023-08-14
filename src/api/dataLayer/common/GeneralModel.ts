@@ -18,9 +18,10 @@ import { UploadFileInfo } from 'naive-ui';
 import { QueryCompositeFilterConstraint, QueryConstraint } from '@firebase/firestore';
 import { safeParseInt, toastError } from '@/store/utils/utils';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
+import { usePermission } from '@/hooks/web/usePermission';
+import { useUserStore } from '@/store/modules/user';
 
 export type FormFields = (Promise<FormField> | FormField)[];
-
 interface JoinManager {
   loader: () => Promise<any[]>;
   key: string;
@@ -176,8 +177,16 @@ export function initModel(g: GeneralModel): Model {
       if (extraCondition) {
         q = query(q, ...extraCondition);
       }
+      const { isCustomer } = usePermission();
       q = query(q, orderBy('createTimestamp', 'desc'), where('deletedAt', '==', 0));
-      const list = (await executeQuery(q)).filter((it) => it.createTimestamp);
+      if (isCustomer()) {
+        const customerId = (await useUserStore().getInfo()).customerId;
+        if (customerId) {
+          q = query(q, where('customerId', '==', customerId));
+        }
+      }
+
+      const list = await executeQuery(q);
       if (g?.joinManager) {
         const dict = keyBy(await g.joinManager?.loader(), 'id');
         list.forEach((it, index) => {
