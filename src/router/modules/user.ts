@@ -20,7 +20,6 @@ const routes: Array<RouteRecordRaw> = [
         name: `userManage`,
         meta: {
           title: '用户管理',
-          activeMenu: 'userManage_index',
         },
         component: () => import('@/views/newViews/UserManage/UserManage.vue'),
       },
@@ -29,7 +28,6 @@ const routes: Array<RouteRecordRaw> = [
         name: `customer`,
         meta: {
           title: '客户管理',
-          activeMenu: 'customerManage_index',
         },
         component: () => import('@/views/newViews/CustomerManage/CustomerManage.vue'),
       },
@@ -38,7 +36,6 @@ const routes: Array<RouteRecordRaw> = [
         name: `warehouse`,
         meta: {
           title: '仓库管理',
-          activeMenu: 'warehouse_index',
         },
         component: () => import('@/views/newViews/WarehouseManage/WarehouseManage.vue'),
       },

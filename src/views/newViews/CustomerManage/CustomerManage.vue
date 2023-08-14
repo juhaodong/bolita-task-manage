@@ -7,7 +7,7 @@
       @clear="updateFilter(null)"
       @submit="updateFilter"
     >
-      <n-button @click="showAdd">新建客户</n-button>
+      <n-button size="small" type="info" @click="showAdd">新建客户</n-button>
     </filter-bar>
     <div class="my-2"></div>
     <BasicTable
