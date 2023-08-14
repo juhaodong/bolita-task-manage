@@ -1,5 +1,5 @@
 import { DataTableColumns } from 'naive-ui';
-import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
 export const columns: DataTableColumns<CustomerModel> = [
@@ -31,10 +31,10 @@ export const columns: DataTableColumns<CustomerModel> = [
     title: '快速账号绑定',
     key: 'quickBindAccount',
   },
-  {
+  statusColumnEasy({
     title: '状态',
     key: 'status',
-  },
+  }),
   {
     title: '备注',
     key: 'note',
