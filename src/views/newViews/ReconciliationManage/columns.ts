@@ -72,6 +72,7 @@ export type ReconciliationModel = {
   id: number;
   customerId: number;
   customerName: string;
+
   settlementTime: string;
   systemSettlementPrice: string;
   file: string;
