@@ -30,6 +30,7 @@ export type BaseUser = {
   password: string;
   token: string;
   permissions: PermissionEnums[];
+  customerId?: string;
 };
 
 export async function login(params: { username: string; password: string }) {

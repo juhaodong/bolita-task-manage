@@ -134,8 +134,8 @@
         listElement.arrivedContainerNumEdit != listElement.arrivedContainerNum
       ) {
         const editInfo: any = {
-          arrivedTrayNum: listElement.arrivedTrayNumEdit,
-          arrivedContainerNum: listElement.arrivedContainerNumEdit,
+          arrivedTrayNum: listElement?.arrivedTrayNumEdit ?? 0,
+          arrivedContainerNum: listElement?.arrivedContainerNumEdit ?? 0,
           note: listElement.note,
         };
         if (listElement.arrivedTrayNumEdit == listElement.trayNum) {

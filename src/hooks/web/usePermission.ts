@@ -1,4 +1,5 @@
 import { useUserStore } from '@/store/modules/user';
+import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
 
 export function usePermission() {
   const userStore = useUserStore();
@@ -47,6 +48,8 @@ export function usePermission() {
     }
     throw new Error(`[hasSomePermission]: ${accesses} should be a array !`);
   }
-
-  return { hasPermission, hasEveryPermission, hasSomePermission };
+  function isCustomer(): boolean {
+    return hasPermission([PermissionEnums.Customer]);
+  }
+  return { hasPermission, hasEveryPermission, hasSomePermission, isCustomer };
 }
