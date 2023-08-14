@@ -20,6 +20,8 @@ export const OutBoundPlanManager = initModel({
     value.logisticCashStatus = CashStatus.NotFinish;
     if (value.onlyDelivery) {
       value.id = await getCollectionNextId(outboundPath, 'W');
+    } else {
+      value.onlyDelivery = false;
     }
     delete value.planList;
     return value;

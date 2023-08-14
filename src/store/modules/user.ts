@@ -1,18 +1,15 @@
 import { defineStore } from 'pinia';
 import { store } from '@/store';
-import { ACCESS_TOKEN, CURRENT_USER, IS_SCREENLOCKED } from '@/store/mutation-types';
+import { ACCESS_TOKEN, CURRENT_USER, CUSTOMER_ID, IS_SCREENLOCKED } from '@/store/mutation-types';
 import { ResultEnum } from '@/store/enums/httpEnum';
 
 import {
   BaseUser,
   getUserInfo as getUserInfoApi,
   login,
-  PermissionEnums,
 } from '@/api/dataLayer/modules/system/user/baseUser';
 import { storage } from '@/store/utils/Storage';
 import { generateOptionFromArray } from '@/store/utils/utils';
-import { CustomerManager } from '@/api/dataLayer/modules/user/user';
-import { where } from 'firebase/firestore';
 
 export type UserInfoType = {
   username: string;
@@ -72,11 +69,13 @@ export const useUserStore = defineStore({
     async login(params: any) {
       const response = await login(params);
       const { result, code } = response;
+      console.log(result);
       if (code === ResultEnum.SUCCESS) {
         const ex = 7 * 24 * 60 * 60;
         storage.set(ACCESS_TOKEN, result.token, ex);
         storage.set(CURRENT_USER, result, ex);
         storage.set(IS_SCREENLOCKED, false);
+        storage.set(CUSTOMER_ID, result.customerId);
         this.setToken(result.token);
         this.setUserInfo(result);
       }
@@ -90,12 +89,6 @@ export const useUserStore = defineStore({
       if (result.permissions && result.permissions.length) {
         const permissionsList = generateOptionFromArray(result.permissions);
         this.setPermissions(permissionsList);
-
-        if (result.permissions.includes(PermissionEnums.Customer)) {
-          result.customerId = (
-            await CustomerManager.load(null, where('userId', '==', result.id))
-          )?.[0]?.id;
-        }
         this.setUserInfo(result);
       } else {
         throw new Error('getInfo: permissionsList must be a non-null array !');

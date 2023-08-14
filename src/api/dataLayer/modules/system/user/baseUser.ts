@@ -3,7 +3,7 @@ import { db, executeQuery } from '@/store/plugins/firebase';
 import { Result, resultError, resultSuccess } from '@/store/request/_util';
 import { ACCESS_TOKEN } from '@/store/mutation-types';
 import { storage } from '@/store/utils/Storage';
-import { userPath } from '@/api/dataLayer/modules/user/user';
+import { CustomerManager, userPath } from '@/api/dataLayer/modules/user/user';
 
 export type Permission = {
   label: string;
@@ -52,8 +52,10 @@ export async function getUserInfo(token?): Promise<Result<BaseUser>> {
   const exist = await executeQuery(
     query(collection(db, userPath), where('token', '==', currentToken))
   );
+
   if (exist[0]) {
     const info = exist[0];
+    info.customerId = (await CustomerManager.load(null, where('userId', '==', info.id)))?.[0]?.id;
     info.permissions = [info.userType];
     return resultSuccess(info);
   } else {

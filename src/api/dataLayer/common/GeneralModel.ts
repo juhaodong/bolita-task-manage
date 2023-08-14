@@ -19,7 +19,9 @@ import { QueryCompositeFilterConstraint, QueryConstraint } from '@firebase/fires
 import { safeParseInt, toastError } from '@/store/utils/utils';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { usePermission } from '@/hooks/web/usePermission';
-import { useUserStore } from '@/store/modules/user';
+import { storage } from '@/store/utils/Storage';
+import { CUSTOMER_ID } from '@/store/mutation-types';
+import { customerPath } from '@/api/dataLayer/modules/user/user';
 
 export type FormFields = (Promise<FormField> | FormField)[];
 interface JoinManager {
@@ -179,8 +181,8 @@ export function initModel(g: GeneralModel): Model {
       }
       const { isCustomer } = usePermission();
       q = query(q, orderBy('createTimestamp', 'desc'), where('deletedAt', '==', 0));
-      if (isCustomer()) {
-        const customerId = (await useUserStore().getInfo()).customerId;
+      if (isCustomer() && g.collectionName != customerPath) {
+        const customerId = storage.get(CUSTOMER_ID);
         if (customerId) {
           q = query(q, where('customerId', '==', customerId));
         }

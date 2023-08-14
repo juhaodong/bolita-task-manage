@@ -5,7 +5,8 @@ import { usePermission } from '@/hooks/web/usePermission';
 import dayjs from 'dayjs';
 import { CustomerManager } from '@/api/dataLayer/modules/user/user';
 import { keyBy } from 'lodash-es';
-import { useUserStore } from '@/store/modules/user';
+import { storage } from '@/store/utils/Storage';
+import { CUSTOMER_ID } from '@/store/mutation-types';
 
 export function getFilesUploadFormField(
   key = 'files',
@@ -71,7 +72,7 @@ export async function asyncCustomerFormField(): Promise<FormField> {
     componentProps: {
       options: customerList,
     },
-    defaultValue: isCustomer() ? (await useUserStore().getInfo()).customerId : null,
+    defaultValue: isCustomer() ? storage.get(CUSTOMER_ID) : null,
     disableCondition() {
       return isCustomer();
     },
