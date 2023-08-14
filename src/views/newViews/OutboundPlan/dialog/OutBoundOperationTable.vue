@@ -73,13 +73,13 @@
     const editValue = {
       operationInfo: localOperationInfo,
       extraInfo: extraInfo,
-      outStatus: OutStatus.Wait,
+      outStatus: OutStatus.WaitOperation,
     };
     if (completeNumber > 0) {
       editValue.outStatus = OutStatus.Partial;
       const targetNumber = safeParseInt(outDetail?.outboundNum);
       if (completeNumber >= targetNumber) {
-        editValue.outStatus = OutStatus.All;
+        editValue.outStatus = OutStatus.Wait;
       }
     }
     await safeScope(async () => {
@@ -99,19 +99,18 @@
 
   async function confirm() {
     const completeNumber = safeSumInt(currentDetailList, 'completeNum');
-    console.log(extraInfo.trayNum);
     const editValue = {
       operationInfo: localOperationInfo,
       extraInfo: extraInfo,
       trayNum: extraInfo?.trayNum ?? '',
-      outStatus: OutStatus.Wait,
+      outStatus: OutStatus.WaitOperation,
       carStatus: CarStatus.Able,
     };
     if (completeNumber > 0) {
       editValue.outStatus = OutStatus.Partial;
       const targetNumber = safeParseInt(outDetail?.outboundNum);
       if (completeNumber >= targetNumber) {
-        editValue.outStatus = OutStatus.All;
+        editValue.outStatus = OutStatus.Wait;
       }
     }
     await safeScope(async () => {
@@ -228,13 +227,15 @@
           <n-input placeholder="操作人:" v-model:value="extraInfo.operationPerson" />
         </n-form-item>
       </div>
-      <div>
+      <div v-if="outDetail?.carStatus != CarStatus.NoNeed">
         <n-form-item label="打托数量">
           <n-input placeholder="操作人:" v-model:value="extraInfo.trayNum" />
         </n-form-item>
       </div>
       <n-button @click="save" type="warning" secondary>保存</n-button>
-      <n-button @click="confirm" type="primary">打托完成</n-button>
+      <n-button @click="confirm" v-if="outDetail?.carStatus != CarStatus.NoNeed" type="primary"
+        >打托完成</n-button
+      >
     </n-space>
   </div>
 </template>

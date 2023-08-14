@@ -9,7 +9,6 @@ import { notifyPath, taskListPath } from '@/api/dataLayer/modules/notify/path';
 export const NotifyManager = initModel({
   collectionName: notifyPath,
   init(value, taskList) {
-    console.log(taskList);
     value.boxCount = safeSumInt(taskList, 'containerNum');
     value.trayCount = safeSumInt(taskList, 'trayNum');
     const info = {
@@ -44,7 +43,8 @@ export enum OutStatus {
   WaitForCheck = '等待审核',
   WaitForPriceConfirm = '等待确认报价',
   All = '全部出库',
-  Partial = '部分出库',
+  Partial = '部分操作',
+  WaitOperation = '等待操作',
   Wait = '等待出库',
   Cancel = '取消',
   Transfer = '转其他系统',

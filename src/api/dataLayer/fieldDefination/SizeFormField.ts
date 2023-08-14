@@ -14,7 +14,11 @@ export const sizeFormField: FormField[] = [
     field: 'height',
   },
   {
-    label: '实重kg',
-    field: 'actualWeight',
+    field: 'weightKg',
+    label: '重量kg',
+  },
+  {
+    field: 'volume',
+    label: '体积',
   },
 ];

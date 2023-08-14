@@ -242,3 +242,19 @@ export function compareStatus(currentValue: string, limitValue: string) {
     return safeParseInt(currentValue) > safeParseInt(limitValue) ? 'error' : 'warning';
   }
 }
+
+export function sizeColumns() {
+  return [
+    sizeColumn,
+    {
+      title: '重量kg',
+      key: 'weightKg',
+      width: 60,
+    },
+    {
+      title: '体积',
+      key: 'volume',
+      width: 60,
+    },
+  ];
+}

@@ -58,6 +58,7 @@
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { handleRequest, safeParseInt, toastError } from '@/store/utils/utils';
   import { afterPlanDetailAdded } from '@/api/dataLayer/modules/OutBoundPlan/outAddHook';
+  import { sizeFormField } from '@/api/dataLayer/fieldDefination/SizeFormField';
 
   interface Props {
     model?: any;
@@ -160,6 +161,7 @@
   ];
 
   const addressFormFields: FormField[] = [
+    ...sizeFormField,
     getFilesUploadFormField('files', false),
     {
       field: 'operationRequirement',

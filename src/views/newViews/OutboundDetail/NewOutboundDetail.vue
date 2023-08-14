@@ -24,7 +24,6 @@
 
   let loading: boolean = $ref(false);
   const prop = defineProps<Props>();
-  console.log(prop.model);
   const schemas: FormField[] = [
     {
       field: 'containerId',
@@ -39,14 +38,6 @@
       label: '数量(箱/件)',
     },
     ...sizeFormField,
-    {
-      field: 'weightKg',
-      label: '重量kg',
-    },
-    {
-      field: 'volume',
-      label: '体积',
-    },
     {
       field: 'note',
       label: '备注',

@@ -4,6 +4,7 @@ import {
   idColumn,
   standardDateFormat,
   statusColumn,
+  statusColumnEasy,
   timeColumn,
 } from '@/views/bolita-views/composable/useableColumns';
 import { h } from 'vue';
@@ -54,22 +55,18 @@ export const columns: DataTableColumns<any> = [
     title: '货柜类型',
     key: 'containerType',
   },
-  {
+  statusColumnEasy({
     title: '出库状态',
     key: 'outStatus',
-  },
+  }),
   {
     title: '备注',
     key: 'note',
   },
-  {
-    title: '交流',
-    key: 'warehouseNote',
-  },
-  {
+  statusColumnEasy({
     title: '结算情况',
     key: 'cashStatus',
-  },
+  }),
 ];
 
 export const filters: FormField[] = [

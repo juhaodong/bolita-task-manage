@@ -1,6 +1,7 @@
 import { DataTableColumns } from 'naive-ui';
 import {
   idColumn,
+  sizeColumns,
   statusColumn,
   statusColumnEasy,
   timeColumn,
@@ -36,6 +37,7 @@ export const columns: DataTableColumns<OutboundPlanModel> = [
     key: 'containerNum',
     width: 60,
   },
+  ...sizeColumns(),
   timeColumn(),
   statusColumnEasy({
     title: '订车状态',
@@ -98,6 +100,7 @@ export type OutboundPlanModel = {
 };
 
 export enum CarStatus {
+  NoNeed = '无需订车',
   Able = '可订车',
   UnAble = '待打托',
   Booked = '已订车',

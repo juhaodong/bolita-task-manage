@@ -152,9 +152,6 @@
               currentId = record.id!;
               showOperationTable = true;
             },
-            ifShow() {
-              return record.outStatus == OutStatus.Wait || record.outStatus == OutStatus.Partial;
-            },
           },
           {
             label: '费用',
@@ -171,9 +168,6 @@
               } else {
                 return 'error';
               }
-            },
-            ifShow() {
-              return record.outStatus == OutStatus.All;
             },
           },
         ],

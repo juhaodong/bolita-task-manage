@@ -9,7 +9,7 @@ export async function afterPlanDetailAdded(planDetails) {
       safeParseInt(detail.instorageContainerNum) - safeParseInt(detail.containerNum);
     let status = OutStatus.Partial;
     if (instorageContainerNum == 0 && instorageTrayNum == 0) {
-      status = OutStatus.All;
+      status = OutStatus.WaitOperation;
     }
     return {
       instorageTrayNum,

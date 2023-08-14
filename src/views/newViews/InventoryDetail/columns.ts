@@ -1,5 +1,5 @@
 import { DataTableColumns } from 'naive-ui';
-import { sizeColumn, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { sizeColumns, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { stayDaysColumn } from '@/views/newViews/NotifyDetail/columns';
 
@@ -28,15 +28,7 @@ export const columns: DataTableColumns<InventoryDetailModel> = [
     title: '数量',
     key: 'instorageContainerNum',
   },
-  sizeColumn,
-  {
-    title: '重量kg',
-    key: 'weightKg',
-  },
-  {
-    title: '体积',
-    key: 'volume',
-  },
+  ...sizeColumns(),
   {
     title: '仓库',
     key: 'warehouseId',

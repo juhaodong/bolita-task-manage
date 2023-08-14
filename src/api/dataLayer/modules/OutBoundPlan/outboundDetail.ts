@@ -49,7 +49,7 @@ export const OutBoundDetailManager = initModel({
       const status = uniq(list.map((it) => it.checkStatus));
       if (status.length == 1 && status[0] == CheckStatus.Checked) {
         const outInfo = await OutBoundPlanManager.getById(outId);
-        let newOutStatus = OutStatus.Wait;
+        let newOutStatus = OutStatus.WaitOperation;
         if (truckDeliveryMethod.includes(outInfo.deliveryMethod)) {
           newOutStatus = OutStatus.WaitForPriceConfirm;
         }

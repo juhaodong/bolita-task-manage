@@ -48,16 +48,6 @@
       return it;
     }),
     {
-      field: 'weightKg',
-      label: '重量kg',
-      required: false,
-    },
-    {
-      field: 'volume',
-      label: '体积',
-      required: false,
-    },
-    {
       field: 'waybillId',
       label: '运单号',
       required: false,
