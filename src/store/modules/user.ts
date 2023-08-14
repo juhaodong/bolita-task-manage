@@ -25,7 +25,7 @@ export interface IUserState {
   welcome: string;
   avatar: string;
   permissions: any[];
-  info: BaseUser;
+  info?: BaseUser;
 }
 
 export const useUserStore = defineStore({
@@ -51,7 +51,7 @@ export const useUserStore = defineStore({
     getPermissions(): [any][] {
       return this.permissions;
     },
-    getUserInfo(): BaseUser {
+    getUserInfo(): BaseUser | undefined {
       return this.info;
     },
   },
