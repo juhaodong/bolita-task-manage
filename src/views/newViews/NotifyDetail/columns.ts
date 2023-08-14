@@ -3,6 +3,7 @@ import {
   colorColumn,
   formatColumn,
   joinDisplayColumn,
+  statusColumnEasy,
 } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { generateOptionFromArray, safeParseInt } from '@/store/utils/utils';
@@ -43,12 +44,22 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
   formatColumn(
     'trayNum',
     '托数',
-    (record) => record['arrivedTrayNum'] + '/' + safeParseInt(record['trayNum'])
+    (record) =>
+      record['instorageTrayNum'] +
+      '/' +
+      record['arrivedTrayNum'] +
+      '/' +
+      safeParseInt(record['trayNum'])
   ),
   formatColumn(
     'containerNum',
     '箱数',
-    (record) => record['arrivedContainerNum'] + '/' + safeParseInt(record['containerNum'])
+    (record) =>
+      record['instorageContainerNum'] +
+      '/' +
+      record['arrivedContainerNum'] +
+      '/' +
+      safeParseInt(record['containerNum'])
   ),
   joinDisplayColumn('containerStandards', '外箱规格', ['length', 'width', 'height'], '*'),
   {
@@ -68,10 +79,10 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
     }
     return sumCount == arrivedCount ? InBoundStatus.All : InBoundStatus.Partial;
   }),
-  {
+  statusColumnEasy({
     title: '出库状态',
     key: 'outStatus',
-  },
+  }),
   {
     title: '运单号',
     key: 'waybillId',

@@ -27,6 +27,7 @@ export const OutBoundDetailManager = initModel({
     value.city = plan.city;
     value.state = plan.state;
     value.country = plan.country;
+    value.notifyDetailId = value.id;
     formatItemAddress(value);
     delete value.outBoundTrayNum;
     delete value.outBoundContainerNum;

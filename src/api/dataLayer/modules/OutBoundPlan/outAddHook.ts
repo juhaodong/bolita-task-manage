@@ -11,12 +11,11 @@ export async function afterPlanDetailAdded(planDetails) {
     if (instorageContainerNum == 0 && instorageTrayNum == 0) {
       status = OutStatus.All;
     }
-
     return {
       instorageTrayNum,
       instorageContainerNum,
       outStatus: status,
-      id: detail.id.toString(),
+      id: detail.notifyDetailId.toString(),
     };
   });
   await NotifyDetailManager.massiveUpdate(updateValue);
