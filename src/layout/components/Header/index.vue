@@ -100,7 +100,7 @@
       <!-- 个人中心 -->
       <div class="layout-header-trigger layout-header-trigger-min">
         <n-dropdown trigger="hover" @select="avatarSelect" :options="avatarOptions">
-          <div class="avatar"> 当前用户: {{ username }} </div>
+          <div class="avatar"> 当前用户: {{ username }}</div>
         </n-dropdown>
       </div>
       <!--设置-->
@@ -151,13 +151,13 @@
       const dialog = useDialog();
       const { navMode, navTheme, headerSetting, menuSetting, crumbsSetting } = useProjectSetting();
 
-      const { realName } = userStore?.info || {};
+      const { realName, permissions } = userStore?.info || {};
       console.log(userStore.info);
 
       const drawerSetting = ref();
 
       const state = reactive({
-        username: realName ?? '',
+        username: realName + '/[' + permissions + ']' ?? '',
         fullscreenIcon: 'FullscreenOutlined',
         navMode,
         navTheme,

@@ -243,7 +243,7 @@
         const displaySchemas = (schemas as FormSchema[]).filter(
           (it) => !it?.displayCondition || it.displayCondition(formModel)
         );
-        for (const schema of displaySchemas) {
+        for (const schema of schemas) {
           const { defaultValue } = schema;
           if (defaultValue) {
             schema.defaultValue = defaultValue;

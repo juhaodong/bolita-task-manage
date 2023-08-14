@@ -2,6 +2,7 @@ import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
 import { renderIcon } from '@/store/utils';
 import { Person } from '@vicons/ionicons5';
+import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -12,6 +13,7 @@ const routes: Array<RouteRecordRaw> = [
       title: '系统设置',
       sort: 9,
       isRoot: true,
+      permissions: [PermissionEnums.Manager],
       icon: renderIcon(Person),
     },
     children: [
@@ -20,7 +22,6 @@ const routes: Array<RouteRecordRaw> = [
         name: `userManage`,
         meta: {
           title: '用户管理',
-          activeMenu: 'userManage_index',
         },
         component: () => import('@/views/newViews/UserManage/UserManage.vue'),
       },
@@ -29,7 +30,6 @@ const routes: Array<RouteRecordRaw> = [
         name: `customer`,
         meta: {
           title: '客户管理',
-          activeMenu: 'customerManage_index',
         },
         component: () => import('@/views/newViews/CustomerManage/CustomerManage.vue'),
       },
@@ -38,7 +38,6 @@ const routes: Array<RouteRecordRaw> = [
         name: `warehouse`,
         meta: {
           title: '仓库管理',
-          activeMenu: 'warehouse_index',
         },
         component: () => import('@/views/newViews/WarehouseManage/WarehouseManage.vue'),
       },

@@ -1,11 +1,11 @@
 import { generateOptionFromArray } from '@/store/utils/utils';
 import { DeliveryMethod, deliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
 import { usePermission } from '@/hooks/web/usePermission';
 import dayjs from 'dayjs';
 import { CustomerManager } from '@/api/dataLayer/modules/user/user';
 import { keyBy } from 'lodash-es';
+import { useUserStore } from '@/store/modules/user';
 
 export function getFilesUploadFormField(
   key = 'files',
@@ -57,7 +57,7 @@ export function getDeliveryMethodSelection(): FormField[] {
 }
 
 export async function asyncCustomerFormField(): Promise<FormField> {
-  const { hasPermission } = usePermission();
+  const { isCustomer } = usePermission();
   const customers = await CustomerManager.load();
   const customerDict = keyBy(customers, 'id');
   const customerList = customers.map((it) => ({
@@ -71,13 +71,14 @@ export async function asyncCustomerFormField(): Promise<FormField> {
     componentProps: {
       options: customerList,
     },
+    defaultValue: isCustomer() ? (await useUserStore().getInfo()).customerId : null,
+    disableCondition() {
+      return isCustomer();
+    },
     onFormUpdate(value) {
       if (value?.customerId) {
         value['warehouseId'] = customerDict[value?.customerId]?.warehouseId;
       }
-    },
-    displayCondition() {
-      return !hasPermission([PermissionEnums.Customer]);
     },
   };
 }

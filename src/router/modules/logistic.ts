@@ -2,6 +2,7 @@ import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
 import { renderIcon } from '@/store/utils';
 import { DeliveryTruck } from '@vicons/carbon';
+import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
 
 const name = 'logistic';
 
@@ -32,6 +33,7 @@ const routes: Array<RouteRecordRaw> = [
         name: `${name}carpoolManage`,
         meta: {
           title: '订车管理',
+          permissions: [PermissionEnums.Manager],
         },
         component: () => import('@/views/newViews/CarpoolManagement/CarpoolManagement.vue'),
       },

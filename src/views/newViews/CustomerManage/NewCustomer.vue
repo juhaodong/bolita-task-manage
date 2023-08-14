@@ -38,9 +38,9 @@
       field: 'warehouseId',
     }),
     asyncUserTypeFormField({
-      label: '所属业务员',
-      field: 'belongSalesName',
-      userType: UserType.Sales,
+      label: '客户账号',
+      field: 'userId',
+      userType: UserType.Customer,
     }),
     {
       label: '使用系统',

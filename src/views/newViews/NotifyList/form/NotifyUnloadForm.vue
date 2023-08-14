@@ -75,9 +75,10 @@
   }
 
   function loadAll() {
-    currentTaskList.forEach((it) => {
-      it.arrivedTrayNumEdit = it.arrivedTrayNum == 0 ? '' : it.arrivedTrayNum;
-      it.arrivedContainerNumEdit = it.arrivedContainerNum == 0 ? '' : it.arrivedContainerNum;
+    currentTaskList.forEach((it, index) => {
+      currentTaskList[index].arrivedTrayNumEdit = it.arrivedTrayNum == 0 ? '' : it.arrivedTrayNum;
+      currentTaskList[index].arrivedContainerNumEdit =
+        it.arrivedContainerNum == 0 ? '' : it.arrivedContainerNum;
     });
   }
 
@@ -134,16 +135,17 @@
         listElement.arrivedContainerNumEdit != listElement.arrivedContainerNum
       ) {
         const editInfo: any = {
-          arrivedTrayNum: listElement.arrivedTrayNumEdit,
-          arrivedContainerNum: listElement.arrivedContainerNumEdit,
+          arrivedTrayNum: listElement?.arrivedTrayNumEdit ?? 0,
+          arrivedContainerNum: listElement?.arrivedContainerNumEdit ?? 0,
           note: listElement.note,
         };
         if (listElement.arrivedTrayNumEdit == listElement.trayNum) {
-          editInfo.instorageTrayNum = listElement.arrivedTrayNumEdit;
+          editInfo.instorageTrayNum = listElement?.arrivedTrayNumEdit ?? 0;
         }
         if (listElement.arrivedContainerNumEdit == listElement.containerNum) {
-          editInfo.instorageContainerNum = listElement.arrivedContainerNumEdit;
+          editInfo.instorageContainerNum = listElement?.arrivedContainerNumEdit ?? 0;
         }
+
         const res = await NotifyDetailManager.edit(editInfo, listElement.id);
         if (res.code != ResultEnum.SUCCESS) {
           toastError(res.message);
@@ -178,8 +180,8 @@
     <loading-frame :loading="loading">
       <n-descriptions v-if="notifyDetail" :columns="3" label-placement="left" bordered>
         <n-descriptions-item :span="2" label="货柜号">
-          {{ notifyDetail?.containerNo }}</n-descriptions-item
-        >
+          {{ notifyDetail?.containerNo }}
+        </n-descriptions-item>
         <n-descriptions-item label="卸柜人" />
         <n-descriptions-item label="日期"> {{ getDateNow() }}</n-descriptions-item>
 

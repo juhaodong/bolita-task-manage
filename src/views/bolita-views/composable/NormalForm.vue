@@ -30,7 +30,6 @@
   });
 
   const schemas: FormSchema[] = $computed(() => {
-    console.log(props.defaultValueModel);
     return realSchemas.map(convertFormFieldToSchema).map((it) => {
       if (props?.defaultValueModel?.[it.field]) {
         it.defaultValue = props?.defaultValueModel?.[it.field];
