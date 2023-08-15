@@ -6,14 +6,10 @@ import {
   timeColumn,
 } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 
 export const columns: DataTableColumns = [
   {
     type: 'selection',
-    disabled(row: any) {
-      return row?.carStatus == CarStatus.UnAble;
-    },
   },
   idColumn('出库ID', '/operation/index', 'id'),
   {
