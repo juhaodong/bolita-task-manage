@@ -21,6 +21,7 @@
   import {
     asyncCustomerFormField,
     getFilesUploadFormField,
+    noteFormField,
   } from '@/api/dataLayer/fieldDefination/common';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
@@ -62,7 +63,13 @@
 
   const step1Field: FormFields = [
     asyncCustomerFormField(),
-    ...sizeFormField,
+    ...sizeFormField.map((it) => {
+      it.required = false;
+      return it;
+    }),
+    { label: '箱数', field: 'containerNum', required: false },
+    { label: '托数', field: 'trayNum', required: false },
+    { label: 'FBA号', field: 'fbaNo', required: false },
     { label: '邮编', field: 'postCode', group: '取货地址' },
     ...cloneDeep(deliveryAddressDetail).map((it) => {
       it.group = '取货地址';
@@ -71,6 +78,7 @@
   ];
   const addressFormFields: FormFields = [
     getFilesUploadFormField('files', false),
+    noteFormField,
     ...getTargetAddressSelectionGroup(truckDeliveryMethod),
   ];
 </script>

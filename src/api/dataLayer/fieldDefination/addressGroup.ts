@@ -22,8 +22,8 @@ export const deliveryAddressDetail: FormField[] = [
   { label: '门牌号', field: 'houseNo' },
   { label: '地址附加', field: 'appendAddress', required: false },
   { label: '城市', field: 'city' },
-  { label: '州', field: 'state' },
-  { label: '国家', field: 'country' },
+  { label: '州', field: 'state', required: false },
+  { label: '国家', field: 'country', required: false },
 ];
 
 export function isAmazon(value) {
