@@ -59,6 +59,7 @@
   import { handleRequest, safeParseInt, toastError } from '@/store/utils/utils';
   import { afterPlanDetailAdded } from '@/api/dataLayer/modules/OutBoundPlan/outAddHook';
   import { sizeFormField } from '@/api/dataLayer/fieldDefination/SizeFormField';
+  import { DeliveryMethod, truckDeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 
   interface Props {
     model?: any;
@@ -161,7 +162,6 @@
   ];
 
   const addressFormFields: FormField[] = [
-    ...sizeFormField,
     getFilesUploadFormField('files', false),
     {
       field: 'operationRequirement',
@@ -171,6 +171,17 @@
       },
     },
     ...getTargetAddressSelectionGroup(),
+    ...sizeFormField.map((it) => {
+      it.displayCondition = (model) => {
+        return (
+          truckDeliveryMethod.includes(model?.deliveryMethod) &&
+          model?.deliveryMethod != DeliveryMethod.PrivateTruck
+        );
+      };
+      it.required = false;
+      it.group = '尺寸信息';
+      return it;
+    }),
   ];
 </script>
 

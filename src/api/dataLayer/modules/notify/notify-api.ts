@@ -45,6 +45,7 @@ export enum OutStatus {
   All = '全部出库',
   Partial = '部分操作',
   WaitOperation = '等待操作',
+  PartialOut = '部分出库',
   Wait = '等待出库',
   Cancel = '取消',
   Transfer = '转其他系统',
