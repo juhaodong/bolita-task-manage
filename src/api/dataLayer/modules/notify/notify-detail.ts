@@ -1,5 +1,5 @@
 import { orderBy, where } from 'firebase/firestore';
-import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
+import { NotifyManager, OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 import { taskListPath } from '@/api/dataLayer/modules/notify/path';
 
@@ -47,6 +47,7 @@ export const NotifyDetailManager = initModel({
     taskInfo.storagePosition = '';
     taskInfo.notifyId = notifyId;
     taskInfo.customerId = customerId;
+    taskInfo.outStatus = OutStatus.WaitCommand;
     return taskInfo;
   },
   joinManager: {

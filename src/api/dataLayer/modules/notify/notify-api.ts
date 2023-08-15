@@ -44,6 +44,7 @@ export enum OutStatus {
   WaitForPriceConfirm = '等待确认报价',
   All = '全部出库',
   Partial = '部分操作',
+  WaitCommand = '等待指令',
   WaitOperation = '等待操作',
   PartialOut = '部分出库',
   Wait = '等待出库',
