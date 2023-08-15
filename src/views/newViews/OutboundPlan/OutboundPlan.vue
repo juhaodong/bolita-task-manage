@@ -172,9 +172,6 @@
             },
           },
         ],
-        select: (key) => {
-          window['$message'].info(`您点击了，${key} 按钮`);
-        },
       });
     },
   });

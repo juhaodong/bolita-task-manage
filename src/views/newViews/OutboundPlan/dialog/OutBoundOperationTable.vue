@@ -18,6 +18,7 @@
   import { safeParseInt, safeSumInt } from '@/store/utils/utils';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
+  import { truckDeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 
   console.log(getDateNow, timeDisplay);
 
@@ -79,7 +80,11 @@
       editValue.outStatus = OutStatus.Partial;
       const targetNumber = safeParseInt(outDetail?.outboundNum);
       if (completeNumber >= targetNumber) {
-        editValue.outStatus = OutStatus.Wait;
+        if (truckDeliveryMethod.includes(outDetail.deliveryMethod)) {
+          editValue.outStatus = OutStatus.Wait;
+        } else {
+          editValue.outStatus = OutStatus.All;
+        }
       }
     }
     await safeScope(async () => {
@@ -234,8 +239,8 @@
       </div>
       <n-button @click="save" type="warning" secondary>保存</n-button>
       <n-button @click="confirm" v-if="outDetail?.carStatus != CarStatus.NoNeed" type="primary"
-        >打托完成</n-button
-      >
+        >打托完成
+      </n-button>
     </n-space>
   </div>
 </template>

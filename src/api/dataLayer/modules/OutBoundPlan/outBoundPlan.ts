@@ -1,5 +1,5 @@
 import { getCollectionNextId, initModel } from '@/api/dataLayer/common/GeneralModel';
-import { CashStatus, OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
+import { CashStatus, NotifyManager, OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 import { safeSumInt } from '@/store/utils/utils';
 import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
@@ -7,7 +7,7 @@ import { truckDeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 
 export const outboundPath = 'outbound';
 export const OutBoundPlanManager = initModel({
-  async init(value): any {
+  async init(value): Promise<any> {
     value.trayNum = safeSumInt(value.planList, 'outBoundTrayNum');
     value.containerNum = safeSumInt(value.planList, 'outBoundContainerNum');
     const isTruck = truckDeliveryMethod.includes(value.deliveryMethod);
@@ -33,6 +33,11 @@ export const OutBoundPlanManager = initModel({
     });
   },
   async afterEditHook(id, value) {
+    if (value.outStatus) {
+      const currentInfo = await OutBoundPlanManager.getById(id);
+      console.log(currentInfo);
+      await NotifyManager.editInternal({ outStatus: value.outStatus }, currentInfo.notifyId);
+    }
     if (value.CMR && value?.outStatus != OutStatus.All) {
       await OutBoundPlanManager.editInternal({ outStatus: OutStatus.All }, id);
     }
