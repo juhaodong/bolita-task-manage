@@ -45,6 +45,8 @@
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { CurrencyEuro } from '@vicons/carbon';
   import CarPaymentDialog from '@/views/newViews/CarpoolManagement/dialog/CarPaymentDialog.vue';
+  import { cloneDeep } from 'lodash-es';
+  import { YesOrNo } from '@/api/dataLayer/modules/operationType';
 
   const showModal = ref(false);
 
@@ -52,7 +54,25 @@
   let currentModel: any | null = $ref(null);
   let paymentDialogShow: boolean = $ref(false);
   const loadDataTable = async () => {
-    return await CarpoolManager.load(filterObj);
+    const fb = filterObj ? cloneDeep(filterObj) : null;
+    if (fb) {
+      delete fb.filterIsYes;
+      console.log(fb);
+    }
+
+    return (await CarpoolManager.load(fb)).filter((it) => {
+      console.log(it);
+      if (!filterObj?.filterIsYes) {
+        return true;
+      } else {
+        console.log(filterObj.filterIsYes);
+        if (filterObj.filterIsYes == YesOrNo.Yes) {
+          return it.id[0] == 'C';
+        } else {
+          return it.id[0] != 'C';
+        }
+      }
+    });
   };
   const actionRef = ref();
 
