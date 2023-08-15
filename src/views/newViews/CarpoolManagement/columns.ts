@@ -6,6 +6,8 @@ import {
 } from '@/api/dataLayer/fieldDefination/common';
 import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
+import { yesOrNo } from '@/api/dataLayer/modules/operationType';
+import { generateOptionFromArray } from '@/store/utils/utils';
 
 export const columns: DataTableColumns<CarpoolManagementModel> = [
   idColumn('订车ID', '/logistic/logisticDetail'),
@@ -49,7 +51,7 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
 ];
 
 export type CarpoolManagementModel = {
-  carPoolId: string;
+  carpoolId: string;
   customerId: string;
   logisticId: string;
   date: string;
@@ -69,32 +71,24 @@ export type CarpoolManagementModel = {
 export const filters: FormFields = [
   {
     label: '订车ID',
-    field: 'carPoolID',
+    field: 'carpoolId',
   },
   asyncCustomerFormField(),
   {
-    label: '出库ID',
-    field: 'OutboundId',
+    label: '是否拼车',
+    field: 'filterIsYes',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(yesOrNo),
+    },
   },
   {
     label: '运输公司',
-    field: 'transportationCompany',
-  },
-  {
-    label: '出库状态',
-    field: 'outStatus',
+    field: 'deliveryCompany',
   },
   {
     label: '仓库',
     field: 'warehouseId',
-  },
-  {
-    label: '结算情况',
-    field: 'settlementSituation',
-  },
-  {
-    field: 'waybillId',
-    label: '运单号',
   },
   {
     field: 'ISA',

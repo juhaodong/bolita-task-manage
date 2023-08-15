@@ -1,5 +1,5 @@
 import { getCollectionNextId, initModel } from '@/api/dataLayer/common/GeneralModel';
-import { CashStatus, NotifyManager, OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
+import { CashStatus, OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 import { safeSumInt } from '@/store/utils/utils';
 import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
@@ -16,7 +16,7 @@ export const OutBoundPlanManager = initModel({
     value.carStatus = isTruck ? CarStatus.UnAble : CarStatus.NoNeed;
     value.cashStatus = CashStatus.NotFinish;
     value.ISA = '';
-    value.carPoolId = '';
+    value.carpoolId = '';
     value.logisticCashStatus = CashStatus.NotFinish;
     if (value.onlyDelivery) {
       value.id = await getCollectionNextId(outboundPath, 'W');
@@ -33,11 +33,6 @@ export const OutBoundPlanManager = initModel({
     });
   },
   async afterEditHook(id, value) {
-    if (value.outStatus) {
-      const currentInfo = await OutBoundPlanManager.getById(id);
-      console.log(currentInfo);
-      await NotifyManager.editInternal({ outStatus: value.outStatus }, currentInfo.notifyId);
-    }
     if (value.CMR && value?.outStatus != OutStatus.All) {
       await OutBoundPlanManager.editInternal({ outStatus: OutStatus.All }, id);
     }

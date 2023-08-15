@@ -11,10 +11,7 @@
           <n-button :disabled="model.priceConfirmed" @click="submit" type="info">提交报价</n-button>
         </template>
         <template #extraContent>
-          <n-popconfirm
-            v-if="!model?.priceConfirmed"
-            @positive-click="handleSubmit({ priceConfirmed: true, outStatus: OutStatus.Wait })"
-          >
+          <n-popconfirm v-if="!model?.priceConfirmed" @positive-click="confirmPrice">
             <template #trigger>
               <n-button type="success">确认报价</n-button>
             </template>
@@ -56,13 +53,22 @@
   });
 
   const emit = defineEmits(['saved']);
-
+  async function confirmPrice() {
+    await handleSubmit({
+      priceConfirmed: true,
+      outStatus: OutStatus.Wait,
+    });
+  }
   async function handleSubmit(values: any) {
     loading = true;
     await safeScope(async () => {
+      console.log(props.model.id, 'id1');
       await OutBoundPlanManager.editInternal(values, props.model.id);
+      console.log(props.model.id, 'id2');
       const info = await OutBoundPlanManager.getById(props.model.id);
+      console.log(info, 'info');
       if (info.carpoolId) {
+        console.log(info.carpoolId, 'id3');
         await carpoolSelfCheck(info.carpoolId);
       }
       emit('saved');
