@@ -22,6 +22,9 @@
     {
       label: '仓库ID',
       field: 'id',
+      disableCondition: () => {
+        return prop.model.id;
+      },
     },
     {
       label: '公司名称',
