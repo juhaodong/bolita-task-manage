@@ -23,7 +23,7 @@
       label: '仓库ID',
       field: 'id',
       disableCondition: () => {
-        return prop.model.id;
+        return prop.model?.id;
       },
     },
     {
