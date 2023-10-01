@@ -134,7 +134,7 @@
   }
 
   const columns: DataTableColumns<any> = $computed(() => [
-    { title: '客户ID', key: 'customerId' },
+    { title: '客户ID', key: 'customerName' },
     { title: '票号', key: 'ticketId' },
     { title: '箱号', key: 'containerId' },
     { title: '托数', key: 'trayNum' },

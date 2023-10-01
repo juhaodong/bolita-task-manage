@@ -14,7 +14,7 @@ export const columns: DataTableColumns<InventoryDetailModel> = [
   },
   {
     title: '客户ID',
-    key: 'customerId',
+    key: 'customerName',
   },
   {
     title: '货柜号',
@@ -79,7 +79,7 @@ export const filters: FormField[] = [
   },
   {
     label: '客户ID',
-    field: 'customerId',
+    field: 'customerName',
   },
   {
     field: 'containerId',

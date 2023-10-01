@@ -24,7 +24,7 @@ export const columns: DataTableColumns<OutboundDetailModel> = [
   },
   {
     title: '客户ID',
-    key: 'customerId',
+    key: 'customerName',
   },
   {
     title: '票号',

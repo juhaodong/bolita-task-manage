@@ -59,7 +59,7 @@ export const columns: DataTableColumns<ToBeClaimedModel> = [
   }),
   {
     title: '认领客户ID',
-    key: 'customerId',
+    key: 'customerName',
   },
   stayDaysColumn,
   timeColumn('discardTime', '废弃时间点'),

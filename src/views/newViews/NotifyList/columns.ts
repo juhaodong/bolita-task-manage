@@ -16,7 +16,7 @@ export const columns: DataTableColumns<any> = [
   timeColumn(),
   {
     title: '客户ID',
-    key: 'customerId',
+    key: 'customerName',
   },
   {
     title: '业务员',
@@ -72,7 +72,7 @@ export const filters: FormField[] = [
   },
   {
     label: '客户ID',
-    field: 'customerId',
+    field: 'customerName',
   },
   {
     label: '业务员',

@@ -13,7 +13,7 @@ export const columns: DataTableColumns<OutboundPlanModel> = [
   idColumn('出库ID', '/operation/detail'),
   {
     title: '客户ID',
-    key: 'customerId',
+    key: 'customerName',
   },
   {
     title: '业务员',
@@ -113,7 +113,7 @@ export const filters: FormField[] = [
   },
   {
     label: '客户ID',
-    field: 'customerId',
+    field: 'customerName',
   },
   {
     label: '出库ID',

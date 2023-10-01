@@ -24,6 +24,7 @@ import { CUSTOMER_ID } from '@/store/mutation-types';
 import { customerPath } from '@/api/dataLayer/modules/user/user';
 
 export type FormFields = (Promise<FormField> | FormField)[];
+
 interface JoinManager {
   loader: () => Promise<any[]>;
   key: string;
@@ -99,6 +100,8 @@ export async function safeScope(func): Promise<any> {
     toastError(e?.message);
   }
 }
+
+let userInfoDict: any | null = null;
 
 export function initModel(g: GeneralModel): Model {
   const scope = async (func) => {
@@ -179,6 +182,10 @@ export function initModel(g: GeneralModel): Model {
       if (extraCondition) {
         q = query(q, ...extraCondition);
       }
+      if (!userInfoDict) {
+        userInfoDict = keyBy(await executeQuery(query(collection(db, 'user'))), 'id');
+        console.log(userInfoDict, 'User Info Dict initialed');
+      }
       const { isCustomer } = usePermission();
       q = query(q, orderBy('createTimestamp', 'desc'), where('deletedAt', '==', 0));
       if (isCustomer() && g.collectionName != customerPath) {
@@ -199,6 +206,12 @@ export function initModel(g: GeneralModel): Model {
           };
         });
       }
+      list.forEach((it) => {
+        if (it.customerId) {
+          console.log(userInfoDict[it.customerId]);
+          it.customerName = userInfoDict[it.customerId]?.userName ?? '';
+        }
+      });
       if (!filterObj) {
         return list;
       } else {

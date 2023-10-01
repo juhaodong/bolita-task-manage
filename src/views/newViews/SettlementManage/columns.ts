@@ -26,7 +26,7 @@ export const columns: DataTableColumns = [
   },
   {
     title: '客户ID',
-    key: 'customerId',
+    key: 'customerName',
   },
 
   {
@@ -66,7 +66,7 @@ export const columns: DataTableColumns = [
 export const filters: FormField[] = [
   {
     label: '客户ID',
-    field: 'customerId',
+    field: 'customerName',
   },
   {
     label: '货柜号',

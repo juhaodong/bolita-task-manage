@@ -14,7 +14,7 @@ export const columns: DataTableColumns = [
   idColumn('出库ID', '/operation/index', 'id'),
   {
     title: '客户ID',
-    key: 'customerId',
+    key: 'customerName',
   },
   statusColumn('订车ID', 'carpoolId'),
   timeColumn(),
@@ -102,7 +102,7 @@ export const filters: FormField[] = [
   },
   {
     label: '客户ID',
-    field: 'customerId',
+    field: 'customerName',
   },
   {
     label: '出库ID',

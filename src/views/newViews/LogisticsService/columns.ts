@@ -19,7 +19,7 @@ export const columns: DataTableColumns<LogisticsServiceModel> = [
   },
   {
     title: '客户ID',
-    key: 'customerId',
+    key: 'customerName',
   },
   {
     title: '出库方式',
@@ -103,7 +103,7 @@ export const filters: FormField[] = [
   },
   {
     label: '客户ID',
-    field: 'customerId',
+    field: 'customerName',
   },
   {
     label: '出库ID',
