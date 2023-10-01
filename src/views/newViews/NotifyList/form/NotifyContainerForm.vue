@@ -76,7 +76,7 @@
       label: '总重量',
       required: false,
     },
-    getFilesUploadFormField('uploadFile', true, () => {
+    getFilesUploadFormField('files', true, () => {
       window.open(
         'https://firebasestorage.googlea' +
           'pis.com/v0/b/bolita-task-manage.appspot.' +

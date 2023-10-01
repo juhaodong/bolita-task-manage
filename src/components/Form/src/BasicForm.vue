@@ -76,6 +76,15 @@
                 </n-button>
               </n-space>
             </template>
+            <template v-else-if="schema.component === 'NAutoComplete'">
+              <n-auto-complete
+                :get-show="() => true"
+                :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
+                v-bind="getComponentProps(schema)"
+                v-model:value="formModel[schema.field]"
+                :class="{ isFull: schema.isFull != false && getProps.isFull }"
+              />
+            </template>
             <!--动态渲染表单组件-->
             <component
               v-else
