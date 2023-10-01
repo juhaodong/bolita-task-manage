@@ -75,7 +75,12 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled, Folder32Filled } from '@vicons/fluent';
-  import { CashStatus, NotifyManager, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
+  import {
+    CashStatus,
+    NotifyManager,
+    NotifyType,
+    OutStatus,
+  } from '@/api/dataLayer/modules/notify/notify-api';
   import NotifyFormIndex from '@/views/newViews/NotifyList/form/NotifyFormIndex.vue';
   import { $ref } from 'vue/macros';
   import { TruckDelivery } from '@vicons/tabler';
@@ -145,6 +150,9 @@
                 await NotifyManager.remove(record.id);
                 reloadTable();
               },
+            },
+            ifShow() {
+              return record['outStatus'] !== OutStatus.All;
             },
           },
           fileAction('附件', 'files', Folder32Filled),

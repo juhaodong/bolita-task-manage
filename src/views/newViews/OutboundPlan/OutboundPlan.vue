@@ -75,6 +75,7 @@
   import OutBoundCheckOutTable from '@/views/newViews/OutboundPlan/dialog/OutBoundCheckOutTable.vue';
   import OutBoundEditDialog from '@/views/newViews/OutboundPlan/dialog/OutBoundEditDialog.vue';
   import { where } from 'firebase/firestore';
+  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
 
   const showModal = ref(false);
 
@@ -153,6 +154,12 @@
               currentId = record.id!;
               showOperationTable = true;
             },
+            permissions: [
+              PermissionEnums.Operator,
+              PermissionEnums.Warehouse,
+              PermissionEnums.Sales,
+              PermissionEnums.Manager,
+            ],
           },
           {
             label: '费用',
