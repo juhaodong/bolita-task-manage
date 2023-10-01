@@ -59,6 +59,7 @@
 
   async function startEdit(id) {
     currentModel = await InventoryManager.getById(id);
+    console.log(id, currentModel);
     showModal.value = true;
   }
 
