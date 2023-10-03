@@ -15,10 +15,24 @@
         </template>
         新建仓外物流
       </n-button>
-      <n-button type="warning" :disabled="checkedRows.length == 0" @click="startShareCar()">
+      <n-button
+        v-if="
+          hasPermission([PermissionEnums.Manager, PermissionEnums.Logistic, PermissionEnums.Sales])
+        "
+        type="warning"
+        :disabled="checkedRows.length == 0"
+        @click="startShareCar()"
+      >
         订车
       </n-button>
-      <n-button type="error" :disabled="checkedRows.length == 0" @click="cancelCar()">
+      <n-button
+        v-if="
+          hasPermission([PermissionEnums.Manager, PermissionEnums.Logistic, PermissionEnums.Sales])
+        "
+        type="error"
+        :disabled="checkedRows.length == 0"
+        @click="cancelCar()"
+      >
         取消订车
       </n-button>
     </filter-bar>
@@ -37,7 +51,8 @@
       preset="card"
       style="width: 90%; min-width: 600px; max-width: 600px"
       title="新建订车"
-      ><new-logistic-detail @saved="reloadTable" />
+    >
+      <new-logistic-detail @saved="reloadTable" />
     </n-modal>
     <n-modal
       v-model:show="showShareCarModel"
@@ -88,11 +103,14 @@
   import { CashStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import LogisticFeeDialog from '@/views/newViews/LogisticsDetails/form/LogisticFeeDialog.vue';
   import NewLogisticDetail from '@/views/newViews/LogisticsDetails/form/NewLogisticDetail.vue';
+  import { usePermission } from '@/hooks/web/usePermission';
+  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
 
   interface Prop {
     carpoolId?: string;
   }
 
+  const { hasPermission } = usePermission();
   const props = defineProps<Prop>();
   let finished = $ref(false);
   let currentModel: any | null = $ref(null);
@@ -175,7 +193,13 @@
     key: 'action',
     width: 120,
     render(record: any) {
-      const fileAction = (label, key, icon?: Component, editable = false) => {
+      const fileAction = (
+        label,
+        key,
+        icon?: Component,
+        editable = false,
+        permissions: any = null
+      ) => {
         return getFileActionButton(
           label,
           key,
@@ -183,7 +207,8 @@
           reloadTable,
           record,
           icon,
-          editable
+          editable,
+          permissions
         );
       };
       return h(TableAction as any, {
@@ -220,10 +245,18 @@
               startFee(record.id);
             },
           },
-          fileAction('附件', 'files', undefined, false),
+          fileAction('附件', 'files', undefined, false, [
+            PermissionEnums.Logistic,
+            PermissionEnums.Manager,
+            PermissionEnums.Cash,
+          ]),
           fileAction('提单', 'pickupFiles'),
           fileAction('POD', 'PODFiles'),
-          fileAction('客户账单', 'billsForCustomer', undefined, true),
+          fileAction('客户账单', 'billsForCustomer', undefined, true, [
+            PermissionEnums.Logistic,
+            PermissionEnums.Manager,
+            PermissionEnums.Cash,
+          ]),
         ],
       });
     },

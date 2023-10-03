@@ -205,7 +205,8 @@ export function getFileActionButton(
   reload: any,
   record: any,
   icon?: Component,
-  editable = true
+  editable = true,
+  permissions = null
 ) {
   return {
     label,
@@ -225,6 +226,7 @@ export function getFileActionButton(
 
       reload();
     },
+    permissions: permissions,
   };
 }
 
