@@ -183,7 +183,7 @@ export function initModel(g: GeneralModel): Model {
         q = query(q, ...extraCondition);
       }
       if (!userInfoDict) {
-        userInfoDict = keyBy(await executeQuery(query(collection(db, 'user'))), 'id');
+        userInfoDict = keyBy(await executeQuery(query(collection(db, 'customer'))), 'id');
         console.log(userInfoDict, 'User Info Dict initialed');
       }
       const { isCustomer } = usePermission();
@@ -209,7 +209,7 @@ export function initModel(g: GeneralModel): Model {
       list.forEach((it) => {
         if (it.customerId) {
           console.log(userInfoDict[it.customerId]);
-          it.customerName = userInfoDict[it.customerId]?.userName ?? '';
+          it.customerName = userInfoDict[it.customerId]?.customerName ?? '';
         }
       });
       if (!filterObj) {
