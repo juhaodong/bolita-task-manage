@@ -34,8 +34,6 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           title: '订车管理',
           permissions: [
-            PermissionEnums.CustomerService,
-            PermissionEnums.CustomerManage,
             PermissionEnums.Logistic,
             PermissionEnums.Manager,
             PermissionEnums.Operator,
