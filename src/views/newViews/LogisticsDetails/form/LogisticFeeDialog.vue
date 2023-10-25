@@ -4,16 +4,40 @@
       <normal-form
         :default-value-model="model"
         :form-fields="schemas"
-        @submit="handleSubmit"
         :show-buttons="false"
+        @submit="handleSubmit"
       >
         <template #extraSubmitButton="{ submit }">
-          <n-button :disabled="model.priceConfirmed" @click="submit" type="info">提交报价</n-button>
+          <n-button
+            v-if="
+              hasPermission([
+                PermissionEnums.Manager,
+                PermissionEnums.Sales,
+                PermissionEnums.Operator,
+                PermissionEnums.Logistic,
+              ])
+            "
+            :disabled="model.priceConfirmed"
+            type="info"
+            @click="submit"
+            >提交报价</n-button
+          >
         </template>
         <template #extraContent>
           <n-popconfirm v-if="!model?.priceConfirmed" @positive-click="confirmPrice">
             <template #trigger>
-              <n-button type="success">确认报价</n-button>
+              <n-button
+                v-if="
+                  hasPermission([
+                    PermissionEnums.Manager,
+                    PermissionEnums.CustomerManage,
+                    PermissionEnums.CustomerService,
+                    PermissionEnums.Cash,
+                  ])
+                "
+                type="success"
+                >确认报价</n-button
+              >
             </template>
             我确认接受此报价
           </n-popconfirm>
@@ -31,6 +55,10 @@
   import { carpoolSelfCheck } from '@/api/dataLayer/modules/logistic/carpool';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
+  import { usePermission } from '@/hooks/web/usePermission';
+
+  const { hasPermission } = usePermission();
 
   interface Props {
     model?: any;

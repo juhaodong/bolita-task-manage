@@ -42,7 +42,7 @@ export async function asyncUserTypeFormField(params: {
       options: userList,
     },
     displayCondition() {
-      return !hasPermission([PermissionEnums.Customer]);
+      return !hasPermission([PermissionEnums.CustomerManage, PermissionEnums.CustomerService]);
     },
   };
 }
@@ -84,7 +84,12 @@ export async function asyncInventoryFormField(
       options: userList,
     },
     displayCondition() {
-      return !hasPermission([PermissionEnums.Warehouse]);
+      return !hasPermission([
+        PermissionEnums.Operator,
+        PermissionEnums.Sales,
+        PermissionEnums.Logistic,
+        PermissionEnums.Cash,
+      ]);
     },
   };
 }

@@ -33,7 +33,15 @@ const routes: Array<RouteRecordRaw> = [
         name: `${name}carpoolManage`,
         meta: {
           title: '订车管理',
-          permissions: [PermissionEnums.Manager],
+          permissions: [
+            PermissionEnums.CustomerService,
+            PermissionEnums.CustomerManage,
+            PermissionEnums.Logistic,
+            PermissionEnums.Manager,
+            PermissionEnums.Operator,
+            PermissionEnums.Sales,
+            PermissionEnums.Cash,
+          ],
         },
         component: () => import('@/views/newViews/CarpoolManagement/CarpoolManagement.vue'),
       },

@@ -16,21 +16,17 @@
         新建仓外物流
       </n-button>
       <n-button
-        v-if="
-          hasPermission([PermissionEnums.Manager, PermissionEnums.Logistic, PermissionEnums.Sales])
-        "
-        type="warning"
+        v-if="hasPermission([PermissionEnums.Manager, PermissionEnums.Logistic])"
         :disabled="checkedRows.length == 0"
+        type="warning"
         @click="startShareCar()"
       >
         订车
       </n-button>
       <n-button
-        v-if="
-          hasPermission([PermissionEnums.Manager, PermissionEnums.Logistic, PermissionEnums.Sales])
-        "
-        type="error"
+        v-if="hasPermission([PermissionEnums.Manager, PermissionEnums.Logistic])"
         :disabled="checkedRows.length == 0"
+        type="error"
         @click="cancelCar()"
       >
         取消订车
@@ -39,11 +35,11 @@
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
+      v-model:checked-row-keys="checkedRows"
       :actionColumn="actionColumn"
       :columns="columns"
       :request="loadDataTable"
       :row-key="(row) => row.id"
-      v-model:checked-row-keys="checkedRows"
     />
     <n-modal
       v-model:show="showOutStorageDeliveryDialog"
@@ -61,7 +57,7 @@
       style="width: 90%; min-width: 600px; max-width: 600px"
       title="新建订车"
     >
-      <new-carpool-management @saved="saveShareCar" :merged-out-ids="checkedRows" />
+      <new-carpool-management :merged-out-ids="checkedRows" @saved="saveShareCar" />
     </n-modal>
     <n-modal
       v-model:show="showFeeDialog"
@@ -220,6 +216,12 @@
             onClick() {
               startEdit(record.id);
             },
+            auth: [
+              PermissionEnums.Manager,
+              PermissionEnums.Sales,
+              PermissionEnums.Operator,
+              PermissionEnums.Logistic,
+            ],
             highlight: () => {
               if (record?.logisticCashStatus == CashStatus.Done) {
                 return 'success';
@@ -244,6 +246,12 @@
             onClick() {
               startFee(record.id);
             },
+            auth: [
+              PermissionEnums.CustomerManage,
+              PermissionEnums.CustomerService,
+              PermissionEnums.Manager,
+              PermissionEnums.Logistic,
+            ],
           },
           fileAction('附件', 'files', undefined, false, [
             PermissionEnums.Logistic,

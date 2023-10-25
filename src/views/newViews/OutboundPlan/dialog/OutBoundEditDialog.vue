@@ -11,6 +11,10 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
+  import { usePermission } from '@/hooks/web/usePermission';
+
+  const { hasPermission } = usePermission();
 
   interface Props {
     model?: any;
@@ -23,6 +27,15 @@
     {
       field: 'trayChange',
       label: '托盘置换',
+      disableCondition() {
+        return hasPermission([
+          PermissionEnums.CustomerService,
+          PermissionEnums.CustomerManage,
+          PermissionEnums.Logistic,
+          PermissionEnums.Sales,
+          PermissionEnums.Cash,
+        ]);
+      },
     },
     {
       field: 'warehouseNote',

@@ -12,8 +12,8 @@ export type Permission = {
 
 export enum PermissionEnums {
   Manager = '管理员',
-  Warehouse = '仓库',
-  Customer = '客户',
+  CustomerManage = '客户管理员',
+  CustomerService = '客户服务',
   Operator = '操作员',
   Sales = '业务员',
   Logistic = '物流',

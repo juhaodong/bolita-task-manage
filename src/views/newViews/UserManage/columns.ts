@@ -41,6 +41,8 @@ export const columns: DataTableColumns = [
 export enum UserType {
   Manager = '管理员',
   Customer = '客户',
+  CustomerManage = '客户管理员',
+  CustomerService = '客户服务',
   Operator = '操作员',
   Sales = '业务员',
   Logistic = '物流',

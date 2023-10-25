@@ -1,7 +1,19 @@
 <template>
   <n-card :bordered="false" class="proCard">
     <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
-      <n-button type="primary" @click="addTable()">
+      <n-button
+        v-if="
+          hasPermission([
+            PermissionEnums.Manager,
+            PermissionEnums.Sales,
+            PermissionEnums.Operator,
+            PermissionEnums.CustomerService,
+            PermissionEnums.CustomerManage,
+          ])
+        "
+        type="primary"
+        @click="addTable()"
+      >
         <template #icon>
           <n-icon>
             <Box20Filled />
@@ -76,6 +88,9 @@
   import OutBoundEditDialog from '@/views/newViews/OutboundPlan/dialog/OutBoundEditDialog.vue';
   import { where } from 'firebase/firestore';
   import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
+  import { usePermission } from '@/hooks/web/usePermission';
+
+  const { hasPermission } = usePermission();
 
   const showModal = ref(false);
 
@@ -146,6 +161,12 @@
               currentId = record.id!;
               showEditInfoDialog = true;
             },
+            auth: [
+              PermissionEnums.Manager,
+              PermissionEnums.Sales,
+              PermissionEnums.Operator,
+              PermissionEnums.Logistic,
+            ],
           },
           {
             label: '操作',
@@ -154,12 +175,6 @@
               currentId = record.id!;
               showOperationTable = true;
             },
-            permissions: [
-              PermissionEnums.Operator,
-              PermissionEnums.Warehouse,
-              PermissionEnums.Sales,
-              PermissionEnums.Manager,
-            ],
           },
           {
             label: '费用',

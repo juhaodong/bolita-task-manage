@@ -4,11 +4,23 @@
       <normal-form
         :default-value-model="model"
         :form-fields="schemas"
-        @submit="handleSubmit"
         :show-buttons="false"
+        @submit="handleSubmit"
       >
         <template #extraSubmitButton="{ submit }">
-          <n-button :disabled="model.paymentSubmit" @click="submit" type="info"
+          <n-button
+            :disabled="
+              model.paymentSubmit ||
+              hasPermission([
+                PermissionEnums.CustomerService,
+                PermissionEnums.CustomerManage,
+                PermissionEnums.Operator,
+                PermissionEnums.Sales,
+                PermissionEnums.Cash,
+              ])
+            "
+            type="info"
+            @click="submit"
             >提交付款申请</n-button
           >
         </template>
@@ -18,7 +30,20 @@
             @positive-click="handleSubmit({ paymentSubmit: true })"
           >
             <template #trigger>
-              <n-button type="success">确认付款</n-button>
+              <n-button
+                :disabled="
+                  hasPermission([
+                    PermissionEnums.CustomerService,
+                    PermissionEnums.CustomerManage,
+                    PermissionEnums.Operator,
+                    PermissionEnums.Sales,
+                    PermissionEnums.Logistic,
+                    PermissionEnums.Cash,
+                  ])
+                "
+                type="success"
+                >确认付款</n-button
+              >
             </template>
             确认本款项已经支付
           </n-popconfirm>
@@ -40,6 +65,10 @@
   import { computed, reactive } from 'vue';
   import { db, getDocContent } from '@/store/plugins/firebase';
   import { doc, setDoc } from 'firebase/firestore';
+  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
+  import { usePermission } from '@/hooks/web/usePermission';
+
+  const { hasPermission } = usePermission();
 
   interface Props {
     model?: any;

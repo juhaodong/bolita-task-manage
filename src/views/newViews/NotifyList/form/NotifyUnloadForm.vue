@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
   import { computed, watchEffect } from 'vue';
   import { InBoundStatus, NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
   import {
@@ -16,12 +16,16 @@
   import { ResultEnum } from '@/store/enums/httpEnum';
   import dayjs from 'dayjs';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
+  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
+  import { usePermission } from '@/hooks/web/usePermission';
 
   console.log(getDateNow, timeDisplay);
 
   interface Props {
     notifyId: string;
   }
+
+  const { hasPermission } = usePermission();
 
   const canEdit = $computed(() => {
     return notifyDetail?.inStatus !== InBoundStatus.All;
@@ -176,9 +180,9 @@
 </script>
 
 <template>
-  <div class="mt-8" id="print">
+  <div id="print" class="mt-8">
     <loading-frame :loading="loading">
-      <n-descriptions v-if="notifyDetail" :columns="3" label-placement="left" bordered>
+      <n-descriptions v-if="notifyDetail" :columns="3" bordered label-placement="left">
         <n-descriptions-item :span="2" label="货柜号">
           {{ notifyDetail?.containerNo }}
         </n-descriptions-item>
@@ -196,7 +200,7 @@
         <n-descriptions-item label="卸柜起止时间" />
       </n-descriptions>
       <div class="mt-4 noMaxHeight" style="max-height: 800px; overflow-y: scroll">
-        <n-table class="mt-4" :single-line="false">
+        <n-table :single-line="false" class="mt-4">
           <thead>
             <tr>
               <th>票号</th>
@@ -208,26 +212,26 @@
             </tr>
           </thead>
           <tbody v-if="currentTaskList">
-            <tr :key="item.id" v-for="item in currentTaskList">
+            <tr v-for="item in currentTaskList" :key="item.id">
               <td>{{ item?.ticketId }}</td>
               <td>{{ item?.trayNum ?? 0 }}</td>
               <td>{{ item?.containerNum ?? 0 }}</td>
               <td>
                 <n-input
                   v-model:value="item.arrivedTrayNumEdit"
-                  placeholder=""
                   :disabled="!canEdit"
                   :status="compareStatus(item.arrivedTrayNumEdit, item.trayNum)"
+                  placeholder=""
                   @focus="item.arrivedTrayNumEdit = ''"
                 />
               </td>
               <td>
                 <n-input
+                  v-model:value="item.arrivedContainerNumEdit"
                   :disabled="!canEdit"
                   :status="compareStatus(item.arrivedContainerNumEdit, item.containerNum)"
-                  @focus="item.arrivedContainerNumEdit = ''"
-                  v-model:value="item.arrivedContainerNumEdit"
                   placeholder=""
+                  @focus="item.arrivedContainerNumEdit = ''"
                 />
               </td>
               <td>
@@ -248,21 +252,60 @@
           </tr>
         </table>
       </div>
-      <n-space v-if="notifyDetail" class="mt-4" :wrap-item="false">
+      <n-space v-if="notifyDetail" :wrap-item="false" class="mt-4">
         <n-button v-print="'#print'" type="default">打印</n-button>
-        <n-button @click="allArrived" secondary>全部到齐</n-button>
+        <n-button
+          v-if="
+            hasPermission([
+              PermissionEnums.Manager,
+              PermissionEnums.Operator,
+              PermissionEnums.Sales,
+              PermissionEnums.Cash,
+            ])
+          "
+          secondary
+          @click="allArrived"
+          >全部到齐</n-button
+        >
         <div class="flex-grow"></div>
         <div>
-          <n-input placeholder="卸柜人员" v-model:value="unloadPerson" />
+          <n-input v-model:value="unloadPerson" placeholder="卸柜人员" />
         </div>
-        <n-button @click="save" type="warning" secondary :disabled="!canEdit">保存</n-button>
-        <n-button @click="confirm" type="primary" :disabled="!canConfirm">确认全部到货</n-button>
+        <n-button
+          v-if="
+            hasPermission([
+              PermissionEnums.Manager,
+              PermissionEnums.Operator,
+              PermissionEnums.Sales,
+              PermissionEnums.Cash,
+            ])
+          "
+          :disabled="!canEdit"
+          secondary
+          type="warning"
+          @click="save"
+          >保存</n-button
+        >
+        <n-button
+          v-if="
+            hasPermission([
+              PermissionEnums.Manager,
+              PermissionEnums.Operator,
+              PermissionEnums.Sales,
+              PermissionEnums.Cash,
+            ])
+          "
+          :disabled="!canConfirm"
+          type="primary"
+          @click="confirm"
+          >确认全部到货</n-button
+        >
       </n-space>
     </loading-frame>
   </div>
 </template>
 
-<style scoped lang="less">
+<style lang="less" scoped>
   @media print {
     .noMaxHeight {
       max-height: unset !important;

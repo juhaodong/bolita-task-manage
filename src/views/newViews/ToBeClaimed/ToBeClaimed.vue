@@ -2,22 +2,46 @@
   <n-card :bordered="false" class="proCard">
     <filter-bar
       v-if="finished"
-      :form-fields="filters"
       :default-value-model="filterObj"
+      :form-fields="filters"
       @clear="updateFilter(null)"
       @submit="updateFilter"
     >
-      <n-button type="primary" @click="showAdd">新建待认领</n-button>
-      <n-button type="warning" @click="startClaim">认领</n-button>
+      <n-button
+        v-if="
+          hasPermission([
+            PermissionEnums.Manager,
+            PermissionEnums.Sales,
+            PermissionEnums.Operator,
+            PermissionEnums.Logistic,
+          ])
+        "
+        type="primary"
+        @click="showAdd"
+        >新建待认领</n-button
+      >
+      <n-button
+        v-if="
+          hasPermission([
+            PermissionEnums.Manager,
+            PermissionEnums.Sales,
+            PermissionEnums.Operator,
+            PermissionEnums.Logistic,
+          ])
+        "
+        type="warning"
+        @click="startClaim"
+        >认领</n-button
+      >
     </filter-bar>
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
+      v-model:checked-row-keys="checkedRows"
       :action-column="actionColumn"
       :columns="columns"
       :request="loadDataTable"
       :row-key="(row) => row.id"
-      v-model:checked-row-keys="checkedRows"
     />
     <n-modal
       v-model:show="showClaim"
@@ -49,6 +73,10 @@
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import NewToBeClaimedFrom from '@/views/newViews/ToBeClaimed/form/NewToBeClaimedFrom.vue';
   import ClaimForm from '@/views/newViews/ToBeClaimed/form/ClaimForm.vue';
+  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
+  import { usePermission } from '@/hooks/web/usePermission';
+
+  const { hasPermission } = usePermission();
 
   interface Prop {
     outId?: string;
@@ -127,6 +155,7 @@
             onClick() {
               startEdit(record.id);
             },
+            auth: [PermissionEnums.Manager, PermissionEnums.Sales, PermissionEnums.Operator],
           },
           {
             label: '认领',
@@ -136,6 +165,7 @@
             onClick() {
               startClaim(record.id);
             },
+            auth: [PermissionEnums.Manager, PermissionEnums.Sales, PermissionEnums.Operator],
           },
         ],
       });

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
   import { computed, reactive, watchEffect } from 'vue';
   import { CashStatus, NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
   import { getNotifyDetailListByNotify } from '@/api/dataLayer/modules/notify/notify-detail';
@@ -6,10 +6,14 @@
   import { cloneDeep } from 'lodash-es';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { OperationType, saveCash } from '@/api/dataLayer/modules/cash/cash';
+  import { usePermission } from '@/hooks/web/usePermission';
+  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
 
   interface Props {
     notifyId: string;
   }
+
+  const { hasPermission } = usePermission();
 
   const props = defineProps<Props>();
   let notifyDetail: any | null = $ref(null);
@@ -100,12 +104,12 @@
 5a
 <template>
   <div class="mt-8">
-    <n-descriptions v-if="notifyDetail" :columns="3" label-placement="left" bordered>
+    <n-descriptions v-if="notifyDetail" :columns="3" bordered label-placement="left">
       <n-descriptions-item :span="2" label="货柜号">
         {{ notifyDetail?.containerNo }}
       </n-descriptions-item>
       <n-descriptions-item label="客户ID"> {{ notifyDetail?.customerId }}</n-descriptions-item>
-      <n-descriptions-item label="入库总数" :span="2">
+      <n-descriptions-item :span="2" label="入库总数">
         {{ notifyDetail?.totalCount }}
       </n-descriptions-item>
       <n-descriptions-item label="入库ID">
@@ -116,7 +120,7 @@
       </n-descriptions-item>
     </n-descriptions>
     <div class="mt-4">
-      <n-table class="mt-4" :single-line="false">
+      <n-table :single-line="false" class="mt-4">
         <thead>
           <tr>
             <th>入库 托</th>
@@ -183,21 +187,42 @@
       </n-table>
     </div>
     <div class="mt-4">
-      <n-input placeholder="说明" v-model:value="extraInfo.explain" />
+      <n-input v-model:value="extraInfo.explain" placeholder="说明" />
     </div>
     <n-space class="mt-4">
-      <n-button @click="save" :disabled="!extraInfo.finalPrice" type="warning" secondary
+      <n-button
+        v-if="
+          hasPermission([
+            PermissionEnums.Manager,
+            PermissionEnums.Operator,
+            PermissionEnums.Sales,
+            PermissionEnums.Cash,
+          ])
+        "
+        :disabled="!extraInfo.finalPrice"
+        secondary
+        type="warning"
+        @click="save"
         >保存结算</n-button
       >
       <n-button
-        @click="confirm"
+        v-if="
+          hasPermission([
+            PermissionEnums.CustomerManage,
+            PermissionEnums.Manager,
+            PermissionEnums.Operator,
+            PermissionEnums.Sales,
+            PermissionEnums.Cash,
+          ])
+        "
         :disabled="notifyDetail?.cashStatus != CashStatus.WaitConfirm"
-        type="primary"
         secondary
+        type="primary"
+        @click="confirm"
         >确认结算</n-button
       >
     </n-space>
   </div>
 </template>
 
-<style scoped lang="less"></style>
+<style lang="less" scoped></style>

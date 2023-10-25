@@ -7,10 +7,28 @@
       @clear="updateFilter(null)"
       @submit="updateFilter"
     >
-      <n-button type="info" :disabled="checkedRows?.length == 0" @click="startEditStoreAddress()">
+      <n-button
+        v-if="
+          hasPermission([PermissionEnums.Manager, PermissionEnums.Operator, PermissionEnums.Sales])
+        "
+        :disabled="checkedRows?.length == 0"
+        type="info"
+        @click="startEditStoreAddress()"
+      >
         批量设置库位
       </n-button>
-      <n-button type="warning" @click="transferToOutBoundPlan">
+      <n-button
+        v-if="
+          hasPermission([
+            PermissionEnums.Manager,
+            PermissionEnums.Sales,
+            PermissionEnums.CustomerService,
+            PermissionEnums.CustomerManage,
+          ])
+        "
+        type="warning"
+        @click="transferToOutBoundPlan"
+      >
         <template #icon>
           <n-icon>
             <Box20Filled />
@@ -22,16 +40,16 @@
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
+      v-model:checked-row-keys="checkedRows"
+      :action-column="actionColumn"
       :columns="columns"
       :request="loadDataTable"
-      :action-column="actionColumn"
       :row-key="(row) => row.id"
-      v-model:checked-row-keys="checkedRows"
     />
     <n-modal v-model:show="storeAddressDialog" :preset="'dialog'" title="请输入新的库位">
       <loading-frame :loading="loading">
-        <n-input class="my-4" placeholder="请输入新的库位" v-model:value="storeAddress" />
-        <n-button @click="realEditStoreAddress" type="primary"> 保存 </n-button>
+        <n-input v-model:value="storeAddress" class="my-4" placeholder="请输入新的库位" />
+        <n-button type="primary" @click="realEditStoreAddress"> 保存 </n-button>
       </loading-frame>
     </n-modal>
     <n-modal
@@ -68,6 +86,10 @@
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
+  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
+  import { usePermission } from '@/hooks/web/usePermission';
+
+  const { hasPermission } = usePermission();
 
   interface Prop {
     notifyId?: string;

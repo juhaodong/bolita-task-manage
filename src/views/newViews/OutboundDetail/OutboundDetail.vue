@@ -2,12 +2,16 @@
   <n-card :bordered="false" class="proCard">
     <filter-bar
       v-if="finished"
-      :form-fields="filters"
       :default-value-model="filterObj"
+      :form-fields="filters"
       @clear="updateFilter(null)"
       @submit="updateFilter"
     >
-      <n-button :disabled="checkedRows.length == 0" @click="showCheck()">
+      <n-button
+        v-if="hasPermission([PermissionEnums.Manager, PermissionEnums.Sales])"
+        :disabled="checkedRows.length == 0"
+        @click="showCheck()"
+      >
         <template #icon>
           <n-icon>
             <Box20Filled />
@@ -19,11 +23,11 @@
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
+      v-model:checked-row-keys="checkedRows"
       :action-column="actionColumn"
       :columns="columns"
       :request="loadDataTable"
       :row-key="(row) => row.id"
-      v-model:checked-row-keys="checkedRows"
     />
 
     <n-modal
@@ -51,6 +55,10 @@
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
+  import { usePermission } from '@/hooks/web/usePermission';
+  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
+
+  const { hasPermission } = usePermission();
 
   interface Prop {
     outId?: string;
@@ -139,6 +147,7 @@
             onClick() {
               startEdit(record.id);
             },
+            auth: [PermissionEnums.Manager, PermissionEnums.Sales, PermissionEnums.Operator],
           },
         ],
       });

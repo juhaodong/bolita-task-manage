@@ -121,10 +121,14 @@ export function formFieldBuilder() {
   };
 }
 
-export function getDatePickerFormField(key = 'date', title = '日期'): FormField {
+export function getDatePickerFormField(key = 'date', title = '日期', disabledUser = []): FormField {
+  const { hasPermission } = usePermission();
   return {
     field: key,
     component: 'NDatePicker',
+    disableCondition() {
+      return disabledUser.length > 0 ? hasPermission(disabledUser) : false;
+    },
     label: title,
     defaultValue: dayjs().valueOf(),
     componentProps: {
