@@ -29,6 +29,7 @@ export type BaseUser = {
   token: string;
   permissions: PermissionEnums[];
   customerId?: string;
+  powerList: any;
 };
 
 export async function login(params: { username: string; password: string }) {

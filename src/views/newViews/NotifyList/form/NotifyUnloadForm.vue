@@ -16,8 +16,9 @@
   import { ResultEnum } from '@/store/enums/httpEnum';
   import dayjs from 'dayjs';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import { usePermission } from '@/hooks/web/usePermission';
+  import { useUserStore } from '@/store/modules/user';
+  import { NotifyListPower } from '@/api/dataLayer/common/PowerModel';
 
   console.log(getDateNow, timeDisplay);
 
@@ -29,6 +30,12 @@
 
   const canEdit = $computed(() => {
     return notifyDetail?.inStatus !== InBoundStatus.All;
+  });
+  const AccountPowerList = computed(() => {
+    return useUserStore()?.info?.powerList;
+  });
+  const showBtn = computed(() => {
+    return AccountPowerList.value.includes(NotifyListPower.Operate);
   });
 
   const props = defineProps<Props>();
@@ -254,50 +261,15 @@
       </div>
       <n-space v-if="notifyDetail" :wrap-item="false" class="mt-4">
         <n-button v-print="'#print'" type="default">打印</n-button>
-        <n-button
-          v-if="
-            hasPermission([
-              PermissionEnums.Manager,
-              PermissionEnums.Operator,
-              PermissionEnums.Sales,
-              PermissionEnums.Cash,
-            ])
-          "
-          secondary
-          @click="allArrived"
-          >全部到齐</n-button
-        >
+        <n-button v-if="showBtn" secondary @click="allArrived">全部到齐</n-button>
         <div class="flex-grow"></div>
         <div>
           <n-input v-model:value="unloadPerson" placeholder="卸柜人员" />
         </div>
-        <n-button
-          v-if="
-            hasPermission([
-              PermissionEnums.Manager,
-              PermissionEnums.Operator,
-              PermissionEnums.Sales,
-              PermissionEnums.Cash,
-            ])
-          "
-          :disabled="!canEdit"
-          secondary
-          type="warning"
-          @click="save"
+        <n-button v-if="showBtn" :disabled="!canEdit" secondary type="warning" @click="save"
           >保存</n-button
         >
-        <n-button
-          v-if="
-            hasPermission([
-              PermissionEnums.Manager,
-              PermissionEnums.Operator,
-              PermissionEnums.Sales,
-              PermissionEnums.Cash,
-            ])
-          "
-          :disabled="!canConfirm"
-          type="primary"
-          @click="confirm"
+        <n-button v-if="showBtn" :disabled="!canConfirm" type="primary" @click="confirm"
           >确认全部到货</n-button
         >
       </n-space>

@@ -6,14 +6,12 @@
   import { cloneDeep } from 'lodash-es';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { OperationType, saveCash } from '@/api/dataLayer/modules/cash/cash';
-  import { usePermission } from '@/hooks/web/usePermission';
-  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
+  import { NotifyListPower } from '@/api/dataLayer/common/PowerModel';
+  import { useUserStore } from '@/store/modules/user';
 
   interface Props {
     notifyId: string;
   }
-
-  const { hasPermission } = usePermission();
 
   const props = defineProps<Props>();
   let notifyDetail: any | null = $ref(null);
@@ -39,6 +37,15 @@
   });
   const totalArrivedTrayCount = computed(() => {
     return currentTaskList.reduce((sum, i) => sum + safeParseInt(i?.arrivedTrayNum), 0);
+  });
+  const AccountPowerList = computed(() => {
+    return useUserStore()?.info?.powerList;
+  });
+  const saveBtn = computed(() => {
+    return AccountPowerList.value.includes(NotifyListPower.CostSave);
+  });
+  const confirmBtn = computed(() => {
+    return AccountPowerList.value.includes(NotifyListPower.CostConfirm);
   });
 
   const totalPrice = computed(() => {
@@ -191,14 +198,7 @@
     </div>
     <n-space class="mt-4">
       <n-button
-        v-if="
-          hasPermission([
-            PermissionEnums.Manager,
-            PermissionEnums.Operator,
-            PermissionEnums.Sales,
-            PermissionEnums.Cash,
-          ])
-        "
+        v-if="saveBtn"
         :disabled="!extraInfo.finalPrice"
         secondary
         type="warning"
@@ -206,15 +206,7 @@
         >保存结算</n-button
       >
       <n-button
-        v-if="
-          hasPermission([
-            PermissionEnums.CustomerManage,
-            PermissionEnums.Manager,
-            PermissionEnums.Operator,
-            PermissionEnums.Sales,
-            PermissionEnums.Cash,
-          ])
-        "
+        v-if="confirmBtn"
         :disabled="notifyDetail?.cashStatus != CashStatus.WaitConfirm"
         secondary
         type="primary"

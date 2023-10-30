@@ -205,17 +205,20 @@ export function getFileActionButton(
   reload: any,
   record: any,
   icon?: Component,
+  disableClick?: boolean,
   editable = true,
   permissions = null
 ) {
   return {
     label,
     icon: icon ?? null,
+    disableClick: disableClick ?? false,
     highlight: () => {
       return record?.[key]?.length > 0 ? 'success' : 'default';
     },
     async onClick() {
       const upload = useUploadDialog();
+      upload.showUploadBtn(disableClick);
       const files = await upload.upload(record[key], undefined, editable);
       if (files.checkPassed) {
         const obj = {};

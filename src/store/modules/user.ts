@@ -10,6 +10,7 @@ import {
 } from '@/api/dataLayer/modules/system/user/baseUser';
 import { storage } from '@/store/utils/Storage';
 import { generateOptionFromArray } from '@/store/utils/utils';
+import { AccountPower } from '@/api/dataLayer/common/PowerModel';
 
 export type UserInfoType = {
   username: string;
@@ -23,6 +24,7 @@ export interface IUserState {
   avatar: string;
   permissions: any[];
   info?: BaseUser;
+  powerList: any[];
 }
 
 export const useUserStore = defineStore({
@@ -33,9 +35,13 @@ export const useUserStore = defineStore({
     welcome: '',
     avatar: '',
     permissions: [],
+    powerList: [],
     info: storage.get(CURRENT_USER, {}),
   }),
   getters: {
+    getPowerList(): [any][] {
+      return this.powerList;
+    },
     getToken(): string {
       return this.token;
     },
@@ -62,6 +68,9 @@ export const useUserStore = defineStore({
     setPermissions(permissions) {
       this.permissions = permissions;
     },
+    setPowerList(powerList) {
+      this.powerList = powerList;
+    },
     setUserInfo(info?: BaseUser) {
       this.info = info;
     },
@@ -85,10 +94,12 @@ export const useUserStore = defineStore({
     // 获取用户信息
     async getInfo() {
       const { result } = await getUserInfoApi();
-
       if (result.permissions && result.permissions.length) {
         const permissionsList = generateOptionFromArray(result.permissions);
         this.setPermissions(permissionsList);
+        const powerList = AccountPower.find((it) => it.name === result.realName)?.Power;
+        result.powerList = powerList;
+        this.setPowerList(powerList);
         this.setUserInfo(result);
       } else {
         throw new Error('getInfo: permissionsList must be a non-null array !');

@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, h, reactive, ref } from 'vue';
+  import { Component, computed, h, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
@@ -47,6 +47,8 @@
   import CarPaymentDialog from '@/views/newViews/CarpoolManagement/dialog/CarPaymentDialog.vue';
   import { cloneDeep } from 'lodash-es';
   import { YesOrNo } from '@/api/dataLayer/modules/operationType';
+  import { useUserStore } from '@/store/modules/user';
+  import { CarpoolManagementPower } from '@/api/dataLayer/common/PowerModel';
 
   const showModal = ref(false);
 
@@ -96,13 +98,34 @@
     paymentDialogShow = true;
   }
 
+  const AccountPowerList = computed(() => {
+    return useUserStore()?.info?.powerList;
+  });
+  const SubmitOrderOperate = computed(() => {
+    return AccountPowerList.value.includes(CarpoolManagementPower.SubmitOrder);
+  });
+  const PODOperate = computed(() => {
+    return AccountPowerList.value.includes(CarpoolManagementPower.POD);
+  });
+  const BillOperate = computed(() => {
+    return AccountPowerList.value.includes(CarpoolManagementPower.Bill);
+  });
+
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
     width: 120,
     render(record: any) {
-      const fileAction = (label, key, icon?: Component) => {
-        return getFileActionButton(label, key, CarpoolManager, reloadTable, record, icon);
+      const fileAction = (label, key, disableClick, icon?: Component) => {
+        return getFileActionButton(
+          label,
+          key,
+          CarpoolManager,
+          reloadTable,
+          record,
+          icon,
+          disableClick
+        );
       };
       return h(TableAction as any, {
         style: 'button',
@@ -111,12 +134,13 @@
             label: '修改',
             icon: DocumentEdit16Filled,
             onClick() {
+              console.log(!SubmitOrderOperate.value, '!SubmitOrderOperate.value');
               startEdit(record.id);
             },
           },
-          fileAction('提单', 'pickupFiles'),
-          fileAction('POD', 'PODFiles'),
-          fileAction('账单', 'bills'),
+          fileAction('提单', 'pickupFiles', !SubmitOrderOperate.value),
+          fileAction('POD', 'PODFiles', !PODOperate.value),
+          fileAction('账单', 'bills', !BillOperate.value),
           {
             label: '费用',
             icon: CurrencyEuro,

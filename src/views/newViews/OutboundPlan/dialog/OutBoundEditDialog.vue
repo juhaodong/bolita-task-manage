@@ -11,8 +11,10 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
-  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import { usePermission } from '@/hooks/web/usePermission';
+  import { computed } from 'vue';
+  import { useUserStore } from '@/store/modules/user';
+  import { OutBoundPlanPower } from '@/api/dataLayer/common/PowerModel';
 
   const { hasPermission } = usePermission();
 
@@ -22,19 +24,19 @@
 
   let loading: boolean = $ref(false);
   const prop = defineProps<Props>();
+  const AccountPowerList = computed(() => {
+    return useUserStore()?.info?.powerList;
+  });
+  const changeTray = computed(() => {
+    return AccountPowerList.value.includes(OutBoundPlanPower.ChangeTray);
+  });
 
   const schemas: FormField[] = [
     {
       field: 'trayChange',
       label: '托盘置换',
       disableCondition() {
-        return hasPermission([
-          PermissionEnums.CustomerService,
-          PermissionEnums.CustomerManage,
-          PermissionEnums.Logistic,
-          PermissionEnums.Sales,
-          PermissionEnums.Cash,
-        ]);
+        return !changeTray.value;
       },
     },
     {

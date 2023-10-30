@@ -8,8 +8,9 @@ import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { yesOrNo } from '@/api/dataLayer/modules/operationType';
 import { generateOptionFromArray } from '@/store/utils/utils';
-import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
 import { usePermission } from '@/hooks/web/usePermission';
+import { useUserStore } from '@/store/modules/user';
+import { CarpoolManagementPower } from '@/api/dataLayer/common/PowerModel';
 
 const { hasPermission } = usePermission();
 
@@ -115,48 +116,43 @@ export const filters: FormFields = [
     },
   },
 ];
-const carPoolUnPower = [
-  PermissionEnums.CustomerService,
-  PermissionEnums.CustomerManage,
-  PermissionEnums.Operator,
-  PermissionEnums.Sales,
-  PermissionEnums.Cash,
-];
+
+const AccountPowerList = useUserStore()?.info?.powerList;
 export const schemas: FormField[] = [
   {
     field: 'ISA',
     label: 'ISA',
     disableCondition() {
-      return hasPermission(carPoolUnPower);
+      return !AccountPowerList.includes(CarpoolManagementPower.Edit);
     },
   },
   {
     field: 'totalCost',
     label: '订车价格',
     disableCondition() {
-      return hasPermission(carPoolUnPower);
+      return !AccountPowerList.includes(CarpoolManagementPower.Edit);
     },
   },
   {
     field: 'billNumber',
     label: '账单号',
     disableCondition() {
-      return hasPermission(carPoolUnPower);
+      return !AccountPowerList.includes(CarpoolManagementPower.Edit);
     },
   },
-  getDatePickerFormField('reservationGetProductTime', '预约取货时间', carPoolUnPower),
+  getDatePickerFormField('reservationGetProductTime', '预约取货时间', ''),
   {
     field: 'REF',
     label: 'REF.',
     disableCondition() {
-      return hasPermission(carPoolUnPower);
+      return !AccountPowerList.includes(CarpoolManagementPower.Edit);
     },
   },
   {
     field: 'deliveryCompany',
     label: '运输公司',
     disableCondition() {
-      return hasPermission(carPoolUnPower);
+      return !AccountPowerList.includes(CarpoolManagementPower.Edit);
     },
   },
 ].map((it) => {

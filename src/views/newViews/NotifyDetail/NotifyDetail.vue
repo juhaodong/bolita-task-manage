@@ -8,27 +8,14 @@
       @submit="updateFilter"
     >
       <n-button
-        v-if="
-          hasPermission([PermissionEnums.Manager, PermissionEnums.Operator, PermissionEnums.Sales])
-        "
+        v-if="settingBtn"
         :disabled="checkedRows?.length == 0"
         type="info"
         @click="startEditStoreAddress()"
       >
         批量设置库位
       </n-button>
-      <n-button
-        v-if="
-          hasPermission([
-            PermissionEnums.Manager,
-            PermissionEnums.Sales,
-            PermissionEnums.CustomerService,
-            PermissionEnums.CustomerManage,
-          ])
-        "
-        type="warning"
-        @click="transferToOutBoundPlan"
-      >
+      <n-button v-if="changeBtn" type="warning" @click="transferToOutBoundPlan">
         <template #icon>
           <n-icon>
             <Box20Filled />
@@ -74,7 +61,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { h, onMounted, reactive, ref } from 'vue';
+  import { computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
@@ -86,8 +73,9 @@
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
-  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import { usePermission } from '@/hooks/web/usePermission';
+  import { useUserStore } from '@/store/modules/user';
+  import { NotifyDetailPower } from '@/api/dataLayer/common/PowerModel';
 
   const { hasPermission } = usePermission();
 
@@ -107,6 +95,16 @@
 
   let storeAddress: string = $ref('');
   let storeAddressDialog: boolean = $ref(false);
+
+  const AccountPowerList = computed(() => {
+    return useUserStore()?.info?.powerList;
+  });
+  const settingBtn = computed(() => {
+    return AccountPowerList.value.includes(NotifyDetailPower.Setting);
+  });
+  const changeBtn = computed(() => {
+    return AccountPowerList.value.includes(NotifyDetailPower.ChangeStatusPlan);
+  });
 
   onMounted(() => {
     if (props.notifyId) {

@@ -7,11 +7,7 @@
       @clear="updateFilter(null)"
       @submit="updateFilter"
     >
-      <n-button
-        v-if="hasPermission([PermissionEnums.Manager, PermissionEnums.Sales])"
-        :disabled="checkedRows.length == 0"
-        @click="showCheck()"
-      >
+      <n-button v-if="checkBtn" :disabled="checkedRows.length == 0" @click="showCheck()">
         <template #icon>
           <n-icon>
             <Box20Filled />
@@ -43,7 +39,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, h, onMounted, reactive, ref } from 'vue';
+  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { CheckStatus, columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
@@ -56,13 +52,24 @@
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
   import { usePermission } from '@/hooks/web/usePermission';
-  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
+  import { useUserStore } from '@/store/modules/user';
+  import { OutBoundDetailPower } from '@/api/dataLayer/common/PowerModel';
 
   const { hasPermission } = usePermission();
 
   interface Prop {
     outId?: string;
   }
+
+  const AccountPowerList = computed(() => {
+    return useUserStore()?.info?.powerList;
+  });
+  const checkBtn = computed(() => {
+    return AccountPowerList.value.includes(OutBoundDetailPower.Check);
+  });
+  const editOperate = computed(() => {
+    return AccountPowerList.value.includes(OutBoundDetailPower.Edit);
+  });
 
   let finished = $ref(false);
   const props = defineProps<Prop>();
@@ -147,7 +154,7 @@
             onClick() {
               startEdit(record.id);
             },
-            auth: [PermissionEnums.Manager, PermissionEnums.Sales, PermissionEnums.Operator],
+            ifShow: editOperate.value,
           },
         ],
       });

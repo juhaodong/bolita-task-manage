@@ -7,32 +7,8 @@
       @clear="updateFilter(null)"
       @submit="updateFilter"
     >
-      <n-button
-        v-if="
-          hasPermission([
-            PermissionEnums.Manager,
-            PermissionEnums.Sales,
-            PermissionEnums.Operator,
-            PermissionEnums.Logistic,
-          ])
-        "
-        type="primary"
-        @click="showAdd"
-        >新建待认领</n-button
-      >
-      <n-button
-        v-if="
-          hasPermission([
-            PermissionEnums.Manager,
-            PermissionEnums.Sales,
-            PermissionEnums.Operator,
-            PermissionEnums.Logistic,
-          ])
-        "
-        type="warning"
-        @click="startClaim"
-        >认领</n-button
-      >
+      <n-button v-if="addBtn" type="primary" @click="showAdd">新建待认领</n-button>
+      <n-button v-if="claimedBtn" type="warning" @click="startClaim">认领</n-button>
     </filter-bar>
     <div class="my-2"></div>
     <BasicTable
@@ -65,7 +41,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { h, onMounted, reactive, ref } from 'vue';
+  import { computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { ClaimManager, ClaimStatus, columns, filters } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
@@ -73,14 +49,31 @@
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import NewToBeClaimedFrom from '@/views/newViews/ToBeClaimed/form/NewToBeClaimedFrom.vue';
   import ClaimForm from '@/views/newViews/ToBeClaimed/form/ClaimForm.vue';
-  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import { usePermission } from '@/hooks/web/usePermission';
+  import { useUserStore } from '@/store/modules/user';
+  import { ToBeClaimedPower } from '@/api/dataLayer/common/PowerModel';
 
   const { hasPermission } = usePermission();
 
   interface Prop {
     outId?: string;
   }
+
+  const AccountPowerList = computed(() => {
+    return useUserStore()?.info?.powerList;
+  });
+  const addBtn = computed(() => {
+    return AccountPowerList.value.includes(ToBeClaimedPower.Add);
+  });
+  const claimedBtn = computed(() => {
+    return AccountPowerList.value.includes(ToBeClaimedPower.ClaimedGoodsBtn);
+  });
+  const editOperate = computed(() => {
+    return AccountPowerList.value.includes(ToBeClaimedPower.Edit);
+  });
+  const claimedOperate = computed(() => {
+    return AccountPowerList.value.includes(ToBeClaimedPower.ClaimedGoodsOperate);
+  });
 
   let finished = $ref(false);
   const props = defineProps<Prop>();
@@ -155,17 +148,16 @@
             onClick() {
               startEdit(record.id);
             },
-            auth: [PermissionEnums.Manager, PermissionEnums.Sales, PermissionEnums.Operator],
+            ifShow: editOperate.value,
           },
           {
             label: '认领',
             ifShow() {
-              return record.claimStatus == ClaimStatus.Waiting;
+              return record.claimStatus == ClaimStatus.Waiting && claimedOperate.value;
             },
             onClick() {
               startClaim(record.id);
             },
-            auth: [PermissionEnums.Manager, PermissionEnums.Sales, PermissionEnums.Operator],
           },
         ],
       });

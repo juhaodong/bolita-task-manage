@@ -7,6 +7,7 @@ import { CustomerManager } from '@/api/dataLayer/modules/user/user';
 import { keyBy } from 'lodash-es';
 import { storage } from '@/store/utils/Storage';
 import { CUSTOMER_ID } from '@/store/mutation-types';
+import { useUserStore } from '@/store/modules/user';
 
 export function getFilesUploadFormField(
   key = 'files',
@@ -120,14 +121,13 @@ export function formFieldBuilder() {
     toColumn,
   };
 }
-
-export function getDatePickerFormField(key = 'date', title = '日期', disabledUser = []): FormField {
-  const { hasPermission } = usePermission();
+export function getDatePickerFormField(key = 'date', title = '日期', powerList = []): FormField {
   return {
     field: key,
     component: 'NDatePicker',
     disableCondition() {
-      return disabledUser.length > 0 ? hasPermission(disabledUser) : false;
+      const AccountPowerList = useUserStore()?.info?.powerList;
+      return !AccountPowerList.includes(powerList);
     },
     label: title,
     defaultValue: dayjs().valueOf(),

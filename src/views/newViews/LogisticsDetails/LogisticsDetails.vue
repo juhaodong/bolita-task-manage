@@ -16,7 +16,7 @@
         新建仓外物流
       </n-button>
       <n-button
-        v-if="hasPermission([PermissionEnums.Manager, PermissionEnums.Logistic])"
+        v-if="bookCarBtn"
         :disabled="checkedRows.length == 0"
         type="warning"
         @click="startShareCar()"
@@ -24,7 +24,7 @@
         订车
       </n-button>
       <n-button
-        v-if="hasPermission([PermissionEnums.Manager, PermissionEnums.Logistic])"
+        v-if="cancelBookBtn"
         :disabled="checkedRows.length == 0"
         type="error"
         @click="cancelCar()"
@@ -81,7 +81,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, h, onMounted, reactive, ref } from 'vue';
+  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
@@ -100,7 +100,8 @@
   import LogisticFeeDialog from '@/views/newViews/LogisticsDetails/form/LogisticFeeDialog.vue';
   import NewLogisticDetail from '@/views/newViews/LogisticsDetails/form/NewLogisticDetail.vue';
   import { usePermission } from '@/hooks/web/usePermission';
-  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
+  import { useUserStore } from '@/store/modules/user';
+  import { LogisticsDetailPower } from '@/api/dataLayer/common/PowerModel';
 
   interface Prop {
     carpoolId?: string;
@@ -133,6 +134,22 @@
   };
 
   const actionRef = ref();
+
+  const AccountPowerList = computed(() => {
+    return useUserStore()?.info?.powerList;
+  });
+  const bookCarBtn = computed(() => {
+    return AccountPowerList.value.includes(LogisticsDetailPower.BookCar);
+  });
+  const cancelBookBtn = computed(() => {
+    return AccountPowerList.value.includes(LogisticsDetailPower.CancelBookCar);
+  });
+  const costOperate = computed(() => {
+    return AccountPowerList.value.includes(LogisticsDetailPower.CostOperate);
+  });
+  const customerBills = computed(() => {
+    return AccountPowerList.value.includes(LogisticsDetailPower.CustomerBills);
+  });
 
   async function startEdit(id) {
     currentModel = await OutBoundPlanManager.getById(id);
@@ -192,6 +209,7 @@
       const fileAction = (
         label,
         key,
+        disableClick,
         icon?: Component,
         editable = false,
         permissions: any = null
@@ -203,6 +221,7 @@
           reloadTable,
           record,
           icon,
+          disableClick,
           editable,
           permissions
         );
@@ -216,12 +235,7 @@
             onClick() {
               startEdit(record.id);
             },
-            auth: [
-              PermissionEnums.Manager,
-              PermissionEnums.Sales,
-              PermissionEnums.Operator,
-              PermissionEnums.Logistic,
-            ],
+            ifShow: costOperate.value,
             highlight: () => {
               if (record?.logisticCashStatus == CashStatus.Done) {
                 return 'success';
@@ -246,25 +260,11 @@
             onClick() {
               startFee(record.id);
             },
-            auth: [
-              PermissionEnums.CustomerManage,
-              PermissionEnums.CustomerService,
-              PermissionEnums.Manager,
-              PermissionEnums.Logistic,
-            ],
           },
-          fileAction('附件', 'files', undefined, false, [
-            PermissionEnums.Logistic,
-            PermissionEnums.Manager,
-            PermissionEnums.Cash,
-          ]),
-          fileAction('提单', 'pickupFiles'),
-          fileAction('POD', 'PODFiles'),
-          fileAction('客户账单', 'billsForCustomer', undefined, true, [
-            PermissionEnums.Logistic,
-            PermissionEnums.Manager,
-            PermissionEnums.Cash,
-          ]),
+          fileAction('附件', 'files', false, undefined, false),
+          fileAction('提单', 'pickupFiles', false),
+          fileAction('POD', 'PODFiles', false),
+          fileAction('客户账单', 'billsForCustomer', !customerBills.value, undefined, true),
         ],
       });
     },

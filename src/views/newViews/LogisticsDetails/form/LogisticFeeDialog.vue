@@ -9,14 +9,7 @@
       >
         <template #extraSubmitButton="{ submit }">
           <n-button
-            v-if="
-              hasPermission([
-                PermissionEnums.Manager,
-                PermissionEnums.Sales,
-                PermissionEnums.Operator,
-                PermissionEnums.Logistic,
-              ])
-            "
+            v-if="submitQuotationBtn"
             :disabled="model.priceConfirmed"
             type="info"
             @click="submit"
@@ -26,18 +19,7 @@
         <template #extraContent>
           <n-popconfirm v-if="!model?.priceConfirmed" @positive-click="confirmPrice">
             <template #trigger>
-              <n-button
-                v-if="
-                  hasPermission([
-                    PermissionEnums.Manager,
-                    PermissionEnums.CustomerManage,
-                    PermissionEnums.CustomerService,
-                    PermissionEnums.Cash,
-                  ])
-                "
-                type="success"
-                >确认报价</n-button
-              >
+              <n-button v-if="confirmQuotationBtn" type="success">确认报价</n-button>
             </template>
             我确认接受此报价
           </n-popconfirm>
@@ -55,8 +37,10 @@
   import { carpoolSelfCheck } from '@/api/dataLayer/modules/logistic/carpool';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
-  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import { usePermission } from '@/hooks/web/usePermission';
+  import { computed } from 'vue';
+  import { useUserStore } from '@/store/modules/user';
+  import { LogisticsDetailPower } from '@/api/dataLayer/common/PowerModel';
 
   const { hasPermission } = usePermission();
 
@@ -66,6 +50,15 @@
 
   const props = defineProps<Props>();
   let loading: boolean = $ref(false);
+  const AccountPowerList = computed(() => {
+    return useUserStore()?.info?.powerList;
+  });
+  const submitQuotationBtn = computed(() => {
+    return AccountPowerList.value.includes(LogisticsDetailPower.SubmitQuotation);
+  });
+  const confirmQuotationBtn = computed(() => {
+    return AccountPowerList.value.includes(LogisticsDetailPower.ConfirmQuotation);
+  });
   const schemas: FormField[] = [
     {
       field: 'price',

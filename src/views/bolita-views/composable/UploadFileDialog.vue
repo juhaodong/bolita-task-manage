@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
 
   import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/common';
@@ -12,25 +12,34 @@
 <template>
   <n-modal :show="checkDialog.show" @close="checkDialog.close()">
     <n-card :title="checkDialog.title" style="max-width: 700px">
-      <append-file-list-display :files-url="checkDialog.currentFileUrls" />
+      <append-file-list-display
+        :disable-click="checkDialog.disableClick"
+        :files-url="checkDialog.currentFileUrls"
+      />
       <n-divider class="my-8" />
       <normal-form
-        class="mt-4"
-        :show-group-header="false"
         :form-fields="field"
+        :show-buttons="false"
+        :show-group-header="false"
+        class="mt-4"
         @cancel="checkDialog.cancel"
         @submit="checkDialog.confirm"
-        :show-buttons="false"
       >
         <template #extraSubmitButton="{ submit }">
-          <n-button v-if="checkDialog.editable" @click="submit" type="success">上传</n-button>
+          <n-button
+            v-if="checkDialog.editable"
+            :disabled="checkDialog.disableClick"
+            type="success"
+            @click="submit"
+            >上传</n-button
+          >
         </template>
         <template #extraCancelButton="{ cancel }">
-          <n-button @click="cancel" type="error">关闭</n-button>
+          <n-button type="error" @click="cancel">关闭</n-button>
         </template>
       </normal-form>
     </n-card>
   </n-modal>
 </template>
 
-<style scoped lang="less"></style>
+<style lang="less" scoped></style>

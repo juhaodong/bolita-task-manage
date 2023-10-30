@@ -8,19 +8,7 @@
         @submit="handleSubmit"
       >
         <template #extraSubmitButton="{ submit }">
-          <n-button
-            :disabled="
-              model.paymentSubmit ||
-              hasPermission([
-                PermissionEnums.CustomerService,
-                PermissionEnums.CustomerManage,
-                PermissionEnums.Operator,
-                PermissionEnums.Sales,
-                PermissionEnums.Cash,
-              ])
-            "
-            type="info"
-            @click="submit"
+          <n-button :disabled="model.paymentSubmit || submitBtn" type="info" @click="submit"
             >提交付款申请</n-button
           >
         </template>
@@ -30,20 +18,7 @@
             @positive-click="handleSubmit({ paymentSubmit: true })"
           >
             <template #trigger>
-              <n-button
-                :disabled="
-                  hasPermission([
-                    PermissionEnums.CustomerService,
-                    PermissionEnums.CustomerManage,
-                    PermissionEnums.Operator,
-                    PermissionEnums.Sales,
-                    PermissionEnums.Logistic,
-                    PermissionEnums.Cash,
-                  ])
-                "
-                type="success"
-                >确认付款</n-button
-              >
+              <n-button :disabled="confirmBtn" type="success">确认付款</n-button>
             </template>
             确认本款项已经支付
           </n-popconfirm>
@@ -65,8 +40,9 @@
   import { computed, reactive } from 'vue';
   import { db, getDocContent } from '@/store/plugins/firebase';
   import { doc, setDoc } from 'firebase/firestore';
-  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import { usePermission } from '@/hooks/web/usePermission';
+  import { useUserStore } from '@/store/modules/user';
+  import { CarpoolManagementPower } from '@/api/dataLayer/common/PowerModel';
 
   const { hasPermission } = usePermission();
 
@@ -80,6 +56,16 @@
   let systemConfig: { receiver: any[]; iban: any[] } = reactive({
     receiver: [],
     iban: [],
+  });
+
+  const AccountPowerList = computed(() => {
+    return useUserStore()?.info?.powerList;
+  });
+  const submitBtn = computed(() => {
+    return AccountPowerList.value.includes(CarpoolManagementPower.SubmitPay);
+  });
+  const confirmBtn = computed(() => {
+    return AccountPowerList.value.includes(CarpoolManagementPower.ConfirmPay);
   });
 
   async function init() {
