@@ -167,10 +167,11 @@
   import { isArray } from '@/store/is';
   import { deepMerge } from '@/store/utils';
   import { groupBy } from 'lodash-es';
+  import { NAutoComplete } from 'naive-ui/es/auto-complete';
 
   export default defineComponent({
     name: 'BasicForm',
-    components: { DownOutlined, UpOutlined, QuestionCircleOutlined },
+    components: { DownOutlined, UpOutlined, QuestionCircleOutlined, NAutoComplete },
     props: {
       ...basicProps,
     },
