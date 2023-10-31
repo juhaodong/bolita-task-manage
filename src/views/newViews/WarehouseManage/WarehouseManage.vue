@@ -7,7 +7,7 @@
       @clear="updateFilter(null)"
       @submit="updateFilter"
     >
-      <n-button @click="showAdd">新建仓库</n-button>
+      <n-button type="primary" size="small" @click="showAdd">新建仓库</n-button>
     </filter-bar>
     <div class="my-2"></div>
     <BasicTable
@@ -18,6 +18,15 @@
       :row-key="(row) => row.id"
       v-model:checked-row-keys="checkedRows"
     />
+    <n-modal
+      v-model:show="wuDialog.showDialog"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 800px; max-width: 800px"
+      title="管理仓库用户"
+    >
+      <user-manage :belongs-to-id="wuDialog.editingId" />
+    </n-modal>
 
     <n-modal
       v-model:show="showModal"
@@ -32,7 +41,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { h, onMounted, reactive, ref } from 'vue';
+  import { h, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
@@ -40,26 +49,17 @@
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { InventoryManager } from '@/api/dataLayer/modules/user/user';
   import NewInventory from '@/views/newViews/WarehouseManage/WarehouseForm.vue';
-
-  interface Prop {
-    outId?: string;
-  }
+  import { useWUDialog } from '@/views/newViews/WarehouseManage/WarehouseUserDialog';
+  import UserManage from '@/views/newViews/UserManage/UserManage.vue';
 
   let finished = $ref(false);
-  const props = defineProps<Prop>();
-  onMounted(() => {
-    if (props.outId) {
-      filterObj = { outId: props.outId };
-    }
-    finished = true;
-  });
+
   const showModal = ref(false);
   let checkedRows = $ref([]);
   let currentModel: any | null = $ref(null);
 
   async function startEdit(id) {
     currentModel = await InventoryManager.getById(id);
-    console.log(id, currentModel);
     showModal.value = true;
   }
 
@@ -78,6 +78,7 @@
     currentModel = null;
     showModal.value = true;
   }
+
   const actionRef = ref();
 
   function reloadTable() {
@@ -85,6 +86,7 @@
     showModal.value = false;
   }
 
+  const wuDialog = useWUDialog();
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
@@ -98,6 +100,12 @@
             icon: DocumentEdit16Filled,
             onClick() {
               startEdit(record.id);
+            },
+          },
+          {
+            label: '用户',
+            onClick() {
+              wuDialog.startEdit(record.id);
             },
           },
         ],

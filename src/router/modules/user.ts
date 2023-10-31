@@ -18,12 +18,12 @@ const routes: Array<RouteRecordRaw> = [
     },
     children: [
       {
-        path: 'userManage',
-        name: `userManage`,
+        path: 'warehouse',
+        name: `warehouse`,
         meta: {
-          title: '用户管理',
+          title: '仓库管理',
         },
-        component: () => import('@/views/newViews/UserManage/UserManage.vue'),
+        component: () => import('@/views/newViews/WarehouseManage/WarehouseManage.vue'),
       },
       {
         path: 'customer',
@@ -34,31 +34,13 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/newViews/CustomerManage/CustomerManage.vue'),
       },
       {
-        path: 'warehouse',
-        name: `warehouse`,
+        path: 'userManage',
+        name: `userManage`,
         meta: {
-          title: '仓库管理',
+          title: '用户管理',
         },
-        component: () => import('@/views/newViews/WarehouseManage/WarehouseManage.vue'),
+        component: () => import('@/views/newViews/UserManage/UserManage.vue'),
       },
-      // {
-      //   path: 'operator',
-      //   name: `operator`,
-      //   meta: {
-      //     title: '操作员管理',
-      //     activeMenu: 'salesmanManage_index',
-      //   },
-      //   component: () => import('@/views/bolita-views/user/operatorManage/list/OperatorIndex.vue'),
-      // },
-      // {
-      //   path: 'sales',
-      //   name: `sales`,
-      //   meta: {
-      //     title: '业务员管理',
-      //     activeMenu: 'salesmanManage_index',
-      //   },
-      //   component: () => import('@/views/bolita-views/user/salesmanManage/list/SalesIndex.vue'),
-      // },
     ],
   },
 ];

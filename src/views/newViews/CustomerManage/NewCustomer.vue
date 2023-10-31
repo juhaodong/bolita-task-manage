@@ -11,11 +11,9 @@
   import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
   import {
     asyncInventoryFormField,
-    asyncUserTypeFormField,
     CustomerManager,
     customerStatusSelection,
   } from '@/api/dataLayer/modules/user/user';
-  import { UserType } from '@/views/newViews/UserManage/columns';
 
   interface Props {
     model?: any;
@@ -36,11 +34,6 @@
     asyncInventoryFormField({
       label: '所属仓库',
       field: 'warehouseId',
-    }),
-    asyncUserTypeFormField({
-      label: '客户账号',
-      field: 'userId',
-      userType: UserType.Customer,
     }),
     {
       label: '使用系统',

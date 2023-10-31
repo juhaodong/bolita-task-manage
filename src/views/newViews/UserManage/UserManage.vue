@@ -7,7 +7,7 @@
       @clear="updateFilter(null)"
       @submit="updateFilter"
     >
-      <n-button @click="showAdd">新建用户</n-button>
+      <n-button type="primary" @click="showAdd" size="small">新建用户</n-button>
     </filter-bar>
     <div class="my-2"></div>
     <BasicTable
@@ -42,14 +42,14 @@
   import NewUser from '@/views/newViews/UserManage/NewUser.vue';
 
   interface Prop {
-    outId?: string;
+    belongsToId?: string;
   }
 
   let finished = $ref(false);
   const props = defineProps<Prop>();
   onMounted(() => {
-    if (props.outId) {
-      filterObj = { outId: props.outId };
+    if (props.belongsToId) {
+      filterObj = { belongsToId: props.belongsToId };
     }
     finished = true;
   });
@@ -75,8 +75,12 @@
 
   function showAdd() {
     currentModel = null;
+    if (props.belongsToId) {
+      currentModel = { belongsToId: props.belongsToId };
+    }
     showModal.value = true;
   }
+
   const actionRef = ref();
 
   function reloadTable() {

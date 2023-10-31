@@ -23,21 +23,9 @@ export const columns: DataTableColumns<InventoryManage> = [
     title: '面积',
     key: 'area',
   },
-  // {
-  //   title: '操作',
-  //   key: 'action',
-  // },
   {
     title: '结算方式',
     key: 'settlementMethod',
-  },
-  {
-    title: '所属操作员',
-    key: 'belongOperator',
-  },
-  {
-    title: '所属业务员',
-    key: 'belongSalesName',
   },
   {
     title: '使用系统',

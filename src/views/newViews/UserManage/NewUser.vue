@@ -20,6 +20,17 @@
 
   let loading: boolean = $ref(false);
   const prop = defineProps<Props>();
+  const availableUserType = $computed(() => {
+    const id = prop?.model?.belongsToId;
+    console.log(id);
+    if (id) {
+      if (id.startsWith('W')) {
+        return [UserType.Operator, UserType.Sales];
+      }
+    } else {
+      return Object.values(UserType);
+    }
+  });
   const schemas: FormField[] = [
     {
       label: '用户名',
@@ -45,7 +56,15 @@
       field: 'userType',
       component: 'NSelect',
       componentProps: {
-        options: generateOptionFromArray(Object.values(UserType)),
+        options: generateOptionFromArray(availableUserType),
+      },
+    },
+    {
+      label: '所属',
+      field: 'belongsToId',
+      required: false,
+      disableCondition() {
+        return true;
       },
     },
     {

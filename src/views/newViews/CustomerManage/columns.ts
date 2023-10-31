@@ -2,7 +2,7 @@ import { DataTableColumns } from 'naive-ui';
 import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
-export const columns: DataTableColumns<CustomerModel> = [
+export const columns: DataTableColumns = [
   {
     title: '客户ID',
     key: 'id',
@@ -42,20 +42,6 @@ export const columns: DataTableColumns<CustomerModel> = [
   timeColumn('creatTime', '创建日期'),
 ];
 
-export type CustomerModel = {
-  customerId: number;
-  customerName: string;
-  businessParty: string;
-  warehouseId: string;
-  belongSalesName: string;
-  action: string;
-  childrenCustomerId: number;
-  useSystem: string;
-  quickBindAccount: string;
-  status: string;
-  note: string;
-  creatTime: string;
-};
 export const filters: FormField[] = [
   {
     label: '客户ID',

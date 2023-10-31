@@ -9,8 +9,7 @@
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { asyncUserTypeFormField, InventoryManager } from '@/api/dataLayer/modules/user/user';
-  import { UserType } from '@/views/newViews/UserManage/columns';
+  import { InventoryManager } from '@/api/dataLayer/modules/user/user';
 
   interface Props {
     model?: any;
@@ -50,16 +49,6 @@
       field: 'settlementMethod',
       required: false,
     },
-    asyncUserTypeFormField({
-      label: '所属操作员',
-      field: 'belongOperator',
-      userType: UserType.Operator,
-    }),
-    asyncUserTypeFormField({
-      label: '所属业务员',
-      field: 'belongSalesName',
-      userType: UserType.Sales,
-    }),
     {
       label: '使用系统',
       field: 'useSystem',
