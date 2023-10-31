@@ -1,7 +1,6 @@
 <template>
   <n-card :bordered="false" class="proCard">
     <filter-bar
-      v-if="finished"
       :form-fields="filters"
       :default-value-model="filterObj"
       @clear="updateFilter(null)"
