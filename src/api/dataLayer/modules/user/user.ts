@@ -61,7 +61,7 @@ export const CustomerManager = initModel({
   init(value): any {
     return value;
   },
-  idPrefix: 'U',
+  idPrefix: 'C',
 });
 
 export async function asyncInventoryFormField(
@@ -76,6 +76,7 @@ export async function asyncInventoryFormField(
     label: it.companyName,
     value: it.id,
   }));
+  console.log(userList);
   return {
     field: field,
     label: label,

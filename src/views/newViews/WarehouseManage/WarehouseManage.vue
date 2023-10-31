@@ -27,7 +27,6 @@
     >
       <user-manage :belongs-to-id="wuDialog.editingId" />
     </n-modal>
-
     <n-modal
       v-model:show="showModal"
       :show-icon="false"
@@ -49,7 +48,7 @@
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { InventoryManager } from '@/api/dataLayer/modules/user/user';
   import NewInventory from '@/views/newViews/WarehouseManage/WarehouseForm.vue';
-  import { useWUDialog } from '@/views/newViews/WarehouseManage/WarehouseUserDialog';
+  import { useEditOrganizationUserDialog } from '@/views/newViews/WarehouseManage/WarehouseUserDialog';
   import UserManage from '@/views/newViews/UserManage/UserManage.vue';
 
   let finished = $ref(false);
@@ -86,7 +85,7 @@
     showModal.value = false;
   }
 
-  const wuDialog = useWUDialog();
+  const wuDialog = useEditOrganizationUserDialog();
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',

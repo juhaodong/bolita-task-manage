@@ -77,7 +77,7 @@
               </n-space>
             </template>
             <template v-else-if="schema.component === 'NAutoComplete'">
-              <n-auto-complete
+              <n-select
                 :get-show="() => true"
                 :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
                 v-bind="getComponentProps(schema)"

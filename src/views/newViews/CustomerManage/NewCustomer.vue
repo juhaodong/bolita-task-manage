@@ -8,10 +8,9 @@
 <script lang="ts" setup>
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
+  import { FormFields } from '@/api/dataLayer/common/GeneralModel';
   import {
     asyncInventoryFormField,
-    CustomerManager,
     customerStatusSelection,
   } from '@/api/dataLayer/modules/user/user';
 
@@ -57,6 +56,7 @@
 
   async function handleSubmit(values: any) {
     loading = true;
+    // console.log(values);
     await safeScope(async () => {
       if (prop?.model?.id) {
         await CustomerManager.editInternal(values, prop.model.id);

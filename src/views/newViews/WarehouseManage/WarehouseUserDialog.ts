@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-export const useWUDialog = defineStore('warehouse-user', () => {
+export const useEditOrganizationUserDialog = defineStore('warehouse-user', () => {
   const showDialog = ref(false);
   const userList = ref<any[]>([]);
   const editingId = ref('');

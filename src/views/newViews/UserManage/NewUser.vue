@@ -26,6 +26,8 @@
     if (id) {
       if (id.startsWith('W')) {
         return [UserType.Operator, UserType.Sales];
+      } else if (id.startsWith('C')) {
+        return [UserType.CustomerService, UserType.CustomerManage];
       }
     } else {
       return Object.values(UserType);

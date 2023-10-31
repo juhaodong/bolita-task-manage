@@ -18,6 +18,15 @@
       :row-key="(row) => row.id"
       v-model:checked-row-keys="checkedRows"
     />
+    <n-modal
+      v-model:show="wuDialog.showDialog"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 800px; max-width: 800px"
+      title="管理客户用户"
+    >
+      <user-manage :belongs-to-id="wuDialog.editingId" />
+    </n-modal>
 
     <n-modal
       v-model:show="showModal"
@@ -40,6 +49,8 @@
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { CustomerManager } from '@/api/dataLayer/modules/user/user';
   import NewCustomer from '@/views/newViews/CustomerManage/NewCustomer.vue';
+  import { useEditOrganizationUserDialog } from '@/views/newViews/WarehouseManage/WarehouseUserDialog';
+  import UserManage from '@/views/newViews/UserManage/UserManage.vue';
 
   interface Prop {
     outId?: string;
@@ -84,7 +95,7 @@
     actionRef.value.reload();
     showModal.value = false;
   }
-
+  const wuDialog = useEditOrganizationUserDialog();
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
@@ -98,6 +109,12 @@
             icon: DocumentEdit16Filled,
             onClick() {
               startEdit(record.id);
+            },
+          },
+          {
+            label: '用户',
+            onClick() {
+              wuDialog.startEdit(record.id);
             },
           },
         ],
