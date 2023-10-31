@@ -7,6 +7,7 @@
 
   const checkDialog = useUploadDialog();
   const field = [getFilesUploadFormField('files', false)];
+  console.log(checkDialog.disableClick, 'disable');
 </script>
 
 <template>

@@ -1,7 +1,7 @@
 <template>
   <n-card :bordered="false" class="proCard">
     <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
-      <n-button v-if="addBtn" type="primary" @click="addTable()">
+      <n-button v-if="hasPermission([OutBoundPlanPower.Add])" type="primary" @click="addTable()">
         <template #icon>
           <n-icon>
             <Box20Filled />
@@ -58,7 +58,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, computed, h, reactive, ref } from 'vue';
+  import { Component, h, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled, Edit24Filled, Folder32Filled } from '@vicons/fluent';
@@ -75,10 +75,8 @@
   import OutBoundCheckOutTable from '@/views/newViews/OutboundPlan/dialog/OutBoundCheckOutTable.vue';
   import OutBoundEditDialog from '@/views/newViews/OutboundPlan/dialog/OutBoundEditDialog.vue';
   import { where } from 'firebase/firestore';
-  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import { usePermission } from '@/hooks/web/usePermission';
-  import { useUserStore } from '@/store/modules/user';
-  import { NotifyListPower, OutBoundPlanPower } from '@/api/dataLayer/common/PowerModel';
+  import { OutBoundPlanPower } from '@/api/dataLayer/common/PowerModel';
 
   const { hasPermission } = usePermission();
 
@@ -93,15 +91,6 @@
   const loadDataTable = async () => {
     return await OutBoundPlanManager.load(filterObj, where('onlyDelivery', '==', false));
   };
-  const AccountPowerList = computed(() => {
-    return useUserStore()?.info?.powerList;
-  });
-  const addBtn = computed(() => {
-    return AccountPowerList.value.includes(OutBoundPlanPower.Add);
-  });
-  const editOperate = computed(() => {
-    return AccountPowerList.value.includes(OutBoundPlanPower.Edit);
-  });
 
   function reloadTable() {
     actionRef.value.reload();
@@ -160,7 +149,7 @@
               currentId = record.id!;
               showEditInfoDialog = true;
             },
-            ifShow: editOperate.value,
+            auth: [OutBoundPlanPower.Edit],
           },
           {
             label: '操作',

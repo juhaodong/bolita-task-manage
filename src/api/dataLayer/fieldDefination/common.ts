@@ -79,7 +79,6 @@ export async function asyncCustomerFormField(): Promise<FormField> {
     },
     onFormUpdate(value) {
       if (value?.customerId) {
-        console.log(customerDict);
         value['warehouseId'] = customerDict[value?.customerId]?.warehouseId;
       }
     },

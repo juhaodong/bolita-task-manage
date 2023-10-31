@@ -52,7 +52,7 @@ export const useUserStore = defineStore({
       return this.username;
     },
     getPermissions(): [any][] {
-      return this.permissions;
+      return this.powerList;
     },
     getUserInfo(): BaseUser | undefined {
       return this.info;
@@ -69,7 +69,7 @@ export const useUserStore = defineStore({
       this.permissions = permissions;
     },
     setPowerList(powerList) {
-      this.powerList = powerList;
+      this.powerList = generateOptionFromArray(powerList);
     },
     setUserInfo(info?: BaseUser) {
       this.info = info;
@@ -97,7 +97,7 @@ export const useUserStore = defineStore({
       if (result.permissions && result.permissions.length) {
         const permissionsList = generateOptionFromArray(result.permissions);
         this.setPermissions(permissionsList);
-        const powerList = AccountPower.find((it) => it.name === result.realName)?.Power;
+        const powerList = AccountPower.find((it) => it.name === result.userType)?.Power ?? [];
         result.powerList = powerList;
         this.setPowerList(powerList);
         this.setUserInfo(result);

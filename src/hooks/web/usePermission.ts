@@ -48,8 +48,10 @@ export function usePermission() {
     }
     throw new Error(`[hasSomePermission]: ${accesses} should be a array !`);
   }
+
   function isCustomer(): boolean {
     return hasPermission([PermissionEnums.CustomerManage, PermissionEnums.CustomerService]);
   }
+
   return { hasPermission, hasEveryPermission, hasSomePermission, isCustomer };
 }

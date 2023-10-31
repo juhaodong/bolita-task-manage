@@ -209,7 +209,6 @@
       const fileAction = (
         label,
         key,
-        disableClick,
         icon?: Component,
         editable = false,
         permissions: any = null
@@ -221,7 +220,6 @@
           reloadTable,
           record,
           icon,
-          disableClick,
           editable,
           permissions
         );
@@ -261,10 +259,10 @@
               startFee(record.id);
             },
           },
-          fileAction('附件', 'files', false, undefined, false),
-          fileAction('提单', 'pickupFiles', false),
-          fileAction('POD', 'PODFiles', false),
-          fileAction('客户账单', 'billsForCustomer', !customerBills.value, undefined, true),
+          fileAction('附件', 'files', undefined, false),
+          fileAction('提单', 'pickupFiles'),
+          fileAction('POD', 'PODFiles'),
+          fileAction('客户账单', 'billsForCustomer', undefined, !customerBills.value),
         ],
       });
     },

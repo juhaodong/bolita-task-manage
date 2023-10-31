@@ -8,14 +8,18 @@
       @submit="updateFilter"
     >
       <n-button
-        v-if="settingBtn"
+        v-if="hasPermission([NotifyDetailPower.Setting])"
         :disabled="checkedRows?.length == 0"
         type="info"
         @click="startEditStoreAddress()"
       >
         批量设置库位
       </n-button>
-      <n-button v-if="changeBtn" type="warning" @click="transferToOutBoundPlan">
+      <n-button
+        v-if="hasPermission([NotifyDetailPower.ChangeStatusPlan])"
+        type="warning"
+        @click="transferToOutBoundPlan"
+      >
         <template #icon>
           <n-icon>
             <Box20Filled />
@@ -36,7 +40,7 @@
     <n-modal v-model:show="storeAddressDialog" :preset="'dialog'" title="请输入新的库位">
       <loading-frame :loading="loading">
         <n-input v-model:value="storeAddress" class="my-4" placeholder="请输入新的库位" />
-        <n-button type="primary" @click="realEditStoreAddress"> 保存 </n-button>
+        <n-button type="primary" @click="realEditStoreAddress"> 保存</n-button>
       </loading-frame>
     </n-modal>
     <n-modal
@@ -61,7 +65,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, h, onMounted, reactive, ref } from 'vue';
+  import { h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
@@ -74,7 +78,6 @@
   import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import { usePermission } from '@/hooks/web/usePermission';
-  import { useUserStore } from '@/store/modules/user';
   import { NotifyDetailPower } from '@/api/dataLayer/common/PowerModel';
 
   const { hasPermission } = usePermission();
@@ -95,16 +98,6 @@
 
   let storeAddress: string = $ref('');
   let storeAddressDialog: boolean = $ref(false);
-
-  const AccountPowerList = computed(() => {
-    return useUserStore()?.info?.powerList;
-  });
-  const settingBtn = computed(() => {
-    return AccountPowerList.value.includes(NotifyDetailPower.Setting);
-  });
-  const changeBtn = computed(() => {
-    return AccountPowerList.value.includes(NotifyDetailPower.ChangeStatusPlan);
-  });
 
   onMounted(() => {
     if (props.notifyId) {
@@ -131,6 +124,7 @@
     filterObj = value;
     reloadTable();
   }
+
   async function realEditStoreAddress() {
     loading = true;
     for (const it of checkedRows) {
@@ -140,16 +134,19 @@
     reloadTable();
     loading = false;
   }
+
   function startEditStoreAddress() {
     storeAddress = '';
     storeAddressDialog = true;
   }
+
   function reloadTable() {
     actionRef.value.reload();
     showOutBoundPlan = false;
     showModal.value = false;
     checkedRows = [];
   }
+
   const actionColumn = reactive({
     title: '操作',
     key: 'action',

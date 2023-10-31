@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
+  import { computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { CheckStatus, columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
@@ -49,7 +49,6 @@
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { useCheckDialog } from '@/store/modules/checkDialogState';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
   import { usePermission } from '@/hooks/web/usePermission';
   import { useUserStore } from '@/store/modules/user';
@@ -134,17 +133,6 @@
     key: 'action',
     width: 40,
     render(record: any) {
-      const fileAction = (label, key, icon?: Component, editable = false) => {
-        return getFileActionButton(
-          label,
-          key,
-          OutBoundDetailManager,
-          reloadTable,
-          record,
-          icon,
-          editable
-        );
-      };
       return h(TableAction as any, {
         style: 'button',
         actions: [

@@ -26,6 +26,7 @@ export type BaseUser = {
   realName: string;
   desc: string;
   password: string;
+  userType: PermissionEnums;
   token: string;
   permissions: PermissionEnums[];
   customerId?: string;

@@ -9,7 +9,7 @@
       :request="loadDataTable"
       :row-key="(row) => row.id"
     >
-      <template #tableTitle> </template>
+      <template #tableTitle></template>
     </BasicTable>
 
     <n-modal
@@ -88,6 +88,7 @@
     showModal.value = false;
     paymentDialogShow = false;
   }
+
   async function startEdit(id) {
     currentModel = await CarpoolManager.getById(id);
     showModal.value = true;
@@ -124,6 +125,7 @@
           reloadTable,
           record,
           icon,
+          true,
           disableClick
         );
       };

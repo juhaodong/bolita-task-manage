@@ -25,11 +25,7 @@
       :row-key="(row) => row.id"
       ref="actionRef"
       :actionColumn="actionColumn"
-    >
-      <template #tableTitle>
-        <n-space />
-      </template>
-    </BasicTable>
+    />
     <n-modal
       v-model:show="showModal"
       :show-icon="false"
@@ -77,6 +73,7 @@
   import { Box20Filled, Folder32Filled } from '@vicons/fluent';
   import {
     CashStatus,
+    InBoundStatus,
     NotifyManager,
     NotifyType,
     OutStatus,
@@ -152,7 +149,9 @@
               },
             },
             ifShow() {
-              return record['outStatus'] !== OutStatus.All;
+              return (
+                record['inStatus'] === InBoundStatus.Wait && record['outStatus'] !== OutStatus.All
+              );
             },
           },
           fileAction('附件', 'files', Folder32Filled),

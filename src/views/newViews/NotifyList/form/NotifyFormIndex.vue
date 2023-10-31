@@ -3,10 +3,10 @@
   import NotifyContainerForm from '@/views/newViews/NotifyList/form/NotifyContainerForm.vue';
   import TrayForm from '@/views/newViews/NotifyList/form/NotifyTrayForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { handleRequest } from '@/store/utils/utils';
   import { getNeededColumnByNotifyType } from '@/api/dataLayer/modules/notify/NotifyRepository';
   import readXlsxFile from 'read-excel-file';
   import { formatItemAddress } from '@/api/dataLayer/fieldDefination/addressGroup';
+  import { handleRequest } from '@/store/utils/utils';
 
   interface Prop {
     type: NotifyType;
@@ -49,10 +49,9 @@
     startLoading();
     value.notifyType = prop.type;
     const taskList = [
-      ...(await readFile(value.uploadFile?.[0].file, value.notifyType)).map(formatItemAddress),
+      ...(await readFile(value.files?.[0].file, value.notifyType)).map(formatItemAddress),
       ...(value?.trayTaskList ?? []),
     ];
-
     delete value.uploadFile;
     const res = await NotifyManager.add(value, taskList);
     await handleRequest(res, async () => {
