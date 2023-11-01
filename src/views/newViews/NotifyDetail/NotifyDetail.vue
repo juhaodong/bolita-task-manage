@@ -79,6 +79,7 @@
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import { usePermission } from '@/hooks/web/usePermission';
   import { NotifyDetailPower } from '@/api/dataLayer/common/PowerModel';
+  import { safeParseInt } from '@/store/utils/utils';
 
   const { hasPermission } = usePermission();
 
@@ -147,6 +148,15 @@
     checkedRows = [];
   }
 
+  function getRecordStatusBy(record) {
+    const sumCount = safeParseInt(record.trayNum) + safeParseInt(record.containerNum);
+    const arrivedCount =
+      safeParseInt(record.arrivedTrayNum) + safeParseInt(record.arrivedContainerNum);
+    if (arrivedCount == 0) {
+      return InBoundStatus.Wait;
+    }
+    return sumCount == arrivedCount ? InBoundStatus.All : InBoundStatus.Partial;
+  }
   const actionColumn = reactive({
     title: '操作',
     key: 'action',
@@ -159,7 +169,8 @@
             label: '修改',
             icon: DocumentEdit16Filled,
             ifShow() {
-              return record.inStatus === InBoundStatus.Wait;
+              console.log(record, InBoundStatus.Wait);
+              return getRecordStatusBy(record) == InBoundStatus.Wait;
             },
             onClick() {
               startEdit(record.id);
