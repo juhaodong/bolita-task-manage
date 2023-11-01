@@ -8,9 +8,10 @@
 <script lang="ts" setup>
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { FormFields } from '@/api/dataLayer/common/GeneralModel';
+  import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
   import {
     asyncInventoryFormField,
+    CustomerManager,
     customerStatusSelection,
   } from '@/api/dataLayer/modules/user/user';
 
