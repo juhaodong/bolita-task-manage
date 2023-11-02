@@ -29,8 +29,12 @@
 
   const { hasPermission } = usePermission();
 
+  const userInfo = $computed(() => {
+    return useUserStore()?.info;
+  });
+
   const userPowerType = $computed(() => {
-    return useUserStore()?.info?.userType;
+    return userInfo?.userType;
   });
 
   const canEdit = $computed(() => {
@@ -39,7 +43,7 @@
     );
   });
   const AccountPowerList = computed(() => {
-    return useUserStore()?.info?.powerList;
+    return userInfo?.powerList;
   });
   const showBtn = computed(() => {
     return AccountPowerList.value.includes(NotifyListPower.Operate);
