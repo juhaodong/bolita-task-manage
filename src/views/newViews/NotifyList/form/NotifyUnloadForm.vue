@@ -19,6 +19,7 @@
   import { usePermission } from '@/hooks/web/usePermission';
   import { useUserStore } from '@/store/modules/user';
   import { NotifyListPower } from '@/api/dataLayer/common/PowerModel';
+  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
 
   console.log(getDateNow, timeDisplay);
 
@@ -28,8 +29,14 @@
 
   const { hasPermission } = usePermission();
 
+  const userPowerType = $computed(() => {
+    return useUserStore()?.info?.userType;
+  });
+
   const canEdit = $computed(() => {
-    return notifyDetail?.inStatus !== InBoundStatus.All;
+    return (
+      notifyDetail?.inStatus !== InBoundStatus.All || userPowerType === PermissionEnums.Manager
+    );
   });
   const AccountPowerList = computed(() => {
     return useUserStore()?.info?.powerList;
