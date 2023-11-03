@@ -63,6 +63,14 @@ export const CustomerManager = initModel({
   },
   idPrefix: 'C',
 });
+export const FBACodePath = 'FBACode';
+export const FBACodeManager = initModel({
+  collectionName: FBACodePath,
+  init(value): any {
+    return value;
+  },
+  idPrefix: 'F',
+});
 
 export async function asyncInventoryFormField(
   params: {

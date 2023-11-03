@@ -41,6 +41,14 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('@/views/newViews/UserManage/UserManage.vue'),
       },
+      {
+        path: 'FBACode',
+        name: `FBACode`,
+        meta: {
+          title: 'FBACode',
+        },
+        component: () => import('@/views/newViews/FBACode/FBACode.vue'),
+      },
     ],
   },
 ];
