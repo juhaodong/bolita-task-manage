@@ -7,6 +7,7 @@ import {
   BaseUser,
   getUserInfo as getUserInfoApi,
   login,
+  PermissionEnums,
 } from '@/api/dataLayer/modules/system/user/baseUser';
 import { storage } from '@/store/utils/Storage';
 import { generateOptionFromArray } from '@/store/utils/utils';
@@ -51,6 +52,9 @@ export const useUserStore = defineStore({
     getNickname(): string {
       return this.username;
     },
+    getRole(): PermissionEnums {
+      return this.permissions?.[0]?.value;
+    },
     getPermissions(): [any][] {
       return this.powerList;
     },
@@ -78,13 +82,12 @@ export const useUserStore = defineStore({
     async login(params: any) {
       const response = await login(params);
       const { result, code } = response;
-      console.log(result);
       if (code === ResultEnum.SUCCESS) {
         const ex = 7 * 24 * 60 * 60;
         storage.set(ACCESS_TOKEN, result.token, ex);
         storage.set(CURRENT_USER, result, ex);
         storage.set(IS_SCREENLOCKED, false);
-        storage.set(CUSTOMER_ID, result.customerId);
+        storage.set(CUSTOMER_ID, result.belongsToId);
         this.setToken(result.token);
         this.setUserInfo(result);
       }
@@ -99,6 +102,7 @@ export const useUserStore = defineStore({
         this.setPermissions(permissionsList);
         const powerList = AccountPower.find((it) => it.name === result.userType)?.Power ?? [];
         result.powerList = powerList;
+        storage.set(CUSTOMER_ID, result.belongsToId);
         this.setPowerList(powerList);
         this.setUserInfo(result);
       } else {

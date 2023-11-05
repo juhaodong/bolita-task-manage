@@ -22,7 +22,6 @@
   const prop = defineProps<Props>();
   const availableUserType = $computed(() => {
     const id = prop?.model?.belongsToId;
-    console.log(id);
     if (id) {
       if (id.startsWith('W')) {
         return [UserType.Operator, UserType.Sales];

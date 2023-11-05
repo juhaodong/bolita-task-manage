@@ -5,11 +5,6 @@ import { ACCESS_TOKEN } from '@/store/mutation-types';
 import { storage } from '@/store/utils/Storage';
 import { CustomerManager, userPath } from '@/api/dataLayer/modules/user/user';
 
-export type Permission = {
-  label: string;
-  value: PermissionEnums;
-};
-
 export enum PermissionEnums {
   Manager = '管理员',
   CustomerManage = '客户管理员',
@@ -34,7 +29,7 @@ export type BaseUser = {
 };
 
 export async function login(params: { username: string; password: string }) {
-  const exist = (await findUserWithUsername(params.username)).find(
+  const exist = (await findUserWithLoginName(params.username)).find(
     (it) => it.password === params.password
   );
   if (exist) {
@@ -45,8 +40,8 @@ export async function login(params: { username: string; password: string }) {
   }
 }
 
-async function findUserWithUsername(username) {
-  return await executeQuery(query(collection(db, userPath), where('userName', '==', username)));
+async function findUserWithLoginName(username) {
+  return await executeQuery(query(collection(db, userPath), where('loginName', '==', username)));
 }
 
 export async function getUserInfo(token?): Promise<Result<BaseUser>> {

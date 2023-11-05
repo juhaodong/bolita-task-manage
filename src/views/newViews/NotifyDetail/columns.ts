@@ -53,7 +53,7 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
   ),
   formatColumn(
     'containerNum',
-    '箱数',
+    '箱数(在库/到货/预报)',
     (record) =>
       record['instorageContainerNum'] +
       '/' +

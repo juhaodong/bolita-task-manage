@@ -50,7 +50,9 @@ export function usePermission() {
   }
 
   function isCustomer(): boolean {
-    return hasPermission([PermissionEnums.CustomerManage, PermissionEnums.CustomerService]);
+    return [PermissionEnums.CustomerManage, PermissionEnums.CustomerService].includes(
+      userStore.getRole
+    );
   }
 
   return { hasPermission, hasEveryPermission, hasSomePermission, isCustomer };
