@@ -38,19 +38,18 @@
   });
 
   const canEdit = $computed(() => {
-    return (
-      notifyDetail?.inStatus !== InBoundStatus.All || userPowerType === PermissionEnums.Manager
-    );
+    return notifyInfo?.inStatus !== InBoundStatus.All || userPowerType === PermissionEnums.Manager;
   });
   const AccountPowerList = computed(() => {
     return userInfo?.powerList;
   });
   const showBtn = computed(() => {
-    return AccountPowerList.value.includes(NotifyListPower.Operate);
+    console.log(AccountPowerList.value);
+    return hasPermission([NotifyListPower.Operate]);
   });
 
   const props = defineProps<Props>();
-  let notifyDetail: any | null = $ref(null);
+  let notifyInfo: any | null = $ref(null);
   let currentTaskList: any[] = $ref([]);
 
   const emit = defineEmits(['close', 'refresh', 'save']);
@@ -74,11 +73,11 @@
 
   async function reload() {
     if (props.notifyId != null) {
-      notifyDetail = await NotifyManager.getById(props.notifyId);
-      currentDate = notifyDetail.currentDate;
+      notifyInfo = await NotifyManager.getById(props.notifyId);
+      currentDate = notifyInfo.currentDate;
       currentTaskList = await getNotifyDetailListByNotify(props.notifyId);
       emit('refresh');
-      unloadPerson = notifyDetail?.unloadPerson ?? '';
+      unloadPerson = notifyInfo?.unloadPerson ?? '';
       loadAll();
     }
   }
@@ -119,7 +118,6 @@
     loading = true;
     for (const listElement of currentTaskList) {
       const editInfo: any = {
-        currentDate: currentDate ?? '',
         arrivedTrayNum: listElement.arrivedTrayNumEdit ?? 0,
         arrivedContainerNum: listElement.arrivedContainerNumEdit ?? 0,
         note: listElement.note,
@@ -141,6 +139,7 @@
         inStatus: newInStatus,
         totalCount: totalTrayCount.value + totalContainerCount.value,
         unloadPerson: unloadPerson,
+        currentDate: currentDate ?? '',
       },
       props.notifyId
     );
@@ -159,7 +158,6 @@
         listElement.arrivedContainerNumEdit != listElement.arrivedContainerNum
       ) {
         const editInfo: any = {
-          currentDate: currentDate ?? '',
           arrivedTrayNum: listElement?.arrivedTrayNumEdit ?? 0,
           arrivedContainerNum: listElement?.arrivedContainerNumEdit ?? 0,
           note: listElement.note,
@@ -189,6 +187,7 @@
         inStatus: newInStatus,
         totalCount: totalTrayCount.value + totalContainerCount.value,
         unloadPerson: unloadPerson,
+        currentDate: currentDate ?? '',
       },
       props.notifyId
     );
@@ -203,20 +202,20 @@
 <template>
   <div id="print" class="mt-8">
     <loading-frame :loading="loading">
-      <n-descriptions v-if="notifyDetail" :columns="3" bordered label-placement="left">
+      <n-descriptions v-if="notifyInfo" :columns="3" bordered label-placement="left">
         <n-descriptions-item :span="2" label="货柜号">
-          {{ notifyDetail?.containerNo }}
+          {{ notifyInfo?.containerNo }}
         </n-descriptions-item>
         <n-descriptions-item label="卸柜人" />
         <n-descriptions-item label="日期"> {{ getDateNow() }}</n-descriptions-item>
 
-        <n-descriptions-item label="客户ID"> {{ notifyDetail?.customerId }}</n-descriptions-item>
+        <n-descriptions-item label="客户ID"> {{ notifyInfo?.customerId }}</n-descriptions-item>
         <n-descriptions-item label="预约日期时间">
-          {{ timeDisplay(notifyDetail?.reserveTime) }}
+          {{ timeDisplay(notifyInfo?.reserveTime) }}
         </n-descriptions-item>
-        <n-descriptions-item label="预报总数"> {{ notifyDetail?.totalCount }}</n-descriptions-item>
+        <n-descriptions-item label="预报总数"> {{ notifyInfo?.totalCount }}</n-descriptions-item>
         <n-descriptions-item label="仓库ID">
-          {{ notifyDetail?.warehouseId ?? '-' }}
+          {{ notifyInfo?.warehouseId ?? '-' }}
         </n-descriptions-item>
         <n-descriptions-item label="卸柜起止时间">
           <n-input v-model:value="currentDate" placeholder="卸柜起止时间" />
@@ -275,7 +274,7 @@
           </tr>
         </table>
       </div>
-      <n-space v-if="notifyDetail" :wrap-item="false" class="mt-4">
+      <n-space v-if="notifyInfo" :wrap-item="false" class="mt-4">
         <n-button v-print="'#print'" type="default">打印</n-button>
         <n-button v-if="showBtn" secondary @click="allArrived">全部到齐</n-button>
         <div class="flex-grow"></div>
@@ -283,11 +282,11 @@
           <n-input v-model:value="unloadPerson" placeholder="卸柜人员" />
         </div>
         <n-button v-if="showBtn" :disabled="!canEdit" secondary type="warning" @click="save"
-          >保存</n-button
-        >
+          >保存
+        </n-button>
         <n-button v-if="showBtn" :disabled="!canConfirm" type="primary" @click="confirm"
-          >确认全部到货</n-button
-        >
+          >确认全部到货
+        </n-button>
       </n-space>
     </loading-frame>
   </div>

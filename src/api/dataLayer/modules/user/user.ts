@@ -48,7 +48,7 @@ export async function asyncUserTypeFormField(params: {
 }
 
 export const inventoryPath = 'inventory';
-export const InventoryManager = initModel({
+export const WarehouseManager = initModel({
   collectionName: inventoryPath,
   init(value): any {
     return value;
@@ -80,7 +80,7 @@ export async function asyncInventoryFormField(
 ): Promise<FormField> {
   const { field, label } = params;
   const { hasPermission } = usePermission();
-  const userList = (await InventoryManager.load()).map((it) => ({
+  const userList = (await WarehouseManager.load()).map((it) => ({
     label: it.companyName,
     value: it.id,
   }));

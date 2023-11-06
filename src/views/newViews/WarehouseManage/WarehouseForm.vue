@@ -9,7 +9,7 @@
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { InventoryManager } from '@/api/dataLayer/modules/user/user';
+  import { WarehouseManager } from '@/api/dataLayer/modules/user/user';
 
   interface Props {
     model?: any;
@@ -72,9 +72,9 @@
     loading = true;
     await safeScope(async () => {
       if (prop?.model?.id) {
-        await InventoryManager.editInternal(values, prop.model.id);
+        await WarehouseManager.editInternal(values, prop.model.id);
       } else {
-        await InventoryManager.addInternal(values);
+        await WarehouseManager.addInternal(values);
       }
       emit('saved', values);
     });
