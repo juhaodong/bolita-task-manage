@@ -17,8 +17,6 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
     label: '箱号',
     field: 'containerId',
   });
-  if (notifyType == NotifyType.TrayOrBox) {
-  }
   builder.addAll([
     {
       label: '托数',
@@ -107,21 +105,17 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       },
     ]);
     builder.add({
-      label: '出库方式',
-      field: 'logisticsMethods',
+      label: '物流方式',
+      field: 'deliveryMethod',
     });
     builder.add({
       label: '包装',
       field: 'package',
     });
-    builder.add({
-      label: '装柜位置',
-      field: 'storeAddress',
-    });
   } else {
     builder.add({
-      label: '出库方式',
-      field: 'logisticsMethods',
+      label: '物流方式',
+      field: 'deliveryMethod',
     });
   }
   builder.add({
@@ -129,7 +123,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
     field: 'note',
   });
   builder.add({
-    label: '产品名称',
+    label: '货物名称',
     field: 'productName',
   });
   return builder;
