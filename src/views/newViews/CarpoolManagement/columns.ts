@@ -31,14 +31,6 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
     key: 'containerNum',
     width: 60,
   },
-  {
-    title: 'ISA',
-    key: 'ISA',
-  },
-  {
-    title: 'REF.',
-    key: 'REF',
-  },
 
   timeColumn('reservationGetProductTime', '预约取货日期'),
   {
@@ -140,7 +132,7 @@ export const schemas: FormField[] = [
       return !AccountPowerList.includes(CarpoolManagementPower.Edit);
     },
   },
-  getDatePickerFormField('reservationGetProductTime', '预约取货时间', ''),
+  getDatePickerFormField('reservationGetProductTime', '预约取货时间'),
   {
     field: 'REF',
     label: 'REF.',

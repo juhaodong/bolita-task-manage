@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
   import { computed, reactive, watchEffect } from 'vue';
   import {
     editableColumn,
@@ -19,6 +19,8 @@
   import { safeParseFloat, safeParseInt, safeSumInt } from '@/store/utils/utils';
   import { OperationType, saveCash } from '@/api/dataLayer/modules/cash/cash';
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
+  import { useUserStore } from '@/store/modules/user';
+  import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
 
   console.log(getDateNow, timeDisplay);
 
@@ -55,13 +57,19 @@
   async function reload() {
     if (props.outId != null) {
       outDetail = await OutBoundPlanManager.getById(props.outId);
+      console.log(outDetail, 'outDetail');
       currentDetailList = await OutBoundDetailManager.load(null, where('outId', '==', props.outId));
+      console.log(currentDetailList, 'list');
       localOperationInfo.length = 0;
       localOperationInfo.push(...cloneDeep(outDetail?.operationInfo ?? operationInfos));
       Object.assign(extraInfo, cloneDeep(outDetail?.extraInfo ?? defaultExtraInfo));
       emit('refresh');
     }
   }
+
+  const userPowerType = $computed(() => {
+    return useUserStore()?.info?.userType;
+  });
 
   async function confirm() {
     const editValue = {
@@ -122,7 +130,17 @@
     { title: '操作名称', key: 'name' },
     { title: '操作类型', key: 'category' },
     { title: '数量', key: 'amount' },
-    editableColumn({ title: '单价', key: 'price' }, billed),
+    editableColumn(
+      {
+        title: '单价',
+        key: 'price',
+        disabled:
+          userPowerType === PermissionEnums.Logistic ||
+          PermissionEnums.CustomerManage ||
+          PermissionEnums.CustomerService,
+      },
+      billed
+    ),
     formatColumn('sum', '小计', (record) => {
       return (safeParseInt(record.amount) * safeParseFloat(record.price)).toFixed(2);
     }),
@@ -140,28 +158,28 @@
 </script>
 
 <template>
-  <div class="mt-8" id="print" v-if="outDetail">
+  <div v-if="outDetail" id="print" class="mt-8">
     <n-space>
       <n-button v-print="'#print'" type="default">打印计划</n-button>
       <n-button secondary>下载</n-button>
     </n-space>
-    <n-descriptions :columns="3" label-placement="left" class="mt-4" bordered>
-      <n-descriptions-item :span="2" label="仓库" />
+    <n-descriptions :columns="3" bordered class="mt-4" label-placement="left">
+      <n-descriptions-item :span="2" label="仓库">{{ outDetail?.warehouseId }}</n-descriptions-item>
       <n-descriptions-item label="日期"> {{ getDateNow() }}</n-descriptions-item>
       <n-descriptions-item label="出库ID"> {{ outDetail?.id }}</n-descriptions-item>
       <n-descriptions-item label="物流渠道"> {{ outDetail?.deliveryMethod }}</n-descriptions-item>
     </n-descriptions>
     <div>
       <n-data-table
-        class="mt-4"
-        virtual-scroll
-        max-height="450"
         :columns="columns"
-        :row-key="(row) => row.id"
         :data="currentDetailList"
+        :row-key="(row) => row.id"
+        class="mt-4"
+        max-height="450"
+        virtual-scroll
       />
     </div>
-    <n-descriptions columns="3" class="mt-4">
+    <n-descriptions class="mt-4" columns="3">
       <n-descriptions-item :span="3" label="操作要求">
         {{ outDetail?.operationRequirement }}
       </n-descriptions-item>
@@ -191,8 +209,8 @@
         {{ extraInfo?.wasteNote ?? '-' }}
       </n-descriptions-item>
     </n-descriptions>
-    <n-data-table class="mt-4" size="small" :columns="checkOutColumn" :data="billed" />
-    <n-descriptions :columns="2" label-placement="top" bordered class="mt-4">
+    <n-data-table :columns="checkOutColumn" :data="billed" class="mt-4" size="small" />
+    <n-descriptions :columns="2" bordered class="mt-4" label-placement="top">
       <n-descriptions-item label="总数">
         {{ summary.amount }}
       </n-descriptions-item>
@@ -200,18 +218,18 @@
         {{ summary.sum }}
       </n-descriptions-item>
     </n-descriptions>
-    <n-space v-if="outDetail" class="mt-4" align="center" :wrap-item="false">
+    <n-space v-if="outDetail" :wrap-item="false" align="center" class="mt-4">
       <div> 装车数量: {{ extraInfo?.loadCount }}</div>
 
       <div class="flex-grow"></div>
       <div> 操作人: {{ extraInfo?.operationPerson }}</div>
-      <n-button @click="save" type="warning" secondary>保存结算</n-button>
-      <n-button @click="confirm" type="primary" secondary>确认结算</n-button>
+      <n-button secondary type="warning" @click="save">保存结算</n-button>
+      <n-button secondary type="primary" @click="confirm">确认结算</n-button>
     </n-space>
   </div>
 </template>
 
-<style scoped lang="less">
+<style lang="less" scoped>
   @media print {
     .noMaxHeight {
       max-height: unset !important;

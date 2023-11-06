@@ -34,6 +34,10 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
     key: 'customerName',
   },
   {
+    title: '货柜号',
+    key: 'containerNo',
+  },
+  {
     title: '票号',
     key: 'ticketId',
   },
@@ -212,5 +216,9 @@ export const filters: FormField[] = [
   {
     label: '出库方式',
     field: 'deliveryWay',
+  },
+  {
+    label: '体积',
+    field: 'volume',
   },
 ];

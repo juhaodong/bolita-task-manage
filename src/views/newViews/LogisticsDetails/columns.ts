@@ -6,7 +6,9 @@ import {
   timeColumn,
 } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
+import { LogisticsDetailPower } from '@/api/dataLayer/common/PowerModel';
 
+// @ts-ignore
 export const columns: DataTableColumns = [
   {
     type: 'selection',
@@ -24,7 +26,7 @@ export const columns: DataTableColumns = [
   },
   {
     title: '提货仓库',
-    key: 'getProductWarehouse',
+    key: 'warehouseId',
   },
   {
     title: '托盘',
@@ -42,6 +44,14 @@ export const columns: DataTableColumns = [
     title: '订车状态',
     key: 'carStatus',
   }),
+  {
+    title: 'ISA',
+    key: 'ISA',
+  },
+  {
+    title: 'REF.',
+    key: 'REF',
+  },
   {
     title: '目的国',
     key: 'targetCountry',
@@ -71,14 +81,17 @@ export const columns: DataTableColumns = [
   {
     title: '运输公司',
     key: 'deliveryCompany',
+    auth: [LogisticsDetailPower.AllowCheckForm],
   },
   {
     title: '账单号',
     key: 'billNumber',
+    auth: [LogisticsDetailPower.AllowCheckForm],
   },
   {
     title: '价格netto',
     key: 'totalCost',
+    auth: [LogisticsDetailPower.AllowCheckForm],
   },
   {
     title: '特殊收费',

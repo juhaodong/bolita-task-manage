@@ -77,6 +77,7 @@
   import { where } from 'firebase/firestore';
   import { usePermission } from '@/hooks/web/usePermission';
   import { OutBoundPlanPower } from '@/api/dataLayer/common/PowerModel';
+  import dayjs from 'dayjs';
 
   const { hasPermission } = usePermission();
 
@@ -89,7 +90,14 @@
   const actionRef = ref();
   let filterObj: any | null = $ref(null);
   const loadDataTable = async () => {
-    return await OutBoundPlanManager.load(filterObj, where('onlyDelivery', '==', false));
+    const res = await OutBoundPlanManager.load(filterObj, where('onlyDelivery', '==', false));
+    res.forEach((it) => {
+      const date1 = dayjs(it.reservationOutboundDate).format('YYYY-MM-DD');
+      const date2 = dayjs(it.createTimestamp).format('YYYY-MM-DD');
+      it.ageing = dayjs(date1).diff(date2, 'day');
+    });
+    console.log(res, 'res');
+    return res;
   };
 
   function reloadTable() {

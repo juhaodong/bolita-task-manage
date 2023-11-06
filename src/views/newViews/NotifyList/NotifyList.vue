@@ -61,7 +61,7 @@
       title="仓库信息"
       style="width: 90%; min-width: 600px; max-width: 800px"
     >
-      <warehouse-info-dialog />
+      <warehouse-info-dialog :notify-id="currentNotifyId!" />
     </n-modal>
   </n-card>
 </template>
@@ -169,6 +169,7 @@
             label: '查看仓库信息',
             icon: Home,
             onClick() {
+              currentNotifyId = record.id!;
               showWarehouseDialog = true;
             },
           },

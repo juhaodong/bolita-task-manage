@@ -178,8 +178,14 @@ export function communicateColumn(keyName = 'createTimestamp', title = '创建�
   };
 }
 
-export function editableColumn(colInfo: { title: string; key: string; width?: number }, data) {
-  const { title, key, width } = colInfo;
+export function editableColumn(
+  colInfo: { title: string; key: string; width?: number; disabled: boolean },
+  data
+) {
+  let { title, key, width, disabled } = colInfo;
+  if (!disabled) {
+    disabled = false;
+  }
   return {
     title,
     key,
@@ -193,6 +199,7 @@ export function editableColumn(colInfo: { title: string; key: string; width?: nu
         onUpdateValue(v) {
           data[index][key] = v;
         },
+        disabled: disabled,
       });
     },
   };

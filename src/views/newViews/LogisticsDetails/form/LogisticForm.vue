@@ -31,12 +31,18 @@
       label: '备注',
     },
     {
-      field: 'settlementPrice',
-      label: '结算金额',
-    },
-    {
       field: 'specialCharges',
       label: '特殊收费',
+    },
+    {
+      field: 'settlementPrice',
+      label: '结算金额',
+      onFormUpdate(value) {
+        if (value) {
+          value['settlementPrice'] =
+            parseFloat(value['price']) + parseFloat(value['specialCharges']);
+        }
+      },
     },
     {
       field: 'cashNote',

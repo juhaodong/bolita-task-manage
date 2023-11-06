@@ -75,15 +75,16 @@
   async function reload() {
     if (props.notifyId != null) {
       notifyDetail = await NotifyManager.getById(props.notifyId);
+      currentDate = notifyDetail.currentDate;
       currentTaskList = await getNotifyDetailListByNotify(props.notifyId);
       emit('refresh');
-      console.log(notifyDetail.unloadPerson);
       unloadPerson = notifyDetail?.unloadPerson ?? '';
       loadAll();
     }
   }
 
   let unloadPerson: string = $ref('');
+  let currentDate: string = $ref('');
 
   const canConfirm = computed(() => {
     return unloadPerson && canEdit;
@@ -118,6 +119,7 @@
     loading = true;
     for (const listElement of currentTaskList) {
       const editInfo: any = {
+        currentDate: currentDate ?? '',
         arrivedTrayNum: listElement.arrivedTrayNumEdit ?? 0,
         arrivedContainerNum: listElement.arrivedContainerNumEdit ?? 0,
         note: listElement.note,
@@ -157,6 +159,7 @@
         listElement.arrivedContainerNumEdit != listElement.arrivedContainerNum
       ) {
         const editInfo: any = {
+          currentDate: currentDate ?? '',
           arrivedTrayNum: listElement?.arrivedTrayNumEdit ?? 0,
           arrivedContainerNum: listElement?.arrivedContainerNumEdit ?? 0,
           note: listElement.note,
@@ -215,7 +218,9 @@
         <n-descriptions-item label="仓库ID">
           {{ notifyDetail?.warehouseId ?? '-' }}
         </n-descriptions-item>
-        <n-descriptions-item label="卸柜起止时间" />
+        <n-descriptions-item label="卸柜起止时间">
+          <n-input v-model:value="currentDate" placeholder="卸柜起止时间" />
+        </n-descriptions-item>
       </n-descriptions>
       <div class="mt-4 noMaxHeight" style="max-height: 800px; overflow-y: scroll">
         <n-table :single-line="false" class="mt-4">

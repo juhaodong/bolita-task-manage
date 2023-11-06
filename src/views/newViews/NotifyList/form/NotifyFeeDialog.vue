@@ -8,6 +8,7 @@
   import { OperationType, saveCash } from '@/api/dataLayer/modules/cash/cash';
   import { NotifyListPower } from '@/api/dataLayer/common/PowerModel';
   import { useUserStore } from '@/store/modules/user';
+  import { CustomerManager } from '@/api/dataLayer/modules/user/user';
 
   interface Props {
     notifyId: string;
@@ -15,6 +16,7 @@
 
   const props = defineProps<Props>();
   let notifyDetail: any | null = $ref(null);
+  let customerInfoany: [] = $ref(null);
   let currentTaskList: any[] = $ref([]);
   const defaultExtraInfo = {
     explain: '',
@@ -47,6 +49,9 @@
   const confirmBtn = computed(() => {
     return AccountPowerList.value.includes(NotifyListPower.CostConfirm);
   });
+  const customerPower = computed(() => {
+    return AccountPowerList.value.includes(NotifyListPower.editFee);
+  });
 
   const totalPrice = computed(() => {
     return (
@@ -58,6 +63,7 @@
   async function reload() {
     if (props.notifyId != null) {
       notifyDetail = await NotifyManager.getById(props.notifyId);
+      customerInfoany = await CustomerManager.getById(notifyDetail?.customerId);
       currentTaskList = await getNotifyDetailListByNotify(props.notifyId);
       Object.assign(extraInfo, cloneDeep(notifyDetail?.extraInfo ?? defaultExtraInfo));
       emit('refresh');
@@ -115,7 +121,7 @@
       <n-descriptions-item :span="2" label="货柜号">
         {{ notifyDetail?.containerNo }}
       </n-descriptions-item>
-      <n-descriptions-item label="客户ID"> {{ notifyDetail?.customerId }}</n-descriptions-item>
+      <n-descriptions-item label="客户ID"> {{ customerInfoany?.customerName }}</n-descriptions-item>
       <n-descriptions-item :span="2" label="入库总数">
         {{ notifyDetail?.totalCount }}
       </n-descriptions-item>
@@ -144,6 +150,7 @@
             <td>
               <n-input
                 v-model:value="extraInfo.traySinglePrice"
+                :disabled="!customerPower"
                 placeholder=""
                 @focus="extraInfo.traySinglePrice = ''"
               />
@@ -152,7 +159,11 @@
               {{ safeParseFloat(extraInfo.traySinglePrice) * totalArrivedTrayCount }}
             </td>
             <td>
-              <n-input v-model:value="extraInfo.trayNote" placeholder="" />
+              <n-input
+                v-model:value="extraInfo.trayNote"
+                :disabled="!customerPower"
+                placeholder=""
+              />
             </td>
           </tr>
           <tr>
@@ -161,6 +172,7 @@
             <td>
               <n-input
                 v-model:value="extraInfo.containerSinglePrice"
+                :disabled="!customerPower"
                 placeholder=""
                 @focus="extraInfo.containerSinglePrice = ''"
               />
@@ -169,7 +181,11 @@
               {{ safeParseFloat(extraInfo.containerSinglePrice) * totalArrivedContainerCount }}
             </td>
             <td>
-              <n-input v-model:value="extraInfo.containerNote" placeholder="" />
+              <n-input
+                v-model:value="extraInfo.containerNote"
+                :disabled="!customerPower"
+                placeholder=""
+              />
             </td>
           </tr>
           <tr>
@@ -186,15 +202,25 @@
             <td> -</td>
             <td> -</td>
             <td>
-              <n-input v-model:value="extraInfo.finalPrice" placeholder="" />
+              <n-input
+                v-model:value="extraInfo.finalPrice"
+                :disabled="!customerPower"
+                placeholder=""
+              />
             </td>
-            <td> <n-input v-model:value="extraInfo.feeNote" placeholder="" /> </td>
+            <td>
+              <n-input
+                v-model:value="extraInfo.feeNote"
+                :disabled="!customerPower"
+                placeholder=""
+              />
+            </td>
           </tr>
         </tbody>
       </n-table>
     </div>
     <div class="mt-4">
-      <n-input v-model:value="extraInfo.explain" placeholder="说明" />
+      <n-input v-model:value="extraInfo.explain" :disabled="!customerPower" placeholder="说明" />
     </div>
     <n-space class="mt-4">
       <n-button

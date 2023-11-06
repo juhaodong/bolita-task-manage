@@ -127,10 +127,12 @@
   let filterObj: any | null = $ref(null);
 
   const loadDataTable = async () => {
-    return await OutBoundPlanManager.load(
+    const res = await OutBoundPlanManager.load(
       filterObj,
       where('deliveryMethod', 'in', truckDeliveryMethod)
     );
+    console.log(res, 'res');
+    return res;
   };
 
   const actionRef = ref();
@@ -210,7 +212,7 @@
         label,
         key,
         icon?: Component,
-        editable = false,
+        editable = true,
         permissions: any = null
       ) => {
         return getFileActionButton(
@@ -259,8 +261,8 @@
               startFee(record.id);
             },
           },
-          fileAction('附件', 'files', undefined, false),
-          fileAction('提单', 'pickupFiles'),
+          fileAction('附件', 'files', undefined, true),
+          fileAction('提单', 'pickupFiles', undefined, false),
           fileAction('POD', 'PODFiles'),
           fileAction('客户账单', 'billsForCustomer', undefined, !customerBills.value),
         ],

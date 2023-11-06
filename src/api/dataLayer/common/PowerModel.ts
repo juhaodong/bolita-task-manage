@@ -1,6 +1,7 @@
 import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
 
 export enum NotifyListPower {
+  editFee = '修改费用',
   Operate = '入库计划操作',
   CostSave = '入库计划保存结算',
   CostConfirm = '入库计划确认结算',
@@ -31,6 +32,7 @@ export enum OutBoundDetailPower {
 }
 
 export enum LogisticsDetailPower {
+  AllowCheckForm = '物流详情允许查看运输公司,账单号,价格',
   CostOperate = '物流详情费用动作',
   CustomerBills = '物流详情客户账单',
   BookCar = '物流详情订车',
@@ -56,6 +58,7 @@ export enum SettlementPower {
 }
 
 export const allPowerList = [
+  NotifyListPower.editFee,
   NotifyListPower.CostSave,
   NotifyListPower.CostConfirm,
   NotifyListPower.Operate,
@@ -71,6 +74,7 @@ export const allPowerList = [
   OutBoundDetailPower.Check,
   OutBoundDetailPower.EditDetail,
   OutBoundDetailPower.Edit,
+  LogisticsDetailPower.AllowCheckForm,
   LogisticsDetailPower.BookCar,
   LogisticsDetailPower.CancelBookCar,
   LogisticsDetailPower.ConfirmQuotation,
@@ -118,6 +122,7 @@ export const AccountPower = [
     id: 4,
     name: '操作员',
     Power: [
+      NotifyListPower.editFee,
       NotifyListPower.CostSave,
       NotifyListPower.CostConfirm,
       NotifyListPower.Operate,
@@ -131,6 +136,7 @@ export const AccountPower = [
       OutBoundPlanPower.ChangeTray,
       OutBoundDetailPower.EditDetail,
       OutBoundDetailPower.Edit,
+      LogisticsDetailPower.AllowCheckForm,
       LogisticsDetailPower.SubmitQuotation,
       LogisticsDetailPower.CostOperate,
       CarpoolManagementPower.POD,
@@ -145,6 +151,7 @@ export const AccountPower = [
     id: 5,
     name: '业务员',
     Power: [
+      NotifyListPower.editFee,
       NotifyListPower.CostSave,
       NotifyListPower.CostConfirm,
       NotifyListPower.Operate,
@@ -159,6 +166,7 @@ export const AccountPower = [
       OutBoundDetailPower.Check,
       OutBoundDetailPower.EditDetail,
       OutBoundDetailPower.Edit,
+      LogisticsDetailPower.AllowCheckForm,
       LogisticsDetailPower.CostOperate,
       LogisticsDetailPower.SubmitQuotation,
       CarpoolManagementPower.SubmitOrder,
@@ -173,9 +181,11 @@ export const AccountPower = [
     id: 6,
     name: '物流',
     Power: [
+      NotifyListPower.editFee,
       ToBeClaimedPower.Add,
       ToBeClaimedPower.ClaimedGoodsBtn,
       OutBoundPlanPower.Edit,
+      LogisticsDetailPower.AllowCheckForm,
       LogisticsDetailPower.BookCar,
       LogisticsDetailPower.CancelBookCar,
       LogisticsDetailPower.SubmitQuotation,
@@ -194,9 +204,11 @@ export const AccountPower = [
     id: 7,
     name: '结算',
     Power: [
+      NotifyListPower.editFee,
       NotifyListPower.CostSave,
       NotifyListPower.CostConfirm,
       NotifyListPower.Operate,
+      LogisticsDetailPower.AllowCheckForm,
       LogisticsDetailPower.ConfirmQuotation,
       CarpoolManagementPower.POD,
       CarpoolManagementPower.SubmitOrder,

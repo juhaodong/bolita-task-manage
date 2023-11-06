@@ -13,16 +13,25 @@ export const useUploadDialog = defineStore('uploadFileDialog', {
     editable: boolean;
     currentFileUrls: string[];
     title: string;
+    disableClick: boolean;
   } {
+    let disableClick;
+    if (!disableClick) {
+      disableClick = false;
+    }
     return {
       resolve: null,
       show: false,
       title: '请选择要上传的文件？',
       currentFileUrls: [],
       editable: true,
+      disableClick: false,
     };
   },
   actions: {
+    showUploadBtn(boolean) {
+      this.disableClick = boolean;
+    },
     async upload(
       currentFileUrls: string[],
       title = '请选择要上传的文件',

@@ -39,6 +39,7 @@ export function getDeliveryMethodSelection(dm = deliveryMethod): FormField[] {
       field: 'deliveryMethod',
       label: '出库方式',
       component: 'NSelect',
+      required: false,
       componentProps: {
         options: generateOptionFromArray(dm),
       },
@@ -128,7 +129,11 @@ export function getDatePickerFormField(key = 'date', title = '日期', powerList
     component: 'NDatePicker',
     disableCondition() {
       const AccountPowerList = useUserStore()?.info?.powerList;
-      return !AccountPowerList.includes(powerList);
+      if (powerList.length < 1) {
+        return false;
+      } else {
+        return !AccountPowerList.includes(powerList);
+      }
     },
     label: title,
     defaultValue: dayjs().valueOf(),
