@@ -59,7 +59,7 @@
     loading = true;
     await safeScope(async () => {
       if (values.settlementPrice) {
-        values.cashId = await saveCash(
+        values.logisticCashId = await saveCash(
           {
             customerId: props.model?.customerId,
             containerNo: props.model?.containerNo ?? '',
@@ -69,7 +69,7 @@
             note: values.note,
             cashStatus: CashStatus.WaitConfirm,
           },
-          props.model.cashId
+          props.model.logisticCashId
         );
       }
 

@@ -85,7 +85,7 @@
           note: extraInfo.explain,
           cashStatus: CashStatus.Done,
         },
-        notifyDetail?.cashId
+        notifyDetail?.outCashId
       );
       emit('save');
     });
@@ -98,7 +98,7 @@
     };
 
     await safeScope(async () => {
-      editValue.cashId = await saveCash(
+      editValue.outCashId = await saveCash(
         {
           customerId: notifyDetail?.customerId,
           containerNo: notifyDetail?.containerNo,
@@ -107,7 +107,7 @@
           amount: extraInfo.finalPrice,
           note: extraInfo.explain,
         },
-        notifyDetail?.cashId
+        notifyDetail?.outCashId
       );
       await NotifyManager.edit(editValue, props.notifyId);
       emit('save');

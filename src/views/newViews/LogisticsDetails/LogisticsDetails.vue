@@ -102,6 +102,7 @@
   import { usePermission } from '@/hooks/web/usePermission';
   import { useUserStore } from '@/store/modules/user';
   import { LogisticsDetailPower } from '@/api/dataLayer/common/PowerModel';
+  import { OperationType, saveCash } from '@/api/dataLayer/modules/cash/cash';
 
   interface Prop {
     carpoolId?: string;
@@ -127,12 +128,10 @@
   let filterObj: any | null = $ref(null);
 
   const loadDataTable = async () => {
-    const res = await OutBoundPlanManager.load(
+    return await OutBoundPlanManager.load(
       filterObj,
       where('deliveryMethod', 'in', truckDeliveryMethod)
     );
-    console.log(res, 'res');
-    return res;
   };
 
   const actionRef = ref();
@@ -267,9 +266,36 @@
           fileAction('客户账单', 'billsForCustomer', undefined, customerBills.value),
           {
             label: '确认结算',
-            highlight: () => {},
-            onClick() {
-              startFee(record.id);
+            highlight: () => {
+              if (record?.logisticCashStatus === CashStatus.Done) {
+                return 'success';
+              }
+            },
+            ifShow: () => {
+              return record.logisticCashId;
+            },
+            async onClick() {
+              if (record.logisticCashStatus !== CashStatus.Done) {
+                const editValue = {
+                  logisticCashStatus: CashStatus.Done,
+                };
+                await safeScope(async () => {
+                  await saveCash(
+                    {
+                      customerId: record?.customerId,
+                      containerNo: record?.containerNo ?? '',
+                      operationId: record.id,
+                      operationType: OperationType.Delivery,
+                      amount: parseFloat(record.totalPrice) + parseFloat(record.specialCharges),
+                      note: record.note,
+                      cashStatus: CashStatus.Done,
+                    },
+                    record?.logisticCashId
+                  );
+                  await OutBoundPlanManager.edit(editValue, record.id);
+                });
+                await reloadTable();
+              }
             },
           },
         ],
