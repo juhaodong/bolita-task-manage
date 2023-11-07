@@ -262,9 +262,16 @@
             },
           },
           fileAction('附件', 'files', undefined, true),
-          fileAction('提单', 'pickupFiles', undefined, false),
+          fileAction('提单', 'pickupFiles', undefined, true),
           fileAction('POD', 'PODFiles'),
-          fileAction('客户账单', 'billsForCustomer', undefined, !customerBills.value),
+          fileAction('客户账单', 'billsForCustomer', undefined, customerBills.value),
+          {
+            label: '确认结算',
+            highlight: () => {},
+            onClick() {
+              startFee(record.id);
+            },
+          },
         ],
       });
     },

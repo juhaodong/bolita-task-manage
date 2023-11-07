@@ -65,6 +65,10 @@
       label: '报价',
     },
     {
+      field: 'specialCharges',
+      label: '特殊收费',
+    },
+    {
       field: 'note',
       label: '备注',
     },

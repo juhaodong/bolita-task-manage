@@ -1,4 +1,3 @@
-import { generateOptionFromArray } from '@/store/utils/utils';
 import { DeliveryMethod, deliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { usePermission } from '@/hooks/web/usePermission';
@@ -8,6 +7,7 @@ import { keyBy } from 'lodash-es';
 import { storage } from '@/store/utils/Storage';
 import { CUSTOMER_ID } from '@/store/mutation-types';
 import { useUserStore } from '@/store/modules/user';
+import { generateOptionFromArray } from '@/store/utils/utils';
 
 export function getFilesUploadFormField(
   key = 'files',
@@ -40,6 +40,7 @@ export function getDeliveryMethodSelection(dm = deliveryMethod): FormField[] {
       label: '出库方式',
       component: 'NSelect',
       required: false,
+      defaultValue: '',
       componentProps: {
         options: generateOptionFromArray(dm),
       },

@@ -136,8 +136,8 @@
         key: 'price',
         disabled:
           userPowerType === PermissionEnums.Logistic ||
-          PermissionEnums.CustomerManage ||
-          PermissionEnums.CustomerService,
+          userPowerType === PermissionEnums.CustomerManage ||
+          userPowerType === PermissionEnums.CustomerService,
       },
       billed
     ),

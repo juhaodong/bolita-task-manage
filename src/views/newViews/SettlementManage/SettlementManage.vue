@@ -2,8 +2,8 @@
   <n-card :bordered="false" class="proCard">
     <filter-bar
       v-if="finished"
-      :form-fields="filters"
       :default-value-model="filterObj"
+      :form-fields="filters"
       @clear="updateFilter(null)"
       @submit="updateFilter"
     >
@@ -19,11 +19,11 @@
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
+      v-model:checked-row-keys="checkedRows"
       :action-column="actionColumn"
       :columns="columns"
       :request="loadDataTable"
       :row-key="(row) => row.id"
-      v-model:checked-row-keys="checkedRows"
     />
 
     <n-modal
@@ -74,7 +74,9 @@
   }
 
   const loadDataTable = async () => {
-    return await CashManager.load(filterObj);
+    const res = await CashManager.load(filterObj);
+    console.log(res, 'res');
+    return res;
   };
 
   let filterObj: any | null = $ref(null);

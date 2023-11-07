@@ -45,14 +45,6 @@ export const columns: DataTableColumns = [
     key: 'carStatus',
   }),
   {
-    title: 'ISA',
-    key: 'ISA',
-  },
-  {
-    title: 'REF.',
-    key: 'REF',
-  },
-  {
     title: '目的国',
     key: 'targetCountry',
   },
@@ -69,6 +61,14 @@ export const columns: DataTableColumns = [
     key: 'deliveryAddress',
   },
   timeColumn('reservationOutboundDate', '预约取货时间'),
+  {
+    title: 'ISA',
+    key: 'ISA',
+  },
+  {
+    title: 'REF.',
+    key: 'REF',
+  },
   {
     title: '运单号',
     key: 'waybillId',

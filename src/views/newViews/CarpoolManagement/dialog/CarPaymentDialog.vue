@@ -62,10 +62,10 @@
     return useUserStore()?.info?.powerList;
   });
   const submitBtn = computed(() => {
-    return AccountPowerList.value.includes(CarpoolManagementPower.SubmitPay);
+    return !AccountPowerList.value.includes(CarpoolManagementPower.SubmitPay);
   });
   const confirmBtn = computed(() => {
-    return AccountPowerList.value.includes(CarpoolManagementPower.ConfirmPay);
+    return !AccountPowerList.value.includes(CarpoolManagementPower.ConfirmPay);
   });
 
   async function init() {
