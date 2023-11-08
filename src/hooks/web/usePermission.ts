@@ -55,5 +55,9 @@ export function usePermission() {
     );
   }
 
-  return { hasPermission, hasEveryPermission, hasSomePermission, isCustomer };
+  function isSalesMan(): boolean {
+    return [PermissionEnums.Sales].includes(userStore.getRole);
+  }
+
+  return { hasPermission, hasEveryPermission, hasSomePermission, isCustomer, isSalesMan };
 }

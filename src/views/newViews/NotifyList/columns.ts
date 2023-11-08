@@ -1,5 +1,10 @@
 import { DataTableColumns } from 'naive-ui';
-import { InBoundStatus, notifyType, OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
+import {
+  InBoundStatus,
+  notifyType,
+  OutAllStatus,
+  OutStatus,
+} from '@/api/dataLayer/modules/notify/notify-api';
 import {
   idColumn,
   standardDateFormat,
@@ -93,6 +98,14 @@ export const filters: FormField[] = [
   {
     label: '货柜号',
     field: 'containerNo',
+  },
+  {
+    label: '显示',
+    field: 'otherStatus',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(Object.values(OutAllStatus)),
+    },
   },
   {
     label: '出库状态',

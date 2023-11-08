@@ -7,7 +7,7 @@
       @clear="updateFilter(null)"
       @submit="updateFilter"
     >
-      <n-button size="small" type="info" @click="showAdd">新建客户</n-button>
+      <n-button size="small" type="primary" @click="showAdd">新建业务员</n-button>
     </filter-bar>
     <div class="my-2"></div>
     <BasicTable
@@ -18,24 +18,15 @@
       :request="loadDataTable"
       :row-key="(row) => row.id"
     />
-    <n-modal
-      v-model:show="wuDialog.showDialog"
-      :show-icon="false"
-      preset="card"
-      style="width: 90%; min-width: 800px; max-width: 800px"
-      title="管理客户用户"
-    >
-      <user-manage :belongs-to-id="wuDialog.editingId" />
-    </n-modal>
 
     <n-modal
       v-model:show="showModal"
       :show-icon="false"
       preset="card"
       style="width: 90%; min-width: 600px; max-width: 600px"
-      title="新建/编辑客户"
+      title="新建/编辑业务员"
     >
-      <new-customer :model="currentModel" :sales-man-list="salesManList" @saved="reloadTable" />
+      <new-sales-man :model="currentModel" :warehouse-list="warehouseList" @saved="reloadTable" />
     </n-modal>
   </n-card>
 </template>
@@ -47,23 +38,21 @@
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
-  import { CustomerManager, SalesManManager } from '@/api/dataLayer/modules/user/user';
-  import NewCustomer from '@/views/newViews/CustomerManage/NewCustomer.vue';
-  import { useEditOrganizationUserDialog } from '@/views/newViews/WarehouseManage/WarehouseUserDialog';
-  import UserManage from '@/views/newViews/UserManage/UserManage.vue';
+  import { SalesManManager, WarehouseManager } from '@/api/dataLayer/modules/user/user';
+  import NewSalesMan from '@/views/newViews/SalesMan/NewSalesMan.vue';
 
   interface Prop {
-    outId?: string;
+    belongsToId?: string;
   }
 
   let finished = $ref(false);
-  let salesManList = $ref([]);
+  let warehouseList = $ref([]);
   const props = defineProps<Prop>();
   onMounted(async () => {
-    salesManList = (await SalesManManager.load()).map((it) => it.realName);
-    console.log(salesManList, 'list');
-    if (props.outId) {
-      filterObj = { outId: props.outId };
+    warehouseList = (await WarehouseManager.load()).map((it) => it.id);
+    console.log(warehouseList, 'list');
+    if (props.belongsToId) {
+      filterObj = { belongsToId: props.belongsToId };
     }
     finished = true;
   });
@@ -72,13 +61,12 @@
   let currentModel: any | null = $ref(null);
 
   async function startEdit(id) {
-    currentModel = await CustomerManager.getById(id);
-    console.log(currentModel);
+    currentModel = await SalesManManager.getById(id);
     showModal.value = true;
   }
 
   const loadDataTable = async () => {
-    const res = await CustomerManager.load(filterObj);
+    const res = await SalesManManager.load(filterObj);
     console.log(res, 'res');
     return res;
   };
@@ -92,15 +80,19 @@
 
   function showAdd() {
     currentModel = null;
+    if (props.belongsToId) {
+      currentModel = { belongsToId: props.belongsToId };
+    }
     showModal.value = true;
   }
+
   const actionRef = ref();
 
   function reloadTable() {
     actionRef.value.reload();
     showModal.value = false;
   }
-  const wuDialog = useEditOrganizationUserDialog();
+
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
@@ -114,12 +106,6 @@
             icon: DocumentEdit16Filled,
             onClick() {
               startEdit(record.id);
-            },
-          },
-          {
-            label: '用户',
-            onClick() {
-              wuDialog.startEdit(record.id);
             },
           },
         ],

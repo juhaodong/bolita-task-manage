@@ -21,7 +21,7 @@ export const columns: DataTableColumns = [
   },
   {
     title: '所属业务员',
-    key: 'belongSalesName',
+    key: 'belongSalesMan',
   },
   {
     title: '使用系统',

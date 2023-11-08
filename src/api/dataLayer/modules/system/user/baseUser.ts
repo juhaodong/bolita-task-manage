@@ -3,7 +3,7 @@ import { db, executeQuery } from '@/store/plugins/firebase';
 import { Result, resultError, resultSuccess } from '@/store/request/_util';
 import { ACCESS_TOKEN } from '@/store/mutation-types';
 import { storage } from '@/store/utils/Storage';
-import { CustomerManager, userPath } from '@/api/dataLayer/modules/user/user';
+import { CustomerManager, salesMan, userPath } from '@/api/dataLayer/modules/user/user';
 
 export enum PermissionEnums {
   Manager = '管理员',
@@ -41,14 +41,33 @@ export async function login(params: { username: string; password: string }) {
 }
 
 async function findUserWithLoginName(username) {
-  return await executeQuery(query(collection(db, userPath), where('loginName', '==', username)));
+  const loginAll = await executeQuery(
+    query(collection(db, userPath), where('loginName', '==', username))
+  );
+  const loginSales = await executeQuery(
+    query(collection(db, salesMan), where('loginName', '==', username))
+  );
+  if (loginAll.length > 0) {
+    return loginAll;
+  } else if (loginSales.length > 0) {
+    return loginSales;
+  }
 }
 
 export async function getUserInfo(token?): Promise<Result<BaseUser>> {
   const currentToken = token ?? storage.get(ACCESS_TOKEN, '');
-  const exist = await executeQuery(
+  const allUser = await executeQuery(
     query(collection(db, userPath), where('token', '==', currentToken))
   );
+  const salesUser = await executeQuery(
+    query(collection(db, salesMan), where('token', '==', currentToken))
+  );
+  let exist;
+  if (allUser.length > 0) {
+    exist = allUser;
+  } else {
+    exist = salesUser;
+  }
 
   if (exist[0]) {
     const info = exist[0];

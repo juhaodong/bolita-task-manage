@@ -19,6 +19,17 @@ export const UserManager = initModel({
   idPrefix: 'U',
 });
 
+export const salesMan = 'salesMan';
+export const SalesManManager = initModel({
+  collectionName: salesMan,
+  init(value): any {
+    value.token = Random.string('upper', 32, 32);
+    value.permissions = [value.userType];
+    return value;
+  },
+  idPrefix: 'S',
+});
+
 export async function getUserWithType(userType: UserType) {
   return await UserManager.load(null, where('userType', '==', userType));
 }

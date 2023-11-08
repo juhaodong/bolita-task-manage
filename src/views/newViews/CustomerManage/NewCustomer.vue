@@ -14,9 +14,12 @@
     CustomerManager,
     customerStatusSelection,
   } from '@/api/dataLayer/modules/user/user';
+  import { $ref } from 'vue/macros';
+  import { asyncSalesManFormField } from '@/api/dataLayer/fieldDefination/common';
 
   interface Props {
     model?: any;
+    salesManList: [];
   }
 
   let loading: boolean = $ref(false);
@@ -35,6 +38,7 @@
       label: '所属仓库',
       field: 'warehouseId',
     }),
+    asyncSalesManFormField(),
     {
       label: '使用系统',
       field: 'useSystem',

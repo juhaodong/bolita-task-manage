@@ -2,7 +2,11 @@ import { DeliveryMethod, deliveryMethod } from '@/api/dataLayer/modules/delivery
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { usePermission } from '@/hooks/web/usePermission';
 import dayjs from 'dayjs';
-import { CustomerManager } from '@/api/dataLayer/modules/user/user';
+import {
+  CustomerManager,
+  SalesManManager,
+  WarehouseManager,
+} from '@/api/dataLayer/modules/user/user';
 import { keyBy } from 'lodash-es';
 import { storage } from '@/store/utils/Storage';
 import { CUSTOMER_ID } from '@/store/mutation-types';
@@ -84,6 +88,41 @@ export async function asyncCustomerFormField(): Promise<FormField> {
       if (value?.customerId) {
         value['warehouseId'] = customerDict[value?.customerId]?.warehouseId;
       }
+    },
+  };
+}
+
+export async function asyncCustomerWarehouseFormField(multiple): Promise<FormField> {
+  const warehouseList = await WarehouseManager.load();
+  const warehouseIdList = warehouseList.map((it) => ({
+    label: it.id,
+    value: it.id,
+  }));
+  return {
+    field: 'warehouseId',
+    label: '仓库',
+    component: 'NSelect',
+    componentProps: {
+      options: warehouseIdList,
+      multiple: multiple,
+    },
+    required: false,
+  };
+}
+
+export async function asyncSalesManFormField(): Promise<FormField> {
+  const salesManList = await SalesManManager.load();
+  console.log(salesManList, 'list');
+  const salesManIdList = salesManList.map((it) => ({
+    label: it.realName,
+    value: it.realName,
+  }));
+  return {
+    field: 'warehouse',
+    label: '仓库',
+    component: 'NSelect',
+    componentProps: {
+      options: salesManIdList,
     },
   };
 }

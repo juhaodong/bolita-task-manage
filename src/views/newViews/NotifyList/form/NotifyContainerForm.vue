@@ -3,11 +3,12 @@
     <normal-form :default-value-model="model" :form-fields="schemas" @submit="handleSubmit" />
   </n-card>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
   import dayjs from 'dayjs';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import {
     asyncCustomerFormField,
+    asyncCustomerWarehouseFormField,
     getFilesUploadFormField,
     salesFormField,
   } from '@/api/dataLayer/fieldDefination/common';
@@ -47,6 +48,7 @@
         clearable: true,
       },
     },
+    asyncCustomerWarehouseFormField(false),
     {
       field: 'reserveTime',
       component: 'NDatePicker',
@@ -100,4 +102,4 @@
   }
 </script>
 
-<style scoped lang="less"></style>
+<style lang="less" scoped></style>

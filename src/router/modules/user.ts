@@ -42,6 +42,14 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/newViews/UserManage/UserManage.vue'),
       },
       {
+        path: 'salesMan',
+        name: `salesMan`,
+        meta: {
+          title: '业务员管理',
+        },
+        component: () => import('@/views/newViews/SalesMan/SalesMan.vue'),
+      },
+      {
         path: 'FBACode',
         name: `FBACode`,
         meta: {

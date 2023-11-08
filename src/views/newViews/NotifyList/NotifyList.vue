@@ -76,6 +76,7 @@
     InBoundStatus,
     NotifyManager,
     NotifyType,
+    OutAllStatus,
     OutStatus,
   } from '@/api/dataLayer/modules/notify/notify-api';
   import NotifyFormIndex from '@/views/newViews/NotifyList/form/NotifyFormIndex.vue';
@@ -106,7 +107,13 @@
   }
 
   const loadDataTable = async () => {
-    return await NotifyManager.load(filterObj);
+    if (filterObj?.otherStatus === OutAllStatus.All) {
+      return (await NotifyManager.load()).filter((it) => it.outStatus === OutStatus.All);
+    } else if (filterObj?.otherStatus === OutAllStatus.NotAll) {
+      return (await NotifyManager.load()).filter((it) => it.outStatus !== OutStatus.All);
+    } else {
+      return await NotifyManager.load(filterObj);
+    }
   };
 
   const actionRef = ref();

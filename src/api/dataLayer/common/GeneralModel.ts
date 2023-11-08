@@ -21,7 +21,8 @@ import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { usePermission } from '@/hooks/web/usePermission';
 import { storage } from '@/store/utils/Storage';
 import { CUSTOMER_ID } from '@/store/mutation-types';
-import { customerPath } from '@/api/dataLayer/modules/user/user';
+import { customerPath, salesMan } from '@/api/dataLayer/modules/user/user';
+import { useUserStore } from '@/store/modules/user';
 
 export type FormFields = (Promise<FormField> | FormField)[];
 
@@ -185,7 +186,7 @@ export function initModel(g: GeneralModel): Model {
       if (!userInfoDict) {
         userInfoDict = keyBy(await executeQuery(query(collection(db, 'customer'))), 'id');
       }
-      const { isCustomer } = usePermission();
+      const { isCustomer, isSalesMan } = usePermission();
       q = query(q, orderBy('createTimestamp', 'desc'), where('deletedAt', '==', 0));
       if (isCustomer() && g.collectionName != customerPath) {
         const customerId = storage.get(CUSTOMER_ID);
@@ -194,7 +195,7 @@ export function initModel(g: GeneralModel): Model {
         }
       }
 
-      const list = await executeQuery(q);
+      let list = await executeQuery(q);
       if (g?.joinManager) {
         const dict = keyBy(await g.joinManager?.loader(), 'id');
         list.forEach((it, index) => {
@@ -204,6 +205,10 @@ export function initModel(g: GeneralModel): Model {
             ...it,
           };
         });
+      }
+      const user = useUserStore()?.info;
+      if (isSalesMan() && g.collectionName != salesMan) {
+        list = list.filter((it) => !it.warehouseId || user?.warehouseId.includes(it.warehouseId));
       }
       list.forEach((it) => {
         if (it.customerId) {

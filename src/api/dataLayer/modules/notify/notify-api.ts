@@ -53,6 +53,11 @@ export enum OutStatus {
   Stay = '留仓',
 }
 
+export enum OutAllStatus {
+  All = '全部出库',
+  NotAll = '其他',
+}
+
 export enum CashStatus {
   Done = '已结算',
   WaitConfirm = '待确认',
