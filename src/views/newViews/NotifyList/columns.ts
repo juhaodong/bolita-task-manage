@@ -102,6 +102,7 @@ export const filters: FormField[] = [
   {
     label: '显示',
     field: 'otherStatus',
+    defaultValue: OutAllStatus.NotAll,
     component: 'NSelect',
     componentProps: {
       options: generateOptionFromArray(Object.values(OutAllStatus)),
