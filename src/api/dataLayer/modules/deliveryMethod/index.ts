@@ -2,16 +2,12 @@ import { generateOptionFromArray } from '@/store/utils/utils';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
 export enum DeliveryMethod {
-  DHL = 'DHL',
-  DPD = 'DPD',
-  UPS = 'UPS',
-  GLS = 'GLS',
+  Package = '快递',
+  TrailAmz = '直送',
   AMZ = 'AMZ卡派',
-  Truck = '卡派',
-  TrailAmz = '尾程直送',
+  Truck = '其他卡派',
   SelfPick = '自提',
-  PrivateTruck = '私人卡派',
-  Others = '其他',
+  PrivateTruck = '散货派送',
 }
 
 export const deliveryMethod = Object.values(DeliveryMethod);

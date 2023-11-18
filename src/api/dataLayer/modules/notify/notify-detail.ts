@@ -3,25 +3,6 @@ import { NotifyManager, OutStatus } from '@/api/dataLayer/modules/notify/notify-
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 import { taskListPath } from '@/api/dataLayer/modules/notify/path';
 
-export type NotifyDetailModel = {
-  arrivedCount: number;
-  sortCode: string;
-  trackingCode: string;
-  trayCode: string;
-  trayHeight: string;
-  trayWidth: string;
-  trayLength: string;
-  count: number;
-  actualWeight: string;
-  volume: string;
-  height: string;
-  length: string;
-  width: string;
-  sku: string;
-  note: string;
-  storagePosition: string;
-};
-
 export async function getNotifyDetailListByNotify(id) {
   return await NotifyDetailManager.load(null, where('notifyId', '==', id));
 }

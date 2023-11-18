@@ -103,41 +103,6 @@ export function getTargetAddressSelectionGroup(dm = deliveryMethod): FormField[]
   });
 }
 
-export function getPickUpAddressSelectionGroup(): FormField[] {
-  return [
-    ...getDeliveryMethodSelection(truckDeliveryMethod),
-    formFieldFBACodeSelection,
-    formFieldTargetCountrySelection,
-    {
-      label: '邮编',
-      field: 'postCode',
-      disableCondition(model) {
-        return isAmazon(model);
-      },
-      onFormUpdate(value) {
-        if (value?.fbaCode) {
-          value['postCode'] = fbaDict[value.fbaCode].postCode;
-        }
-      },
-      displayCondition(model) {
-        return (
-          truckDeliveryMethod.includes(model?.deliveryMethod) &&
-          model?.deliveryMethod != DeliveryMethod.PrivateTruck
-        );
-      },
-    },
-    {
-      label: 'PO',
-      field: 'po',
-      required: false,
-    },
-    ...getCommonDeliveryField(),
-  ].map((it: FormField) => {
-    it.group = '取货地址';
-    return it;
-  });
-}
-
 export function generateAddress(value: any) {
   return `${value.street} ${value.houseNo}
   ${value.appendAddress}
