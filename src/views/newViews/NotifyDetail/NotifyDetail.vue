@@ -11,6 +11,7 @@
         v-if="hasPermission([NotifyDetailPower.Setting])"
         :disabled="checkedRows?.length == 0"
         type="info"
+        size="small"
         @click="startEditStoreAddress()"
       >
         批量设置库位
@@ -18,6 +19,7 @@
       <n-button
         v-if="hasPermission([NotifyDetailPower.ChangeStatusPlan])"
         type="warning"
+        size="small"
         @click="transferToOutBoundPlan"
       >
         <template #icon>
@@ -118,7 +120,12 @@
   }
 
   const loadDataTable = async () => {
-    return await NotifyDetailManager.load(filterObj);
+    return (await NotifyDetailManager.load(filterObj)).filter((it) => {
+      return (
+        safeParseInt(it.instorageTrayNum) + safeParseInt(it.instorageContainerNum) != 0 ||
+        safeParseInt(it.arrivedContainerNum) + safeParseInt(it.arrivedTrayNum) == 0
+      );
+    });
   };
 
   function updateFilter(value) {
@@ -168,10 +175,9 @@
           {
             label: '修改',
             icon: DocumentEdit16Filled,
-            ifShow() {
-              console.log(record, InBoundStatus.Wait);
-              return getRecordStatusBy(record) == InBoundStatus.Wait;
-            },
+            // ifShow() {
+            //   return getRecordStatusBy(record) == InBoundStatus.Wait;
+            // },
             onClick() {
               startEdit(record.id);
             },
