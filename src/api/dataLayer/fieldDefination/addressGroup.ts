@@ -1,5 +1,8 @@
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { formFieldTargetCountrySelection } from '@/api/dataLayer/fieldDefination/TargetCountry';
+import {
+  formFieldPostCodeInput,
+  formFieldTargetCountrySelection,
+} from '@/api/dataLayer/fieldDefination/TargetCountry';
 import {
   fbaDict,
   formFieldFBACodeSelection,
@@ -7,13 +10,17 @@ import {
 } from '@/api/dataLayer/fieldDefination/FBACode';
 import { getDeliveryMethodSelection } from '@/api/dataLayer/fieldDefination/common';
 import {
-  boxDeliveryMethod,
   deliveryMethod,
   DeliveryMethod,
   fbaBasedDeliveryMethod,
-  truckDeliveryMethod,
 } from '@/api/dataLayer/modules/deliveryMethod';
 import { cloneDeep } from 'lodash-es';
+import {
+  AmazonDeliveryDetail,
+  boxDeliveryMethod,
+  OtherDeliveryDetail,
+  shouldUseFBACode,
+} from '@/api/dataLayer/modules/deliveryMethod/detail';
 
 export const deliveryAddressDetail: FormField[] = [
   { label: '收件人', field: 'contact' },
@@ -26,17 +33,12 @@ export const deliveryAddressDetail: FormField[] = [
   { label: '国家', field: 'country', required: false },
 ];
 
-export function isAmazon(value) {
-  return (
-    value['deliveryMethod'] == DeliveryMethod.AMZ ||
-    value['deliveryMethod'] == DeliveryMethod.TrailAmz
-  );
-}
-
 function getDeliveryAddressDetail(): FormField[] {
   return cloneDeep(deliveryAddressDetail).map((it: FormField) => {
     it.displayCondition = (value) => {
-      return value['deliveryMethod'] == DeliveryMethod.Truck;
+      return [OtherDeliveryDetail.SingleTruck, AmazonDeliveryDetail.OtherAddress].includes(
+        value.detailDeliveryMethod
+      );
     };
     it.meta = 'detail';
     return it;
@@ -53,7 +55,7 @@ export function getCommonDeliveryField(): FormField[] {
       },
       required: true,
       disableCondition(model) {
-        return isAmazon(model);
+        return shouldUseFBACode(model);
       },
       onFormUpdate(value) {
         if (value?.fbaCode) {
@@ -61,7 +63,7 @@ export function getCommonDeliveryField(): FormField[] {
         }
       },
       displayCondition(model) {
-        return isAmazon(model);
+        return shouldUseFBACode(model);
       },
     },
     ...getDeliveryAddressDetail(),
@@ -73,28 +75,22 @@ export function getTargetAddressSelectionGroup(dm = deliveryMethod): FormField[]
     ...getDeliveryMethodSelection(dm),
     formFieldFBACodeSelection,
     formFieldTargetCountrySelection,
+    formFieldPostCodeInput,
     {
-      label: '邮编',
-      field: 'postCode',
-      disableCondition(model) {
-        return isAmazon(model);
-      },
-      onFormUpdate(value) {
-        if (value?.fbaCode) {
-          value['postCode'] = fbaDict[value.fbaCode].postCode;
-        }
-      },
+      field: 'FBA号',
+      label: 'FBANo',
+      required: false,
       displayCondition(model) {
-        return (
-          truckDeliveryMethod.includes(model?.deliveryMethod) &&
-          model?.deliveryMethod != DeliveryMethod.PrivateTruck
-        );
+        return shouldUseFBACode(model);
       },
     },
     {
       label: 'PO',
       field: 'po',
       required: false,
+      displayCondition(model) {
+        return shouldUseFBACode(model);
+      },
     },
     ...getCommonDeliveryField(),
   ].map((it: FormField) => {

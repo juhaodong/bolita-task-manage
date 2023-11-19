@@ -1,6 +1,6 @@
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { fbaDict } from '@/api/dataLayer/fieldDefination/FBACode';
-import { isAmazon } from '@/api/dataLayer/fieldDefination/addressGroup';
+import { shouldUseFBACode } from '@/api/dataLayer/modules/deliveryMethod/detail';
 
 export const targetCountry = [
   { name: '奥地利', code: 'AT' },
@@ -49,14 +49,29 @@ export const formFieldTargetCountrySelection: FormField = {
     })),
   },
   disableCondition(model) {
-    return isAmazon(model);
+    return shouldUseFBACode(model);
   },
   displayCondition(model) {
-    return isAmazon(model);
+    return shouldUseFBACode(model);
   },
   onFormUpdate(value) {
     if (value?.fbaCode) {
       value['targetCountry'] = fbaDict[value?.fbaCode]?.countryCode;
     }
+  },
+};
+export const formFieldPostCodeInput: FormField = {
+  label: '邮编',
+  field: 'postCode',
+  disableCondition(model) {
+    return shouldUseFBACode(model);
+  },
+  onFormUpdate(value) {
+    if (value?.fbaCode) {
+      value['postCode'] = fbaDict[value.fbaCode].postCode;
+    }
+  },
+  displayCondition(model) {
+    return shouldUseFBACode(model);
   },
 };

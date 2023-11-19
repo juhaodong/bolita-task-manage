@@ -77,7 +77,6 @@
   import { $ref } from 'vue/macros';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
-  import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import { usePermission } from '@/hooks/web/usePermission';
   import { NotifyDetailPower } from '@/api/dataLayer/common/PowerModel';
@@ -110,7 +109,6 @@
   });
 
   function transferToOutBoundPlan() {
-    console.log(checkedRows);
     showOutBoundPlan = true;
   }
 
@@ -155,15 +153,6 @@
     checkedRows = [];
   }
 
-  function getRecordStatusBy(record) {
-    const sumCount = safeParseInt(record.trayNum) + safeParseInt(record.containerNum);
-    const arrivedCount =
-      safeParseInt(record.arrivedTrayNum) + safeParseInt(record.arrivedContainerNum);
-    if (arrivedCount == 0) {
-      return InBoundStatus.Wait;
-    }
-    return sumCount == arrivedCount ? InBoundStatus.All : InBoundStatus.Partial;
-  }
   const actionColumn = reactive({
     title: '操作',
     key: 'action',
@@ -175,9 +164,6 @@
           {
             label: '修改',
             icon: DocumentEdit16Filled,
-            // ifShow() {
-            //   return getRecordStatusBy(record) == InBoundStatus.Wait;
-            // },
             onClick() {
               startEdit(record.id);
             },

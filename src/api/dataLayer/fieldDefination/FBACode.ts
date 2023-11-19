@@ -1,6 +1,6 @@
 import { keyBy } from 'lodash-es';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { isAmazon } from '@/api/dataLayer/fieldDefination/addressGroup';
+import { shouldUseFBACode } from '@/api/dataLayer/modules/deliveryMethod/detail';
 
 interface FBAAddress {
   code: string;
@@ -1094,7 +1094,7 @@ export const formFieldFBACodeSelection: FormField = {
     })),
   },
   displayCondition(value) {
-    return isAmazon(value);
+    return shouldUseFBACode(value);
   },
 };
 

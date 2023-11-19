@@ -16,9 +16,7 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
   import { handleRequest } from '@/store/utils/utils';
-  import { formFieldBuilder, noteFormField } from '@/api/dataLayer/fieldDefination/common';
-  import { NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
-  import { boxDeliveryMethodField } from '@/api/dataLayer/modules/deliveryMethod';
+  import { formFieldBuilder } from '@/api/dataLayer/fieldDefination/common';
 
   interface Props {
     model: any;
@@ -53,37 +51,29 @@
       required: false,
     },
   ]);
-  if (props.model.notifyType === NotifyType.Container) {
-    builder.addAll([
-      {
-        field: 'FBA号',
-        label: 'FBANo',
-        required: false,
+
+  builder.addAll([
+    {
+      field: 'productName',
+      label: '货物名称',
+      required: false,
+    },
+    {
+      field: 'package',
+      label: '包装',
+      required: false,
+    },
+    {
+      field: 'operationRequirement',
+      label: '操作要求',
+      required: false,
+      componentProps: {
+        type: 'textarea',
       },
-      {
-        field: 'productName',
-        label: '货物名称',
-        required: false,
-      },
-      {
-        field: 'package',
-        label: '包装',
-        required: false,
-      },
-      {
-        field: 'operationRequirement',
-        label: '操作要求',
-        required: false,
-        componentProps: {
-          type: 'textarea',
-        },
-      },
-    ]);
-    builder.setGroup('地址信息');
-    builder.addAll(getTargetAddressSelectionGroup());
-  } else {
-    builder.addAll([boxDeliveryMethodField, noteFormField]);
-  }
+    },
+  ]);
+  builder.setGroup('地址信息');
+  builder.addAll(getTargetAddressSelectionGroup());
 
   const schemas: FormField[] = builder.build();
 

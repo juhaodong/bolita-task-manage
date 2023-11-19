@@ -1,4 +1,4 @@
-import { DeliveryMethod, deliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
+import { deliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { usePermission } from '@/hooks/web/usePermission';
 import dayjs from 'dayjs';
@@ -12,6 +12,7 @@ import { storage } from '@/store/utils/Storage';
 import { CUSTOMER_ID } from '@/store/mutation-types';
 import { useUserStore } from '@/store/modules/user';
 import { generateOptionFromArray } from '@/store/utils/utils';
+import { deliveryDetailMethods } from '@/api/dataLayer/modules/deliveryMethod/detail';
 
 export function getFilesUploadFormField(
   key = 'files',
@@ -49,13 +50,7 @@ export function getDeliveryMethodSelection(dm = deliveryMethod): FormField[] {
         options: generateOptionFromArray(dm),
       },
     },
-    {
-      field: 'otherDeliveryName',
-      label: '其他出库方式名称',
-      displayCondition(value) {
-        return value.deliveryMethod === DeliveryMethod.Others;
-      },
-    },
+    ...deliveryDetailMethods,
     {
       field: 'waybillId',
       label: '物流单号',
