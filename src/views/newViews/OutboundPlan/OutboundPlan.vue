@@ -96,7 +96,6 @@
       const date2 = dayjs(it.createTimestamp).format('YYYY-MM-DD');
       it.ageing = dayjs(date1).diff(date2, 'day');
     });
-    console.log(res, 'res');
     return res;
   };
 

@@ -121,6 +121,7 @@
   const loadDataTable = async () => {
     return (await NotifyDetailManager.load(filterObj)).filter((it) => {
       return (
+        Object.keys(filterObj ?? {}).length > 0 ||
         safeParseInt(it.instorageTrayNum) + safeParseInt(it.instorageContainerNum) != 0 ||
         safeParseInt(it.arrivedContainerNum) + safeParseInt(it.arrivedTrayNum) == 0
       );
