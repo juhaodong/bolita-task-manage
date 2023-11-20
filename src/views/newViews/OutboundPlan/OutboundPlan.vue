@@ -162,6 +162,9 @@
           {
             label: '操作',
             icon: Hammer,
+            ifShow() {
+              return record.outStatus !== OutStatus.WaitForCheck;
+            },
             onClick() {
               currentId = record.id!;
               showOperationTable = true;

@@ -9,15 +9,12 @@ import {
   getAddressByCode,
 } from '@/api/dataLayer/fieldDefination/FBACode';
 import { getDeliveryMethodSelection } from '@/api/dataLayer/fieldDefination/common';
-import {
-  DeliveryMethod,
-  deliveryMethod,
-  TruckDeliveryMethod,
-} from '@/api/dataLayer/modules/deliveryMethod';
+import { DeliveryMethod, deliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 import { cloneDeep } from 'lodash-es';
 import {
   AmazonDeliveryDetail,
   boxDeliveryMethod,
+  directDeliveryMethodDetail,
   OtherDeliveryDetail,
   shouldUseFBACode,
 } from '@/api/dataLayer/modules/deliveryMethod/detail';
@@ -36,8 +33,11 @@ export const deliveryAddressDetail: FormField[] = [
 function getDeliveryAddressDetail(): FormField[] {
   return cloneDeep(deliveryAddressDetail).map((it: FormField) => {
     it.displayCondition = (value) => {
-      return [AmazonDeliveryDetail.SingleTruck, AmazonDeliveryDetail.OtherAddress].includes(
-        value.deliveryDetail
+      return (
+        value.deliveryMethod == DeliveryMethod.AMZ &&
+        [AmazonDeliveryDetail.SingleTruck, AmazonDeliveryDetail.OtherAddress].includes(
+          value.deliveryDetail
+        )
       );
     };
     it.meta = 'detail';
@@ -108,8 +108,6 @@ ${value.state}/${value.countryCode ?? value.country}
 }
 
 export function formatItemAddress(item) {
-  console.log('i am called');
-  console.trace();
   const clean = () => {
     deliveryAddressDetail.forEach((key) => {
       item[key.field] = '';
@@ -120,6 +118,7 @@ export function formatItemAddress(item) {
   item.fbaCode = '';
   item.deliveryAddress = '';
   item.targetCountry = '';
+  console.log(item.deliveryMethod, item.deliveryDetail);
   if (!deliveryMethod.includes(item.deliveryMethod)) {
     clean();
     item.deliveryMethod = DeliveryMethod.Other;
@@ -159,9 +158,9 @@ export function formatItemAddress(item) {
 
 export const deliveryDetailList = [
   ...boxDeliveryMethod,
-  Object.values(AmazonDeliveryDetail),
-  Object.values(TruckDeliveryMethod),
-  Object.values(OtherDeliveryDetail),
+  ...Object.values(AmazonDeliveryDetail),
+  ...directDeliveryMethodDetail,
+  ...Object.values(OtherDeliveryDetail),
 ];
 
 export function checkInfo(item) {

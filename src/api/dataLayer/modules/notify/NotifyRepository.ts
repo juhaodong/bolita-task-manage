@@ -57,7 +57,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
     builder.addAll([
       {
         label: '目的国',
-        field: 'targetCountry',
+        field: 'country',
       },
       {
         label: 'FBAcode',

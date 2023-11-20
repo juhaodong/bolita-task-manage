@@ -57,6 +57,7 @@
   import { groupBy } from 'lodash';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
+  import { afterPlanDetailAdded } from '@/api/dataLayer/modules/OutBoundPlan/outAddHook';
 
   interface Props {
     model?: any;
@@ -118,9 +119,10 @@
     loading = true;
     for (const item in groupNotifyDetail.value) {
       value.planList = groupNotifyDetail.value[item];
-      console.log(value.planList, 'list');
+      value.deliveryMethod = value.planList[0].deliveryMethod;
+      value.deliveryDetail = value.planList[0].deliveryDetail;
       await OutBoundPlanManager.add(value, groupNotifyDetail.value[item]);
-      // await afterPlanDetailAdded(groupNotifyDetail.value[item]);
+      await afterPlanDetailAdded(groupNotifyDetail.value[item]);
     }
     await safeScope(() => {
       emit('saved');

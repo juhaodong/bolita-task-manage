@@ -1,6 +1,7 @@
 import { keyBy } from 'lodash-es';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { shouldUseFBACode } from '@/api/dataLayer/modules/deliveryMethod/detail';
+import { DeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 
 interface FBAAddress {
   code: string;
@@ -1092,6 +1093,15 @@ export const formFieldFBACodeSelection: FormField = {
       label: it.code + '(' + it.countryCode + ')',
       value: it.code,
     })),
+  },
+  onFormUpdate(value) {
+    console.log(value?.deliveryDetail, fbaDict[value?.deliveryDetail]);
+    if (value?.deliveryMethod == DeliveryMethod.Direct && fbaDict[value?.deliveryDetail]) {
+      value['fbaCode'] = value?.deliveryDetail;
+    }
+  },
+  disableCondition(value) {
+    return value?.deliveryMethod == DeliveryMethod.Direct;
   },
   displayCondition(value) {
     return shouldUseFBACode(value);

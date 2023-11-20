@@ -35,7 +35,6 @@
     );
     try {
       const { rows, errors } = await readXlsxFile(file, { schema });
-      console.log(rows, errors);
       if (rows.length > 0 && errors.length == 0) {
         return rows.map((it) => ({ ...it, arrivedCount: 0 }));
       }

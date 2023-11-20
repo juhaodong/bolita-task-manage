@@ -76,7 +76,6 @@ export async function asyncCustomerFormField(): Promise<FormField> {
     },
     defaultValue: isCustomer() ? storage.get(CUSTOMER_ID) : null,
     disableCondition() {
-      console.log(storage.get(CUSTOMER_ID));
       return isCustomer();
     },
     onFormUpdate(value) {

@@ -22,6 +22,8 @@ export enum OtherDeliveryDetail {
   Stay = '留仓',
 }
 
+export const directDeliveryMethodDetail = ['DTM2', 'HAJ1', 'WRO5', '90451'];
+
 const otherDeliveryMethodField: FormField = {
   field: 'deliveryDetail',
   label: '物流方式',
@@ -49,7 +51,7 @@ const directDeliveryMethodField: FormField = {
   label: '物流方式',
   component: 'NSelect',
   componentProps: {
-    options: generateOptionFromArray(['DTM2', 'HAJ1', 'WRO5', '90451']),
+    options: generateOptionFromArray(directDeliveryMethodDetail),
   },
 
   displayCondition(value) {

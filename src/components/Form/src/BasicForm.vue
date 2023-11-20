@@ -315,13 +315,17 @@
       watch(
         () => getSchema.value,
         (schema) => {
+          if (unref(isUpdateDefaultRef)) {
+            return;
+          }
           if (schema?.length) {
             initDefault();
+            setTimeout(() => {
+              isUpdateDefaultRef.value = true;
+            }, 100);
           }
         },
         {
-          deep: true,
-          immediate: true,
           flush: 'post',
         }
       );

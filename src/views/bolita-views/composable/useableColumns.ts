@@ -230,7 +230,6 @@ export function getFileActionButton(
         console.log(files.files[0]);
         await manager.editInternal(obj, record.id);
       }
-
       reload();
     },
     permissions: permissions,
