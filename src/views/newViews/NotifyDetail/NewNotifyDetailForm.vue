@@ -45,11 +45,6 @@
       it.required = false;
       return it;
     }),
-    {
-      field: 'waybillId',
-      label: '运单号',
-      required: false,
-    },
   ]);
 
   builder.addAll([

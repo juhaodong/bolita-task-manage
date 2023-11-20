@@ -22,7 +22,7 @@ export enum OtherDeliveryDetail {
 }
 
 const otherDeliveryMethodField: FormField = {
-  field: 'detailDeliveryMethod',
+  field: 'deliveryDetail',
   label: '物流方式',
   component: 'NSelect',
   componentProps: {
@@ -33,7 +33,7 @@ const otherDeliveryMethodField: FormField = {
   },
 };
 const packageDeliveryMethodField: FormField = {
-  field: 'detailDeliveryMethod',
+  field: 'deliveryDetail',
   label: '物流方式',
   component: 'NSelect',
   componentProps: {
@@ -44,7 +44,7 @@ const packageDeliveryMethodField: FormField = {
   },
 };
 const directDeliveryMethodField: FormField = {
-  field: 'detailDeliveryMethod',
+  field: 'deliveryDetail',
   label: '物流方式',
   component: 'NSelect',
   componentProps: {
@@ -56,7 +56,7 @@ const directDeliveryMethodField: FormField = {
   },
 };
 const truckDeliveryMethodField: FormField = {
-  field: 'detailDeliveryMethod',
+  field: 'deliveryDetail',
   label: '物流方式',
   component: 'NSelect',
   componentProps: {
@@ -76,6 +76,6 @@ export const deliveryDetailMethods = [
 export function shouldUseFBACode(model) {
   return (
     model?.deliveryMethod == DeliveryMethod.Direct ||
-    model?.detailDeliveryMethod == AmazonDeliveryDetail.Amazon
+    model?.deliveryDetail == AmazonDeliveryDetail.Amazon
   );
 }

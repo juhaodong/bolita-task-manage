@@ -73,7 +73,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       },
       {
         label: '收件人',
-        field: 'name',
+        field: 'contact',
       },
       {
         label: '电话/邮箱',

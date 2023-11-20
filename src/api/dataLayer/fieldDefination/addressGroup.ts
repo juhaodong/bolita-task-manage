@@ -25,14 +25,14 @@ export const deliveryAddressDetail: FormField[] = [
   { label: '地址附加', field: 'appendAddress', required: false },
   { label: '城市', field: 'city' },
   { label: '州', field: 'state', required: false },
-  { label: '国家', field: 'country', required: false },
+  { label: '国家', field: 'country', required: true },
 ];
 
 function getDeliveryAddressDetail(): FormField[] {
   return cloneDeep(deliveryAddressDetail).map((it: FormField) => {
     it.displayCondition = (value) => {
       return [OtherDeliveryDetail.SingleTruck, AmazonDeliveryDetail.OtherAddress].includes(
-        value.detailDeliveryMethod
+        value.deliveryDetail
       );
     };
     it.meta = 'detail';
@@ -119,7 +119,7 @@ export function formatItemAddress(item) {
   } else if (!deliveryDetailList.includes(item.deliveryDetail)) {
     clean();
     item.deliveryMethod = '留仓';
-  } else if (useFbaCode.includes(item.deliveryDetail)) {
+  } else if (shouldUseFBACode(item)) {
     clean();
     if (fbaDict[fbaCode]) {
       item.deliveryAddress = getAddressByCode(fbaCode);
@@ -152,26 +152,25 @@ export const deliveryDetailList = [
 ];
 
 export function checkInfo(item) {
-  if (useFbaCode.includes(item.deliveryDetail)) {
-    if (
-      !item.FBANo ||
-      !item.PO ||
-      !item.fbaCode ||
-      !item.targetCountry ||
-      !item.postCode ||
-      !item.containerNum ||
-      !item.length ||
-      !item.width ||
-      !item.height ||
-      !item.volume ||
-      !item.weightKg
-    ) {
-      return false;
-    }
+  if (shouldUseFBACode(item)) {
+    const checkField = [
+      'fbaCode',
+      'targetCountry',
+      'postCode',
+      'containerNum',
+      'length',
+      'width',
+      'height',
+      'volume',
+      'weightKg',
+    ];
+    return checkField.every((it) => item[it]);
   } else if (item.deliveryDetail === '其他地址' || item.deliveryDetail === '散货派送') {
-    if (!item.targetCountry || !item.postCode || !item.deliveryAddress || !item.name) {
-      return false;
-    }
+    const checkField = ['country', 'postCode', 'deliveryAddress', 'contact'];
+    checkField.forEach((it) => {
+      console.log(it, item[it]);
+    });
+    return checkField.every((it) => item[it]);
   } else {
     return true;
   }

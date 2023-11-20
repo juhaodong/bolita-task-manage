@@ -258,6 +258,7 @@
           if (defaultValue) {
             schema.defaultValue = defaultValue;
           }
+
           schema.giProps = {
             span: 1,
           };
@@ -314,13 +315,14 @@
       watch(
         () => getSchema.value,
         (schema) => {
-          if (unref(isUpdateDefaultRef)) {
-            return;
-          }
           if (schema?.length) {
             initDefault();
-            isUpdateDefaultRef.value = true;
           }
+        },
+        {
+          deep: true,
+          immediate: true,
+          flush: 'post',
         }
       );
 
