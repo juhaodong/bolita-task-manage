@@ -17,6 +17,14 @@
         </template>
         新建散货/托盘预报
       </n-button>
+      <n-button size="small" @click="clearAllData()">
+        <template #icon>
+          <n-icon>
+            <TruckDelivery />
+          </n-icon>
+        </template>
+        清楚数据
+      </n-button>
     </filter-bar>
     <div class="my-2"></div>
     <BasicTable
@@ -90,6 +98,7 @@
   import WarehouseInfoDialog from '@/views/newViews/NotifyList/form/WarehouseInfoDialog.vue';
   import NotifyFeeDialog from '@/views/newViews/NotifyList/form/NotifyFeeDialog.vue';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
+  import { clearAllData } from '@/api/dataLayer/clearAllData';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
 
