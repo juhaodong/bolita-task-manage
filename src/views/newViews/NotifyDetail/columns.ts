@@ -178,6 +178,10 @@ export const filters: FormField[] = [
     field: 'ticketId',
   },
   {
+    label: '货柜号',
+    field: 'containerNo',
+  },
+  {
     label: '仓库',
     field: 'warehouseId',
   },
