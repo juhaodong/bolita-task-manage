@@ -2,25 +2,25 @@
   <n-card class="proCard">
     <loading-frame :loading="loading">
       <template v-if="step == 0">
-        <filter-bar :form-fields="searchSchema" @submit="updateFilter" @clear="updateFilter" />
+        <filter-bar :form-fields="searchSchema" @clear="updateFilter" @submit="updateFilter" />
         <n-data-table
-          class="mt-4"
-          v-model:checked-row-keys="checkedRowKeys"
-          virtual-scroll
-          max-height="450"
           v-if="allNotifyDetail.length > 0"
+          v-model:checked-row-keys="checkedRowKeys"
           :columns="columns"
-          :row-key="(row) => row.id"
           :data="allNotifyDetail"
+          :row-key="(row) => row.id"
+          class="mt-4"
+          max-height="450"
+          virtual-scroll
         />
         <n-space
           v-if="checkedRowKeys.length > 0"
-          class="mt-4"
           align="center"
+          class="mt-4"
           justify="space-between"
         >
           <div>已经选择{{ checkedRowKeys.length }}条记录</div>
-          <n-button @click="confirmSelection" :disabled="checkedRowKeys.length == 0" type="primary"
+          <n-button :disabled="checkedRowKeys.length == 0" type="primary" @click="confirmSelection"
             >确定
           </n-button>
         </n-space>
@@ -28,15 +28,15 @@
       <template v-else>
         <n-button @click="step = 0">返回上一步</n-button>
         <n-data-table
-          class="mt-4"
-          v-model:checked-row-keys="checkedRowKeys"
-          virtual-scroll
-          max-height="450"
           v-if="allNotifyDetail.length > 0"
+          v-model:checked-row-keys="checkedRowKeys"
           :columns="displayColumns"
           :data="allNotifyDetail"
+          class="mt-4"
+          max-height="450"
+          virtual-scroll
         />
-        <normal-form class="mt-8" :form-fields="addressFormFields" @submit="saveOutboundPlan" />
+        <normal-form :form-fields="addressFormFields" class="mt-8" @submit="saveOutboundPlan" />
       </template>
     </loading-frame>
   </n-card>
@@ -44,22 +44,20 @@
 <script lang="ts" setup>
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { onMounted, ref } from 'vue';
-  import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { DataTableColumns } from 'naive-ui';
   import { getReserveItems } from '@/api/dataLayer/modules/notify/notify-detail';
   import { editableColumn } from '@/views/bolita-views/composable/useableColumns';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
-  import { getTargetAddressSelectionGroup } from '@/api/dataLayer/fieldDefination/addressGroup';
   import {
     asyncCustomerFormField,
     getFilesUploadFormField,
   } from '@/api/dataLayer/fieldDefination/common';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
+  import { safeParseInt, toastError } from '@/store/utils/utils';
+  import { groupBy } from 'lodash';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
-  import { handleRequest, safeParseInt, toastError } from '@/store/utils/utils';
   import { afterPlanDetailAdded } from '@/api/dataLayer/modules/OutBoundPlan/outAddHook';
-  import { sizeFormField } from '@/api/dataLayer/fieldDefination/SizeFormField';
-  import { DeliveryMethod, truckDeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
+  import { safeScope } from '@/api/dataLayer/common/GeneralModel';
 
   interface Props {
     model?: any;
@@ -69,12 +67,16 @@
   const prop = defineProps<Props>();
   const emit = defineEmits(['saved']);
   const checkedRowKeys = ref<any[]>([]);
+  const groupNotifyDetail = ref<any[]>([]);
   onMounted(async () => {
     await init();
     checkedRowKeys.value = prop?.initialKey ?? [];
     if (checkedRowKeys.value.length > 0) {
       allNotifyDetail = allNotifyDetail.filter((it: any) => checkedRowKeys.value.includes(it.id));
     }
+    console.log(allNotifyDetail, 'all');
+    groupNotifyDetail.value = groupBy(allNotifyDetail, 'deliveryDetail');
+    console.log(groupNotifyDetail.value, 'log1');
   });
   let allNotifyDetail: any[] = $ref([]);
   let loading: boolean = $ref(false);
@@ -99,6 +101,7 @@
 
   function confirmSelection() {
     allNotifyDetail = allNotifyDetail.filter((it: any) => checkedRowKeys.value.includes(it.id));
+    console.log(allNotifyDetail, 'log2');
     const notEnough = allNotifyDetail.find((it) => {
       return (
         safeParseInt(it.outBoundTrayNum) > safeParseInt(it.instorageTrayNum) ||
@@ -114,10 +117,13 @@
 
   async function saveOutboundPlan(value) {
     loading = true;
-    value.planList = allNotifyDetail;
-    const res = await OutBoundPlanManager.add(value, allNotifyDetail);
-    await afterPlanDetailAdded(allNotifyDetail);
-    await handleRequest(res, () => {
+    for (const item in groupNotifyDetail.value) {
+      value.planList = groupNotifyDetail.value[item];
+      console.log(value.planList, 'list');
+      await OutBoundPlanManager.add(value, groupNotifyDetail.value[item]);
+      await afterPlanDetailAdded(groupNotifyDetail.value[item]);
+    }
+    await safeScope(() => {
       emit('saved');
     });
     loading = false;
@@ -129,6 +135,9 @@
       key: 'selection',
     },
     { title: '入库ID', key: 'notifyId' },
+    { title: '物流详情', key: 'deliveryDetail' },
+    { title: '地址', key: 'deliveryAddress' },
+    { title: '物流方式', key: 'deliveryMethod' },
     { title: '票号', key: 'ticketId' },
     editableColumn({ title: '箱号', key: 'containerId' }, allNotifyDetail),
     editableColumn({ title: '托数', key: 'outBoundTrayNum', width: 60 }, allNotifyDetail),
@@ -143,10 +152,14 @@
   ]);
   const displayColumns: DataTableColumns<any> = $computed(() => [
     { title: '入库ID', key: 'notifyId' },
+    { title: '物流详情', key: 'deliveryDetail' },
     { title: '票号', key: 'ticketId' },
     { title: '箱号', key: 'containerId' },
     { title: '托数', key: 'outBoundTrayNum' },
     { title: '箱数', key: 'outBoundContainerNum' },
+    { title: '物流详情', key: 'deliveryDetail' },
+    { title: '地址', key: 'deliveryAddress' },
+    { title: '物流方式', key: 'deliveryMethod' },
     { title: '长', key: 'length' },
     { title: '宽', key: 'width' },
     { title: '高', key: 'height' },
@@ -170,18 +183,18 @@
         type: 'textarea',
       },
     },
-    ...getTargetAddressSelectionGroup(),
-    ...sizeFormField.map((it) => {
-      it.displayCondition = (model) => {
-        return (
-          truckDeliveryMethod.includes(model?.deliveryMethod) &&
-          model?.deliveryMethod != DeliveryMethod.PrivateTruck
-        );
-      };
-      it.required = false;
-      it.group = '尺寸信息';
-      return it;
-    }),
+    // ...getTargetAddressSelectionGroup(),
+    // ...sizeFormField.map((it) => {
+    //   it.displayCondition = (model) => {
+    //     return (
+    //       truckDeliveryMethod.includes(model?.deliveryMethod) &&
+    //       model?.deliveryMethod != DeliveryMethod.PrivateTruck
+    //     );
+    //   };
+    //   it.required = false;
+    //   it.group = '尺寸信息';
+    //   return it;
+    // }),
   ];
 </script>
 

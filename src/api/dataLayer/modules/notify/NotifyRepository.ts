@@ -65,7 +65,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       },
       {
         label: 'PO',
-        field: 'po',
+        field: 'PO',
       },
       {
         label: 'FBA号',
@@ -104,19 +104,31 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
         field: 'state',
       },
     ]);
-    builder.add({
-      label: '物流方式',
-      field: 'deliveryMethod',
-    });
+    builder.addAll([
+      {
+        label: '物流方式',
+        field: 'deliveryMethod',
+      },
+      {
+        label: '详细物流方式',
+        field: 'deliveryDetail',
+      },
+    ]);
     builder.add({
       label: '包装',
       field: 'package',
     });
   } else {
-    builder.add({
-      label: '物流方式',
-      field: 'deliveryMethod',
-    });
+    builder.addAll([
+      {
+        label: '物流方式',
+        field: 'deliveryMethod',
+      },
+      {
+        label: '详细物流方式',
+        field: 'deliveryDetail',
+      },
+    ]);
   }
   builder.add({
     label: '备注',

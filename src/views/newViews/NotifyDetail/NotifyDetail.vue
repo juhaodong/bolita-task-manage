@@ -10,16 +10,16 @@
       <n-button
         v-if="hasPermission([NotifyDetailPower.Setting])"
         :disabled="checkedRows?.length == 0"
-        type="info"
         size="small"
+        type="info"
         @click="startEditStoreAddress()"
       >
         批量设置库位
       </n-button>
       <n-button
         v-if="hasPermission([NotifyDetailPower.ChangeStatusPlan])"
-        type="warning"
         size="small"
+        type="warning"
         @click="transferToOutBoundPlan"
       >
         <template #icon>
@@ -81,6 +81,7 @@
   import { usePermission } from '@/hooks/web/usePermission';
   import { NotifyDetailPower } from '@/api/dataLayer/common/PowerModel';
   import { safeParseInt } from '@/store/utils/utils';
+  import { checkInfo } from '@/api/dataLayer/fieldDefination/addressGroup';
 
   const { hasPermission } = usePermission();
 
@@ -166,6 +167,11 @@
             icon: DocumentEdit16Filled,
             onClick() {
               startEdit(record.id);
+            },
+            highlight: () => {
+              if (!checkInfo(record)) {
+                return 'error';
+              }
             },
           },
         ],

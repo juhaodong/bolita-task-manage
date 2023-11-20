@@ -9,15 +9,10 @@ import {
   getAddressByCode,
 } from '@/api/dataLayer/fieldDefination/FBACode';
 import { getDeliveryMethodSelection } from '@/api/dataLayer/fieldDefination/common';
-import {
-  deliveryMethod,
-  DeliveryMethod,
-  fbaBasedDeliveryMethod,
-} from '@/api/dataLayer/modules/deliveryMethod';
+import { deliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 import { cloneDeep } from 'lodash-es';
 import {
   AmazonDeliveryDetail,
-  boxDeliveryMethod,
   OtherDeliveryDetail,
   shouldUseFBACode,
 } from '@/api/dataLayer/modules/deliveryMethod/detail';
@@ -118,9 +113,13 @@ export function formatItemAddress(item) {
   item.fbaCode = '';
   item.deliveryAddress = '';
   item.targetCountry = '';
-  if (boxDeliveryMethod.includes(item.deliveryMethod)) {
+  if (!deliveryMethodList.includes(item.deliveryMethod)) {
     clean();
-  } else if (fbaBasedDeliveryMethod.includes(item.deliveryMethod)) {
+    item.deliveryMethod = '留仓';
+  } else if (!deliveryDetailList.includes(item.deliveryDetail)) {
+    clean();
+    item.deliveryMethod = '留仓';
+  } else if (useFbaCode.includes(item.deliveryDetail)) {
     clean();
     if (fbaDict[fbaCode]) {
       item.deliveryAddress = getAddressByCode(fbaCode);
@@ -128,10 +127,52 @@ export function formatItemAddress(item) {
       item.postCode = fbaDict[fbaCode].postCode;
       item.fbaCode = fbaCode;
     }
-  } else if (item.deliveryMethod == DeliveryMethod.Truck) {
-    item.deliveryAddress = generateAddress(item);
   } else {
-    clean();
+    item.deliveryAddress = generateAddress(item);
   }
   return item;
+}
+
+export const useFbaCode = ['DTM2', 'HAJ1', 'WRO5', '90451', '亚马逊'];
+
+export const deliveryMethodList = ['快递', '直送', '卡派', '其他'];
+
+export const deliveryDetailList = [
+  'DHL',
+  'DPD',
+  'UPS',
+  'GLS',
+  'DTM2',
+  'HAJ1',
+  'WRO5',
+  '90451',
+  '亚马逊',
+  '其他地址',
+  '自提',
+];
+
+export function checkInfo(item) {
+  if (useFbaCode.includes(item.deliveryDetail)) {
+    if (
+      !item.FBANo ||
+      !item.PO ||
+      !item.fbaCode ||
+      !item.targetCountry ||
+      !item.postCode ||
+      !item.containerNum ||
+      !item.length ||
+      !item.width ||
+      !item.height ||
+      !item.volume ||
+      !item.weightKg
+    ) {
+      return false;
+    }
+  } else if (item.deliveryDetail === '其他地址' || item.deliveryDetail === '散货派送') {
+    if (!item.targetCountry || !item.postCode || !item.deliveryAddress || !item.name) {
+      return false;
+    }
+  } else {
+    return true;
+  }
 }

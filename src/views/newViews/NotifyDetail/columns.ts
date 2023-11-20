@@ -9,6 +9,7 @@ import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { generateOptionFromArray, safeParseInt } from '@/store/utils/utils';
 import { InBoundStatus, notifyType } from '@/api/dataLayer/modules/notify/notify-api';
 import dayjs from 'dayjs';
+import { checkInfo } from '@/api/dataLayer/fieldDefination/addressGroup';
 
 export const stayDaysColumn = formatColumn('arriveTime', '存放天数', (record) => {
   const time = record['arriveTime'];
@@ -22,7 +23,10 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
   {
     type: 'selection',
     disabled(row: any) {
-      return safeParseInt(row.instorageTrayNum) + safeParseInt(row.instorageContainerNum) == 0;
+      return (
+        safeParseInt(row.instorageTrayNum) + safeParseInt(row.instorageContainerNum) == 0 &&
+        !checkInfo(row)
+      );
     },
   },
   {
@@ -116,6 +120,10 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
     key: 'deliveryMethod',
   },
   {
+    title: '物流详情',
+    key: 'deliveryDetail',
+  },
+  {
     title: '库位',
     key: 'storeAddress',
   },
@@ -149,6 +157,8 @@ export type NotifyDetailInfoModel = {
   waybillId: number;
   targetCountry: string;
   fbaCode: string;
+  deliveryDetail: string;
+  PO: string;
 
   shippingAddress: string;
   logisticsMethods: string;
