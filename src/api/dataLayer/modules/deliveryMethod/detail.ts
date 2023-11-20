@@ -14,11 +14,12 @@ export const boxDeliveryMethod = Object.values(BoxDeliveryMethod);
 export enum AmazonDeliveryDetail {
   Amazon = '亚马逊',
   OtherAddress = '其他地址',
+  SingleTruck = '散货派送',
 }
 
 export enum OtherDeliveryDetail {
   SelfPick = '自提',
-  SingleTruck = '散货派送',
+  Stay = '留仓',
 }
 
 const otherDeliveryMethodField: FormField = {

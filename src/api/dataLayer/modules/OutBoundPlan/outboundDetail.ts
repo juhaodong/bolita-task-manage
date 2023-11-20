@@ -9,24 +9,11 @@ import { truckDeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 
 export const outboundDetailPath = 'outboundDetail';
 export const OutBoundDetailManager = initModel({
-  init(value, outId: string, plan): any {
+  init(value, outId: string): any {
     value.outId = outId;
     value.checkStatus = CheckStatus.Wait;
     value.trayNum = value.outBoundTrayNum;
     value.containerNum = value.outBoundContainerNum;
-    value.deliveryMethod = plan.deliveryMethod;
-    value.fbaCode = plan.fbaCode;
-    value.deliveryAddress = plan.deliveryAddress;
-    value.targetCountry = plan.targetCountry;
-    value.postCode = plan?.postCode ?? '';
-    value.contact = plan.contact;
-    value.email = plan.email;
-    value.street = plan.street;
-    value.houseNo = plan.houseNo;
-    value.appendAddress = plan.appendAddress;
-    value.city = plan.city;
-    value.state = plan.state;
-    value.country = plan.country;
     value.notifyDetailId = value.id;
     delete value.outStatus;
     formatItemAddress(value);

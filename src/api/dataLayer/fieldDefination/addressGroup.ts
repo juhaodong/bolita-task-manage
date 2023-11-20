@@ -9,10 +9,15 @@ import {
   getAddressByCode,
 } from '@/api/dataLayer/fieldDefination/FBACode';
 import { getDeliveryMethodSelection } from '@/api/dataLayer/fieldDefination/common';
-import { deliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
+import {
+  DeliveryMethod,
+  deliveryMethod,
+  TruckDeliveryMethod,
+} from '@/api/dataLayer/modules/deliveryMethod';
 import { cloneDeep } from 'lodash-es';
 import {
   AmazonDeliveryDetail,
+  boxDeliveryMethod,
   OtherDeliveryDetail,
   shouldUseFBACode,
 } from '@/api/dataLayer/modules/deliveryMethod/detail';
@@ -31,7 +36,7 @@ export const deliveryAddressDetail: FormField[] = [
 function getDeliveryAddressDetail(): FormField[] {
   return cloneDeep(deliveryAddressDetail).map((it: FormField) => {
     it.displayCondition = (value) => {
-      return [OtherDeliveryDetail.SingleTruck, AmazonDeliveryDetail.OtherAddress].includes(
+      return [AmazonDeliveryDetail.SingleTruck, AmazonDeliveryDetail.OtherAddress].includes(
         value.deliveryDetail
       );
     };
@@ -103,6 +108,8 @@ ${value.state}/${value.countryCode ?? value.country}
 }
 
 export function formatItemAddress(item) {
+  console.log('i am called');
+  console.trace();
   const clean = () => {
     deliveryAddressDetail.forEach((key) => {
       item[key.field] = '';
@@ -113,12 +120,14 @@ export function formatItemAddress(item) {
   item.fbaCode = '';
   item.deliveryAddress = '';
   item.targetCountry = '';
-  if (!deliveryMethodList.includes(item.deliveryMethod)) {
+  if (!deliveryMethod.includes(item.deliveryMethod)) {
     clean();
-    item.deliveryMethod = '留仓';
+    item.deliveryMethod = DeliveryMethod.Other;
+    item.deliveryDetail = OtherDeliveryDetail.Stay;
   } else if (!deliveryDetailList.includes(item.deliveryDetail)) {
     clean();
-    item.deliveryMethod = '留仓';
+    item.deliveryMethod = DeliveryMethod.Other;
+    item.deliveryDetail = OtherDeliveryDetail.Stay;
   } else if (shouldUseFBACode(item)) {
     clean();
     if (fbaDict[fbaCode]) {
@@ -127,28 +136,32 @@ export function formatItemAddress(item) {
       item.postCode = fbaDict[fbaCode].postCode;
       item.fbaCode = fbaCode;
     }
+  } else if (item.deliveryMethod == DeliveryMethod.Package) {
+    clean();
   } else {
+    const neededField = [
+      'street',
+      'houseNo',
+      'appendAddress',
+      'city',
+      'postCode',
+      'state',
+      'country',
+    ];
+
+    neededField.forEach((it) => {
+      item[it] = item[it] ?? '';
+    });
     item.deliveryAddress = generateAddress(item);
   }
   return item;
 }
 
-export const useFbaCode = ['DTM2', 'HAJ1', 'WRO5', '90451', '亚马逊'];
-
-export const deliveryMethodList = ['快递', '直送', '卡派', '其他'];
-
 export const deliveryDetailList = [
-  'DHL',
-  'DPD',
-  'UPS',
-  'GLS',
-  'DTM2',
-  'HAJ1',
-  'WRO5',
-  '90451',
-  '亚马逊',
-  '其他地址',
-  '自提',
+  ...boxDeliveryMethod,
+  Object.values(AmazonDeliveryDetail),
+  Object.values(TruckDeliveryMethod),
+  Object.values(OtherDeliveryDetail),
 ];
 
 export function checkInfo(item) {
@@ -167,11 +180,8 @@ export function checkInfo(item) {
     return checkField.every((it) => item[it]);
   } else if (item.deliveryDetail === '其他地址' || item.deliveryDetail === '散货派送') {
     const checkField = ['country', 'postCode', 'deliveryAddress', 'contact'];
-    checkField.forEach((it) => {
-      console.log(it, item[it]);
-    });
     return checkField.every((it) => item[it]);
   } else {
-    return true;
+    return item.deliveryDetail != OtherDeliveryDetail.Stay;
   }
 }

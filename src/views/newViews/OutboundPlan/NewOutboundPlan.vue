@@ -55,9 +55,8 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeParseInt, toastError } from '@/store/utils/utils';
   import { groupBy } from 'lodash';
-  import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
-  import { afterPlanDetailAdded } from '@/api/dataLayer/modules/OutBoundPlan/outAddHook';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
+  import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
 
   interface Props {
     model?: any;
@@ -121,7 +120,7 @@
       value.planList = groupNotifyDetail.value[item];
       console.log(value.planList, 'list');
       await OutBoundPlanManager.add(value, groupNotifyDetail.value[item]);
-      await afterPlanDetailAdded(groupNotifyDetail.value[item]);
+      // await afterPlanDetailAdded(groupNotifyDetail.value[item]);
     }
     await safeScope(() => {
       emit('saved');
@@ -134,10 +133,8 @@
       type: 'selection',
       key: 'selection',
     },
-    { title: '入库ID', key: 'notifyId' },
-    { title: '物流详情', key: 'deliveryDetail' },
-    { title: '地址', key: 'deliveryAddress' },
     { title: '物流方式', key: 'deliveryMethod' },
+    { title: '物流详情', key: 'deliveryDetail' },
     { title: '票号', key: 'ticketId' },
     editableColumn({ title: '箱号', key: 'containerId' }, allNotifyDetail),
     editableColumn({ title: '托数', key: 'outBoundTrayNum', width: 60 }, allNotifyDetail),
@@ -183,18 +180,6 @@
         type: 'textarea',
       },
     },
-    // ...getTargetAddressSelectionGroup(),
-    // ...sizeFormField.map((it) => {
-    //   it.displayCondition = (model) => {
-    //     return (
-    //       truckDeliveryMethod.includes(model?.deliveryMethod) &&
-    //       model?.deliveryMethod != DeliveryMethod.PrivateTruck
-    //     );
-    //   };
-    //   it.required = false;
-    //   it.group = '尺寸信息';
-    //   return it;
-    // }),
   ];
 </script>
 
