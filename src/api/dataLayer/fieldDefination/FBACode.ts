@@ -13,6 +13,13 @@ interface FBAAddress {
 
 export const fbaCode: FBAAddress[] = [
   {
+    code: 'HAJ1',
+    state: '',
+    address: 'Amazon Fulfillment Center HAJ1' + 'Zur Alten Molkerei 1' + '  Helmstedt',
+    postCode: '38350',
+    countryCode: 'DE',
+  },
+  {
     code: 'CZ-PRG2',
     state: 'Dobrovíz',
     address: 'K Amazonu 235',
