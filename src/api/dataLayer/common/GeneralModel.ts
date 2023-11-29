@@ -71,10 +71,7 @@ async function generalInit(value) {
 
 export async function generalAdd(value: any, collectionName: string, prefix = '') {
   const id = value?.id ?? (await getCollectionNextId(collectionName, prefix));
-  const missionsList = value.missionsList;
   await generalInit(value);
-  value.missionsList = missionsList;
-  console.log(value.missionsList, 'before');
   await setDoc(doc(collection(db, collectionName), id), value);
   await doLog({
     toStatus: '创建',
@@ -133,7 +130,6 @@ export function initModel(g: GeneralModel): Model {
 
   return {
     async addInternal(value, ...args): Promise<string> {
-      console.log(value.missionsList, 'missionsList');
       if (g.uniqKeys) {
         for (const uniqKey of g.uniqKeys) {
           const exist = await executeQuery(
@@ -145,7 +141,6 @@ export function initModel(g: GeneralModel): Model {
         }
       }
       const t = await g.init(value, ...args);
-      console.log(t.missionsList, 't.missionsList');
       const id = await generalAdd(t, g.collectionName, g?.idPrefix);
       if (g.afterAddHook) {
         await g.afterAddHook(id, t, ...args);
@@ -243,6 +238,7 @@ export function initModel(g: GeneralModel): Model {
       });
     },
     async massiveAdd(list, ...args) {
+      console.log(list, 'list');
       return await massiveAdd(list, g.collectionName, g.idPrefix, ...args);
     },
     async massiveUpdate(listWithId: any[]) {

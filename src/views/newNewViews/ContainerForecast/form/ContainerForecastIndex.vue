@@ -60,9 +60,7 @@
       ...(value?.trayTaskList ?? []),
     ];
     delete value.uploadFile;
-    console.log(taskList, 'list');
-    value.missionsList = taskList;
-    console.log(value, 'value');
+    console.log(taskList, 'list2');
     const res = await NotifyManager.add(value, taskList);
     await handleRequest(res, async () => {
       emit('saved');

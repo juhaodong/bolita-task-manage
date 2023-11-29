@@ -1,4 +1,7 @@
-import { getNotifyDetailListByNotify } from '@/api/dataLayer/modules/notify/notify-detail';
+import {
+  getNotifyDetailListByNotify,
+  NotifyDetailManager,
+} from '@/api/dataLayer/modules/notify/notify-detail';
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 import { notifyPath, taskListPath } from '@/api/dataLayer/modules/notify/path';
 
@@ -17,10 +20,10 @@ export const NotifyManager = initModel({
     collectionName: taskListPath,
     loader: getNotifyDetailListByNotify,
   },
-  // async afterAddHook(id, value, taskList) {
-  //   value.missionsList = taskList;
-  //   await NotifyDetailManager.massiveAdd(taskList, id);
-  // },
+  async afterAddHook(id, value, taskList) {
+    console.log(taskList, 'taskList');
+    await NotifyDetailManager.massiveAdd(taskList, id, '123');
+  },
 });
 
 export enum InBoundStatus {

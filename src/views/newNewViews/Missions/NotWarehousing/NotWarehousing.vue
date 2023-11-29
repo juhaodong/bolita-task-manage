@@ -60,7 +60,6 @@
   import {
     CashStatus,
     InBoundStatus,
-    NotifyManager,
     NotifyType,
     OutStatus,
   } from '@/api/dataLayer/modules/notify/notify-api';
@@ -75,6 +74,7 @@
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import ContainerForecastIndex from '@/views/newNewViews/ContainerForecast/form/ContainerForecastIndex.vue';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
+  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
   let currentModel: any | null = $ref(null);
@@ -88,9 +88,7 @@
   let filterObj: any | null = $ref(null);
 
   const loadDataTable = async () => {
-    const res = (await NotifyManager.load(filterObj)).filter(
-      (it) => it.inStatus !== InBoundStatus.All
-    );
+    const res = await NotifyDetailManager.load(filterObj);
     console.log(res, 'res');
     return res;
   };
@@ -103,7 +101,7 @@
   }
 
   async function startEdit(id) {
-    currentModel = await NotifyManager.getById(id);
+    currentModel = await NotifyDetailManager.getById(id);
     showModal.value = true;
   }
 
@@ -124,7 +122,7 @@
     width: 120,
     render(record: any) {
       const fileAction = (label, key, icon?: Component) => {
-        return getFileActionButton(label, key, NotifyManager, reloadTable, record, icon);
+        return getFileActionButton(label, key, NotifyDetailManager, reloadTable, record, icon);
       };
       return h(TableAction as any, {
         style: 'button',
@@ -135,7 +133,7 @@
             popConfirm: {
               title: '是否确定删除此预报？',
               async confirm() {
-                await NotifyManager.remove(record.id);
+                await NotifyDetailManager.remove(record.id);
                 reloadTable();
               },
             },

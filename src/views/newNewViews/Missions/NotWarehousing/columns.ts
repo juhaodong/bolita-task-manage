@@ -5,65 +5,110 @@ import {
   OutAllStatus,
   OutStatus,
 } from '@/api/dataLayer/modules/notify/notify-api';
-import {
-  idColumn,
-  standardDateFormat,
-  statusColumn,
-  statusColumnEasy,
-  timeColumn,
-} from '@/views/bolita-views/composable/useableColumns';
-import { h } from 'vue';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { generateOptionFromArray } from '@/store/utils/utils';
 
 export const columns: DataTableColumns<any> = [
-  idColumn('入库ID', '/notify/detail'),
-  timeColumn(),
-  // {
-  //   title: '客户ID',
-  //   key: 'customerName',
-  // },
-  // {
-  //   title: '业务员',
-  //   key: 'salesName',
-  // },
   {
-    title: '仓库',
-    key: 'warehouseId',
-    width: 60,
+    title: '柜号',
+    key: 'containerId',
   },
   {
-    title: '货柜号',
-    key: 'containerNo',
-    width: 140,
+    title: '票号',
+    key: 'ticketId',
   },
-  timeColumn('planArriveDateTime', '预计到达时间'),
-  timeColumn('reserveTime', '预约仓位', standardDateFormat),
   {
-    title: '入库数量',
-    key: 'arrivedCount',
-    render(record) {
-      const display = record.arrivedCount + '/' + record.totalCount;
-      return h('div', display);
-    },
+    title: '国家',
+    key: 'country',
   },
-  statusColumn('入库状态', 'inStatus'),
   {
-    title: '入库类型',
-    key: 'notifyType',
+    title: '件数',
+    key: 'number',
   },
-  statusColumnEasy({
-    title: '出库状态',
-    key: 'outStatus',
-  }),
+  {
+    title: '总实重',
+    key: 'weight',
+  },
+  {
+    title: '总体积',
+    key: 'volume',
+  },
+  {
+    title: 'FBA/快递单号',
+    key: 'FBA/DeliveryCode',
+  },
+  {
+    title: 'PO',
+    key: 'PO',
+  },
+  {
+    title: 'FC/送货地址',
+    key: 'FC/Address',
+  },
+  {
+    title: '操作',
+    key: 'operation',
+  },
+  {
+    title: '换单文件',
+    key: 'files',
+  },
+  {
+    title: '分拣标识',
+    key: 'sign',
+  },
+  {
+    title: '包装',
+    key: 'package',
+  },
+  {
+    title: '托数',
+    key: 'trayNum',
+  },
+  {
+    title: '品名',
+    key: 'productName',
+  },
+  {
+    title: 'UN号',
+    key: 'UNNumber',
+  },
+  {
+    title: '邮编',
+    key: 'postcode',
+  },
+  {
+    title: '街道+门牌号',
+    key: 'address1',
+  },
+  {
+    title: '地址2',
+    key: 'address2',
+  },
+  {
+    title: '公司名称',
+    key: 'companyName',
+  },
+  {
+    title: '收件人',
+    key: 'recipient',
+  },
+  {
+    title: '联系电话',
+    key: 'phone',
+  },
+  {
+    title: '邮箱',
+    key: 'email',
+  },
+  {
+    title: '是否需要预约',
+    key: 'needReserve',
+  },
   {
     title: '备注',
     key: 'note',
   },
-  statusColumnEasy({
-    title: '结算情况',
-    key: 'cashStatus',
-  }),
 ];
 
 export const filters: FormField[] = [
