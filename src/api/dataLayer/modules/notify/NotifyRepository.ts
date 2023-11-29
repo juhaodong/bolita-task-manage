@@ -54,7 +54,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
     },
     {
       label: '换单文件',
-      field: 'files',
+      field: 'changeOrderFiles',
     },
   ]);
   builder.addAll([
