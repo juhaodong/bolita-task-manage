@@ -71,7 +71,10 @@ async function generalInit(value) {
 
 export async function generalAdd(value: any, collectionName: string, prefix = '') {
   const id = value?.id ?? (await getCollectionNextId(collectionName, prefix));
+  const missionsList = value.missionsList;
   await generalInit(value);
+  value.missionsList = missionsList;
+  console.log(value.missionsList, 'before');
   await setDoc(doc(collection(db, collectionName), id), value);
   await doLog({
     toStatus: '创建',
