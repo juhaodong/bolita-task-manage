@@ -9,135 +9,112 @@ export function getNeededColumnByNotifyType(notifyType: NotifyType | null) {
 
 function getNeededFieldBuilder(notifyType: NotifyType | null) {
   const builder = formFieldBuilder();
-  builder.add({
-    label: '票号',
-    field: 'ticketId',
-  });
-  builder.add({
-    label: '箱号',
-    field: 'containerId',
-  });
   builder.addAll([
+    {
+      label: '柜号',
+      field: 'containerId',
+    },
+    {
+      label: '票号',
+      field: 'ticketId',
+    },
+    {
+      label: '国家',
+      field: 'country',
+    },
+    {
+      label: '件数',
+      field: 'number',
+    },
+    {
+      label: '总实重',
+      field: 'weight',
+    },
+    {
+      label: '总体积',
+      field: 'volume',
+    },
+  ]);
+  builder.addAll([
+    {
+      label: 'FBA/快递单号',
+      field: 'FBA/DeliveryCode',
+    },
+    {
+      label: 'PO',
+      field: 'PO',
+    },
+    {
+      label: 'FC/送货地址',
+      field: 'FC/Address',
+    },
+    {
+      label: '操作',
+      field: 'operation',
+    },
+    {
+      label: '换单文件',
+      field: 'files',
+    },
+  ]);
+  builder.addAll([
+    {
+      label: '分拣标识',
+      field: 'sign',
+    },
+    {
+      label: '包装',
+      field: 'package',
+    },
     {
       label: '托数',
       field: 'trayNum',
     },
     {
-      label: '箱数',
-      field: 'containerNum',
+      label: '品名',
+      field: 'productName',
     },
     {
-      label: '长',
-      field: 'length',
+      label: 'UN号',
+      field: 'UNNumber',
     },
     {
-      label: '宽',
-      field: 'width',
+      label: '邮编',
+      field: 'postcode',
     },
     {
-      label: '高',
-      field: 'height',
+      label: '街道+门牌号',
+      field: 'address1',
     },
     {
-      label: '重量kg',
-      field: 'weightKg',
+      label: '地址2',
+      field: 'address2',
+    },
+    {
+      label: '公司名称',
+      field: 'companyName',
+    },
+    {
+      label: '收件人',
+      field: 'recipient',
+    },
+    {
+      label: '联系电话',
+      field: 'phone',
+    },
+    {
+      label: '邮箱',
+      field: 'email',
+    },
+    {
+      label: '是否需要预约',
+      field: 'needReserve',
+    },
+    {
+      label: '备注',
+      field: 'note',
     },
   ]);
-  if (notifyType == NotifyType.Container) {
-    builder.add({
-      label: '体积',
-      field: 'volume',
-    });
-  }
-  builder.add({
-    label: '运单号',
-    field: 'waybillId',
-  });
-  if (notifyType == NotifyType.Container) {
-    builder.addAll([
-      {
-        label: '目的国',
-        field: 'country',
-      },
-      {
-        label: 'FBAcode',
-        field: 'fbaCode',
-      },
-      {
-        label: 'PO',
-        field: 'PO',
-      },
-      {
-        label: 'FBA号',
-        field: 'FBANo',
-      },
-      {
-        label: '收件人',
-        field: 'contact',
-      },
-      {
-        label: '电话/邮箱',
-        field: 'email',
-      },
-      {
-        label: '街道',
-        field: 'street',
-      },
-      {
-        label: '门牌号',
-        field: 'houseNo',
-      },
-      {
-        label: '地址附加',
-        field: 'address2',
-      },
-      {
-        label: '邮编',
-        field: 'postCode',
-      },
-      {
-        label: '城市',
-        field: 'city',
-      },
-      {
-        label: '州',
-        field: 'state',
-      },
-    ]);
-    builder.addAll([
-      {
-        label: '物流方式',
-        field: 'deliveryMethod',
-      },
-      {
-        label: '详细物流方式',
-        field: 'deliveryDetail',
-      },
-    ]);
-    builder.add({
-      label: '包装',
-      field: 'package',
-    });
-  } else {
-    builder.addAll([
-      {
-        label: '物流方式',
-        field: 'deliveryMethod',
-      },
-      {
-        label: '详细物流方式',
-        field: 'deliveryDetail',
-      },
-    ]);
-  }
-  builder.add({
-    label: '备注',
-    field: 'note',
-  });
-  builder.add({
-    label: '货物名称',
-    field: 'productName',
-  });
   return builder;
 }
 

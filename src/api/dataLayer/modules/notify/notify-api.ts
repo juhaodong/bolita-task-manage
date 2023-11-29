@@ -1,26 +1,15 @@
-import {
-  getNotifyDetailListByNotify,
-  NotifyDetailManager,
-} from '@/api/dataLayer/modules/notify/notify-detail';
-import { safeParseInt, safeSumInt } from '@/store/utils/utils';
+import { getNotifyDetailListByNotify } from '@/api/dataLayer/modules/notify/notify-detail';
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 import { notifyPath, taskListPath } from '@/api/dataLayer/modules/notify/path';
 
 export const NotifyManager = initModel({
   collectionName: notifyPath,
-  init(value, taskList) {
-    value.boxCount = safeSumInt(taskList, 'containerNum');
-    value.trayCount = safeSumInt(taskList, 'trayNum');
+  init(value) {
     const info = {
-      containerNo: '',
-      containerType: '',
       arrivedCount: 0,
-      note: '',
       inStatus: InBoundStatus.Wait,
       outStatus: OutStatus.Wait,
       cashStatus: CashStatus.NotFinish,
-      warehouseNote: '',
-      totalCount: safeParseInt(value.boxCount) + safeParseInt(value.trayCount),
     };
     return Object.assign(info, value);
   },
@@ -28,9 +17,10 @@ export const NotifyManager = initModel({
     collectionName: taskListPath,
     loader: getNotifyDetailListByNotify,
   },
-  async afterAddHook(id, value, taskList) {
-    await NotifyDetailManager.massiveAdd(taskList, id, value.customerId);
-  },
+  // async afterAddHook(id, value, taskList) {
+  //   value.missionsList = taskList;
+  //   await NotifyDetailManager.massiveAdd(taskList, id);
+  // },
 });
 
 export enum InBoundStatus {

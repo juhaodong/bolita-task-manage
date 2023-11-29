@@ -4,11 +4,11 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { getNeededColumnByNotifyType } from '@/api/dataLayer/modules/notify/NotifyRepository';
   import readXlsxFile from 'read-excel-file';
-  import { formatItemAddress } from '@/api/dataLayer/fieldDefination/addressGroup';
-  import { handleRequest } from '@/store/utils/utils';
   import NewContainerForecast from '@/views/newNewViews/ContainerForecast/form/NewContainerForecast.vue';
+  import { handleRequest } from '@/store/utils/utils';
 
   interface Prop {
+    currentModel?: any;
     type: NotifyType;
   }
 
@@ -30,12 +30,16 @@
     }
     const schema = Object.fromEntries(
       getNeededColumnByNotifyType(notifyType).map((it) => {
-        return [it.title, { prop: it.key, type: String }];
+        return [it.title, { prop: it.key }];
       })
     );
+    console.log(schema, 'schema');
     try {
-      const { rows, errors } = await readXlsxFile(file, { schema });
+      let { rows, errors } = await readXlsxFile(file, { schema });
+      rows = rows.slice(2);
+      console.log(rows, errors, '123');
       if (rows.length > 0 && errors.length == 0) {
+        rows.slice(2);
         return rows.map((it) => ({ ...it, arrivedCount: 0 }));
       }
     } catch (e: any) {
@@ -44,14 +48,21 @@
     return [];
   }
 
+  function closeDialog() {
+    emit('saved');
+  }
+
   async function saveNotify(value: any) {
     startLoading();
     value.notifyType = prop.type;
     const taskList = [
-      ...(await readFile(value.files?.[0].file, value.notifyType)).map(formatItemAddress),
+      ...(await readFile(value.files?.[0].file, value.notifyType)),
       ...(value?.trayTaskList ?? []),
     ];
     delete value.uploadFile;
+    console.log(taskList, 'list');
+    value.missionsList = taskList;
+    console.log(value, 'value');
     const res = await NotifyManager.add(value, taskList);
     await handleRequest(res, async () => {
       emit('saved');
@@ -63,10 +74,10 @@
 <template>
   <loading-frame :loading="loading">
     <template v-if="type == NotifyType.Container">
-      <new-container-forecast @submit="saveNotify" />
+      <new-container-forecast :model="currentModel" @closed="closeDialog" @submit="saveNotify" />
     </template>
     <template v-else-if="type == NotifyType.TrayOrBox">
-      <tray-form @submit="saveNotify" />
+      <tray-form :model="currentModel" @submit="saveNotify" />
     </template>
   </loading-frame>
 </template>

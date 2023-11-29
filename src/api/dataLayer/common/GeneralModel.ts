@@ -130,6 +130,7 @@ export function initModel(g: GeneralModel): Model {
 
   return {
     async addInternal(value, ...args): Promise<string> {
+      console.log(value.missionsList, 'missionsList');
       if (g.uniqKeys) {
         for (const uniqKey of g.uniqKeys) {
           const exist = await executeQuery(
@@ -141,6 +142,7 @@ export function initModel(g: GeneralModel): Model {
         }
       }
       const t = await g.init(value, ...args);
+      console.log(t.missionsList, 't.missionsList');
       const id = await generalAdd(t, g.collectionName, g?.idPrefix);
       if (g.afterAddHook) {
         await g.afterAddHook(id, t, ...args);
