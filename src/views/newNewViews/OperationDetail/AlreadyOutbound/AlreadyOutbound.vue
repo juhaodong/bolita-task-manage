@@ -30,12 +30,13 @@
   import { Component, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
-  import { NotifyManager, OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import { $ref } from 'vue/macros';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import NewPickUpPlan from '@/views/newNewViews/PickUp/NewPickUpPlan.vue';
   import { Folder32Filled } from '@vicons/fluent';
+  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
 
   const showModal = ref(false);
 
@@ -48,12 +49,12 @@
   }
 
   async function startEdit(id) {
-    currentModel = await NotifyManager.getById(id);
+    currentModel = await NotifyDetailManager.getById(id);
     showModal.value = true;
   }
 
   const loadDataTable = async () => {
-    return (await NotifyManager.load(filterObj)).filter(
+    return (await NotifyDetailManager.load(filterObj)).filter(
       (it) => it.outStatus === OutStatus.All && it.POD
     );
   };
@@ -83,7 +84,7 @@
     width: 120,
     render(record: any) {
       const fileAction = (label, key, icon?: Component) => {
-        return getFileActionButton(label, key, NotifyManager, reloadTable, record, icon);
+        return getFileActionButton(label, key, NotifyDetailManager, reloadTable, record, icon);
       };
       return h(TableAction as any, {
         style: 'button',

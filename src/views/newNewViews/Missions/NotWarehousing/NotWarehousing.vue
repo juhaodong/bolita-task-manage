@@ -88,7 +88,9 @@
   let filterObj: any | null = $ref(null);
 
   const loadDataTable = async () => {
-    const res = await NotifyDetailManager.load(filterObj);
+    const res = (await NotifyDetailManager.load(filterObj)).filter(
+      (it) => it.inStatus !== InBoundStatus.All
+    );
     console.log(res, 'res');
     return res;
   };

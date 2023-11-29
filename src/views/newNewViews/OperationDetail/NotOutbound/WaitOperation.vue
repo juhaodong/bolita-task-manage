@@ -76,6 +76,7 @@
   import OutBoundEditDialog from '@/views/newViews/OutboundPlan/dialog/OutBoundEditDialog.vue';
   import { usePermission } from '@/hooks/web/usePermission';
   import { OutBoundPlanPower } from '@/api/dataLayer/common/PowerModel';
+  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
 
   const { hasPermission } = usePermission();
 
@@ -88,7 +89,7 @@
   const actionRef = ref();
   let filterObj: any | null = $ref(null);
   const loadDataTable = async () => {
-    return (await NotifyManager.load(filterObj)).filter(
+    return (await NotifyDetailManager.load(filterObj)).filter(
       (it) => it.outStatus !== OutStatus.All || !it.POD
     );
   };
@@ -115,7 +116,7 @@
         return getFileActionButton(
           label,
           key,
-          OutBoundPlanManager,
+          NotifyDetailManager,
           reloadTable,
           record,
           icon,

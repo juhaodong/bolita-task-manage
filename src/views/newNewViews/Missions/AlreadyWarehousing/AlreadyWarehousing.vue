@@ -35,6 +35,8 @@
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import NewPickUpPlan from '@/views/newNewViews/PickUp/NewPickUpPlan.vue';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
+  import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import { Folder32Filled } from '@vicons/fluent';
 
   const showModal = ref(false);
 
@@ -52,7 +54,9 @@
   }
 
   const loadDataTable = async () => {
-    const res = await NotifyDetailManager.load(filterObj);
+    const res = (await NotifyDetailManager.load(filterObj)).filter(
+      (it) => it.inStatus === InBoundStatus.All
+    );
     console.log(res, 'res');
     return res;
   };
@@ -86,7 +90,12 @@
       };
       return h(TableAction as any, {
         style: 'button',
-        actions: [],
+        actions: [
+          fileAction('提单文件', 'files', Folder32Filled),
+          fileAction('POD', 'POD'),
+          fileAction('操作文件', 'operationFiles'),
+          fileAction('问题图片', 'problemFiles'),
+        ],
       });
     },
   });
