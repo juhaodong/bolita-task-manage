@@ -57,26 +57,6 @@ export const columns: DataTableColumns<any> = [
     width: 140,
   },
   {
-    title: '可约车',
-    key: 'bookingCar',
-    width: 140,
-  },
-  timeColumn('pickUpDateTime', '提货时间'),
-  {
-    title: '提货方',
-    key: 'pickUpPerson',
-    width: 140,
-  },
-  {
-    title: '明细',
-    key: 'detail',
-    width: 140,
-  },
-  {
-    title: 'POD',
-    key: 'POD',
-  },
-  {
     title: '备注',
     key: 'note',
   },

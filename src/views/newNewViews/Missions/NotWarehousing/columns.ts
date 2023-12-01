@@ -51,7 +51,7 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: '换单文件',
-    key: 'files',
+    key: 'changeOrderFiles',
   },
   {
     title: '分拣标识',

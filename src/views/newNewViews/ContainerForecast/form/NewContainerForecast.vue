@@ -71,38 +71,38 @@
       field: 'destination',
       label: '目的地',
     },
-    {
-      field: 'bookingCar',
-      component: 'NSelect',
-      label: '可约车',
-      componentProps: {
-        options: [
-          { value: '1', label: '是' },
-          { value: '0', label: '否' },
-        ],
-      },
-    },
-    {
-      field: 'pickUpDateTime',
-      component: 'NDatePicker',
-      label: '提货时间',
-      componentProps: {
-        type: 'date',
-        clearable: true,
-      },
-    },
-    {
-      field: 'pickUpPerson',
-      label: '提货方',
-    },
-    {
-      field: 'detail',
-      label: '明细',
-    },
-    {
-      field: 'POD',
-      label: 'POD',
-    },
+    // {
+    //   field: 'bookingCar',
+    //   component: 'NSelect',
+    //   label: '可约车',
+    //   componentProps: {
+    //     options: [
+    //       { value: '1', label: '是' },
+    //       { value: '0', label: '否' },
+    //     ],
+    //   },
+    // },
+    // {
+    //   field: 'pickUpDateTime',
+    //   component: 'NDatePicker',
+    //   label: '提货时间',
+    //   componentProps: {
+    //     type: 'date',
+    //     clearable: true,
+    //   },
+    // },
+    // {
+    //   field: 'pickUpPerson',
+    //   label: '提货方',
+    // },
+    // {
+    //   field: 'detail',
+    //   label: '明细',
+    // },
+    // {
+    //   field: 'POD',
+    //   label: 'POD',
+    // },
     {
       field: 'note',
       label: '备注',

@@ -30,13 +30,13 @@
   import { Component, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
-  import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import { $ref } from 'vue/macros';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import NewPickUpPlan from '@/views/newNewViews/PickUp/NewPickUpPlan.vue';
   import { Folder32Filled } from '@vicons/fluent';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
+  import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
 
   const showModal = ref(false);
 
@@ -54,9 +54,7 @@
   }
 
   const loadDataTable = async () => {
-    return (await NotifyDetailManager.load(filterObj)).filter(
-      (it) => it.outStatus === OutStatus.All && it.POD
-    );
+    return (await OutBoundDetailManager.load(filterObj)).filter((it) => it.POD);
   };
 
   const actionRef = ref();

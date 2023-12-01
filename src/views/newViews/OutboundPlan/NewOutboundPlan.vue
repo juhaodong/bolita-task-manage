@@ -54,10 +54,10 @@
   } from '@/api/dataLayer/fieldDefination/common';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeParseInt, toastError } from '@/store/utils/utils';
-  import { groupBy } from 'lodash';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { afterPlanDetailAdded } from '@/api/dataLayer/modules/OutBoundPlan/outAddHook';
+  import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 
   interface Props {
     model?: any;
@@ -75,8 +75,6 @@
       allNotifyDetail = allNotifyDetail.filter((it: any) => checkedRowKeys.value.includes(it.id));
     }
     console.log(allNotifyDetail, 'all');
-    groupNotifyDetail.value = groupBy(allNotifyDetail, 'deliveryDetail');
-    console.log(groupNotifyDetail.value, 'log1');
   });
   let allNotifyDetail: any[] = $ref([]);
   let loading: boolean = $ref(false);
@@ -117,13 +115,16 @@
 
   async function saveOutboundPlan(value) {
     loading = true;
-    for (const item in groupNotifyDetail.value) {
-      value.planList = groupNotifyDetail.value[item];
-      value.deliveryMethod = value.planList[0].deliveryMethod;
-      value.deliveryDetail = value.planList[0].deliveryDetail;
-      await OutBoundPlanManager.add(value, groupNotifyDetail.value[item]);
-      await afterPlanDetailAdded(groupNotifyDetail.value[item]);
-    }
+    allNotifyDetail.forEach((it) => {
+      it.needCar = value.needCar;
+      if (it.needCar === '1') {
+        it.carStatus = CarStatus.UnAble;
+      } else {
+        it.carStatus = CarStatus.NoNeed;
+      }
+    });
+    await OutBoundPlanManager.add(value, allNotifyDetail);
+    await afterPlanDetailAdded(allNotifyDetail);
     await safeScope(() => {
       emit('saved');
     });
@@ -135,36 +136,25 @@
       type: 'selection',
       key: 'selection',
     },
-    { title: '物流方式', key: 'deliveryMethod' },
-    { title: '物流详情', key: 'deliveryDetail' },
     { title: '票号', key: 'ticketId' },
     editableColumn({ title: '箱号', key: 'containerId' }, allNotifyDetail),
     editableColumn({ title: '托数', key: 'outBoundTrayNum', width: 60 }, allNotifyDetail),
     editableColumn({ title: '箱数', key: 'outBoundContainerNum', width: 60 }, allNotifyDetail),
-    editableColumn({ title: '长', key: 'length', width: 60 }, allNotifyDetail),
-    editableColumn({ title: '宽', key: 'width', width: 60 }, allNotifyDetail),
-    editableColumn({ title: '高', key: 'height', width: 60 }, allNotifyDetail),
-    editableColumn({ title: '重量', key: 'weightKg', width: 60 }, allNotifyDetail),
+    editableColumn({ title: '重量', key: 'weight', width: 60 }, allNotifyDetail),
     editableColumn({ title: '体积', key: 'volume', width: 60 }, allNotifyDetail),
-    editableColumn({ title: 'FBA号', key: 'FBANo' }, allNotifyDetail),
+    editableColumn({ title: 'FBA号', key: 'FBA/DeliveryCode' }, allNotifyDetail),
     editableColumn({ title: '备注', key: 'note' }, allNotifyDetail),
   ]);
   const displayColumns: DataTableColumns<any> = $computed(() => [
     { title: '入库ID', key: 'notifyId' },
-    { title: '物流详情', key: 'deliveryDetail' },
     { title: '票号', key: 'ticketId' },
     { title: '箱号', key: 'containerId' },
     { title: '托数', key: 'outBoundTrayNum' },
     { title: '箱数', key: 'outBoundContainerNum' },
-    { title: '物流详情', key: 'deliveryDetail' },
-    { title: '地址', key: 'deliveryAddress' },
-    { title: '物流方式', key: 'deliveryMethod' },
-    { title: '长', key: 'length' },
-    { title: '宽', key: 'width' },
-    { title: '高', key: 'height' },
-    { title: '重量', key: 'weightKg' },
+    { title: '地址', key: 'address' },
+    { title: '重量', key: 'weight' },
     { title: '体积', key: 'volume' },
-    { title: 'FBA号', key: 'FBANo' },
+    { title: 'FBA号', key: 'FBA/DeliveryCode' },
     { title: '备注', key: 'note' },
   ]);
   const searchSchema: FormField[] = [
@@ -175,6 +165,34 @@
 
   const addressFormFields: FormField[] = [
     getFilesUploadFormField('files', false),
+    {
+      field: 'needCar',
+      component: 'NSelect',
+      label: '是否需要订车',
+      componentProps: {
+        options: [
+          { value: '1', label: '是' },
+          { value: '0', label: '否' },
+        ],
+      },
+    },
+    {
+      field: 'pickUpDateTime',
+      component: 'NDatePicker',
+      label: '提货时间',
+      componentProps: {
+        type: 'date',
+        clearable: true,
+      },
+    },
+    {
+      field: 'pickUpPerson',
+      label: '提货方',
+    },
+    {
+      field: 'detail',
+      label: '明细',
+    },
     {
       field: 'operationRequirement',
       label: '操作要求',

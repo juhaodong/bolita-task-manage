@@ -21,7 +21,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           title: '订车管理',
         },
-        component: () => import('@/views/newViews/LogisticsDetails/LogisticsDetails.vue'),
+        component: () => import('@/views/newNewViews/CarManage/CarpoolManagement.vue'),
       },
 
       {

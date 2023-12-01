@@ -5,7 +5,16 @@
       :form-fields="filters"
       @clear="updateFilter(null)"
       @submit="updateFilter"
-    />
+    >
+      <n-button type="primary" @click="addTable">
+        <template #icon>
+          <n-icon>
+            <Box20Filled />
+          </n-icon>
+        </template>
+        新建出库计划
+      </n-button></filter-bar
+    >
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
@@ -19,9 +28,9 @@
       :show-icon="false"
       preset="card"
       style="width: 90%; min-width: 600px; max-width: 1200px"
-      title="取货计划"
+      title="出库计划"
     >
-      <new-pick-up-plan :model="currentModel" @saved="reloadTable" />
+      <new-outbound-plan @saved="reloadTable" />
     </n-modal>
   </n-card>
 </template>
@@ -33,10 +42,10 @@
   import { $ref } from 'vue/macros';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import NewPickUpPlan from '@/views/newNewViews/PickUp/NewPickUpPlan.vue';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
   import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
-  import { Folder32Filled } from '@vicons/fluent';
+  import { Box20Filled, Folder32Filled } from '@vicons/fluent';
+  import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
 
   const showModal = ref(false);
 
@@ -50,6 +59,10 @@
 
   async function startEdit(id) {
     currentModel = await NotifyDetailManager.getById(id);
+    showModal.value = true;
+  }
+
+  function addTable() {
     showModal.value = true;
   }
 

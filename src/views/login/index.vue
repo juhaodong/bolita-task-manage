@@ -11,15 +11,15 @@
       <div class="view-account-form">
         <n-form
           ref="formRef"
-          label-placement="left"
-          size="large"
           :model="formInline"
           :rules="rules"
+          label-placement="left"
+          size="large"
         >
           <n-form-item path="username">
             <n-input v-model:value="formInline.username" placeholder="请输入用户名">
               <template #prefix>
-                <n-icon size="18" color="#808695">
+                <n-icon color="#808695" size="18">
                   <PersonOutline />
                 </n-icon>
               </template>
@@ -28,12 +28,12 @@
           <n-form-item path="password">
             <n-input
               v-model:value="formInline.password"
-              type="password"
-              showPasswordOn="click"
               placeholder="请输入密码"
+              showPasswordOn="click"
+              type="password"
             >
               <template #prefix>
-                <n-icon size="18" color="#808695">
+                <n-icon color="#808695" size="18">
                   <LockClosedOutline />
                 </n-icon>
               </template>
@@ -50,7 +50,7 @@
             </div>
           </n-form-item>
           <n-form-item>
-            <n-button type="primary" @click="handleSubmit" size="large" :loading="loading" block>
+            <n-button :loading="loading" block size="large" type="primary" @click="handleSubmit">
               登录
             </n-button>
           </n-form-item>
@@ -61,14 +61,14 @@
               </div>
               <div class="flex-initial mx-2">
                 <a href="javascript:">
-                  <n-icon size="24" color="#2d8cf0">
+                  <n-icon color="#2d8cf0" size="24">
                     <LogoGithub />
                   </n-icon>
                 </a>
               </div>
               <div class="flex-initial mx-2">
                 <a href="javascript:">
-                  <n-icon size="24" color="#2d8cf0">
+                  <n-icon color="#2d8cf0" size="24">
                     <LogoFacebook />
                   </n-icon>
                 </a>
@@ -106,7 +106,7 @@
   const LOGIN_NAME = PageEnum.BASE_LOGIN_NAME;
 
   const formInline = reactive({
-    username: 'admin',
+    username: 'juhaodong',
     password: '123456',
     isCaptcha: true,
   });

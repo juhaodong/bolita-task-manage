@@ -33,11 +33,9 @@
         return [it.title, { prop: it.key }];
       })
     );
-    console.log(schema, 'schema');
     try {
       let { rows, errors } = await readXlsxFile(file, { schema });
       rows = rows.slice(2);
-      console.log(rows, errors, '123');
       if (rows.length > 0 && errors.length == 0) {
         rows.slice(2);
         return rows.map((it) => ({ ...it, arrivedCount: 0 }));
@@ -60,7 +58,6 @@
       ...(value?.trayTaskList ?? []),
     ];
     delete value.uploadFile;
-    console.log(taskList, 'list2');
     const res = await NotifyManager.add(value, taskList);
     await handleRequest(res, async () => {
       emit('saved');

@@ -7,8 +7,13 @@ import {
 } from '@/api/dataLayer/modules/notify/notify-api';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { generateOptionFromArray } from '@/store/utils/utils';
+import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 
 export const columns: DataTableColumns<any> = [
+  {
+    type: 'selection',
+    disabled: (row) => row.needCar === '0' || row.carStatus === CarStatus.Booked,
+  },
   {
     title: '柜号',
     key: 'containerId',
@@ -16,6 +21,14 @@ export const columns: DataTableColumns<any> = [
   {
     title: '票号',
     key: 'ticketId',
+  },
+  {
+    title: '订车状态',
+    key: 'carStatus',
+  },
+  {
+    title: '订车ID',
+    key: 'carpoolId',
   },
   {
     title: '国家',
@@ -51,7 +64,7 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: '换单文件',
-    key: 'files',
+    key: 'changeOrderFiles',
   },
   {
     title: '分拣标识',
