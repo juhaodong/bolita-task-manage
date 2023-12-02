@@ -27,13 +27,7 @@
         @submit="checkDialog.confirm"
       >
         <template #extraSubmitButton="{ submit }">
-          <n-button
-            v-if="checkDialog.editable"
-            :disabled="checkDialog.disableClick"
-            type="success"
-            @click="submit"
-            >上传</n-button
-          >
+          <n-button type="success" @click="submit">上传</n-button>
         </template>
         <template #extraCancelButton="{ cancel }">
           <n-button type="error" @click="cancel">关闭</n-button>

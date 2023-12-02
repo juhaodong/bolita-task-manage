@@ -35,7 +35,6 @@
   import { $ref } from 'vue/macros';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { usePermission } from '@/hooks/web/usePermission';
-  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
   import NewCarpoolManagement from '@/views/newNewViews/CarManage/dialog/NewCarpoolManagement.vue';
 
@@ -80,7 +79,7 @@
         return getFileActionButton(
           label,
           key,
-          NotifyDetailManager,
+          OutBoundDetailManager,
           reloadTable,
           record,
           icon,
