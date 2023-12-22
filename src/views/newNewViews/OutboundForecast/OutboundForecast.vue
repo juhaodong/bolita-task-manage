@@ -1,87 +1,32 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <filter-bar @submit="updateFilter" :form-fields="filters" @clear="updateFilter(null)">
+    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
       <n-button size="small" type="info" @click="addTable(NotifyType.Container)">
         <template #icon>
           <n-icon>
             <Box20Filled />
           </n-icon>
         </template>
-        新建货柜预报
-      </n-button>
-      <n-button size="small" type="info">
-        <template #icon>
-          <n-icon>
-            <Box20Filled />
-          </n-icon>
-        </template>
-        卸柜业务流程
-      </n-button>
-      <n-button size="small" type="info">
-        <template #icon>
-          <n-icon>
-            <Box20Filled />
-          </n-icon>
-        </template>
-        货柜预报填写注意事项
-      </n-button>
-      <n-button size="small" @click="clearAllData()">
-        <template #icon>
-          <n-icon>
-            <TruckDelivery />
-          </n-icon>
-        </template>
-        清楚数据
+        新建出库预报
       </n-button>
     </filter-bar>
     <div class="my-2"></div>
     <BasicTable
+      ref="actionRef"
+      :actionColumn="actionColumn"
       :columns="columns"
       :request="loadDataTable"
       :row-key="(row) => row.id"
-      ref="actionRef"
-      :actionColumn="actionColumn"
     />
     <n-modal
       v-model:show="showModal"
       :show-icon="false"
-      preset="card"
-      title="新建货柜预报"
       :style="{ maxWidth: notifyType === NotifyType.TrayOrBox ? '1600px' : '800px' }"
+      preset="card"
       style="width: 90%; min-width: 600px"
+      title="新建出库预报"
     >
-      <container-forecast-index
-        :current-model="currentModel"
-        @saved="closeAddDialog"
-        :type="notifyType"
-      />
-    </n-modal>
-    <n-modal
-      v-model:show="showOperationTable"
-      :show-icon="false"
-      preset="dialog"
-      title="卸柜表"
-      style="width: 90%; min-width: 600px; max-width: 800px"
-    >
-      <notify-unload-form @save="reloadTable" :notify-id="currentNotifyId!" />
-    </n-modal>
-    <n-modal
-      v-model:show="showFeeDialog"
-      :show-icon="false"
-      preset="dialog"
-      title="费用表"
-      style="width: 90%; min-width: 600px; max-width: 800px"
-    >
-      <notify-fee-dialog :notify-id="currentNotifyId!" @save="reloadTable" />
-    </n-modal>
-    <n-modal
-      v-model:show="showWarehouseDialog"
-      :show-icon="false"
-      preset="dialog"
-      title="仓库信息"
-      style="width: 90%; min-width: 600px; max-width: 800px"
-    >
-      <warehouse-info-dialog :notify-id="currentNotifyId!" />
+      <new-outbound-forecast />
     </n-modal>
   </n-card>
 </template>
@@ -98,33 +43,19 @@
     OutStatus,
   } from '@/api/dataLayer/modules/notify/notify-api';
   import { $ref } from 'vue/macros';
-  import { TruckDelivery } from '@vicons/tabler';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
-  import Delete28Filled from '@vicons/fluent/es/Delete28Filled';
   import { Hammer } from '@vicons/ionicons5';
-  import { CurrencyEuro } from '@vicons/carbon';
-  import NotifyUnloadForm from '@/views/newViews/NotifyList/form/NotifyUnloadForm.vue';
-  import WarehouseInfoDialog from '@/views/newViews/NotifyList/form/WarehouseInfoDialog.vue';
-  import NotifyFeeDialog from '@/views/newViews/NotifyList/form/NotifyFeeDialog.vue';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import { clearAllData } from '@/api/dataLayer/clearAllData';
-  import ContainerForecastIndex from '@/views/newNewViews/ContainerForecast/form/ContainerForecastIndex.vue';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
+  import NewOutboundForecast from '@/views/newNewViews/OutboundForecast/NewOutboundForecast.vue';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
-  let currentModel: any | null = $ref(null);
 
   const showModal = ref(false);
-
-  let showOperationTable = $ref(false);
-  let currentNotifyId: string | null = $ref(null);
-  let showWarehouseDialog = $ref(false);
-  let showFeeDialog = $ref(false);
   let filterObj: any | null = $ref(null);
 
   function addTable(type: NotifyType) {
     notifyType = type;
-    currentModel = null;
     showModal.value = true;
   }
 
@@ -169,7 +100,7 @@
         style: 'button',
         actions: [
           {
-            label: '修改',
+            label: '更改',
             icon: DocumentEdit16Filled,
             onClick() {
               startEdit(record.id);
@@ -181,17 +112,15 @@
             },
           },
           fileAction('CMR', 'CMRFiles'),
+          fileAction('POD', 'PODFiles'),
+          fileAction('提单', 'LadingBill'),
           {
-            label: '卸柜单',
+            label: '出库单',
             icon: Hammer,
             onClick() {
               currentNotifyId = record.id!;
               showOperationTable = true;
             },
-          },
-          {
-            label: '预报文件',
-            icon: CurrencyEuro,
           },
         ],
       });

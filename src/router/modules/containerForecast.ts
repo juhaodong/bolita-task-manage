@@ -19,10 +19,18 @@ const routes: Array<RouteRecordRaw> = [
         path: 'forecast',
         name: `forecast`,
         meta: {
-          title: '预报',
+          title: '到货预报',
           activeMenu: 'forecast',
         },
         component: () => import('@/views/newNewViews/ContainerForecast/ContainerForecast.vue'),
+      },
+      {
+        path: 'outbound',
+        name: `outbound`,
+        meta: {
+          title: '出库预报',
+        },
+        component: () => import('@/views/newNewViews/OutboundForecast/OutboundForecast.vue'),
       },
       {
         path: 'pickUp',

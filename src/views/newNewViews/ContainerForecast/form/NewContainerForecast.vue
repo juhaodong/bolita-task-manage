@@ -17,8 +17,8 @@
 
   const schemas: FormFields = [
     {
-      field: 'weeks',
-      label: '自然周',
+      field: 'containerNo',
+      label: '货柜号',
     },
     {
       field: 'planArriveDateTime',
@@ -30,8 +30,8 @@
       },
     },
     {
-      field: 'address',
-      label: '地址',
+      field: 'inHouseTime',
+      label: '到达时间',
     },
     {
       field: 'realArriveDateTime',
@@ -42,11 +42,6 @@
         clearable: true,
       },
     },
-    {
-      field: 'inHouseTime',
-      label: '仓位时间',
-      required: false,
-    },
     getFilesUploadFormField('files', false, () => {
       window.open(
         'https://firebasestorage.googlea' +
@@ -56,56 +51,9 @@
       );
     }),
     {
-      field: 'trayNum',
-      label: '托盘',
-    },
-    {
-      field: 'carNumber',
-      label: '卡车号',
-    },
-    {
-      field: 'ISA',
-      label: 'ISA',
-    },
-    {
-      field: 'destination',
-      label: '目的地',
-    },
-    // {
-    //   field: 'bookingCar',
-    //   component: 'NSelect',
-    //   label: '可约车',
-    //   componentProps: {
-    //     options: [
-    //       { value: '1', label: '是' },
-    //       { value: '0', label: '否' },
-    //     ],
-    //   },
-    // },
-    // {
-    //   field: 'pickUpDateTime',
-    //   component: 'NDatePicker',
-    //   label: '提货时间',
-    //   componentProps: {
-    //     type: 'date',
-    //     clearable: true,
-    //   },
-    // },
-    // {
-    //   field: 'pickUpPerson',
-    //   label: '提货方',
-    // },
-    // {
-    //   field: 'detail',
-    //   label: '明细',
-    // },
-    // {
-    //   field: 'POD',
-    //   label: 'POD',
-    // },
-    {
       field: 'note',
       label: '备注',
+      required: false,
     },
   ];
 

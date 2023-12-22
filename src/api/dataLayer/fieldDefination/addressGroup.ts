@@ -13,10 +13,12 @@ import { DeliveryMethod, deliveryMethod } from '@/api/dataLayer/modules/delivery
 import { cloneDeep } from 'lodash-es';
 import {
   AmazonDeliveryDetail,
-  boxDeliveryMethod,
-  directDeliveryMethodDetail,
-  OtherDeliveryDetail,
+  expressDelivery,
+  looseBoxDelivery,
+  retainWarehouse,
   shouldUseFBACode,
+  transfer,
+  trayDelivery,
 } from '@/api/dataLayer/modules/deliveryMethod/detail';
 
 export const deliveryAddressDetail: FormField[] = [
@@ -157,10 +159,11 @@ export function formatItemAddress(item) {
 }
 
 export const deliveryDetailList = [
-  ...boxDeliveryMethod,
-  ...Object.values(AmazonDeliveryDetail),
-  ...directDeliveryMethodDetail,
-  ...Object.values(OtherDeliveryDetail),
+  ...Object.values(expressDelivery),
+  ...Object.values(trayDelivery),
+  ...Object.values(looseBoxDelivery),
+  ...Object.values(retainWarehouse),
+  ...Object.values(transfer),
 ];
 
 export function checkInfo(item) {

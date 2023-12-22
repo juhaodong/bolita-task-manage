@@ -2,14 +2,35 @@ import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { generateOptionFromArray } from '@/store/utils/utils';
 import { DeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod/index';
 
-export enum BoxDeliveryMethod {
-  DHL = 'DHL',
-  DPD = 'DPD',
-  UPS = 'UPS',
-  GLS = 'GLS',
+export enum expressDelivery {
+  handPDP = '交DPD',
+  handDHL = '交DHL',
+  handUPS = '交UPS',
+  handGLS = '交GLS',
+  stickPDP = '贴PDP',
+  stickDHL = '贴DHL',
+  stickUPS = '贴UPS',
+  stickGLS = '贴GLS',
 }
 
-export const boxDeliveryMethod = Object.values(BoxDeliveryMethod);
+export enum trayDelivery {
+  AMZ = 'AMZ',
+  trayOther = '其他',
+}
+
+export enum looseBoxDelivery {
+  AMZ = 'FBA',
+  LooseBoxOther = '其他',
+}
+
+export enum retainWarehouse {
+  retainWarehouse = '流仓',
+}
+
+export enum transfer {
+  otherSystem = '其他系统',
+  transferOther = '其他',
+}
 
 export enum AmazonDeliveryDetail {
   Amazon = '亚马逊',
@@ -17,63 +38,52 @@ export enum AmazonDeliveryDetail {
   SingleTruck = '散货派送',
 }
 
-export enum OtherDeliveryDetail {
-  SelfPick = '自提',
-  Stay = '留仓',
-}
-
-export const directDeliveryMethodDetail = ['DTM2', 'HAJ1', 'WRO5', '90451'];
-
-const otherDeliveryMethodField: FormField = {
+const expressDeliveryMethodField: FormField = {
   field: 'deliveryDetail',
   label: '物流方式',
   component: 'NSelect',
   componentProps: {
-    options: generateOptionFromArray(Object.values(OtherDeliveryDetail)),
-  },
-  displayCondition(value) {
-    return value.deliveryMethod === DeliveryMethod.Other;
+    options: generateOptionFromArray(Object.values(expressDelivery)),
   },
 };
-const packageDeliveryMethodField: FormField = {
+const trayDeliveryMethodField: FormField = {
   field: 'deliveryDetail',
   label: '物流方式',
   component: 'NSelect',
   componentProps: {
-    options: generateOptionFromArray(boxDeliveryMethod),
-  },
-  displayCondition(value) {
-    return value.deliveryMethod === DeliveryMethod.Package;
+    options: generateOptionFromArray(Object.values(trayDelivery)),
   },
 };
-const directDeliveryMethodField: FormField = {
+const looseBoxDeliveryMethodField: FormField = {
   field: 'deliveryDetail',
   label: '物流方式',
   component: 'NSelect',
   componentProps: {
-    options: generateOptionFromArray(directDeliveryMethodDetail),
-  },
-
-  displayCondition(value) {
-    return value.deliveryMethod === DeliveryMethod.Direct;
+    options: generateOptionFromArray(Object.values(looseBoxDelivery)),
   },
 };
-const truckDeliveryMethodField: FormField = {
+const retainWarehouseMethodField: FormField = {
   field: 'deliveryDetail',
   label: '物流方式',
   component: 'NSelect',
   componentProps: {
-    options: generateOptionFromArray(Object.values(AmazonDeliveryDetail)),
+    options: generateOptionFromArray(Object.values(retainWarehouse)),
   },
-  displayCondition(value) {
-    return value.deliveryMethod === DeliveryMethod.AMZ;
+};
+const transferMethodField: FormField = {
+  field: 'deliveryDetail',
+  label: '物流方式',
+  component: 'NSelect',
+  componentProps: {
+    options: generateOptionFromArray(Object.values(transfer)),
   },
 };
 export const deliveryDetailMethods = [
-  otherDeliveryMethodField,
-  packageDeliveryMethodField,
-  directDeliveryMethodField,
-  truckDeliveryMethodField,
+  expressDeliveryMethodField,
+  trayDeliveryMethodField,
+  looseBoxDeliveryMethodField,
+  retainWarehouseMethodField,
+  transferMethodField,
 ];
 
 export function shouldUseFBACode(model) {

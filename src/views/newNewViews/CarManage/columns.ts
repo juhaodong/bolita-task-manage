@@ -1,48 +1,115 @@
 import { DataTableColumns } from 'naive-ui';
 import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
-import {
-  asyncCustomerFormField,
-  getDatePickerFormField,
-} from '@/api/dataLayer/fieldDefination/common';
+import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
 import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { yesOrNo } from '@/api/dataLayer/modules/operationType';
-import { generateOptionFromArray } from '@/store/utils/utils';
-import { usePermission } from '@/hooks/web/usePermission';
 import { useUserStore } from '@/store/modules/user';
 import { CarpoolManagementPower } from '@/api/dataLayer/common/PowerModel';
 
-const { hasPermission } = usePermission();
-
 export const columns: DataTableColumns<CarpoolManagementModel> = [
   {
-    title: '订车ID',
+    title: '物流ID',
     key: 'id',
   },
-  timeColumn(),
+  {
+    title: '操作ID',
+    key: 'operateId',
+  },
+  timeColumn('orderDate', '下单日期'),
+  {
+    title: '仓库',
+    key: 'warehouseId',
+  },
+  {
+    title: '国家',
+    key: 'country',
+  },
+  {
+    title: '邮编',
+    key: 'postCode',
+  },
+  {
+    title: 'FBACode',
+    key: 'FBACode',
+  },
+  {
+    title: 'PO',
+    key: 'PO',
+  },
+  {
+    title: '数量',
+    key: 'amount',
+  },
+  {
+    title: '总实重',
+    key: 'totalWeight',
+  },
+  {
+    title: '总体积',
+    key: 'totalVolume',
+  },
+  {
+    title: 'Ref',
+    key: 'Ref',
+  },
+  {
+    title: 'AMZ-Sendungs ID',
+    key: 'AMZID',
+  },
+  {
+    title: '提货仓库地址',
+    key: 'warehouseAddress',
+  },
   {
     title: '托盘',
     key: 'trayNum',
-    width: 60,
+  },
+  timeColumn('appointmentPickupDate', '预约取货日期'),
+  timeColumn('pickupDate', '取货日期'),
+  {
+    title: '报价',
+    key: 'offer',
   },
   {
-    title: '箱数',
-    key: 'containerNum',
-    width: 60,
+    title: '托数(长*宽*高*数)',
+    key: 'totalTrayNum',
   },
 
-  timeColumn('reservationGetProductTime', '预约取货日期'),
-  // {
-  //   title: '车号',
-  //   key: 'carNumber',
-  // },
   {
-    title: '运输公司',
-    key: 'deliveryCompany',
+    title: '城市',
+    key: 'city',
   },
   {
-    title: '总开销',
-    key: 'totalCost',
+    title: '街道',
+    key: 'street',
+  },
+  {
+    title: '门牌号',
+    key: 'houseNumber',
+  },
+  {
+    title: '收件人',
+    key: 'recipient',
+  },
+  {
+    title: '联系电话',
+    key: 'phone',
+  },
+  {
+    title: '是否需要预约',
+    key: 'needReservation',
+  },
+  {
+    title: '包装',
+    key: 'package',
+  },
+  {
+    title: '品名',
+    key: 'productName',
+  },
+  {
+    title: '备注',
+    key: 'addressNote',
   },
 ];
 
@@ -65,17 +132,12 @@ export type CarpoolManagementModel = {
 };
 export const filters: FormFields = [
   {
-    label: '订车ID',
-    field: 'carpoolId',
+    label: '物流ID',
+    field: 'deliveryId',
   },
-  asyncCustomerFormField(),
   {
-    label: '是否拼车',
-    field: 'filterIsYes',
-    component: 'NSelect',
-    componentProps: {
-      options: generateOptionFromArray(yesOrNo),
-    },
+    label: '操作ID',
+    field: 'operationID',
   },
   {
     label: '运输公司',
@@ -86,8 +148,20 @@ export const filters: FormFields = [
     field: 'warehouseId',
   },
   {
+    label: '结算情况',
+    field: 'settlement',
+  },
+  {
+    label: '运单号',
+    field: 'deliveryID',
+  },
+  {
     field: 'ISA',
     label: 'ISA',
+  },
+  {
+    field: 'PO',
+    label: 'PP',
   },
   {
     field: 'REF',
@@ -98,13 +172,8 @@ export const filters: FormFields = [
     label: 'FBACode',
   },
   {
-    field: 'NotifyEndDateTime',
-    component: 'NDatePicker',
-    label: '预约出库日期',
-    componentProps: {
-      type: 'date',
-      clearable: true,
-    },
+    field: 'paymentStatus',
+    label: '付款状态',
   },
 ];
 

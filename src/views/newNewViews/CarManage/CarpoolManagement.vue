@@ -11,16 +11,6 @@
     >
       <template #tableTitle></template>
     </BasicTable>
-
-    <n-modal
-      v-model:show="paymentDialogShow"
-      :show-icon="false"
-      preset="card"
-      style="width: 90%; min-width: 600px; max-width: 600px"
-      title="费用支付情况管理"
-    >
-      <car-payment-dialog :model="currentModel" @saved="reloadTable" />
-    </n-modal>
     <n-modal
       v-model:show="showModal"
       :show-icon="false"
@@ -42,9 +32,6 @@
   import { $ref } from 'vue/macros';
   import { CarpoolManager } from '@/api/dataLayer/modules/logistic/carpool';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
-  import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
-  import { CurrencyEuro } from '@vicons/carbon';
-  import CarPaymentDialog from '@/views/newViews/CarpoolManagement/dialog/CarPaymentDialog.vue';
   import { useUserStore } from '@/store/modules/user';
   import { CarpoolManagementPower } from '@/api/dataLayer/common/PowerModel';
 
@@ -114,33 +101,9 @@
       return h(TableAction as any, {
         style: 'button',
         actions: [
-          {
-            label: '修改',
-            icon: DocumentEdit16Filled,
-            onClick() {
-              console.log(!SubmitOrderOperate.value, '!SubmitOrderOperate.value');
-              startEdit(record.id);
-            },
-          },
           fileAction('提单', 'pickupFiles', !SubmitOrderOperate.value),
           fileAction('POD', 'PODFiles', !PODOperate.value),
-          fileAction('账单', 'bills', !BillOperate.value),
-          {
-            label: '费用',
-            icon: CurrencyEuro,
-            highlight: () => {
-              if (record?.paymentSubmit) {
-                return 'success';
-              } else if (record?.billedCompany) {
-                return 'warning';
-              } else {
-                return 'error';
-              }
-            },
-            onClick() {
-              doPayment(record.id);
-            },
-          },
+          fileAction('CMR', 'CMRFiles', !BillOperate.value),
         ],
       });
     },

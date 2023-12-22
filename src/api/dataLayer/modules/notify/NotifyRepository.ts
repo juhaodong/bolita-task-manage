@@ -9,112 +9,66 @@ export function getNeededColumnByNotifyType(notifyType: NotifyType | null) {
 
 function getNeededFieldBuilder(notifyType: NotifyType | null) {
   const builder = formFieldBuilder();
-  builder.addAll([
-    {
-      label: '柜号',
-      field: 'containerId',
-    },
-    {
-      label: '票号',
-      field: 'ticketId',
-    },
-    {
-      label: '国家',
-      field: 'country',
-    },
-    {
-      label: '件数',
-      field: 'number',
-    },
-    {
-      label: '总实重',
-      field: 'weight',
-    },
-    {
-      label: '总体积',
-      field: 'volume',
-    },
-  ]);
-  builder.addAll([
-    {
-      label: 'FBA/快递单号',
-      field: 'FBA/DeliveryCode',
-    },
-    {
-      label: 'PO',
-      field: 'PO',
-    },
-    {
-      label: 'FC/送货地址',
-      field: 'FC/Address',
-    },
-    {
-      label: '操作',
-      field: 'operation',
-    },
-    {
-      label: '换单文件',
-      field: 'changeOrderFiles',
-    },
-  ]);
-  builder.addAll([
-    {
-      label: '分拣标识',
-      field: 'sign',
-    },
-    {
-      label: '包装',
-      field: 'package',
-    },
-    {
-      label: '托数',
-      field: 'trayNum',
-    },
-    {
-      label: '品名',
-      field: 'productName',
-    },
-    {
-      label: 'UN号',
-      field: 'UNNumber',
-    },
-    {
-      label: '邮编',
-      field: 'postcode',
-    },
-    {
-      label: '街道+门牌号',
-      field: 'address1',
-    },
-    {
-      label: '地址2',
-      field: 'address2',
-    },
-    {
-      label: '公司名称',
-      field: 'companyName',
-    },
-    {
-      label: '收件人',
-      field: 'recipient',
-    },
-    {
-      label: '联系电话',
-      field: 'phone',
-    },
-    {
-      label: '邮箱',
-      field: 'email',
-    },
-    {
-      label: '是否需要预约',
-      field: 'needReserve',
-    },
-    {
-      label: '备注',
-      field: 'note',
-    },
-  ]);
+  builder.add({
+    label: '自然周',
+    field: 'weeks',
+  });
+  builder.add({
+    label: '预计到仓时间',
+    field: 'planArriveDateTime',
+  });
+  builder.add({
+    label: '地址',
+    field: 'address',
+  });
+  builder.add({
+    label: '实际仓位日期',
+    field: 'realArriveDateTime',
+  });
+  builder.add({
+    label: '仓位时间',
+    field: 'inHouseTime',
+  });
+  builder.add({
+    label: '托盘',
+    field: 'trayNum',
+  });
+  builder.add({
+    label: '卡车号',
+    field: 'carNumber',
+  });
+  builder.add({
+    label: 'ISA',
+    field: 'ISA',
+  });
+  builder.add({
+    label: '目的地',
+    field: 'destination',
+  });
+  builder.add({
+    label: '可约车',
+    field: 'bookingCar',
+  });
+  builder.add({
+    label: '提货时间',
+    field: 'pickUpDateTime',
+  });
+  builder.add({
+    label: '提货方',
+    field: 'pickUpPerson',
+  });
+  builder.add({
+    field: 'POD',
+    label: 'POD',
+  });
+  builder.add({
+    label: '备注',
+    field: 'note',
+  });
+  builder.add({
+    label: '备注',
+    field: 'note',
+  });
   return builder;
 }
 
