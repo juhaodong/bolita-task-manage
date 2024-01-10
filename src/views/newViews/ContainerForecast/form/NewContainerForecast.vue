@@ -1,0 +1,73 @@
+<template>
+  <n-card class="proCard">
+    <normal-form :default-value-model="model" :form-fields="schemas" @submit="handleSubmit" />
+  </n-card>
+</template>
+<script lang="ts" setup>
+  import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
+  import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/common';
+  import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
+  import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
+  import { generateOptionFromArray } from '@/store/utils/utils';
+  import { reservationTimeList } from '@/views/newViews/ContainerForecast/columns';
+
+  interface Props {
+    model?: any;
+  }
+
+  const prop = defineProps<Props>();
+
+  const schemas: FormFields = [
+    {
+      field: 'containerNo',
+      label: '货柜号',
+    },
+    {
+      field: 'planArriveDateTime',
+      component: 'NDatePicker',
+      label: '预计到仓时间',
+      componentProps: {
+        type: 'date',
+        clearable: true,
+      },
+    },
+    {
+      field: 'inHouseTime',
+      label: '到达时间',
+      component: 'NSelect',
+      defaultValue: '',
+      componentProps: {
+        options: generateOptionFromArray(reservationTimeList),
+      },
+    },
+    getFilesUploadFormField('files', false, () => {
+      window.open(
+        'https://firebasestorage.googlea' +
+          'pis.com/v0/b/bolita-task-manage.appspot.' +
+          'com/o/%E8%B4%A7%E6%9F%9C%E6%A8%A1%E6%9D%BF' +
+          '.xlsx?alt=media&token=a5cfed10-917c-41dd-806d-5d9addd5156d'
+      );
+    }),
+    {
+      field: 'note',
+      label: '备注',
+      required: false,
+    },
+  ];
+
+  const emit = defineEmits(['submit', 'closed']);
+  async function handleSubmit(values: any) {
+    console.log(values);
+    console.log(prop?.model?.id, 'prop?.model?.id');
+    await safeScope(async () => {
+      if (prop?.model?.id) {
+        await NotifyManager.editInternal(values, prop.model.id);
+        emit('closed');
+      } else {
+        emit('submit', values);
+      }
+    });
+  }
+</script>
+
+<style lang="less" scoped></style>

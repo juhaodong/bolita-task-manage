@@ -86,6 +86,11 @@ export const deliveryDetailMethods = [
   transferMethodField,
 ];
 
+export function getSelectedDeliveryMethods(item) {
+  console.log(item, 'item');
+  return generateOptionFromArray(Object.values(retainWarehouse));
+}
+
 export function shouldUseFBACode(model) {
   return (
     model?.deliveryMethod == DeliveryMethod.Direct ||

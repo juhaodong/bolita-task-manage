@@ -12,7 +12,6 @@ import { storage } from '@/store/utils/Storage';
 import { CUSTOMER_ID } from '@/store/mutation-types';
 import { useUserStore } from '@/store/modules/user';
 import { generateOptionFromArray } from '@/store/utils/utils';
-import { deliveryDetailMethods } from '@/api/dataLayer/modules/deliveryMethod/detail';
 
 export function getFilesUploadFormField(
   key = 'files',
@@ -49,12 +48,6 @@ export function getDeliveryMethodSelection(dm = deliveryMethod): FormField[] {
       componentProps: {
         options: generateOptionFromArray(dm),
       },
-    },
-    ...deliveryDetailMethods,
-    {
-      field: 'waybillId',
-      label: '物流单号',
-      required: false,
     },
   ];
 }

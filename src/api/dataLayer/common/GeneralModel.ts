@@ -194,7 +194,6 @@ export function initModel(g: GeneralModel): Model {
           q = query(q, where('customerId', '==', customerId));
         }
       }
-
       let list = await executeQuery(q);
       if (g?.joinManager) {
         const dict = keyBy(await g.joinManager?.loader(), 'id');
@@ -213,6 +212,7 @@ export function initModel(g: GeneralModel): Model {
       list.forEach((it) => {
         if (it.customerId) {
           it.customerName = userInfoDict[it.customerId]?.customerName ?? '';
+          it.warehouseId = userInfoDict[it.customerId]?.warehouseId ?? '';
         }
       });
       if (!filterObj) {
@@ -238,7 +238,6 @@ export function initModel(g: GeneralModel): Model {
       });
     },
     async massiveAdd(list, ...args) {
-      console.log(list, 'list');
       return await massiveAdd(list, g.collectionName, g.idPrefix, ...args);
     },
     async massiveUpdate(listWithId: any[]) {

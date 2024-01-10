@@ -22,7 +22,7 @@ const routes: Array<RouteRecordRaw> = [
           title: '到货预报',
           activeMenu: 'forecast',
         },
-        component: () => import('@/views/newNewViews/ContainerForecast/ContainerForecast.vue'),
+        component: () => import('@/views/newViews/ContainerForecast/ContainerForecast.vue'),
       },
       {
         path: 'outbound',
@@ -30,7 +30,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           title: '出库预报',
         },
-        component: () => import('@/views/newNewViews/OutboundForecast/OutboundForecast.vue'),
+        component: () => import('@/views/newViews/OutboundForecast/OutboundForecast.vue'),
       },
       {
         path: 'pickUp',
@@ -38,7 +38,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           title: '卡派/散货取货',
         },
-        component: () => import('@/views/newNewViews/PickUp/PickUp.vue'),
+        component: () => import('@/views/newViews/PickUp/PickUp.vue'),
       },
       {
         path: 'claimManage',

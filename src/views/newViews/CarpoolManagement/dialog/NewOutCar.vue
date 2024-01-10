@@ -8,9 +8,8 @@
 <script lang="ts" setup>
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { safeScope } from '@/api/dataLayer/common/GeneralModel';
+  import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { CarpoolManager } from '@/api/dataLayer/modules/logistic/carpool';
-  import { schemas } from '../columns';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
   import { safeSumBy } from '@/store/utils/utils';
@@ -24,6 +23,64 @@
   const prop = defineProps<Props>();
 
   const emit = defineEmits(['saved']);
+
+  const schemas: FormFields = [
+    {
+      field: 'note',
+      label: '备注',
+      required: false,
+    },
+    {
+      field: 'note',
+      label: '备注',
+      required: false,
+    },
+    {
+      field: 'note',
+      label: '备注',
+      required: false,
+    },
+    {
+      field: 'note',
+      label: '备注',
+      required: false,
+    },
+    {
+      field: 'note',
+      label: '备注',
+      required: false,
+    },
+    {
+      field: 'note',
+      label: '备注',
+      required: false,
+    },
+    {
+      field: 'note',
+      label: '备注',
+      required: false,
+    },
+    {
+      field: 'note',
+      label: '备注',
+      required: false,
+    },
+    {
+      field: 'note',
+      label: '备注',
+      required: false,
+    },
+    {
+      field: 'note',
+      label: '备注',
+      required: false,
+    },
+    {
+      field: 'note',
+      label: '备注',
+      required: false,
+    },
+  ];
 
   async function handleSubmit(values: any) {
     loading = true;

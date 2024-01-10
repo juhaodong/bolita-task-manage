@@ -53,11 +53,19 @@
     getFilesUploadFormField,
   } from '@/api/dataLayer/fieldDefination/common';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { safeParseInt, toastError } from '@/store/utils/utils';
+  import { generateOptionFromArray, safeParseInt, toastError } from '@/store/utils/utils';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { afterPlanDetailAdded } from '@/api/dataLayer/modules/OutBoundPlan/outAddHook';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
+  import { deliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
+  import {
+    expressDelivery,
+    looseBoxDelivery,
+    retainWarehouse,
+    transfer,
+    trayDelivery,
+  } from '@/api/dataLayer/modules/deliveryMethod/detail';
 
   interface Props {
     model?: any;
@@ -151,7 +159,6 @@
     { title: '箱号', key: 'containerId' },
     { title: '托数', key: 'outBoundTrayNum' },
     { title: '箱数', key: 'outBoundContainerNum' },
-    { title: '地址', key: 'address' },
     { title: '重量', key: 'weight' },
     { title: '体积', key: 'volume' },
     { title: 'FBA号', key: 'FBA/DeliveryCode' },
@@ -166,6 +173,78 @@
   const addressFormFields: FormField[] = [
     getFilesUploadFormField('files', false),
     {
+      field: 'deliveryMethod',
+      label: '出库方式',
+      component: 'NSelect',
+      required: false,
+      defaultValue: '',
+      componentProps: {
+        options: generateOptionFromArray(deliveryMethod),
+      },
+    },
+    {
+      field: 'deliveryDetail',
+      label: '物流方式',
+      component: 'NSelect',
+      displayCondition(model) {
+        return model.deliveryMethod === '快递';
+      },
+      componentProps: {
+        options: generateOptionFromArray(Object.values(expressDelivery)),
+      },
+    },
+    {
+      field: 'deliveryDetail',
+      label: '物流方式',
+      component: 'NSelect',
+      displayCondition(model) {
+        return model.deliveryMethod === '托盘';
+      },
+      componentProps: {
+        options: generateOptionFromArray(Object.values(trayDelivery)),
+      },
+    },
+    {
+      field: 'deliveryDetail',
+      label: '物流方式',
+      component: 'NSelect',
+      displayCondition(model) {
+        return model.deliveryMethod === '散箱';
+      },
+      componentProps: {
+        options: generateOptionFromArray(Object.values(looseBoxDelivery)),
+      },
+    },
+    {
+      field: 'deliveryDetail',
+      label: '物流方式',
+      component: 'NSelect',
+      displayCondition(model) {
+        return model.deliveryMethod === '留仓';
+      },
+      componentProps: {
+        options: generateOptionFromArray(Object.values(retainWarehouse)),
+      },
+    },
+    {
+      field: 'deliveryDetail',
+      label: '物流方式',
+      component: 'NSelect',
+      displayCondition(model) {
+        return model.deliveryMethod === '移交';
+      },
+      componentProps: {
+        options: generateOptionFromArray(Object.values(transfer)),
+      },
+    },
+    {
+      field: 'waybillId',
+      label: '物流单号',
+      displayCondition(model) {
+        return model.deliveryMethod;
+      },
+    },
+    {
       field: 'needCar',
       component: 'NSelect',
       label: '是否需要订车',
@@ -179,7 +258,7 @@
     {
       field: 'pickUpDateTime',
       component: 'NDatePicker',
-      label: '提货时间',
+      label: '提货日期',
       componentProps: {
         type: 'date',
         clearable: true,
@@ -188,6 +267,10 @@
     {
       field: 'pickUpPerson',
       label: '提货方',
+      displayCondition(model) {
+        console.log(model.needCar, 'needCar');
+        return model.needCar === '0';
+      },
     },
     {
       field: 'detail',

@@ -1,6 +1,5 @@
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 import { CheckStatus } from '@/views/newViews/OutboundDetail/columns';
-import { formatItemAddress } from '@/api/dataLayer/fieldDefination/addressGroup';
 import { where } from 'firebase/firestore';
 import { uniq } from 'lodash-es';
 import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
@@ -16,7 +15,7 @@ export const OutBoundDetailManager = initModel({
     value.containerNum = value.outBoundContainerNum;
     value.notifyDetailId = value.id;
     delete value.outStatus;
-    formatItemAddress(value);
+    // formatItemAddress(value);
     delete value.outBoundTrayNum;
     delete value.outBoundContainerNum;
     delete value.id;

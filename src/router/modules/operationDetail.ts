@@ -22,7 +22,7 @@ const routes: Array<RouteRecordRaw> = [
           title: '已出库',
         },
         component: () =>
-          import('@/views/newNewViews/OperationDetail/AlreadyOutbound/AlreadyOutbound.vue'),
+          import('@/views/newViews/OperationDetail/AlreadyOutbound/AlreadyOutbound.vue'),
       },
       {
         path: 'waitOperation',
@@ -30,8 +30,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           title: '待操作',
         },
-        component: () =>
-          import('@/views/newNewViews/OperationDetail/NotOutbound/WaitOperation.vue'),
+        component: () => import('@/views/newViews/OperationDetail/NotOutbound/WaitOperation.vue'),
       },
     ],
   },

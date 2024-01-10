@@ -1,8 +1,9 @@
 export enum DeliveryMethod {
-  Package = '快递',
-  Direct = '直送',
-  AMZ = '卡派',
-  Other = '其他',
+  Express = '快递',
+  Tray = '托盘',
+  LooseBox = '散箱',
+  RetainWarehouse = '留仓',
+  Transfer = '移交',
 }
 
 export const deliveryMethod = Object.values(DeliveryMethod);

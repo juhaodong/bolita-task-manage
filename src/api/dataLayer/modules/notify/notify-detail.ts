@@ -27,7 +27,8 @@ export const NotifyDetailManager = initModel({
     taskInfo.arriveTime = 0;
     taskInfo.storagePosition = '';
     taskInfo.notifyId = notifyId;
-    taskInfo.customerId = customerId;
+    taskInfo.customerId = customerId.customerId;
+    taskInfo.customerInfo = customerId;
     taskInfo.outStatus = OutStatus.WaitCommand;
     return taskInfo;
   },

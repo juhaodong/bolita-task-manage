@@ -4,12 +4,15 @@ import {
 } from '@/api/dataLayer/modules/notify/notify-detail';
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 import { notifyPath, taskListPath } from '@/api/dataLayer/modules/notify/path';
+import { safeParseInt } from '@/store/utils/utils';
 
 export const NotifyManager = initModel({
   collectionName: notifyPath,
-  init(value) {
+  init(value, taskList) {
+    const totalTrayNumber = taskList.reduce((sum, i) => sum + safeParseInt(i?.trayNum), 0);
+    const totalNumber = taskList.reduce((sum, i) => sum + safeParseInt(i?.number), 0);
     const info = {
-      arrivedCount: 0,
+      arrivedCount: totalTrayNumber + '托' + totalNumber + '箱',
       inStatus: InBoundStatus.Wait,
       outStatus: OutStatus.Wait,
       cashStatus: CashStatus.NotFinish,
@@ -21,8 +24,7 @@ export const NotifyManager = initModel({
     loader: getNotifyDetailListByNotify,
   },
   async afterAddHook(id, value, taskList) {
-    console.log(taskList, 'taskList');
-    await NotifyDetailManager.massiveAdd(taskList, id, '123');
+    await NotifyDetailManager.massiveAdd(taskList, id, value);
   },
 });
 

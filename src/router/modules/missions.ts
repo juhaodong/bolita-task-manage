@@ -23,7 +23,7 @@ const routes: Array<RouteRecordRaw> = [
           activeMenu: 'alreadyWarehousing',
         },
         component: () =>
-          import('@/views/newNewViews/Missions/AlreadyWarehousing/AlreadyWarehousing.vue'),
+          import('@/views/newViews/Missions/AlreadyWarehousing/AlreadyWarehousing.vue'),
       },
       {
         path: 'notWarehousing',
@@ -31,7 +31,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           title: '未入库',
         },
-        component: () => import('@/views/newNewViews/Missions/NotWarehousing/NotWarehousing.vue'),
+        component: () => import('@/views/newViews/Missions/NotWarehousing/NotWarehousing.vue'),
       },
     ],
   },

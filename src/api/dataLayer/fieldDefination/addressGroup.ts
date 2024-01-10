@@ -27,6 +27,7 @@ export const deliveryAddressDetail: FormField[] = [
   { label: '街道', field: 'street' },
   { label: '门牌号', field: 'houseNo' },
   { label: '地址附加', field: 'appendAddress', required: false },
+  { label: '邮编', field: 'postcode' },
   { label: '城市', field: 'city' },
   { label: '州', field: 'state', required: false },
   { label: '国家', field: 'country', required: true },
