@@ -1,6 +1,6 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <filter-bar @submit="updateFilter" :form-fields="filters" @clear="updateFilter(null)">
+    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
       <n-button size="small" type="info" @click="addTable(NotifyType.Container)">
         <template #icon>
           <n-icon>
@@ -9,7 +9,7 @@
         </template>
         新建货柜预报
       </n-button>
-      <n-button @click="downloadFiles" size="small" type="info">
+      <n-button size="small" type="info" @click="downloadFiles">
         <template #icon>
           <n-icon>
             <Box20Filled />
@@ -17,7 +17,7 @@
         </template>
         卸柜业务流程
       </n-button>
-      <n-button @click="downloadFiles" size="small" type="info">
+      <n-button size="small" type="info" @click="downloadFiles">
         <template #icon>
           <n-icon>
             <Box20Filled />
@@ -36,24 +36,24 @@
     </filter-bar>
     <div class="my-2"></div>
     <BasicTable
+      ref="actionRef"
+      :actionColumn="actionColumn"
       :columns="columns"
       :request="loadDataTable"
       :row-key="(row) => row.id"
-      ref="actionRef"
-      :actionColumn="actionColumn"
     />
     <n-modal
       v-model:show="showModal"
       :show-icon="false"
-      preset="card"
-      title="新建货柜预报"
       :style="{ maxWidth: notifyType === NotifyType.TrayOrBox ? '1600px' : '800px' }"
+      preset="card"
       style="width: 90%; min-width: 600px"
+      title="新建货柜预报"
     >
       <container-forecast-index
         :current-model="currentModel"
-        @saved="closeAddDialog"
         :type="notifyType"
+        @saved="closeAddDialog"
       />
     </n-modal>
     <n-modal
@@ -97,14 +97,14 @@
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import Delete28Filled from '@vicons/fluent/es/Delete28Filled';
   import { Hammer } from '@vicons/ionicons5';
-  import NotifyUnloadForm from '@/views/newViews/ContainerForecast/form/NotifyUnloadForm.vue';
-  import WarehouseInfoDialog from '@/views/newViews/ContainerForecast/form/WarehouseInfoDialog.vue';
-  import NotifyFeeDialog from '@/views/newViews/ContainerForecast/form/NotifyFeeDialog.vue';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { clearAllData } from '@/api/dataLayer/clearAllData';
-  import ContainerForecastIndex from '@/views/newViews/ContainerForecast/form/ContainerForecastIndex.vue';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { handleRequest, toastSuccess } from '@/store/utils/utils';
+  import NotifyUnloadForm from '@/views/newViews/ContainerForecast/form/NotifyUnloadForm.vue';
+  import NotifyFeeDialog from '@/views/newViews/ContainerForecast/form/NotifyFeeDialog.vue';
+  import WarehouseInfoDialog from '@/views/newViews/ContainerForecast/form/WarehouseInfoDialog.vue';
+  import ContainerForecastIndex from '@/views/newViews/ContainerForecast/form/ContainerForecastIndex.vue';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
   let currentModel: any | null = $ref(null);

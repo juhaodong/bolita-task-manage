@@ -1,12 +1,12 @@
 <script lang="ts" setup>
   import { NotifyManager, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
-  import TrayForm from '@/views/newViews/ContainerForecast/form/NotifyTrayForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { getNeededColumnByNotifyType } from '@/api/dataLayer/modules/notify/NotifyRepository';
-  import readXlsxFile from 'read-excel-file';
   import NewContainerForecast from '@/views/newViews/ContainerForecast/form/NewContainerForecast.vue';
   import { handleRequest } from '@/store/utils/utils';
   import { useUserStore } from '@/store/modules/user';
+  import NotifyTrayForm from '@/views/newViews/ContainerForecast/form/NotifyTrayForm.vue';
+  import readXlsxFile from 'read-excel-file';
 
   interface Prop {
     currentModel?: any;
@@ -55,7 +55,7 @@
     startLoading();
     const userStore = useUserStore();
     console.log(userStore.info, 'user');
-    value.customerId = userStore.info?.belongsToId;
+    value.customerId = userStore.info?.belongsToId ?? '';
     value.notifyType = prop.type;
     const taskList = [
       ...(await readFile(value.files?.[0].file, value.notifyType)),
@@ -76,7 +76,7 @@
       <new-container-forecast :model="currentModel" @closed="closeDialog" @submit="saveNotify" />
     </template>
     <template v-else-if="type == NotifyType.TrayOrBox">
-      <tray-form :model="currentModel" @submit="saveNotify" />
+      <notify-tray-form :model="currentModel" @submit="saveNotify" />
     </template>
   </loading-frame>
 </template>

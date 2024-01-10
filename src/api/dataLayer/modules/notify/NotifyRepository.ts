@@ -1,5 +1,5 @@
 import { NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
-import { formFieldBuilder } from '@/api/dataLayer/fieldDefation/common';
+import { formFieldBuilder } from '@/api/dataLayer/fieldDefination/common';
 
 export function getNeededColumnByNotifyType(notifyType: NotifyType | null) {
   return getNeededFieldBuilder(notifyType)

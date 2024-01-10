@@ -20,7 +20,6 @@ const routes: Array<RouteRecordRaw> = [
         name: `forecast`,
         meta: {
           title: '到货预报',
-          activeMenu: 'forecast',
         },
         component: () => import('@/views/newViews/ContainerForecast/ContainerForecast.vue'),
       },

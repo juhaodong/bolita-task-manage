@@ -6,7 +6,7 @@
   import readXlsxFile from 'read-excel-file';
   import { formatItemAddress } from '@/api/dataLayer/fieldDefination/addressGroup';
   import { handleRequest } from '@/store/utils/utils';
-  import NewContainerForecast from '@/views/newNewViews/ContainerForecast/form/NewContainerForecast.vue';
+  import NewContainerForecast from '@/views/newViews/ContainerForecast/form/NewContainerForecast.vue';
 
   interface Prop {
     type: NotifyType;
