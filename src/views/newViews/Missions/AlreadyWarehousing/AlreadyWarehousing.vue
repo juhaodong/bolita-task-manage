@@ -13,8 +13,8 @@
           </n-icon>
         </template>
         新建出库计划
-      </n-button></filter-bar
-    >
+      </n-button>
+    </filter-bar>
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
@@ -44,7 +44,7 @@
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
   import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
-  import { Box20Filled, Folder32Filled } from '@vicons/fluent';
+  import { Box20Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
 
   const showModal = ref(false);
@@ -104,7 +104,7 @@
       return h(TableAction as any, {
         style: 'button',
         actions: [
-          fileAction('提单文件', 'files', Folder32Filled),
+          fileAction('提单文件', 'files'),
           fileAction('POD', 'POD'),
           fileAction('操作文件', 'operationFiles'),
           fileAction('问题图片', 'problemFiles'),

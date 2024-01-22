@@ -12,18 +12,18 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
     title: '物流ID',
     key: 'id',
   },
-  {
-    title: '操作ID',
-    key: 'operateId',
-  },
   timeColumn('createTimestamp', '下单日期'),
   {
+    title: '运单号',
+    key: 'waybillId',
+  },
+  {
     title: '总托数',
-    key: 'totalTray',
+    key: 'trayNum',
   },
   {
     title: '总件数',
-    key: 'totalNumber',
+    key: 'containerNum',
   },
   {
     title: '国家',

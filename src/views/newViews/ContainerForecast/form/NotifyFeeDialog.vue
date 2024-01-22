@@ -80,9 +80,11 @@
           containerNo: notifyDetail?.containerNo,
           operationId: props.notifyId,
           operationType: OperationType.In,
-          amount: extraInfo.finalPrice,
+          amount: extraInfo.inboundPrice,
           note: extraInfo.note,
+          otherPrice: extraInfo.otherPrice,
           cashStatus: CashStatus.Done,
+          subtotal: extraInfo.finalPrice,
         },
         notifyDetail?.outCashId
       );
@@ -97,14 +99,18 @@
     };
 
     await safeScope(async () => {
+      editValue.inboundFinalPrice = extraInfo.finalPrice;
       editValue.outCashId = await saveCash(
         {
           customerId: notifyDetail?.customerId,
           containerNo: notifyDetail?.containerNo,
           operationId: props.notifyId,
           operationType: OperationType.In,
-          amount: extraInfo.finalPrice,
-          note: extraInfo.inboundPrice,
+          amount: extraInfo.inboundPrice,
+          note: extraInfo.note,
+          cashStatus: CashStatus.Done,
+          subtotal: extraInfo.finalPrice,
+          otherPrice: extraInfo.otherPrice,
         },
         notifyDetail?.outCashId
       );

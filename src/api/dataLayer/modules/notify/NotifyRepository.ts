@@ -38,6 +38,10 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       label: '总体积',
       field: 'volume',
     },
+    {
+      label: '运单号',
+      field: 'deliveryIdIn',
+    },
   ]);
   builder.addAll([
     {

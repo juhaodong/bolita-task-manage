@@ -24,7 +24,7 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: '国家',
-    key: 'countryIn',
+    key: 'country',
   },
   {
     title: '件数',
@@ -39,16 +39,24 @@ export const columns: DataTableColumns<any> = [
     key: 'volume',
   },
   {
+    title: '运单号',
+    key: 'deliveryIdIn',
+  },
+  {
     title: 'FBA/快递单号',
-    key: 'FBA/DeliveryCodeIn',
+    key: 'FBA/DeliveryCode',
+  },
+  {
+    title: '出库方式',
+    key: 'operation',
   },
   {
     title: 'PO',
-    key: 'POIn',
+    key: 'PO',
   },
   {
     title: 'FC/送货地址',
-    key: 'FC/AddressIn',
+    key: 'FC/Address',
   },
   {
     title: '换单文件',

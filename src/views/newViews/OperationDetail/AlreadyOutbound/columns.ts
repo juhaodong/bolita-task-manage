@@ -7,17 +7,20 @@ import {
 } from '@/api/dataLayer/modules/notify/notify-api';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { generateOptionFromArray } from '@/store/utils/utils';
-import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 
 export const columns: DataTableColumns<any> = [
   {
     type: 'selection',
   },
-  timeColumn('arriveTime', '到仓日期'),
-  timeColumn('outboundDate', '出库日期'),
   {
-    title: '出库时间',
-    key: 'outboundTime',
+    title: 'ID',
+    key: 'id',
+  },
+  timeColumn('reservationGetProductTime', '预计出库日期'),
+  {
+    title: '预计出库时间',
+    key: 'reservationGetProductDetailTime',
   },
   {
     title: 'Halle',
@@ -25,7 +28,7 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: 'Ref',
-    key: 'Ref',
+    key: 'REF',
   },
   {
     title: 'ISA',
@@ -37,11 +40,11 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: 'Kunden',
-    key: 'Kunden',
+    key: 'customerId',
   },
   {
     title: '数量',
-    key: 'number',
+    key: 'containerNum',
   },
   {
     title: '托数',
@@ -49,16 +52,16 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: '出库方式',
-    key: 'deliveryMethod',
+    key: 'deliveryDetail',
   },
   {
     title: '地址',
     key: 'customerAddress',
   },
-  {
+  statusColumnEasy({
     title: '状态',
     key: 'outStatus',
-  },
+  }),
   {
     title: '操作人',
     key: 'unloadPerson',

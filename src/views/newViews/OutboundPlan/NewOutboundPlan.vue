@@ -2,7 +2,7 @@
   <n-card class="proCard">
     <loading-frame :loading="loading">
       <template v-if="step == 0">
-        <filter-bar :form-fields="searchSchema" @clear="updateFilter" @submit="updateFilter" />
+        <filter-bar :form-fields="filters" @clear="updateFilter" @submit="updateFilter" />
         <n-data-table
           v-if="allNotifyDetail.length > 0"
           v-model:checked-row-keys="checkedRowKeys"
@@ -42,6 +42,7 @@
   </n-card>
 </template>
 <script lang="ts" setup>
+  import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { onMounted, ref } from 'vue';
   import { DataTableColumns } from 'naive-ui';
@@ -60,12 +61,14 @@
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
   import { deliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
   import {
+    deliveryDetailMethods,
     expressDelivery,
     looseBoxDelivery,
     retainWarehouse,
     transfer,
     trayDelivery,
   } from '@/api/dataLayer/modules/deliveryMethod/detail';
+  import { addOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
 
   interface Props {
     model?: any;
@@ -78,6 +81,7 @@
   const groupNotifyDetail = ref<any[]>([]);
   onMounted(async () => {
     await init();
+    console.log(deliveryDetailMethods.flat(), 'deliveryDetailMethods');
     checkedRowKeys.value = prop?.initialKey ?? [];
     if (checkedRowKeys.value.length > 0) {
       allNotifyDetail = allNotifyDetail.filter((it: any) => checkedRowKeys.value.includes(it.id));
@@ -124,6 +128,8 @@
   async function saveOutboundPlan(value) {
     loading = true;
     allNotifyDetail.forEach((it) => {
+      it.deliveryDetail = value.deliveryDetail;
+      it.deliveryMethod = value.deliveryMethod;
       it.needCar = value.needCar;
       if (it.needCar === '1') {
         it.carStatus = CarStatus.UnAble;
@@ -131,6 +137,12 @@
         it.carStatus = CarStatus.NoNeed;
       }
     });
+    const res = {
+      ...value,
+      carStatus: value.needCar === '1' ? CarStatus.UnAble : CarStatus.NoNeed,
+      outboundDetailInfo: [...allNotifyDetail],
+    };
+    await addOutboundForecast(res);
     await OutBoundPlanManager.add(value, allNotifyDetail);
     await afterPlanDetailAdded(allNotifyDetail);
     await safeScope(() => {
@@ -150,6 +162,7 @@
     editableColumn({ title: '箱数', key: 'outBoundContainerNum', width: 60 }, allNotifyDetail),
     editableColumn({ title: '重量', key: 'weight', width: 60 }, allNotifyDetail),
     editableColumn({ title: '体积', key: 'volume', width: 60 }, allNotifyDetail),
+    editableColumn({ title: '预计出库方式', key: 'operation' }, allNotifyDetail),
     editableColumn({ title: 'FBA号', key: 'FBA/DeliveryCode' }, allNotifyDetail),
     editableColumn({ title: '备注', key: 'note' }, allNotifyDetail),
   ]);
@@ -161,6 +174,7 @@
     { title: '箱数', key: 'outBoundContainerNum' },
     { title: '重量', key: 'weight' },
     { title: '体积', key: 'volume' },
+    { title: '预计出库方式', key: 'operation' },
     { title: 'FBA号', key: 'FBA/DeliveryCode' },
     { title: '备注', key: 'note' },
   ]);
@@ -237,13 +251,13 @@
         options: generateOptionFromArray(Object.values(transfer)),
       },
     },
-    {
-      field: 'waybillId',
-      label: '物流单号',
-      displayCondition(model) {
-        return model.deliveryMethod;
-      },
-    },
+    // {
+    //   field: 'waybillId',
+    //   label: '物流单号',
+    //   displayCondition(model) {
+    //     return model.deliveryMethod;
+    //   },
+    // },
     {
       field: 'needCar',
       component: 'NSelect',
@@ -263,6 +277,9 @@
         type: 'date',
         clearable: true,
       },
+      displayCondition(model) {
+        return model.needCar === '0';
+      },
     },
     {
       field: 'pickUpPerson',
@@ -281,6 +298,17 @@
       label: '操作要求',
       componentProps: {
         type: 'textarea',
+      },
+    },
+  ];
+
+  const filters: FormField[] = [
+    {
+      label: '出库方式',
+      field: 'operation',
+      component: 'NSelect',
+      componentProps: {
+        options: deliveryDetailMethods.flat(),
       },
     },
   ];

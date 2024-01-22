@@ -29,8 +29,6 @@ export const CashManager = initModel({
   collectionName: cashPath,
   init(value: CashModel): any {
     value.cashStatus = CashStatus.WaitConfirm;
-    value.extraAmount = 0;
-    value.subtotal = value.amount;
     return value;
   },
   idPrefix: 'J',

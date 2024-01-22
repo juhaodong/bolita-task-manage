@@ -37,6 +37,7 @@
   import { usePermission } from '@/hooks/web/usePermission';
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
+  import { getOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
 
   const { hasPermission } = usePermission();
 
@@ -46,9 +47,7 @@
   const actionRef = ref();
   let filterObj: any | null = $ref(null);
   const loadDataTable = async () => {
-    const res = (await OutBoundDetailManager.load(filterObj)).filter((it) => !it.POD);
-    console.log(res, 'res');
-    return res;
+    return await getOutboundForecast();
   };
   function startShareCar() {
     console.log(checkedRows, 'check');
@@ -89,23 +88,19 @@
       return h(TableAction as any, {
         style: 'button',
         actions: [
-          // {
-          //   label: '订车',
-          //   icon: Hammer,
-          //   ifShow: () => {
-          //     return record?.needCar === '1';
-          //   },
-          //   highlight: () => {
-          //     return 'error';
-          //   },
-          //   onClick() {
-          //     showShareCarModel = true;
-          //   },
-          // },
           fileAction('提单文件', 'files', Folder32Filled),
           fileAction('POD', 'POD'),
           fileAction('操作文件', 'operationFiles'),
           fileAction('问题图片', 'problemFiles'),
+          {
+            label: '信息已变更',
+            highlight: () => {
+              return 'error';
+            },
+            ifShow: () => {
+              return record.alreadyChanged;
+            },
+          },
         ],
       });
     },

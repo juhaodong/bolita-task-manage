@@ -10,6 +10,15 @@
       :request="loadDataTable"
       :row-key="(row) => row.id"
     />
+    <n-modal
+      v-model:show="showShareCarModel"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 600px; max-width: 600px"
+      title="新建订车"
+    >
+      <new-carpool-management :merged-out-ids="checkedRows" @saved="saveShareCar" />
+    </n-modal>
   </n-card>
 </template>
 
@@ -17,12 +26,12 @@
   import { Component, h, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
-  import { Folder32Filled } from '@vicons/fluent';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import { $ref } from 'vue/macros';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { usePermission } from '@/hooks/web/usePermission';
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
+  import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
   import { getOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
 
   const { hasPermission } = usePermission();
@@ -34,14 +43,16 @@
   const actionRef = ref();
   let filterObj: any | null = $ref(null);
   const loadDataTable = async () => {
-    allOutboundForecastList = (await getOutboundForecast())
-      .filter((it) => !it.interception || it.interception !== 1)
-      .filter((x) => x.outStatus === '已出库');
+    allOutboundForecastList = (await getOutboundForecast()).filter((it) => it.interception === 1);
     allOutboundForecastList.forEach((it) => {
       it.customerAddress = it?.country + it?.postcode + it?.FBACode + it?.AMZID;
     });
     return allOutboundForecastList;
   };
+  function startShareCar() {
+    console.log(checkedRows, 'check');
+    showShareCarModel = true;
+  }
   function reloadTable() {
     actionRef.value.reload();
     showModal.value = false;
@@ -51,6 +62,11 @@
   function updateFilter(value) {
     filterObj = value;
     reloadTable();
+  }
+
+  async function saveShareCar() {
+    reloadTable();
+    checkedRows = [];
   }
 
   const actionColumn = reactive({
@@ -72,23 +88,12 @@
       return h(TableAction as any, {
         style: 'button',
         actions: [
-          // {
-          //   label: '订车',
-          //   icon: Hammer,
-          //   ifShow: () => {
-          //     return record?.needCar === '1';
-          //   },
-          //   highlight: () => {
-          //     return 'error';
-          //   },
-          //   onClick() {
-          //     showShareCarModel = true;
-          //   },
-          // },
-          fileAction('提单文件', 'files', Folder32Filled),
-          fileAction('POD', 'POD'),
-          fileAction('操作文件', 'operationFiles'),
-          fileAction('问题图片', 'problemFiles'),
+          {
+            label: '修改',
+            async onClick() {
+              console.log(record, 'record');
+            },
+          },
         ],
       });
     },

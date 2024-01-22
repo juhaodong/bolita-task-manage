@@ -18,6 +18,10 @@ export const columns: DataTableColumns<any> = [
     key: 'customerName',
   },
   {
+    title: '仓库',
+    key: 'warehouseId',
+  },
+  {
     title: '数量',
     key: 'arrivedCount',
   },
@@ -39,7 +43,7 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: '结算',
-    key: 'inboundfinalPrice',
+    key: 'inboundFinalPrice',
   },
 ];
 

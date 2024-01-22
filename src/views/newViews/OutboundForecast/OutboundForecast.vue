@@ -14,6 +14,42 @@
       :request="loadDataTable"
       :row-key="(row) => row.id"
     />
+    <n-modal
+      v-model:show="showOutboundOrderDetail"
+      :show-icon="false"
+      preset="dialog"
+      style="width: 90%; min-width: 600px; max-width: 800px"
+      title="出库单"
+    >
+      <outbound-order
+        :amz-id="AMZID"
+        :data="currentData"
+        :delivery-method="currentDeliveryMethod"
+        :fba-code="FBACode"
+        :pick-date="pickDate"
+        :ref-code="RefCode"
+        @saved="closeDetail"
+      />
+    </n-modal>
+    <n-modal
+      v-model:show="showOutboundChange"
+      :show-icon="false"
+      preset="dialog"
+      style="width: 90%; min-width: 600px; max-width: 800px"
+      title="出库单"
+    >
+      <change-forecast
+        :id="currentId"
+        :amz-id="AMZID"
+        :change-note="changeNote"
+        :isa="ISACode"
+        :operator="operator"
+        :pick-date="pickDate"
+        :pick-time="pickTime"
+        :ref-code="RefCode"
+        @saved="closeChange"
+      />
+    </n-modal>
   </n-card>
 </template>
 
@@ -27,48 +63,87 @@
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { usePermission } from '@/hooks/web/usePermission';
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
-  import { CarpoolManager } from '@/api/dataLayer/modules/logistic/carpool';
   import { toastSuccess } from '@/store/utils/utils';
-  import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
+  import {
+    getOutboundForecast,
+    updateOutboundForecast,
+  } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import OutboundOrder from '@/views/newViews/OutboundForecast/OutboundOrder.vue';
+  import dayjs from 'dayjs';
+  import ChangeForecast from '@/views/newViews/OutboundForecast/ChangeForecast.vue';
 
   const { hasPermission } = usePermission();
 
   const showModal = ref(false);
-  let showShareCarModel = $ref(false);
+  let allOutboundForecastList = $ref([]);
+  let currentData = $ref('');
+  let RefCode = $ref('');
+  let FBACode = $ref('');
+  let pickDate = $ref('');
+  let pickTime = $ref('');
+  let AMZID = $ref('');
+  let currentId = $ref('');
+  let ISACode = $ref('');
+  let changeNote = $ref('');
+  let operator = $ref('');
+  let currentDeliveryMethod = $ref('');
+  let showOutboundOrderDetail = $ref(false);
+  let showOutboundChange = $ref(false);
   let checkedRows = $ref([]);
   const actionRef = ref();
   let filterObj: any | null = $ref(null);
   const loadDataTable = async () => {
-    const res = (await OutBoundDetailManager.load(filterObj))
-      .filter((it) => it.carStatus === '已订车' || it.carStatus === '无需订车')
+    allOutboundForecastList = (await getOutboundForecast())
+      .filter((it) => !it.interception || it.interception !== 1)
       .filter((x) => x.outStatus !== '已出库');
-    const carPool = await CarpoolManager.load();
-    res.forEach((it) => {
-      let carpoolInfo = carPool.find((x) => x.id === it.carpoolId);
-      it.Ref = carpoolInfo?.REF ?? '';
-      it.ISA = carpoolInfo?.ISA ?? '';
-      it.customerAddress =
-        carpoolInfo?.country + carpoolInfo?.postcode + carpoolInfo?.FBACode + carpoolInfo?.AMZID;
-      it.outboundDate = carpoolInfo?.reservationGetProductTime ?? '';
-      it.outboundTime = carpoolInfo?.reservationGetProductDetailTime ?? '';
-      it.AMZID = carpoolInfo?.AMZID ?? '';
-      it.Kunden = carpoolInfo?.contact ?? '';
+    allOutboundForecastList.forEach((it) => {
+      it.customerAddress = it?.country + it?.postcode + it?.FBACode + it?.AMZID;
     });
-    console.log(res, 'res');
-    return res;
+    return allOutboundForecastList;
   };
   async function confirmOutbound() {
     for (const item of checkedRows) {
-      await OutBoundDetailManager.editInternal(
-        {
-          outStatus: '已出库',
-        },
-        item
-      );
+      console.log(item, 'item');
+      await updateOutboundForecast(item, { outStatus: '已出库' });
     }
-    toastSuccess('sucees');
+    toastSuccess('success');
     reloadTable();
+  }
+
+  async function checkOutboundOrder(id) {
+    const res = allOutboundForecastList.find((it) => it.id === id);
+    currentData = res.outboundDetailInfo;
+    currentDeliveryMethod = res.deliveryDetail;
+    AMZID = res.AMZID;
+    pickDate = dayjs(res.reservationGetProductTime).format('YYYY-MM-DD');
+    FBACode = res.FBACode;
+    RefCode = res.REF;
+    showOutboundOrderDetail = true;
+  }
+
+  async function changeForecastOrder(id) {
+    const res = allOutboundForecastList.find((it) => it.id === id);
+    currentId = id;
+    AMZID = res.AMZID;
+    pickDate = dayjs(res.reservationGetProductTime).format('YYYY-MM-DD');
+    pickTime = res.reservationGetProductDetailTime;
+    RefCode = res.REF;
+    pickTime = res.reservationGetProductDetailTime;
+    ISACode = res.ISA;
+    operator = res.changeOperator ?? '';
+    changeNote = res.changeNote ?? '';
+    showOutboundChange = true;
+  }
+
+  async function closeDetail() {
+    showOutboundOrderDetail = false;
+    await loadDataTable();
+  }
+
+  async function closeChange() {
+    showOutboundChange = false;
+    await loadDataTable();
   }
 
   async function startEdit(id) {
@@ -78,7 +153,6 @@
   function reloadTable() {
     actionRef.value.reload();
     showModal.value = false;
-    showShareCarModel = false;
   }
 
   function updateFilter(value) {
@@ -109,10 +183,22 @@
           fileAction('POD', 'POD'),
           fileAction('CMR', 'CMRFilesOut'),
           {
-            label: '修改',
-            icon: DocumentEdit16Filled,
+            label: '出库单',
             onClick() {
-              startEdit(record.id);
+              checkOutboundOrder(record.id);
+            },
+          },
+          {
+            label: '变更',
+            onClick() {
+              changeForecastOrder(record.id);
+            },
+          },
+          {
+            label: '截停',
+            async onClick() {
+              await updateOutboundForecast(record.id, { interception: 1 });
+              await loadDataTable();
             },
           },
         ],

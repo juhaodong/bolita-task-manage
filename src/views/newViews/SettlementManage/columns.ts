@@ -15,11 +15,7 @@ export const columns: DataTableColumns = [
     title: '结算ID',
     key: 'id',
   },
-  {
-    title: '财务ID',
-    key: 'financeId',
-  },
-  timeColumn('finishTime', '完成日期'),
+  timeColumn('createTimestamp', '完成日期'),
   {
     title: '货柜号',
     key: 'containerNo',
@@ -47,16 +43,16 @@ export const columns: DataTableColumns = [
   },
   {
     title: '合计',
-    key: 'totalPrice',
+    key: 'subtotal',
   },
   {
     title: '备注',
     key: 'note',
   },
-  {
+  statusColumnEasy({
     title: '结算状态',
     key: 'cashStatus',
-  },
+  }),
   {
     title: '时间线',
     key: 'timeLine',

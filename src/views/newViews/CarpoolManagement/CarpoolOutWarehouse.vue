@@ -20,7 +20,7 @@
       style="width: 90%; min-width: 600px; max-width: 600px"
       title="新建外部订车"
     >
-      <new-out-car @saved="reloadTable" />
+      <new-out-car :data="data" @saved="reloadTable" />
     </n-modal>
   </n-card>
 </template>
@@ -34,17 +34,17 @@
   import { CarpoolManager } from '@/api/dataLayer/modules/logistic/carpool';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import { useUserStore } from '@/store/modules/user';
-  import { CarpoolManagementPower } from '@/api/dataLayer/common/PowerModel';
   import NewOutCar from '@/views/newViews/CarpoolManagement/dialog/NewOutCar.vue';
-  import { getOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import { getOutboundForecastByOut } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
 
   const showModal = ref(false);
 
   let filterObj: any | null = $ref(null);
+  let data: any = $ref([]);
   let currentModel: any | null = $ref(null);
   let paymentDialogShow: boolean = $ref(false);
   const loadDataTable = async () => {
-    return await getOutboundForecast();
+    return await getOutboundForecastByOut();
   };
   const actionRef = ref();
 
@@ -59,6 +59,7 @@
     paymentDialogShow = false;
   }
   async function addOut() {
+    data = [];
     showModal.value = true;
   }
 
@@ -67,22 +68,8 @@
     showModal.value = true;
   }
 
-  async function doPayment(id) {
-    currentModel = await CarpoolManager.getById(id);
-    paymentDialogShow = true;
-  }
-
   const AccountPowerList = computed(() => {
     return useUserStore()?.info?.powerList;
-  });
-  const SubmitOrderOperate = computed(() => {
-    return AccountPowerList.value.includes(CarpoolManagementPower.SubmitOrder);
-  });
-  const PODOperate = computed(() => {
-    return AccountPowerList.value.includes(CarpoolManagementPower.POD);
-  });
-  const BillOperate = computed(() => {
-    return AccountPowerList.value.includes(CarpoolManagementPower.Bill);
   });
 
   const actionColumn = reactive({
@@ -108,12 +95,22 @@
           {
             label: '修改',
             async onClick() {
+              data = record;
+              showModal.value = true;
               console.log(record, 'record');
             },
           },
-          fileAction('提单', 'pickupFiles', !SubmitOrderOperate.value),
-          fileAction('POD', 'PODFiles', !PODOperate.value),
-          fileAction('CMR', 'CMRFiles', !BillOperate.value),
+          fileAction('提单', 'pickupFiles', false),
+          fileAction('POD', 'PODFiles', false),
+          {
+            label: '已截停',
+            highlight: () => {
+              return 'error';
+            },
+            ifShow: () => {
+              return record.interception === 1;
+            },
+          },
         ],
       });
     },

@@ -60,6 +60,7 @@
   import {
     CashStatus,
     InBoundStatus,
+    NotifyManager,
     NotifyType,
     OutStatus,
   } from '@/api/dataLayer/modules/notify/notify-api';
@@ -75,6 +76,7 @@
   import ContainerForecastIndex from '@/views/newViews/ContainerForecast/form/ContainerForecastIndex.vue';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
+  import { handleRequest, toastSuccess } from '@/store/utils/utils';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
   let currentModel: any | null = $ref(null);
@@ -128,62 +130,7 @@
       };
       return h(TableAction as any, {
         style: 'button',
-        actions: [
-          {
-            label: '删除',
-            icon: Delete28Filled,
-            popConfirm: {
-              title: '是否确定删除此预报？',
-              async confirm() {
-                await NotifyDetailManager.remove(record.id);
-                reloadTable();
-              },
-            },
-            ifShow() {
-              return (
-                record['inStatus'] === InBoundStatus.Wait && record['outStatus'] !== OutStatus.All
-              );
-            },
-          },
-          {
-            label: '修改',
-            icon: DocumentEdit16Filled,
-            onClick() {
-              startEdit(record.id);
-            },
-            ifShow() {
-              return (
-                record['inStatus'] === InBoundStatus.Wait && record['outStatus'] !== OutStatus.All
-              );
-            },
-          },
-          fileAction('CMR', 'CMRFiles'),
-          {
-            label: '操作',
-            icon: Hammer,
-            onClick() {
-              currentNotifyId = record.id!;
-              showOperationTable = true;
-            },
-          },
-          {
-            label: '费用',
-            icon: CurrencyEuro,
-            highlight: () => {
-              if (record?.cashStatus == CashStatus.Done) {
-                return 'success';
-              } else if (record?.cashStatus == CashStatus.WaitConfirm) {
-                return 'warning';
-              } else {
-                return 'error';
-              }
-            },
-            onClick() {
-              currentNotifyId = record.id!;
-              showFeeDialog = true;
-            },
-          },
-        ],
+        actions: [fileAction('CMR', 'CMRFiles')],
       });
     },
   });

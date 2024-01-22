@@ -24,6 +24,14 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/newViews/CarpoolManagement/CarpoolManagement.vue'),
       },
       {
+        path: 'carBookingOut',
+        name: `carBookingOut`,
+        meta: {
+          title: '库外订车',
+        },
+        component: () => import('@/views/newViews/CarpoolManagement/CarpoolOutWarehouse.vue'),
+      },
+      {
         path: 'logisticService',
         name: `logisticService`,
         meta: {

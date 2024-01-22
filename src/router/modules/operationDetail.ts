@@ -32,6 +32,14 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('@/views/newViews/OperationDetail/NotOutbound/WaitOperation.vue'),
       },
+      {
+        path: 'Interception',
+        name: `Interception`,
+        meta: {
+          title: '已截停',
+        },
+        component: () => import('@/views/newViews/OperationDetail/Interception/Interception.vue'),
+      },
     ],
   },
 ];

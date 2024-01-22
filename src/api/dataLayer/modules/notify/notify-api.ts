@@ -9,6 +9,7 @@ import { safeParseInt } from '@/store/utils/utils';
 export const NotifyManager = initModel({
   collectionName: notifyPath,
   init(value, taskList) {
+    console.log(value, taskList, '123');
     const totalTrayNumber = taskList.reduce((sum, i) => sum + safeParseInt(i?.trayNum), 0);
     const totalNumber = taskList.reduce((sum, i) => sum + safeParseInt(i?.number), 0);
     const info = {

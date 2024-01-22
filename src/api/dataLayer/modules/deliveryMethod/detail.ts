@@ -1,4 +1,3 @@
-import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { generateOptionFromArray } from '@/store/utils/utils';
 import { DeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod/index';
 
@@ -15,12 +14,12 @@ export enum expressDelivery {
 
 export enum trayDelivery {
   AMZ = 'AMZ',
-  trayOther = '其他',
+  trayOther = '托盘其他',
 }
 
 export enum looseBoxDelivery {
   AMZ = 'FBA',
-  LooseBoxOther = '其他',
+  LooseBoxOther = '散箱其他',
 }
 
 export enum retainWarehouse {
@@ -29,7 +28,7 @@ export enum retainWarehouse {
 
 export enum transfer {
   otherSystem = '其他系统',
-  transferOther = '其他',
+  transferSales = '销售',
 }
 
 export enum AmazonDeliveryDetail {
@@ -38,52 +37,12 @@ export enum AmazonDeliveryDetail {
   SingleTruck = '散货派送',
 }
 
-const expressDeliveryMethodField: FormField = {
-  field: 'deliveryDetail',
-  label: '物流方式',
-  component: 'NSelect',
-  componentProps: {
-    options: generateOptionFromArray(Object.values(expressDelivery)),
-  },
-};
-const trayDeliveryMethodField: FormField = {
-  field: 'deliveryDetail',
-  label: '物流方式',
-  component: 'NSelect',
-  componentProps: {
-    options: generateOptionFromArray(Object.values(trayDelivery)),
-  },
-};
-const looseBoxDeliveryMethodField: FormField = {
-  field: 'deliveryDetail',
-  label: '物流方式',
-  component: 'NSelect',
-  componentProps: {
-    options: generateOptionFromArray(Object.values(looseBoxDelivery)),
-  },
-};
-const retainWarehouseMethodField: FormField = {
-  field: 'deliveryDetail',
-  label: '物流方式',
-  component: 'NSelect',
-  componentProps: {
-    options: generateOptionFromArray(Object.values(retainWarehouse)),
-  },
-};
-const transferMethodField: FormField = {
-  field: 'deliveryDetail',
-  label: '物流方式',
-  component: 'NSelect',
-  componentProps: {
-    options: generateOptionFromArray(Object.values(transfer)),
-  },
-};
 export const deliveryDetailMethods = [
-  expressDeliveryMethodField,
-  trayDeliveryMethodField,
-  looseBoxDeliveryMethodField,
-  retainWarehouseMethodField,
-  transferMethodField,
+  generateOptionFromArray(Object.values(expressDelivery)),
+  generateOptionFromArray(Object.values(trayDelivery)),
+  generateOptionFromArray(Object.values(looseBoxDelivery)),
+  generateOptionFromArray(Object.values(retainWarehouse)),
+  generateOptionFromArray(Object.values(transfer)),
 ];
 
 export function getSelectedDeliveryMethods(item) {

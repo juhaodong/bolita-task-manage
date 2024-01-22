@@ -82,7 +82,7 @@
   }
 
   let unloadPerson: string = $ref('');
-  let currentDate: string = $ref('');
+  let currentDate: any = $ref(null);
   let totalTime: string = $ref('');
 
   const canConfirm = computed(() => {
@@ -216,7 +216,11 @@
         </n-descriptions-item>
         <n-descriptions-item label="预报总数"> {{ notifyInfo?.arrivedCount }}</n-descriptions-item>
         <n-descriptions-item label="实际卸柜日期">
-          <n-input v-model:value="currentDate" :placeholder="notifyInfo?.currentDate" />
+          <n-date-picker
+            v-model:value="currentDate"
+            :placeholder="timeDisplay(notifyInfo?.currentDate)"
+            type="date"
+          />
         </n-descriptions-item>
         <n-descriptions-item label="卸柜时长">
           <n-input v-model:value="totalTime" :placeholder="notifyInfo?.totalTime" />

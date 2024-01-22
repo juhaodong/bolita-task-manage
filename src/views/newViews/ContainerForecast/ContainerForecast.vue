@@ -91,7 +91,7 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
-  import { NotifyManager, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
+  import { CashStatus, NotifyManager, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
   import { $ref } from 'vue/macros';
   import { TruckDelivery } from '@vicons/tabler';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
@@ -188,7 +188,6 @@
           },
           {
             label: '预报文件',
-            icon: DocumentEdit16Filled,
             onClick() {
               window.open(record.files[0]);
             },
@@ -204,14 +203,18 @@
                 record.id
               );
               await handleRequest(res, () => {
-                toastSuccess('sucees');
+                toastSuccess('success');
                 reloadTable();
               });
             },
           },
           {
             label: '结算',
-            icon: DocumentEdit16Filled,
+            highlight: () => {
+              if (record?.editValue.cashStatus == CashStatus.Done) {
+                return 'success';
+              }
+            },
             onClick() {
               currentNotifyId = record.id!;
               showFeeDialog = true;

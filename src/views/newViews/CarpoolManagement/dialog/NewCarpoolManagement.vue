@@ -9,11 +9,10 @@
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { CarpoolManager } from '@/api/dataLayer/modules/logistic/carpool';
   import { schemas } from '../columns';
+  import { updateOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
-  import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
-  import { safeSumBy } from '@/store/utils/utils';
+  import dayjs from 'dayjs';
 
   interface Props {
     model?: any;
@@ -27,31 +26,11 @@
 
   async function handleSubmit(values: any) {
     loading = true;
+    values.carStatus = CarStatus.Booked;
+    values.createTimestamp = dayjs().format('YYYY-MM-DD');
     await safeScope(async () => {
-      console.log(values, 'values');
-      if (prop?.model?.id) {
-        await CarpoolManager.editInternal(values, prop.model.id);
-      } else {
-        if (prop.mergedOutIds) {
-          const currentList: any[] = [];
-          for (const checkedRow of prop.mergedOutIds) {
-            currentList.push(await OutBoundDetailManager.getById(checkedRow));
-          }
-          console.log(currentList, 'List');
-          values.totalTray = safeSumBy(currentList, 'trayNum');
-          values.totalNumber = safeSumBy(currentList, 'number');
-          const id = await CarpoolManager.addInternal({}, currentList);
-          for (const checkedRow of prop.mergedOutIds) {
-            await OutBoundDetailManager.editInternal(
-              {
-                carpoolId: id,
-                carStatus: CarStatus.Booked,
-              },
-              checkedRow
-            );
-          }
-          await CarpoolManager.editInternal(values, id);
-        }
+      for (const id of prop.mergedOutIds) {
+        await updateOutboundForecast(id, values);
       }
       emit('saved', values);
     });
