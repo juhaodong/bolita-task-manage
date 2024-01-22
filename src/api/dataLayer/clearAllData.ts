@@ -6,6 +6,10 @@ import { outboundPath } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan'
 import { outboundDetailPath } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
 import { collection, deleteDoc, getDocs } from 'firebase/firestore';
 import { db } from '@/store/plugins/firebase';
+import {
+  OutboundForecast,
+  OutWareHouse,
+} from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
 
 export async function clearAllData() {
   const path = [
@@ -17,6 +21,8 @@ export async function clearAllData() {
     taskListPath,
     outboundPath,
     outboundDetailPath,
+    OutboundForecast,
+    OutWareHouse,
   ];
   for (const collectionName of path) {
     const ref = collection(db, collectionName);

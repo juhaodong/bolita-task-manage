@@ -47,7 +47,9 @@
   const actionRef = ref();
   let filterObj: any | null = $ref(null);
   const loadDataTable = async () => {
-    return await getOutboundForecast();
+    const res = await getOutboundForecast();
+    console.log(res, 'res');
+    return res;
   };
   function startShareCar() {
     console.log(checkedRows, 'check');

@@ -184,7 +184,7 @@ export const schemas: FormField[] = [
     },
   },
   {
-    field: 'deliveryId',
+    field: 'waybillId',
     label: '运单号',
     disableCondition() {
       return !AccountPowerList.includes(CarpoolManagementPower.Edit);

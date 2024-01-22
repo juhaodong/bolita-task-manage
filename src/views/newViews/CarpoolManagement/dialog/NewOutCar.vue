@@ -230,7 +230,7 @@
       state: customerState,
       interception: 0,
     };
-    if (prop.data) {
+    if (currentId) {
       await updateOutboundForecastByOut(prop.data.id, res);
     } else {
       await addOutboundForecastByOut(res);
@@ -243,7 +243,6 @@
   }
 
   function nextStep() {
-    console.log(step, 'step');
     step = step + 1;
   }
 </script>

@@ -211,7 +211,7 @@
           {
             label: '结算',
             highlight: () => {
-              if (record?.editValue.cashStatus == CashStatus.Done) {
+              if (record?.editValue?.cashStatus == CashStatus.Done) {
                 return 'success';
               }
             },
