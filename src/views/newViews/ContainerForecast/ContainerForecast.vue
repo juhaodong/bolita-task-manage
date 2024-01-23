@@ -35,13 +35,22 @@
       </n-button>
     </filter-bar>
     <div class="my-2"></div>
-    <BasicTable
-      ref="actionRef"
-      :actionColumn="actionColumn"
-      :columns="columns"
-      :request="loadDataTable"
-      :row-key="(row) => row.id"
-    />
+    <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
+      <n-tab-pane
+        v-for="currentMonth in monthTab"
+        :key="currentMonth"
+        :name="currentMonth"
+        :tab="currentMonth"
+      >
+        <BasicTable
+          ref="actionRef"
+          :actionColumn="actionColumn"
+          :columns="columns"
+          :request="loadDataTable"
+          :row-key="(row) => row.id"
+        />
+      </n-tab-pane>
+    </n-tabs>
     <n-modal
       v-model:show="showModal"
       :show-icon="false"
@@ -87,7 +96,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, h, reactive, ref } from 'vue';
+  import { Component, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
@@ -105,12 +114,16 @@
   import NotifyFeeDialog from '@/views/newViews/ContainerForecast/form/NotifyFeeDialog.vue';
   import WarehouseInfoDialog from '@/views/newViews/ContainerForecast/form/WarehouseInfoDialog.vue';
   import ContainerForecastIndex from '@/views/newViews/ContainerForecast/form/ContainerForecastIndex.vue';
+  import { useUserStore } from '@/store/modules/user';
+  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import dayjs from 'dayjs';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
   let currentModel: any | null = $ref(null);
 
   const showModal = ref(false);
-
+  let selectedMonth: any | null = $ref('');
+  let monthTab: any | null = $ref(null);
   let showOperationTable = $ref(false);
   let currentNotifyId: string | null = $ref(null);
   let showWarehouseDialog = $ref(false);
@@ -123,8 +136,15 @@
     showModal.value = true;
   }
 
+  onMounted(async () => {
+    monthTab = OneYearMonthTab();
+    selectedMonth = monthTab[0];
+  });
+
   const loadDataTable = async () => {
-    const res = await NotifyManager.load(filterObj);
+    const res = (await NotifyManager.load(filterObj)).filter(
+      (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
+    );
     console.log(res, 'res');
     return res;
   };

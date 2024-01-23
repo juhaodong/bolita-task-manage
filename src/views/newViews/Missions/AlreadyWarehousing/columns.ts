@@ -70,7 +70,8 @@ export const columns: DataTableColumns<any> = [
     title: '备注/库位',
     key: 'note/address',
   },
-  timeColumn('arriveDateTime', '到仓时间'),
+  timeColumn('planArriveDateTime', '预期到仓日期'),
+  timeColumn('currentDate', '实际到仓日期'),
   timeColumn('deliveryTime', '发货时间'),
   {
     title: 'Ref',

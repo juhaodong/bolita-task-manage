@@ -2,22 +2,31 @@
   <n-card :bordered="false" class="proCard">
     <filter-bar
       v-if="finished"
-      :form-fields="filters"
       :default-value-model="filterObj"
+      :form-fields="filters"
       @clear="updateFilter(null)"
       @submit="updateFilter"
     >
       <n-button @click="showAdd">新建物流售后</n-button>
     </filter-bar>
     <div class="my-2"></div>
-    <BasicTable
-      ref="actionRef"
-      :action-column="actionColumn"
-      :columns="columns"
-      :request="loadDataTable"
-      :row-key="(row) => row.id"
-      v-model:checked-row-keys="checkedRows"
-    />
+    <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
+      <n-tab-pane
+        v-for="currentMonth in monthTab"
+        :key="currentMonth"
+        :name="currentMonth"
+        :tab="currentMonth"
+      >
+        <BasicTable
+          ref="actionRef"
+          v-model:checked-row-keys="checkedRows"
+          :action-column="actionColumn"
+          :columns="columns"
+          :request="loadDataTable"
+          :row-key="(row) => row.id"
+        />
+      </n-tab-pane>
+    </n-tabs>
 
     <n-modal
       v-model:show="showModal"
@@ -52,6 +61,8 @@
   import { LogisticServiceManager } from '@/api/dataLayer/modules/logistic/logistcService';
   import ServiceFeedBack from '@/views/newViews/LogisticsService/form/ServiceFeedBack.vue';
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
+  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import dayjs from 'dayjs';
 
   interface Prop {
     outId?: string;
@@ -67,6 +78,8 @@
   });
   const showModal = ref(false);
   let checkedRows = $ref([]);
+  let selectedMonth: any | null = $ref('');
+  let monthTab: any | null = $ref(null);
   let currentModel: any | null = $ref(null);
   let showFeedBackDialog = $ref(false);
 
@@ -80,8 +93,15 @@
     showFeedBackDialog = true;
   }
 
+  onMounted(async () => {
+    monthTab = OneYearMonthTab();
+    selectedMonth = monthTab[0];
+  });
+
   const loadDataTable = async () => {
-    return await LogisticServiceManager.load(filterObj);
+    return (await LogisticServiceManager.load(filterObj)).filter(
+      (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
+    );
   };
 
   let filterObj: any | null = $ref(null);

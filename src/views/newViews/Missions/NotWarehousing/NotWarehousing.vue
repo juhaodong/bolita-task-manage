@@ -1,55 +1,14 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <filter-bar @submit="updateFilter" :form-fields="filters" @clear="updateFilter(null)" />
+    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter" />
     <div class="my-2"></div>
     <BasicTable
+      ref="actionRef"
+      :actionColumn="actionColumn"
       :columns="columns"
       :request="loadDataTable"
       :row-key="(row) => row.id"
-      ref="actionRef"
-      :actionColumn="actionColumn"
     />
-    <n-modal
-      v-model:show="showModal"
-      :show-icon="false"
-      preset="card"
-      title="新建入库计划"
-      :style="{ maxWidth: notifyType === NotifyType.TrayOrBox ? '1600px' : '800px' }"
-      style="width: 90%; min-width: 600px"
-    >
-      <container-forecast-index
-        :current-model="currentModel"
-        @saved="closeAddDialog"
-        :type="notifyType"
-      />
-    </n-modal>
-    <n-modal
-      v-model:show="showOperationTable"
-      :show-icon="false"
-      preset="dialog"
-      title="卸柜表"
-      style="width: 90%; min-width: 600px; max-width: 800px"
-    >
-      <notify-unload-form @save="reloadTable" :notify-id="currentNotifyId!" />
-    </n-modal>
-    <n-modal
-      v-model:show="showFeeDialog"
-      :show-icon="false"
-      preset="dialog"
-      title="费用表"
-      style="width: 90%; min-width: 600px; max-width: 800px"
-    >
-      <notify-fee-dialog :notify-id="currentNotifyId!" @save="reloadTable" />
-    </n-modal>
-    <n-modal
-      v-model:show="showWarehouseDialog"
-      :show-icon="false"
-      preset="dialog"
-      title="仓库信息"
-      style="width: 90%; min-width: 600px; max-width: 800px"
-    >
-      <warehouse-info-dialog :notify-id="currentNotifyId!" />
-    </n-modal>
   </n-card>
 </template>
 
@@ -57,26 +16,11 @@
   import { Component, h, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
-  import {
-    CashStatus,
-    InBoundStatus,
-    NotifyManager,
-    NotifyType,
-    OutStatus,
-  } from '@/api/dataLayer/modules/notify/notify-api';
+  import { InBoundStatus, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
   import { $ref } from 'vue/macros';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
-  import Delete28Filled from '@vicons/fluent/es/Delete28Filled';
-  import { Hammer } from '@vicons/ionicons5';
-  import { CurrencyEuro } from '@vicons/carbon';
-  import NotifyUnloadForm from '@/views/newViews/ContainerForecast/form/NotifyUnloadForm.vue';
-  import WarehouseInfoDialog from '@/views/newViews/ContainerForecast/form/WarehouseInfoDialog.vue';
-  import NotifyFeeDialog from '@/views/newViews/ContainerForecast/form/NotifyFeeDialog.vue';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import ContainerForecastIndex from '@/views/newViews/ContainerForecast/form/ContainerForecastIndex.vue';
-  import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
-  import { handleRequest, toastSuccess } from '@/store/utils/utils';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
   let currentModel: any | null = $ref(null);

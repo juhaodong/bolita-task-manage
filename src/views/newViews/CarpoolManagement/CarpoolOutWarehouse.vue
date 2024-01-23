@@ -4,15 +4,22 @@
       <n-button size="small" type="info" @click="addOut"> 外部仓库新建 </n-button>
     </filter-bar>
     <div class="my-2"></div>
-    <BasicTable
-      ref="actionRef"
-      :actionColumn="actionColumn"
-      :columns="columns"
-      :request="loadDataTable"
-      :row-key="(row) => row.id"
-    >
-      <template #tableTitle></template>
-    </BasicTable>
+    <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
+      <n-tab-pane
+        v-for="currentMonth in monthTab"
+        :key="currentMonth"
+        :name="currentMonth"
+        :tab="currentMonth"
+      >
+        <BasicTable
+          ref="actionRef"
+          :actionColumn="actionColumn"
+          :columns="columns"
+          :request="loadDataTable"
+          :row-key="(row) => row.id"
+        />
+      </n-tab-pane>
+    </n-tabs>
     <n-modal
       v-model:show="showModal"
       :show-icon="false"
@@ -26,7 +33,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, computed, h, reactive, ref } from 'vue';
+  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
@@ -36,6 +43,8 @@
   import { useUserStore } from '@/store/modules/user';
   import NewOutCar from '@/views/newViews/CarpoolManagement/dialog/NewOutCar.vue';
   import { getOutboundForecastByOut } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import dayjs from 'dayjs';
 
   const showModal = ref(false);
 
@@ -43,9 +52,18 @@
   let data: any = $ref([]);
   let currentModel: any | null = $ref(null);
   let paymentDialogShow: boolean = $ref(false);
+  let selectedMonth: any | null = $ref('');
+  let monthTab: any | null = $ref(null);
   const loadDataTable = async () => {
-    return await getOutboundForecastByOut();
+    return (await getOutboundForecastByOut()).filter(
+      (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
+    );
   };
+
+  onMounted(async () => {
+    monthTab = OneYearMonthTab();
+    selectedMonth = monthTab[0];
+  });
   const actionRef = ref();
 
   function updateFilter(value) {
@@ -54,6 +72,7 @@
   }
 
   function reloadTable() {
+    console.log(actionRef);
     actionRef.value.reload();
     showModal.value = false;
     paymentDialogShow = false;

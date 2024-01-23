@@ -24,7 +24,7 @@ export const columns: DataTableColumns<SalesMan> = [
     title: '仓库',
     key: 'warehouse',
     render(row) {
-      const tags = row.warehouse.map((tagKey) => {
+      const tags = row?.warehouseId.map((tagKey) => {
         return h(
           NTag,
           {

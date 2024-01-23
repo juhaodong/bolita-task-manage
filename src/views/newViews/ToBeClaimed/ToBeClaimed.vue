@@ -11,14 +11,23 @@
       <n-button v-if="claimedBtn" type="warning" @click="startClaim">认领</n-button>
     </filter-bar>
     <div class="my-2"></div>
-    <BasicTable
-      ref="actionRef"
-      v-model:checked-row-keys="checkedRows"
-      :action-column="actionColumn"
-      :columns="columns"
-      :request="loadDataTable"
-      :row-key="(row) => row.id"
-    />
+    <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
+      <n-tab-pane
+        v-for="currentMonth in monthTab"
+        :key="currentMonth"
+        :name="currentMonth"
+        :tab="currentMonth"
+      >
+        <BasicTable
+          ref="actionRef"
+          v-model:checked-row-keys="checkedRows"
+          :action-column="actionColumn"
+          :columns="columns"
+          :request="loadDataTable"
+          :row-key="(row) => row.id"
+        />
+      </n-tab-pane>
+    </n-tabs>
     <n-modal
       v-model:show="showClaim"
       :show-icon="false"
@@ -52,13 +61,17 @@
   import { usePermission } from '@/hooks/web/usePermission';
   import { useUserStore } from '@/store/modules/user';
   import { ToBeClaimedPower } from '@/api/dataLayer/common/PowerModel';
+  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import dayjs from 'dayjs';
 
   const { hasPermission } = usePermission();
+
+  let selectedMonth: any | null = $ref('');
+  let monthTab: any | null = $ref(null);
 
   interface Prop {
     outId?: string;
   }
-
   const AccountPowerList = computed(() => {
     return useUserStore()?.info?.powerList;
   });
@@ -78,6 +91,8 @@
   let finished = $ref(false);
   const props = defineProps<Prop>();
   onMounted(() => {
+    monthTab = OneYearMonthTab();
+    selectedMonth = monthTab[0];
     if (props.outId) {
       filterObj = { outId: props.outId };
     }
@@ -98,7 +113,9 @@
   }
 
   const loadDataTable = async () => {
-    return await ClaimManager.load(filterObj);
+    return (await ClaimManager.load(filterObj)).filter(
+      (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
+    );
   };
 
   let filterObj: any | null = $ref(null);

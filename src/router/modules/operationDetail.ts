@@ -16,29 +16,12 @@ const routes: Array<RouteRecordRaw> = [
     },
     children: [
       {
-        path: 'alreadyOutbound',
-        name: `alreadyOutbound`,
+        path: 'Operation',
+        name: `Operation`,
         meta: {
-          title: '已出库',
-        },
-        component: () =>
-          import('@/views/newViews/OperationDetail/AlreadyOutbound/AlreadyOutbound.vue'),
-      },
-      {
-        path: 'waitOperation',
-        name: `waitOperation`,
-        meta: {
-          title: '待操作',
+          title: '操作明细',
         },
         component: () => import('@/views/newViews/OperationDetail/NotOutbound/WaitOperation.vue'),
-      },
-      {
-        path: 'Interception',
-        name: `Interception`,
-        meta: {
-          title: '已截停',
-        },
-        component: () => import('@/views/newViews/OperationDetail/Interception/Interception.vue'),
       },
     ],
   },

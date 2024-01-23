@@ -105,8 +105,8 @@ export async function asyncSalesManFormField(): Promise<FormField> {
     value: it.realName,
   }));
   return {
-    field: 'warehouse',
-    label: '仓库',
+    field: 'belongSalesMan',
+    label: '业务员',
     component: 'NSelect',
     componentProps: {
       options: salesManIdList,

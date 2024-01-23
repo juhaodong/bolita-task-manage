@@ -72,19 +72,6 @@
       return h(TableAction as any, {
         style: 'button',
         actions: [
-          // {
-          //   label: '订车',
-          //   icon: Hammer,
-          //   ifShow: () => {
-          //     return record?.needCar === '1';
-          //   },
-          //   highlight: () => {
-          //     return 'error';
-          //   },
-          //   onClick() {
-          //     showShareCarModel = true;
-          //   },
-          // },
           fileAction('提单文件', 'files', Folder32Filled),
           fileAction('POD', 'POD'),
           fileAction('操作文件', 'operationFiles'),

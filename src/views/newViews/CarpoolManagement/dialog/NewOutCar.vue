@@ -105,11 +105,7 @@
         </div>
       </div>
     </div>
-    <n-button
-      v-if="currentId && data.interception !== 1"
-      style="float: right"
-      type="error"
-      @click="cancel"
+    <n-button v-if="currentId && data.interception !== 1" type="error" @click="cancel"
       >截停</n-button
     >
   </div>
@@ -121,6 +117,7 @@
     updateOutboundForecastByOut,
   } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import { watchEffect } from 'vue';
+  import dayjs from 'dayjs';
 
   let currentId = $ref('');
 
@@ -233,6 +230,7 @@
     if (currentId) {
       await updateOutboundForecastByOut(prop.data.id, res);
     } else {
+      res.createTimestamp = dayjs().format('YYYY-MM-DD HH:mm:ss');
       await addOutboundForecastByOut(res);
     }
     emit('saved');

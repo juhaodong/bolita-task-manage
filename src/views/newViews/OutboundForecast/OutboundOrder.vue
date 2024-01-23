@@ -27,6 +27,8 @@
 <script lang="ts" setup>
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
+  import { NTag } from 'naive-ui';
+  import { h } from 'vue';
 
   interface Props {
     data?: any;
@@ -43,10 +45,32 @@
     {
       title: '客户ID',
       key: 'customerName',
+      render(row) {
+        return h(
+          NTag,
+          {
+            color: { borderColor: row.customerColor },
+          },
+          {
+            default: () => row.customerName,
+          }
+        );
+      },
     },
     {
       title: '货柜号',
       key: 'containerId',
+      render(row) {
+        return h(
+          NTag,
+          {
+            color: { borderColor: row.containColor },
+          },
+          {
+            default: () => row.containerId,
+          }
+        );
+      },
     },
     {
       title: '票号',

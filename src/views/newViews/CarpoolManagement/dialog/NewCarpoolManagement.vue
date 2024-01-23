@@ -13,6 +13,7 @@
   import { updateOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
   import dayjs from 'dayjs';
+  import { FBACodeManager } from '@/api/dataLayer/modules/user/user';
 
   interface Props {
     model?: any;
@@ -28,6 +29,15 @@
     loading = true;
     values.carStatus = CarStatus.Booked;
     values.createTimestamp = dayjs().format('YYYY-MM-DD');
+    const res = (await FBACodeManager.load()).find((it) => it.code === values.FBACode);
+    values.street = res.street;
+    values.state = res.state;
+    values.country = res.country;
+    values.houseNo = res.houseNo;
+    values.postcode = res.postcode;
+    values.city = res.city ?? '';
+    values.appendAddress = res.appendAddress ?? '';
+    console.log(res, values, '123');
     await safeScope(async () => {
       for (const id of prop.mergedOutIds) {
         await updateOutboundForecast(id, values);

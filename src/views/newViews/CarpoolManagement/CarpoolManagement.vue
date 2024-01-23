@@ -1,32 +1,28 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
-      <n-button size="small" type="info" @click="addOut"> 外部仓库新建 </n-button>
-    </filter-bar>
+    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter" />
     <div class="my-2"></div>
-    <BasicTable
-      ref="actionRef"
-      :actionColumn="actionColumn"
-      :columns="columns"
-      :request="loadDataTable"
-      :row-key="(row) => row.id"
-    >
-      <template #tableTitle></template>
-    </BasicTable>
-    <n-modal
-      v-model:show="showModal"
-      :show-icon="false"
-      preset="card"
-      style="width: 90%; min-width: 600px; max-width: 600px"
-      title="新建外部订车"
-    >
-      <new-out-car @saved="reloadTable" />
-    </n-modal>
+    <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
+      <n-tab-pane
+        v-for="currentMonth in monthTab"
+        :key="currentMonth"
+        :name="currentMonth"
+        :tab="currentMonth"
+      >
+        <BasicTable
+          ref="actionRef"
+          :actionColumn="actionColumn"
+          :columns="columns"
+          :request="loadDataTable"
+          :row-key="(row) => row.id"
+        />
+      </n-tab-pane>
+    </n-tabs>
   </n-card>
 </template>
 
 <script lang="ts" setup>
-  import { Component, computed, h, reactive, ref } from 'vue';
+  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
@@ -35,18 +31,28 @@
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import { useUserStore } from '@/store/modules/user';
   import { CarpoolManagementPower } from '@/api/dataLayer/common/PowerModel';
-  import NewOutCar from '@/views/newViews/CarpoolManagement/dialog/NewOutCar.vue';
   import { getOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import dayjs from 'dayjs';
 
   const showModal = ref(false);
 
   let filterObj: any | null = $ref(null);
   let currentModel: any | null = $ref(null);
   let paymentDialogShow: boolean = $ref(false);
+  let selectedMonth: any | null = $ref('');
+  let monthTab: any | null = $ref(null);
   const loadDataTable = async () => {
-    return await getOutboundForecast();
+    return (await getOutboundForecast()).filter(
+      (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
+    );
   };
   const actionRef = ref();
+
+  onMounted(async () => {
+    monthTab = OneYearMonthTab();
+    selectedMonth = monthTab[0];
+  });
 
   function updateFilter(value) {
     filterObj = value;

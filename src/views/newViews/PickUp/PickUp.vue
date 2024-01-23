@@ -16,13 +16,22 @@
       </n-button>
     </filter-bar>
     <div class="my-2"></div>
-    <BasicTable
-      ref="actionRef"
-      :actionColumn="actionColumn"
-      :columns="columns"
-      :request="loadDataTable"
-      :row-key="(row) => row.id"
-    />
+    <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
+      <n-tab-pane
+        v-for="currentMonth in monthTab"
+        :key="currentMonth"
+        :name="currentMonth"
+        :tab="currentMonth"
+      >
+        <BasicTable
+          ref="actionRef"
+          :actionColumn="actionColumn"
+          :columns="columns"
+          :request="loadDataTable"
+          :row-key="(row) => row.id"
+        />
+      </n-tab-pane>
+    </n-tabs>
     <n-modal
       v-model:show="showModal"
       :show-icon="false"
@@ -47,11 +56,15 @@
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import NewPickUpPlan from '@/views/newViews/PickUp/NewPickUpPlan.vue';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
+  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import dayjs from 'dayjs';
 
   const showModal = ref(false);
 
   let filterObj: any | null = $ref(null);
   let currentModel: any | null = $ref(null);
+  let selectedMonth: any | null = $ref('');
+  let monthTab: any | null = $ref(null);
   let finished = $ref(false);
   const props = defineProps<Prop>();
   interface Prop {
@@ -62,13 +75,20 @@
     showModal.value = true;
   }
 
+  onMounted(async () => {
+    monthTab = OneYearMonthTab();
+    selectedMonth = monthTab[0];
+  });
+
   async function startEdit(id) {
     currentModel = await PickUpPlanManager.getById(id);
     showModal.value = true;
   }
 
   const loadDataTable = async () => {
-    const res = await PickUpPlanManager.load(filterObj);
+    const res = (await PickUpPlanManager.load(filterObj)).filter(
+      (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
+    );
     console.log(res, 'res');
     return res;
   };

@@ -8,6 +8,7 @@ import {
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { generateOptionFromArray } from '@/store/utils/utils';
 import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
+import { statusColumnEasy } from '@/views/bolita-views/composable/useableColumns';
 
 export const columns: DataTableColumns<any> = [
   {
@@ -19,16 +20,32 @@ export const columns: DataTableColumns<any> = [
     key: 'id',
   },
   {
-    title: '仓库',
+    title: '出库日期',
+    key: 'realOutDate',
+  },
+  {
+    title: 'Halle',
     key: 'warehouseId',
   },
+  // {
+  //   title: '时效',
+  //   key: 'warehouseId',
+  // },
   {
-    title: '物流单号',
-    key: 'waybillId',
+    title: 'Ref',
+    key: 'REF',
   },
   {
-    title: '订车状态',
-    key: 'carStatus',
+    title: 'ISA',
+    key: 'ISA',
+  },
+  {
+    title: 'AMZ-Sendungs ID',
+    key: 'AMZID',
+  },
+  {
+    title: 'Kunden',
+    key: 'customerId',
   },
   {
     title: '件数',
@@ -39,12 +56,24 @@ export const columns: DataTableColumns<any> = [
     key: 'trayNum',
   },
   {
-    title: '总实重',
-    key: 'totalWeight',
+    title: 'FBA',
+    key: 'FBACode',
   },
   {
-    title: '总体积',
-    key: 'totalVolume',
+    title: '出库方式',
+    key: 'deliveryDetail',
+  },
+  {
+    title: '地址',
+    key: 'customerAddress',
+  },
+  statusColumnEasy({
+    title: '订车状态',
+    key: 'carStatus',
+  }),
+  {
+    title: '操作人',
+    key: 'unloadPerson',
   },
   {
     title: '备注',

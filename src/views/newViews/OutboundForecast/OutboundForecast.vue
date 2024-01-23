@@ -6,14 +6,23 @@
       </n-button>
     </filter-bar>
     <div class="my-2"></div>
-    <BasicTable
-      ref="actionRef"
-      v-model:checked-row-keys="checkedRows"
-      :actionColumn="actionColumn"
-      :columns="columns"
-      :request="loadDataTable"
-      :row-key="(row) => row.id"
-    />
+    <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
+      <n-tab-pane
+        v-for="currentMonth in monthTab"
+        :key="currentMonth"
+        :name="currentMonth"
+        :tab="currentMonth"
+      >
+        <BasicTable
+          ref="actionRef"
+          v-model:checked-row-keys="checkedRows"
+          :actionColumn="actionColumn"
+          :columns="columns"
+          :request="loadDataTable"
+          :row-key="(row) => row.id"
+        />
+      </n-tab-pane>
+    </n-tabs>
     <n-modal
       v-model:show="showOutboundOrderDetail"
       :show-icon="false"
@@ -54,7 +63,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, h, reactive, ref } from 'vue';
+  import { Component, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Folder32Filled } from '@vicons/fluent';
@@ -72,10 +81,19 @@
   import OutboundOrder from '@/views/newViews/OutboundForecast/OutboundOrder.vue';
   import dayjs from 'dayjs';
   import ChangeForecast from '@/views/newViews/OutboundForecast/ChangeForecast.vue';
+  import { useUserStore } from '@/store/modules/user';
+  import { groupBy } from 'lodash';
+  import {
+    randomContainColorList,
+    randomCustomerColorList,
+  } from '@/api/dataLayer/common/ColorList';
+  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
 
   const { hasPermission } = usePermission();
 
   const showModal = ref(false);
+  let selectedMonth: any | null = $ref('');
+  let monthTab: any | null = $ref(null);
   let allOutboundForecastList = $ref([]);
   let currentData = $ref('');
   let RefCode = $ref('');
@@ -102,10 +120,19 @@
     });
     return allOutboundForecastList;
   };
+
+  onMounted(async () => {
+    monthTab = OneYearMonthTab();
+    selectedMonth = monthTab[0];
+  });
   async function confirmOutbound() {
+    const userStore = useUserStore();
     for (const item of checkedRows) {
-      console.log(item, 'item');
-      await updateOutboundForecast(item, { outStatus: '已出库' });
+      await updateOutboundForecast(item, {
+        outStatus: '已出库',
+        realOutDate: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        unloadPerson: userStore.info?.realName ?? '',
+      });
     }
     toastSuccess('success');
     reloadTable();
@@ -114,6 +141,24 @@
   async function checkOutboundOrder(id) {
     const res = allOutboundForecastList.find((it) => it.id === id);
     currentData = res.outboundDetailInfo;
+    const customerColor = groupBy(currentData, 'customerName');
+    const containColor = groupBy(currentData, 'containerId');
+    let customerIndex = 0;
+    let containIndex = 0;
+    for (const item in customerColor) {
+      const customerColorIndex = customerIndex % randomCustomerColorList.length;
+      customerColor[item].forEach(
+        (x) => (x.customerColor = randomCustomerColorList[customerColorIndex])
+      );
+      customerIndex = customerIndex + 1;
+    }
+    for (const item in containColor) {
+      const containColorIndex = containIndex % randomContainColorList.length;
+      containColor[item].forEach(
+        (x) => (x.containColor = randomContainColorList[containColorIndex])
+      );
+      containIndex = containIndex + 1;
+    }
     currentDeliveryMethod = res.deliveryDetail;
     AMZID = res.AMZID;
     pickDate = dayjs(res.reservationGetProductTime).format('YYYY-MM-DD');

@@ -5,7 +5,8 @@ import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { useUserStore } from '@/store/modules/user';
 import { CarpoolManagementPower } from '@/api/dataLayer/common/PowerModel';
-import { deliveryAddressDetail } from '@/api/dataLayer/fieldDefination/addressGroup';
+import { generateOptionFromArray } from '@/store/utils/utils';
+import { FBACodeManager } from '@/api/dataLayer/modules/user/user';
 
 export const columns: DataTableColumns<CarpoolManagementModel> = [
   {
@@ -191,10 +192,11 @@ export const schemas: FormField[] = [
     },
   },
   {
-    field: 'FBACode',
     label: 'FBACode',
-    disableCondition() {
-      return !AccountPowerList.includes(CarpoolManagementPower.Edit);
+    field: 'FBACode',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(await getFBACodeList()),
     },
   },
   {
@@ -212,7 +214,6 @@ export const schemas: FormField[] = [
       return !AccountPowerList.includes(CarpoolManagementPower.Edit);
     },
   },
-  ...deliveryAddressDetail,
   {
     field: 'note',
     label: '备注',
@@ -224,3 +225,7 @@ export const schemas: FormField[] = [
   it.required = false;
   return it;
 });
+
+export async function getFBACodeList() {
+  return (await FBACodeManager.load()).map((it) => it.code);
+}

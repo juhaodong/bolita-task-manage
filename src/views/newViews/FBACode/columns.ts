@@ -11,25 +11,40 @@ export const columns: DataTableColumns<FBACode> = [
     key: 'state',
   },
   {
-    title: '地址',
-    key: 'address',
+    title: '街道',
+    key: 'street',
+  },
+  {
+    title: '门牌号',
+    key: 'houseNo',
+  },
+  {
+    title: '地址附加',
+    key: 'appendAddress',
+  },
+  {
+    title: '城市',
+    key: 'city',
   },
   {
     title: '邮编',
-    key: 'postCode',
+    key: 'postcode',
   },
   {
     title: '国家',
-    key: 'countryCode',
+    key: 'country',
   },
 ];
 
 export type FBACode = {
   code: number;
   state: number;
-  address: number;
-  postCode: number;
-  countryCode: string;
+  street: string;
+  houseNo: string;
+  appendAddress: string;
+  city: string;
+  postcode: number;
+  country: string;
 };
 
 export const filters: FormField[] = [
@@ -42,15 +57,27 @@ export const filters: FormField[] = [
     field: 'state',
   },
   {
-    label: '地址',
-    field: 'address',
+    label: '街道',
+    field: 'street',
+  },
+  {
+    label: '门牌号',
+    field: 'houseNo',
+  },
+  {
+    label: '地址附加',
+    field: 'appendAddress',
+  },
+  {
+    label: '城市',
+    field: 'city',
   },
   {
     label: '邮编',
-    field: 'postCode',
+    field: 'postcode',
   },
   {
     label: '国家',
-    field: 'countryCode',
+    field: 'country',
   },
 ];

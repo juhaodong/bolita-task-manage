@@ -27,16 +27,30 @@
       field: 'state',
     },
     {
-      label: '地址',
-      field: 'address',
+      label: '街道',
+      field: 'street',
+    },
+    {
+      label: '门牌号',
+      field: 'houseNo',
+    },
+    {
+      label: '地址附加',
+      field: 'appendAddress',
+      required: false,
+    },
+    {
+      label: '城市',
+      field: 'city',
+      required: false,
     },
     {
       label: '邮编',
-      field: 'postCode',
+      field: 'postcode',
     },
     {
       label: '国家',
-      field: 'countryCode',
+      field: 'country',
     },
   ];
 
