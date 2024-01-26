@@ -43,7 +43,7 @@
   import { useUserStore } from '@/store/modules/user';
   import NewOutCar from '@/views/newViews/CarpoolManagement/dialog/NewOutCar.vue';
   import { getOutboundForecastByOut } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
-  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
 
   const showModal = ref(false);
@@ -55,9 +55,9 @@
   let selectedMonth: any | null = $ref('');
   let monthTab: any | null = $ref(null);
   const loadDataTable = async () => {
-    return (await getOutboundForecastByOut()).filter(
-      (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
-    );
+    return (await getOutboundForecastByOut())
+      .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth)
+      .sort(dateCompare('createTimestamp'));
   };
 
   onMounted(async () => {

@@ -36,8 +36,8 @@
               总计: {{ inboundTotal }}
             </n-grid-item>
           </n-grid>
-          <n-grid :cols="5" x-gap="12">
-            <n-gi class="textStyle"> 类别 </n-gi>
+          <n-grid :cols="6" x-gap="12">
+            <n-gi class="textStyle" span="2"> 类别 </n-gi>
             <n-gi class="textStyle"> 单价 </n-gi>
             <n-gi class="textStyle"> 数量 </n-gi>
             <n-gi class="textStyle"> 总计 </n-gi>
@@ -46,8 +46,8 @@
 
           <div v-for="(a, index) in inboundFeeList" :key="a.key" class="d-flex align-center mb-1">
             <div style="display: flex">
-              <n-grid :cols="5" x-gap="12">
-                <n-gi>
+              <n-grid :cols="6" x-gap="12">
+                <n-gi span="2">
                   <n-select v-model:value="a.type" :options="inboundType" placeholder="type" />
                 </n-gi>
                 <n-gi>
@@ -86,8 +86,8 @@
               总计: {{ outboundTotal }}
             </n-grid-item>
           </n-grid>
-          <n-grid :cols="5" x-gap="12">
-            <n-gi class="textStyle"> 类别 </n-gi>
+          <n-grid :cols="6" x-gap="12">
+            <n-gi class="textStyle" span="2"> 类别 </n-gi>
             <n-gi class="textStyle"> 单价 </n-gi>
             <n-gi class="textStyle"> 数量 </n-gi>
             <n-gi class="textStyle"> 总计 </n-gi>
@@ -96,8 +96,8 @@
 
           <div v-for="(b, index) in outboundFeeList" :key="b.key" class="d-flex align-center mb-1">
             <div style="display: flex">
-              <n-grid :cols="5" x-gap="12">
-                <n-gi>
+              <n-grid :cols="6" x-gap="12">
+                <n-gi span="2">
                   <n-select v-model:value="b.type" :options="outboundType" placeholder="type" />
                 </n-gi>
                 <n-gi>
@@ -136,8 +136,8 @@
               总计: {{ operateTotal }}
             </n-grid-item>
           </n-grid>
-          <n-grid :cols="5" x-gap="12">
-            <n-gi class="textStyle"> 类别 </n-gi>
+          <n-grid :cols="6" x-gap="12">
+            <n-gi class="textStyle" span="2"> 类别 </n-gi>
             <n-gi class="textStyle"> 单价 </n-gi>
             <n-gi class="textStyle"> 数量 </n-gi>
             <n-gi class="textStyle"> 总计 </n-gi>
@@ -146,8 +146,8 @@
 
           <div v-for="(b, index) in operateFeeList" :key="b.key" class="d-flex align-center mb-1">
             <div style="display: flex">
-              <n-grid :cols="5" x-gap="12">
-                <n-gi>
+              <n-grid :cols="6" x-gap="12">
+                <n-gi span="2">
                   <n-select v-model:value="b.type" :options="operateType" placeholder="type" />
                 </n-gi>
                 <n-gi>
@@ -186,8 +186,8 @@
               总计: {{ specialOperateTotal }}
             </n-grid-item>
           </n-grid>
-          <n-grid :cols="5" x-gap="12">
-            <n-gi class="textStyle"> 类别 </n-gi>
+          <n-grid :cols="6" x-gap="12">
+            <n-gi class="textStyle" span="2"> 类别 </n-gi>
             <n-gi class="textStyle"> 单价 </n-gi>
             <n-gi class="textStyle"> 数量 </n-gi>
             <n-gi class="textStyle"> 总计 </n-gi>
@@ -200,8 +200,8 @@
             class="d-flex align-center mb-1"
           >
             <div style="display: flex">
-              <n-grid :cols="5" x-gap="12">
-                <n-gi>
+              <n-grid :cols="6" x-gap="12">
+                <n-gi span="2">
                   <n-select
                     v-model:value="b.type"
                     :options="specialOperationType"
@@ -244,9 +244,9 @@
               总计: {{ deliveryTotal }}
             </n-grid-item>
           </n-grid>
-          <n-grid :cols="6" x-gap="12">
-            <n-gi class="textStyle"> 方式 </n-gi>
-            <n-gi class="textStyle"> 类别 </n-gi>
+          <n-grid :cols="8" x-gap="12">
+            <n-gi class="textStyle" span="2"> 方式 </n-gi>
+            <n-gi class="textStyle" span="2"> 类别 </n-gi>
             <n-gi class="textStyle"> 单价 </n-gi>
             <n-gi class="textStyle"> 数量 </n-gi>
             <n-gi class="textStyle"> 总计 </n-gi>
@@ -255,11 +255,11 @@
 
           <div v-for="(b, index) in deliveryFeeList" :key="b.key" class="d-flex align-center mb-1">
             <div style="display: flex">
-              <n-grid :cols="6" x-gap="12">
-                <n-gi>
+              <n-grid :cols="8" x-gap="12">
+                <n-gi span="2">
                   <n-select v-model:value="b.method" :options="allDelivery" placeholder="method" />
                 </n-gi>
-                <n-gi>
+                <n-gi span="2">
                   <n-select
                     v-model:value="b.type"
                     :options="
@@ -308,8 +308,8 @@
               总计: {{ consumablesTotal }}
             </n-grid-item>
           </n-grid>
-          <n-grid :cols="5" x-gap="12">
-            <n-gi class="textStyle"> 类别 </n-gi>
+          <n-grid :cols="6" x-gap="12">
+            <n-gi class="textStyle" span="2"> 类别 </n-gi>
             <n-gi class="textStyle"> 单价 </n-gi>
             <n-gi class="textStyle"> 数量 </n-gi>
             <n-gi class="textStyle"> 总计 </n-gi>
@@ -318,8 +318,8 @@
 
           <div v-for="(a, index) in consumablesList" :key="a.key" class="d-flex align-center mb-1">
             <div style="display: flex">
-              <n-grid :cols="5" x-gap="12">
-                <n-gi>
+              <n-grid :cols="6" x-gap="12">
+                <n-gi span="2">
                   <n-input v-model:value="a.type" placeholder="type" />
                 </n-gi>
                 <n-gi>
@@ -361,6 +361,7 @@
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
   import Delete16Filled from '@vicons/fluent/es/Delete16Filled';
   import { assign } from 'lodash';
+  import dayjs from 'dayjs';
 
   interface Props {
     currentData?: any[];
@@ -430,23 +431,15 @@
     return obj;
   }
 
-  function checkList(list) {
-    if (list.length > 0) {
-      return list;
-    } else {
-      return list.push([createDefaultList()]);
-    }
-  }
-
   async function reload() {
     currentInfo = (await getSettlement()).find((it) => it.ticketId === prop.currentData.ticketId);
     if (currentInfo) {
       inboundFeeList = assign(inboundFeeList, currentInfo?.inbound);
       outboundFeeList = assign(outboundFeeList, currentInfo?.outbound);
-      operateFeeList = assign(outboundFeeList, currentInfo?.operate);
-      specialOperateFeeList = assign(outboundFeeList, currentInfo?.specialOperate);
-      deliveryFeeList = assign(outboundFeeList, currentInfo?.delivery);
-      consumablesList = assign(outboundFeeList, currentInfo?.consumables);
+      operateFeeList = assign(operateFeeList, currentInfo?.operate);
+      specialOperateFeeList = assign(specialOperateFeeList, currentInfo?.specialOperate);
+      deliveryFeeList = assign(deliveryFeeList, currentInfo?.delivery);
+      consumablesList = assign(consumablesList, currentInfo?.consumables);
     }
   }
 
@@ -592,14 +585,23 @@
       delivery: deliveryFeeList,
       consumablesTotal: consumablesTotal,
       consumables: consumablesList,
+      totalPrice:
+        inboundTotal +
+        outboundTotal +
+        operateTotal +
+        specialOperateTotal +
+        deliveryTotal +
+        consumablesTotal,
     };
     const notifyDetail = prop.currentData;
     notifyDetail.finalStatus = '已结算';
 
     await safeScope(async () => {
       if (currentInfo) {
+        res.updateTimestamp = dayjs().format('YYYY-MM-DD HH:mm:ss');
         await updateSettlement(currentInfo.id, res);
       } else {
+        res.createTimestamp = dayjs().format('YYYY-MM-DD HH:mm:ss');
         await addSettlement(res);
         await NotifyDetailManager.edit(notifyDetail, notifyDetail.id);
       }

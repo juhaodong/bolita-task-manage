@@ -1,10 +1,10 @@
 import { DataTableColumns } from 'naive-ui';
-import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
 
-export const columns: DataTableColumns = [
+export const columnsIn: DataTableColumns = [
   {
     type: 'selection',
     disabled(row: any) {
@@ -15,23 +15,79 @@ export const columns: DataTableColumns = [
     title: '结算ID',
     key: 'id',
   },
-  timeColumn('createTimestamp', '完成日期'),
+  timeColumn('createTimestamp', '创建日期'),
+  timeColumn('updateTimestamp', '修改日期'),
   {
     title: '货柜号',
     key: 'containerNo',
   },
   {
     title: '客户ID',
-    key: 'customerName',
+    key: 'customerId',
   },
   {
-    title: '备注',
-    key: 'note',
+    title: '卸柜费',
+    key: 'amount',
   },
-  statusColumnEasy({
-    title: '结算状态',
-    key: 'cashStatus',
-  }),
+  {
+    title: '其他费',
+    key: 'amount',
+  },
+  {
+    title: '总费用',
+    key: 'subtotal',
+  },
+];
+
+export const columnsOut: DataTableColumns = [
+  {
+    type: 'selection',
+    disabled(row: any) {
+      return row?.financeId;
+    },
+  },
+  {
+    title: '结算ID',
+    key: 'id',
+  },
+  timeColumn('createTimestamp', '创建日期'),
+  timeColumn('updateTimestamp', '修改日期'),
+  {
+    title: '货柜号',
+    key: 'containerId',
+  },
+  {
+    title: '客户ID',
+    key: 'customerId',
+  },
+  {
+    title: '入库费',
+    key: 'inboundTotal',
+  },
+  {
+    title: '出库费',
+    key: 'outboundTotal',
+  },
+  {
+    title: '操作费',
+    key: 'operateTotal',
+  },
+  {
+    title: '特殊操作费',
+    key: 'specialOperateTotal',
+  },
+  {
+    title: '物流费',
+    key: 'deliveryTotal',
+  },
+  {
+    title: '耗材费',
+    key: 'consumablesTotal',
+  },
+  {
+    title: '总费用',
+    key: 'totalPrice',
+  },
 ];
 
 export const filters: FormField[] = [

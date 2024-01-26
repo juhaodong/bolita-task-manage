@@ -7,6 +7,11 @@ export function OneYearMonthTab() {
     const getMonth = currentMonth.subtract(i, 'month').format('YYYY-MM');
     monthArray.push(getMonth);
   }
-  console.log(monthArray, 'array');
   return monthArray;
+}
+
+export function dateCompare(dateKey) {
+  return (a, b) => {
+    return Date.parse(b[dateKey]) - Date.parse(a[dateKey]);
+  };
 }

@@ -87,7 +87,7 @@
     randomContainColorList,
     randomCustomerColorList,
   } from '@/api/dataLayer/common/ColorList';
-  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 
   const { hasPermission } = usePermission();
@@ -119,8 +119,7 @@
     allOutboundForecastList.forEach((it) => {
       it.customerAddress = it?.country + it?.postcode + it?.FBACode + it?.AMZID;
     });
-    console.log(allOutboundForecastList, 'allOutboundForecastList');
-    return allOutboundForecastList;
+    return allOutboundForecastList.sort(dateCompare('createTimestamp'));
   };
 
   onMounted(async () => {

@@ -41,7 +41,7 @@
   import { useUserStore } from '@/store/modules/user';
   import { CarpoolManagementPower } from '@/api/dataLayer/common/PowerModel';
   import { getOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
-  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import EditOF from '@/views/newViews/OperationDetail/NotOutbound/EditOF.vue';
 
@@ -55,9 +55,9 @@
   let editOutboundForecast = $ref(false);
   let editId = $ref('');
   const loadDataTable = async () => {
-    return (await getOutboundForecast()).filter(
-      (x) => dayjs(x.createBookCarTimestamp).format('YYYY-MM') === selectedMonth
-    );
+    return (await getOutboundForecast())
+      .filter((x) => dayjs(x.createBookCarTimestamp).format('YYYY-MM') === selectedMonth)
+      .sort(dateCompare('createBookCarTimestamp'));
   };
   const actionRef = ref();
 

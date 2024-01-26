@@ -109,7 +109,7 @@
           amount: extraInfo.inboundPrice,
           note: extraInfo.note,
           cashStatus: CashStatus.Done,
-          subtotal: extraInfo.finalPrice,
+          subtotal: safeParseFloat(extraInfo.inboundPrice) + safeParseFloat(extraInfo.otherPrice),
           otherPrice: extraInfo.otherPrice,
         },
         notifyDetail?.outCashId
@@ -138,9 +138,6 @@
       <n-descriptions-item :span="2" label="费用总额">
         <n-input v-model:value="totalPrice" disabled />
       </n-descriptions-item>
-      <n-descriptions-item :span="2" label="结算金额">
-        <n-input v-model:value="extraInfo.finalPrice" :disabled="!customerPower" />
-      </n-descriptions-item>
       <n-descriptions-item :span="2" label="备注">
         <n-input v-model:value="extraInfo.note" :disabled="!customerPower" />
       </n-descriptions-item>
@@ -148,7 +145,7 @@
     <n-space class="mt-4">
       <n-button
         v-if="saveBtn"
-        :disabled="!extraInfo.finalPrice"
+        :disabled="!extraInfo.inboundPrice"
         secondary
         type="warning"
         @click="save"
@@ -156,7 +153,7 @@
       >
       <n-button
         v-if="confirmBtn"
-        :disabled="notifyDetail?.cashStatus != CashStatus.WaitConfirm"
+        :disabled="notifyDetail?.cashStatus !== CashStatus.WaitConfirm"
         secondary
         type="primary"
         @click="confirm"

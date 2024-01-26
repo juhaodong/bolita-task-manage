@@ -71,7 +71,7 @@
         v-model:show="addNewFeeDialog"
         :show-icon="false"
         preset="card"
-        style="width: 90%; min-width: 600px; max-width: 600px"
+        style="width: 90%; min-width: 800px; max-width: 800px"
         title="新建费用"
       >
         <new-total-fee :current-data="currentData" @saved="reloadTable" />
@@ -91,7 +91,7 @@
   import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import { Box20Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
-  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
   import NewTotalFee from '@/views/newViews/SettlementManage/NewTotalFee.vue';
@@ -133,8 +133,7 @@
         .filter((it) => it.inStatus === InBoundStatus.All)
         .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
     }
-    console.log(allList, 'allList');
-    return allList;
+    return allList.sort(dateCompare('createTimestamp'));
   };
   const actionRef = ref();
 

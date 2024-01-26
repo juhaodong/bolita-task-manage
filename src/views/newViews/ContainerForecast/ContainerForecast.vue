@@ -115,7 +115,7 @@
   import WarehouseInfoDialog from '@/views/newViews/ContainerForecast/form/WarehouseInfoDialog.vue';
   import ContainerForecastIndex from '@/views/newViews/ContainerForecast/form/ContainerForecastIndex.vue';
   import { useUserStore } from '@/store/modules/user';
-  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
@@ -146,7 +146,7 @@
       (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
     );
     console.log(res, 'res');
-    return res;
+    return res.sort(dateCompare('createTimestamp'));
   };
 
   const actionRef = ref();
@@ -233,6 +233,7 @@
               }
             },
             onClick() {
+              console.log(record.id);
               currentNotifyId = record.id!;
               showFeeDialog = true;
             },

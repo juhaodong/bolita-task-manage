@@ -17,14 +17,49 @@
       </n-button>
     </filter-bar>
     <div class="my-2"></div>
-    <BasicTable
-      ref="actionRef"
-      v-model:checked-row-keys="checkedRows"
-      :action-column="actionColumn"
-      :columns="columns"
-      :request="loadDataTable"
-      :row-key="(row) => row.id"
-    />
+    <n-tabs
+      v-model:value="typeMission"
+      animated
+      class="card-tabs"
+      pane-style="padding-left: 4px; padding-right: 4px; box-sizing: border-box;"
+      pane-wrapper-style="margin: 0 -4px"
+      size="large"
+    >
+      <n-tab-pane
+        v-for="currentType in typeTab"
+        :key="currentType"
+        :name="currentType"
+        :tab="currentType"
+      >
+        <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
+          <n-tab-pane
+            v-for="currentMonth in monthTab"
+            :key="currentMonth"
+            :name="currentMonth"
+            :tab="currentMonth"
+          >
+            <BasicTable
+              ref="actionRef"
+              v-model:checked-row-keys="checkedRows"
+              :action-column="actionColumn"
+              :columns="typeMission === '卸柜结算' ? columnsIn : columnsOut"
+              :request="loadDataTable"
+              :row-key="(row) => row.id"
+            />
+          </n-tab-pane>
+        </n-tabs>
+      </n-tab-pane>
+    </n-tabs>
+
+    <n-modal
+      v-model:show="addNewFeeDialog"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 800px; max-width: 800px"
+      title="管理账单"
+    >
+      <new-total-fee :current-data="currentData" @saved="reloadTable" />
+    </n-modal>
 
     <n-modal
       v-model:show="showModal"
@@ -35,22 +70,36 @@
     >
       <new-settlement :model="currentModel" @saved="reloadTable" />
     </n-modal>
+    <n-modal
+      v-model:show="showFeeDialog"
+      :show-icon="false"
+      preset="dialog"
+      style="width: 90%; min-width: 600px; max-width: 800px"
+      title="费用表"
+    >
+      <notify-fee-dialog :notify-id="currentNotifyId!" @save="reloadTable" />
+    </n-modal>
   </n-card>
 </template>
 
 <script lang="ts" setup>
   import { Component, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { columns, filters } from './columns';
+  import { columnsIn, columnsOut, filters } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
-  import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { CashManager, FinanceManager } from '@/api/dataLayer/modules/cash/cash';
   import NewSettlement from '@/views/newViews/SettlementManage/NewSettlement.vue';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
-  import { Box20Filled, Folder32Filled } from '@vicons/fluent';
+  import { Box20Filled } from '@vicons/fluent';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { safeSumBy } from '@/store/utils/utils';
+  import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import { getSettlement } from '@/api/dataLayer/common/SettlementType';
+  import NewTotalFee from '@/views/newViews/SettlementManage/NewTotalFee.vue';
+  import dayjs from 'dayjs';
+  import NotifyFeeDialog from '@/views/newViews/NotifyList/form/NotifyFeeDialog.vue';
+  import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
 
   interface Prop {
     outId?: string;
@@ -58,10 +107,19 @@
 
   let finished = $ref(false);
   const props = defineProps<Prop>();
+  let addNewFeeDialog = $ref(false);
+  let showFeeDialog = $ref(false);
+  let selectedMonth: any | null = $ref('');
+  let monthTab: any | null = $ref(null);
+  let allList: any | null = $ref([]);
+  let currentNotifyId: string | null = $ref(null);
+  let typeMission: any | null = $ref('');
+  let currentData: any | null = $ref([]);
+  let typeTab = $ref(['卸柜结算', '货柜结算']);
   onMounted(() => {
-    if (props.outId) {
-      filterObj = { outId: props.outId };
-    }
+    monthTab = OneYearMonthTab();
+    selectedMonth = monthTab[0];
+    typeMission = '货柜结算';
     finished = true;
   });
   const showModal = ref(false);
@@ -69,14 +127,22 @@
   let currentModel: any | null = $ref(null);
 
   async function startEdit(id) {
-    currentModel = await CashManager.getById(id);
-    showModal.value = true;
+    currentData = allList.find((it) => it.id === id);
+    console.log(currentData, 'data');
+    addNewFeeDialog = true;
   }
 
   const loadDataTable = async () => {
-    const res = await CashManager.load(filterObj);
-    console.log(res, 'res');
-    return res;
+    if (typeMission === '货柜结算') {
+      allList = (await getSettlement()).filter(
+        (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
+      );
+    } else {
+      allList = (await CashManager.load()).filter(
+        (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
+      );
+    }
+    return allList.sort(dateCompare('createTimestamp'));
   };
 
   let filterObj: any | null = $ref(null);
@@ -89,8 +155,10 @@
   const actionRef = ref();
 
   function reloadTable() {
-    actionRef.value.reload();
+    actionRef.value[0].reload();
     showModal.value = false;
+    addNewFeeDialog = false;
+    showFeeDialog = false;
   }
 
   async function merge() {
@@ -121,20 +189,18 @@
     key: 'action',
     width: 60,
     render(record: any) {
-      const fileAction = (label, key, icon?: Component, editable = false) => {
-        return getFileActionButton(label, key, CashManager, reloadTable, record, icon, editable);
-      };
       return h(TableAction as any, {
         style: 'button',
         actions: [
           {
             label: '修改',
-            icon: DocumentEdit16Filled,
             onClick() {
               startEdit(record.id);
             },
+            ifShow: () => {
+              return typeMission === '货柜结算';
+            },
           },
-          fileAction('附件', 'files', Folder32Filled, true),
         ],
       });
     },

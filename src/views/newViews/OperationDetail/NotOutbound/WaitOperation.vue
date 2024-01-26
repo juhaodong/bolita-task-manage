@@ -94,7 +94,7 @@
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
   import { getOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
-  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import { useUserStore } from '@/store/modules/user';
   import OutboundOrder from '@/views/newViews/OutboundForecast/OutboundOrder.vue';
@@ -153,7 +153,7 @@
         it.customerAddress = it?.country + it?.postcode + it?.FBACode + it?.AMZID;
       });
     }
-    return currentList;
+    return currentList.sort(dateCompare('createTimestamp'));
   };
   let currentModel = $ref(null);
   function startEditOF(id) {
