@@ -22,20 +22,9 @@
     <div v-if="!loading">
       <n-card :bordered="false" class="mt-4" embedded title="💴 入库费">
         <div>
-          <n-grid :cols="6" item-responsive>
-            <n-grid-item
-              class="font-bold text-l"
-              span="4"
-              style="display: flex; justify-content: center; align-items: center"
-            />
-            <n-grid-item
-              class="font-bold text-l"
-              span="2"
-              style="display: flex; justify-content: center; align-items: center"
-            >
-              总计: {{ inboundTotal }}
-            </n-grid-item>
-          </n-grid>
+          <div style="display: flex; align-items: flex-end; justify-content: end"
+            >总计: {{ inboundTotal }}</div
+          >
           <n-grid :cols="6" x-gap="12">
             <n-gi class="textStyle" span="2"> 类别 </n-gi>
             <n-gi class="textStyle"> 单价 </n-gi>
@@ -72,20 +61,9 @@
       </n-card>
       <n-card :bordered="false" class="mt-4" embedded title="💴 出库费">
         <div>
-          <n-grid :cols="6" item-responsive>
-            <n-grid-item
-              class="font-bold text-l"
-              span="4"
-              style="display: flex; justify-content: center; align-items: center"
-            />
-            <n-grid-item
-              class="font-bold text-l"
-              span="2"
-              style="display: flex; justify-content: center; align-items: center"
-            >
-              总计: {{ outboundTotal }}
-            </n-grid-item>
-          </n-grid>
+          <div style="display: flex; align-items: flex-end; justify-content: end"
+            >总计: {{ outboundTotal }}</div
+          >
           <n-grid :cols="6" x-gap="12">
             <n-gi class="textStyle" span="2"> 类别 </n-gi>
             <n-gi class="textStyle"> 单价 </n-gi>
@@ -122,20 +100,9 @@
       </n-card>
       <n-card :bordered="false" class="mt-4" embedded title="💴 操作费">
         <div>
-          <n-grid :cols="6" item-responsive>
-            <n-grid-item
-              class="font-bold text-l"
-              span="4"
-              style="display: flex; justify-content: center; align-items: center"
-            />
-            <n-grid-item
-              class="font-bold text-l"
-              span="2"
-              style="display: flex; justify-content: center; align-items: center"
-            >
-              总计: {{ operateTotal }}
-            </n-grid-item>
-          </n-grid>
+          <div style="display: flex; align-items: flex-end; justify-content: end"
+            >总计: {{ operateTotal }}</div
+          >
           <n-grid :cols="6" x-gap="12">
             <n-gi class="textStyle" span="2"> 类别 </n-gi>
             <n-gi class="textStyle"> 单价 </n-gi>
@@ -172,20 +139,9 @@
       </n-card>
       <n-card :bordered="false" class="mt-4" embedded title="💴 特殊操作费">
         <div>
-          <n-grid :cols="6" item-responsive>
-            <n-grid-item
-              class="font-bold text-l"
-              span="4"
-              style="display: flex; justify-content: center; align-items: center"
-            />
-            <n-grid-item
-              class="font-bold text-l"
-              span="2"
-              style="display: flex; justify-content: center; align-items: center"
-            >
-              总计: {{ specialOperateTotal }}
-            </n-grid-item>
-          </n-grid>
+          <div style="display: flex; align-items: flex-end; justify-content: end"
+            >总计: {{ specialOperateTotal }}</div
+          >
           <n-grid :cols="6" x-gap="12">
             <n-gi class="textStyle" span="2"> 类别 </n-gi>
             <n-gi class="textStyle"> 单价 </n-gi>
@@ -230,20 +186,9 @@
       </n-card>
       <n-card :bordered="false" class="mt-4" embedded title="💴 物流费">
         <div>
-          <n-grid :cols="6" item-responsive>
-            <n-grid-item
-              class="font-bold text-l"
-              span="4"
-              style="display: flex; justify-content: center; align-items: center"
-            />
-            <n-grid-item
-              class="font-bold text-l"
-              span="2"
-              style="display: flex; justify-content: center; align-items: center"
-            >
-              总计: {{ deliveryTotal }}
-            </n-grid-item>
-          </n-grid>
+          <div style="display: flex; align-items: flex-end; justify-content: end"
+            >总计: {{ deliveryTotal }}</div
+          >
           <n-grid :cols="8" x-gap="12">
             <n-gi class="textStyle" span="2"> 方式 </n-gi>
             <n-gi class="textStyle" span="2"> 类别 </n-gi>
@@ -294,20 +239,9 @@
       </n-card>
       <n-card :bordered="false" class="mt-4" embedded title="💴 耗材费">
         <div>
-          <n-grid :cols="6" item-responsive>
-            <n-grid-item
-              class="font-bold text-l"
-              span="4"
-              style="display: flex; justify-content: center; align-items: center"
-            />
-            <n-grid-item
-              class="font-bold text-l"
-              span="2"
-              style="display: flex; justify-content: center; align-items: center"
-            >
-              总计: {{ consumablesTotal }}
-            </n-grid-item>
-          </n-grid>
+          <div style="display: flex; align-items: flex-end; justify-content: end"
+            >总计: {{ consumablesTotal }}</div
+          >
           <n-grid :cols="6" x-gap="12">
             <n-gi class="textStyle" span="2"> 类别 </n-gi>
             <n-gi class="textStyle"> 单价 </n-gi>
