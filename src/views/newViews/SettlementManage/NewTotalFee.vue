@@ -57,7 +57,7 @@
                   <n-input v-model:value="a.amount" placeholder="amount" />
                 </n-gi>
                 <n-gi>
-                  <n-input v-model:value="a.total" placeholder="total" />
+                  <n-input v-model:value="a.total" disabled placeholder="total" />
                 </n-gi>
                 <n-gi>
                   <n-input v-model:value="a.note" placeholder="note" />
@@ -107,7 +107,7 @@
                   <n-input v-model:value="b.amount" placeholder="amount" />
                 </n-gi>
                 <n-gi>
-                  <n-input v-model:value="b.total" placeholder="total" />
+                  <n-input v-model:value="b.total" disabled placeholder="total" />
                 </n-gi>
                 <n-gi>
                   <n-input v-model:value="b.note" placeholder="note" />
@@ -157,7 +157,7 @@
                   <n-input v-model:value="b.amount" placeholder="amount" />
                 </n-gi>
                 <n-gi>
-                  <n-input v-model:value="b.total" placeholder="total" />
+                  <n-input v-model:value="b.total" disabled placeholder="total" />
                 </n-gi>
                 <n-gi>
                   <n-input v-model:value="b.note" placeholder="note" />
@@ -215,7 +215,7 @@
                   <n-input v-model:value="b.amount" placeholder="amount" />
                 </n-gi>
                 <n-gi>
-                  <n-input v-model:value="b.total" placeholder="total" />
+                  <n-input v-model:value="b.total" disabled placeholder="total" />
                 </n-gi>
                 <n-gi>
                   <n-input v-model:value="b.note" placeholder="note" />
@@ -279,7 +279,7 @@
                   <n-input v-model:value="b.amount" placeholder="amount" />
                 </n-gi>
                 <n-gi>
-                  <n-input v-model:value="b.total" placeholder="total" />
+                  <n-input v-model:value="b.total" disabled placeholder="total" />
                 </n-gi>
                 <n-gi>
                   <n-input v-model:value="b.note" placeholder="note" />
@@ -329,7 +329,7 @@
                   <n-input v-model:value="a.amount" placeholder="amount" />
                 </n-gi>
                 <n-gi>
-                  <n-input v-model:value="a.total" placeholder="total" />
+                  <n-input v-model:value="a.total" disabled placeholder="total" />
                 </n-gi>
                 <n-gi>
                   <n-input v-model:value="a.note" placeholder="note" />
@@ -353,9 +353,14 @@
   import { $ref } from 'vue/macros';
   import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { addSettlement, getSettlement } from '@/api/dataLayer/common/SettlementType';
+  import {
+    addSettlement,
+    getSettlement,
+    updateSettlement,
+  } from '@/api/dataLayer/common/SettlementType';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
   import Delete16Filled from '@vicons/fluent/es/Delete16Filled';
+  import { assign } from 'lodash';
 
   interface Props {
     currentData?: any[];
@@ -436,18 +441,12 @@
   async function reload() {
     currentInfo = (await getSettlement()).find((it) => it.ticketId === prop.currentData.ticketId);
     if (currentInfo) {
-      inboundFeeList = checkList(currentInfo?.inbound);
-      outboundFeeList = checkList(currentInfo?.outbound);
-      operateFeeList = checkList(currentInfo?.operate);
-      specialOperateFeeList = checkList(currentInfo?.specialOperate);
-      deliveryFeeList = checkList(currentInfo?.delivery);
-      consumablesList = checkList(currentInfo?.consumables);
-      inboundTotal = currentInfo?.inboundTotal;
-      outboundTotal = currentInfo?.outboundTotal;
-      deliveryTotal = currentInfo?.deliveryTotal;
-      operateTotal = currentInfo?.operateTotal;
-      specialOperateTotal = currentInfo?.specialOperateTotal;
-      consumablesTotal = currentInfo?.consumablesTotal;
+      inboundFeeList = assign(inboundFeeList, currentInfo?.inbound);
+      outboundFeeList = assign(outboundFeeList, currentInfo?.outbound);
+      operateFeeList = assign(outboundFeeList, currentInfo?.operate);
+      specialOperateFeeList = assign(outboundFeeList, currentInfo?.specialOperate);
+      deliveryFeeList = assign(outboundFeeList, currentInfo?.delivery);
+      consumablesList = assign(outboundFeeList, currentInfo?.consumables);
     }
   }
 
@@ -476,8 +475,6 @@
     ],
     ([inbound, outbound, operate, specialOperate, delivery, consumables]) => {
       //
-      console.log(inbound, 'inbound');
-      console.log(inboundFeeList, 'inboundList');
       inbound.forEach((it) => {
         it.total = it.price * it.amount;
       });
@@ -600,8 +597,12 @@
     notifyDetail.finalStatus = '已结算';
 
     await safeScope(async () => {
-      await addSettlement(res);
-      await NotifyDetailManager.edit(notifyDetail, notifyDetail.id);
+      if (currentInfo) {
+        await updateSettlement(currentInfo.id, res);
+      } else {
+        await addSettlement(res);
+        await NotifyDetailManager.edit(notifyDetail, notifyDetail.id);
+      }
       emit('saved');
     });
     loading = false;
