@@ -72,8 +72,7 @@
   }
 
   function reloadTable() {
-    console.log(actionRef);
-    actionRef.value.reload();
+    actionRef.value[0].reload();
     showModal.value = false;
     paymentDialogShow = false;
   }

@@ -18,6 +18,15 @@
         />
       </n-tab-pane>
     </n-tabs>
+    <n-modal
+      v-model:show="editOutboundForecast"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 600px; max-width: 600px"
+      title="编辑"
+    >
+      <edit-o-f :id="editId" @saved="saved" />
+    </n-modal>
   </n-card>
 </template>
 
@@ -34,6 +43,7 @@
   import { getOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
+  import EditOF from '@/views/newViews/OperationDetail/NotOutbound/EditOF.vue';
 
   const showModal = ref(false);
 
@@ -42,9 +52,11 @@
   let paymentDialogShow: boolean = $ref(false);
   let selectedMonth: any | null = $ref('');
   let monthTab: any | null = $ref(null);
+  let editOutboundForecast = $ref(false);
+  let editId = $ref('');
   const loadDataTable = async () => {
     return (await getOutboundForecast()).filter(
-      (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
+      (x) => dayjs(x.createBookCarTimestamp).format('YYYY-MM') === selectedMonth
     );
   };
   const actionRef = ref();
@@ -60,12 +72,17 @@
   }
 
   function reloadTable() {
-    actionRef.value.reload();
+    actionRef.value[0].reload();
     showModal.value = false;
     paymentDialogShow = false;
+    editOutboundForecast = false;
   }
   async function addOut() {
     showModal.value = true;
+  }
+
+  function saved() {
+    reloadTable();
   }
 
   async function startEdit(id) {
@@ -90,6 +107,10 @@
   const BillOperate = computed(() => {
     return AccountPowerList.value.includes(CarpoolManagementPower.Bill);
   });
+  function startEditOF(id) {
+    editId = id;
+    editOutboundForecast = true;
+  }
 
   const actionColumn = reactive({
     title: '可用动作',
@@ -113,8 +134,8 @@
         actions: [
           {
             label: '修改',
-            async onClick() {
-              console.log(record, 'record');
+            onClick() {
+              startEditOF(record.id);
             },
           },
           fileAction('提单', 'pickupFiles', !SubmitOrderOperate.value),

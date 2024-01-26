@@ -9,7 +9,7 @@
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { FBACodeManager } from '@/api/dataLayer/modules/user/user';
+  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
 
   interface Props {
     model?: any;
@@ -37,22 +37,27 @@
     {
       label: '件数',
       field: 'number',
+      required: false,
     },
     {
       label: '总实重',
       field: 'weight',
+      required: false,
     },
     {
       label: '总体积',
       field: 'volume',
+      required: false,
     },
     {
       label: '运单号',
       field: 'deliveryIdIn',
+      required: false,
     },
     {
       label: 'FBA/快递单号',
       field: 'FBA/DeliveryCode',
+      required: false,
     },
     {
       label: '出库方式',
@@ -77,6 +82,7 @@
     {
       label: '托数',
       field: 'trayNum',
+      required: false,
     },
     {
       label: '备注/库位',
@@ -159,11 +165,13 @@
 
   async function handleSubmit(values: any) {
     loading = true;
+    values.alreadyChanged = 1;
+    console.log(values, 'values');
     await safeScope(async () => {
       if (prop?.model?.id) {
-        await FBACodeManager.editInternal(values, prop.model.id);
+        await NotifyDetailManager.editInternal(values, prop.model.id);
       } else {
-        await FBACodeManager.addInternal(values);
+        await NotifyDetailManager.addInternal(values);
       }
       emit('saved', values);
     });

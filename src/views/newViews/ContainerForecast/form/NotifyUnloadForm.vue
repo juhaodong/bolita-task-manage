@@ -132,10 +132,11 @@
       }
     }
     const newInStatus = InBoundStatus.All;
-    const userStore = useUserStore();
+    // const userStore = useUserStore();
+    // const allCustomer = (await SalesManManager.load())
     const res = await NotifyManager.edit(
       {
-        salesName: userStore?.info?.realName,
+        // salesName: userStore?.info?.realName,
         arrivedCount: totalArrivedTrayCount.value + totalArrivedContainerCount.value,
         inStatus: newInStatus,
         totalCount: totalTrayCount.value + totalContainerCount.value,
@@ -146,7 +147,7 @@
       props.notifyId
     );
     await handleRequest(res, () => {
-      toastSuccess('sucees');
+      toastSuccess('success');
       emit('save');
     });
     loading = false;

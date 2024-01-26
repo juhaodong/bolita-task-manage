@@ -1,13 +1,8 @@
 import { DataTableColumns } from 'naive-ui';
-import {
-  InBoundStatus,
-  notifyType,
-  OutAllStatus,
-  OutStatus,
-} from '@/api/dataLayer/modules/notify/notify-api';
+import { finalStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import { generateOptionFromArray } from '@/store/utils/utils';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 
 export const columns: DataTableColumns<any> = [
   {
@@ -39,6 +34,10 @@ export const columns: DataTableColumns<any> = [
     key: 'volume',
   },
   {
+    title: '仓库',
+    key: 'warehouseId',
+  },
+  {
     title: '运单号',
     key: 'deliveryIdIn',
   },
@@ -50,6 +49,10 @@ export const columns: DataTableColumns<any> = [
     title: '出库方式',
     key: 'operation',
   },
+  statusColumnEasy({
+    title: '结算状态',
+    key: 'finalStatus',
+  }),
   {
     title: 'PO',
     key: 'PO',
@@ -134,73 +137,23 @@ export const columns: DataTableColumns<any> = [
 
 export const filters: FormField[] = [
   {
-    label: '入库ID',
-    field: 'id',
+    label: '结算状态',
+    field: 'finalStatus',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(Object.values(finalStatus)),
+    },
   },
-  // {
-  //   label: '客户ID',
-  //   field: 'customerName',
-  // },
-  // {
-  //   label: '业务员',
-  //   field: 'salesName',
-  // },
   {
     label: '仓库',
     field: 'warehouseId',
-  },
-  {
-    label: '入库状态',
-    field: 'inStatus',
-    component: 'NSelect',
-    componentProps: {
-      options: generateOptionFromArray(Object.values(InBoundStatus)),
-    },
   },
   {
     label: '货柜号',
     field: 'containerNo',
   },
   {
-    label: '显示',
-    field: 'otherStatus',
-    component: 'NSelect',
-    componentProps: {
-      options: generateOptionFromArray(Object.values(OutAllStatus)),
-    },
-  },
-  {
-    label: '出库状态',
-    field: 'outStatus',
-    component: 'NSelect',
-    componentProps: {
-      options: generateOptionFromArray(Object.values(OutStatus)),
-    },
-  },
-  {
-    label: '入库类型',
-    field: 'notifyType',
-    component: 'NSelect',
-    componentProps: {
-      options: generateOptionFromArray(notifyType),
-    },
-  },
-  {
-    field: 'planArriveStartDateTime',
-    component: 'NDatePicker',
-    label: '预计到仓开始时间',
-    componentProps: {
-      type: 'date',
-      clearable: true,
-    },
-  },
-  {
-    field: 'planArriveEndDateTime',
-    component: 'NDatePicker',
-    label: '预计到仓结束时间',
-    componentProps: {
-      type: 'date',
-      clearable: true,
-    },
+    label: '票号',
+    field: 'ticketId',
   },
 ];

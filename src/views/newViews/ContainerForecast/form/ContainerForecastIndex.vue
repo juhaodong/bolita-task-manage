@@ -7,6 +7,7 @@
   import { useUserStore } from '@/store/modules/user';
   import NotifyTrayForm from '@/views/newViews/ContainerForecast/form/NotifyTrayForm.vue';
   import readXlsxFile from 'read-excel-file';
+  import { CustomerManager } from '@/api/dataLayer/modules/user/user';
 
   interface Prop {
     currentModel?: any;
@@ -57,6 +58,8 @@
     console.log(userStore.info, 'user');
     value.customerId = userStore.info?.belongsToId ?? '';
     value.notifyType = prop.type;
+    const currentCustomer = (await CustomerManager.load()).find((it) => it.id === value.customerId);
+    value.salesName = currentCustomer.belongSalesMan ?? '';
     const taskList = [
       ...(await readFile(value.files?.[0].file, value.notifyType)),
       ...(value?.trayTaskList ?? []),

@@ -44,30 +44,19 @@
 <script lang="ts" setup>
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
-  import { onMounted, ref } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import { DataTableColumns } from 'naive-ui';
   import { getReserveItems } from '@/api/dataLayer/modules/notify/notify-detail';
   import { editableColumn } from '@/views/bolita-views/composable/useableColumns';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
-  import {
-    asyncCustomerFormField,
-    getFilesUploadFormField,
-  } from '@/api/dataLayer/fieldDefination/common';
+  import { asyncCustomerFormField } from '@/api/dataLayer/fieldDefination/common';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { generateOptionFromArray, safeParseInt, toastError } from '@/store/utils/utils';
+  import { safeParseInt, toastError } from '@/store/utils/utils';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { afterPlanDetailAdded } from '@/api/dataLayer/modules/OutBoundPlan/outAddHook';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
-  import { deliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
-  import {
-    deliveryDetailMethods,
-    expressDelivery,
-    looseBoxDelivery,
-    retainWarehouse,
-    transfer,
-    trayDelivery,
-  } from '@/api/dataLayer/modules/deliveryMethod/detail';
+  import { deliveryDetailMethods } from '@/api/dataLayer/modules/deliveryMethod/detail';
   import { addOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
 
   interface Props {
@@ -79,17 +68,22 @@
   const emit = defineEmits(['saved']);
   const checkedRowKeys = ref<any[]>([]);
   const groupNotifyDetail = ref<any[]>([]);
+  const deliveryMethod = ref<any[]>([]);
   onMounted(async () => {
     await init();
-    console.log(deliveryDetailMethods.flat(), 'deliveryDetailMethods');
-    checkedRowKeys.value = prop?.initialKey ?? [];
-    if (checkedRowKeys.value.length > 0) {
-      allNotifyDetail = allNotifyDetail.filter((it: any) => checkedRowKeys.value.includes(it.id));
-    }
-    console.log(allNotifyDetail, 'all');
   });
   let allNotifyDetail: any[] = $ref([]);
   let loading: boolean = $ref(false);
+
+  watch(checkedRowKeys, async (val) => {
+    if (val.length > 0) {
+      deliveryMethod.value = allNotifyDetail.find((it) => it.id === val[0]).operation;
+      allNotifyDetail = allNotifyDetail.filter((x) => x?.operation === deliveryMethod.value);
+    } else {
+      await updateFilter(null);
+      deliveryMethod.value = '';
+    }
+  });
 
   let step = $ref(0);
 
@@ -126,10 +120,11 @@
   }
 
   async function saveOutboundPlan(value) {
+    console.log(allNotifyDetail, 'detail');
+    value.deliveryDetail = deliveryMethod;
+    console.log(value, 'value');
     loading = true;
     allNotifyDetail.forEach((it) => {
-      it.deliveryDetail = value.deliveryDetail;
-      it.deliveryMethod = value.deliveryMethod;
       it.needCar = value.needCar;
       if (it.needCar === '1') {
         it.carStatus = CarStatus.UnAble;
@@ -157,13 +152,13 @@
       key: 'selection',
     },
     { title: '票号', key: 'ticketId' },
-    editableColumn({ title: '箱号', key: 'containerId' }, allNotifyDetail),
-    editableColumn({ title: '托数', key: 'outBoundTrayNum', width: 60 }, allNotifyDetail),
-    editableColumn({ title: '箱数', key: 'outBoundContainerNum', width: 60 }, allNotifyDetail),
-    editableColumn({ title: '重量', key: 'weight', width: 60 }, allNotifyDetail),
-    editableColumn({ title: '体积', key: 'volume', width: 60 }, allNotifyDetail),
-    editableColumn({ title: '预计出库方式', key: 'operation' }, allNotifyDetail),
-    editableColumn({ title: 'FBA号', key: 'FBA/DeliveryCode' }, allNotifyDetail),
+    { title: '箱号', key: 'containerId' },
+    { title: '托数', key: 'outBoundTrayNum' },
+    { title: '箱数', key: 'outBoundContainerNum' },
+    { title: '重量', key: 'weight' },
+    { title: '体积', key: 'volume' },
+    { title: '出库方式', key: 'operation' },
+    { title: 'FBA号', key: 'FBA/DeliveryCode' },
     editableColumn({ title: '备注', key: 'note' }, allNotifyDetail),
   ]);
   const displayColumns: DataTableColumns<any> = $computed(() => [
@@ -185,79 +180,6 @@
   ];
 
   const addressFormFields: FormField[] = [
-    getFilesUploadFormField('files', false),
-    {
-      field: 'deliveryMethod',
-      label: '出库方式',
-      component: 'NSelect',
-      required: false,
-      defaultValue: '',
-      componentProps: {
-        options: generateOptionFromArray(deliveryMethod),
-      },
-    },
-    {
-      field: 'deliveryDetail',
-      label: '物流方式',
-      component: 'NSelect',
-      displayCondition(model) {
-        return model.deliveryMethod === '快递';
-      },
-      componentProps: {
-        options: generateOptionFromArray(Object.values(expressDelivery)),
-      },
-    },
-    {
-      field: 'deliveryDetail',
-      label: '物流方式',
-      component: 'NSelect',
-      displayCondition(model) {
-        return model.deliveryMethod === '托盘';
-      },
-      componentProps: {
-        options: generateOptionFromArray(Object.values(trayDelivery)),
-      },
-    },
-    {
-      field: 'deliveryDetail',
-      label: '物流方式',
-      component: 'NSelect',
-      displayCondition(model) {
-        return model.deliveryMethod === '散箱';
-      },
-      componentProps: {
-        options: generateOptionFromArray(Object.values(looseBoxDelivery)),
-      },
-    },
-    {
-      field: 'deliveryDetail',
-      label: '物流方式',
-      component: 'NSelect',
-      displayCondition(model) {
-        return model.deliveryMethod === '留仓';
-      },
-      componentProps: {
-        options: generateOptionFromArray(Object.values(retainWarehouse)),
-      },
-    },
-    {
-      field: 'deliveryDetail',
-      label: '物流方式',
-      component: 'NSelect',
-      displayCondition(model) {
-        return model.deliveryMethod === '移交';
-      },
-      componentProps: {
-        options: generateOptionFromArray(Object.values(transfer)),
-      },
-    },
-    // {
-    //   field: 'waybillId',
-    //   label: '物流单号',
-    //   displayCondition(model) {
-    //     return model.deliveryMethod;
-    //   },
-    // },
     {
       field: 'needCar',
       component: 'NSelect',

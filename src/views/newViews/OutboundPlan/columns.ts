@@ -101,9 +101,9 @@ export type OutboundPlanModel = {
 
 export enum CarStatus {
   NoNeed = '无需订车',
-  Able = '可订车',
   UnAble = '待订车',
   Booked = '已订车',
+  Interception = '已截停',
 }
 
 export const filters: FormField[] = [

@@ -43,7 +43,7 @@
 
   const columns = [
     {
-      title: '客户ID',
+      title: 'Kunden',
       key: 'customerName',
       render(row) {
         return h(
@@ -58,7 +58,7 @@
       },
     },
     {
-      title: '货柜号',
+      title: 'Container',
       key: 'containerId',
       render(row) {
         return h(
@@ -73,19 +73,19 @@
       },
     },
     {
-      title: '票号',
+      title: 'Sendungsnummer',
       key: 'ticketId',
     },
     {
-      title: 'FBA号',
+      title: 'FBA',
       key: 'FBA/DeliveryCode',
     },
     {
-      title: '数量',
+      title: 'Menge',
       key: 'number',
     },
     {
-      title: '货物位置',
+      title: 'Halle',
       key: 'warehouseId',
     },
   ];

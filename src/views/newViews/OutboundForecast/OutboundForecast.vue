@@ -45,7 +45,7 @@
       :show-icon="false"
       preset="dialog"
       style="width: 90%; min-width: 600px; max-width: 800px"
-      title="出库单"
+      title="编辑"
     >
       <change-forecast
         :id="currentId"
@@ -88,6 +88,7 @@
     randomCustomerColorList,
   } from '@/api/dataLayer/common/ColorList';
   import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 
   const { hasPermission } = usePermission();
 
@@ -113,11 +114,12 @@
   let filterObj: any | null = $ref(null);
   const loadDataTable = async () => {
     allOutboundForecastList = (await getOutboundForecast())
-      .filter((it) => !it.interception || it.interception !== 1)
+      .filter((it) => it.carStatus !== CarStatus.Interception)
       .filter((x) => x.outStatus !== '已出库');
     allOutboundForecastList.forEach((it) => {
       it.customerAddress = it?.country + it?.postcode + it?.FBACode + it?.AMZID;
     });
+    console.log(allOutboundForecastList, 'allOutboundForecastList');
     return allOutboundForecastList;
   };
 
@@ -183,12 +185,12 @@
 
   async function closeDetail() {
     showOutboundOrderDetail = false;
-    await loadDataTable();
+    reloadTable();
   }
 
   async function closeChange() {
     showOutboundChange = false;
-    await loadDataTable();
+    reloadTable();
   }
 
   async function startEdit(id) {
@@ -196,7 +198,7 @@
     showModal.value = true;
   }
   function reloadTable() {
-    actionRef.value.reload();
+    actionRef.value[0].reload();
     showModal.value = false;
   }
 
@@ -242,8 +244,21 @@
           {
             label: '截停',
             async onClick() {
-              await updateOutboundForecast(record.id, { interception: 1 });
-              await loadDataTable();
+              await updateOutboundForecast(record.id, { carStatus: CarStatus.Interception });
+              reloadTable();
+            },
+          },
+          {
+            label: '信息已变更',
+            async onClick() {
+              await updateOutboundForecast(record.id, { alreadyChanged: 0 });
+              reloadTable();
+            },
+            highlight: () => {
+              return 'error';
+            },
+            ifShow: () => {
+              return record.alreadyChanged;
             },
           },
         ],

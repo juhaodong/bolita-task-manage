@@ -162,7 +162,7 @@
   }
 
   function reloadTable() {
-    actionRef.value.reload();
+    actionRef.value[0].reload();
     showOperationTable = false;
     showFeeDialog = false;
   }
@@ -192,7 +192,6 @@
         actions: [
           {
             label: '修改',
-            icon: DocumentEdit16Filled,
             onClick() {
               startEdit(record.id);
             },
@@ -200,7 +199,6 @@
           fileAction('CMR', 'CMRFiles'),
           {
             label: '卸柜单',
-            icon: Hammer,
             onClick() {
               currentNotifyId = record.id!;
               showOperationTable = true;
@@ -214,7 +212,6 @@
           },
           {
             label: '取消',
-            icon: Delete28Filled,
             async onClick() {
               const res = await NotifyManager.edit(
                 {

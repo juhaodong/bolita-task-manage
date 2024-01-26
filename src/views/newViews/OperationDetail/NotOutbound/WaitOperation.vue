@@ -70,6 +70,15 @@
     >
       <new-carpool-management :merged-out-ids="checkedRows" @saved="saveShareCar" />
     </n-modal>
+    <n-modal
+      v-model:show="editOutboundForecast"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 600px; max-width: 600px"
+      title="编辑"
+    >
+      <edit-o-f :id="editId" @saved="saved" />
+    </n-modal>
   </n-card>
 </template>
 
@@ -94,6 +103,8 @@
     randomContainColorList,
     randomCustomerColorList,
   } from '@/api/dataLayer/common/ColorList';
+  import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
+  import EditOF from '@/views/newViews/OperationDetail/NotOutbound/EditOF.vue';
 
   const { hasPermission } = usePermission();
 
@@ -105,53 +116,61 @@
   let typeMission: any | null = $ref('');
   let selectedMonth: any | null = $ref('');
   let showOutboundOrderDetail = $ref(false);
+  let editOutboundForecast = $ref(false);
   let currentDeliveryMethod = $ref('');
   let currentData = $ref('');
   let RefCode = $ref('');
   let FBACode = $ref('');
   let pickDate = $ref('');
   let AMZID = $ref('');
+  let editId = $ref('');
   let allList = $ref([]);
   let currentList = $ref([]);
   const actionRef = ref();
   let filterObj: any | null = $ref(null);
   const loadDataTable = async () => {
     const userStore = useUserStore();
-    console.log(userStore.info, 'user');
     let allList = (await getOutboundForecast()).filter(
       (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
     );
     if (typeMission === '待操作') {
       currentList = allList
         .filter((it) => it.outStatus !== '已出库')
-        .filter((it) => !it.interception || it.interception !== 1);
+        .filter((it) => it.carStatus !== CarStatus.Interception);
       currentList.forEach((it) => {
         it.customerAddress = it?.country + it?.postcode + it?.FBACode + it?.AMZID;
       });
     } else if (typeMission === '已出库') {
       currentList = allList
-        .filter((it) => !it.interception || it.interception !== 1)
+        .filter((it) => it.carStatus !== CarStatus.Interception)
         .filter((x) => x.outStatus === '已出库');
       currentList.forEach((it) => {
         it.customerAddress = it?.country + it?.postcode + it?.FBACode + it?.AMZID;
       });
     } else {
-      currentList = allList.filter((it) => it.interception === 1);
+      currentList = allList.filter((it) => it.carStatus === CarStatus.Interception);
       currentList.forEach((it) => {
         it.customerAddress = it?.country + it?.postcode + it?.FBACode + it?.AMZID;
       });
     }
-    console.log(currentList, 'res');
     return currentList;
   };
+  let currentModel = $ref(null);
+  function startEditOF(id) {
+    editId = id;
+    editOutboundForecast = true;
+  }
   function startShareCar() {
-    console.log(checkedRows, 'check');
     showShareCarModel = true;
   }
+  function saved() {
+    reloadTable();
+  }
   function reloadTable() {
-    actionRef.value.reload();
+    actionRef.value[0].reload();
     showModal.value = false;
     showShareCarModel = false;
+    editOutboundForecast = false;
   }
 
   async function checkOutboundOrder(id) {
@@ -220,7 +239,7 @@
         actions: [
           fileAction('提单文件', 'files', Folder32Filled),
           fileAction('POD', 'POD'),
-          fileAction('操作文件', 'operationFiles'),
+          fileAction('CMR', 'CMRFiles'),
           fileAction('问题图片', 'problemFiles'),
           {
             label: '出库单',
@@ -228,8 +247,16 @@
               return typeMission === '已出库';
             },
             onClick() {
-              console.log(record.id, 'id');
               checkOutboundOrder(record.id);
+            },
+          },
+          {
+            label: '修改',
+            ifShow: () => {
+              return record.carStatus === CarStatus.Interception;
+            },
+            onClick() {
+              startEditOF(record.id);
             },
           },
           {

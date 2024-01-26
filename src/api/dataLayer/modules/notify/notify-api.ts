@@ -35,6 +35,10 @@ export enum InBoundStatus {
   Wait = '等待入库',
 }
 
+export enum finalStatus {
+  finish = '已结算',
+}
+
 export enum OutStatus {
   WaitForCheck = '等待审核',
   WaitForPriceConfirm = '等待确认报价',

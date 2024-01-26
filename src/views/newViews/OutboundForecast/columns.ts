@@ -1,13 +1,8 @@
 import { DataTableColumns } from 'naive-ui';
-import {
-  InBoundStatus,
-  notifyType,
-  OutAllStatus,
-  OutStatus,
-} from '@/api/dataLayer/modules/notify/notify-api';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { generateOptionFromArray } from '@/store/utils/utils';
 import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 
 export const columns: DataTableColumns<any> = [
   {
@@ -78,7 +73,7 @@ export const filters: FormField[] = [
     field: 'id',
   },
   {
-    label: '客户ID',
+    label: 'Kunden',
     field: 'customerName',
   },
   {
@@ -86,61 +81,23 @@ export const filters: FormField[] = [
     field: 'salesName',
   },
   {
-    label: '仓库',
+    label: 'Halle',
     field: 'warehouseId',
   },
   {
-    label: '入库状态',
-    field: 'inStatus',
-    component: 'NSelect',
-    componentProps: {
-      options: generateOptionFromArray(Object.values(InBoundStatus)),
-    },
-  },
-  {
-    label: '货柜号',
-    field: 'containerNo',
-  },
-  {
-    label: '显示',
-    field: 'otherStatus',
-    component: 'NSelect',
-    componentProps: {
-      options: generateOptionFromArray(Object.values(OutAllStatus)),
-    },
-  },
-  {
-    label: '出库状态',
+    label: '状态',
     field: 'outStatus',
     component: 'NSelect',
     componentProps: {
-      options: generateOptionFromArray(Object.values(OutStatus)),
+      options: generateOptionFromArray(Object.values(CarStatus)),
     },
   },
   {
-    label: '入库类型',
-    field: 'notifyType',
-    component: 'NSelect',
-    componentProps: {
-      options: generateOptionFromArray(notifyType),
-    },
+    label: 'ISA',
+    field: 'ISA',
   },
   {
-    field: 'planArriveStartDateTime',
-    component: 'NDatePicker',
-    label: '预计到仓开始时间',
-    componentProps: {
-      type: 'date',
-      clearable: true,
-    },
-  },
-  {
-    field: 'planArriveEndDateTime',
-    component: 'NDatePicker',
-    label: '预计到仓结束时间',
-    componentProps: {
-      type: 'date',
-      clearable: true,
-    },
+    label: 'Ref',
+    field: 'REF',
   },
 ];

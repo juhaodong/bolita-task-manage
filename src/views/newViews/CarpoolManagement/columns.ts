@@ -1,5 +1,5 @@
 import { DataTableColumns } from 'naive-ui';
-import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
 import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
@@ -13,7 +13,15 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
     title: '物流ID',
     key: 'id',
   },
-  timeColumn('createTimestamp', '下单日期'),
+  timeColumn('createBookCarTimestamp', '下单日期'),
+  statusColumnEasy({
+    title: '订车状态',
+    key: 'carStatus',
+  }),
+  {
+    title: '出库方式',
+    key: 'deliveryDetail',
+  },
   {
     title: '运单号',
     key: 'waybillId',

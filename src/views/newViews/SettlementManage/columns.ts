@@ -24,27 +24,6 @@ export const columns: DataTableColumns = [
     title: '客户ID',
     key: 'customerName',
   },
-
-  {
-    title: '金额',
-    key: 'amount',
-  },
-  {
-    title: '操作ID',
-    key: 'operationId',
-  },
-  statusColumnEasy({
-    title: '操作类型',
-    key: 'operationType',
-  }),
-  {
-    title: '其他费用',
-    key: 'otherPrice',
-  },
-  {
-    title: '合计',
-    key: 'subtotal',
-  },
   {
     title: '备注',
     key: 'note',
@@ -53,10 +32,6 @@ export const columns: DataTableColumns = [
     title: '结算状态',
     key: 'cashStatus',
   }),
-  {
-    title: '时间线',
-    key: 'timeLine',
-  },
 ];
 
 export const filters: FormField[] = [

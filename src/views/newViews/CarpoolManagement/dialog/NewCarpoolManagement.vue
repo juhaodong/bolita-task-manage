@@ -28,7 +28,7 @@
   async function handleSubmit(values: any) {
     loading = true;
     values.carStatus = CarStatus.Booked;
-    values.createTimestamp = dayjs().format('YYYY-MM-DD');
+    values.createBookCarTimestamp = dayjs().format('YYYY-MM-DD');
     const res = (await FBACodeManager.load()).find((it) => it.code === values.FBACode);
     values.street = res.street;
     values.state = res.state;
@@ -37,7 +37,6 @@
     values.postcode = res.postcode;
     values.city = res.city ?? '';
     values.appendAddress = res.appendAddress ?? '';
-    console.log(res, values, '123');
     await safeScope(async () => {
       for (const id of prop.mergedOutIds) {
         await updateOutboundForecast(id, values);

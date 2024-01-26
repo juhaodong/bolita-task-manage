@@ -63,9 +63,18 @@
         :show-icon="false"
         preset="card"
         style="width: 90%; min-width: 600px; max-width: 600px"
-        title="新建/编辑业务员"
+        title="编辑详情"
       >
         <edit-mission-detail :model="currentModel" @saved="reloadTable" />
+      </n-modal>
+      <n-modal
+        v-model:show="addNewFeeDialog"
+        :show-icon="false"
+        preset="card"
+        style="width: 90%; min-width: 600px; max-width: 600px"
+        title="新建费用"
+      >
+        <new-total-fee :current-data="currentData" @saved="reloadTable" />
       </n-modal>
     </div>
   </n-card>
@@ -85,17 +94,21 @@
   import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
+  import NewTotalFee from '@/views/newViews/SettlementManage/NewTotalFee.vue';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
 
   let filterObj: any | null = $ref(null);
+  let finished = $ref(false);
+  let addNewFeeDialog = $ref(false);
   let currentModel: any | null = $ref(null);
   let typeTab = $ref(['未入库', '已入库']);
   let monthTab: any | null = $ref(null);
   let typeMission: any | null = $ref('');
   let selectedMonth: any | null = $ref('');
-  let finished = $ref(false);
+  let currentData: any | null = $ref('');
+  let allList: any | null = $ref([]);
   const props = defineProps<Prop>();
   interface Prop {
     belongsToId?: string;
@@ -111,18 +124,17 @@
   }
 
   const loadDataTable = async () => {
-    let res = [];
     if (typeMission === '未入库') {
-      res = (await NotifyDetailManager.load(filterObj))
+      allList = (await NotifyDetailManager.load(filterObj))
         .filter((it) => it.inStatus !== InBoundStatus.All)
         .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
     } else {
-      res = (await NotifyDetailManager.load(filterObj)).filter(
-        (it) => it.inStatus === InBoundStatus.All
-      );
+      allList = (await NotifyDetailManager.load(filterObj))
+        .filter((it) => it.inStatus === InBoundStatus.All)
+        .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
     }
-    console.log(res, 'res');
-    return res;
+    console.log(allList, 'allList');
+    return allList;
   };
   const actionRef = ref();
 
@@ -131,9 +143,17 @@
     reloadTable();
   }
 
+  function checkCashStatus(id) {
+    currentData = allList.find((it) => it.id === id);
+    console.log(currentData, 'data');
+    addNewFeeDialog = true;
+  }
+
   function reloadTable() {
-    actionRef.value.reload();
+    actionRef.value[0].reload();
     showModal.value = false;
+    editDetailModel.value = false;
+    addNewFeeDialog = false;
   }
 
   onMounted(async () => {
@@ -164,10 +184,32 @@
               startEdit(record.id);
             },
           },
+          {
+            label: '结算',
+            onClick() {
+              checkCashStatus(record.id);
+            },
+            ifShow: () => {
+              return typeMission === '已入库';
+            },
+          },
           fileAction('提单文件', 'files'),
           fileAction('POD', 'POD'),
           fileAction('操作文件', 'operationFiles'),
           fileAction('问题图片', 'problemFiles'),
+          {
+            label: '信息已变更',
+            highlight: () => {
+              return 'error';
+            },
+            async onClick() {
+              record.alreadyChanged = 0;
+              await NotifyDetailManager.editInternal(record, record.id);
+            },
+            ifShow: () => {
+              return record.alreadyChanged;
+            },
+          },
         ],
       });
     },
