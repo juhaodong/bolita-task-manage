@@ -33,7 +33,7 @@
               span="2"
               style="display: flex; justify-content: center; align-items: center"
             >
-              总计:
+              总计: {{ inboundTotal }}
             </n-grid-item>
           </n-grid>
           <n-grid :cols="5" x-gap="12">
@@ -83,7 +83,7 @@
               span="2"
               style="display: flex; justify-content: center; align-items: center"
             >
-              总计:
+              总计: {{ outboundTotal }}
             </n-grid-item>
           </n-grid>
           <n-grid :cols="5" x-gap="12">
@@ -133,7 +133,7 @@
               span="2"
               style="display: flex; justify-content: center; align-items: center"
             >
-              总计:
+              总计: {{ operateTotal }}
             </n-grid-item>
           </n-grid>
           <n-grid :cols="5" x-gap="12">
@@ -183,7 +183,7 @@
               span="2"
               style="display: flex; justify-content: center; align-items: center"
             >
-              总计:
+              总计: {{ specialOperateTotal }}
             </n-grid-item>
           </n-grid>
           <n-grid :cols="5" x-gap="12">
@@ -241,7 +241,7 @@
               span="2"
               style="display: flex; justify-content: center; align-items: center"
             >
-              总计:
+              总计: {{ deliveryTotal }}
             </n-grid-item>
           </n-grid>
           <n-grid :cols="6" x-gap="12">
@@ -305,7 +305,7 @@
               span="2"
               style="display: flex; justify-content: center; align-items: center"
             >
-              总计:
+              总计: {{ consumablesTotal }}
             </n-grid-item>
           </n-grid>
           <n-grid :cols="5" x-gap="12">
@@ -391,6 +391,12 @@
   let specialOperateFeeList = reactive([]);
   let deliveryFeeList = reactive([]);
   let consumablesList = reactive([]);
+  let inboundTotal = $ref('');
+  let outboundTotal = $ref('');
+  let deliveryTotal = $ref('');
+  let operateTotal = $ref('');
+  let specialOperateTotal = $ref('');
+  let consumablesTotal = $ref('');
   let defaultList = {
     type: '',
     price: '',
@@ -436,6 +442,12 @@
       specialOperateFeeList = checkList(currentInfo?.specialOperate);
       deliveryFeeList = checkList(currentInfo?.delivery);
       consumablesList = checkList(currentInfo?.consumables);
+      inboundTotal = currentInfo?.inboundTotal;
+      outboundTotal = currentInfo?.outboundTotal;
+      deliveryTotal = currentInfo?.deliveryTotal;
+      operateTotal = currentInfo?.operateTotal;
+      specialOperateTotal = currentInfo?.specialOperateTotal;
+      consumablesTotal = currentInfo?.consumablesTotal;
     }
   }
 
@@ -464,9 +476,15 @@
     ],
     ([inbound, outbound, operate, specialOperate, delivery, consumables]) => {
       //
+      console.log(inbound, 'inbound');
+      console.log(inboundFeeList, 'inboundList');
+      inbound.forEach((it) => {
+        it.total = it.price * it.amount;
+      });
       const emptyInbound = inbound.filter(
-        (it) => it.type === '' && it.price === '' && it.amount === '' && it.total === ''
+        (it) => it.type === '' && it.price === '' && it.amount === ''
       ).length;
+      inboundTotal = safeSumBy(inbound, 'total');
       if (emptyInbound === 0) {
         inbound.push(createDefaultList());
         inboundFeeList = inbound;
@@ -474,8 +492,12 @@
         inboundFeeList = inbound;
       }
       //
+      outbound.forEach((it) => {
+        it.total = it.price * it.amount;
+      });
+      outboundTotal = safeSumBy(outbound, 'total');
       const emptyOutbound = outbound.filter(
-        (it) => it.type === '' && it.price === '' && it.amount === '' && it.total === ''
+        (it) => it.type === '' && it.price === '' && it.amount === ''
       ).length;
       if (emptyOutbound === 0) {
         outbound.push(createDefaultList());
@@ -484,8 +506,12 @@
         outboundFeeList = outbound;
       }
       //
+      operate.forEach((it) => {
+        it.total = it.price * it.amount;
+      });
+      operateTotal = safeSumBy(operate, 'total');
       const emptyOperate = operate.filter(
-        (it) => it.type === '' && it.price === '' && it.amount === '' && it.total === ''
+        (it) => it.type === '' && it.price === '' && it.amount === ''
       ).length;
       if (emptyOperate === 0) {
         operate.push(createDefaultList());
@@ -494,8 +520,12 @@
         operateFeeList = operate;
       }
       //
+      specialOperate.forEach((it) => {
+        it.total = it.price * it.amount;
+      });
+      specialOperateTotal = safeSumBy(specialOperate, 'total');
       const emptySpecialOperate = specialOperate.filter(
-        (it) => it.type === '' && it.price === '' && it.amount === '' && it.total === ''
+        (it) => it.type === '' && it.price === '' && it.amount === ''
       ).length;
       if (emptySpecialOperate === 0) {
         specialOperate.push(createDefaultList());
@@ -504,8 +534,12 @@
         specialOperateFeeList = specialOperate;
       }
       //
+      delivery.forEach((it) => {
+        it.total = it.price * it.amount;
+      });
+      deliveryTotal = safeSumBy(delivery, 'total');
       const emptyExpress = delivery.filter(
-        (it) => it.type === '' && it.price === '' && it.amount === '' && it.total === ''
+        (it) => it.type === '' && it.price === '' && it.amount === ''
       ).length;
       if (emptyExpress === 0) {
         delivery.push(createDefaultDeliveryList());
@@ -514,8 +548,12 @@
         deliveryFeeList = delivery;
       }
       //
+      consumables.forEach((it) => {
+        it.total = it.price * it.amount;
+      });
+      consumablesTotal = safeSumBy(consumables, 'total');
       const emptyConsumables = consumables.filter(
-        (it) => it.type === '' && it.price === '' && it.amount === '' && it.total === ''
+        (it) => it.type === '' && it.price === '' && it.amount === ''
       ).length;
       if (emptyConsumables === 0) {
         consumables.push(createDefaultList());
@@ -534,7 +572,6 @@
 
   async function handleSubmit() {
     loading = true;
-    console.log(inboundFeeList, 'list');
     inboundFeeList = inboundFeeList.splice(0, inboundFeeList.length - 1);
     outboundFeeList = outboundFeeList.splice(0, outboundFeeList.length - 1);
     operateFeeList = operateFeeList.splice(0, operateFeeList.length - 1);
@@ -546,17 +583,17 @@
       customerId: prop?.currentData?.customerId ?? '',
       ticketId: prop?.currentData?.ticketId ?? '',
       containerId: prop?.currentData?.containerId ?? '',
-      inboundTotal: safeSumBy(inboundFeeList, 'total'),
+      inboundTotal: inboundTotal,
       inbound: inboundFeeList,
-      outboundTotal: safeSumBy(outboundFeeList, 'total'),
+      outboundTotal: outboundTotal,
       outbound: outboundFeeList,
-      operateTotal: safeSumBy(operateFeeList, 'total'),
+      operateTotal: operateTotal,
       operate: operateFeeList,
-      specialOperateTotal: safeSumBy(specialOperateFeeList, 'total'),
+      specialOperateTotal: specialOperateTotal,
       specialOperate: specialOperateFeeList,
-      deliveryTotal: safeSumBy(deliveryFeeList, 'total'),
+      deliveryTotal: deliveryTotal,
       delivery: deliveryFeeList,
-      consumablesTotal: safeSumBy(consumablesList, 'total'),
+      consumablesTotal: consumablesTotal,
       consumables: consumablesList,
     };
     const notifyDetail = prop.currentData;
