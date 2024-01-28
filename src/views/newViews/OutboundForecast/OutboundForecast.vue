@@ -66,12 +66,10 @@
   import { Component, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
-  import { Folder32Filled } from '@vicons/fluent';
-  import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
+  import { getFileActionButtonByOutForecast } from '@/views/bolita-views/composable/useableColumns';
   import { $ref } from 'vue/macros';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { usePermission } from '@/hooks/web/usePermission';
-  import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
   import { toastSuccess } from '@/store/utils/utils';
   import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
   import {
@@ -212,20 +210,12 @@
     width: 120,
     render(record) {
       const fileAction = (label, key, icon?: Component, editable = false) => {
-        return getFileActionButton(
-          label,
-          key,
-          OutBoundDetailManager,
-          reloadTable,
-          record,
-          icon,
-          editable
-        );
+        return getFileActionButtonByOutForecast(label, key, reloadTable, record, icon, editable);
       };
       return h(TableAction as any, {
         style: 'button',
         actions: [
-          fileAction('提单文件', 'files', Folder32Filled),
+          fileAction('提单文件', 'files'),
           fileAction('POD', 'POD'),
           fileAction('CMR', 'CMRFilesOut'),
           {

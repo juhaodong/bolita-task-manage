@@ -37,7 +37,7 @@
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import { CarpoolManager } from '@/api/dataLayer/modules/logistic/carpool';
-  import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
+  import { getFileActionButtonByOutForecast } from '@/views/bolita-views/composable/useableColumns';
   import { useUserStore } from '@/store/modules/user';
   import { CarpoolManagementPower } from '@/api/dataLayer/common/PowerModel';
   import { getOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
@@ -118,10 +118,9 @@
     width: 120,
     render(record: any) {
       const fileAction = (label, key, disableClick, icon?: Component) => {
-        return getFileActionButton(
+        return getFileActionButtonByOutForecast(
           label,
           key,
-          CarpoolManager,
           reloadTable,
           record,
           icon,

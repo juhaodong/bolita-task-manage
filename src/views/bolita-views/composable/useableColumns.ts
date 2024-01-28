@@ -5,6 +5,7 @@ import { RouterLink } from 'vue-router';
 import { NInput, NText } from 'naive-ui';
 import { Model } from '@/api/dataLayer/common/GeneralModel';
 import { safeParseInt } from '@/store/utils/utils';
+import { updateOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
 
 export const standardDateFormat = 'YYYY-MM-DD/HH:mm';
 export const dateFormat = 'DD/MM/YYYY';
@@ -229,6 +230,37 @@ export function getFileActionButton(
         obj[key] = files.files;
         console.log(files.files[0]);
         await manager.editInternal(obj, record.id);
+      }
+      reload();
+    },
+    permissions: permissions,
+  };
+}
+
+export function getFileActionButtonByOutForecast(
+  label: string,
+  key: string,
+  reload: any,
+  record: any,
+  icon?: Component,
+  editable = true,
+  permissions = null
+) {
+  return {
+    label,
+    icon: icon ?? null,
+    highlight: () => {
+      return record?.[key]?.length > 0 ? 'success' : 'default';
+    },
+    async onClick() {
+      const upload = useUploadDialog();
+      const files = await upload.upload(record[key], undefined, editable);
+      console.log(files, 'files');
+      if (files.checkPassed) {
+        const obj = {};
+        obj[key] = files.files;
+        console.log(files.files[0]);
+        await updateOutboundForecast(record.id, obj);
       }
       reload();
     },
