@@ -1,4 +1,4 @@
-import { cashPath, financePath } from '@/api/dataLayer/modules/cash/cash';
+import { cashPath, financeContainerPath, financePath } from '@/api/dataLayer/modules/cash/cash';
 import { carpoolPath } from '@/api/dataLayer/modules/logistic/carpool';
 import { logisticServicePath } from '@/api/dataLayer/modules/logistic/logistcService';
 import { notifyPath, taskListPath } from '@/api/dataLayer/modules/notify/path';
@@ -10,6 +10,7 @@ import {
   OutboundForecast,
   OutWareHouse,
 } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+import { SettlementManage } from '@/api/dataLayer/common/SettlementType';
 
 export async function clearAllData() {
   const path = [
@@ -23,6 +24,8 @@ export async function clearAllData() {
     outboundDetailPath,
     OutboundForecast,
     OutWareHouse,
+    financeContainerPath,
+    SettlementManage,
   ];
   for (const collectionName of path) {
     const ref = collection(db, collectionName);
