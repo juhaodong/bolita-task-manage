@@ -120,7 +120,7 @@
   }
 
   async function saveOutboundPlan(value) {
-    value.deliveryDetail = deliveryMethod;
+    value.deliveryDetail = deliveryMethod.value ?? '';
     loading = true;
     allNotifyDetail.forEach((it) => {
       it.needCar = value.needCar;

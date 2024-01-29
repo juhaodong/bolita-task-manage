@@ -37,6 +37,9 @@ export enum InBoundStatus {
 
 export enum finalStatus {
   finish = '已结算',
+  waitOrder = '未开票',
+  alreadyOrder = '已开票',
+  alreadyGetMoney = '已收款',
 }
 
 export enum OutStatus {
