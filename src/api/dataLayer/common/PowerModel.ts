@@ -1,5 +1,3 @@
-import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
-
 export enum NotifyListPower {
   editFee = '修改费用',
   Operate = '入库计划操作',
@@ -69,7 +67,7 @@ export const allPowerList = [
 ].flat();
 
 export const AccountPower = [
-  { id: 1, name: PermissionEnums.Manager, Power: allPowerList },
+  { id: 1, name: '管理员', Power: allPowerList },
 
   {
     id: 2,

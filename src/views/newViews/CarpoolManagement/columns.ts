@@ -3,10 +3,7 @@ import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/us
 import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
 import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { useUserStore } from '@/store/modules/user';
-import { CarpoolManagementPower } from '@/api/dataLayer/common/PowerModel';
-import { generateOptionFromArray } from '@/store/utils/utils';
-import { FBACodeManager } from '@/api/dataLayer/modules/user/user';
+import { asyncFBACode } from '@/store/utils/utils';
 
 export const columns: DataTableColumns<CarpoolManagementModel> = [
   {
@@ -169,71 +166,38 @@ export const filters: FormFields = [
   },
 ];
 
-const AccountPowerList = useUserStore()?.info?.powerList;
 export const schemas: FormField[] = [
   {
     field: 'REF',
     label: 'REF.',
-    disableCondition() {
-      return !AccountPowerList.includes(CarpoolManagementPower.Edit);
-    },
   },
   {
     field: 'ISA',
     label: 'ISA',
-    disableCondition() {
-      return !AccountPowerList.includes(CarpoolManagementPower.Edit);
-    },
   },
   {
     field: 'AMZID',
     label: 'AMZ-Sendungs ID',
-    disableCondition() {
-      return !AccountPowerList.includes(CarpoolManagementPower.Edit);
-    },
   },
   {
     field: 'waybillId',
     label: '运单号',
-    disableCondition() {
-      return !AccountPowerList.includes(CarpoolManagementPower.Edit);
-    },
   },
-  {
-    label: 'FBACode',
-    field: 'FBACode',
-    component: 'NSelect',
-    componentProps: {
-      options: generateOptionFromArray(await getFBACodeList()),
-    },
-  },
+  asyncFBACode(),
   {
     field: 'orderCarPrice',
     label: '订车价格',
-    disableCondition() {
-      return !AccountPowerList.includes(CarpoolManagementPower.Edit);
-    },
   },
   getDatePickerFormField('reservationGetProductTime', '预约取货日期'),
   {
     field: 'reservationGetProductDetailTime',
     label: '取货时间',
-    disableCondition() {
-      return !AccountPowerList.includes(CarpoolManagementPower.Edit);
-    },
   },
   {
     field: 'note',
     label: '备注',
-    disableCondition() {
-      return !AccountPowerList.includes(CarpoolManagementPower.Edit);
-    },
   },
 ].map((it) => {
   it.required = false;
   return it;
 });
-
-export async function getFBACodeList() {
-  return (await FBACodeManager.load()).map((it) => it.code);
-}

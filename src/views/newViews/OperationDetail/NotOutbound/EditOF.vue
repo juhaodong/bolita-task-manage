@@ -51,10 +51,10 @@
   import { onMounted } from 'vue';
   import { $ref } from 'vue/macros';
   import { generateOptionFromArray } from '@/store/utils/utils';
-  import { getFBACodeList } from '@/views/newViews/CarpoolManagement/columns';
   import { allDeliveryMethod } from '@/api/dataLayer/common/DeliveryMethod';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
+  import { getFBACodeList } from '@/api/dataLayer/fieldDefination/common';
 
   interface Props {
     id?: any[];

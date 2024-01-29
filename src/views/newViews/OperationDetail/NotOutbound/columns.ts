@@ -6,11 +6,10 @@ import {
   OutStatus,
 } from '@/api/dataLayer/modules/notify/notify-api';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { generateOptionFromArray } from '@/store/utils/utils';
+import { asyncFBACode, generateOptionFromArray } from '@/store/utils/utils';
 import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 import { statusColumnEasy } from '@/views/bolita-views/composable/useableColumns';
 import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
-import { getFBACodeList } from '@/views/newViews/CarpoolManagement/columns';
 import { deliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 import {
   expressDelivery,
@@ -245,14 +244,7 @@ export const schemas: FormField[] = [
     field: 'waybillId',
     label: '运单号',
   },
-  {
-    label: 'FBACode',
-    field: 'FBACode',
-    component: 'NSelect',
-    componentProps: {
-      options: generateOptionFromArray(await getFBACodeList()),
-    },
-  },
+  asyncFBACode(),
   {
     field: 'orderCarPrice',
     label: '订车价格',

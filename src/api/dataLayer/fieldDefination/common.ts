@@ -4,6 +4,7 @@ import { usePermission } from '@/hooks/web/usePermission';
 import dayjs from 'dayjs';
 import {
   CustomerManager,
+  FBACodeManager,
   SalesManManager,
   WarehouseManager,
 } from '@/api/dataLayer/modules/user/user';
@@ -181,3 +182,7 @@ export const noteFormField = {
   label: '备注',
   required: false,
 };
+
+export async function getFBACodeList() {
+  return (await FBACodeManager.load()).map((it) => it.code);
+}
