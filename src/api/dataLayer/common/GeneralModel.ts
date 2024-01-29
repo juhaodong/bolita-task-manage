@@ -58,20 +58,23 @@ export async function getCollectionNextId(collectionName: string, prefix = '') {
   return prefix + id.toString().padStart(4, '0');
 }
 
-async function generalInit(value) {
+async function generalInit(value, file) {
   value.createTimestamp = dayjs().valueOf();
   value.deletedAt = 0;
-  for (const k of Object.keys(value)) {
-    if (value[k] instanceof Array<UploadFileInfo>) {
-      value[k] = await getFileListUrl(value[k]);
+  console.log(file, 'file');
+  if (file) {
+    for (const k of Object.keys(value)) {
+      if (value[k] instanceof Array<UploadFileInfo>) {
+        value[k] = await getFileListUrl(value[k]);
+      }
     }
   }
   return value;
 }
 
-export async function generalAdd(value: any, collectionName: string, prefix = '') {
+export async function generalAdd(value: any, collectionName: string, prefix = '', file: any) {
   const id = value?.id ?? (await getCollectionNextId(collectionName, prefix));
-  await generalInit(value);
+  await generalInit(value, file);
   await setDoc(doc(collection(db, collectionName), id), value);
   await doLog({
     toStatus: '创建',
@@ -119,7 +122,7 @@ export function initModel(g: GeneralModel): Model {
     const ids: any = [];
     for (let value of list) {
       value = await g.init(value, ...args);
-      await generalInit(value);
+      await generalInit(value, ...args);
       ids.push(currentMaxId);
       batch.set(doc(collection(db, collectionName), prefix + currentMaxId), value);
       currentMaxId++;
@@ -130,6 +133,7 @@ export function initModel(g: GeneralModel): Model {
 
   return {
     async addInternal(value, ...args): Promise<string> {
+      console.log(...args, '...args');
       if (g.uniqKeys) {
         for (const uniqKey of g.uniqKeys) {
           const exist = await executeQuery(
@@ -141,7 +145,8 @@ export function initModel(g: GeneralModel): Model {
         }
       }
       const t = await g.init(value, ...args);
-      const id = await generalAdd(t, g.collectionName, g?.idPrefix);
+      console.log(t, 't');
+      const id = await generalAdd(t, g.collectionName, g?.idPrefix, ...args);
       if (g.afterAddHook) {
         await g.afterAddHook(id, t, ...args);
       }

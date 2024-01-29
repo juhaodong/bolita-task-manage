@@ -71,7 +71,10 @@
   async function confirm() {
     await safeScope(async () => {
       await NotifyManager.edit(
-        { cashStatus: CashStatus.Done, finalPrice: extraInfo.finalPrice },
+        {
+          containerFinalStatus: CashStatus.Done,
+          finalPrice: extraInfo.finalPrice,
+        },
         props.notifyId
       );
       await saveCash(
@@ -83,7 +86,7 @@
           amount: extraInfo.inboundPrice,
           note: extraInfo.note,
           otherPrice: extraInfo.otherPrice,
-          cashStatus: CashStatus.Done,
+          containerFinalStatus: CashStatus.Done,
           subtotal: safeParseFloat(extraInfo.inboundPrice) + safeParseFloat(extraInfo.otherPrice),
         },
         notifyDetail?.outCashId
@@ -99,6 +102,7 @@
     };
 
     await safeScope(async () => {
+      editValue.containerFinalStatus = CashStatus.WaitConfirm;
       editValue.inboundFinalPrice = extraInfo.finalPrice;
       editValue.outCashId = await saveCash(
         {
@@ -108,7 +112,6 @@
           operationType: OperationType.In,
           amount: extraInfo.inboundPrice,
           note: extraInfo.note,
-          cashStatus: CashStatus.Done,
           subtotal: safeParseFloat(extraInfo.inboundPrice) + safeParseFloat(extraInfo.otherPrice),
           otherPrice: extraInfo.otherPrice,
         },

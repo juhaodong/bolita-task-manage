@@ -59,7 +59,7 @@ export const columns: DataTableColumns<any> = [
   }),
   {
     title: '操作人',
-    key: 'unloadPerson',
+    key: 'changeOperator',
   },
   {
     title: '备注',

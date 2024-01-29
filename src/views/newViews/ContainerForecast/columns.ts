@@ -43,7 +43,7 @@ export const columns: DataTableColumns<any> = [
   },
   statusColumnEasy({
     title: '结算状态',
-    key: 'cashStatus',
+    key: 'containerFinalStatus',
   }),
 ];
 

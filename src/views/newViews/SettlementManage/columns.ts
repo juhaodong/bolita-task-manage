@@ -1,5 +1,5 @@
 import { DataTableColumns } from 'naive-ui';
-import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
@@ -8,7 +8,7 @@ export const columnsIn: DataTableColumns = [
   {
     type: 'selection',
     disabled(row: any) {
-      return row?.finalStatus === '已对账';
+      return row?.finalStatus === '已对账' || row?.finalStatus === '待确认';
     },
   },
   {
@@ -17,6 +17,10 @@ export const columnsIn: DataTableColumns = [
   },
   timeColumn('createTimestamp', '创建日期'),
   timeColumn('updateTimestamp', '修改日期'),
+  statusColumnEasy({
+    title: '结算状态',
+    key: 'finalStatus',
+  }),
   {
     title: '货柜号',
     key: 'containerNo',
@@ -43,7 +47,11 @@ export const columnsOut: DataTableColumns = [
   {
     type: 'selection',
     disabled(row: any) {
-      return row?.finalStatus === '已对账';
+      return (
+        row?.finalStatus === '已对账' ||
+        row?.finalStatus === '待确认' ||
+        row?.finalStatus === '已结算'
+      );
     },
   },
   {
@@ -52,6 +60,10 @@ export const columnsOut: DataTableColumns = [
   },
   timeColumn('createTimestamp', '创建日期'),
   timeColumn('updateTimestamp', '修改日期'),
+  statusColumnEasy({
+    title: '结算状态',
+    key: 'finalStatus',
+  }),
   {
     title: '货柜号',
     key: 'containerId',

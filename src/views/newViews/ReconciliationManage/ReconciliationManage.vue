@@ -64,7 +64,7 @@
   import NewReconciliation from '@/views/newViews/ReconciliationManage/NewReconciliation.vue';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import { Folder32Filled } from '@vicons/fluent';
-  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
 
   interface Prop {
@@ -108,7 +108,7 @@
       );
     }
     console.log(allList, 'list');
-    return allList;
+    return allList.sort(dateCompare('createTimestamp'));
   };
 
   let filterObj: any | null = $ref(null);

@@ -14,7 +14,14 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { schemas, schemasContainer } from './columns';
-  import { FinanceContainerManager, FinanceManager } from '@/api/dataLayer/modules/cash/cash';
+  import {
+    CashManager,
+    FinanceContainerManager,
+    FinanceManager,
+  } from '@/api/dataLayer/modules/cash/cash';
+  import { updateSettlement } from '@/api/dataLayer/common/SettlementType';
+  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
+  import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
 
   interface Props {
     model?: any;
@@ -31,8 +38,23 @@
     await safeScope(async () => {
       if (prop?.model?.id) {
         if (prop.typeMission === '货柜对账') {
+          const res = await FinanceManager.getById(prop.model.id);
+          for (const item of res?.detailInfo) {
+            item.finalStatus = values.collectionStatus;
+            item.detailInfo.finalStatus = values.collectionStatus;
+            await updateSettlement(item.id, item);
+            await NotifyDetailManager.editInternal(item.detailInfo, item.detailInfo.id);
+          }
           await FinanceManager.editInternal(values, prop.model.id);
         } else {
+          const res = await FinanceContainerManager.getById(prop.model.id);
+          for (const item of res?.detailInfo) {
+            item.containerFinalStatus = values.collectionStatus;
+            await CashManager.editInternal(item, item.id);
+            let currentNotify = await NotifyManager.getById(item.operationId);
+            currentNotify.containerFinalStatus = values.collectionStatus;
+            await NotifyManager.editInternal(currentNotify, currentNotify.id);
+          }
           await FinanceContainerManager.editInternal(values, prop.model.id);
         }
       } else {

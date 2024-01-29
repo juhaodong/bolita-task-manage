@@ -504,6 +504,7 @@
     consumablesList = consumablesList.splice(0, consumablesList.length - 1);
 
     const res = {
+      detailInfo: prop?.currentData,
       customerId: prop?.currentData?.customerId ?? '',
       ticketId: prop?.currentData?.ticketId ?? '',
       containerId: prop?.currentData?.containerId ?? '',
@@ -534,6 +535,7 @@
       if (currentInfo) {
         res.updateTimestamp = dayjs().format('YYYY-MM-DD HH:mm:ss');
         await updateSettlement(currentInfo.id, res);
+        await NotifyDetailManager.edit(notifyDetail, notifyDetail.id);
       } else {
         res.createTimestamp = dayjs().format('YYYY-MM-DD HH:mm:ss');
         await addSettlement(res);

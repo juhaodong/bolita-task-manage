@@ -29,6 +29,12 @@ export async function getOutboundForecast() {
   return await resultOfId(res);
 }
 
+export async function getOutboundForecastById(id) {
+  const collectionRef = collection(db, OutboundForecast);
+  const res = query(collectionRef);
+  return (await resultOfId(res)).find((it) => it.id === id);
+}
+
 export async function addOutboundForecastByOut(list) {
   const id = await getCollectionNextId(OutWareHouse, 'Out');
   const purchaseRef = doc(db, OutWareHouse, id);

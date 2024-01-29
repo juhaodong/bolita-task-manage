@@ -103,7 +103,7 @@
   let finished = $ref(false);
   let addNewFeeDialog = $ref(false);
   let currentModel: any | null = $ref(null);
-  let typeTab = $ref(['未入库', '已入库']);
+  let typeTab = $ref(['未入库', '已入库', '已出库']);
   let monthTab: any | null = $ref(null);
   let typeMission: any | null = $ref('');
   let selectedMonth: any | null = $ref('');
@@ -128,11 +128,17 @@
       allList = (await NotifyDetailManager.load(filterObj))
         .filter((it) => it.inStatus !== InBoundStatus.All)
         .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
-    } else {
+    } else if (typeMission === '已入库') {
       allList = (await NotifyDetailManager.load(filterObj))
         .filter((it) => it.inStatus === InBoundStatus.All)
+        .filter((it) => it.outboundStatus !== '已出库')
+        .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
+    } else {
+      allList = (await NotifyDetailManager.load(filterObj))
+        .filter((it) => it.outboundStatus === '已出库')
         .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
     }
+    console.log(allList, 'list');
     return allList.sort(dateCompare('createTimestamp'));
   };
   const actionRef = ref();
@@ -189,7 +195,7 @@
               checkCashStatus(record.id);
             },
             ifShow: () => {
-              return typeMission === '已入库';
+              return typeMission === '已出库';
             },
           },
           fileAction('提单文件', 'files'),
