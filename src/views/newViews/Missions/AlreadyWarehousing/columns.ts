@@ -69,10 +69,10 @@ export const columns: DataTableColumns<any> = [
     title: '托数',
     key: 'trayNum',
   },
-  {
-    title: '备注/库位',
-    key: 'note/address',
-  },
+  // {
+  //   title: '备注/库位',
+  //   key: 'note/address',
+  // },
   timeColumn('planArriveDateTime', '预期到仓日期'),
   timeColumn('currentDate', '实际到仓日期'),
   timeColumn('deliveryTime', '发货时间'),
@@ -80,22 +80,30 @@ export const columns: DataTableColumns<any> = [
     title: 'Ref',
     key: 'Ref',
   },
-  {
-    title: '运费报价',
-    key: 'freightQuotation',
-  },
-  {
-    title: '结算',
-    key: 'settlement',
-  },
+  // {
+  //   title: '运费报价',
+  //   key: 'freightQuotation',
+  // },
+  // {
+  //   title: '结算',
+  //   key: 'settlement',
+  // },
   {
     title: '分拣标识',
     key: 'sign',
   },
   {
-    title: '托数(长*宽*高*数)',
-    key: 'totalTrayNum',
+    title: '包装',
+    key: 'package',
   },
+  {
+    title: '品名',
+    key: 'productName',
+  },
+  // {
+  //   title: '托数(长*宽*高*数)',
+  //   key: 'trayNum',
+  // },
 
   {
     title: '城市',
@@ -119,19 +127,11 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: '是否需要预约',
-    key: 'needReservation',
-  },
-  {
-    title: '包装',
-    key: 'package',
-  },
-  {
-    title: '品名',
-    key: 'productName',
+    key: 'needReserve',
   },
   {
     title: '备注',
-    key: 'addressNote',
+    key: 'noteIn',
   },
 ];
 

@@ -87,8 +87,16 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'postcode',
     },
     {
-      label: '街道+门牌号',
-      field: 'address1',
+      label: '城市',
+      field: 'city',
+    },
+    {
+      label: '街道',
+      field: 'street',
+    },
+    {
+      label: '门牌号',
+      field: 'houseNumber',
     },
     {
       label: '地址2',
@@ -116,7 +124,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
     },
     {
       label: '备注',
-      field: 'note',
+      field: 'noteIn',
     },
   ]);
   return builder;
