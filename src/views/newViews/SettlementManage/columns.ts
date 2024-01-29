@@ -43,7 +43,7 @@ export const columnsOut: DataTableColumns = [
   {
     type: 'selection',
     disabled(row: any) {
-      return row?.financeId;
+      return row?.finalStatus === '已对账';
     },
   },
   {
