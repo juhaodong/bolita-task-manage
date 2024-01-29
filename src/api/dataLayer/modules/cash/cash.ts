@@ -67,3 +67,14 @@ export const FinanceManager = initModel({
   },
   idPrefix: 'F',
 });
+
+export const financeContainerPath = 'financeContainer';
+
+export const FinanceContainerManager = initModel({
+  collectionName: financeContainerPath,
+  init(value: any): any {
+    value.collectionStatus = CashCollectionStatus.NotCollect;
+    return value;
+  },
+  idPrefix: 'FC',
+});

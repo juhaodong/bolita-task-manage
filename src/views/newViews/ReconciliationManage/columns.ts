@@ -18,41 +18,101 @@ export const columns: DataTableColumns<ReconciliationModel> = [
     title: '本系统结算金额',
     key: 'systemSettlementPrice',
   },
-  {
-    title: '附件',
-    key: 'file',
-  },
+  // {
+  //   title: '附件',
+  //   key: 'files',
+  // },
   {
     title: '其他系统结算',
     key: 'otherSystemSettlement',
   },
   {
     title: '操作费',
-    key: 'OperatingPrice',
+    key: 'operateTotal',
   },
   {
-    title: '快递结算',
-    key: 'deliverySettlement',
+    title: '特殊操作费',
+    key: 'specialOperateTotal',
   },
   {
-    title: '物流费用',
-    key: 'logisticsPrice',
+    title: '入库费',
+    key: 'inboundTotal',
   },
   {
-    title: '仓储费',
-    key: 'inventoryPrice',
+    title: '耗材费',
+    key: 'consumablesTotal',
   },
   {
-    title: '其他费用',
-    key: 'otherPrice',
+    title: '物流费',
+    key: 'deliveryTotal',
+  },
+  {
+    title: '出库费',
+    key: 'outboundTotal',
   },
   {
     title: '合计netto',
-    key: 'totalNetto',
+    key: 'totalPrice',
   },
   {
-    title: '发票金额',
+    title: '发票金额/RMB',
     key: 'RMBPrice',
+  },
+  {
+    title: '发票金额/EUR',
+    key: 'EURPrice',
+  },
+  {
+    title: '发票号',
+    key: 'invoiceNumber',
+  },
+  statusColumnEasy({
+    title: '回款情况',
+    key: 'collectionStatus',
+  }),
+  {
+    title: '备注',
+    key: 'note',
+  },
+];
+
+export const columnsContainer: DataTableColumns<ReconciliationModel> = [
+  {
+    title: '财务ID',
+    key: 'id',
+  },
+  {
+    title: '客户ID',
+    key: 'customerName',
+  },
+  timeColumn(),
+  {
+    title: '本系统结算金额',
+    key: 'systemSettlementPrice',
+  },
+  {
+    title: '其他系统结算',
+    key: 'otherSystemSettlement',
+  },
+  {
+    title: '卸柜费',
+    key: 'unloadingCabinetsTotal',
+  },
+  {
+    title: '其他费',
+    key: 'otherPriceTotal',
+  },
+  {
+    title: '合计netto',
+    key: 'subTotal',
+  },
+  {
+    title: '发票金额/RMB',
+    key: 'RMBPrice',
+  },
+  {
+    title: '发票金额/EUR',
+    key: 'EURPrice',
   },
   {
     title: '发票号',
@@ -124,39 +184,97 @@ export enum CashCollectionStatus {
 
 export const schemas: FormFields = [
   {
+    label: '本系统结算金额',
+    field: 'systemSettlementPrice',
+  },
+  {
     label: '其他系统结算',
     field: 'otherSystemSettlement',
   },
   {
     label: '操作费',
-    field: 'OperatingPrice',
+    field: 'operateTotal',
   },
   {
-    label: '快递结算',
-    field: 'deliverySettlement',
+    label: '特殊操作费',
+    field: 'specialOperateTotal',
   },
   {
-    label: '物流费用',
-    field: 'logisticsPrice',
+    label: '入库费',
+    field: 'inboundTotal',
   },
   {
-    label: '仓储费',
-    field: 'inventoryPrice',
+    label: '耗材费',
+    field: 'consumablesTotal',
   },
   {
-    label: '其他费用',
-    field: 'otherPrice',
+    label: '物流费',
+    field: 'deliveryTotal',
+  },
+  {
+    label: '出库费',
+    field: 'outboundTotal',
   },
   {
     label: '合计netto',
-    field: 'totalNetto',
+    field: 'totalPrice',
   },
   {
-    label: '发票金额',
+    label: '发票金额/RMB',
     field: 'RMBPrice',
   },
   {
-    label: '发票金额',
+    label: '发票金额/EUR',
+    field: 'EURPrice',
+  },
+  {
+    label: '发票号',
+    field: 'invoiceNumber',
+  },
+  {
+    label: '回款情况',
+    field: 'collectionStatus',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(Object.values(CashCollectionStatus)),
+    },
+  },
+  {
+    label: '备注',
+    field: 'note',
+  },
+].map((it: FormField) => {
+  it.required = false;
+  return it;
+});
+
+export const schemasContainer: FormFields = [
+  {
+    label: '本系统结算金额',
+    field: 'systemSettlementPrice',
+  },
+  {
+    label: '其他系统结算',
+    field: 'otherSystemSettlement',
+  },
+  {
+    label: '卸柜费',
+    field: 'unloadingCabinetsTotal',
+  },
+  {
+    label: '其他费',
+    field: 'otherPriceTotal',
+  },
+  {
+    label: '合计netto',
+    field: 'subTotal',
+  },
+  {
+    label: '发票金额/RMB',
+    field: 'RMBPrice',
+  },
+  {
+    label: '发票金额/EUR',
     field: 'EURPrice',
   },
   {

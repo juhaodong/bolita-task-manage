@@ -69,11 +69,11 @@
     }
   }
   async function confirm() {
-    const editValue = {
-      cashStatus: CashStatus.Done,
-    };
     await safeScope(async () => {
-      await NotifyManager.edit({ editValue, finalPrice: extraInfo.finalPrice }, props.notifyId);
+      await NotifyManager.edit(
+        { cashStatus: CashStatus.Done, finalPrice: extraInfo.finalPrice },
+        props.notifyId
+      );
       await saveCash(
         {
           customerId: notifyDetail?.customerId,
@@ -84,7 +84,7 @@
           note: extraInfo.note,
           otherPrice: extraInfo.otherPrice,
           cashStatus: CashStatus.Done,
-          subtotal: extraInfo.finalPrice,
+          subtotal: safeParseFloat(extraInfo.inboundPrice) + safeParseFloat(extraInfo.otherPrice),
         },
         notifyDetail?.outCashId
       );

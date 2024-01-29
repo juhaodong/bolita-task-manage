@@ -88,18 +88,27 @@
   import { columnsIn, columnsOut, filters } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
-  import { CashManager, FinanceManager } from '@/api/dataLayer/modules/cash/cash';
+  import {
+    CashManager,
+    FinanceContainerManager,
+    FinanceManager,
+  } from '@/api/dataLayer/modules/cash/cash';
   import NewSettlement from '@/views/newViews/SettlementManage/NewSettlement.vue';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import { Box20Filled } from '@vicons/fluent';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { safeSumBy } from '@/store/utils/utils';
   import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
-  import { getSettlement } from '@/api/dataLayer/common/SettlementType';
+  import {
+    getSettlement,
+    getSettlementById,
+    updateSettlement,
+  } from '@/api/dataLayer/common/SettlementType';
   import NewTotalFee from '@/views/newViews/SettlementManage/NewTotalFee.vue';
   import dayjs from 'dayjs';
   import NotifyFeeDialog from '@/views/newViews/NotifyList/form/NotifyFeeDialog.vue';
   import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
+  import { CashCollectionStatus } from '@/views/newViews/ReconciliationManage/columns';
 
   interface Prop {
     outId?: string;
@@ -142,6 +151,7 @@
         (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
       );
     }
+    console.log(allList, 'list');
     return allList.sort(dateCompare('createTimestamp'));
   };
 
@@ -164,21 +174,57 @@
   async function merge() {
     await safeScope(async () => {
       const currentList: any[] = [];
-      for (const checkedRow of checkedRows) {
-        currentList.push(await CashManager.getById(checkedRow));
+      if (typeMission === '货柜结算') {
+        for (const checkedRow of checkedRows) {
+          const res = await getSettlementById(checkedRow);
+          currentList.push(res);
+        }
+        const operateTotal = safeSumBy(currentList, 'operateTotal');
+        const specialOperateTotal = safeSumBy(currentList, 'specialOperateTotal');
+        const inboundTotal = safeSumBy(currentList, 'inboundTotal');
+        const consumablesTotal = safeSumBy(currentList, 'consumablesTotal');
+        const deliveryTotal = safeSumBy(currentList, 'deliveryTotal');
+        const outboundTotal = safeSumBy(currentList, 'outboundTotal');
+        const totalPrice = safeSumBy(currentList, 'totalPrice');
+        console.log(currentList);
+        const id = await FinanceManager.addInternal({
+          detailInfo: checkedRows,
+          operateTotal: operateTotal,
+          specialOperateTotal: specialOperateTotal,
+          inboundTotal: inboundTotal,
+          consumablesTotal: consumablesTotal,
+          deliveryTotal: deliveryTotal,
+          outboundTotal: outboundTotal,
+          totalPrice: totalPrice,
+          customerId: currentList[0].customerId,
+        });
+        for (const checkedRow of checkedRows) {
+          const res = await getSettlementById(checkedRow);
+          res.finalStatus = '已对账';
+          res.financeId = id;
+          await updateSettlement(checkedRow, res);
+        }
+      } else {
+        for (const checkedRow of checkedRows) {
+          currentList.push(await CashManager.getById(checkedRow));
+        }
+        const unloadingCabinetsTotal = safeSumBy(currentList, 'amount');
+        const otherPriceTotal = safeSumBy(currentList, 'otherPrice');
+        const subTotal = safeSumBy(currentList, 'subtotal');
+        const id = await FinanceContainerManager.addInternal({
+          unloadingCabinetsTotal: unloadingCabinetsTotal,
+          otherPriceTotal: otherPriceTotal,
+          subTotal: subTotal,
+          customerId: currentList[0].customerId,
+        });
+        await CashManager.massiveUpdate(
+          checkedRows.map((it) => ({
+            id: it,
+            finalStatus: '已对账',
+            financeContainerId: id,
+          }))
+        );
       }
-      const totalPrice = safeSumBy(currentList, 'subtotal');
-      console.log(currentList);
-      const id = await FinanceManager.addInternal({
-        systemSettlementPrice: totalPrice,
-        customerId: currentList[0].customerId,
-      });
-      await CashManager.massiveUpdate(
-        checkedRows.map((it) => ({
-          id: it,
-          financeId: id,
-        }))
-      );
       reloadTable();
       checkedRows = [];
     });

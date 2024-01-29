@@ -29,3 +29,9 @@ export async function getSettlement() {
   const res = query(collectionRef);
   return await resultOfId(res);
 }
+
+export async function getSettlementById(id) {
+  const collectionRef = collection(db, SettlementManage);
+  const res = query(collectionRef);
+  return (await resultOfId(res)).find((it) => it.id === id);
+}

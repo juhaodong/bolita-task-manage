@@ -41,10 +41,10 @@ export const columns: DataTableColumns<any> = [
     title: '备注',
     key: 'note',
   },
-  {
-    title: '结算',
-    key: 'inboundFinalPrice',
-  },
+  statusColumnEasy({
+    title: '结算状态',
+    key: 'cashStatus',
+  }),
 ];
 
 export const filters: FormField[] = [

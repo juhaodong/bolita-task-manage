@@ -8,7 +8,7 @@ export const columnsIn: DataTableColumns = [
   {
     type: 'selection',
     disabled(row: any) {
-      return row?.financeId;
+      return row?.finalStatus === '已对账';
     },
   },
   {
@@ -31,7 +31,7 @@ export const columnsIn: DataTableColumns = [
   },
   {
     title: '其他费',
-    key: 'amount',
+    key: 'otherPrice',
   },
   {
     title: '总费用',
