@@ -55,11 +55,11 @@
   async function saveNotify(value: any) {
     startLoading();
     const userStore = useUserStore();
-    console.log(userStore.info, 'user');
     value.customerId = userStore.info?.belongsToId ?? '';
     value.notifyType = prop.type;
-    const currentCustomer = (await CustomerManager.load()).find((it) => it.id === value.customerId);
-    value.salesName = currentCustomer.belongSalesMan ?? '';
+    const currentCustomer =
+      (await CustomerManager.load()).find((it) => it.id === value.customerId) ?? '';
+    value.salesName = currentCustomer.belongSalesMan ?? userStore.info?.userType;
     const taskList = [
       ...(await readFile(value.files?.[0].file, value.notifyType)),
       ...(value?.trayTaskList ?? []),

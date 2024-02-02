@@ -65,10 +65,10 @@
     return currentTaskList.reduce((sum, i) => sum + safeParseInt(i?.trayCount), 0);
   });
   const totalArrivedContainerCount = computed(() => {
-    return safeSumInt(currentTaskList, 'arrivedContainerNumEdit');
+    return safeSumInt(currentTaskList, 'arrivedContainerNumEdit') ?? 0;
   });
   const totalArrivedTrayCount = computed(() => {
-    return safeSumInt(currentTaskList, 'arrivedTrayNumEdit');
+    return safeSumInt(currentTaskList, 'arrivedTrayNumEdit') ?? 0;
   });
 
   async function reload() {
@@ -137,7 +137,9 @@
     const res = await NotifyManager.edit(
       {
         // salesName: userStore?.info?.realName,
-        arrivedCount: totalArrivedTrayCount.value + totalArrivedContainerCount.value,
+        arrivedCount: totalArrivedTrayCount.value + '托' + totalArrivedContainerCount.value + '箱',
+        trayArrivedCount: totalArrivedTrayCount.value,
+        containerArrivedCount: totalArrivedContainerCount.value,
         inStatus: newInStatus,
         totalCount: totalTrayCount.value + totalContainerCount.value,
         unloadPerson: unloadPerson,

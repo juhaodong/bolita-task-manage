@@ -33,6 +33,10 @@ export const columns: DataTableColumns<any> = [
     title: '总体积',
     key: 'volume',
   },
+  statusColumnEasy({
+    title: '入库状态',
+    key: 'inStatus',
+  }),
   {
     title: '仓库',
     key: 'warehouseId',
