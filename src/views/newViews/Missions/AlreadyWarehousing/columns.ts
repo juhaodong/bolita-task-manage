@@ -57,6 +57,10 @@ export const columns: DataTableColumns<any> = [
     title: '出库方式',
     key: 'outboundMethod',
   },
+  {
+    title: '物流渠道',
+    key: 'deliveryMethod',
+  },
   statusColumnEasy({
     title: '结算状态',
     key: 'finalStatus',
