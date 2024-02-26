@@ -2,6 +2,7 @@ import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
 import { renderIcon } from '@/store/utils';
 import { Person } from '@vicons/ionicons5';
+import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -12,6 +13,7 @@ const routes: Array<RouteRecordRaw> = [
       title: '系统设置',
       sort: 6,
       isRoot: true,
+      permissions: [PermissionEnums.Manager],
       icon: renderIcon(Person),
     },
     children: [
