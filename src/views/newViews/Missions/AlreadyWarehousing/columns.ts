@@ -46,12 +46,16 @@ export const columns: DataTableColumns<any> = [
     key: 'deliveryIdIn',
   },
   {
+    title: '基础备注',
+    key: 'normalNote',
+  },
+  {
     title: 'FBA/快递单号',
     key: 'FBA/DeliveryCode',
   },
   {
     title: '出库方式',
-    key: 'operation',
+    key: 'outboundMethod',
   },
   statusColumnEasy({
     title: '结算状态',
@@ -63,20 +67,20 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: 'FC/送货地址',
-    key: 'FC/Address',
+    key: 'FCAddress',
   },
   {
     title: '换单文件',
     key: 'changeOrderFiles',
   },
   {
+    title: '送货备注',
+    key: 'transportationNote',
+  },
+  {
     title: '托数',
     key: 'trayNum',
   },
-  // {
-  //   title: '备注/库位',
-  //   key: 'note/address',
-  // },
   timeColumn('planArriveDateTime', '预期到仓日期'),
   timeColumn('currentDate', '实际到仓日期'),
   timeColumn('deliveryTime', '发货时间'),
@@ -84,14 +88,6 @@ export const columns: DataTableColumns<any> = [
     title: 'Ref',
     key: 'Ref',
   },
-  // {
-  //   title: '运费报价',
-  //   key: 'freightQuotation',
-  // },
-  // {
-  //   title: '结算',
-  //   key: 'settlement',
-  // },
   {
     title: '分拣标识',
     key: 'sign',
@@ -104,30 +100,33 @@ export const columns: DataTableColumns<any> = [
     title: '品名',
     key: 'productName',
   },
-  // {
-  //   title: '托数(长*宽*高*数)',
-  //   key: 'trayNum',
-  // },
-
-  {
-    title: '城市',
-    key: 'city',
-  },
-  {
-    title: '街道',
-    key: 'street',
-  },
-  {
-    title: '门牌号',
-    key: 'houseNumber',
-  },
   {
     title: '收件人',
     key: 'recipient',
   },
   {
-    title: '联系电话',
+    title: '电话',
     key: 'phone',
+  },
+  {
+    title: '邮箱',
+    key: 'email',
+  },
+  {
+    title: '地址1',
+    key: 'address1',
+  },
+  {
+    title: '地址2',
+    key: 'address2',
+  },
+  {
+    title: '工业品国家',
+    key: 'industrialCountry',
+  },
+  {
+    title: '工业品城市',
+    key: 'industrialCity',
   },
   {
     title: '是否需要预约',
@@ -135,7 +134,7 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: '备注',
-    key: 'noteIn',
+    key: 'industrialNote',
   },
 ];
 

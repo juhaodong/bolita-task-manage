@@ -42,6 +42,10 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       label: '运单号',
       field: 'deliveryIdIn',
     },
+    {
+      label: '基础备注',
+      field: 'normalNote',
+    },
   ]);
   builder.addAll([
     {
@@ -54,15 +58,23 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
     },
     {
       label: 'FC/送货地址',
-      field: 'FC/Address',
+      field: 'FCAddress',
     },
     {
-      label: '操作',
-      field: 'operation',
+      label: '出库方式',
+      field: 'outboundMethod',
+    },
+    {
+      label: '物流渠道',
+      field: 'deliveryMethod',
     },
     {
       label: '换单文件',
       field: 'changeOrderFiles',
+    },
+    {
+      label: '送货备注',
+      field: 'transportationNote',
     },
   ]);
   builder.addAll([
@@ -75,6 +87,10 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'package',
     },
     {
+      label: '工业品托数',
+      field: 'industrialTrayNum',
+    },
+    {
       label: '品名',
       field: 'productName',
     },
@@ -83,35 +99,11 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'UNNumber',
     },
     {
-      label: '邮编',
-      field: 'postcode',
-    },
-    {
-      label: '城市',
-      field: 'city',
-    },
-    {
-      label: '街道',
-      field: 'street',
-    },
-    {
-      label: '门牌号',
-      field: 'houseNumber',
-    },
-    {
-      label: '地址2',
-      field: 'address2',
-    },
-    {
-      label: '公司名称',
-      field: 'companyName',
-    },
-    {
       label: '收件人',
       field: 'recipient',
     },
     {
-      label: '联系电话',
+      label: '电话',
       field: 'phone',
     },
     {
@@ -119,12 +111,28 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'email',
     },
     {
+      label: '地址1',
+      field: 'address1',
+    },
+    {
+      label: '地址2',
+      field: 'address2',
+    },
+    {
+      label: '工业品国家',
+      field: 'industrialCountry',
+    },
+    {
+      label: '工业品城市',
+      field: 'industrialCity',
+    },
+    {
       label: '是否需要预约',
       field: 'needReserve',
     },
     {
       label: '备注',
-      field: 'noteIn',
+      field: 'industrialNote',
     },
   ]);
   return builder;

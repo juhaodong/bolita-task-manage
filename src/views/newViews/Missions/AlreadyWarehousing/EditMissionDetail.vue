@@ -71,7 +71,7 @@
     },
     {
       label: 'FC/送货地址',
-      field: 'FC/Address',
+      field: 'FCAddress',
       required: false,
     },
     {

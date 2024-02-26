@@ -1,5 +1,4 @@
 import { DataTableColumns } from 'naive-ui';
-import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
 export const columns: DataTableColumns<FBACode> = [
   {
@@ -11,16 +10,8 @@ export const columns: DataTableColumns<FBACode> = [
     key: 'state',
   },
   {
-    title: '街道',
-    key: 'street',
-  },
-  {
-    title: '门牌号',
-    key: 'houseNo',
-  },
-  {
-    title: '地址附加',
-    key: 'appendAddress',
+    title: '地址',
+    key: 'address',
   },
   {
     title: '城市',
@@ -29,10 +20,6 @@ export const columns: DataTableColumns<FBACode> = [
   {
     title: '邮编',
     key: 'postcode',
-  },
-  {
-    title: '国家',
-    key: 'country',
   },
 ];
 
@@ -46,38 +33,3 @@ export type FBACode = {
   postcode: number;
   country: string;
 };
-
-export const filters: FormField[] = [
-  {
-    label: 'FBA码',
-    field: 'code',
-  },
-  {
-    label: '州',
-    field: 'state',
-  },
-  {
-    label: '街道',
-    field: 'street',
-  },
-  {
-    label: '门牌号',
-    field: 'houseNo',
-  },
-  {
-    label: '地址附加',
-    field: 'appendAddress',
-  },
-  {
-    label: '城市',
-    field: 'city',
-  },
-  {
-    label: '邮编',
-    field: 'postcode',
-  },
-  {
-    label: '国家',
-    field: 'country',
-  },
-];

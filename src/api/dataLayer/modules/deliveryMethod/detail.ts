@@ -18,7 +18,7 @@ export enum trayDelivery {
 }
 
 export enum looseBoxDelivery {
-  AMZ = 'FBA',
+  FBA = 'FBA卡派',
   LooseBoxOther = '散箱其他',
 }
 
@@ -56,3 +56,5 @@ export function shouldUseFBACode(model) {
     model?.deliveryDetail == AmazonDeliveryDetail.Amazon
   );
 }
+
+export const outboundMethodList = ['散货', '标准托盘', '大件托盘', '存仓'];

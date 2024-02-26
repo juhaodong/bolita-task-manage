@@ -76,6 +76,15 @@
       >
         <new-total-fee :current-data="currentData" @saved="reloadTable" />
       </n-modal>
+      <n-modal
+        v-model:show="addNewTrayDialog"
+        :show-icon="false"
+        preset="card"
+        style="width: 90%; min-width: 800px; max-width: 800px"
+        title="添加托盘"
+      >
+        <new-tray-dialog :current-data="recordData" @saved="reloadTable" />
+      </n-modal>
     </div>
   </n-card>
 </template>
@@ -95,6 +104,8 @@
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
   import NewTotalFee from '@/views/newViews/SettlementManage/NewTotalFee.vue';
+  import { useUploadDialog } from '@/store/modules/uploadFileState';
+  import NewTrayDialog from '@/views/newViews/Missions/AlreadyWarehousing/NewTrayDialog.vue';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -108,7 +119,9 @@
   let typeMission: any | null = $ref('');
   let selectedMonth: any | null = $ref('');
   let currentData: any | null = $ref('');
+  let recordData: any | null = $ref('');
   let allList: any | null = $ref([]);
+  let addNewTrayDialog = $ref(false);
   const props = defineProps<Prop>();
   interface Prop {
     belongsToId?: string;
@@ -117,6 +130,11 @@
   async function startEdit(id) {
     currentModel = await NotifyDetailManager.getById(id);
     editDetailModel.value = true;
+  }
+
+  async function startAddTray(id) {
+    console.log(id, 'id');
+    addNewTrayDialog = true;
   }
 
   function addTable() {
@@ -150,7 +168,6 @@
 
   function checkCashStatus(id) {
     currentData = allList.find((it) => it.id === id);
-    console.log(currentData, 'data');
     addNewFeeDialog = true;
   }
 
@@ -159,6 +176,7 @@
     showModal.value = false;
     editDetailModel.value = false;
     addNewFeeDialog = false;
+    addNewTrayDialog = false;
   }
 
   onMounted(async () => {
@@ -198,10 +216,40 @@
               return typeMission === '已出库';
             },
           },
+          {
+            label: '换单文件',
+            highlight: () => {
+              return record?.['changeOrder']?.length > 0 ? 'success' : 'error';
+            },
+            ifShow: () => {
+              return record?.changeOrderFiles === 1;
+            },
+            async onClick() {
+              const upload = useUploadDialog();
+              const files = await upload.upload(record['changeOrder']);
+              if (files.checkPassed) {
+                const obj = {};
+                obj['changeOrder'] = files.files;
+                console.log(files.files[0]);
+                await NotifyDetailManager.editInternal(obj, record.id);
+              }
+              actionRef.value[0].reload();
+            },
+          },
           fileAction('提单文件', 'files'),
           fileAction('POD', 'POD'),
           fileAction('操作文件', 'operationFiles'),
           fileAction('问题图片', 'problemFiles'),
+          {
+            label: '添加托盘',
+            onClick() {
+              recordData = record;
+              startAddTray(record.id);
+            },
+            ifShow: () => {
+              return record.outboundMethod === '大件托盘' || record.outboundMethod === '标准托盘';
+            },
+          },
           {
             label: '信息已变更',
             highlight: () => {

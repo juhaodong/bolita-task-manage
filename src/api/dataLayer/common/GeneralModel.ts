@@ -19,9 +19,7 @@ import { QueryCompositeFilterConstraint, QueryConstraint } from '@firebase/fires
 import { safeParseInt, toastError } from '@/store/utils/utils';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { usePermission } from '@/hooks/web/usePermission';
-import { storage } from '@/store/utils/Storage';
-import { CUSTOMER_ID } from '@/store/mutation-types';
-import { customerPath, salesMan } from '@/api/dataLayer/modules/user/user';
+import { salesMan } from '@/api/dataLayer/modules/user/user';
 import { useUserStore } from '@/store/modules/user';
 
 export type FormFields = (Promise<FormField> | FormField)[];
@@ -58,13 +56,13 @@ export async function getCollectionNextId(collectionName: string, prefix = '') {
   return prefix + id.toString().padStart(4, '0');
 }
 
-async function generalInit(value, file) {
+async function generalInit(value) {
   value.createTimestamp = dayjs().valueOf();
   value.deletedAt = 0;
-  console.log(file, 'file');
-  if (file) {
-    for (const k of Object.keys(value)) {
-      if (value[k] instanceof Array<UploadFileInfo>) {
+
+  for (const k of Object.keys(value)) {
+    if (value[k] instanceof Array<UploadFileInfo>) {
+      if (value[k]?.[0]?.file && value[k]?.[0]?.name) {
         value[k] = await getFileListUrl(value[k]);
       }
     }
@@ -133,7 +131,6 @@ export function initModel(g: GeneralModel): Model {
 
   return {
     async addInternal(value, ...args): Promise<string> {
-      console.log(...args, '...args');
       if (g.uniqKeys) {
         for (const uniqKey of g.uniqKeys) {
           const exist = await executeQuery(
@@ -193,13 +190,14 @@ export function initModel(g: GeneralModel): Model {
       }
       const { isCustomer, isSalesMan } = usePermission();
       q = query(q, orderBy('createTimestamp', 'desc'), where('deletedAt', '==', 0));
-      if (isCustomer() && g.collectionName != customerPath) {
-        const customerId = storage.get(CUSTOMER_ID);
-        if (customerId) {
-          q = query(q, where('customerId', '==', customerId));
-        }
-      }
+      // if (isCustomer() && g.collectionName != customerPath) {
+      //   const customerId = storage.get(CUSTOMER_ID);
+      //   if (customerId) {
+      //     q = query(q, where('customerId', '==', customerId));
+      //   }
+      // }
       let list = await executeQuery(q);
+      console.log(list, 'list');
       if (g?.joinManager) {
         const dict = keyBy(await g.joinManager?.loader(), 'id');
         list.forEach((it, index) => {

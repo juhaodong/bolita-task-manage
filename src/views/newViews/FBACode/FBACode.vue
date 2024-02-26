@@ -1,6 +1,9 @@
 <template>
   <n-card :bordered="false" class="proCard">
     <n-button size="small" type="primary" @click="showAdd">新建FBACode</n-button>
+    <n-button size="small" style="margin-left: 10px" type="primary" @click="downloadFBACode"
+      >下载FBACode</n-button
+    >
     <BasicTable
       ref="actionRef"
       v-model:checked-row-keys="checkedRows"
@@ -30,18 +33,22 @@
   import NewFBACode from '@/views/newViews/FBACode/NewFBACode.vue';
   import { $ref } from 'vue/macros';
   import { FBACodeManager } from '@/api/dataLayer/modules/user/user';
+  import FileSaver from 'file-saver';
 
   const actionRef = ref();
   let currentModel: any | null = $ref(null);
   const showModal = ref(false);
   let checkedRows = $ref([]);
+  let FBACodeList = $ref([]);
 
   function showAdd() {
     currentModel = null;
     showModal.value = true;
   }
   const loadDataTable = async () => {
-    return await FBACodeManager.load(filterObj);
+    FBACodeList = await FBACodeManager.load(filterObj);
+    console.log(FBACodeList, 'list');
+    return FBACodeList;
   };
 
   let filterObj: any | null = $ref(null);
@@ -54,6 +61,17 @@
   async function startEdit(id) {
     currentModel = await FBACodeManager.getById(id);
     showModal.value = true;
+  }
+
+  async function downloadFBACode() {
+    let dataStrings = ['FBACode,州,地址,城市,邮编'];
+    FBACodeList.forEach((it) => {
+      const res = [it.code, it.state, it.address, it.city, it.postcode];
+      dataStrings.push(res.join());
+    });
+    dataStrings = dataStrings.join('\n');
+    const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
+    FileSaver.saveAs(blob, 'FBACode.csv');
   }
 
   async function startRemove(id) {

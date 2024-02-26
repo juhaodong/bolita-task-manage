@@ -187,20 +187,17 @@
         const outboundTotal = safeSumBy(currentList, 'outboundTotal');
         const totalPrice = safeSumBy(currentList, 'totalPrice');
         console.log(currentList, 'currentList');
-        const id = await FinanceManager.addInternal(
-          {
-            detailInfo: currentList,
-            operateTotal: operateTotal,
-            specialOperateTotal: specialOperateTotal,
-            inboundTotal: inboundTotal,
-            consumablesTotal: consumablesTotal,
-            deliveryTotal: deliveryTotal,
-            outboundTotal: outboundTotal,
-            totalPrice: totalPrice,
-            customerId: currentList[0].customerId,
-          },
-          false
-        );
+        const id = await FinanceManager.addInternal({
+          detailInfo: currentList,
+          operateTotal: operateTotal,
+          specialOperateTotal: specialOperateTotal,
+          inboundTotal: inboundTotal,
+          consumablesTotal: consumablesTotal,
+          deliveryTotal: deliveryTotal,
+          outboundTotal: outboundTotal,
+          totalPrice: totalPrice,
+          customerId: currentList[0].customerId,
+        });
         for (const checkedRow of checkedRows) {
           const res = await getSettlementById(checkedRow);
           res.finalStatus = '已对账';
@@ -214,16 +211,13 @@
         const unloadingCabinetsTotal = safeSumBy(currentList, 'amount');
         const otherPriceTotal = safeSumBy(currentList, 'otherPrice');
         const subTotal = safeSumBy(currentList, 'subtotal');
-        const id = await FinanceContainerManager.addInternal(
-          {
-            detailInfo: currentList,
-            unloadingCabinetsTotal: unloadingCabinetsTotal,
-            otherPriceTotal: otherPriceTotal,
-            subTotal: subTotal,
-            customerId: currentList[0].customerId,
-          },
-          false
-        );
+        const id = await FinanceContainerManager.addInternal({
+          detailInfo: currentList,
+          unloadingCabinetsTotal: unloadingCabinetsTotal,
+          otherPriceTotal: otherPriceTotal,
+          subTotal: subTotal,
+          customerId: currentList[0].customerId,
+        });
         await CashManager.massiveUpdate(
           checkedRows.map((it) => ({
             id: it,

@@ -56,7 +56,7 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: 'FC/送货地址',
-    key: 'FC/Address',
+    key: 'FCAddress',
   },
   {
     title: '换单文件',

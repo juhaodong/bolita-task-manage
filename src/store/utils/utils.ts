@@ -2,6 +2,7 @@ import { ResultEnum } from '@/store/enums/httpEnum';
 import { sumBy } from 'lodash-es';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { getFBACodeList } from '@/api/dataLayer/fieldDefination/common';
+import { CustomerManager } from '@/api/dataLayer/modules/user/user';
 
 export function generateOptionFromArray(arr?: any[]) {
   return (
@@ -21,6 +22,38 @@ export async function asyncFBACode(): Promise<FormField> {
   return {
     field: 'FBACode',
     label: 'FBACode',
+    component: 'NSelect',
+    componentProps: {
+      options: list,
+    },
+  };
+}
+
+export async function asyncFCAddress(): Promise<FormField> {
+  const FBACodeList = await getFBACodeList();
+  const list = FBACodeList.map((it) => ({
+    label: it,
+    value: it,
+  }));
+  return {
+    field: 'FCAddress',
+    label: 'FCAddress',
+    component: 'NSelect',
+    componentProps: {
+      options: list,
+    },
+  };
+}
+
+export async function asyncCustomer(): Promise<FormField> {
+  const customerList = await CustomerManager.load();
+  const list = customerList.map((it) => ({
+    label: it.customerName,
+    value: it.customerName,
+  }));
+  return {
+    field: 'customerName',
+    label: '客户',
     component: 'NSelect',
     componentProps: {
       options: list,

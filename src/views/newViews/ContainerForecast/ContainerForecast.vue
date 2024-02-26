@@ -92,6 +92,15 @@
     >
       <warehouse-info-dialog :notify-id="currentNotifyId!" />
     </n-modal>
+    <n-modal
+      v-model:show="showErrorMessageDialog"
+      :show-icon="false"
+      preset="dialog"
+      title="仓库信息"
+      style="width: 90%; min-width: 600px; max-width: 800px"
+    >
+      <error-message-dialog :notify-id="currentNotifyId!" />
+    </n-modal>
   </n-card>
 </template>
 
@@ -127,6 +136,7 @@
   let showOperationTable = $ref(false);
   let currentNotifyId: string | null = $ref(null);
   let showWarehouseDialog = $ref(false);
+  let showErrorMessageDialog = $ref(false);
   let showFeeDialog = $ref(false);
   let filterObj: any | null = $ref(null);
 

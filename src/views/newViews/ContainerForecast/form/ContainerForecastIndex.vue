@@ -5,9 +5,12 @@
   import NewContainerForecast from '@/views/newViews/ContainerForecast/form/NewContainerForecast.vue';
   import { handleRequest } from '@/store/utils/utils';
   import { useUserStore } from '@/store/modules/user';
-  import NotifyTrayForm from '@/views/newViews/ContainerForecast/form/NotifyTrayForm.vue';
   import readXlsxFile from 'read-excel-file';
-  import { CustomerManager } from '@/api/dataLayer/modules/user/user';
+  import { CustomerManager, FBACodeManager } from '@/api/dataLayer/modules/user/user';
+  import { difference } from 'lodash-es';
+  import { allKeysList } from '@/api/dataLayer/common/AllKeys';
+  import { $ref } from 'vue/macros';
+  import ErrorMessageDialog from '@/views/newViews/ContainerForecast/form/ErrorMessageDialog.vue';
 
   interface Prop {
     currentModel?: any;
@@ -26,6 +29,8 @@
     loading = false;
   }
 
+  let errorMessage = $ref([]);
+
   async function readFile(file, notifyType) {
     if (!file) {
       return [];
@@ -35,9 +40,34 @@
         return [it.title, { prop: it.key }];
       })
     );
+    const allFBACodeList = await FBACodeManager.load();
     try {
       let { rows, errors } = await readXlsxFile(file, { schema });
       rows = rows.slice(2);
+      rows.forEach((it, index) => {
+        const keys = Object.keys(it);
+        const res = difference(
+          allKeysList.map((x) => x.field),
+          keys
+        );
+        if (it.deliveryMethod === 'FBA卡派') {
+          const currentFBACode = allFBACodeList.find((b) => b.code === it.FCAddress);
+          if (!currentFBACode) {
+            errorMessage.push({ index: index + 4, detail: 'FBACode错误' });
+          }
+        }
+        if (res.length > 0) {
+          const realMessageDetail = [];
+          res.forEach((it) => {
+            const detailInfo = allKeysList.find((x) => x.field === it).label;
+            realMessageDetail.push(detailInfo);
+          });
+          errorMessage.push({ index: index + 4, detail: realMessageDetail });
+        }
+      });
+      if (errorMessage.length > 0) {
+        return [];
+      }
       if (rows.length > 0 && errors.length == 0) {
         rows.slice(2);
         return rows.map((it) => ({ ...it, arrivedCount: 0 }));
@@ -65,22 +95,29 @@
       ...(value?.trayTaskList ?? []),
     ];
     delete value.uploadFile;
-    const res = await NotifyManager.add(value, taskList);
-    await handleRequest(res, async () => {
-      emit('saved');
-    });
+    if (errorMessage.length === 0) {
+      const res = await NotifyManager.add(value, taskList);
+      await handleRequest(res, async () => {
+        emit('saved');
+      });
+    } else {
+      // emit('saved');
+    }
     stop();
   }
 </script>
 
 <template>
   <loading-frame :loading="loading">
-    <template v-if="type == NotifyType.Container">
+    <template v-if="errorMessage.length === 0">
       <new-container-forecast :model="currentModel" @closed="closeDialog" @submit="saveNotify" />
     </template>
-    <template v-else-if="type == NotifyType.TrayOrBox">
-      <notify-tray-form :model="currentModel" @submit="saveNotify" />
+    <template v-else>
+      <error-message-dialog :error-message="errorMessage" @closed="closeDialog" />
     </template>
+    <!--    <template v-else-if="type == NotifyType.TrayOrBox">-->
+    <!--      <notify-tray-form :model="currentModel" @submit="saveNotify" />-->
+    <!--    </template>-->
   </loading-frame>
 </template>
 
