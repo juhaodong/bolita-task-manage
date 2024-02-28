@@ -12,10 +12,6 @@ export const allKeysList = [
     field: 'country',
   },
   {
-    label: '托数',
-    field: 'trayNum',
-  },
-  {
     label: '件数',
     field: 'number',
   },
@@ -31,10 +27,6 @@ export const allKeysList = [
     label: '运单号',
     field: 'deliveryIdIn',
   },
-  // {
-  //   label: '基础备注',
-  //   field: 'normalNote',
-  // },
   {
     label: 'FBA/快递单号',
     field: 'FBA/DeliveryCode',
@@ -59,8 +51,4 @@ export const allKeysList = [
     label: '换单文件',
     field: 'changeOrderFiles',
   },
-  // {
-  //   label: '送货备注',
-  //   field: 'transportationNote',
-  // },
 ];

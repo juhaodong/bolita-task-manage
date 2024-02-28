@@ -61,6 +61,14 @@ export const columns: DataTableColumns<any> = [
     title: '物流渠道',
     key: 'deliveryMethod',
   },
+  {
+    title: '操作要求',
+    key: 'operationRequire',
+  },
+  {
+    title: '操作备注',
+    key: 'operationNote',
+  },
   statusColumnEasy({
     title: '结算状态',
     key: 'finalStatus',
@@ -72,6 +80,10 @@ export const columns: DataTableColumns<any> = [
   {
     title: 'FC/送货地址',
     key: 'FCAddress',
+  },
+  {
+    title: '邮箱',
+    key: 'postcode',
   },
   {
     title: '换单文件',

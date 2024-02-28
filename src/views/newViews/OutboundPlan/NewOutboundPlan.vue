@@ -174,6 +174,7 @@
     { title: '箱数', key: 'outBoundContainerNum' },
     { title: '重量', key: 'weight' },
     { title: '体积', key: 'volume' },
+    { title: '邮编', key: 'postcode' },
     { title: '出库方式', key: 'outboundMethod' },
     { title: '物流方式', key: 'deliveryMethod' },
     { title: 'FBA号', key: 'FBA/DeliveryCode' },
@@ -186,6 +187,7 @@
     { title: '箱数', key: 'outBoundContainerNum' },
     { title: '重量', key: 'weight' },
     { title: '体积', key: 'volume' },
+    { title: '邮编', key: 'postcode' },
     { title: '预计出库方式', key: 'outboundMethod' },
     { title: '物流方式', key: 'deliveryMethod' },
     { title: 'FBA号', key: 'FBA/DeliveryCode' },
@@ -261,6 +263,10 @@
       componentProps: {
         options: outboundMethodList,
       },
+    },
+    {
+      label: '邮编',
+      field: 'postcode',
     },
   ];
 </script>

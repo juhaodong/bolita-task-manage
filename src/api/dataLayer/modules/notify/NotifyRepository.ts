@@ -23,10 +23,6 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'country',
     },
     {
-      label: '托数',
-      field: 'trayNum',
-    },
-    {
       label: '件数',
       field: 'number',
     },
@@ -61,12 +57,24 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'FCAddress',
     },
     {
+      label: '邮编',
+      field: 'postcode',
+    },
+    {
       label: '出库方式',
       field: 'outboundMethod',
     },
     {
       label: '物流渠道',
       field: 'deliveryMethod',
+    },
+    {
+      label: '操作要求',
+      field: 'operationRequire',
+    },
+    {
+      label: '操作备注',
+      field: 'operationNote',
     },
     {
       label: '换单文件',
@@ -141,4 +149,37 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
 export function getNeededFieldByNotifyType(notifyType: NotifyType | null): any[] {
   const builder = getNeededFieldBuilder(notifyType);
   return builder.build();
+}
+
+export function getNeededColumnByFBACode() {
+  return getFBACodeNeededFieldBuilder()
+    .toColumn()
+    .filter((it) => it?.meta != 'detail');
+}
+
+function getFBACodeNeededFieldBuilder() {
+  const builder = formFieldBuilder();
+  builder.addAll([
+    {
+      label: 'FBA CODE',
+      field: 'code',
+    },
+    {
+      label: '地址',
+      field: 'address',
+    },
+    {
+      label: 'City',
+      field: 'city',
+    },
+    {
+      label: 'State',
+      field: 'state',
+    },
+    {
+      label: 'Zip',
+      field: 'postcode',
+    },
+  ]);
+  return builder;
 }

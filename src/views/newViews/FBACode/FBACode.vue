@@ -1,8 +1,11 @@
 <template>
   <n-card :bordered="false" class="proCard">
     <n-button size="small" type="primary" @click="showAdd">新建FBACode</n-button>
-    <n-button size="small" style="margin-left: 10px" type="primary" @click="downloadFBACode"
-      >下载FBACode</n-button
+    <!--    <n-button size="small" style="margin-left: 10px" type="primary" @click="downloadFBACode"-->
+    <!--      >下载FBACode</n-button-->
+    <!--    >-->
+    <n-button size="small" style="margin-left: 10px" type="primary" @click="ImportCode = true"
+      >导入FBACode</n-button
     >
     <BasicTable
       ref="actionRef"
@@ -21,6 +24,15 @@
     >
       <new-f-b-a-code :model="currentModel" @saved="reloadTable" />
     </n-modal>
+    <n-modal
+      v-model:show="ImportCode"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 600px; max-width: 600px"
+      title="新建/编辑FBA码"
+    >
+      <import-f-b-a-code-file @saved="reloadTable" />
+    </n-modal>
   </n-card>
 </template>
 
@@ -34,11 +46,13 @@
   import { $ref } from 'vue/macros';
   import { FBACodeManager } from '@/api/dataLayer/modules/user/user';
   import FileSaver from 'file-saver';
+  import ImportFBACodeFile from '@/views/newViews/FBACode/ImportFBACodeFile.vue';
 
   const actionRef = ref();
   let currentModel: any | null = $ref(null);
   const showModal = ref(false);
   let checkedRows = $ref([]);
+  let ImportCode = $ref(false);
   let FBACodeList = $ref([]);
 
   function showAdd() {
@@ -47,7 +61,6 @@
   }
   const loadDataTable = async () => {
     FBACodeList = await FBACodeManager.load(filterObj);
-    console.log(FBACodeList, 'list');
     return FBACodeList;
   };
 
@@ -56,6 +69,7 @@
   function reloadTable() {
     actionRef.value.reload();
     showModal.value = false;
+    ImportCode = false;
   }
 
   async function startEdit(id) {

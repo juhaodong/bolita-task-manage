@@ -91,7 +91,7 @@
 
   function allArrived() {
     currentTaskList.forEach((it) => {
-      it.arrivedTrayNumEdit = it.trayNum;
+      it.arrivedTrayNumEdit = it.trayNum ?? 0;
       it.arrivedContainerNumEdit = it.number;
     });
   }
