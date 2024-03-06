@@ -42,15 +42,23 @@
         <normal-form :form-fields="addressFormFields" class="mt-8" @submit="saveOutboundPlan" />
       </template>
     </loading-frame>
+    <n-modal
+      v-model:show="showDetailInfo"
+      :show-icon="false"
+      preset="dialog"
+      style="width: 90%; min-width: 600px; max-width: 1000px"
+      title="详情"
+    >
+      <detail-info :current-date="currentDate" @save="reloadTable" />
+    </n-modal>
   </n-card>
 </template>
 <script lang="ts" setup>
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
-  import { onMounted, ref, watch } from 'vue';
-  import { DataTableColumns } from 'naive-ui';
+  import { h, onMounted, ref, watch } from 'vue';
+  import { DataTableColumns, NButton } from 'naive-ui';
   import { getReserveItems } from '@/api/dataLayer/modules/notify/notify-detail';
-  import { editableColumn } from '@/views/bolita-views/composable/useableColumns';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { asyncCustomerFormField } from '@/api/dataLayer/fieldDefination/common';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
@@ -63,13 +71,16 @@
   } from '@/store/utils/utils';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
-  import { afterPlanDetailAdded } from '@/api/dataLayer/modules/OutBoundPlan/outAddHook';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
   import {
     deliveryDetailMethods,
     outboundMethodList,
   } from '@/api/dataLayer/modules/deliveryMethod/detail';
   import { addOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import DetailInfo from '@/views/newViews/Missions/AlreadyWarehousing/DetailInfo.vue';
+  import { $ref } from 'vue/macros';
+  import { afterPlanDetailAdded } from '@/api/dataLayer/modules/OutBoundPlan/outAddHook';
+  import { OutPlanStatus } from '@/api/dataLayer/modules/notify/notify-api';
 
   interface Props {
     model?: any;
@@ -79,7 +90,8 @@
   const prop = defineProps<Props>();
   const emit = defineEmits(['saved']);
   const checkedRowKeys = ref<any[]>([]);
-  const groupNotifyDetail = ref<any[]>([]);
+  let showDetailInfo = $ref(false);
+  let currentDate = ref([]);
   const outboundMethod = ref<any[]>([]);
   const totalNumber = ref(null);
   const totalVolume = ref(null);
@@ -104,18 +116,24 @@
 
   async function updateFilter(filterObj) {
     allNotifyDetail = (await getReserveItems(filterObj))
-      .filter((it) => it.instorageContainerNum > 0 || it.instorageTrayNum > 0)
+      .filter(
+        (a) =>
+          a.outStatus !== OutPlanStatus.AlreadyPlan &&
+          a.outStatus !== OutPlanStatus.AlreadyOut &&
+          a.outStatus !== OutPlanStatus.AlreadyBookingCar
+      )
+      .filter((it) => it.instorageContainerNum > 0)
       .filter((x) => {
         return x.outboundMethod !== '标准托盘' && x.outboundMethod !== '大件托盘'
           ? true
           : !!x.detailTray;
       })
       .map((it) => {
-        it.outBoundTrayNum = it.instorageTrayNum;
         it.outBoundContainerNum = it.instorageContainerNum;
         it.originId = it.id;
         return it;
       });
+    console.log(allNotifyDetail, 'detail');
   }
 
   async function init() {
@@ -139,7 +157,8 @@
   }
 
   async function saveOutboundPlan(value) {
-    value.deliveryDetail = outboundMethod.value ?? '';
+    console.log(value, 'value');
+    value.deliveryDetail = allNotifyDetail[0].deliveryMethod ?? '';
     loading = true;
     allNotifyDetail.forEach((it) => {
       it.needCar = value.needCar;
@@ -169,20 +188,39 @@
       key: 'selection',
     },
     { title: '票号', key: 'ticketId' },
-    { title: '箱号', key: 'containerId' },
-    { title: '托数', key: 'outBoundTrayNum' },
+    { title: '柜号', key: 'containerId' },
+    { title: '托数', key: 'trayNum' },
     { title: '箱数', key: 'outBoundContainerNum' },
     { title: '重量', key: 'weight' },
     { title: '体积', key: 'volume' },
+    { title: 'FBACode', key: 'FCAddress' },
     { title: '邮编', key: 'postcode' },
     { title: '出库方式', key: 'outboundMethod' },
     { title: '物流方式', key: 'deliveryMethod' },
-    { title: 'FBA号', key: 'FBA/DeliveryCode' },
-    editableColumn({ title: '备注', key: 'note' }, allNotifyDetail),
+    { title: 'FBA号', key: 'FBADeliveryCode' },
+    {
+      title: '详情',
+      key: 'actions',
+      render(row) {
+        return h(
+          NButton,
+          {
+            strong: true,
+            tertiary: true,
+            size: 'small',
+            onClick: () => {
+              currentDate.value = row;
+              showDetailInfo = true;
+            },
+          },
+          { default: () => '查看' }
+        );
+      },
+    },
   ]);
   const displayColumns: DataTableColumns<any> = $computed(() => [
     { title: '票号', key: 'ticketId' },
-    { title: '箱号', key: 'containerId' },
+    { title: '柜号', key: 'containerId' },
     { title: '托数', key: 'outBoundTrayNum' },
     { title: '箱数', key: 'outBoundContainerNum' },
     { title: '重量', key: 'weight' },
@@ -190,9 +228,8 @@
     { title: '邮编', key: 'postcode' },
     { title: '预计出库方式', key: 'outboundMethod' },
     { title: '物流方式', key: 'deliveryMethod' },
-    { title: 'FBA号', key: 'FBA/DeliveryCode' },
+    { title: 'FBA号', key: 'FBADeliveryCode' },
     { title: '仓库', key: 'warehouseId' },
-    { title: '备注', key: 'note' },
   ]);
   const searchSchema: FormField[] = [
     { label: '入库ID', field: 'notifyId' },
@@ -232,21 +269,14 @@
         return model.needCar === '0';
       },
     },
-    {
-      field: 'detail',
-      label: '明细',
-    },
-    {
-      field: 'operationRequirement',
-      label: '操作要求',
-      componentProps: {
-        type: 'textarea',
-      },
-    },
   ];
 
   const filters: FormField[] = [
     asyncCustomer(),
+    {
+      label: '柜号',
+      field: 'containerId',
+    },
     asyncFCAddress(),
     {
       label: '物流方式',
@@ -254,6 +284,7 @@
       component: 'NSelect',
       componentProps: {
         options: deliveryDetailMethods.flat(),
+        multiple: true,
       },
     },
     {

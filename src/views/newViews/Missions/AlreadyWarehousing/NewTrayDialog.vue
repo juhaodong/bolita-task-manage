@@ -155,7 +155,6 @@
         trayList.filter((a) => a.type === 'KT'),
         'amount'
       );
-      console.log(trayList, 'list');
     },
     {
       deep: true,
@@ -170,6 +169,20 @@
     await safeScope(async () => {
       const res = prop.currentData;
       res.trayNum = totalFP + totalKI + totalXP + totalKT;
+      let trayType = '';
+      if (parseFloat(totalFP) > 0) {
+        trayType = trayType + 'FP/';
+      }
+      if (parseFloat(totalKI) > 0) {
+        trayType = trayType + 'KI/';
+      }
+      if (parseFloat(totalXP) > 0) {
+        trayType = trayType + 'XP/';
+      }
+      if (parseFloat(totalKT) > 0) {
+        trayType = trayType + 'XP/';
+      }
+      res.trayType = trayType;
       res.detailTray = trayList;
       await NotifyDetailManager.edit(res, res.id);
       emit('saved');

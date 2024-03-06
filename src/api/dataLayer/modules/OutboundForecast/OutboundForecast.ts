@@ -8,7 +8,7 @@ export const OutboundForecast = 'OutboundForecast';
 export const OutWareHouse = 'OutWareHouse';
 
 export async function addOutboundForecast(list) {
-  list.trayNum = safeSumInt(list.outboundDetailInfo, 'outBoundTrayNum');
+  list.trayNum = safeSumInt(list.outboundDetailInfo, 'trayNum');
   list.containerNum = safeSumInt(list.outboundDetailInfo, 'outBoundContainerNum');
   list.totalWeight = safeSumBy(list.outboundDetailInfo, 'weight');
   list.totalVolume = safeSumBy(list.outboundDetailInfo, 'volume');

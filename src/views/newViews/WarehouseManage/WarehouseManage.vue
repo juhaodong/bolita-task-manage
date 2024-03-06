@@ -1,21 +1,21 @@
 <template>
   <n-card :bordered="false" class="proCard">
     <filter-bar
-      :form-fields="filters"
       :default-value-model="filterObj"
+      :form-fields="filters"
       @clear="updateFilter(null)"
       @submit="updateFilter"
     >
-      <n-button type="primary" size="small" @click="showAdd">新建仓库</n-button>
+      <n-button size="small" type="primary" @click="showAdd">新建仓库</n-button>
     </filter-bar>
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
+      v-model:checked-row-keys="checkedRows"
       :action-column="actionColumn"
       :columns="columns"
       :request="loadDataTable"
       :row-key="(row) => row.id"
-      v-model:checked-row-keys="checkedRows"
     />
     <n-modal
       v-model:show="wuDialog.showDialog"
@@ -62,7 +62,9 @@
   }
 
   const loadDataTable = async () => {
-    return await WarehouseManager.load(filterObj);
+    const res = await WarehouseManager.load(filterObj);
+    console.log(res, 'res');
+    return res;
   };
 
   let filterObj: any | null = $ref(null);

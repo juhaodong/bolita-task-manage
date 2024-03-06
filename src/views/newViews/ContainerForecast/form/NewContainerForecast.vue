@@ -8,7 +8,7 @@
   import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/common';
   import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
-  import { generateOptionFromArray } from '@/store/utils/utils';
+  import { asyncWarehouseList, generateOptionFromArray } from '@/store/utils/utils';
   import { reservationTimeList } from '@/views/newViews/ContainerForecast/columns';
 
   interface Props {
@@ -22,6 +22,7 @@
       field: 'containerNo',
       label: '货柜号',
     },
+    asyncWarehouseList(),
     {
       field: 'planArriveDateTime',
       component: 'NDatePicker',

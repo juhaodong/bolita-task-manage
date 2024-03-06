@@ -4,7 +4,6 @@
     editableColumn,
     formatColumn,
     getDateNow,
-    timeDisplay,
   } from '@/views/bolita-views/composable/useableColumns';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { DataTableColumns } from 'naive-ui';
@@ -21,8 +20,6 @@
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
   import { useUserStore } from '@/store/modules/user';
   import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
-
-  console.log(getDateNow, timeDisplay);
 
   interface Props {
     outId: string;

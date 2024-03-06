@@ -1,10 +1,6 @@
-<script setup lang="ts">
+<script lang="ts" setup>
   import { computed, reactive, watchEffect } from 'vue';
-  import {
-    editableColumn,
-    getDateNow,
-    timeDisplay,
-  } from '@/views/bolita-views/composable/useableColumns';
+  import { editableColumn, getDateNow } from '@/views/bolita-views/composable/useableColumns';
   import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { DataTableColumns } from 'naive-ui';
   import { where } from 'firebase/firestore';
@@ -19,8 +15,6 @@
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
   import { truckDeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
-
-  console.log(getDateNow, timeDisplay);
 
   interface Props {
     outId: string;
@@ -145,12 +139,12 @@
 </script>
 
 <template>
-  <div class="mt-8" id="print" v-if="outDetail">
+  <div v-if="outDetail" id="print" class="mt-8">
     <n-space>
       <n-button v-print="'#print'" type="default">打印计划</n-button>
       <n-button secondary>下载</n-button>
     </n-space>
-    <n-descriptions :columns="3" label-placement="left" class="mt-4" bordered>
+    <n-descriptions :columns="3" bordered class="mt-4" label-placement="left">
       <n-descriptions-item :span="2" label="仓库" />
       <n-descriptions-item label="日期"> {{ getDateNow() }}</n-descriptions-item>
       <n-descriptions-item label="出库ID"> {{ outDetail?.id }}</n-descriptions-item>
@@ -158,94 +152,94 @@
     </n-descriptions>
     <div>
       <n-data-table
-        class="mt-4"
-        virtual-scroll
-        max-height="450"
         :columns="columns"
-        :row-key="(row) => row.id"
         :data="currentDetailList"
+        :row-key="(row) => row.id"
+        class="mt-4"
+        max-height="450"
+        virtual-scroll
       />
     </div>
-    <n-descriptions columns="7" class="mt-4">
+    <n-descriptions class="mt-4" columns="7">
       <n-descriptions-item :span="4" label="操作要求">
         {{ outDetail?.operationRequirement }}
       </n-descriptions-item>
       <n-descriptions-item label="箱号/SKU">
         <div>
-          <n-input placeholder="" v-model:value="extraInfo.containerNo" />
+          <n-input v-model:value="extraInfo.containerNo" placeholder="" />
         </div>
       </n-descriptions-item>
       <n-descriptions-item label="旧标签">
         <div>
-          <n-input placeholder="" v-model:value="extraInfo.oldLabel" />
+          <n-input v-model:value="extraInfo.oldLabel" placeholder="" />
         </div>
       </n-descriptions-item>
       <n-descriptions-item label="新标签">
         <div>
-          <n-input placeholder="" v-model:value="extraInfo.newLabel" />
+          <n-input v-model:value="extraInfo.newLabel" placeholder="" />
         </div>
       </n-descriptions-item>
-      <n-descriptions-item label="操作" content-style="width:100px"> 数量</n-descriptions-item>
+      <n-descriptions-item content-style="width:100px" label="操作"> 数量</n-descriptions-item>
       <n-descriptions-item v-for="item in normalOperationInfos" :key="item.name" :label="item.name">
         <div>
-          <n-input placeholder="" v-model:value="item.amount" />
+          <n-input v-model:value="item.amount" placeholder="" />
         </div>
       </n-descriptions-item>
-      <n-descriptions-item label="特殊操作" content-style="width:60px"> 数量</n-descriptions-item>
+      <n-descriptions-item content-style="width:60px" label="特殊操作"> 数量</n-descriptions-item>
       <n-descriptions-item
         v-for="item in specialOperationInfos"
         :key="item.name"
         :label="item.name"
       >
         <div>
-          <n-input placeholder="" v-model:value="item.amount" />
+          <n-input v-model:value="item.amount" placeholder="" />
         </div>
       </n-descriptions-item>
-      <n-descriptions-item label="耗材" content-style="width:60px"> 数量</n-descriptions-item>
+      <n-descriptions-item content-style="width:60px" label="耗材"> 数量</n-descriptions-item>
       <n-descriptions-item v-for="item in wasteOperationInfos" :key="item.name" :label="item.name">
         <div>
-          <n-input placeholder="" v-model:value="item.amount" />
+          <n-input v-model:value="item.amount" placeholder="" />
         </div>
       </n-descriptions-item>
     </n-descriptions>
-    <n-descriptions :columns="1" label-placement="left" bordered class="mt-4">
-      <n-descriptions-item label="操作备注" v-model:value="extraInfo.operationNote">
+    <n-descriptions :columns="1" bordered class="mt-4" label-placement="left">
+      <n-descriptions-item v-model:value="extraInfo.operationNote" label="操作备注">
         <n-input />
       </n-descriptions-item>
-      <n-descriptions-item label="特殊操作备注" v-model:value="extraInfo.specialNote">
+      <n-descriptions-item v-model:value="extraInfo.specialNote" label="特殊操作备注">
         <n-input />
       </n-descriptions-item>
-      <n-descriptions-item label="耗材备注" v-model:value="extraInfo.wasteNote">
+      <n-descriptions-item v-model:value="extraInfo.wasteNote" label="耗材备注">
         <n-input />
       </n-descriptions-item>
     </n-descriptions>
-    <n-space v-if="outDetail" class="mt-4" :wrap-item="false">
+    <n-space v-if="outDetail" :wrap-item="false" class="mt-4">
       <div>
         <n-form-item label="装车数量">
-          <n-input placeholder="装车数量" v-model:value="extraInfo.loadCount" />
+          <n-input v-model:value="extraInfo.loadCount" placeholder="装车数量" />
         </n-form-item>
       </div>
 
       <div class="flex-grow"></div>
       <div>
         <n-form-item label="操作人">
-          <n-input placeholder="操作人:" v-model:value="extraInfo.operationPerson" />
+          <n-input v-model:value="extraInfo.operationPerson" placeholder="操作人:" />
         </n-form-item>
       </div>
       <div v-if="outDetail?.carStatus != CarStatus.NoNeed">
         <n-form-item label="打托数量">
-          <n-input placeholder="操作人:" v-model:value="extraInfo.trayNum" />
+          <n-input v-model:value="extraInfo.trayNum" placeholder="操作人:" />
         </n-form-item>
       </div>
-      <n-button @click="save" type="warning" secondary>保存</n-button>
-      <n-button @click="confirm" v-if="outDetail?.carStatus != CarStatus.NoNeed" type="primary"
+      <n-button secondary type="warning" @click="save">保存</n-button>
+      <n-button v-if="outDetail?.carStatus != CarStatus.NoNeed" type="primary" @click="confirm"
         >打托完成
       </n-button>
     </n-space>
   </div>
 </template>
 
-<style scoped lang="less">
+<style lang="less" scoped>
   @media print {
     .noMaxHeight {
       max-height: unset !important;

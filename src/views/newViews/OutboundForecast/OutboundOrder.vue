@@ -78,7 +78,7 @@
     },
     {
       title: 'FBA',
-      key: 'FBA/DeliveryCode',
+      key: 'FBADeliveryCode',
     },
     {
       title: 'Menge',

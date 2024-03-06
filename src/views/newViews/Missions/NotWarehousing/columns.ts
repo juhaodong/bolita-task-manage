@@ -44,7 +44,7 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: 'FBA/快递单号',
-    key: 'FBA/DeliveryCode',
+    key: 'FBADeliveryCode',
   },
   {
     title: '出库方式',

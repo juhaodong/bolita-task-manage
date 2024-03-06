@@ -15,3 +15,7 @@ export function dateCompare(dateKey) {
     return Date.parse(b[dateKey]) - Date.parse(a[dateKey]);
   };
 }
+
+export function dayjsDateByYMD(item) {
+  return dayjs(item).format('YYYY-MM-DD');
+}

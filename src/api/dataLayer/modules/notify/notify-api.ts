@@ -9,13 +9,12 @@ import { safeParseInt } from '@/store/utils/utils';
 export const NotifyManager = initModel({
   collectionName: notifyPath,
   init(value, taskList) {
-    console.log(value, taskList, '123');
-    const totalTrayNumber = taskList.reduce((sum, i) => sum + safeParseInt(i?.trayNum), 0);
+    // const totalTrayNumber = taskList.reduce((sum, i) => sum + safeParseInt(i?.trayNum), 0);
     const totalNumber = taskList.reduce((sum, i) => sum + safeParseInt(i?.number), 0);
     const info = {
-      arrivedCount: totalTrayNumber + '托' + totalNumber + '箱',
-      inStatus: InBoundStatus.Wait,
-      outStatus: OutStatus.Wait,
+      arrivedCount: totalNumber + '箱',
+      inStatus: InBoundStatus.WaitCheck,
+      // outStatus: OutStatus.Wait,
       cashStatus: CashStatus.NotFinish,
     };
     return Object.assign(info, value);
@@ -25,6 +24,7 @@ export const NotifyManager = initModel({
     loader: getNotifyDetailListByNotify,
   },
   async afterAddHook(id, value, taskList) {
+    console.log(value, id, 'value');
     await NotifyDetailManager.massiveAdd(taskList, id, value);
   },
 });
@@ -33,6 +33,13 @@ export enum InBoundStatus {
   All = '全部入库',
   Partial = '部分入库',
   Wait = '等待入库',
+  WaitCheck = '等待审核',
+}
+
+export enum InBoundDetailStatus {
+  WaitSubmit = '等待提交',
+  WaitCheck = '等待审核',
+  Checked = '已审核',
 }
 
 export enum finalStatus {
@@ -54,6 +61,12 @@ export enum OutStatus {
   Cancel = '取消',
   Transfer = '转其他系统',
   Stay = '留仓',
+}
+
+export enum OutPlanStatus {
+  AlreadyPlan = '已创建出库计划',
+  AlreadyOut = '已出库',
+  AlreadyBookingCar = '已订车',
 }
 
 export enum OutAllStatus {

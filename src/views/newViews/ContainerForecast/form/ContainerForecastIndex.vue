@@ -1,5 +1,9 @@
 <script lang="ts" setup>
-  import { NotifyManager, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
+  import {
+    InBoundDetailStatus,
+    NotifyManager,
+    NotifyType,
+  } from '@/api/dataLayer/modules/notify/notify-api';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { getNeededColumnByNotifyType } from '@/api/dataLayer/modules/notify/NotifyRepository';
   import NewContainerForecast from '@/views/newViews/ContainerForecast/form/NewContainerForecast.vue';
@@ -11,6 +15,7 @@
   import { allKeysList } from '@/api/dataLayer/common/AllKeys';
   import { $ref } from 'vue/macros';
   import ErrorMessageDialog from '@/views/newViews/ContainerForecast/form/ErrorMessageDialog.vue';
+  import dayjs from 'dayjs';
 
   interface Prop {
     currentModel?: any;
@@ -50,11 +55,20 @@
           allKeysList.map((x) => x.field),
           keys
         );
-        if (it.deliveryMethod === 'FBA卡派') {
+        it.trayNum = 0;
+        it.uploadFileTime = dayjs().format('YYYY-MM-DD');
+        if (!it.postcode) {
           const currentFBACode = allFBACodeList.find((b) => b.code === it.FCAddress);
           if (!currentFBACode) {
             errorMessage.push({ index: index + 4, detail: 'FBACode错误' });
+          } else {
+            it.postcode = currentFBACode.postcode;
           }
+        }
+        if (it.changeOrderFiles === '是') {
+          it.inBoundDetailStatus = InBoundDetailStatus.WaitSubmit;
+        } else {
+          it.inBoundDetailStatus = InBoundDetailStatus.WaitCheck;
         }
         if (res.length > 0) {
           const realMessageDetail = [];
@@ -90,12 +104,13 @@
     const currentCustomer =
       (await CustomerManager.load()).find((it) => it.id === value.customerId) ?? '';
     value.salesName = currentCustomer.belongSalesMan ?? userStore.info?.userType;
-    const taskList = [
+    let taskList = [
       ...(await readFile(value.files?.[0].file, value.notifyType)),
       ...(value?.trayTaskList ?? []),
     ];
     delete value.uploadFile;
     if (errorMessage.length === 0) {
+      console.log(taskList, 'list');
       const res = await NotifyManager.add(value, taskList);
       await handleRequest(res, async () => {
         emit('saved');

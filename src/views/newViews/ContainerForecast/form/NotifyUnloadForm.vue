@@ -12,7 +12,7 @@
     toastError,
     toastSuccess,
   } from '@/store/utils/utils';
-  import { getDateNow, timeDisplay } from '@/views/bolita-views/composable/useableColumns';
+  import { timeDisplay } from '@/views/bolita-views/composable/useableColumns';
   import { ResultEnum } from '@/store/enums/httpEnum';
   import dayjs from 'dayjs';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
@@ -20,8 +20,6 @@
   import { useUserStore } from '@/store/modules/user';
   import { NotifyListPower } from '@/api/dataLayer/common/PowerModel';
   import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
-
-  console.log(getDateNow, timeDisplay);
 
   interface Props {
     notifyId: string;
@@ -91,7 +89,6 @@
 
   function allArrived() {
     currentTaskList.forEach((it) => {
-      it.arrivedTrayNumEdit = it.trayNum ?? 0;
       it.arrivedContainerNumEdit = it.number;
     });
   }
@@ -116,6 +113,7 @@
 
   async function confirm() {
     loading = true;
+    const newInStatus = InBoundStatus.All;
     for (const listElement of currentTaskList) {
       const editInfo: any = {
         arrivedTrayNum: listElement.arrivedTrayNumEdit ?? 0,
@@ -124,6 +122,7 @@
       };
       editInfo.instorageTrayNum = listElement.arrivedTrayNumEdit ?? 0;
       editInfo.instorageContainerNum = listElement.arrivedContainerNumEdit ?? 0;
+      editInfo.inStatus = newInStatus;
       editInfo.arriveTime = dayjs().valueOf();
       const res = await NotifyDetailManager.edit(editInfo, listElement.id);
       if (res.code != ResultEnum.SUCCESS) {
@@ -131,14 +130,12 @@
         break;
       }
     }
-    const newInStatus = InBoundStatus.All;
     // const userStore = useUserStore();
     // const allCustomer = (await SalesManManager.load())
     const res = await NotifyManager.edit(
       {
         // salesName: userStore?.info?.realName,
-        arrivedCount: totalArrivedTrayCount.value + '托' + totalArrivedContainerCount.value + '箱',
-        trayArrivedCount: totalArrivedTrayCount.value,
+        arrivedCount: totalArrivedContainerCount.value + '箱',
         containerArrivedCount: totalArrivedContainerCount.value,
         inStatus: newInStatus,
         totalCount: totalTrayCount.value + totalContainerCount.value,
@@ -163,7 +160,6 @@
         listElement.arrivedContainerNumEdit != listElement.arrivedContainerNum
       ) {
         const editInfo: any = {
-          arrivedTrayNum: listElement?.arrivedTrayNumEdit ?? 0,
           arrivedContainerNum: listElement?.arrivedContainerNumEdit ?? 0,
           note: listElement.note,
         };
@@ -234,9 +230,7 @@
           <thead>
             <tr>
               <th>票号</th>
-              <th>预报 托</th>
               <th>预报 箱</th>
-              <th style="width: 100px">入库 托</th>
               <th style="width: 100px">入库 箱</th>
               <th>备注</th>
             </tr>
@@ -244,17 +238,7 @@
           <tbody v-if="currentTaskList">
             <tr v-for="item in currentTaskList" :key="item.id">
               <td>{{ item?.ticketId }}</td>
-              <td>{{ item?.trayNum ?? 0 }}</td>
               <td>{{ item?.number ?? 0 }}</td>
-              <td>
-                <n-input
-                  v-model:value="item.arrivedTrayNumEdit"
-                  :disabled="!canEdit"
-                  :status="compareStatus(item.arrivedTrayNumEdit, item.trayNum)"
-                  placeholder=""
-                  @focus="item.arrivedTrayNumEdit = ''"
-                />
-              </td>
               <td>
                 <n-input
                   v-model:value="item.arrivedContainerNumEdit"
@@ -275,9 +259,7 @@
         <table>
           <tr class="!bg-gray-100" style="height: 32px">
             <td>总计</td>
-            <td>预报 托 {{ totalTrayCount }}</td>
             <td>预报 箱 {{ totalContainerCount }}</td>
-            <td>到达 托 {{ totalArrivedTrayCount }}</td>
             <td>到达 箱 {{ totalArrivedContainerCount }}</td>
           </tr>
         </table>

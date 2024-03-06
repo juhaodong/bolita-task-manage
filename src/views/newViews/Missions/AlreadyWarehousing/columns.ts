@@ -1,10 +1,14 @@
 import { DataTableColumns } from 'naive-ui';
-import { finalStatus } from '@/api/dataLayer/modules/notify/notify-api';
+import { finalStatus, InBoundDetailStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import { generateOptionFromArray } from '@/store/utils/utils';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 
 export const columns: DataTableColumns<any> = [
+  {
+    type: 'selection',
+    disabled: (row) => row.inBoundDetailStatus !== InBoundDetailStatus.WaitCheck,
+  },
   {
     title: '客户ID',
     key: 'customerName',
@@ -51,7 +55,7 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: 'FBA/快递单号',
-    key: 'FBA/DeliveryCode',
+    key: 'FBADeliveryCode',
   },
   {
     title: '出库方式',
@@ -64,6 +68,10 @@ export const columns: DataTableColumns<any> = [
   {
     title: '操作要求',
     key: 'operationRequire',
+    width: 500,
+    // ellipsis: {
+    //   tooltip: true,
+    // },
   },
   {
     title: '操作备注',
@@ -82,9 +90,13 @@ export const columns: DataTableColumns<any> = [
     key: 'FCAddress',
   },
   {
-    title: '邮箱',
+    title: '邮编',
     key: 'postcode',
   },
+  statusColumnEasy({
+    title: '审核状态',
+    key: 'inBoundDetailStatus',
+  }),
   {
     title: '换单文件',
     key: 'changeOrderFiles',

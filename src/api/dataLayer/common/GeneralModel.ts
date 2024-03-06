@@ -142,7 +142,6 @@ export function initModel(g: GeneralModel): Model {
         }
       }
       const t = await g.init(value, ...args);
-      console.log(t, 't');
       const id = await generalAdd(t, g.collectionName, g?.idPrefix, ...args);
       if (g.afterAddHook) {
         await g.afterAddHook(id, t, ...args);
@@ -197,7 +196,6 @@ export function initModel(g: GeneralModel): Model {
       //   }
       // }
       let list = await executeQuery(q);
-      console.log(list, 'list');
       if (g?.joinManager) {
         const dict = keyBy(await g.joinManager?.loader(), 'id');
         list.forEach((it, index) => {
@@ -215,7 +213,7 @@ export function initModel(g: GeneralModel): Model {
       list.forEach((it) => {
         if (it.customerId) {
           it.customerName = userInfoDict[it.customerId]?.customerName ?? '';
-          it.warehouseId = userInfoDict[it.customerId]?.warehouseId ?? '';
+          // it.warehouseId = userInfoDict[it.customerId]?.warehouseId ?? '';
         }
       });
       if (!filterObj) {

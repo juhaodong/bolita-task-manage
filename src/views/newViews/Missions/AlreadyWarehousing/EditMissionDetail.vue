@@ -56,7 +56,7 @@
     },
     {
       label: 'FBA/快递单号',
-      field: 'FBA/DeliveryCode',
+      field: 'FBADeliveryCode',
       required: false,
     },
     {

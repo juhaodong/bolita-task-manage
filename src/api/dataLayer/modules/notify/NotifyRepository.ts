@@ -46,7 +46,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
   builder.addAll([
     {
       label: 'FBA/快递单号',
-      field: 'FBA/DeliveryCode',
+      field: 'FBADeliveryCode',
     },
     {
       label: 'PO',

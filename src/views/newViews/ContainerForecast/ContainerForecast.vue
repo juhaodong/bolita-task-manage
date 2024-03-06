@@ -93,13 +93,13 @@
       <warehouse-info-dialog :notify-id="currentNotifyId!" />
     </n-modal>
     <n-modal
-      v-model:show="showErrorMessageDialog"
+      v-model:show="showUnloadingList"
       :show-icon="false"
       preset="dialog"
-      title="仓库信息"
-      style="width: 90%; min-width: 600px; max-width: 800px"
+      title="卸柜单"
+      style="width: 90%; min-width: 600px; max-width: 1000px"
     >
-      <error-message-dialog :notify-id="currentNotifyId!" />
+      <unloading-list @save="reloadTable" :notify-id="currentNotifyId!" />
     </n-modal>
   </n-card>
 </template>
@@ -109,23 +109,25 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
-  import { CashStatus, NotifyManager, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
+  import {
+    CashStatus,
+    InBoundStatus,
+    NotifyManager,
+    NotifyType,
+  } from '@/api/dataLayer/modules/notify/notify-api';
   import { $ref } from 'vue/macros';
   import { TruckDelivery } from '@vicons/tabler';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
-  import Delete28Filled from '@vicons/fluent/es/Delete28Filled';
-  import { Hammer } from '@vicons/ionicons5';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { clearAllData } from '@/api/dataLayer/clearAllData';
-  import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { handleRequest, toastSuccess } from '@/store/utils/utils';
   import NotifyUnloadForm from '@/views/newViews/ContainerForecast/form/NotifyUnloadForm.vue';
   import NotifyFeeDialog from '@/views/newViews/ContainerForecast/form/NotifyFeeDialog.vue';
   import WarehouseInfoDialog from '@/views/newViews/ContainerForecast/form/WarehouseInfoDialog.vue';
   import ContainerForecastIndex from '@/views/newViews/ContainerForecast/form/ContainerForecastIndex.vue';
-  import { useUserStore } from '@/store/modules/user';
   import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
+  import UnloadingList from '@/views/newViews/ContainerForecast/form/UnloadingList.vue';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
   let currentModel: any | null = $ref(null);
@@ -136,9 +138,9 @@
   let showOperationTable = $ref(false);
   let currentNotifyId: string | null = $ref(null);
   let showWarehouseDialog = $ref(false);
-  let showErrorMessageDialog = $ref(false);
   let showFeeDialog = $ref(false);
   let filterObj: any | null = $ref(null);
+  let showUnloadingList = $ref(false);
 
   function addTable(type: NotifyType) {
     notifyType = type;
@@ -155,7 +157,6 @@
     const res = (await NotifyManager.load(filterObj)).filter(
       (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
     );
-    console.log(res, 'res');
     return res.sort(dateCompare('createTimestamp'));
   };
 
@@ -210,8 +211,16 @@
           {
             label: '卸柜单',
             onClick() {
-              currentNotifyId = record.id!;
-              showOperationTable = true;
+              if (record.inStatus !== InBoundStatus.All) {
+                currentNotifyId = record.id!;
+                showOperationTable = true;
+              } else {
+                currentNotifyId = record.id!;
+                showUnloadingList = true;
+              }
+            },
+            ifShow: () => {
+              return record?.inStatus !== InBoundStatus.WaitCheck;
             },
           },
           {

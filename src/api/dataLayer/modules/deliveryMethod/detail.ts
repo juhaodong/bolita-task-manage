@@ -10,6 +10,8 @@ export enum expressDelivery {
   stickDHL = '贴DHL',
   stickUPS = '贴UPS',
   stickGLS = '贴GLS',
+  stickSKU = '贴SKU',
+  stickFBA = '贴FBA',
 }
 
 export enum trayDelivery {
@@ -23,7 +25,7 @@ export enum looseBoxDelivery {
 }
 
 export enum retainWarehouse {
-  retainWarehouse = '流仓',
+  retainWarehouse = '留仓',
 }
 
 export enum transfer {

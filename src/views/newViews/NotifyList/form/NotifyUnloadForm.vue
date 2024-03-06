@@ -12,7 +12,7 @@
     toastError,
     toastSuccess,
   } from '@/store/utils/utils';
-  import { getDateNow, timeDisplay } from '@/views/bolita-views/composable/useableColumns';
+  import { timeDisplay } from '@/views/bolita-views/composable/useableColumns';
   import { ResultEnum } from '@/store/enums/httpEnum';
   import dayjs from 'dayjs';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
@@ -20,8 +20,6 @@
   import { useUserStore } from '@/store/modules/user';
   import { NotifyListPower } from '@/api/dataLayer/common/PowerModel';
   import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
-
-  console.log(getDateNow, timeDisplay);
 
   interface Props {
     notifyId: string;
