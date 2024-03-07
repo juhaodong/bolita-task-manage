@@ -89,6 +89,7 @@
   } from '@/api/dataLayer/common/ColorList';
   import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
+  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
 
   const { hasPermission } = usePermission();
 
@@ -129,9 +130,7 @@
   async function confirmOutbound() {
     const userStore = useUserStore();
     for (const item of checkedRows) {
-      console.log(item, 'item');
       const list = await getOutboundForecastById(item);
-      console.log(list, 'list');
       await updateOutboundForecast(item, {
         outboundDetailInfo: list.outboundDetailInfo,
         outStatus: '已出库',
@@ -147,7 +146,12 @@
 
   async function checkOutboundOrder(id) {
     const res = allOutboundForecastList.find((it) => it.id === id);
-    currentData = res.outboundDetailInfo;
+    const currentTaskList = [];
+    for (const item of res.outboundDetailInfo) {
+      const res = await NotifyDetailManager.getById(item);
+      currentTaskList.push(res);
+    }
+    currentData = currentTaskList;
     const customerColor = groupBy(currentData, 'customerName');
     const containColor = groupBy(currentData, 'containerId');
     let customerIndex = 0;
@@ -166,7 +170,7 @@
       );
       containIndex = containIndex + 1;
     }
-    currentDeliveryMethod = res.deliveryDetail;
+    currentDeliveryMethod = res.deliveryMethod;
     AMZID = res.AMZID;
     pickDate = dayjs(res.reservationGetProductTime).format('YYYY-MM-DD');
     FBACode = res.FBACode;
@@ -229,6 +233,7 @@
           {
             label: '出库单',
             onClick() {
+              console.log('123');
               checkOutboundOrder(record.id);
             },
           },
