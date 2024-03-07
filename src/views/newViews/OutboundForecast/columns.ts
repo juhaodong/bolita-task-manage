@@ -47,11 +47,11 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: '出库方式',
-    key: 'deliveryDetail',
+    key: 'deliveryMethod',
   },
   {
-    title: '地址',
-    key: 'customerAddress',
+    title: 'FC/送货地址',
+    key: 'FCAddress',
   },
   statusColumnEasy({
     title: '状态',

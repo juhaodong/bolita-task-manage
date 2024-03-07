@@ -16,7 +16,7 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
   }),
   {
     title: '出库方式',
-    key: 'deliveryDetail',
+    key: 'deliveryMethod',
   },
   {
     title: '运单号',
@@ -30,10 +30,10 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
     title: '总件数',
     key: 'containerNum',
   },
-  {
-    title: '国家',
-    key: 'country',
-  },
+  // {
+  //   title: '国家',
+  //   key: 'country',
+  // },
   {
     title: '邮编',
     key: 'postcode',
@@ -42,10 +42,10 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
     title: 'FC/送货地址',
     key: 'FCAddress',
   },
-  {
-    title: 'PO',
-    key: 'PO',
-  },
+  // {
+  //   title: 'PO',
+  //   key: 'PO',
+  // },
   {
     title: 'Ref',
     key: 'REF',

@@ -182,7 +182,6 @@
     for (const rows of checkedRows) {
       const res = allList.find((it) => it.id === rows);
       if (res) {
-        res.inBoundDetailStatus = InBoundDetailStatus.Checked;
         res.inStatus = InBoundStatus.Wait;
         res.checkedTime = dayjs().format('YYYY-MM-DD');
         await NotifyDetailManager.editInternal(res, rows);
@@ -190,7 +189,11 @@
         if (containerForecastInfo.inStatus === InBoundStatus.WaitCheck) {
           const allDetailList = allList
             .filter((x) => x.notifyId === res.notifyId)
-            .filter((b) => b.inBoundDetailStatus !== InBoundDetailStatus.Checked);
+            .filter(
+              (b) =>
+                b.inStatus === InBoundDetailStatus.WaitSubmit ||
+                b.inStatus === InBoundDetailStatus.WaitCheck
+            );
           if (allDetailList.length === 0) {
             containerForecastInfo.inStatus = InBoundStatus.Wait;
             await NotifyManager.editInternal(containerForecastInfo, containerForecastInfo.id);
@@ -239,7 +242,6 @@
         .filter((it) => it.inStatus === OutPlanStatus.AlreadyOut)
         .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
     }
-    console.log(allList, 'list');
     return allList.sort(dateCompare('createTimestamp'));
   };
 
@@ -329,7 +331,7 @@
               if (files.checkPassed) {
                 const obj = {};
                 obj['changeOrder'] = files.files;
-                obj['inBoundDetailStatus'] = InBoundDetailStatus.WaitCheck;
+                obj['inStatus'] = InBoundDetailStatus.WaitCheck;
                 await NotifyDetailManager.editInternal(obj, record.id);
               }
               actionRef.value[0].reload();

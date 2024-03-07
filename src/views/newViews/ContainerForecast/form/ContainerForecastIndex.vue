@@ -65,9 +65,9 @@
           }
         }
         if (it.changeOrderFiles === '是') {
-          it.inBoundDetailStatus = InBoundDetailStatus.WaitSubmit;
+          it.inStatus = InBoundDetailStatus.WaitSubmit;
         } else {
-          it.inBoundDetailStatus = InBoundDetailStatus.WaitCheck;
+          it.inStatus = InBoundDetailStatus.WaitCheck;
         }
         if (res.length > 0) {
           const realMessageDetail = [];

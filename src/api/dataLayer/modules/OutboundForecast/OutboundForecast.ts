@@ -55,6 +55,19 @@ export async function updateTaskListAfterBookingCar(id) {
   }
 }
 
+export async function updateTaskListConfirmOut(id) {
+  const taskListIds = (await getOutboundForecastById(id)).outboundDetailInfo;
+  for (const taskId of taskListIds) {
+    await NotifyDetailManager.massiveUpdate([
+      {
+        confirmOutTime: dayjs().format('YYYY-MM-DD'),
+        inStatus: OutPlanStatus.AlreadyOut,
+        id: taskId,
+      },
+    ]);
+  }
+}
+
 export async function addOutboundForecastByOut(list) {
   const id = await getCollectionNextId(OutWareHouse, 'Out');
   const purchaseRef = doc(db, OutWareHouse, id);

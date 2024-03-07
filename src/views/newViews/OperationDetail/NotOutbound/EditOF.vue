@@ -19,7 +19,7 @@
       <n-descriptions-item :span="2" label="运单号">
         <n-input v-model:value="newWaybillId" />
       </n-descriptions-item>
-      <n-descriptions-item :span="2" label="FBACode">
+      <n-descriptions-item :span="2" label="FC/送货地址">
         <n-select v-model:value="newFBACode" :options="options" />
       </n-descriptions-item>
       <n-descriptions-item :span="2" label="订车价格">

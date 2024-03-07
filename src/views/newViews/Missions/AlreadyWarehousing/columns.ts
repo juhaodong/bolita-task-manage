@@ -7,7 +7,7 @@ import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/us
 export const columns: DataTableColumns<any> = [
   {
     type: 'selection',
-    disabled: (row) => row.inBoundDetailStatus !== InBoundDetailStatus.WaitCheck,
+    disabled: (row) => row.inStatus !== InBoundDetailStatus.WaitCheck,
   },
   {
     title: '客户ID',

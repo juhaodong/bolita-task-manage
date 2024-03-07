@@ -76,6 +76,7 @@
     getOutboundForecast,
     getOutboundForecastById,
     updateOutboundForecast,
+    updateTaskListConfirmOut,
   } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import OutboundOrder from '@/views/newViews/OutboundForecast/OutboundOrder.vue';
   import dayjs from 'dayjs';
@@ -88,7 +89,6 @@
   } from '@/api/dataLayer/common/ColorList';
   import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
-  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
 
   const { hasPermission } = usePermission();
 
@@ -129,11 +129,9 @@
   async function confirmOutbound() {
     const userStore = useUserStore();
     for (const item of checkedRows) {
+      console.log(item, 'item');
       const list = await getOutboundForecastById(item);
-      for (const detailInfo of list?.outboundDetailInfo) {
-        detailInfo.outboundStatus = '已出库';
-        await NotifyDetailManager.editInternal(detailInfo, detailInfo.id);
-      }
+      console.log(list, 'list');
       await updateOutboundForecast(item, {
         outboundDetailInfo: list.outboundDetailInfo,
         outStatus: '已出库',
@@ -141,6 +139,7 @@
         realOutDate: dayjs().format('YYYY-MM-DD HH:mm:ss'),
         unloadPerson: userStore.info?.realName ?? '',
       });
+      await updateTaskListConfirmOut(item);
     }
     toastSuccess('success');
     reloadTable();
