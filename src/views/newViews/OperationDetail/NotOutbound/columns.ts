@@ -57,24 +57,16 @@ export const columns: DataTableColumns<any> = [
     key: 'customerId',
   },
   {
-    title: '件数',
-    key: 'containerNum',
+    title: 'FC/送货地址',
+    key: 'FCAddress',
   },
   {
-    title: '托数',
-    key: 'trayNum',
+    title: '物流方式',
+    key: 'deliveryMethod',
   },
   {
-    title: 'FBA',
-    key: 'FBACode',
-  },
-  {
-    title: '出库方式',
-    key: 'deliveryDetail',
-  },
-  {
-    title: '地址',
-    key: 'customerAddress',
+    title: '邮编',
+    key: 'postcode',
   },
   statusColumnEasy({
     title: '订车状态',

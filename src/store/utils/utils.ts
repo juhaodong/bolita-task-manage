@@ -27,6 +27,7 @@ export async function asyncFBACode(): Promise<FormField> {
     componentProps: {
       options: list,
     },
+    required: false,
   };
 }
 
@@ -59,7 +60,7 @@ export async function asyncFCAddress(): Promise<FormField> {
   }));
   return {
     field: 'FCAddress',
-    label: 'FBACode',
+    label: 'FC/送货地址',
     component: 'NSelect',
     componentProps: {
       options: list,

@@ -12,7 +12,7 @@
     toastError,
     toastSuccess,
   } from '@/store/utils/utils';
-  import { timeDisplay } from '@/views/bolita-views/composable/useableColumns';
+  import { timeDisplay, timeDisplayYMD } from '@/views/bolita-views/composable/useableColumns';
   import { ResultEnum } from '@/store/enums/httpEnum';
   import dayjs from 'dayjs';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
@@ -89,6 +89,7 @@
 
   function allArrived() {
     currentTaskList.forEach((it) => {
+      it.arrivedTrayNumEdit = it.trayNum ?? 0;
       it.arrivedContainerNumEdit = it.number;
     });
   }
@@ -99,6 +100,7 @@
       currentTaskList[index].arrivedContainerNumEdit =
         it.arrivedContainerNum == 0 ? '' : it.arrivedContainerNum;
     });
+    console.log(currentTaskList, 'list');
   }
 
   function compareStatus(currentValue: string, limitValue: string) {
@@ -135,7 +137,8 @@
     const res = await NotifyManager.edit(
       {
         // salesName: userStore?.info?.realName,
-        arrivedCount: totalArrivedContainerCount.value + '箱',
+        arrivedCount: totalArrivedTrayCount.value + '托' + totalArrivedContainerCount.value + '箱',
+        trayArrivedCount: totalArrivedTrayCount.value,
         containerArrivedCount: totalArrivedContainerCount.value,
         inStatus: newInStatus,
         totalCount: totalTrayCount.value + totalContainerCount.value,
@@ -160,6 +163,7 @@
         listElement.arrivedContainerNumEdit != listElement.arrivedContainerNum
       ) {
         const editInfo: any = {
+          arrivedTrayNum: listElement?.arrivedTrayNumEdit ?? 0,
           arrivedContainerNum: listElement?.arrivedContainerNumEdit ?? 0,
           note: listElement.note,
         };
@@ -217,7 +221,7 @@
         <n-descriptions-item label="实际卸柜日期">
           <n-date-picker
             v-model:value="currentDate"
-            :placeholder="timeDisplay(notifyInfo?.currentDate)"
+            :placeholder="timeDisplayYMD(notifyInfo?.currentDate)"
             type="date"
           />
         </n-descriptions-item>
@@ -230,7 +234,9 @@
           <thead>
             <tr>
               <th>票号</th>
+              <th>预报 托</th>
               <th>预报 箱</th>
+              <th style="width: 100px">入库 托</th>
               <th style="width: 100px">入库 箱</th>
               <th>备注</th>
             </tr>
@@ -238,7 +244,17 @@
           <tbody v-if="currentTaskList">
             <tr v-for="item in currentTaskList" :key="item.id">
               <td>{{ item?.ticketId }}</td>
+              <td>{{ item?.trayNum ?? 0 }}</td>
               <td>{{ item?.number ?? 0 }}</td>
+              <td>
+                <n-input
+                  v-model:value="item.arrivedTrayNumEdit"
+                  :disabled="!canEdit"
+                  :status="compareStatus(item.arrivedTrayNumEdit, item.trayNum)"
+                  placeholder=""
+                  @focus="item.arrivedTrayNumEdit = ''"
+                />
+              </td>
               <td>
                 <n-input
                   v-model:value="item.arrivedContainerNumEdit"

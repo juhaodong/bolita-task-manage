@@ -23,6 +23,10 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'country',
     },
     {
+      label: '托数',
+      field: 'trayNum',
+    },
+    {
       label: '件数',
       field: 'number',
     },
@@ -45,7 +49,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
   ]);
   builder.addAll([
     {
-      label: 'FBA/快递单号',
+      label: 'FBA单号',
       field: 'FBADeliveryCode',
     },
     {

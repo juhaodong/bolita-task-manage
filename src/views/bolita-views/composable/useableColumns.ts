@@ -18,6 +18,10 @@ export function timeDisplay(time) {
   return dayjs(time).format(standardDateFormat);
 }
 
+export function timeDisplayYMD(time) {
+  return dayjs(time).format('YYYY-MM-DD');
+}
+
 function hashCode(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {

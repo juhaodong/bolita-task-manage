@@ -122,6 +122,7 @@
     InBoundDetailStatus,
     InBoundStatus,
     NotifyManager,
+    OutPlanStatus,
   } from '@/api/dataLayer/modules/notify/notify-api';
   import { Box20Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
@@ -182,6 +183,7 @@
       const res = allList.find((it) => it.id === rows);
       if (res) {
         res.inBoundDetailStatus = InBoundDetailStatus.Checked;
+        res.inStatus = InBoundStatus.Wait;
         res.checkedTime = dayjs().format('YYYY-MM-DD');
         await NotifyDetailManager.editInternal(res, rows);
         const containerForecastInfo = await NotifyManager.getById(res.notifyId);
@@ -215,18 +217,26 @@
         .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
     } else if (typeMission === '已入库') {
       allList = (await NotifyDetailManager.load(filterObj))
-        .filter((it) => it.inStatus === InBoundStatus.All)
-        .filter((it) => it.outboundStatus !== '已出库')
+        .filter(
+          (it) =>
+            it.inStatus === InBoundStatus.All ||
+            it.inStatus === OutPlanStatus.AlreadyPlan ||
+            it.inStatus === OutPlanStatus.AlreadyBookingCar
+        )
         .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
     } else if (typeMission === '库内操作') {
       allList = (await NotifyDetailManager.load(filterObj))
-        .filter((it) => it.inStatus === InBoundStatus.All)
-        .filter((it) => it.outboundStatus !== '已出库')
+        .filter(
+          (it) =>
+            it.inStatus === InBoundStatus.All ||
+            it.inStatus === OutPlanStatus.AlreadyPlan ||
+            it.inStatus === OutPlanStatus.AlreadyBookingCar
+        )
         .filter((it) => it.changeOrderFiles === '是' || it.deliveryMethod === '留仓')
         .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
     } else {
       allList = (await NotifyDetailManager.load(filterObj))
-        .filter((it) => it.outboundStatus === '已出库')
+        .filter((it) => it.inStatus === OutPlanStatus.AlreadyOut)
         .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
     }
     console.log(allList, 'list');
@@ -301,9 +311,9 @@
             onClick() {
               checkCashStatus(record.id);
             },
-            ifShow: () => {
-              return typeMission === '已出库';
-            },
+            // ifShow: () => {
+            //   return typeMission === '已出库';
+            // },
           },
           {
             label: '换单文件',
@@ -320,7 +330,6 @@
                 const obj = {};
                 obj['changeOrder'] = files.files;
                 obj['inBoundDetailStatus'] = InBoundDetailStatus.WaitCheck;
-                console.log(files.files[0]);
                 await NotifyDetailManager.editInternal(obj, record.id);
               }
               actionRef.value[0].reload();

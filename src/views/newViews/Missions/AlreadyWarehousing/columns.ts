@@ -26,8 +26,12 @@ export const columns: DataTableColumns<any> = [
     key: 'country',
   },
   {
-    title: '件数',
+    title: '预报件数',
     key: 'number',
+  },
+  {
+    title: '实际件数',
+    key: 'arrivedContainerNum',
   },
   {
     title: '总实重',
@@ -38,7 +42,7 @@ export const columns: DataTableColumns<any> = [
     key: 'volume',
   },
   statusColumnEasy({
-    title: '入库状态',
+    title: '状态',
     key: 'inStatus',
   }),
   {
@@ -106,8 +110,12 @@ export const columns: DataTableColumns<any> = [
     key: 'transportationNote',
   },
   {
-    title: '托数',
+    title: '预报托数',
     key: 'trayNum',
+  },
+  {
+    title: '实际托数',
+    key: 'arrivedTrayNum',
   },
   timeColumn('planArriveDateTime', '预期到仓日期'),
   timeColumn('currentDate', '实际到仓日期'),

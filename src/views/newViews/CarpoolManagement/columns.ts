@@ -3,7 +3,6 @@ import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/us
 import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
 import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { asyncFBACode } from '@/store/utils/utils';
 
 export const columns: DataTableColumns<CarpoolManagementModel> = [
   {
@@ -40,8 +39,8 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
     key: 'postcode',
   },
   {
-    title: 'FBACode',
-    key: 'FBACode',
+    title: 'FC/送货地址',
+    key: 'FCAddress',
   },
   {
     title: 'PO',
@@ -183,7 +182,6 @@ export const schemas: FormField[] = [
     field: 'waybillId',
     label: '运单号',
   },
-  asyncFBACode(),
   {
     field: 'orderCarPrice',
     label: '订车价格',

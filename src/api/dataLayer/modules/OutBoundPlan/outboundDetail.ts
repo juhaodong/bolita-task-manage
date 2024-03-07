@@ -11,13 +11,9 @@ export const OutBoundDetailManager = initModel({
   init(value, outId: string): any {
     value.outId = outId;
     value.checkStatus = CheckStatus.Wait;
-    value.trayNum = value.outBoundTrayNum;
-    value.containerNum = value.outBoundContainerNum;
     value.notifyDetailId = value.id;
     delete value.outStatus;
     // formatItemAddress(value);
-    delete value.outBoundTrayNum;
-    delete value.outBoundContainerNum;
     delete value.id;
     return value;
   },

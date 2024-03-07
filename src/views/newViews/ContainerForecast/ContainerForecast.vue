@@ -157,6 +157,7 @@
     const res = (await NotifyManager.load(filterObj)).filter(
       (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
     );
+    console.log(res, 'res');
     return res.sort(dateCompare('createTimestamp'));
   };
 
@@ -208,19 +209,22 @@
             },
           },
           fileAction('CMR', 'CMRFiles'),
+          fileAction('上传卸柜单', 'unloadingFile'),
           {
-            label: '卸柜单',
+            label: '生成卸柜单',
             onClick() {
-              if (record.inStatus !== InBoundStatus.All) {
-                currentNotifyId = record.id!;
-                showOperationTable = true;
-              } else {
-                currentNotifyId = record.id!;
-                showUnloadingList = true;
-              }
+              currentNotifyId = record.id!;
+              showUnloadingList = true;
             },
             ifShow: () => {
-              return record?.inStatus !== InBoundStatus.WaitCheck;
+              return !record?.unloadingFile;
+            },
+          },
+          {
+            label: '卸柜',
+            onClick() {
+              currentNotifyId = record.id!;
+              showOperationTable = true;
             },
           },
           {

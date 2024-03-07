@@ -3,15 +3,22 @@ import { safeSumBy, safeSumInt } from '@/store/utils/utils';
 import { collection, doc, getDocs, query, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/store/plugins/firebase';
 import dayjs from 'dayjs';
+import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
+import { OutPlanStatus } from '@/api/dataLayer/modules/notify/notify-api';
 
 export const OutboundForecast = 'OutboundForecast';
 export const OutWareHouse = 'OutWareHouse';
 
 export async function addOutboundForecast(list) {
-  list.trayNum = safeSumInt(list.outboundDetailInfo, 'trayNum');
-  list.containerNum = safeSumInt(list.outboundDetailInfo, 'outBoundContainerNum');
-  list.totalWeight = safeSumBy(list.outboundDetailInfo, 'weight');
-  list.totalVolume = safeSumBy(list.outboundDetailInfo, 'volume');
+  const currentTaskList = [];
+  for (const item of list.outboundDetailInfo) {
+    const res = await NotifyDetailManager.getById(item);
+    currentTaskList.push(res);
+  }
+  list.trayNum = safeSumInt(currentTaskList, 'arrivedTrayNum');
+  list.containerNum = safeSumInt(currentTaskList, 'arrivedContainerNum');
+  list.totalWeight = safeSumBy(currentTaskList, 'weight');
+  list.totalVolume = safeSumBy(currentTaskList, 'volume');
   list.createTimestamp = dayjs().format('YYYY-MM-DD HH:mm:ss');
   const id = await getCollectionNextId(OutboundForecast, 'OF');
   const purchaseRef = doc(db, OutboundForecast, id);
@@ -33,6 +40,19 @@ export async function getOutboundForecastById(id) {
   const collectionRef = collection(db, OutboundForecast);
   const res = query(collectionRef);
   return (await resultOfId(res)).find((it) => it.id === id);
+}
+
+export async function updateTaskListAfterBookingCar(id) {
+  const taskListIds = (await getOutboundForecastById(id)).outboundDetailInfo;
+  for (const taskId of taskListIds) {
+    await NotifyDetailManager.massiveUpdate([
+      {
+        bookingCarTime: dayjs().format('YYYY-MM-DD'),
+        inStatus: OutPlanStatus.AlreadyBookingCar,
+        id: taskId,
+      },
+    ]);
+  }
 }
 
 export async function addOutboundForecastByOut(list) {

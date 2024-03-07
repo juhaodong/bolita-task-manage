@@ -7,6 +7,7 @@
   import dayjs from 'dayjs';
   import { DataTableColumns } from 'naive-ui';
   import { flatMap, groupBy } from 'lodash';
+  import FileSaver from 'file-saver';
 
   interface Props {
     notifyId: string;
@@ -20,8 +21,8 @@
   watchEffect(async () => {
     await reload();
   });
-  const currentArriveTime = computed(() => {
-    return dayjsDateByYMD(notifyInfo?.currentDate) ?? dayjs().format('YYYY-MM-DD');
+  const planArriveTime = computed(() => {
+    return dayjsDateByYMD(notifyInfo?.planArriveDateTime) ?? dayjs().format('YYYY-MM-DD');
   });
 
   async function reload() {
@@ -48,15 +49,44 @@
     }
   }
 
+  async function downloadUnloadingFile() {
+    let headerTitle = ['Container Nr,Name des Kunden,Gesamtmenge,Ankunftszeit'];
+    let headerDate = [
+      notifyInfo?.containerNo,
+      notifyInfo?.customerId,
+      notifyInfo?.arrivedCount,
+      planArriveTime.value,
+    ];
+    let dataStrings = ['Kenzeichen,FBA,Menge,R/F,Pal Menge,Pal Type,adresse,Anmerkung'];
+    dataStrings.unshift(headerDate);
+    dataStrings.unshift(headerTitle);
+    currentTaskList.forEach((it) => {
+      const res = [
+        it.ticketId,
+        it.FBADeliveryCode,
+        it.number,
+        '',
+        '',
+        '',
+        it.postcode,
+        it.Anmerkung,
+      ];
+      dataStrings.push(res.join());
+    });
+    dataStrings = dataStrings.join('\n');
+    const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
+    FileSaver.saveAs(blob, notifyInfo?.containerNo + '.csv');
+  }
+
   const columns: DataTableColumns<any> = $computed(() => [
     { title: 'Kenzeichen', key: 'ticketId' },
     { title: 'FBA', key: 'FBADeliveryCode', width: 150 },
     { title: 'Menge', key: 'number' },
     // { title: 'Gesamt', key: 'outBoundContainerNum' },
-    // { title: 'R/F', key: 'weight' },
-    { title: 'Pal Menge', key: 'trayNum' },
-    { title: 'Pal Type', key: 'trayType' },
-    { title: 'Adresse', key: 'FCAddress', width: 200 },
+    { title: 'R/F', key: 'fakeDate' },
+    { title: 'Pal Menge', key: 'fakeDate' },
+    { title: 'Pal Type', key: 'fakeDate' },
+    { title: 'Adresse', key: 'postcode', width: 200 },
     { title: 'Anmerkung', key: 'Anmerkung' },
   ]);
 
@@ -76,7 +106,7 @@
         <n-descriptions-item label="Name des Kunden:">
           {{ notifyInfo?.customerId }}</n-descriptions-item
         >
-        <n-descriptions-item label="Ankunftszeit:"> {{ currentArriveTime }}</n-descriptions-item>
+        <n-descriptions-item label="Ankunftszeit:"> {{ planArriveTime }}</n-descriptions-item>
       </n-descriptions>
       <n-data-table
         :bordered="false"
@@ -84,6 +114,7 @@
         :data="currentTaskList"
         :single-line="false"
       />
+      <n-button @click="downloadUnloadingFile">下载</n-button>
     </loading-frame>
   </div>
 </template>

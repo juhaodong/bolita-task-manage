@@ -10,10 +10,12 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { schemas } from '../columns';
-  import { updateOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
-  import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
+  import {
+    updateOutboundForecast,
+    updateTaskListAfterBookingCar,
+  } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import dayjs from 'dayjs';
-  import { FBACodeManager } from '@/api/dataLayer/modules/user/user';
+  import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 
   interface Props {
     model?: any;
@@ -29,17 +31,10 @@
     loading = true;
     values.carStatus = CarStatus.Booked;
     values.createBookCarTimestamp = dayjs().format('YYYY-MM-DD');
-    const res = (await FBACodeManager.load()).find((it) => it.code === values.FBACode);
-    values.street = res.street;
-    values.state = res.state;
-    values.country = res.country;
-    values.houseNo = res.houseNo;
-    values.postcode = res.postcode;
-    values.city = res.city ?? '';
-    values.appendAddress = res.appendAddress ?? '';
     await safeScope(async () => {
       for (const id of prop.mergedOutIds) {
         await updateOutboundForecast(id, values);
+        await updateTaskListAfterBookingCar(id);
       }
       emit('saved', values);
     });

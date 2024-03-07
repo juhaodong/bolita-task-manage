@@ -70,7 +70,6 @@
     toastError,
   } from '@/store/utils/utils';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { OutBoundPlanManager } from '@/api/dataLayer/modules/OutBoundPlan/outBoundPlan';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
   import {
     deliveryDetailMethods,
@@ -80,7 +79,7 @@
   import DetailInfo from '@/views/newViews/Missions/AlreadyWarehousing/DetailInfo.vue';
   import { $ref } from 'vue/macros';
   import { afterPlanDetailAdded } from '@/api/dataLayer/modules/OutBoundPlan/outAddHook';
-  import { OutPlanStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
 
   interface Props {
     model?: any;
@@ -96,6 +95,9 @@
   const totalNumber = ref(null);
   const totalVolume = ref(null);
   const totalWeight = ref(null);
+  let selectedPostcode = $ref('');
+  let selectedDeliveryMethod = $ref('');
+  let selectedFCAddress = $ref('');
   onMounted(async () => {
     await init();
   });
@@ -104,6 +106,22 @@
 
   watch(checkedRowKeys, async (val) => {
     let realList = [];
+    if (val.length > 0) {
+      selectedDeliveryMethod = allNotifyDetail.find((it) => it.id === val[0]).deliveryMethod;
+      selectedPostcode = allNotifyDetail.find((x) => x.id === val[0]).postcode;
+      selectedFCAddress = allNotifyDetail.find((x) => x.id === val[0]).FCAddress;
+      allNotifyDetail = allNotifyDetail.filter(
+        (b) =>
+          b.postcode === selectedPostcode &&
+          b.deliveryMethod === selectedDeliveryMethod &&
+          b.FCAddress === selectedFCAddress
+      );
+    } else {
+      await updateFilter(null);
+      selectedPostcode = '';
+      selectedDeliveryMethod = '';
+      selectedFCAddress = '';
+    }
     for (const item of val) {
       realList.push(allNotifyDetail.find((it) => it.id === item));
     }
@@ -116,20 +134,15 @@
 
   async function updateFilter(filterObj) {
     allNotifyDetail = (await getReserveItems(filterObj))
-      .filter(
-        (a) =>
-          a.outStatus !== OutPlanStatus.AlreadyPlan &&
-          a.outStatus !== OutPlanStatus.AlreadyOut &&
-          a.outStatus !== OutPlanStatus.AlreadyBookingCar
-      )
-      .filter((it) => it.instorageContainerNum > 0)
+      .filter((a) => a.inStatus === InBoundStatus.All)
+      // .filter((it) => it.instorageContainerNum > 0)
       .filter((x) => {
         return x.outboundMethod !== '标准托盘' && x.outboundMethod !== '大件托盘'
           ? true
           : !!x.detailTray;
       })
       .map((it) => {
-        it.outBoundContainerNum = it.instorageContainerNum;
+        // it.outBoundContainerNum = it.instorageContainerNum;
         it.originId = it.id;
         return it;
       });
@@ -157,8 +170,6 @@
   }
 
   async function saveOutboundPlan(value) {
-    console.log(value, 'value');
-    value.deliveryDetail = allNotifyDetail[0].deliveryMethod ?? '';
     loading = true;
     allNotifyDetail.forEach((it) => {
       it.needCar = value.needCar;
@@ -169,12 +180,15 @@
       }
     });
     const res = {
+      FCAddress: selectedFCAddress,
+      deliveryMethod: selectedDeliveryMethod,
+      postcode: selectedPostcode,
       ...value,
       carStatus: value.needCar === '1' ? CarStatus.UnAble : CarStatus.NoNeed,
-      outboundDetailInfo: [...allNotifyDetail],
+      outboundDetailInfo: allNotifyDetail.map((it) => it.id),
     };
     await addOutboundForecast(res);
-    await OutBoundPlanManager.add(value, allNotifyDetail);
+    // await OutBoundPlanManager.add(value, allNotifyDetail);
     await afterPlanDetailAdded(allNotifyDetail);
     await safeScope(() => {
       emit('saved');
@@ -189,15 +203,15 @@
     },
     { title: '票号', key: 'ticketId' },
     { title: '柜号', key: 'containerId' },
-    { title: '托数', key: 'trayNum' },
-    { title: '箱数', key: 'outBoundContainerNum' },
+    { title: '托数', key: 'arrivedTrayNum' },
+    { title: '箱数', key: 'arrivedContainerNum' },
     { title: '重量', key: 'weight' },
     { title: '体积', key: 'volume' },
-    { title: 'FBACode', key: 'FCAddress' },
+    { title: 'FC/送货地址', key: 'FCAddress' },
     { title: '邮编', key: 'postcode' },
     { title: '出库方式', key: 'outboundMethod' },
     { title: '物流方式', key: 'deliveryMethod' },
-    { title: 'FBA号', key: 'FBADeliveryCode' },
+    { title: 'FBA单号', key: 'FBADeliveryCode' },
     {
       title: '详情',
       key: 'actions',
@@ -221,14 +235,14 @@
   const displayColumns: DataTableColumns<any> = $computed(() => [
     { title: '票号', key: 'ticketId' },
     { title: '柜号', key: 'containerId' },
-    { title: '托数', key: 'outBoundTrayNum' },
-    { title: '箱数', key: 'outBoundContainerNum' },
+    { title: '托数', key: 'arrivedTrayNum' },
+    { title: '箱数', key: 'arrivedContainerNum' },
     { title: '重量', key: 'weight' },
     { title: '体积', key: 'volume' },
     { title: '邮编', key: 'postcode' },
     { title: '预计出库方式', key: 'outboundMethod' },
     { title: '物流方式', key: 'deliveryMethod' },
-    { title: 'FBA号', key: 'FBADeliveryCode' },
+    { title: 'FBA单号', key: 'FBADeliveryCode' },
     { title: '仓库', key: 'warehouseId' },
   ]);
   const searchSchema: FormField[] = [

@@ -55,7 +55,6 @@
           allKeysList.map((x) => x.field),
           keys
         );
-        it.trayNum = 0;
         it.uploadFileTime = dayjs().format('YYYY-MM-DD');
         if (!it.postcode) {
           const currentFBACode = allFBACodeList.find((b) => b.code === it.FCAddress);
@@ -110,7 +109,6 @@
     ];
     delete value.uploadFile;
     if (errorMessage.length === 0) {
-      console.log(taskList, 'list');
       const res = await NotifyManager.add(value, taskList);
       await handleRequest(res, async () => {
         emit('saved');

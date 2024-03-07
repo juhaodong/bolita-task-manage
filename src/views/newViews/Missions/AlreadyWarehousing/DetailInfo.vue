@@ -32,7 +32,9 @@
         <n-descriptions-item label="物流方式">
           {{ currentDate?.deliveryMethod }}
         </n-descriptions-item>
-        <n-descriptions-item label="FBACode"> {{ currentDate?.FCAddress }} </n-descriptions-item>
+        <n-descriptions-item label="FC/送货地址">
+          {{ currentDate?.FCAddress }}
+        </n-descriptions-item>
         <n-descriptions-item label="FBA/快递单号">
           {{ currentDate?.FBADeliveryCode }}
         </n-descriptions-item>

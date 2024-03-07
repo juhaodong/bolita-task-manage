@@ -8,7 +8,6 @@ import { truckDeliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
 export const outboundPath = 'outbound';
 export const OutBoundPlanManager = initModel({
   async init(value): Promise<any> {
-    value.trayNum = safeSumInt(value.planList, 'outBoundTrayNum');
     value.containerNum = safeSumInt(value.planList, 'outBoundContainerNum');
     const isTruck = truckDeliveryMethod.includes(value.deliveryMethod);
     value.outboundNum = value.trayNum + value.containerNum;
