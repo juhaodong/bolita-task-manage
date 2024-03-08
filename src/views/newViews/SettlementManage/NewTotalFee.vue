@@ -276,6 +276,9 @@
           </div>
         </div>
       </n-card>
+      <n-card :bordered="false" class="mt-4" embedded title="📕 附件">
+        <n-button type="info" @click="uploadFiles">检查文件</n-button>
+      </n-card>
     </div>
     <n-space style="float: right">
       <n-button secondary type="warning" @click="handleSubmit">保存</n-button>
@@ -296,6 +299,7 @@
   import Delete16Filled from '@vicons/fluent/es/Delete16Filled';
   import { assign } from 'lodash';
   import dayjs from 'dayjs';
+  import { useUploadDialog } from '@/store/modules/uploadFileState';
 
   interface Props {
     currentData?: any[];
@@ -374,6 +378,18 @@
       specialOperateFeeList = assign(specialOperateFeeList, currentInfo?.specialOperate);
       deliveryFeeList = assign(deliveryFeeList, currentInfo?.delivery);
       consumablesList = assign(consumablesList, currentInfo?.consumables);
+    }
+  }
+
+  async function uploadFiles() {
+    const realCurrentData = await NotifyDetailManager.getById(prop.currentData.id);
+    const upload = useUploadDialog();
+    const files = await upload.upload(realCurrentData['settlementFiles']);
+    const currentFiles = realCurrentData.settlementFiles.concat(files.files);
+    if (files.checkPassed) {
+      const obj = {};
+      obj['settlementFiles'] = currentFiles;
+      await NotifyDetailManager.editInternal(obj, realCurrentData.id);
     }
   }
 

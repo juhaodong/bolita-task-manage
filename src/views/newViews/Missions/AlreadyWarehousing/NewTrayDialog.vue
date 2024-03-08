@@ -168,7 +168,7 @@
     loading = true;
     await safeScope(async () => {
       const res = prop.currentData;
-      res.trayNum = totalFP + totalKI + totalXP + totalKT;
+      res.arrivedTrayNum = totalFP + totalKI + totalXP + totalKT;
       let trayType = '';
       if (parseFloat(totalFP) > 0) {
         trayType = trayType + 'FP/';

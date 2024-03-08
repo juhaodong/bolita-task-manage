@@ -208,7 +208,13 @@
   const loadDataTable = async () => {
     if (typeMission === '未入库') {
       allList = (await NotifyDetailManager.load(filterObj))
-        .filter((it) => it.inStatus !== InBoundStatus.All)
+        .filter(
+          (it) =>
+            it.inStatus === InBoundDetailStatus.WaitCheck ||
+            it.inStatus === InBoundDetailStatus.WaitSubmit ||
+            it.inStatus === InBoundDetailStatus.Checked ||
+            it.inStatus === InBoundStatus.Wait
+        )
         .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
     } else if (typeMission === '待审核') {
       allList = (await NotifyDetailManager.load(filterObj))
@@ -242,6 +248,7 @@
         .filter((it) => it.inStatus === OutPlanStatus.AlreadyOut)
         .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
     }
+    console.log(allList, 'list');
     return allList.sort(dateCompare('createTimestamp'));
   };
 
@@ -331,7 +338,9 @@
               if (files.checkPassed) {
                 const obj = {};
                 obj['changeOrder'] = files.files;
-                obj['inStatus'] = InBoundDetailStatus.WaitCheck;
+                if (!record.arriveTime) {
+                  obj['inStatus'] = InBoundDetailStatus.WaitCheck;
+                }
                 await NotifyDetailManager.editInternal(obj, record.id);
               }
               actionRef.value[0].reload();
