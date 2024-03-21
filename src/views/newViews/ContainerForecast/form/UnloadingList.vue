@@ -37,7 +37,7 @@
         } else if (it.outboundMethod === '大件托盘') {
           it.Anmerkung = 'PL';
         } else if (it.outboundMethod === '标准托盘') {
-          if (it.deliveryMethod === 'FBA卡派') {
+          if (it.deliveryMethod === 'FBA卡车派送') {
             it.Anmerkung = 'AMZ PL';
           } else {
             it.Anmerkung = 'PRI PL';

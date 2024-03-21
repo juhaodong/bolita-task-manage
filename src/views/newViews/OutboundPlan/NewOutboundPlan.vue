@@ -72,7 +72,7 @@
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
   import {
-    deliveryDetailMethods,
+    deliveryMethodList,
     outboundMethodList,
   } from '@/api/dataLayer/modules/deliveryMethod/detail';
   import { addOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
@@ -295,7 +295,7 @@
       field: 'deliveryMethod',
       component: 'NSelect',
       componentProps: {
-        options: deliveryDetailMethods.flat(),
+        options: deliveryMethodList,
         multiple: true,
       },
     },

@@ -20,7 +20,7 @@ export enum trayDelivery {
 }
 
 export enum looseBoxDelivery {
-  FBA = 'FBA卡派',
+  FBA = 'FBA卡车派送',
   LooseBoxOther = '散箱其他',
 }
 
@@ -60,3 +60,5 @@ export function shouldUseFBACode(model) {
 }
 
 export const outboundMethodList = ['散货', '标准托盘', '大件托盘', '存仓'];
+
+export const deliveryMethodList = ['FBA卡车派送', 'DHL', 'DPD', 'UPS', 'GLS', '其他'];
