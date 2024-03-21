@@ -120,6 +120,11 @@ export const allTitleGroup = [
     tagType: 'info',
   },
   {
+    title: '留仓时间',
+    key: 'stayTime',
+    tagType: 'info',
+  },
+  {
     title: '预期到仓日期',
     key: 'planArriveDateTime',
     tagType: 'info',

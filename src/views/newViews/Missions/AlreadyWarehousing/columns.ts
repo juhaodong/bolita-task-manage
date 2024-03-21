@@ -50,6 +50,10 @@ export const columns: DataTableColumns<any> = [
     key: 'warehouseId',
   },
   {
+    title: '留仓时间',
+    key: 'stayTime',
+  },
+  {
     title: '运单号',
     key: 'deliveryIdIn',
   },

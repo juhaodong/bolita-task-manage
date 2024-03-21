@@ -226,6 +226,11 @@
         .filter((it) => it.inStatus === '存仓')
         .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
     }
+    allList.forEach((it) => {
+      const today = dayjs().format('YYYY-MM-DD');
+      it.stayTime = dayjs(today).diff(it.arriveTime, 'day') + 1;
+    });
+    console.log(allList, 'list');
     return allList.sort(dateCompare('createTimestamp'));
   };
 
