@@ -1,13 +1,13 @@
 <template>
   <n-card :bordered="false" class="proCard">
     <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
-      <n-button
-        v-if="typeMission === '待操作'"
-        :disabled="checkedRows.length == 0"
-        type="warning"
-        @click="startShareCar()"
-      >
-        订车
+      <n-button type="primary" @click="selectedHeader">
+        <template #icon>
+          <n-icon>
+            <Box20Filled />
+          </n-icon>
+        </template>
+        选择表头显示
       </n-button>
     </filter-bar>
     <div class="my-2"></div>
@@ -36,7 +36,7 @@
               ref="actionRef"
               v-model:checked-row-keys="checkedRows"
               :actionColumn="actionColumn"
-              :columns="columns"
+              :columns="currentColumns"
               :request="loadDataTable"
               :row-key="(row) => row.id"
             />
@@ -79,39 +79,107 @@
     >
       <edit-o-f :id="editId" @saved="saved" />
     </n-modal>
+    <n-modal
+      v-model:show="showLoadingCarListDialog"
+      :show-icon="false"
+      preset="dialog"
+      style="width: 90%; min-width: 600px; max-width: 800px"
+      title="装柜表"
+    >
+      <loading-car-list :id="currentId" :outbound-info="currentInfo" @save="reloadTable" />
+    </n-modal>
+    <n-modal
+      v-model:show="showFeeDialog"
+      :show-icon="false"
+      preset="dialog"
+      style="width: 90%; min-width: 600px; max-width: 800px"
+      title="费用表"
+    >
+      <out-bound-fee-dialog :current-info="currentInfo" @save="reloadTable" />
+    </n-modal>
+    <n-modal
+      v-model:show="showCurrentHeaderDataTable"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 800px; max-width: 800px"
+      title="添加表头"
+    >
+      <selected-header-table
+        :all-columns="operationColumns"
+        :type="'operation'"
+        @saved="reloadHeader"
+      />
+    </n-modal>
+    <n-modal
+      v-model:show="showDetailInfoDialog"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 800px; max-width: 800px"
+      title="查看详情"
+    >
+      <detail-info-dialog :ids="currentIds" />
+    </n-modal>
+    <n-modal
+      v-model:show="showLoadingCarDoc"
+      :show-icon="false"
+      preset="dialog"
+      title="装车单"
+      style="width: 90%; min-width: 600px; max-width: 1000px"
+    >
+      <loading-car-doc @save="reloadTable" :notify-id="currentNotifyId!" />
+    </n-modal>
   </n-card>
 </template>
 
 <script lang="ts" setup>
+  import { Box20Filled } from '@vicons/fluent';
   import { Component, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { columns, filters } from './columns';
-  import { Folder32Filled } from '@vicons/fluent';
-  import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
+  import { filters } from './columns';
+  import {
+    getFileActionButton,
+    statusColumnEasy,
+  } from '@/views/bolita-views/composable/useableColumns';
   import { $ref } from 'vue/macros';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { usePermission } from '@/hooks/web/usePermission';
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
-  import { getOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import {
+    getOutboundForecast,
+    updateOutboundForecast,
+  } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
-  import { useUserStore } from '@/store/modules/user';
   import OutboundOrder from '@/views/newViews/OutboundForecast/OutboundOrder.vue';
   import { groupBy } from 'lodash';
   import {
     randomContainColorList,
     randomCustomerColorList,
   } from '@/api/dataLayer/common/ColorList';
-  import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
   import EditOF from '@/views/newViews/OperationDetail/NotOutbound/EditOF.vue';
+  import LoadingCarList from '@/views/newViews/OperationDetail/NotOutbound/LoadingCarList.vue';
+  import OutBoundFeeDialog from '@/views/newViews/OperationDetail/NotOutbound/OutBoundFeeDialog.vue';
+  import { NButton } from 'naive-ui';
+  import { columns } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
+  import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
+  import { getTableHeader } from '@/api/dataLayer/common/TableHeader';
+  import DetailInfoDialog from '@/views/newViews/OperationDetail/NotOutbound/DetailInfoDialog.vue';
+  import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
+  import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import {
+    getDetailListById,
+    NotifyDetailManager,
+  } from '@/api/dataLayer/modules/notify/notify-detail';
+  import { useUploadDialog } from '@/store/modules/uploadFileState';
+  import LoadingCarDoc from '@/views/newViews/OperationDetail/NotOutbound/LoadingCarDoc.vue';
 
   const { hasPermission } = usePermission();
 
   const showModal = ref(false);
   let showShareCarModel = $ref(false);
   let checkedRows = $ref([]);
-  let typeTab = $ref(['已出库', '待操作', '已截停']);
+  let typeTab = $ref(['出库任务看板', '库内操作看板']);
   let monthTab: any | null = $ref(null);
   let typeMission: any | null = $ref('');
   let selectedMonth: any | null = $ref('');
@@ -125,34 +193,122 @@
   let AMZID = $ref('');
   let editId = $ref('');
   let allList = $ref([]);
+  let currentId = $ref([]);
+  let showLoadingCarListDialog = $ref(false);
   let currentList = $ref([]);
+  let currentInfo = $ref([]);
+  let showFeeDialog = $ref(false);
+  let showDetailInfoDialog = $ref(false);
+  let currentIds = $ref([]);
+  let currentNotifyId: string | null = $ref(null);
+  let showLoadingCarDoc = $ref(false);
+  const operationColumns = $ref([
+    {
+      title: 'ID',
+      key: 'id',
+    },
+    {
+      title: '出库日期',
+      key: 'realOutDate',
+    },
+    {
+      title: 'Halle',
+      key: 'warehouseId',
+    },
+    statusColumnEasy({
+      title: '状态',
+      key: 'inStatus',
+    }),
+    {
+      title: '状态',
+      key: 'inStatus',
+    },
+    {
+      title: '详情',
+      key: 'actions',
+      render(row) {
+        return h(
+          NButton,
+          {
+            strong: true,
+            tertiary: true,
+            size: 'small',
+            onClick: () => {
+              console.log(row, 'row');
+              currentIds = row.outboundDetailInfo;
+              console.log(currentIds, 'currentIds');
+              showDetailInfoDialog = true;
+            },
+          },
+          { default: () => '查看' }
+        );
+      },
+    },
+    {
+      title: 'Ref',
+      key: 'REF',
+    },
+    {
+      title: 'ISA',
+      key: 'ISA',
+    },
+    {
+      title: 'AMZ-Sendungs ID',
+      key: 'AMZID',
+    },
+    {
+      title: 'Kunden',
+      key: 'customerId',
+    },
+    {
+      title: 'FC/送货地址',
+      key: 'FCAddress',
+    },
+    {
+      title: '物流方式',
+      key: 'deliveryMethod',
+    },
+    {
+      title: '邮编',
+      key: 'postcode',
+    },
+    // statusColumnEasy({
+    //   title: '订车状态',
+    //   key: 'carStatus',
+    // }),
+    {
+      title: '操作人',
+      key: 'outOperatePerson',
+    },
+  ]);
+  let currentHeader = $ref([]);
+  let currentColumns = $ref([]);
+  let showCurrentHeaderDataTable = $ref(false);
   const actionRef = ref();
   let filterObj: any | null = $ref(null);
+
+  async function reloadHeader() {
+    currentColumns = [];
+    currentHeader = await getTableHeader('operation');
+    currentHeader.forEach((item) => {
+      const res = operationColumns.find((it) => it.key === item.key);
+      currentColumns.push(res);
+    });
+    currentColumns = currentColumns.length > 0 ? currentColumns : operationColumns;
+    showCurrentHeaderDataTable = false;
+  }
   const loadDataTable = async () => {
-    const userStore = useUserStore();
     let allList = (await getOutboundForecast()).filter(
       (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
     );
-    if (typeMission === '待操作') {
-      currentList = allList
-        .filter((it) => it.outStatus !== '已出库')
-        .filter((it) => it.carStatus !== CarStatus.Interception);
-      currentList.forEach((it) => {
-        it.customerAddress = it?.country + it?.postcode + it?.FBACode + it?.AMZID;
-      });
-    } else if (typeMission === '已出库') {
-      currentList = allList
-        .filter((it) => it.carStatus !== CarStatus.Interception)
-        .filter((x) => x.outStatus === '已出库');
-      currentList.forEach((it) => {
-        it.customerAddress = it?.country + it?.postcode + it?.FBACode + it?.AMZID;
-      });
-    } else {
-      currentList = allList.filter((it) => it.carStatus === CarStatus.Interception);
-      currentList.forEach((it) => {
-        it.customerAddress = it?.country + it?.postcode + it?.FBACode + it?.AMZID;
-      });
+    if (typeMission === '出库任务看板') {
+      currentList = allList.filter(
+        (a) => a.carStatus !== CarStatus.UnAble || a.carStatus !== CarStatus.Interception
+      );
+    } else if (typeMission === '库内操作看板') {
+      currentList = allList.filter((a) => a.carStatus === CarStatus.Interception);
     }
+    console.log(currentList, 'list');
     return currentList.sort(dateCompare('createTimestamp'));
   };
   let currentModel = $ref(null);
@@ -166,11 +322,18 @@
   function saved() {
     reloadTable();
   }
+
+  async function selectedHeader() {
+    showCurrentHeaderDataTable = true;
+    console.log(columns, 'columns');
+  }
   function reloadTable() {
-    actionRef.value[0].reload();
     showModal.value = false;
     showShareCarModel = false;
     editOutboundForecast = false;
+    showLoadingCarListDialog = false;
+    showFeeDialog = false;
+    actionRef.value[0].reload();
   }
 
   async function checkOutboundOrder(id) {
@@ -213,8 +376,9 @@
   }
 
   onMounted(async () => {
+    await reloadHeader();
     monthTab = OneYearMonthTab();
-    typeMission = '待操作';
+    typeMission = '出库任务看板';
     selectedMonth = monthTab[0];
   });
 
@@ -237,26 +401,75 @@
       return h(TableAction as any, {
         style: 'button',
         actions: [
-          fileAction('提单文件', 'files', Folder32Filled),
-          fileAction('POD', 'POD'),
-          fileAction('CMR', 'CMRFiles'),
-          fileAction('问题图片', 'problemFiles'),
           {
-            label: '出库单',
-            ifShow: () => {
-              return typeMission === '已出库';
+            label: 'CMR',
+            highlight: () => {
+              return record?.['CMRFiles']?.length > 0 ? 'success' : 'error';
             },
+            async onClick() {
+              const upload = useUploadDialog();
+              const files = await upload.upload(record['CMRFiles']);
+              if (files.checkPassed) {
+                const obj = {};
+                obj['CMRFiles'] = files.files;
+                obj['inStatus'] = OutStatus.All;
+                await updateOutboundForecast(record.id, obj);
+                const taskList = await getDetailListById(record.outboundDetailInfo);
+                for (const task of taskList) {
+                  task.CMRFiles = files.files;
+                  task.inStatus = OutStatus.All;
+                  task.realOutDate = dayjs().format('YYYY-MM-DD');
+                  await NotifyDetailManager.editInternal(task, task.id);
+                }
+              }
+              await actionRef.value[0].reload();
+            },
+          },
+          {
+            label: '装车单',
             onClick() {
-              checkOutboundOrder(record.id);
+              currentInfo = record;
+              currentId = record?.outboundDetailInfo;
+              showLoadingCarListDialog = true;
+            },
+          },
+          {
+            label: '生成装车单',
+            onClick() {
+              currentNotifyId = record.id!;
+              showLoadingCarDoc = true;
+            },
+            ifShow: () => {
+              return !record?.unloadingFile;
+            },
+          },
+          {
+            label: '上传装车单',
+            highlight: () => {
+              return record?.['loadingCarDoc']?.length > 0 ? 'success' : 'error';
+            },
+            async onClick() {
+              const upload = useUploadDialog();
+              const files = await upload.upload(record['loadingCarDoc']);
+              if (files.checkPassed) {
+                const obj = {};
+                obj['loadingCarDoc'] = files.files;
+                await updateOutboundForecast(record.id, obj);
+              }
+              await actionRef.value[0].reload();
             },
           },
           {
             label: '修改',
-            ifShow: () => {
-              return record.carStatus === CarStatus.Interception;
-            },
             onClick() {
               startEditOF(record.id);
+            },
+          },
+          {
+            label: '结算',
+            onClick() {
+              currentInfo = record;
+              showFeeDialog = true;
             },
           },
           {

@@ -4,7 +4,7 @@
       <n-tag
         v-for="(item, index) in waitForUseList"
         :key="index"
-        :type="item.userByHeader ? 'success' : 'default'"
+        :type="item.tagType"
         class="ml-2 mt-2"
         round
         size="large"
@@ -17,6 +17,7 @@
       <n-tag
         v-for="(item, index) in currentHeaderList"
         :key="index"
+        :type="item.tagType"
         class="ml-2 mt-2"
         round
         size="large"
@@ -35,19 +36,22 @@
   import { $ref } from 'vue/macros';
   import { getTableHeader, setTableHeader } from '@/api/dataLayer/common/TableHeader';
   import _, { differenceWith } from 'lodash';
+  import { allTitleGroup, operationTitleGroup } from '@/api/dataLayer/common/TitleGroup';
 
   interface Props {
     allColumns?: any;
+    type?: any;
   }
   const emit = defineEmits(['saved']);
   let allHeaderList = $ref([]);
   let currentHeaderList = $ref([]);
   const prop = defineProps<Props>();
   const waitForUseList = computed(() => {
-    const res = prop.allColumns.slice(1).map((x) => {
-      return { title: x.title, key: x.key };
-    });
-    return differenceWith(res, currentHeaderList, _.isEqual);
+    if (prop.type === 'mission') {
+      return differenceWith(allTitleGroup, currentHeaderList, _.isEqual);
+    } else {
+      return differenceWith(operationTitleGroup, currentHeaderList, _.isEqual);
+    }
   });
   onMounted(async () => {
     await reload();
@@ -60,14 +64,10 @@
   }
   async function reload() {
     allHeaderList = prop.allColumns.slice(1);
-    currentHeaderList = await getTableHeader('missions');
-    console.log(currentHeaderList, 'list');
+    currentHeaderList = await getTableHeader(prop.type);
   }
   async function save() {
-    currentHeaderList = currentHeaderList.map((it) => {
-      return { title: it.title, key: it.key };
-    });
-    await setTableHeader('missions', currentHeaderList);
+    await setTableHeader(prop.type, currentHeaderList);
     emit('saved');
   }
 </script>

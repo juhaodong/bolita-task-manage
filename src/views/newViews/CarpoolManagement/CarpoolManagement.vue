@@ -1,6 +1,15 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter" />
+    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
+      <n-button :disabled="checkedRows.length < 1" type="primary" @click="startShareCar">
+        <template #icon>
+          <n-icon>
+            <Box20Filled />
+          </n-icon>
+        </template>
+        订车
+      </n-button>
+    </filter-bar>
     <div class="my-2"></div>
     <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
       <n-tab-pane
@@ -11,6 +20,7 @@
       >
         <BasicTable
           ref="actionRef"
+          v-model:checked-row-keys="checkedRows"
           :actionColumn="actionColumn"
           :columns="columns"
           :request="loadDataTable"
@@ -27,10 +37,20 @@
     >
       <edit-o-f :id="editId" @saved="saved" />
     </n-modal>
+    <n-modal
+      v-model:show="showShareCarModel"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 600px; max-width: 600px"
+      title="新建订车"
+    >
+      <new-carpool-management :merged-out-ids="checkedRows" @saved="saveShareCar" />
+    </n-modal>
   </n-card>
 </template>
 
 <script lang="ts" setup>
+  import { Box20Filled } from '@vicons/fluent';
   import { Component, computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
@@ -44,6 +64,8 @@
   import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import EditOF from '@/views/newViews/OperationDetail/NotOutbound/EditOF.vue';
+  import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
+  import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 
   const showModal = ref(false);
 
@@ -53,9 +75,12 @@
   let selectedMonth: any | null = $ref('');
   let monthTab: any | null = $ref(null);
   let editOutboundForecast = $ref(false);
+  let showShareCarModel = $ref(false);
+  let checkedRows = $ref([]);
   let editId = $ref('');
   const loadDataTable = async () => {
     return (await getOutboundForecast())
+      .filter((a) => a.inStatus === CarStatus.UnAble)
       .filter((x) => dayjs(x.createBookCarTimestamp).format('YYYY-MM') === selectedMonth)
       .sort(dateCompare('createBookCarTimestamp'));
   };
@@ -66,6 +91,15 @@
     selectedMonth = monthTab[0];
   });
 
+  function startShareCar() {
+    showShareCarModel = true;
+  }
+
+  async function saveShareCar() {
+    reloadTable();
+    checkedRows = [];
+  }
+
   function updateFilter(value) {
     filterObj = value;
     reloadTable();
@@ -74,6 +108,7 @@
   function reloadTable() {
     actionRef.value[0].reload();
     showModal.value = false;
+    showShareCarModel = false;
     paymentDialogShow = false;
     editOutboundForecast = false;
   }

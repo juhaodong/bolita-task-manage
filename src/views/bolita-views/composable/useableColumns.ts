@@ -122,6 +122,31 @@ export function idColumn(title = 'ID', targetPage, keyName = 'id') {
   };
 }
 
+export function selectedIdColumn(title, targetPage, keyName) {
+  return {
+    title: title,
+    key: keyName,
+    width: 60,
+    render(record) {
+      return h(
+        RouterLink,
+        {
+          to: targetPage + '?' + keyName + '=' + record[keyName],
+        },
+        () =>
+          h(
+            NText,
+            {
+              underline: true,
+              type: 'info',
+            },
+            () => record[keyName]
+          )
+      );
+    },
+  };
+}
+
 export function timeColumn(
   keyName = 'createTimestamp',
   title = '创建时间',

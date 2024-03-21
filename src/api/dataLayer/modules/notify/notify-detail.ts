@@ -2,6 +2,7 @@ import { orderBy, where } from 'firebase/firestore';
 import { NotifyManager, OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 import { taskListPath } from '@/api/dataLayer/modules/notify/path';
+import { chunk } from 'lodash-es';
 
 export async function getNotifyDetailListByNotify(id) {
   return await NotifyDetailManager.load(null, where('notifyId', '==', id));
@@ -24,7 +25,7 @@ export const NotifyDetailManager = initModel({
     taskInfo.instorageContainerNum = 0;
     taskInfo.instorageTrayNum = 0;
     taskInfo.note = '';
-    taskInfo.arriveTime = 0;
+    taskInfo.arriveTime = '';
     taskInfo.storagePosition = '';
     taskInfo.notifyId = notifyId;
     taskInfo.customerId = customerId.customerId;
@@ -37,3 +38,13 @@ export const NotifyDetailManager = initModel({
     loader: () => NotifyManager.load(null),
   },
 });
+
+export async function getDetailListById(ids) {
+  const currentTaskList = [];
+  const res = chunk(ids, 30);
+  for (const idList of res) {
+    const result = await NotifyDetailManager.load(null, where('id', 'in', idList));
+    currentTaskList.push(result);
+  }
+  return currentTaskList.flat();
+}

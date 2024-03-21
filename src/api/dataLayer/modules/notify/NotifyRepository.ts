@@ -39,11 +39,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'volume',
     },
     {
-      label: '运单号',
-      field: 'deliveryIdIn',
-    },
-    {
-      label: '基础备注',
+      label: '客户备注',
       field: 'normalNote',
     },
   ]);
@@ -143,7 +139,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'needReserve',
     },
     {
-      label: '备注',
+      label: '工业品备注',
       field: 'industrialNote',
     },
   ]);

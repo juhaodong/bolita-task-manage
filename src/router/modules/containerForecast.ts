@@ -23,22 +23,22 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('@/views/newViews/ContainerForecast/ContainerForecast.vue'),
       },
-      {
-        path: 'outbound',
-        name: `outbound`,
-        meta: {
-          title: '出库预报',
-        },
-        component: () => import('@/views/newViews/OutboundForecast/OutboundForecast.vue'),
-      },
-      {
-        path: 'pickUp',
-        name: `pickUp`,
-        meta: {
-          title: '卡派/散货取货',
-        },
-        component: () => import('@/views/newViews/PickUp/PickUp.vue'),
-      },
+      // {
+      //   path: 'outbound',
+      //   name: `outbound`,
+      //   meta: {
+      //     title: '出库预报',
+      //   },
+      //   component: () => import('@/views/newViews/OutboundForecast/OutboundForecast.vue'),
+      // },
+      // {
+      //   path: 'pickUp',
+      //   name: `pickUp`,
+      //   meta: {
+      //     title: '卡派/散货取货',
+      //   },
+      //   component: () => import('@/views/newViews/PickUp/PickUp.vue'),
+      // },
       {
         path: 'claimManage',
         name: `claimManage`,

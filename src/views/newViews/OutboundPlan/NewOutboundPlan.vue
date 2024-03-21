@@ -135,14 +135,12 @@
   async function updateFilter(filterObj) {
     allNotifyDetail = (await getReserveItems(filterObj))
       .filter((a) => a.inStatus === InBoundStatus.All)
-      // .filter((it) => it.instorageContainerNum > 0)
       .filter((x) => {
         return x.outboundMethod !== '标准托盘' && x.outboundMethod !== '大件托盘'
           ? true
           : !!x.detailTray;
       })
       .map((it) => {
-        // it.outBoundContainerNum = it.instorageContainerNum;
         it.originId = it.id;
         return it;
       });
@@ -184,7 +182,7 @@
       deliveryMethod: selectedDeliveryMethod,
       postcode: selectedPostcode,
       ...value,
-      carStatus: value.needCar === '1' ? CarStatus.UnAble : CarStatus.NoNeed,
+      inStatus: value.needCar === '1' ? CarStatus.UnAble : CarStatus.NoNeed,
       outboundDetailInfo: allNotifyDetail.map((it) => it.id),
     };
     await addOutboundForecast(res);

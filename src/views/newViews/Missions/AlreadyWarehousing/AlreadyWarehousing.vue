@@ -18,7 +18,7 @@
           </template>
           选择表头显示
         </n-button>
-        <n-button v-if="typeMission === '待审核'" type="primary" @click="checkDetailInfo">
+        <n-button type="primary" @click="checkDetailInfo">
           <template #icon>
             <n-icon>
               <Box20Filled />
@@ -104,7 +104,16 @@
         style="width: 90%; min-width: 800px; max-width: 800px"
         title="添加表头"
       >
-        <selected-header-table :all-columns="columns" @saved="reloadHeader" />
+        <selected-header-table :all-columns="columns" :type="'mission'" @saved="reloadHeader" />
+      </n-modal>
+      <n-modal
+        v-model:show="showTimeLine"
+        :show-icon="false"
+        preset="card"
+        style="width: 90%; min-width: 800px; max-width: 800px"
+        title="时间线"
+      >
+        <time-line :ids="currentId" />
       </n-modal>
     </div>
   </n-card>
@@ -122,7 +131,6 @@
     InBoundDetailStatus,
     InBoundStatus,
     NotifyManager,
-    OutPlanStatus,
   } from '@/api/dataLayer/modules/notify/notify-api';
   import { Box20Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
@@ -134,6 +142,7 @@
   import NewTrayDialog from '@/views/newViews/Missions/AlreadyWarehousing/NewTrayDialog.vue';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
   import { getTableHeader } from '@/api/dataLayer/common/TableHeader';
+  import TimeLine from '@/views/newViews/Missions/AlreadyWarehousing/TimeLine.vue';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -142,7 +151,7 @@
   let addNewFeeDialog = $ref(false);
   let checkedRows = $ref([]);
   let currentModel: any | null = $ref(null);
-  let typeTab = $ref(['待审核', '未入库', '已入库', '库内操作', '已出库']);
+  let typeTab = $ref(['整柜任务看板', '存仓看板']);
   let monthTab: any | null = $ref(null);
   let typeMission: any | null = $ref('');
   let selectedMonth: any | null = $ref('');
@@ -153,6 +162,8 @@
   let showCurrentHeaderDataTable = $ref(false);
   let currentHeader = $ref([]);
   let currentColumns = $ref([]);
+  let currentId = $ref('');
+  let showTimeLine = $ref(false);
   const actionRef = ref();
   const props = defineProps<Prop>();
   interface Prop {
@@ -206,49 +217,15 @@
   }
 
   const loadDataTable = async () => {
-    if (typeMission === '未入库') {
-      allList = (await NotifyDetailManager.load(filterObj))
-        .filter(
-          (it) =>
-            it.inStatus === InBoundDetailStatus.WaitCheck ||
-            it.inStatus === InBoundDetailStatus.WaitSubmit ||
-            it.inStatus === InBoundDetailStatus.Checked ||
-            it.inStatus === InBoundStatus.Wait
-        )
-        .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
-    } else if (typeMission === '待审核') {
-      allList = (await NotifyDetailManager.load(filterObj))
-        .filter(
-          (it) =>
-            it.inStatus === InBoundDetailStatus.WaitCheck ||
-            it.inStatus === InBoundDetailStatus.WaitSubmit
-        )
-        .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
-    } else if (typeMission === '已入库') {
-      allList = (await NotifyDetailManager.load(filterObj))
-        .filter(
-          (it) =>
-            it.inStatus === InBoundStatus.All ||
-            it.inStatus === OutPlanStatus.AlreadyPlan ||
-            it.inStatus === OutPlanStatus.AlreadyBookingCar
-        )
-        .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
-    } else if (typeMission === '库内操作') {
-      allList = (await NotifyDetailManager.load(filterObj))
-        .filter(
-          (it) =>
-            it.inStatus === InBoundStatus.All ||
-            it.inStatus === OutPlanStatus.AlreadyPlan ||
-            it.inStatus === OutPlanStatus.AlreadyBookingCar
-        )
-        .filter((it) => it.changeOrderFiles === '是' || it.deliveryMethod === '留仓')
-        .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
+    if (typeMission === '整柜任务看板') {
+      allList = (await NotifyDetailManager.load(filterObj)).filter(
+        (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
+      );
     } else {
       allList = (await NotifyDetailManager.load(filterObj))
-        .filter((it) => it.inStatus === OutPlanStatus.AlreadyOut)
+        .filter((it) => it.inStatus === '存仓')
         .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
     }
-    console.log(allList, 'list');
     return allList.sort(dateCompare('createTimestamp'));
   };
 
@@ -264,7 +241,7 @@
 
   async function reloadHeader() {
     currentColumns = [];
-    currentHeader = await getTableHeader('missions');
+    currentHeader = await getTableHeader('mission');
     currentHeader.forEach((item) => {
       const res = columns.find((it) => it.key === item.key);
       currentColumns.push(res);
@@ -283,15 +260,31 @@
     addNewFeeDialog = false;
     addNewTrayDialog = false;
     showCurrentHeaderDataTable = false;
-    actionRef.value[0].reload();
+    await actionRef.value[0].reload();
+  }
+
+  function getQueryString(name) {
+    return (
+      decodeURIComponent(
+        (new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.href) || [
+          '',
+          '',
+        ])[1].replace(/\+/g, '%20')
+      ) || null
+    );
   }
 
   onMounted(async () => {
     await reloadHeader();
     monthTab = OneYearMonthTab();
-    typeMission = '已入库';
+    typeMission = '整柜任务看板';
     selectedMonth = monthTab[0];
-    await reloadTable();
+    const res = getQueryString('containerId');
+    if (res) {
+      updateFilter({ containerId: res });
+    } else {
+      await reloadTable();
+    }
     if (props.belongsToId) {
       filterObj = { belongsToId: props.belongsToId };
     }
@@ -311,7 +304,6 @@
           {
             label: '修改',
             onClick() {
-              console.log(record.id, 'id');
               startEdit(record.id);
             },
           },
@@ -320,9 +312,13 @@
             onClick() {
               checkCashStatus(record.id);
             },
-            // ifShow: () => {
-            //   return typeMission === '已出库';
-            // },
+          },
+          {
+            label: '时间线',
+            onClick() {
+              currentId = record.id;
+              showTimeLine = true;
+            },
           },
           {
             label: '换单文件',
@@ -346,7 +342,6 @@
               actionRef.value[0].reload();
             },
           },
-          fileAction('提单文件', 'files'),
           fileAction('POD', 'POD'),
           fileAction('操作文件', 'operationFiles'),
           fileAction('问题图片', 'problemFiles'),

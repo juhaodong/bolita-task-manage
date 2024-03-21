@@ -30,6 +30,7 @@
   async function handleSubmit(values: any) {
     loading = true;
     values.carStatus = CarStatus.Booked;
+    values.inStatus = CarStatus.Booked;
     values.createBookCarTimestamp = dayjs().format('YYYY-MM-DD');
     await safeScope(async () => {
       for (const id of prop.mergedOutIds) {

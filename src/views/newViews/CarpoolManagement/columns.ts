@@ -11,8 +11,8 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
   },
   timeColumn('createBookCarTimestamp', '下单日期'),
   statusColumnEasy({
-    title: '订车状态',
-    key: 'carStatus',
+    title: '状态',
+    key: 'inStatus',
   }),
   {
     title: '出库方式',

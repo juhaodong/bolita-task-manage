@@ -52,7 +52,16 @@ export const useUploadDialog = defineStore('uploadFileDialog', {
         }
         this.resolve({
           checkPassed: true,
-          files: value.files,
+          files: this.currentFileUrls ? this.currentFileUrls.concat(value.files) : value.files,
+        });
+        this.show = false;
+      }
+    },
+    async deleteFile(file) {
+      if (this.resolve != null) {
+        this.resolve({
+          checkPassed: true,
+          files: this.currentFileUrls.filter((it) => it !== file),
         });
         this.show = false;
       }

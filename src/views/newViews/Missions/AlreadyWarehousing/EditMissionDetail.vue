@@ -21,6 +21,7 @@
     {
       label: '客户ID',
       field: 'customerName',
+      required: false,
     },
     {
       label: '柜号',
@@ -33,6 +34,11 @@
     {
       label: '国家',
       field: 'country',
+    },
+    {
+      label: '托数',
+      field: 'trayNum',
+      required: false,
     },
     {
       label: '件数',
@@ -55,13 +61,18 @@
       required: false,
     },
     {
-      label: 'FBA/快递单号',
+      label: 'FBA单号',
       field: 'FBADeliveryCode',
       required: false,
     },
     {
       label: '出库方式',
-      field: 'operation',
+      field: 'outboundMethod',
+      required: false,
+    },
+    {
+      label: '物流渠道',
+      field: 'deliveryMethod',
       required: false,
     },
     {
@@ -86,22 +97,7 @@
     },
     {
       label: '备注/库位',
-      field: 'note/address',
-      required: false,
-    },
-    {
-      label: 'Ref',
-      field: 'Ref',
-      required: false,
-    },
-    {
-      label: '运费报价',
-      field: 'freightQuotation',
-      required: false,
-    },
-    {
-      label: '结算',
-      field: 'settlement',
+      field: 'warehouseId',
       required: false,
     },
     {
@@ -110,43 +106,8 @@
       required: false,
     },
     {
-      label: '托数(长*宽*高*数)',
-      field: 'totalTrayNum',
-      required: false,
-    },
-    {
-      label: '城市',
-      field: 'city',
-      required: false,
-    },
-    {
-      label: '街道',
-      field: 'street',
-      required: false,
-    },
-    {
-      label: '门牌号',
-      field: 'houseNumber',
-      required: false,
-    },
-    {
-      label: '收件人',
-      field: 'recipient',
-      required: false,
-    },
-    {
-      label: '联系电话',
-      field: 'phone',
-      required: false,
-    },
-    {
-      label: '是否需要预约',
-      field: 'needReservation',
-      required: false,
-    },
-    {
-      label: '包装',
-      field: 'package',
+      label: '工业品托数',
+      field: 'industrialTrayNum',
       required: false,
     },
     {
@@ -155,8 +116,53 @@
       required: false,
     },
     {
-      label: '备注',
-      field: 'addressNote',
+      label: 'UN号',
+      field: 'UNNumber',
+      required: false,
+    },
+    {
+      label: '收件人',
+      field: 'recipient',
+      required: false,
+    },
+    {
+      label: '电话',
+      field: 'phone',
+      required: false,
+    },
+    {
+      label: '邮箱',
+      field: 'email',
+      required: false,
+    },
+    {
+      label: '地址1',
+      field: 'address1',
+      required: false,
+    },
+    {
+      label: '地址2',
+      field: 'address2',
+      required: false,
+    },
+    {
+      label: '工业品国家',
+      field: 'industrialCountry',
+      required: false,
+    },
+    {
+      label: '工业品城市',
+      field: 'industrialCity',
+      required: false,
+    },
+    {
+      label: '是否需要预约',
+      field: 'needReserve',
+      required: false,
+    },
+    {
+      label: '工业品备注',
+      field: 'industrialNote',
       required: false,
     },
   ];
@@ -167,6 +173,11 @@
     loading = true;
     values.alreadyChanged = 1;
     console.log(values, 'values');
+    if (values.outboundMethod === '存仓') {
+      values.inStatus = '存仓';
+    } else {
+      values.inStatus = '全部入库';
+    }
     await safeScope(async () => {
       if (prop?.model?.id) {
         await NotifyDetailManager.editInternal(values, prop.model.id);

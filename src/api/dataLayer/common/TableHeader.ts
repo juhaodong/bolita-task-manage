@@ -11,5 +11,5 @@ export async function setTableHeader(type, list) {
 export async function getTableHeader(type) {
   const collectionRef = collection(db, TableHeaderList);
   const res = query(collectionRef);
-  return (await resultOfId(res)).find((it) => it.id === type).list ?? [];
+  return (await resultOfId(res)).find((it) => it.id === type)?.list ?? [];
 }

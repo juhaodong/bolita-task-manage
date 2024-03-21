@@ -1,5 +1,9 @@
 import { DataTableColumns } from 'naive-ui';
-import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import {
+  selectedIdColumn,
+  statusColumnEasy,
+  timeColumn,
+} from '@/views/bolita-views/composable/useableColumns';
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
@@ -9,10 +13,11 @@ export const columns: DataTableColumns<any> = [
     title: '预计时间',
     key: 'inHouseTime',
   },
-  {
-    title: '柜号',
-    key: 'containerNo',
-  },
+  selectedIdColumn('柜号', '/missions/missionDetail', 'containerNo'),
+  // {
+  //   title: '柜号',
+  //   key: 'containerNo',
+  // },
   {
     title: '客户ID',
     key: 'customerName',

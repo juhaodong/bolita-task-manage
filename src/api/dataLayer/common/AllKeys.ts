@@ -24,11 +24,7 @@ export const allKeysList = [
     field: 'volume',
   },
   {
-    label: '运单号',
-    field: 'deliveryIdIn',
-  },
-  {
-    label: 'FBA/快递单号',
+    label: 'FBA单号',
     field: 'FBADeliveryCode',
   },
   {

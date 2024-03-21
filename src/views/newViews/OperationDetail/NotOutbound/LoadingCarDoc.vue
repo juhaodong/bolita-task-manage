@@ -1,20 +1,20 @@
 <script lang="ts" setup>
   import { computed, watchEffect } from 'vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
-  import { getNotifyDetailListByNotify } from '@/api/dataLayer/modules/notify/notify-detail';
+  import { getDetailListById } from '@/api/dataLayer/modules/notify/notify-detail';
   import { dayjsDateByYMD } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import { DataTableColumns } from 'naive-ui';
   import { flatMap, groupBy } from 'lodash';
   import FileSaver from 'file-saver';
+  import { getOutboundForecastById } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
 
   interface Props {
     notifyId: string;
   }
 
   const props = defineProps<Props>();
-  let notifyInfo: any | null = $ref(null);
+  let outboundInfo: any | null = $ref(null);
   let currentTaskList: any[] = $ref([]);
 
   const emit = defineEmits(['close', 'refresh', 'save']);
@@ -22,14 +22,13 @@
     await reload();
   });
   const planArriveTime = computed(() => {
-    return dayjsDateByYMD(notifyInfo?.planArriveDateTime) ?? dayjs().format('YYYY-MM-DD');
+    return dayjsDateByYMD(outboundInfo?.planArriveDateTime) ?? dayjs().format('YYYY-MM-DD');
   });
 
   async function reload() {
     if (props.notifyId != null) {
-      notifyInfo = await NotifyManager.getById(props.notifyId);
-      const res = await getNotifyDetailListByNotify(props.notifyId);
-      console.log(res, 'res');
+      outboundInfo = await getOutboundForecastById(props.notifyId);
+      const res = await getDetailListById(outboundInfo.outboundDetailInfo);
       currentTaskList = flatMap(groupBy(res, 'FCAddress'));
       currentTaskList.forEach((it) => {
         if (it.outboundMethod === '存仓') {
@@ -65,9 +64,9 @@
   async function downloadUnloadingFile() {
     let headerTitle = ['Container Nr,Name des Kunden,Gesamtmenge,Ankunftszeit'];
     let headerDate = [
-      notifyInfo?.containerNo,
-      notifyInfo?.customerId,
-      notifyInfo?.arrivedCount,
+      outboundInfo?.containerNo,
+      outboundInfo?.customerId,
+      outboundInfo?.arrivedCount,
       planArriveTime.value,
     ];
     let dataStrings = ['Kenzeichen,FBA,Menge,R/F,Pal Menge,Pal Type,adresse,Anmerkung'];
@@ -88,7 +87,7 @@
     });
     dataStrings = dataStrings.join('\n');
     const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
-    FileSaver.saveAs(blob, notifyInfo?.containerNo + '.csv');
+    FileSaver.saveAs(blob, outboundInfo?.REF + '.csv');
   }
 
   const columns: DataTableColumns<any> = $computed(() => [
@@ -109,17 +108,19 @@
 <template>
   <div id="print" class="mt-8">
     <loading-frame :loading="loading">
-      <n-descriptions v-if="notifyInfo" :columns="2" bordered label-placement="left">
-        <n-descriptions-item label="Container Nr.">
-          {{ notifyInfo?.containerNo }}
+      <n-descriptions v-if="outboundInfo" :columns="2" bordered label-placement="left">
+        <n-descriptions-item label="Ref.">
+          {{ outboundInfo?.REF }}
         </n-descriptions-item>
         <n-descriptions-item label="Gesamtmenge:">
-          {{ notifyInfo?.arrivedCount }}</n-descriptions-item
+          {{ outboundInfo?.outCount }}</n-descriptions-item
         >
         <n-descriptions-item label="Name des Kunden:">
-          {{ notifyInfo?.customerId }}</n-descriptions-item
+          {{ outboundInfo?.customerId }}</n-descriptions-item
         >
-        <n-descriptions-item label="Ankunftszeit:"> {{ planArriveTime }}</n-descriptions-item>
+        <n-descriptions-item label="Abfahrtszeit:">
+          {{ outboundInfo?.createBookCarTimestamp }}</n-descriptions-item
+        >
       </n-descriptions>
       <n-data-table
         :bordered="false"

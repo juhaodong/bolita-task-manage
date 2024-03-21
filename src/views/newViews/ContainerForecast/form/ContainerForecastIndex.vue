@@ -64,6 +64,9 @@
             it.postcode = currentFBACode.postcode;
           }
         }
+        if (it.outboundMethod === '标准托盘' && it.deliveryMethod === 'FBA卡车派送') {
+          it.changeOrderFiles = '是';
+        }
         if (it.changeOrderFiles === '是') {
           it.inStatus = InBoundDetailStatus.WaitSubmit;
         } else {

@@ -7,7 +7,6 @@ import {
 } from '@/api/dataLayer/modules/notify/notify-api';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { asyncFBACode, generateOptionFromArray } from '@/store/utils/utils';
-import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 import { statusColumnEasy } from '@/views/bolita-views/composable/useableColumns';
 import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
 import { deliveryMethod } from '@/api/dataLayer/modules/deliveryMethod';
@@ -20,10 +19,6 @@ import {
 } from '@/api/dataLayer/modules/deliveryMethod/detail';
 
 export const columns: DataTableColumns<any> = [
-  {
-    type: 'selection',
-    disabled: (row) => row.needCar === '0' || row.carStatus === CarStatus.Booked,
-  },
   {
     title: 'ID',
     key: 'id',
@@ -74,12 +69,12 @@ export const columns: DataTableColumns<any> = [
   }),
   {
     title: '操作人',
-    key: 'unloadPerson',
+    key: 'outOperatePerson',
   },
-  {
-    title: '备注',
-    key: 'operationRequirement',
-  },
+  // {
+  //   title: '备注',
+  //   key: 'operationRequirement',
+  // },
 ];
 
 export const filters: FormField[] = [

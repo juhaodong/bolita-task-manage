@@ -124,8 +124,8 @@
       };
       editInfo.instorageTrayNum = listElement.arrivedTrayNumEdit ?? 0;
       editInfo.instorageContainerNum = listElement.arrivedContainerNumEdit ?? 0;
-      editInfo.inStatus = newInStatus;
-      editInfo.arriveTime = dayjs().valueOf();
+      editInfo.inStatus = listElement.outboundMethod === '存仓' ? '存仓' : newInStatus;
+      editInfo.arriveTime = dayjs().format('YYYY-MM-DD');
       const res = await NotifyDetailManager.edit(editInfo, listElement.id);
       if (res.code != ResultEnum.SUCCESS) {
         toastError(res.message);

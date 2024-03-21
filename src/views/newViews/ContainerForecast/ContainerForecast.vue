@@ -158,7 +158,7 @@
       (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
     );
     console.log(res, 'res');
-    return res.sort(dateCompare('createTimestamp'));
+    return res.sort(dateCompare('planArriveDateTime'));
   };
 
   const actionRef = ref();
@@ -208,7 +208,6 @@
               startEdit(record.id);
             },
           },
-          fileAction('CMR', 'CMRFiles'),
           fileAction('上传卸柜单', 'unloadingFile'),
           {
             label: '生成卸柜单',

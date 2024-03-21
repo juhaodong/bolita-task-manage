@@ -1,0 +1,223 @@
+<script lang="ts" setup>
+  import { computed, watchEffect } from 'vue';
+  import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import {
+    getDetailListById,
+    NotifyDetailManager,
+  } from '@/api/dataLayer/modules/notify/notify-detail';
+  import { safeParseInt, safeSumInt, toastError, toastSuccess } from '@/store/utils/utils';
+  import { timeDisplay, timeDisplayYMD } from '@/views/bolita-views/composable/useableColumns';
+  import { ResultEnum } from '@/store/enums/httpEnum';
+  import dayjs from 'dayjs';
+  import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
+  import { usePermission } from '@/hooks/web/usePermission';
+  import { useUserStore } from '@/store/modules/user';
+  import { $ref } from 'vue/macros';
+  import { updateOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+
+  interface Props {
+    outboundInfo: [];
+    id: [];
+  }
+
+  const { hasPermission } = usePermission();
+
+  const userInfo = $computed(() => {
+    return useUserStore()?.info;
+  });
+
+  const props = defineProps<Props>();
+  let currentTaskList: any[] = $ref([]);
+  let currentOutBoundInfo = $ref([]);
+
+  const emit = defineEmits(['close', 'refresh', 'save']);
+  watchEffect(async () => {
+    await reload();
+  });
+
+  const totalContainerCount = computed(() => {
+    return currentTaskList.reduce((sum, i) => sum + safeParseInt(i?.arrivedContainerNum), 0);
+  });
+
+  const totalTrayCount = computed(() => {
+    return currentTaskList.reduce((sum, i) => sum + safeParseInt(i?.arrivedTrayNum), 0);
+  });
+  const totalOutContainerCount = computed(() => {
+    return safeSumInt(currentTaskList, 'outContainerNumEdit') ?? 0;
+  });
+  const totalOutTrayCount = computed(() => {
+    return safeSumInt(currentTaskList, 'outTrayNumEdit') ?? 0;
+  });
+
+  async function reload() {
+    if (props.id != null) {
+      currentOutBoundInfo = props.outboundInfo;
+      currentTaskList = await getDetailListById(props.id);
+      outOperatePerson = currentOutBoundInfo?.outOperatePerson ?? '';
+      loadAll();
+    }
+  }
+
+  let outOperatePerson: string = $ref('');
+  let currentDate: any = $ref(null);
+  let totalTime: string = $ref('');
+
+  function allOut() {
+    currentTaskList.forEach((it) => {
+      it.outTrayNumEdit = it.arrivedTrayNum ?? 0;
+      it.outContainerNumEdit = it.arrivedContainerNum ?? 0;
+    });
+  }
+
+  function loadAll() {
+    currentTaskList.forEach((it, index) => {
+      currentTaskList[index].outTrayNumEdit = it.outTrayNum == 0 ? '' : it.outTrayNum;
+      currentTaskList[index].outContainerNumEdit =
+        it.outContainerNum == 0 ? '' : it.outContainerNum;
+    });
+  }
+
+  let loading: boolean = $ref(false);
+
+  async function confirm() {
+    loading = true;
+    const newInStatus = OutStatus.All;
+    for (const listElement of currentTaskList) {
+      const editInfo: any = {
+        outTrayNum: listElement?.outTrayNumEdit ?? 0,
+        outContainerNum: listElement?.outContainerNumEdit ?? 0,
+      };
+      editInfo.inStatus = newInStatus;
+      editInfo.OutBoundTime = dayjs().valueOf();
+      const res = await NotifyDetailManager.edit(editInfo, listElement.id);
+      if (res.code != ResultEnum.SUCCESS) {
+        toastError(res.message);
+        break;
+      }
+    }
+    await updateOutboundForecast(props.outboundInfo?.id, {
+      outCount: totalOutTrayCount.value + '托' + totalOutContainerCount.value + '箱',
+      inStatus: newInStatus,
+      trayOutCount: totalOutTrayCount.value,
+      containerOutCount: totalOutContainerCount.value,
+      outOperatePerson: outOperatePerson,
+      currentOutDate: currentDate ?? dayjs().format('YYYY-MM-DD'),
+      outTotalTime: totalTime ?? '',
+    });
+    toastSuccess('success');
+    emit('save');
+    loading = false;
+  }
+
+  async function save() {
+    loading = true;
+    for (const listElement of currentTaskList) {
+      if (
+        listElement.outTrayNumEdit != listElement.outTrayNum ||
+        listElement.outContainerNumEdit != listElement.outContainerNum
+      ) {
+        const editInfo: any = {
+          outTrayNum: listElement?.outTrayNumEdit ?? 0,
+          outContainerNum: listElement?.outContainerNumEdit ?? 0,
+        };
+        const res = await NotifyDetailManager.edit(editInfo, listElement.id);
+        if (res.code != ResultEnum.SUCCESS) {
+          toastError(res.message);
+          break;
+        }
+      }
+    }
+    const newInStatus = OutStatus.Wait;
+    await updateOutboundForecast(props.outboundInfo?.id, {
+      outCount: totalOutTrayCount.value + '托' + totalOutContainerCount.value + '箱',
+      inStatus: newInStatus,
+      outOperatePerson: outOperatePerson,
+      currentOutDate: currentDate ?? dayjs().format('YYYY-MM-DD'),
+      outTotalTime: totalTime ?? '',
+    });
+    toastSuccess('sucees');
+    emit('save');
+    loading = false;
+  }
+</script>
+
+<template>
+  <div id="print" class="mt-8">
+    <loading-frame :loading="loading">
+      <n-descriptions v-if="currentOutBoundInfo" :columns="2" bordered label-placement="left">
+        <n-descriptions-item label="Ref."> {{ currentOutBoundInfo.REF }} </n-descriptions-item>
+        <n-descriptions-item label="预报总数">
+          {{ currentOutBoundInfo?.containerNum }}</n-descriptions-item
+        >
+        <n-descriptions-item label="预约日期时间">
+          {{ timeDisplay(currentOutBoundInfo?.pickUpDateTime) }}
+        </n-descriptions-item>
+        <n-descriptions-item label="装柜时长">
+          <n-input v-model:value="totalTime" :placeholder="currentOutBoundInfo?.outTotalTime" />
+        </n-descriptions-item>
+        <n-descriptions-item label="实际卸柜日期">
+          <n-date-picker
+            v-model:value="currentDate"
+            :placeholder="timeDisplayYMD(currentOutBoundInfo?.currentOutDate)"
+            type="date"
+          />
+        </n-descriptions-item>
+      </n-descriptions>
+      <div class="mt-4 noMaxHeight" style="max-height: 800px; overflow-y: scroll">
+        <n-table :single-line="false" class="mt-4">
+          <thead>
+            <tr>
+              <th>票号</th>
+              <th>预报 托</th>
+              <th>预报 箱</th>
+              <th style="width: 100px">出库 托</th>
+              <th style="width: 100px">出库 箱</th>
+            </tr>
+          </thead>
+          <tbody v-if="currentTaskList">
+            <tr v-for="item in currentTaskList" :key="item.id">
+              <td>{{ item?.ticketId }}</td>
+              <td>{{ item?.arrivedTrayNum ?? 0 }}</td>
+              <td>{{ item?.arrivedContainerNum ?? 0 }}</td>
+              <td>
+                <n-input v-model:value="item.outTrayNumEdit" placeholder="" />
+              </td>
+              <td>
+                <n-input v-model:value="item.outContainerNumEdit" placeholder="" />
+              </td>
+            </tr>
+          </tbody>
+        </n-table>
+      </div>
+      <div class="mt-4">
+        <table>
+          <tr class="!bg-gray-100" style="height: 32px">
+            <td>总计</td>
+            <td>预报 {{ totalContainerCount }} 箱</td>
+            <td>预报 {{ totalTrayCount }} 托 </td>
+            <td>出库 {{ totalOutContainerCount }} 箱</td>
+            <td>出库 {{ totalOutTrayCount }} 托 </td>
+          </tr>
+        </table>
+      </div>
+      <n-space v-if="currentOutBoundInfo" :wrap-item="false" class="mt-4">
+        <n-button secondary @click="allOut">全部到齐</n-button>
+        <div class="flex-grow"></div>
+        <div>
+          <n-input v-model:value="outOperatePerson" placeholder="装柜人员" />
+        </div>
+        <n-button secondary type="warning" @click="save">保存 </n-button>
+        <n-button type="primary" @click="confirm">确认出库 </n-button>
+      </n-space>
+    </loading-frame>
+  </div>
+</template>
+
+<style lang="less" scoped>
+  @media print {
+    .noMaxHeight {
+      max-height: unset !important;
+      overflow: hidden;
+    }
+  }
+</style>

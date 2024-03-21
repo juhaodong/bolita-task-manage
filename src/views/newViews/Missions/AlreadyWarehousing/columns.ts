@@ -54,11 +54,11 @@ export const columns: DataTableColumns<any> = [
     key: 'deliveryIdIn',
   },
   {
-    title: '基础备注',
+    title: '客户备注',
     key: 'normalNote',
   },
   {
-    title: 'FBA/快递单号',
+    title: 'FBA单号',
     key: 'FBADeliveryCode',
   },
   {
@@ -174,7 +174,25 @@ export const columns: DataTableColumns<any> = [
   },
 ];
 
+const allInStatusList = [
+  '待审核',
+  '未入库',
+  '全部入库',
+  '已计划出库',
+  '全部出库',
+  '存仓',
+  '已订车',
+];
+
 export const filters: FormField[] = [
+  {
+    label: '状态',
+    field: 'inStatus',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(allInStatusList),
+    },
+  },
   {
     label: '结算状态',
     field: 'finalStatus',
