@@ -228,13 +228,12 @@
     }
     allList.forEach((it) => {
       const today = dayjs().format('YYYY-MM-DD');
-      if (it.inStatus === '全部出库') {
+      if (it.inStatus === '全部出库' || it.inStatus === '等待审核' || it.inStatus === '等待入库') {
         it.stayTime = '-';
       } else {
         it.stayTime = dayjs(today).diff(it.arriveTime, 'day') + 1;
       }
     });
-    console.log(allList, 'list');
     return allList.sort(dateCompare('createTimestamp'));
   };
 
