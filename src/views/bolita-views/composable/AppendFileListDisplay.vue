@@ -1,12 +1,11 @@
 <script lang="ts" setup>
   import { getFileNameAndTypeForFirebaseLink } from '@/store/utils/utils';
-  import { FileTextOutlined, LinkOutlined } from '@vicons/antd';
+  import { DeleteOutlined, FileTextOutlined, LinkOutlined } from '@vicons/antd';
   import { downloadFile } from '@/store/plugins/firebase';
 
   const emit = defineEmits(['deleteFile']);
 
   function deleteFile(files) {
-    console.log(files, 'files');
     emit('deleteFile', files);
   }
 
@@ -33,7 +32,7 @@
           <n-button :disabled="disableClick" icon-placement="right" @click="deleteFile(f)"
             >删除
             <template #icon>
-              <n-icon> <link-outlined /> </n-icon>
+              <n-icon> <delete-outlined /> </n-icon>
             </template>
           </n-button>
         </div>
