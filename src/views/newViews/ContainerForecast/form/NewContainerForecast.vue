@@ -59,8 +59,6 @@
 
   const emit = defineEmits(['submit', 'closed']);
   async function handleSubmit(values: any) {
-    console.log(values);
-    console.log(prop?.model?.id, 'prop?.model?.id');
     await safeScope(async () => {
       if (prop?.model?.id) {
         await NotifyManager.editInternal(values, prop.model.id);

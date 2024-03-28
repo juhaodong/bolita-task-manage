@@ -33,7 +33,7 @@
               ref="actionRef"
               v-model:checked-row-keys="checkedRows"
               :action-column="typeMission === '货柜对账' ? actionColumn : actionColumnContainer"
-              :columns="typeMission === '货柜对账' ? columns : columnsContainer"
+              :columns="typeMission === '货柜对账' ? columns : downProductsColumns"
               :request="loadDataTable"
               :row-key="(row) => row.id"
             />
@@ -51,25 +51,216 @@
     >
       <new-reconciliation :model="currentModel" :type-mission="typeMission" @saved="reloadTable" />
     </n-modal>
+    <n-modal
+      v-model:show="showDetailInfoDialog"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 800px; max-width: 800px"
+      title="查看详情"
+    >
+      <show-container-detail-dialog :ids="currentIds" />
+    </n-modal>
+    <n-modal
+      v-model:show="showDownProductsDetailInfoDialog"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 800px; max-width: 800px"
+      title="查看详情"
+    >
+      <show-down-products-detail-dialog :ids="currentIds" />
+    </n-modal>
   </n-card>
 </template>
 
 <script lang="ts" setup>
   import { Component, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { columns, columnsContainer, filters } from './columns';
+  import { filters } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import { FinanceContainerManager, FinanceManager } from '@/api/dataLayer/modules/cash/cash';
   import NewReconciliation from '@/views/newViews/ReconciliationManage/NewReconciliation.vue';
-  import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
+  import {
+    getFileActionButton,
+    statusColumnEasy,
+    timeColumn,
+  } from '@/views/bolita-views/composable/useableColumns';
   import { Folder32Filled } from '@vicons/fluent';
   import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
+  import { NButton } from 'naive-ui';
+  import ShowContainerDetailDialog from '@/views/newViews/ReconciliationManage/ShowContainerDetailDialog.vue';
+  import ShowDownProductsDetailDialog from '@/views/newViews/ReconciliationManage/ShowDownProductsDetailDialog.vue';
 
   interface Prop {
     outId?: string;
   }
+  let currentIds = $ref([]);
+  let showDetailInfoDialog = $ref(false);
+  let showDownProductsDetailInfoDialog = $ref(false);
+
+  const columns = [
+    {
+      title: '财务ID',
+      key: 'id',
+    },
+    {
+      title: '客户ID',
+      key: 'customerName',
+    },
+    {
+      title: '详情',
+      key: 'actions',
+      render(row) {
+        return h(
+          NButton,
+          {
+            strong: true,
+            tertiary: true,
+            size: 'small',
+            onClick: () => {
+              currentIds = row.detailInfo;
+              showDetailInfoDialog = true;
+              console.log(currentIds, 'currentIds');
+            },
+          },
+          { default: () => '查看' }
+        );
+      },
+    },
+    timeColumn(),
+    {
+      title: '本系统结算金额',
+      key: 'systemSettlementPrice',
+    },
+    // {
+    //   title: '附件',
+    //   key: 'files',
+    // },
+    {
+      title: '其他系统结算',
+      key: 'otherSystemSettlement',
+    },
+    {
+      title: '操作费',
+      key: 'operateTotal',
+    },
+    {
+      title: '特殊操作费',
+      key: 'specialOperateTotal',
+    },
+    {
+      title: '入库费',
+      key: 'inboundTotal',
+    },
+    {
+      title: '耗材费',
+      key: 'consumablesTotal',
+    },
+    {
+      title: '物流费',
+      key: 'deliveryTotal',
+    },
+    {
+      title: '出库费',
+      key: 'outboundTotal',
+    },
+    {
+      title: '合计netto',
+      key: 'totalPrice',
+    },
+    {
+      title: '发票金额/RMB',
+      key: 'RMBPrice',
+    },
+    {
+      title: '发票金额/EUR',
+      key: 'EURPrice',
+    },
+    {
+      title: '发票号',
+      key: 'invoiceNumber',
+    },
+    statusColumnEasy({
+      title: '回款情况',
+      key: 'collectionStatus',
+    }),
+    {
+      title: '备注',
+      key: 'note',
+    },
+  ];
+  const downProductsColumns = [
+    {
+      title: '财务ID',
+      key: 'id',
+    },
+    {
+      title: '详情',
+      key: 'actions',
+      render(row) {
+        return h(
+          NButton,
+          {
+            strong: true,
+            tertiary: true,
+            size: 'small',
+            onClick: () => {
+              console.log(row, 'row');
+              currentIds = row.id;
+              showDownProductsDetailInfoDialog = true;
+            },
+          },
+          { default: () => '查看' }
+        );
+      },
+    },
+    {
+      title: '客户ID',
+      key: 'customerName',
+    },
+    timeColumn(),
+    {
+      title: '本系统结算金额',
+      key: 'systemSettlementPrice',
+    },
+    {
+      title: '其他系统结算',
+      key: 'otherSystemSettlement',
+    },
+    {
+      title: '卸柜费',
+      key: 'unloadingCabinetsTotal',
+    },
+    {
+      title: '其他费',
+      key: 'otherPriceTotal',
+    },
+    {
+      title: '合计netto',
+      key: 'subTotal',
+    },
+    {
+      title: '发票金额/RMB',
+      key: 'RMBPrice',
+    },
+    {
+      title: '发票金额/EUR',
+      key: 'EURPrice',
+    },
+    {
+      title: '发票号',
+      key: 'invoiceNumber',
+    },
+    statusColumnEasy({
+      title: '回款情况',
+      key: 'collectionStatus',
+    }),
+    {
+      title: '备注',
+      key: 'note',
+    },
+  ];
 
   let finished = $ref(false);
   const props = defineProps<Prop>();

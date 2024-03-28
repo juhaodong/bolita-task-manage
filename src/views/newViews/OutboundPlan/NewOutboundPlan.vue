@@ -289,6 +289,10 @@
       label: '柜号',
       field: 'containerId',
     },
+    {
+      label: '票号',
+      field: 'ticketId',
+    },
     asyncFCAddress(),
     {
       label: '物流方式',

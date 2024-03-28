@@ -186,9 +186,8 @@
         const deliveryTotal = safeSumBy(currentList, 'deliveryTotal');
         const outboundTotal = safeSumBy(currentList, 'outboundTotal');
         const totalPrice = safeSumBy(currentList, 'totalPrice');
-        console.log(currentList, 'currentList');
         const id = await FinanceManager.addInternal({
-          detailInfo: currentList,
+          detailInfo: currentList.map((it) => it.id),
           operateTotal: operateTotal,
           specialOperateTotal: specialOperateTotal,
           inboundTotal: inboundTotal,
@@ -212,7 +211,7 @@
         const otherPriceTotal = safeSumBy(currentList, 'otherPrice');
         const subTotal = safeSumBy(currentList, 'subtotal');
         const id = await FinanceContainerManager.addInternal({
-          detailInfo: currentList,
+          detailInfo: currentList.map((it) => it.id),
           unloadingCabinetsTotal: unloadingCabinetsTotal,
           otherPriceTotal: otherPriceTotal,
           subTotal: subTotal,

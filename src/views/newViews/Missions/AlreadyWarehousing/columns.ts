@@ -189,6 +189,10 @@ const allInStatusList = [
   '存仓',
 ];
 
+export const allOutboundMethod = ['散货', '存仓', '大件托盘', '标准托盘'];
+
+export const allDeliveryMethod = ['FBA卡车派送', 'DHL', 'DPD', 'UPS', 'GLS', '其他'];
+
 export const filters: FormField[] = [
   {
     label: '状态',

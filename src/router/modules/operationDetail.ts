@@ -19,9 +19,17 @@ const routes: Array<RouteRecordRaw> = [
         path: 'Operation',
         name: `Operation`,
         meta: {
-          title: '操作明细',
+          title: '出库任务看板',
         },
         component: () => import('@/views/newViews/OperationDetail/NotOutbound/WaitOperation.vue'),
+      },
+      {
+        path: 'InventoryView',
+        name: `InventoryView`,
+        meta: {
+          title: '库内操作看板',
+        },
+        component: () => import('@/views/newViews/OperationDetail/NotOutbound/InventoryView.vue'),
       },
     ],
   },

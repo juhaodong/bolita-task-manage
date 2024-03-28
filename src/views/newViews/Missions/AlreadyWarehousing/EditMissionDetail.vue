@@ -10,6 +10,11 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
+  import { generateOptionFromArray } from '@/store/utils/utils';
+  import {
+    allDeliveryMethod,
+    allOutboundMethod,
+  } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
 
   interface Props {
     model?: any;
@@ -68,12 +73,18 @@
     {
       label: '出库方式',
       field: 'outboundMethod',
-      required: false,
+      component: 'NSelect',
+      componentProps: {
+        options: generateOptionFromArray(allOutboundMethod),
+      },
     },
     {
       label: '物流渠道',
       field: 'deliveryMethod',
-      required: false,
+      component: 'NSelect',
+      componentProps: {
+        options: generateOptionFromArray(allDeliveryMethod),
+      },
     },
     {
       label: 'PO',

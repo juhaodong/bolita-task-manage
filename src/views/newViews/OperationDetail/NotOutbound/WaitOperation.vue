@@ -11,37 +11,21 @@
       </n-button>
     </filter-bar>
     <div class="my-2"></div>
-    <n-tabs
-      v-model:value="typeMission"
-      animated
-      class="card-tabs"
-      pane-style="padding-left: 4px; padding-right: 4px; box-sizing: border-box;"
-      pane-wrapper-style="margin: 0 -4px"
-      size="large"
-    >
+    <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
       <n-tab-pane
-        v-for="currentType in typeTab"
-        :key="currentType"
-        :name="currentType"
-        :tab="currentType"
+        v-for="currentMonth in monthTab"
+        :key="currentMonth"
+        :name="currentMonth"
+        :tab="currentMonth"
       >
-        <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
-          <n-tab-pane
-            v-for="currentMonth in monthTab"
-            :key="currentMonth"
-            :name="currentMonth"
-            :tab="currentMonth"
-          >
-            <BasicTable
-              ref="actionRef"
-              v-model:checked-row-keys="checkedRows"
-              :actionColumn="actionColumn"
-              :columns="currentColumns"
-              :request="loadDataTable"
-              :row-key="(row) => row.id"
-            />
-          </n-tab-pane>
-        </n-tabs>
+        <BasicTable
+          ref="actionRef"
+          v-model:checked-row-keys="checkedRows"
+          :actionColumn="actionColumn"
+          :columns="currentColumns"
+          :request="loadDataTable"
+          :row-key="(row) => row.id"
+        />
       </n-tab-pane>
     </n-tabs>
     <n-modal
@@ -301,13 +285,9 @@
     let allList = (await getOutboundForecast()).filter(
       (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
     );
-    if (typeMission === '出库任务看板') {
-      currentList = allList.filter(
-        (a) => a.carStatus !== CarStatus.UnAble || a.carStatus !== CarStatus.Interception
-      );
-    } else if (typeMission === '库内操作看板') {
-      currentList = allList.filter((a) => a.carStatus === CarStatus.Interception);
-    }
+    currentList = allList.filter(
+      (a) => a.carStatus !== CarStatus.UnAble || a.carStatus !== CarStatus.Interception
+    );
     console.log(currentList, 'list');
     return currentList.sort(dateCompare('createTimestamp'));
   };

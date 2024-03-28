@@ -11,7 +11,7 @@ export const columnsIn: DataTableColumns = [
       return (
         row?.finalStatus === '已对账' ||
         row?.finalStatus === '待确认' ||
-        row.containerFinalStatus === '已对账'
+        row.containerFinalStatus !== '已结算'
       );
     },
   },

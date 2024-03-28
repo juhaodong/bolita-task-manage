@@ -56,7 +56,11 @@
           keys
         );
         it.uploadFileTime = dayjs().format('YYYY-MM-DD');
-        if (it.outboundMethod !== '存仓') {
+        if (
+          it.outboundMethod !== '存仓' ||
+          it.deliveryMethod === 'FBA卡车派送' ||
+          it.deliveryMethod === '其他'
+        ) {
           if (!it.FCAddress) {
             errorMessage.push({ index: index + 4, detail: 'FC/送货地址' });
           }

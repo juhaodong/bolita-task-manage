@@ -3,6 +3,7 @@ import { NotifyManager, OutStatus } from '@/api/dataLayer/modules/notify/notify-
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 import { taskListPath } from '@/api/dataLayer/modules/notify/path';
 import { chunk } from 'lodash-es';
+import { CashManager } from '@/api/dataLayer/modules/cash/cash';
 
 export async function getNotifyDetailListByNotify(id) {
   return await NotifyDetailManager.load(null, where('notifyId', '==', id));
@@ -47,4 +48,8 @@ export async function getDetailListById(ids) {
     currentTaskList.push(result);
   }
   return currentTaskList.flat();
+}
+
+export async function getDownProductsDetailListById(ids) {
+  return await CashManager.load(null, where('financeContainerId', '==', ids));
 }
