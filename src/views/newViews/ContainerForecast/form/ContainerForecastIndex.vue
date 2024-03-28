@@ -56,12 +56,17 @@
           keys
         );
         it.uploadFileTime = dayjs().format('YYYY-MM-DD');
-        if (!it.postcode) {
-          const currentFBACode = allFBACodeList.find((b) => b.code === it.FCAddress);
-          if (!currentFBACode) {
-            errorMessage.push({ index: index + 4, detail: 'FBACode错误' });
-          } else {
-            it.postcode = currentFBACode.postcode;
+        if (it.outboundMethod !== '存仓') {
+          if (!it.FCAddress) {
+            errorMessage.push({ index: index + 4, detail: 'FC/送货地址' });
+          }
+          if (!it.postcode) {
+            const currentFBACode = allFBACodeList.find((b) => b.code === it.FCAddress);
+            if (!currentFBACode) {
+              errorMessage.push({ index: index + 4, detail: 'FC/送货地址' });
+            } else {
+              it.postcode = currentFBACode.postcode;
+            }
           }
         }
         if (it.outboundMethod === '标准托盘' && it.deliveryMethod === 'FBA卡车派送') {

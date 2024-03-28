@@ -62,12 +62,12 @@
   }
 
   async function downloadUnloadingFile() {
-    let headerTitle = ['Container Nr,Name des Kunden,Gesamtmenge,Ankunftszeit'];
+    let headerTitle = ['Ref,Name des Kunden,Gesamtmenge,Ankunftszeit'];
     let headerDate = [
-      outboundInfo?.containerNo,
+      outboundInfo?.REF,
       outboundInfo?.customerId,
-      outboundInfo?.arrivedCount,
-      planArriveTime.value,
+      outboundInfo?.containerNum,
+      outboundInfo?.createBookCarTimestamp,
     ];
     let dataStrings = ['Kenzeichen,FBA,Menge,R/F,Pal Menge,Pal Type,adresse,Anmerkung'];
     dataStrings.unshift(headerDate);
@@ -113,7 +113,7 @@
           {{ outboundInfo?.REF }}
         </n-descriptions-item>
         <n-descriptions-item label="Gesamtmenge:">
-          {{ outboundInfo?.outCount }}</n-descriptions-item
+          {{ outboundInfo?.containerNum }}</n-descriptions-item
         >
         <n-descriptions-item label="Name des Kunden:">
           {{ outboundInfo?.customerId }}</n-descriptions-item

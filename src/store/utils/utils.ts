@@ -84,6 +84,22 @@ export async function asyncCustomer(): Promise<FormField> {
   };
 }
 
+export async function asyncCustomerId(): Promise<FormField> {
+  const customerList = await CustomerManager.load();
+  const list = customerList.map((it) => ({
+    label: it.customerName,
+    value: it.customerId,
+  }));
+  return {
+    field: 'customerId',
+    label: '客户',
+    component: 'NSelect',
+    componentProps: {
+      options: list,
+    },
+  };
+}
+
 export function toastError(message: string) {
   const $message = window['$message'];
   $message.error(message);

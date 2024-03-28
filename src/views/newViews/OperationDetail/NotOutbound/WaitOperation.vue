@@ -413,6 +413,7 @@
                 const obj = {};
                 obj['CMRFiles'] = files.files;
                 obj['inStatus'] = OutStatus.All;
+                obj['realOutDate'] = dayjs().format('YYYY-MM-DD');
                 await updateOutboundForecast(record.id, obj);
                 const taskList = await getDetailListById(record.outboundDetailInfo);
                 for (const task of taskList) {
@@ -426,7 +427,7 @@
             },
           },
           {
-            label: '装车单',
+            label: '装车',
             onClick() {
               currentInfo = record;
               currentId = record?.outboundDetailInfo;

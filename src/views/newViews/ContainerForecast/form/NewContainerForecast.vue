@@ -18,6 +18,7 @@
   const prop = defineProps<Props>();
 
   const schemas: FormFields = [
+    // asyncCustomerId(),
     {
       field: 'containerNo',
       label: '货柜号',

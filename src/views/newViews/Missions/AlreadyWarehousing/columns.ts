@@ -180,12 +180,13 @@ export const columns: DataTableColumns<any> = [
 
 const allInStatusList = [
   '待审核',
-  '未入库',
+  '等待入库',
   '全部入库',
   '已计划出库',
+  '已订车',
+  '已装车',
   '全部出库',
   '存仓',
-  '已订车',
 ];
 
 export const filters: FormField[] = [

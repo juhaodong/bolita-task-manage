@@ -81,7 +81,7 @@
 
   async function confirm() {
     loading = true;
-    const newInStatus = OutStatus.All;
+    const newInStatus = OutStatus.uploadCar;
     for (const listElement of currentTaskList) {
       const editInfo: any = {
         outTrayNum: listElement?.outTrayNumEdit ?? 0,
@@ -155,7 +155,7 @@
         <n-descriptions-item label="装柜时长">
           <n-input v-model:value="totalTime" :placeholder="currentOutBoundInfo?.outTotalTime" />
         </n-descriptions-item>
-        <n-descriptions-item label="实际卸柜日期">
+        <n-descriptions-item label="实际装柜日期">
           <n-date-picker
             v-model:value="currentDate"
             :placeholder="timeDisplayYMD(currentOutBoundInfo?.currentOutDate)"
@@ -201,7 +201,7 @@
         </table>
       </div>
       <n-space v-if="currentOutBoundInfo" :wrap-item="false" class="mt-4">
-        <n-button secondary @click="allOut">全部到齐</n-button>
+        <n-button secondary @click="allOut">全部装柜</n-button>
         <div class="flex-grow"></div>
         <div>
           <n-input v-model:value="outOperatePerson" placeholder="装柜人员" />

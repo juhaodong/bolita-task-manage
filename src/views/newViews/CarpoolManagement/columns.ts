@@ -3,6 +3,8 @@ import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/us
 import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
 import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
+import { generateOptionFromArray } from '@/store/utils/utils';
+import { reservationTimeList } from '@/views/newViews/ContainerForecast/columns';
 
 export const columns: DataTableColumns<CarpoolManagementModel> = [
   {
@@ -190,6 +192,11 @@ export const schemas: FormField[] = [
   {
     field: 'reservationGetProductDetailTime',
     label: '取货时间',
+    component: 'NSelect',
+    defaultValue: '',
+    componentProps: {
+      options: generateOptionFromArray(reservationTimeList),
+    },
   },
   {
     field: 'note',

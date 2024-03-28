@@ -60,6 +60,7 @@ export enum OutStatus {
   Wait = '等待出库',
   Cancel = '取消',
   Transfer = '转其他系统',
+  uploadCar = '已装车',
   Stay = '留仓',
 }
 

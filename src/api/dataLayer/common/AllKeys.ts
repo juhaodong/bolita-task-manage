@@ -27,14 +27,14 @@ export const allKeysList = [
     label: 'FBA单号',
     field: 'FBADeliveryCode',
   },
-  {
-    label: 'PO',
-    field: 'PO',
-  },
-  {
-    label: 'FC/送货地址',
-    field: 'FCAddress',
-  },
+  // {
+  //   label: 'PO',
+  //   field: 'PO',
+  // },
+  // {
+  //   label: 'FC/送货地址',
+  //   field: 'FCAddress',
+  // },
   {
     label: '出库方式',
     field: 'outboundMethod',
