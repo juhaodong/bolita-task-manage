@@ -8,7 +8,11 @@ export const columnsIn: DataTableColumns = [
   {
     type: 'selection',
     disabled(row: any) {
-      return row?.finalStatus === '已对账' || row?.finalStatus === '待确认';
+      return (
+        row?.finalStatus === '已对账' ||
+        row?.finalStatus === '待确认' ||
+        row.containerFinalStatus === '已对账'
+      );
     },
   },
   {
