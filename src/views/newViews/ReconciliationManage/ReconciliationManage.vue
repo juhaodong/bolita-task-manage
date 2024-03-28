@@ -47,7 +47,7 @@
       :show-icon="false"
       preset="card"
       style="width: 90%; min-width: 600px; max-width: 600px"
-      title="新建/编辑用户"
+      title="对账管理"
     >
       <new-reconciliation :model="currentModel" :type-mission="typeMission" @saved="reloadTable" />
     </n-modal>

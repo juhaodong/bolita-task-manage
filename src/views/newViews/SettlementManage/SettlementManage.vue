@@ -66,7 +66,7 @@
       :show-icon="false"
       preset="card"
       style="width: 90%; min-width: 600px; max-width: 600px"
-      title="新建/编辑用户"
+      title="结算管理"
     >
       <new-settlement :model="currentModel" @saved="reloadTable" />
     </n-modal>
