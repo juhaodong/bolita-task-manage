@@ -255,7 +255,6 @@
               }
             },
             onClick() {
-              console.log(record.id);
               currentNotifyId = record.id!;
               showFeeDialog = true;
             },

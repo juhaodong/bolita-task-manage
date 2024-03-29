@@ -10,7 +10,7 @@ import {
   OutboundForecast,
   OutWareHouse,
 } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
-import { SettlementManage } from '@/api/dataLayer/common/SettlementType';
+import { SettlementManagePath } from '@/api/dataLayer/common/SettlementType';
 
 export async function clearAllData() {
   const path = [
@@ -25,7 +25,7 @@ export async function clearAllData() {
     OutboundForecast,
     OutWareHouse,
     financeContainerPath,
-    SettlementManage,
+    SettlementManagePath,
   ];
   for (const collectionName of path) {
     const ref = collection(db, collectionName);
