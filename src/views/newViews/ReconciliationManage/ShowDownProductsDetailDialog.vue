@@ -3,6 +3,7 @@
   import { onMounted } from 'vue';
   import { getDownProductsDetailListById } from '@/api/dataLayer/modules/notify/notify-detail';
   import { $ref } from 'vue/macros';
+  import FileSaver from 'file-saver';
 
   interface Props {
     ids: [];
@@ -13,6 +14,16 @@
   async function reload() {
     currentItems = await getDownProductsDetailListById(props.ids);
     console.log(currentItems, 'items');
+  }
+  function downloadFiles() {
+    let dataStrings = ['柜号,卸柜费,其他费,总计'];
+    currentItems.forEach((it) => {
+      const res = [it.containerNo, it.amount, it.otherPrice, it.subtotal];
+      dataStrings.push(res.join());
+    });
+    dataStrings = dataStrings.join('\n');
+    const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
+    FileSaver.saveAs(blob, currentItems[0].financeContainerId + '.csv');
   }
   onMounted(async () => {
     await reload();
@@ -33,6 +44,7 @@
           <n-descriptions-item label="其他费"> {{ item?.otherPrice }} </n-descriptions-item>
         </n-descriptions>
       </div>
+      <n-button class="mt-2" @click="downloadFiles">下载</n-button>
     </loading-frame>
   </div>
 </template>
