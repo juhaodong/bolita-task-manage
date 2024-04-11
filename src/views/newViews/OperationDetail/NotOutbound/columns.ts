@@ -1,10 +1,5 @@
 import { DataTableColumns } from 'naive-ui';
-import {
-  InBoundStatus,
-  notifyType,
-  OutAllStatus,
-  OutStatus,
-} from '@/api/dataLayer/modules/notify/notify-api';
+import { InBoundStatus, OutAllStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { asyncFBACode, generateOptionFromArray } from '@/store/utils/utils';
 import { statusColumnEasy } from '@/views/bolita-views/composable/useableColumns';
@@ -79,23 +74,7 @@ export const columns: DataTableColumns<any> = [
 
 export const filters: FormField[] = [
   {
-    label: '入库ID',
-    field: 'id',
-  },
-  {
-    label: '客户ID',
-    field: 'customerName',
-  },
-  {
-    label: '业务员',
-    field: 'salesName',
-  },
-  {
-    label: '仓库',
-    field: 'warehouseId',
-  },
-  {
-    label: '入库状态',
+    label: '状态',
     field: 'inStatus',
     component: 'NSelect',
     componentProps: {
@@ -115,38 +94,16 @@ export const filters: FormField[] = [
     },
   },
   {
-    label: '出库状态',
-    field: 'outStatus',
+    label: '过滤项',
+    field: 'filterTitle',
     component: 'NSelect',
     componentProps: {
-      options: generateOptionFromArray(Object.values(OutStatus)),
+      options: generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title)),
     },
   },
   {
-    label: '入库类型',
-    field: 'notifyType',
-    component: 'NSelect',
-    componentProps: {
-      options: generateOptionFromArray(notifyType),
-    },
-  },
-  {
-    field: 'planArriveStartDateTime',
-    component: 'NDatePicker',
-    label: '预计到仓开始时间',
-    componentProps: {
-      type: 'date',
-      clearable: true,
-    },
-  },
-  {
-    field: 'planArriveEndDateTime',
-    component: 'NDatePicker',
-    label: '预计到仓结束时间',
-    componentProps: {
-      type: 'date',
-      clearable: true,
-    },
+    label: '过滤值',
+    field: 'filterKey',
   },
 ];
 

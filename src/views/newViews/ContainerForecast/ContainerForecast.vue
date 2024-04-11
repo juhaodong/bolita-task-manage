@@ -25,6 +25,14 @@
         </template>
         货柜预报填写注意事项
       </n-button>
+      <n-button size="small" type="info" @click="selectedHeader">
+        <template #icon>
+          <n-icon>
+            <Box20Filled />
+          </n-icon>
+        </template>
+        选择表头显示
+      </n-button>
       <n-button size="small" @click="clearAllData()">
         <template #icon>
           <n-icon>
@@ -45,7 +53,7 @@
         <BasicTable
           ref="actionRef"
           :actionColumn="actionColumn"
-          :columns="columns"
+          :columns="currentColumns"
           :request="loadDataTable"
           :row-key="(row) => row.id"
         />
@@ -101,6 +109,19 @@
     >
       <unloading-list @save="reloadTable" :notify-id="currentNotifyId!" />
     </n-modal>
+    <n-modal
+      v-model:show="showCurrentHeaderDataTable"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 800px; max-width: 800px"
+      title="添加表头"
+    >
+      <selected-header-table
+        :all-columns="columns"
+        :type="'containerForecast'"
+        @saved="reloadHeader"
+      />
+    </n-modal>
   </n-card>
 </template>
 
@@ -128,10 +149,12 @@
   import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import UnloadingList from '@/views/newViews/ContainerForecast/form/UnloadingList.vue';
+  import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
+  import { getTableHeader } from '@/api/dataLayer/common/TableHeader';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
   let currentModel: any | null = $ref(null);
-
+  let showCurrentHeaderDataTable = $ref(false);
   const showModal = ref(false);
   let selectedMonth: any | null = $ref('');
   let monthTab: any | null = $ref(null);
@@ -141,6 +164,8 @@
   let showFeeDialog = $ref(false);
   let filterObj: any | null = $ref(null);
   let showUnloadingList = $ref(false);
+  let currentHeader = $ref([]);
+  let currentColumns = $ref([]);
 
   function addTable(type: NotifyType) {
     notifyType = type;
@@ -149,6 +174,7 @@
   }
 
   onMounted(async () => {
+    await reloadHeader();
     monthTab = OneYearMonthTab();
     selectedMonth = monthTab[0];
   });
@@ -164,13 +190,42 @@
   const actionRef = ref();
 
   function updateFilter(value) {
-    filterObj = value;
+    if (value !== null) {
+      let { filterTitle, filterKey, ...NewObj } = value;
+      if (value['filterTitle'] && value['filterKey']) {
+        const res = columns.find((it) => it.title === value['filterTitle']).key;
+        NewObj[res] = value['filterKey'];
+      }
+      filterObj = NewObj;
+    } else {
+      filterObj = null;
+    }
     reloadTable();
+  }
+
+  async function reloadHeader() {
+    currentColumns = [];
+    currentHeader = await getTableHeader('containerForecast');
+    currentHeader.forEach((item) => {
+      const res = columns.find((it) => it.key === item.key);
+      currentColumns.push(res);
+    });
+    const selectionType = columns.find((x) => x.type === 'selection');
+    if (selectionType) {
+      currentColumns.unshift(selectionType);
+    }
+    currentColumns = currentColumns.length > 0 ? currentColumns : columns;
+    showCurrentHeaderDataTable = false;
   }
 
   async function startEdit(id) {
     currentModel = await NotifyManager.getById(id);
     showModal.value = true;
+  }
+
+  async function selectedHeader() {
+    showCurrentHeaderDataTable = true;
+    console.log(columns, 'columns');
   }
 
   function reloadTable() {

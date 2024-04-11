@@ -81,7 +81,7 @@
         '',
         '',
         '',
-        it.postcode,
+        it.Adresse,
         it.Anmerkung,
       ];
       dataStrings.push(res.join());

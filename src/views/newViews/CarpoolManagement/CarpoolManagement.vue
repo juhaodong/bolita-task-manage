@@ -1,7 +1,15 @@
 <template>
   <n-card :bordered="false" class="proCard">
     <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
-      <n-button :disabled="checkedRows.length < 1" type="primary" @click="startShareCar">
+      <n-button :disabled="priceRules" type="primary" @click="startShareCar('offer')">
+        <template #icon>
+          <n-icon>
+            <Box20Filled />
+          </n-icon>
+        </template>
+        报价
+      </n-button>
+      <n-button :disabled="carRules" type="primary" @click="startShareCar('car')">
         <template #icon>
           <n-icon>
             <Box20Filled />
@@ -44,7 +52,11 @@
       style="width: 90%; min-width: 600px; max-width: 600px"
       title="新建订车"
     >
-      <new-carpool-management :merged-out-ids="checkedRows" @saved="saveShareCar" />
+      <new-carpool-management
+        :merged-out-ids="checkedRows"
+        :type-name="typeName"
+        @saved="saveShareCar"
+      />
     </n-modal>
   </n-card>
 </template>
@@ -65,7 +77,6 @@
   import dayjs from 'dayjs';
   import EditOF from '@/views/newViews/OperationDetail/NotOutbound/EditOF.vue';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
-  import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 
   const showModal = ref(false);
 
@@ -77,12 +88,14 @@
   let editOutboundForecast = $ref(false);
   let showShareCarModel = $ref(false);
   let checkedRows = $ref([]);
+  let typeName = $ref('');
   let editId = $ref('');
+  let allList = $ref([]);
   const loadDataTable = async () => {
-    return (await getOutboundForecast())
-      .filter((a) => a.inStatus === CarStatus.UnAble)
+    allList = (await getOutboundForecast(filterObj))
       .filter((x) => dayjs(x.createBookCarTimestamp).format('YYYY-MM') === selectedMonth)
       .sort(dateCompare('createBookCarTimestamp'));
+    return allList;
   };
   const actionRef = ref();
 
@@ -90,8 +103,29 @@
     monthTab = OneYearMonthTab();
     selectedMonth = monthTab[0];
   });
+  const realDetailInfoById = computed(() => {
+    let res = [];
+    for (const id of checkedRows) {
+      const detailInfoById = allList.find((it) => it.id === id);
+      res.push(detailInfoById);
+    }
+    return res;
+  });
+  const priceRules = computed(() => {
+    return (
+      checkedRows.length < 1 || realDetailInfoById?.value.filter((it) => it.waitPrice).length !== 0
+    );
+  });
+  const carRules = computed(() => {
+    return (
+      checkedRows.length < 1 ||
+      realDetailInfoById?.value.filter((it) => it.waitCar).length !== 0 ||
+      realDetailInfoById?.value.filter((it) => it.waitPrice === 1).length !== checkedRows.length
+    );
+  });
 
-  function startShareCar() {
+  function startShareCar(item) {
+    typeName = item;
     showShareCarModel = true;
   }
 
@@ -101,7 +135,16 @@
   }
 
   function updateFilter(value) {
-    filterObj = value;
+    if (value !== null) {
+      let { filterTitle, filterKey, ...NewObj } = value;
+      if (value['filterTitle'] && value['filterKey']) {
+        const res = columns.find((it) => it.title === value['filterTitle']).key;
+        NewObj[res] = value['filterKey'];
+      }
+      filterObj = NewObj;
+    } else {
+      filterObj = null;
+    }
     reloadTable();
   }
 

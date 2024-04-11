@@ -124,8 +124,20 @@
       };
       editInfo.instorageTrayNum = listElement.arrivedTrayNumEdit ?? 0;
       editInfo.instorageContainerNum = listElement.arrivedContainerNumEdit ?? 0;
-      editInfo.inStatus = listElement.outboundMethod === '存仓' ? '存仓' : newInStatus;
+      editInfo.inStatus =
+        listElement.outboundMethod === '存仓'
+          ? '存仓'
+          : listElement.operateInStorage === '是'
+          ? '库内操作'
+          : newInStatus;
       editInfo.arriveTime = dayjs().format('YYYY-MM-DD');
+      let timeLineInfo = listElement.timeLine;
+      timeLineInfo.unshift({
+        operator: userInfo?.realName,
+        detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        note: '卸柜并入库',
+      });
+      editInfo.timeLine = timeLineInfo;
       const res = await NotifyDetailManager.edit(editInfo, listElement.id);
       if (res.code != ResultEnum.SUCCESS) {
         toastError(res.message);

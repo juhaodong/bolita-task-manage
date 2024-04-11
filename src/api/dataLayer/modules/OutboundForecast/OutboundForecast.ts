@@ -5,6 +5,7 @@ import { db } from '@/store/plugins/firebase';
 import dayjs from 'dayjs';
 import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
 import { OutPlanStatus } from '@/api/dataLayer/modules/notify/notify-api';
+import { useUserStore } from '@/store/modules/user';
 
 export const OutboundForecast = 'OutboundForecast';
 export const OutWareHouse = 'OutWareHouse';
@@ -23,6 +24,7 @@ export async function addOutboundForecast(list) {
   const id = await getCollectionNextId(OutboundForecast, 'OF');
   const purchaseRef = doc(db, OutboundForecast, id);
   await setDoc(purchaseRef, { ...list });
+  return id;
 }
 
 export async function updateOutboundForecast(id, list) {
@@ -30,10 +32,16 @@ export async function updateOutboundForecast(id, list) {
   await updateDoc(purchaseRef, { ...list });
 }
 
-export async function getOutboundForecast() {
+export async function getOutboundForecast(filterObj) {
   const collectionRef = collection(db, OutboundForecast);
   const res = query(collectionRef);
-  return await resultOfId(res);
+  if (!filterObj) {
+    return await resultOfId(res);
+  } else {
+    return (await resultOfId(res)).filter((it) => {
+      return Object.keys(filterObj).every((k) => !filterObj[k] || filterObj[k] == it[k]);
+    });
+  }
 }
 
 export async function getOutboundForecastById(id) {
@@ -44,12 +52,43 @@ export async function getOutboundForecastById(id) {
 
 export async function updateTaskListAfterBookingCar(id) {
   const taskListIds = (await getOutboundForecastById(id)).outboundDetailInfo;
+  const userInfo = useUserStore().info;
   for (const taskId of taskListIds) {
+    const res = await NotifyDetailManager.getById(taskId);
+    const timeLineInfo = res.timeLine;
+    timeLineInfo.unshift({
+      operator: userInfo?.realName,
+      detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      note: '已定车',
+    });
     await NotifyDetailManager.massiveUpdate([
       {
         bookingCarTime: dayjs().format('YYYY-MM-DD'),
         inStatus: OutPlanStatus.AlreadyBookingCar,
         id: taskId,
+        timeLine: timeLineInfo,
+      },
+    ]);
+  }
+}
+
+export async function updateTaskListAfterOfferPriceCar(id) {
+  const taskListIds = (await getOutboundForecastById(id)).outboundDetailInfo;
+  const userInfo = useUserStore().info;
+  for (const taskId of taskListIds) {
+    const res = await NotifyDetailManager.getById(taskId);
+    const timeLineInfo = res.timeLine;
+    timeLineInfo.unshift({
+      operator: userInfo?.realName,
+      detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      note: '提交了物流报价',
+    });
+    await NotifyDetailManager.massiveUpdate([
+      {
+        bookingCarTime: dayjs().format('YYYY-MM-DD'),
+        inStatus: OutPlanStatus.AlreadyBookingCar,
+        id: taskId,
+        timeLine: timeLineInfo,
       },
     ]);
   }

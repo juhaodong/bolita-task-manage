@@ -7,12 +7,28 @@
   interface Props {
     ids: [];
   }
+  const columns = $ref([
+    {
+      title: '时间',
+      key: 'detailTime',
+    },
+    {
+      title: '操作人员',
+      key: 'operator',
+    },
+    {
+      title: '操作事项',
+      key: 'note',
+    },
+  ]);
+  let dataInfo = $ref([]);
 
   let currentItems = $ref([]);
   const props = defineProps<Props>();
   async function reload() {
     currentItems = await NotifyDetailManager.getById(props.ids);
-    console.log(currentItems, 'items');
+    dataInfo = currentItems.timeLine;
+    console.log(dataInfo, 'info');
   }
   onMounted(async () => {
     await reload();
@@ -23,17 +39,7 @@
 <template>
   <div>
     <loading-frame :loading="loading">
-      <n-descriptions :columns="1" bordered label-placement="left">
-        <n-descriptions-item label="审核时间"> {{ currentItems.checkedTime }} </n-descriptions-item>
-        <n-descriptions-item label="入库时间"> {{ currentItems.arriveTime }} </n-descriptions-item>
-        <n-descriptions-item label="创建出库计划时间">
-          {{ currentItems.createPlanTime }}
-        </n-descriptions-item>
-        <n-descriptions-item label="订车时间">
-          {{ currentItems.bookingCarTime }}
-        </n-descriptions-item>
-        <n-descriptions-item label="出库时间"> {{ currentItems.realOutDate }} </n-descriptions-item>
-      </n-descriptions>
+      <n-data-table :bordered="false" :columns="columns" :data="dataInfo" />
     </loading-frame>
   </div>
 </template>

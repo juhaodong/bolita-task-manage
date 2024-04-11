@@ -204,7 +204,10 @@ export const allTitleGroup = [
     key: 'industrialNote',
     tagType: 'success',
   },
-];
+].map((it, index) => {
+  it.sort = index;
+  return it;
+});
 
 export const operationTitleGroup = [
   {
@@ -263,4 +266,57 @@ export const operationTitleGroup = [
     title: '操作人',
     key: 'outOperatePerson',
   },
-];
+].map((it, index) => {
+  it.sort = index;
+  return it;
+});
+
+export const containerForecastTitleGroup = [
+  {
+    title: '预计入库日期',
+    key: 'planArriveDateTime',
+  },
+  {
+    title: '预计时间',
+    key: 'inHouseTime',
+  },
+  {
+    title: '柜号',
+    key: 'containerNo',
+  },
+  {
+    title: '客户ID',
+    key: 'customerName',
+  },
+  {
+    title: '仓库',
+    key: 'warehouseId',
+  },
+  {
+    title: '数量',
+    key: 'arrivedCount',
+  },
+  {
+    title: '状态',
+    key: 'inStatus',
+  },
+  {
+    title: '操作人',
+    key: 'unloadPerson',
+  },
+  {
+    title: '业务员',
+    key: 'salesName',
+  },
+  {
+    title: '备注',
+    key: 'note',
+  },
+  {
+    title: '结算状态',
+    key: 'containerFinalStatus',
+  },
+].map((it, index) => {
+  it.sort = index;
+  return it;
+});

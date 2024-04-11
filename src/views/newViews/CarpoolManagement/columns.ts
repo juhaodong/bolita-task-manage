@@ -1,5 +1,9 @@
 import { DataTableColumns } from 'naive-ui';
-import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import {
+  selectedIdColumn,
+  statusColumnEasy,
+  timeColumn,
+} from '@/views/bolita-views/composable/useableColumns';
 import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
 import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
@@ -7,10 +11,11 @@ import { generateOptionFromArray } from '@/store/utils/utils';
 import { reservationTimeList } from '@/views/newViews/ContainerForecast/columns';
 
 export const columns: DataTableColumns<CarpoolManagementModel> = [
-  {
-    title: '物流ID',
-    key: 'id',
-  },
+  // {
+  //   title: '物流ID',
+  //   key: 'id',
+  // },
+  selectedIdColumn('物流ID', '/car/carBookingDetail', 'id'),
   timeColumn('createBookCarTimestamp', '下单日期'),
   statusColumnEasy({
     title: '状态',
@@ -126,14 +131,6 @@ export const filters: FormFields = [
     field: 'deliveryId',
   },
   {
-    label: '操作ID',
-    field: 'operationID',
-  },
-  {
-    label: '运输公司',
-    field: 'deliveryCompany',
-  },
-  {
     label: '仓库',
     field: 'warehouseId',
   },
@@ -142,32 +139,20 @@ export const filters: FormFields = [
     field: 'settlement',
   },
   {
-    label: '运单号',
-    field: 'deliveryID',
+    label: '过滤项',
+    field: 'filterTitle',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title)),
+    },
   },
   {
-    field: 'ISA',
-    label: 'ISA',
-  },
-  {
-    field: 'PO',
-    label: 'PP',
-  },
-  {
-    field: 'REF',
-    label: 'REF.',
-  },
-  {
-    field: 'fbaCode',
-    label: 'FBACode',
-  },
-  {
-    field: 'paymentStatus',
-    label: '付款状态',
+    label: '过滤值',
+    field: 'filterKey',
   },
 ];
 
-export const schemas: FormField[] = [
+export const offerSchemas: FormField[] = [
   {
     field: 'REF',
     label: 'REF.',
@@ -185,9 +170,26 @@ export const schemas: FormField[] = [
     label: '运单号',
   },
   {
-    field: 'orderCarPrice',
-    label: '订车价格',
+    field: 'suggestedPrice',
+    label: '建议报价',
   },
+  {
+    field: 'costPrice',
+    label: '成本价',
+  },
+  {
+    field: 'externalPrice',
+    label: '对外报价',
+    disableCondition() {
+      return true;
+    },
+  },
+].map((it) => {
+  it.required = false;
+  return it;
+});
+
+export const carSchemas: FormField[] = [
   getDatePickerFormField('reservationGetProductTime', '预约取货日期'),
   {
     field: 'reservationGetProductDetailTime',

@@ -81,6 +81,10 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'changeOrderFiles',
     },
     {
+      label: '库内操作',
+      field: 'operateInStorage',
+    },
+    {
       label: '送货备注',
       field: 'transportationNote',
     },

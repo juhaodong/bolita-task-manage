@@ -23,10 +23,10 @@ export const allKeysList = [
     label: '总体积',
     field: 'volume',
   },
-  {
-    label: 'FBA单号',
-    field: 'FBADeliveryCode',
-  },
+  // {
+  //   label: 'FBA单号',
+  //   field: 'FBADeliveryCode',
+  // },
   // {
   //   label: 'PO',
   //   field: 'PO',
@@ -48,3 +48,5 @@ export const allKeysList = [
     field: 'changeOrderFiles',
   },
 ];
+
+export const allDeliveryList = ['DHL', 'DPD', 'UPS', 'GLA', 'GLS', 'UPA'];

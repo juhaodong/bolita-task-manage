@@ -35,8 +35,12 @@
   import { computed, onMounted } from 'vue';
   import { $ref } from 'vue/macros';
   import { getTableHeader, setTableHeader } from '@/api/dataLayer/common/TableHeader';
-  import _, { differenceWith } from 'lodash';
-  import { allTitleGroup, operationTitleGroup } from '@/api/dataLayer/common/TitleGroup';
+  import _, { differenceWith, sortBy } from 'lodash';
+  import {
+    allTitleGroup,
+    containerForecastTitleGroup,
+    operationTitleGroup,
+  } from '@/api/dataLayer/common/TitleGroup';
 
   interface Props {
     allColumns?: any;
@@ -47,10 +51,12 @@
   let currentHeaderList = $ref([]);
   const prop = defineProps<Props>();
   const waitForUseList = computed(() => {
-    if (prop.type === 'mission') {
+    if (prop.type === 'mission' || prop.type === 'carDetail') {
       return differenceWith(allTitleGroup, currentHeaderList, _.isEqual);
-    } else {
+    } else if (prop.type === 'operation') {
       return differenceWith(operationTitleGroup, currentHeaderList, _.isEqual);
+    } else if (prop.type === 'containerForecast') {
+      return differenceWith(containerForecastTitleGroup, currentHeaderList, _.isEqual);
     }
   });
   onMounted(async () => {
@@ -58,9 +64,11 @@
   });
   async function selectedTag(item) {
     currentHeaderList.push(item);
+    currentHeaderList = sortBy(currentHeaderList, 'sort');
   }
   function deletedTag(item) {
     currentHeaderList = currentHeaderList.filter((it) => it.title !== item.title);
+    currentHeaderList = sortBy(currentHeaderList, 'sort');
   }
   async function reload() {
     allHeaderList = prop.allColumns.slice(1);

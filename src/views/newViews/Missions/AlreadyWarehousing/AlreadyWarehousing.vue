@@ -143,6 +143,7 @@
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
   import { getTableHeader } from '@/api/dataLayer/common/TableHeader';
   import TimeLine from '@/views/newViews/Missions/AlreadyWarehousing/TimeLine.vue';
+  import { useUserStore } from '@/store/modules/user';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -195,6 +196,12 @@
       if (res) {
         res.inStatus = InBoundStatus.Wait;
         res.checkedTime = dayjs().format('YYYY-MM-DD');
+        const userInfo = useUserStore().info;
+        res.timeLine.unshift({
+          operator: userInfo?.realName,
+          detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+          note: '进行了审核',
+        });
         await NotifyDetailManager.editInternal(res, rows);
         const containerForecastInfo = await NotifyManager.getById(res.notifyId);
         if (containerForecastInfo.inStatus === InBoundStatus.WaitCheck) {
@@ -238,7 +245,16 @@
   };
 
   function updateFilter(value) {
-    filterObj = value;
+    if (value !== null) {
+      let { filterTitle, filterKey, ...NewObj } = value;
+      if (value['filterTitle'] && value['filterKey']) {
+        const res = columns.find((it) => it.title === value['filterTitle']).key;
+        NewObj[res] = value['filterKey'];
+      }
+      filterObj = NewObj;
+    } else {
+      filterObj = null;
+    }
     reloadTable();
   }
 
@@ -322,6 +338,18 @@
             },
           },
           {
+            label: '请报价',
+            onClick() {
+              checkCashStatus(record.id);
+            },
+            highlight: () => {
+              return 'info';
+            },
+            ifShow: () => {
+              return record?.['needOfferPrice'] === '1';
+            },
+          },
+          {
             label: '时间线',
             onClick() {
               currentId = record.id;
@@ -339,12 +367,49 @@
             async onClick() {
               const upload = useUploadDialog();
               const files = await upload.upload(record['changeOrder']);
+              const userInfo = useUserStore().info;
               if (files.checkPassed) {
                 const obj = {};
                 obj['changeOrder'] = files.files;
                 if (!record.arriveTime) {
                   obj['inStatus'] = InBoundDetailStatus.WaitCheck;
                 }
+                let res = record.timeLine;
+                res.unshift({
+                  operator: userInfo?.realName,
+                  detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                  note: '提交了换单文件',
+                });
+                obj['timeLine'] = res;
+                await NotifyDetailManager.editInternal(obj, record.id);
+              }
+              actionRef.value[0].reload();
+            },
+          },
+          {
+            label: '托盘标签',
+            highlight: () => {
+              return record?.['trayFiles']?.length > 0 ? 'success' : 'error';
+            },
+            ifShow: () => {
+              return (
+                record?.deliveryMethod === 'FBA卡车派送' && record?.outboundMethod === '标准托盘'
+              );
+            },
+            async onClick() {
+              const upload = useUploadDialog();
+              const files = await upload.upload(record['trayFiles']);
+              const userInfo = useUserStore().info;
+              if (files.checkPassed) {
+                const obj = {};
+                obj['trayFiles'] = files.files;
+                let res = record.timeLine;
+                res.unshift({
+                  operator: userInfo?.realName,
+                  detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                  note: '提交了托盘标签',
+                });
+                obj['timeLine'] = res;
                 await NotifyDetailManager.editInternal(obj, record.id);
               }
               actionRef.value[0].reload();

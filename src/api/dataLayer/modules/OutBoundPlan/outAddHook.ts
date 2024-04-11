@@ -9,15 +9,26 @@ import {
   NotifyDetailManager,
 } from '@/api/dataLayer/modules/notify/notify-detail';
 import dayjs from 'dayjs';
+import { useUserStore } from '@/store/modules/user';
 
 export async function afterPlanDetailAdded(planDetails) {
   const notifyIds: any = {};
+  const userInfo = useUserStore().info;
   const updateValue = planDetails.map((detail) => {
     notifyIds[detail?.notifyId] = detail?.notifyId;
+    const timeLineInfo = detail.timeLine;
+    timeLineInfo.unshift({
+      operator: userInfo?.realName,
+      detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      note: '提交了出库计划',
+    });
     return {
+      needOfferPrice: detail.needOfferPrice,
       createPlanTime: dayjs().format('YYYY-MM-DD'),
       inStatus: OutPlanStatus.AlreadyPlan,
       id: detail.originId,
+      outboundId: detail.outboundId,
+      timeLine: timeLineInfo,
     };
   });
   await NotifyDetailManager.massiveUpdate(updateValue);

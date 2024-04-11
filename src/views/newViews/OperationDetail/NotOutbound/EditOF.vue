@@ -22,8 +22,14 @@
       <n-descriptions-item :span="2" label="FC/送货地址">
         <n-select v-model:value="newFBACode" :options="options" />
       </n-descriptions-item>
-      <n-descriptions-item :span="2" label="订车价格">
-        <n-input v-model:value="newOrderCarPrice" />
+      <n-descriptions-item :span="2" label="建议报价">
+        <n-input v-model:value="newSuggestedPrice" />
+      </n-descriptions-item>
+      <n-descriptions-item :span="2" label="成本价">
+        <n-input v-model:value="newCostPrice" />
+      </n-descriptions-item>
+      <n-descriptions-item :span="2" label="对外报价">
+        <n-input v-model:value="newExternalPrice" disabled />
       </n-descriptions-item>
       <n-descriptions-item :span="2" label="预约取货日期">
         <n-date-picker v-model:value="newReservationGetProductTime" type="date" />
@@ -70,6 +76,9 @@
   let newOrderCarPrice = $ref('');
   let newReservationGetProductTime = $ref(null);
   let newReservationGetProductDetailTime = $ref(null);
+  let newSuggestedPrice = $ref('');
+  let newCostPrice = $ref('');
+  let newExternalPrice = $ref('');
   let newDeliveryDetail = $ref('');
   let newNote = $ref('');
   let options = $ref([]);
@@ -79,7 +88,7 @@
   onMounted(async () => {
     options = generateOptionFromArray(await getFBACodeList());
     currentInfo = (await getOutboundForecast()).find((it) => it.id === prop.id);
-    newDeliveryDetail = currentInfo.deliveryDetail;
+    newDeliveryDetail = currentInfo.deliveryMethod;
     newRef = currentInfo?.REF;
     newISA = currentInfo?.ISA;
     newAMZ = currentInfo?.AMZID;
@@ -89,13 +98,16 @@
     newReservationGetProductTime = dayjs(currentInfo?.reservationGetProductTime).valueOf();
     newReservationGetProductDetailTime = currentInfo?.reservationGetProductDetailTime;
     newNote = currentInfo?.note;
+    newSuggestedPrice = currentInfo?.suggestedPrice;
+    newCostPrice = currentInfo?.costPrice;
+    newExternalPrice = currentInfo?.externalPrice;
   });
 
   const emit = defineEmits(['saved']);
 
   async function handleSubmit() {
     loading = true;
-    const FBAList = (await FBACodeManager.load()).find((it) => it.code === newFBACode);
+    const FBAList = (await FBACodeManager.load()).find((it) => it.code === newFBACode) ?? [];
     const childrenInfo = currentInfo?.outboundDetailInfo;
     for (const item of childrenInfo) {
       item.operation = newDeliveryDetail;
@@ -113,13 +125,16 @@
       deliveryDetail: newDeliveryDetail,
       note: newNote,
       outboundDetailInfo: childrenInfo,
+      externalPrice: newExternalPrice,
+      costPrice: newCostPrice,
+      suggestedPrice: newSuggestedPrice,
       carStatus: CarStatus.Booked,
       createBookCarTimestamp: dayjs().format('YYYY-MM-DD'),
-      street: FBAList.street,
-      state: FBAList.state,
-      country: FBAList.country,
-      houseNo: FBAList.houseNo,
-      postcode: FBAList.postcode,
+      street: FBAList.street ?? '',
+      state: FBAList.state ?? '',
+      country: FBAList.country ?? '',
+      houseNo: FBAList.houseNo ?? '',
+      postcode: FBAList.postcode ?? '',
       city: FBAList.city ?? '',
       appendAddress: FBAList.appendAddress ?? '',
     };

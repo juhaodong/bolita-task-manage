@@ -1,17 +1,1 @@
-export const allDeliveryMethod = [
-  '交DPD',
-  '交DHL',
-  '交UPS',
-  '交GLS',
-  '贴DPD',
-  '贴DHL',
-  '贴UPS',
-  '贴GLS',
-  'AMZ',
-  '托盘其他',
-  'FBA',
-  '散箱其他',
-  '留仓',
-  '其它系统',
-  '销售',
-];
+export const allDeliveryMethod = ['FBA卡车派送', 'DHL', 'DPD', 'UPS', 'GLS', '其他'];

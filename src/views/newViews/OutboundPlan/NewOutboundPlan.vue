@@ -60,7 +60,6 @@
   import { DataTableColumns, NButton } from 'naive-ui';
   import { getReserveItems } from '@/api/dataLayer/modules/notify/notify-detail';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
-  import { asyncCustomerFormField } from '@/api/dataLayer/fieldDefination/common';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import {
     asyncCustomer,
@@ -148,7 +147,7 @@
   }
 
   async function init() {
-    addressFormFields.unshift(await asyncCustomerFormField());
+    // addressFormFields.unshift(await asyncCustomerFormField());
     await updateFilter(null);
   }
 
@@ -169,6 +168,15 @@
 
   async function saveOutboundPlan(value) {
     loading = true;
+    const res = {
+      FCAddress: selectedFCAddress ?? '',
+      deliveryMethod: selectedDeliveryMethod,
+      postcode: selectedPostcode ?? '',
+      ...value,
+      inStatus: value.needCar === '1' ? CarStatus.UnAble : CarStatus.NoNeed,
+      outboundDetailInfo: allNotifyDetail.map((it) => it.id),
+    };
+    const outboundId = await addOutboundForecast(res);
     allNotifyDetail.forEach((it) => {
       it.needCar = value.needCar;
       if (it.needCar === '1') {
@@ -176,16 +184,9 @@
       } else {
         it.carStatus = CarStatus.NoNeed;
       }
+      it.outboundId = outboundId;
+      it.needOfferPrice = value.needOfferPrice;
     });
-    const res = {
-      FCAddress: selectedFCAddress,
-      deliveryMethod: selectedDeliveryMethod,
-      postcode: selectedPostcode,
-      ...value,
-      inStatus: value.needCar === '1' ? CarStatus.UnAble : CarStatus.NoNeed,
-      outboundDetailInfo: allNotifyDetail.map((it) => it.id),
-    };
-    await addOutboundForecast(res);
     // await OutBoundPlanManager.add(value, allNotifyDetail);
     await afterPlanDetailAdded(allNotifyDetail);
     await safeScope(() => {
@@ -254,6 +255,17 @@
       field: 'needCar',
       component: 'NSelect',
       label: '是否需要订车',
+      componentProps: {
+        options: [
+          { value: '1', label: '是' },
+          { value: '0', label: '否' },
+        ],
+      },
+    },
+    {
+      field: 'needOfferPrice',
+      component: 'NSelect',
+      label: '是否需要报价',
       componentProps: {
         options: [
           { value: '1', label: '是' },

@@ -15,6 +15,12 @@
     allDeliveryMethod,
     allOutboundMethod,
   } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
+  import dayjs from 'dayjs';
+  import { useUserStore } from '@/store/modules/user';
+  import {
+    getOutboundForecastById,
+    updateOutboundForecast,
+  } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
 
   interface Props {
     model?: any;
@@ -183,12 +189,29 @@
   async function handleSubmit(values: any) {
     loading = true;
     values.alreadyChanged = 1;
-    console.log(values, 'values');
+    let inStorageTime = prop.model?.storageTime ? prop.model?.storageTime : [];
     if (values.outboundMethod === '存仓') {
       values.inStatus = '存仓';
-    } else {
-      values.inStatus = '全部入库';
+      inStorageTime.push({ storageTime: dayjs().format('YYYY-MM-DD HH:mm:ss') });
+      values.inStorageTime = inStorageTime;
+      if (prop.model?.outboundId) {
+        let outboundInfo = await getOutboundForecastById(prop.model?.outboundId);
+        outboundInfo.inStatus = '异常';
+        await updateOutboundForecast(prop.model?.outboundId, outboundInfo);
+      }
+    } else if (values.outboundMethod !== '存仓' && prop.model?.outboundMethod === '存仓') {
+      inStorageTime.push({ outBoundTime: dayjs().format('YYYY-MM-DD HH:mm:ss') });
+      values.inStatus = '入库待出库';
+      values.inStorageTime = inStorageTime;
     }
+    const userInfo = useUserStore().info;
+    let res = prop.model?.timeLine ? prop.model?.timeLine : [];
+    res.unshift({
+      operator: userInfo?.realName,
+      detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      note: '修改了具体信息',
+    });
+    values.timeLine = res;
     await safeScope(async () => {
       if (prop?.model?.id) {
         await NotifyDetailManager.editInternal(values, prop.model.id);

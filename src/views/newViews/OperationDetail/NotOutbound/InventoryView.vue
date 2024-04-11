@@ -90,17 +90,12 @@
 <script lang="ts" setup>
   import { Component, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { filters } from './columns';
-  import { columns } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
+  import { columns, filters } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
   import { $ref } from 'vue/macros';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
-  import {
-    InBoundDetailStatus,
-    InBoundStatus,
-    NotifyManager,
-  } from '@/api/dataLayer/modules/notify/notify-api';
+  import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import { Box20Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
@@ -112,6 +107,7 @@
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
   import { getTableHeader } from '@/api/dataLayer/common/TableHeader';
   import TimeLine from '@/views/newViews/Missions/AlreadyWarehousing/TimeLine.vue';
+  import { useUserStore } from '@/store/modules/user';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -120,7 +116,6 @@
   let addNewFeeDialog = $ref(false);
   let checkedRows = $ref([]);
   let currentModel: any | null = $ref(null);
-  let typeTab = $ref(['整柜任务看板', '存仓看板']);
   let monthTab: any | null = $ref(null);
   let typeMission: any | null = $ref('');
   let selectedMonth: any | null = $ref('');
@@ -154,40 +149,9 @@
     addNewTrayDialog = true;
   }
 
-  function addTable() {
-    showModal.value = true;
-  }
-
-  async function checkDetailInfo() {
-    for (const rows of checkedRows) {
-      const res = allList.find((it) => it.id === rows);
-      if (res) {
-        res.inStatus = InBoundStatus.Wait;
-        res.checkedTime = dayjs().format('YYYY-MM-DD');
-        await NotifyDetailManager.editInternal(res, rows);
-        const containerForecastInfo = await NotifyManager.getById(res.notifyId);
-        if (containerForecastInfo.inStatus === InBoundStatus.WaitCheck) {
-          const allDetailList = allList
-            .filter((x) => x.notifyId === res.notifyId)
-            .filter(
-              (b) =>
-                b.inStatus === InBoundDetailStatus.WaitSubmit ||
-                b.inStatus === InBoundDetailStatus.WaitCheck
-            );
-          if (allDetailList.length === 0) {
-            containerForecastInfo.inStatus = InBoundStatus.Wait;
-            await NotifyManager.editInternal(containerForecastInfo, containerForecastInfo.id);
-          }
-        }
-      }
-    }
-    checkedRows = [];
-    await reloadTable();
-  }
-
   const loadDataTable = async () => {
     allList = (await NotifyDetailManager.load(filterObj))
-      .filter((it) => it.inStatus === '存仓')
+      .filter((it) => it.inStatus === '存仓' || it.inStatus === '库内操作')
       .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
     allList.forEach((it) => {
       const today = dayjs().format('YYYY-MM-DD');
@@ -201,7 +165,16 @@
   };
 
   function updateFilter(value) {
-    filterObj = value;
+    if (value !== null) {
+      let { filterTitle, filterKey, ...NewObj } = value;
+      if (value['filterTitle'] && value['filterKey']) {
+        const res = columns.find((it) => it.title === value['filterTitle']).key;
+        NewObj[res] = value['filterKey'];
+      }
+      filterObj = NewObj;
+    } else {
+      filterObj = null;
+    }
     reloadTable();
   }
 
@@ -340,6 +313,31 @@
             },
             ifShow: () => {
               return record.alreadyChanged;
+            },
+          },
+          {
+            label: '转库外',
+            highlight: () => {
+              return 'info';
+            },
+            async onClick() {
+              const userInfo = useUserStore().info;
+              let timeInfo = record.timeLine;
+              record.operateInStorage = '否';
+              timeInfo.unshift({
+                operator: userInfo?.realName,
+                detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                note: '完成库内操作',
+              });
+              if (record.outboundMethod !== '存仓') {
+                record.inStatus = InBoundStatus.All;
+              }
+              record.timeLine = timeInfo;
+              await NotifyDetailManager.editInternal(record, record.id);
+              await reloadTable();
+            },
+            ifShow: () => {
+              return record.operateInStorage === '是';
             },
           },
         ],

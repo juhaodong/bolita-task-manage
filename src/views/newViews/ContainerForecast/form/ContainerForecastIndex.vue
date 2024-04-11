@@ -11,8 +11,8 @@
   import { useUserStore } from '@/store/modules/user';
   import readXlsxFile from 'read-excel-file';
   import { CustomerManager, FBACodeManager } from '@/api/dataLayer/modules/user/user';
-  import { difference } from 'lodash-es';
-  import { allKeysList } from '@/api/dataLayer/common/AllKeys';
+  import { difference, uniqBy } from 'lodash-es';
+  import { allDeliveryList, allKeysList } from '@/api/dataLayer/common/AllKeys';
   import { $ref } from 'vue/macros';
   import ErrorMessageDialog from '@/views/newViews/ContainerForecast/form/ErrorMessageDialog.vue';
   import dayjs from 'dayjs';
@@ -57,7 +57,20 @@
         );
         it.uploadFileTime = dayjs().format('YYYY-MM-DD');
         if (it.outboundMethod !== '存仓') {
-          if (it.deliveryMethod === 'FBA卡车派送' || it.deliveryMethod === '其他') {
+          if (it.outboundMethod === '散货') {
+            if (it.deliveryMethod === 'FBA卡车派送') {
+              if (!it.FBADeliveryCode) {
+                errorMessage.push({ index: index + 4, detail: 'FBA单号' });
+              }
+              if (!it.PO) {
+                errorMessage.push({ index: index + 4, detail: 'PO' });
+              }
+            }
+            if (!allDeliveryList.includes(it.deliveryMethod) && !it.FCAddress) {
+              errorMessage.push({ index: index + 4, detail: 'FC/送货地址' });
+            }
+          }
+          if (it.deliveryMethod === 'FBA卡车派送') {
             if (!it.FCAddress) {
               errorMessage.push({ index: index + 4, detail: 'FC/送货地址' });
             }
@@ -89,6 +102,9 @@
         }
       });
       if (errorMessage.length > 0) {
+        errorMessage = uniqBy(errorMessage, (x) => {
+          `${x.index} + ${x.detail}`;
+        });
         return [];
       }
       if (rows.length > 0 && errors.length == 0) {
@@ -102,7 +118,7 @@
   }
 
   function closeDialog() {
-    emit('saved');
+    errorMessage = [];
   }
 
   async function saveNotify(value: any) {

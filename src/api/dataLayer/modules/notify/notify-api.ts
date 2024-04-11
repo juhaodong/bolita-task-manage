@@ -24,13 +24,12 @@ export const NotifyManager = initModel({
     loader: getNotifyDetailListByNotify,
   },
   async afterAddHook(id, value, taskList) {
-    console.log(value, id, 'value');
     await NotifyDetailManager.massiveAdd(taskList, id, value);
   },
 });
 
 export enum InBoundStatus {
-  All = '全部入库',
+  All = '入库待出库',
   Partial = '部分入库',
   Wait = '等待入库',
   WaitCheck = '等待审核',
@@ -68,6 +67,7 @@ export enum OutPlanStatus {
   AlreadyPlan = '已计划出库',
   AlreadyOut = '已出库',
   AlreadyBookingCar = '已订车',
+  AlreadyOffer = '已报价',
 }
 
 export enum OutAllStatus {

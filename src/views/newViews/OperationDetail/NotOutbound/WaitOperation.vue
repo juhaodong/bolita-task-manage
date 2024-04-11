@@ -157,13 +157,13 @@
   } from '@/api/dataLayer/modules/notify/notify-detail';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
   import LoadingCarDoc from '@/views/newViews/OperationDetail/NotOutbound/LoadingCarDoc.vue';
+  import { useUserStore } from '@/store/modules/user';
 
   const { hasPermission } = usePermission();
 
   const showModal = ref(false);
   let showShareCarModel = $ref(false);
   let checkedRows = $ref([]);
-  let typeTab = $ref(['出库任务看板', '库内操作看板']);
   let monthTab: any | null = $ref(null);
   let typeMission: any | null = $ref('');
   let selectedMonth: any | null = $ref('');
@@ -282,13 +282,10 @@
     showCurrentHeaderDataTable = false;
   }
   const loadDataTable = async () => {
-    let allList = (await getOutboundForecast()).filter(
+    let allList = (await getOutboundForecast(filterObj)).filter(
       (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
     );
-    currentList = allList.filter(
-      (a) => a.carStatus !== CarStatus.UnAble || a.carStatus !== CarStatus.Interception
-    );
-    console.log(currentList, 'list');
+    currentList = allList.filter((a) => a.inStatus === CarStatus.Booked || a.inStatus === '已装车');
     return currentList.sort(dateCompare('createTimestamp'));
   };
   let currentModel = $ref(null);
@@ -346,7 +343,21 @@
   }
 
   function updateFilter(value) {
-    filterObj = value;
+    console.log(value, 'value');
+    if (value !== null) {
+      let { filterTitle, filterKey, ...NewObj } = value;
+      console.log(NewObj, 'new');
+      if (value['filterTitle'] && value['filterKey']) {
+        console.log('123');
+        const res = operationColumns.find((it) => it.title === value['filterTitle']).key;
+        console.log(res, 'res');
+        NewObj[res] = value['filterKey'];
+      }
+      filterObj = NewObj;
+    } else {
+      filterObj = null;
+    }
+    console.log(filterObj, 'obj');
     reloadTable();
   }
 
@@ -395,11 +406,19 @@
                 obj['inStatus'] = OutStatus.All;
                 obj['realOutDate'] = dayjs().format('YYYY-MM-DD');
                 await updateOutboundForecast(record.id, obj);
+                const userInfo = useUserStore().info;
                 const taskList = await getDetailListById(record.outboundDetailInfo);
                 for (const task of taskList) {
+                  let timeLineInfo = task.timeLine;
+                  timeLineInfo.unshift({
+                    operator: userInfo?.realName,
+                    detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                    note: '已出库',
+                  });
                   task.CMRFiles = files.files;
                   task.inStatus = OutStatus.All;
                   task.realOutDate = dayjs().format('YYYY-MM-DD');
+                  task.timeLine = timeLineInfo;
                   await NotifyDetailManager.editInternal(task, task.id);
                 }
               }

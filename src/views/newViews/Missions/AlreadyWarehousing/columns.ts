@@ -181,7 +181,7 @@ export const columns: DataTableColumns<any> = [
 const allInStatusList = [
   '待审核',
   '等待入库',
-  '全部入库',
+  '入库待出库',
   '已计划出库',
   '已订车',
   '已装车',
@@ -221,5 +221,17 @@ export const filters: FormField[] = [
   {
     label: '票号',
     field: 'ticketId',
+  },
+  {
+    label: '过滤项',
+    field: 'filterTitle',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title)),
+    },
+  },
+  {
+    label: '过滤值',
+    field: 'filterKey',
   },
 ];

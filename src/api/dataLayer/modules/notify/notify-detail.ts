@@ -4,6 +4,8 @@ import { initModel } from '@/api/dataLayer/common/GeneralModel';
 import { taskListPath } from '@/api/dataLayer/modules/notify/path';
 import { chunk } from 'lodash-es';
 import { CashManager } from '@/api/dataLayer/modules/cash/cash';
+import { useUserStore } from '@/store/modules/user';
+import dayjs from 'dayjs';
 
 export async function getNotifyDetailListByNotify(id) {
   return await NotifyDetailManager.load(null, where('notifyId', '==', id));
@@ -21,6 +23,7 @@ export async function getReserveItems(filterObj?: any) {
 export const NotifyDetailManager = initModel({
   collectionName: taskListPath,
   async init(taskInfo, notifyId, customerId) {
+    const userInfo = useUserStore().info;
     taskInfo.arrivedContainerNum = 0;
     taskInfo.arrivedTrayNum = 0;
     taskInfo.instorageContainerNum = 0;
@@ -32,6 +35,13 @@ export const NotifyDetailManager = initModel({
     taskInfo.customerId = customerId.customerId;
     taskInfo.customerInfo = customerId;
     taskInfo.outStatus = OutStatus.WaitCommand;
+    taskInfo.timeLine = [
+      {
+        operator: userInfo?.realName,
+        detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        note: '新建货柜预报',
+      },
+    ];
     return taskInfo;
   },
   joinManager: {
