@@ -30,38 +30,12 @@
       outboundInfo = await getOutboundForecastById(props.notifyId);
       const res = await getDetailListById(outboundInfo.outboundDetailInfo);
       currentTaskList = flatMap(groupBy(res, 'FCAddress'));
-      currentTaskList.forEach((it) => {
-        if (it.outboundMethod === '存仓') {
-          it.Anmerkung = 'Im Lager';
-        } else if (it.outboundMethod === '大件托盘') {
-          it.Anmerkung = 'PL';
-        } else if (it.outboundMethod === '标准托盘') {
-          if (it.deliveryMethod === 'FBA卡车派送') {
-            it.Anmerkung = 'AMZ PL';
-          } else {
-            it.Anmerkung = 'PRI PL';
-          }
-        } else if (it.outboundMethod === '散货') {
-          it.Anmerkung = 'Loose';
-        }
-        if (it.deliveryMethod === 'FBA卡车派送') {
-          it.Adresse = it.FCAddress;
-        } else if (
-          it.deliveryMethod === 'DHL' ||
-          it.deliveryMethod === 'DPD' ||
-          it.deliveryMethod === 'UPS' ||
-          it.deliveryMethod === 'GLS'
-        ) {
-          it.Adresse = it.deliveryMethod;
-        } else {
-          it.Adresse = '-';
-        }
-      });
       emit('refresh');
     }
   }
 
   async function downloadUnloadingFile() {
+    console.log(outboundInfo, 'info');
     let headerTitle = ['Ref,Name des Kunden,Gesamtmenge,Ankunftszeit'];
     let headerDate = [
       outboundInfo?.REF,
@@ -69,7 +43,7 @@
       outboundInfo?.containerNum,
       outboundInfo?.createBookCarTimestamp,
     ];
-    let dataStrings = ['Kenzeichen,FBA,Menge,R/F,Pal Menge,Pal Type,adresse,Anmerkung'];
+    let dataStrings = ['Kenzeichen,FBA,Menge,R/F,Pal Menge,Pal Type,Lager,Contaniner nr.'];
     dataStrings.unshift(headerDate);
     dataStrings.unshift(headerTitle);
     currentTaskList.forEach((it) => {
@@ -80,8 +54,8 @@
         '',
         '',
         '',
-        it.postcode,
-        it.Anmerkung,
+        it.warehouseId,
+        it.containerId,
       ];
       dataStrings.push(res.join());
     });
@@ -98,8 +72,8 @@
     { title: 'R/F', key: 'fakeDate' },
     { title: 'Pal Menge', key: 'fakeDate' },
     { title: 'Pal Type', key: 'fakeDate' },
-    { title: 'Adresse', key: 'Adresse', width: 200 },
-    { title: 'Anmerkung', key: 'Anmerkung' },
+    { title: 'Lager', key: 'warehouseId', width: 200 },
+    { title: 'Contaniner nr.', key: 'containerId' },
   ]);
 
   let loading: boolean = $ref(false);
@@ -110,7 +84,7 @@
     <loading-frame :loading="loading">
       <n-descriptions v-if="outboundInfo" :columns="2" bordered label-placement="left">
         <n-descriptions-item label="Ref.">
-          {{ outboundInfo?.REF }}
+          {{ outboundInfo?.REF ?? outboundInfo?.id }}
         </n-descriptions-item>
         <n-descriptions-item label="Gesamtmenge:">
           {{ outboundInfo?.containerNum }}</n-descriptions-item

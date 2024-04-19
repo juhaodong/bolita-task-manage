@@ -72,7 +72,7 @@ export async function updateTaskListAfterBookingCar(id) {
   }
 }
 
-export async function updateTaskListAfterOfferPriceCar(id) {
+export async function updateTaskListAfterOfferPriceCar(id, offerInfo) {
   const taskListIds = (await getOutboundForecastById(id)).outboundDetailInfo;
   const userInfo = useUserStore().info;
   for (const taskId of taskListIds) {
@@ -85,6 +85,7 @@ export async function updateTaskListAfterOfferPriceCar(id) {
     });
     await NotifyDetailManager.massiveUpdate([
       {
+        offerPriceInfo: offerInfo,
         bookingCarTime: dayjs().format('YYYY-MM-DD'),
         inStatus: OutPlanStatus.AlreadyBookingCar,
         id: taskId,

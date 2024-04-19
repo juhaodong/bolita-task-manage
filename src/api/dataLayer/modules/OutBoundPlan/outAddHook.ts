@@ -10,6 +10,7 @@ import {
 } from '@/api/dataLayer/modules/notify/notify-detail';
 import dayjs from 'dayjs';
 import { useUserStore } from '@/store/modules/user';
+import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 
 export async function afterPlanDetailAdded(planDetails) {
   const notifyIds: any = {};
@@ -25,7 +26,8 @@ export async function afterPlanDetailAdded(planDetails) {
     return {
       needOfferPrice: detail.needOfferPrice,
       createPlanTime: dayjs().format('YYYY-MM-DD'),
-      inStatus: OutPlanStatus.AlreadyPlan,
+      inStatus:
+        detail.carStatus === CarStatus.NoNeed ? CarStatus.NoNeed : OutPlanStatus.AlreadyPlan,
       id: detail.originId,
       outboundId: detail.outboundId,
       timeLine: timeLineInfo,

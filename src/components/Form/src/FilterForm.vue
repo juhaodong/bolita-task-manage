@@ -1,5 +1,5 @@
 <template>
-  <n-form v-bind="getBindValue" :model="formModel" ref="formElRef">
+  <n-form ref="formElRef" :model="formModel" v-bind="getBindValue">
     <div class="flex">
       <n-space wrap>
         <slot></slot>
@@ -8,9 +8,9 @@
             <div style="width: 120px">
               <template v-if="schema.slot">
                 <slot
-                  :name="schema.slot"
-                  :model="formModel"
                   :field="schema.field"
+                  :model="formModel"
+                  :name="schema.slot"
                   :value="formModel[schema.field]"
                 ></slot>
               </template>
@@ -21,8 +21,8 @@
                     <n-checkbox
                       v-for="item in schema.componentProps.options"
                       :key="item.value"
-                      :value="item.value"
                       :label="item.label"
+                      :value="item.value"
                     />
                   </n-space>
                 </n-checkbox-group>
@@ -50,9 +50,9 @@
                     <n-button> 上传文件</n-button>
                   </n-upload>
                   <n-button
-                    type="info"
-                    dashed
                     v-if="getComponentProps(schema).uploadTemplate"
+                    dashed
+                    type="info"
                     @click="getComponentProps(schema).uploadTemplate"
                     >下载上传模板
                   </n-button>
@@ -61,28 +61,28 @@
               <!--动态渲染表单组件-->
               <template v-else-if="schema.component === 'NAutoComplete'">
                 <n-auto-complete
-                  :get-show="() => true"
-                  :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
-                  v-bind="getComponentProps(schema)"
                   v-model:value="formModel[schema.field]"
                   :class="{ isFull: schema.isFull != false && getProps.isFull }"
+                  :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
+                  :get-show="() => true"
+                  v-bind="getComponentProps(schema)"
                 />
               </template>
               <component
-                v-else
-                :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
-                v-bind="getComponentProps(schema)"
                 :is="schema.component"
+                v-else
                 v-model:value="formModel[schema.field]"
                 :class="{ isFull: schema.isFull != false && getProps.isFull }"
+                :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
                 :show-feedback="false"
+                v-bind="getComponentProps(schema)"
               />
               <!--组件后面的内容-->
               <template v-if="schema.suffix">
                 <slot
-                  :name="schema.suffix"
-                  :model="formModel"
                   :field="schema.field"
+                  :model="formModel"
+                  :name="schema.suffix"
                   :value="formModel[schema.field]"
                 ></slot>
               </template>
@@ -96,16 +96,16 @@
       <n-space :wrap="false">
         <n-button
           v-if="getProps.showActionButtonGroup && getProps.showSubmitButton"
-          v-bind="getSubmitBtnOptions"
-          size="small"
-          @click="handleSubmit"
           :loading="loadingSub"
+          size="small"
+          v-bind="getSubmitBtnOptions"
+          @click="handleSubmit"
           >{{ getProps.submitButtonText }}
         </n-button>
         <n-button
           v-if="getProps.showActionButtonGroup && getProps.showResetButton"
-          v-bind="getResetBtnOptions"
           size="small"
+          v-bind="getResetBtnOptions"
           @click="resetFields"
           >{{ getProps.resetButtonText }}
         </n-button>
@@ -116,7 +116,16 @@
 
 <script lang="ts">
   import type { Ref } from 'vue';
-  import { computed, defineComponent, onMounted, reactive, ref, unref, watch } from 'vue';
+  import {
+    computed,
+    defineComponent,
+    onMounted,
+    onUnmounted,
+    reactive,
+    ref,
+    unref,
+    watch,
+  } from 'vue';
   import { createPlaceholderMessage } from './helper';
   import { useFormEvents } from './hooks/useFormEvents';
   import { useFormValues } from './hooks/useFormValues';
@@ -296,8 +305,22 @@
       });
       onMounted(() => {
         initDefault();
+        window.addEventListener('keydown', handleKeydown);
         emit('register', formActionType);
       });
+
+      onUnmounted(() => {
+        window.removeEventListener('keydown', handleKeydown);
+      });
+
+      const handleKeydown = (event) => {
+        console.log(event.key);
+        if (event.key === 'Enter') {
+          handleSubmit();
+        } else if (event.key === 'Escape') {
+          resetFields();
+        }
+      };
 
       return {
         formElRef,
@@ -320,7 +343,7 @@
   });
 </script>
 
-<script setup lang="ts"></script>
+<script lang="ts" setup></script>
 <style lang="less" scoped>
   .isFull {
     width: 100%;

@@ -145,7 +145,9 @@
   <div id="print" class="mt-8">
     <loading-frame :loading="loading">
       <n-descriptions v-if="currentOutBoundInfo" :columns="2" bordered label-placement="left">
-        <n-descriptions-item label="Ref."> {{ currentOutBoundInfo.REF }} </n-descriptions-item>
+        <n-descriptions-item label="Ref.">
+          {{ currentOutBoundInfo.REF ?? currentOutBoundInfo.id }}
+        </n-descriptions-item>
         <n-descriptions-item label="预报总数">
           {{ currentOutBoundInfo?.containerNum }}</n-descriptions-item
         >
@@ -207,7 +209,7 @@
           <n-input v-model:value="outOperatePerson" placeholder="装柜人员" />
         </div>
         <n-button secondary type="warning" @click="save">保存 </n-button>
-        <n-button type="primary" @click="confirm">确认出库 </n-button>
+        <n-button type="primary" @click="confirm">确认装车 </n-button>
       </n-space>
     </loading-frame>
   </div>

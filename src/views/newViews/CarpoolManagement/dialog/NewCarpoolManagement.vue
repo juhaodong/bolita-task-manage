@@ -55,7 +55,7 @@
           await updateTaskListAfterBookingCar(id);
         } else {
           await updateOutboundForecast(id, values);
-          await updateTaskListAfterOfferPriceCar(id);
+          await updateTaskListAfterOfferPriceCar(id, values);
         }
       }
       emit('saved', values);

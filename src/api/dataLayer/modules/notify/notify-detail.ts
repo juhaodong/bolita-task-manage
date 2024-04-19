@@ -11,6 +11,10 @@ export async function getNotifyDetailListByNotify(id) {
   return await NotifyDetailManager.load(null, where('notifyId', '==', id));
 }
 
+export async function getNotifyDetailListByOutbound(id) {
+  return await NotifyDetailManager.load(null, where('outboundId', '==', id));
+}
+
 export async function getReserveItems(filterObj?: any) {
   return await NotifyDetailManager.load(
     filterObj,

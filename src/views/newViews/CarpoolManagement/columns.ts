@@ -37,10 +37,18 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
     title: '总件数',
     key: 'containerNum',
   },
-  // {
-  //   title: '国家',
-  //   key: 'country',
-  // },
+  {
+    title: '对外报价',
+    key: 'totalOutOffer',
+  },
+  {
+    title: '物流底价',
+    key: 'costPrice',
+  },
+  {
+    title: '建议报价',
+    key: 'suggestedPrice',
+  },
   {
     title: '邮编',
     key: 'postcode',
@@ -158,18 +166,6 @@ export const offerSchemas: FormField[] = [
     label: 'REF.',
   },
   {
-    field: 'ISA',
-    label: 'ISA',
-  },
-  {
-    field: 'AMZID',
-    label: 'AMZ-Sendungs ID',
-  },
-  {
-    field: 'waybillId',
-    label: '运单号',
-  },
-  {
     field: 'suggestedPrice',
     label: '建议报价',
   },
@@ -190,6 +186,18 @@ export const offerSchemas: FormField[] = [
 });
 
 export const carSchemas: FormField[] = [
+  {
+    field: 'ISA',
+    label: 'ISA',
+  },
+  {
+    field: 'AMZID',
+    label: 'AMZ-Sendungs ID',
+  },
+  {
+    field: 'waybillId',
+    label: '运单号',
+  },
   getDatePickerFormField('reservationGetProductTime', '预约取货日期'),
   {
     field: 'reservationGetProductDetailTime',

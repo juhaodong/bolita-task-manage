@@ -26,10 +26,10 @@ export const columns: DataTableColumns<any> = [
     title: 'Halle',
     key: 'warehouseId',
   },
-  // {
-  //   title: '时效',
-  //   key: 'warehouseId',
-  // },
+  {
+    title: '取货时间',
+    key: 'warehouseId',
+  },
   {
     title: 'Ref',
     key: 'REF',

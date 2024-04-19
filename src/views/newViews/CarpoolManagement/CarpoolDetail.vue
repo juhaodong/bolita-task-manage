@@ -58,7 +58,10 @@
   import { $ref } from 'vue/macros';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
+  import {
+    getDetailListById,
+    NotifyDetailManager,
+  } from '@/api/dataLayer/modules/notify/notify-detail';
   import { Box20Filled } from '@vicons/fluent';
   import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
@@ -69,6 +72,7 @@
     getOutboundForecastById,
     updateOutboundForecast,
   } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import { safeSumBy } from '@/store/utils/utils';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -187,6 +191,9 @@
               if (!outboundInfo.waitPrice) {
                 outboundInfo.inStatus = '待订车';
               }
+              if (outboundInfo.waitPrice && !outboundInfo.waitCar) {
+                outboundInfo.inStatus = '待订车';
+              }
               if (outboundInfo.waitCar) {
                 outboundInfo.inStatus = '已订车';
               }
@@ -195,7 +202,12 @@
               }
               record.outboundId = '';
               await NotifyDetailManager.editInternal(record, record.id);
-              await updateOutboundForecast(record.outboundId, outboundInfo);
+              const currentList = await getDetailListById(outboundInfo.outboundDetailInfo);
+              outboundInfo.totalOutOffer = safeSumBy(currentList, 'outPrice') ?? 0;
+              outboundInfo.totalVolume = safeSumBy(currentList, 'volume') ?? 0;
+              outboundInfo.totalWeight = safeSumBy(currentList, 'weight') ?? 0;
+              outboundInfo.containerNum = safeSumBy(currentList, 'arrivedContainerNum') ?? 0;
+              await updateOutboundForecast(outboundInfo.id, outboundInfo);
               await reloadTable();
             },
             ifShow: () => {

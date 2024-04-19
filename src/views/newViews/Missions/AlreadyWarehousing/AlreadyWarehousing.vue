@@ -2,14 +2,6 @@
   <n-card :bordered="false" class="proCard">
     <div>
       <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
-        <n-button type="primary" @click="addTable">
-          <template #icon>
-            <n-icon>
-              <Box20Filled />
-            </n-icon>
-          </template>
-          新建出库计划
-        </n-button>
         <n-button type="primary" @click="selectedHeader">
           <template #icon>
             <n-icon>
@@ -18,13 +10,29 @@
           </template>
           选择表头显示
         </n-button>
-        <n-button type="primary" @click="checkDetailInfo">
+        <n-button v-if="typeMission === '整柜任务看板'" type="primary" @click="addTable">
+          <template #icon>
+            <n-icon>
+              <Box20Filled />
+            </n-icon>
+          </template>
+          新建出库计划
+        </n-button>
+        <n-button v-if="typeMission === '审核看板'" type="primary" @click="checkDetailInfo">
           <template #icon>
             <n-icon>
               <Box20Filled />
             </n-icon>
           </template>
           审核
+        </n-button>
+        <n-button v-if="typeMission === '报价看板'" type="primary" @click="showOfferPrice = true">
+          <template #icon>
+            <n-icon>
+              <Box20Filled />
+            </n-icon>
+          </template>
+          报价
         </n-button>
       </filter-bar>
       <div class="my-2"></div>
@@ -68,7 +76,7 @@
         style="width: 90%; min-width: 600px; max-width: 1200px"
         title="出库计划"
       >
-        <new-outbound-plan @saved="reloadTable" />
+        <new-outbound-plan :model="checkedRows" @saved="reloadTable" />
       </n-modal>
       <n-modal
         v-model:show="editDetailModel"
@@ -115,12 +123,21 @@
       >
         <time-line :ids="currentId" />
       </n-modal>
+      <n-modal
+        v-model:show="showOfferPrice"
+        :show-icon="false"
+        preset="card"
+        style="width: 90%; min-width: 800px; max-width: 800px"
+        title="报价表"
+      >
+        <offer-price-dialog :ids="checkedRows" @save="reloadTable" />
+      </n-modal>
     </div>
   </n-card>
 </template>
 
 <script lang="ts" setup>
-  import { Component, h, onMounted, reactive, ref } from 'vue';
+  import { Component, h, onMounted, reactive, ref, watch } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { $ref } from 'vue/macros';
@@ -144,6 +161,12 @@
   import { getTableHeader } from '@/api/dataLayer/common/TableHeader';
   import TimeLine from '@/views/newViews/Missions/AlreadyWarehousing/TimeLine.vue';
   import { useUserStore } from '@/store/modules/user';
+  import {
+    checkedObj,
+    offerObj,
+    planObj,
+  } from '@/views/newViews/Missions/AlreadyWarehousing/selectionType';
+  import OfferPriceDialog from '@/views/newViews/Missions/AlreadyWarehousing/OfferPriceDialog.vue';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -152,9 +175,9 @@
   let addNewFeeDialog = $ref(false);
   let checkedRows = $ref([]);
   let currentModel: any | null = $ref(null);
-  let typeTab = $ref(['整柜任务看板', '存仓看板']);
+  let typeTab = $ref(['整柜任务看板', '审核看板', '报价看板', '存仓看板']);
   let monthTab: any | null = $ref(null);
-  let typeMission: any | null = $ref('');
+  let typeMission = ref('');
   let selectedMonth: any | null = $ref('');
   let currentData: any | null = $ref('');
   let recordData: any | null = $ref('');
@@ -165,6 +188,8 @@
   let currentColumns = $ref([]);
   let currentId = $ref('');
   let showTimeLine = $ref(false);
+  let currentWithOutSelection = $ref([]);
+  let showOfferPrice = $ref(false);
   const actionRef = ref();
   const props = defineProps<Prop>();
   interface Prop {
@@ -178,7 +203,6 @@
 
   async function selectedHeader() {
     showCurrentHeaderDataTable = true;
-    console.log(columns, 'columns');
   }
 
   async function startAddTray(id) {
@@ -224,13 +248,21 @@
   }
 
   const loadDataTable = async () => {
-    if (typeMission === '整柜任务看板') {
+    if (typeMission.value === '整柜任务看板') {
       allList = (await NotifyDetailManager.load(filterObj)).filter(
         (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
       );
-    } else {
+    } else if (typeMission.value === '存仓看板') {
       allList = (await NotifyDetailManager.load(filterObj))
         .filter((it) => it.inStatus === '存仓')
+        .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
+    } else if (typeMission.value === '审核看板') {
+      allList = (await NotifyDetailManager.load(filterObj))
+        .filter((it) => it.inStatus === '等待提交' || it.inStatus === '等待审核')
+        .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
+    } else if (typeMission.value === '报价看板') {
+      allList = (await NotifyDetailManager.load(filterObj))
+        .filter((it) => it.offerPriceInfo)
         .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
     }
     allList.forEach((it) => {
@@ -263,18 +295,34 @@
     addNewFeeDialog = true;
   }
 
+  watch(
+    typeMission,
+    async (value, oldValue) => {
+      if (value !== oldValue) {
+        await reloadHeader();
+      }
+    },
+    { immediate: true, deep: true }
+  );
+
   async function reloadHeader() {
-    currentColumns = [];
+    currentWithOutSelection = [];
     currentHeader = await getTableHeader('mission');
     currentHeader.forEach((item) => {
       const res = columns.find((it) => it.key === item.key);
-      currentColumns.push(res);
+      currentWithOutSelection.push(res);
     });
-    const selectionType = columns.find((x) => x.type === 'selection');
-    if (selectionType) {
-      currentColumns.unshift(selectionType);
+    currentWithOutSelection =
+      currentWithOutSelection.length > 0 ? currentWithOutSelection : columns;
+    if (typeMission.value === '整柜任务看板') {
+      currentColumns = [planObj, ...currentWithOutSelection];
+    } else if (typeMission.value === '审核看板') {
+      currentColumns = [checkedObj, ...currentWithOutSelection];
+    } else if (typeMission.value === '报价看板') {
+      currentColumns = [offerObj, ...currentWithOutSelection];
+    } else {
+      currentColumns = [...currentWithOutSelection];
     }
-    currentColumns = currentColumns.length > 0 ? currentColumns : columns;
     showCurrentHeaderDataTable = false;
   }
 
@@ -284,6 +332,7 @@
     addNewFeeDialog = false;
     addNewTrayDialog = false;
     showCurrentHeaderDataTable = false;
+    showOfferPrice = false;
     await actionRef.value[0].reload();
   }
 
@@ -300,8 +349,8 @@
 
   onMounted(async () => {
     await reloadHeader();
+    typeMission.value = '整柜任务看板';
     monthTab = OneYearMonthTab();
-    typeMission = '整柜任务看板';
     selectedMonth = monthTab[0];
     const res = getQueryString('containerId');
     if (res) {

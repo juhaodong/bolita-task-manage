@@ -60,7 +60,7 @@ export const columns: DataTableColumns = [
     title: '地址',
     key: 'deliveryAddress',
   },
-  timeColumn('reservationOutboundDate', '预约取货时间'),
+  timeColumn('reservationOutboundDate', '预约送货时间'),
   {
     title: 'ISA',
     key: 'ISA',

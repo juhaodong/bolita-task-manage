@@ -1,13 +1,15 @@
 <script lang="ts" setup>
-  import { computed, watchEffect } from 'vue';
+  import { computed, h, watchEffect } from 'vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
   import { getNotifyDetailListByNotify } from '@/api/dataLayer/modules/notify/notify-detail';
   import { dayjsDateByYMD } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
-  import { DataTableColumns } from 'naive-ui';
+  import { DataTableColumns, NTag } from 'naive-ui';
   import { flatMap, groupBy } from 'lodash';
   import FileSaver from 'file-saver';
+  import { randomContainColorList } from '@/api/dataLayer/common/ColorList';
+  import { safeSumBy } from '@/store/utils/utils';
 
   interface Props {
     notifyId: string;
@@ -25,13 +27,15 @@
     return dayjsDateByYMD(notifyInfo?.planArriveDateTime) ?? dayjs().format('YYYY-MM-DD');
   });
 
+  function getTotalNumber(list) {
+    return safeSumBy(list, 'number');
+  }
+
   async function reload() {
     if (props.notifyId != null) {
       notifyInfo = await NotifyManager.getById(props.notifyId);
       const res = await getNotifyDetailListByNotify(props.notifyId);
-      console.log(res, 'res');
-      currentTaskList = flatMap(groupBy(res, 'FCAddress'));
-      currentTaskList.forEach((it) => {
+      res.forEach((it) => {
         if (it.outboundMethod === '存仓') {
           it.Anmerkung = 'Im Lager';
         } else if (it.outboundMethod === '大件托盘') {
@@ -58,6 +62,18 @@
           it.Adresse = '-';
         }
       });
+      let groupByInfo = groupBy(res, 'Adresse');
+      let containIndex = 0;
+      for (const item in groupByInfo) {
+        const totalNumber = getTotalNumber(groupByInfo[item]);
+        const containColorIndex = containIndex % randomContainColorList.length;
+        groupByInfo[item].forEach((x) => {
+          x.totalNumberColor = randomContainColorList[containColorIndex];
+          x.unloadingTotalNumber = totalNumber;
+        });
+        containIndex = containIndex + 1;
+      }
+      currentTaskList = flatMap(groupByInfo);
       emit('refresh');
     }
   }
@@ -70,7 +86,7 @@
       notifyInfo?.arrivedCount,
       planArriveTime.value,
     ];
-    let dataStrings = ['Kenzeichen,FBA,Menge,R/F,Pal Menge,Pal Type,adresse,Anmerkung'];
+    let dataStrings = ['Kenzeichen,FBA,Menge,Gesamt,R/F,Pal Menge,Pal Type,adresse,Anmerkung'];
     dataStrings.unshift(headerDate);
     dataStrings.unshift(headerTitle);
     currentTaskList.forEach((it) => {
@@ -78,6 +94,7 @@
         it.ticketId,
         it.FBADeliveryCode,
         it.number,
+        it.unloadingTotalNumber,
         '',
         '',
         '',
@@ -95,7 +112,21 @@
     { title: 'Kenzeichen', key: 'ticketId' },
     { title: 'FBA', key: 'FBADeliveryCode', width: 150 },
     { title: 'Menge', key: 'number' },
-    // { title: 'Gesamt', key: 'outBoundContainerNum' },
+    {
+      title: 'Gesamt',
+      key: 'unloadingTotalNumber',
+      render(row) {
+        return h(
+          NTag,
+          {
+            color: { borderColor: row.totalNumberColor },
+          },
+          {
+            default: () => row.unloadingTotalNumber,
+          }
+        );
+      },
+    },
     { title: 'R/F', key: 'fakeDate' },
     { title: 'Pal Menge', key: 'fakeDate' },
     { title: 'Pal Type', key: 'fakeDate' },

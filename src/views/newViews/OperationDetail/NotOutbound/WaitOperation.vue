@@ -121,8 +121,10 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { filters } from './columns';
   import {
+    dateShowInTable,
     getFileActionButton,
     statusColumnEasy,
+    timeTableColumn,
   } from '@/views/bolita-views/composable/useableColumns';
   import { $ref } from 'vue/macros';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
@@ -195,6 +197,8 @@
       title: '出库日期',
       key: 'realOutDate',
     },
+    timeTableColumn('pickUpDateTime', '预计取货时间'),
+    timeTableColumn('reservationGetProductTime', '预约送货时间'),
     {
       title: 'Halle',
       key: 'warehouseId',
@@ -203,10 +207,6 @@
       title: '状态',
       key: 'inStatus',
     }),
-    {
-      title: '状态',
-      key: 'inStatus',
-    },
     {
       title: '详情',
       key: 'actions',
@@ -285,7 +285,13 @@
     let allList = (await getOutboundForecast(filterObj)).filter(
       (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
     );
-    currentList = allList.filter((a) => a.inStatus === CarStatus.Booked || a.inStatus === '已装车');
+    currentList = allList.filter(
+      (a) =>
+        a.inStatus === CarStatus.Booked ||
+        a.inStatus === '已装车' ||
+        a.inStatus === CarStatus.NoNeed ||
+        a.inStatus === '全部出库'
+    );
     return currentList.sort(dateCompare('createTimestamp'));
   };
   let currentModel = $ref(null);
@@ -393,13 +399,13 @@
         style: 'button',
         actions: [
           {
-            label: 'CMR',
+            label: '上传装车单',
             highlight: () => {
-              return record?.['CMRFiles']?.length > 0 ? 'success' : 'error';
+              return record?.['loadingCarDoc']?.length > 0 ? 'success' : 'error';
             },
             async onClick() {
               const upload = useUploadDialog();
-              const files = await upload.upload(record['CMRFiles']);
+              const files = await upload.upload(record['loadingCarDoc']);
               if (files.checkPassed) {
                 const obj = {};
                 obj['CMRFiles'] = files.files;
@@ -441,22 +447,6 @@
             },
             ifShow: () => {
               return !record?.unloadingFile;
-            },
-          },
-          {
-            label: '上传装车单',
-            highlight: () => {
-              return record?.['loadingCarDoc']?.length > 0 ? 'success' : 'error';
-            },
-            async onClick() {
-              const upload = useUploadDialog();
-              const files = await upload.upload(record['loadingCarDoc']);
-              if (files.checkPassed) {
-                const obj = {};
-                obj['loadingCarDoc'] = files.files;
-                await updateOutboundForecast(record.id, obj);
-              }
-              await actionRef.value[0].reload();
             },
           },
           {

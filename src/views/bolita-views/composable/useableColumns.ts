@@ -163,6 +163,18 @@ export function timeColumn(
   };
 }
 
+export function timeTableColumn(keyName, title, timeFormat = dateFormat) {
+  return {
+    title: title,
+    key: keyName,
+    width: 110,
+    render(record) {
+      const display = record[keyName] ? dayjs(record[keyName]).format(timeFormat) : '-';
+      return h('div', display);
+    },
+  };
+}
+
 export function formatColumn(keyName: string, title: string, formatter: (record: any) => string) {
   return {
     title: title,

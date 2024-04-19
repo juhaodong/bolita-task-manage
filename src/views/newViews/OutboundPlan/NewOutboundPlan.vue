@@ -58,7 +58,7 @@
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { h, onMounted, ref, watch } from 'vue';
   import { DataTableColumns, NButton } from 'naive-ui';
-  import { getReserveItems } from '@/api/dataLayer/modules/notify/notify-detail';
+  import { getDetailListById, getReserveItems } from '@/api/dataLayer/modules/notify/notify-detail';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import {
@@ -98,6 +98,7 @@
   let selectedDeliveryMethod = $ref('');
   let selectedFCAddress = $ref('');
   onMounted(async () => {
+    console.log(prop.model, 'model');
     await init();
   });
   let allNotifyDetail: any[] = $ref([]);
@@ -132,18 +133,24 @@
   let step = $ref(0);
 
   async function updateFilter(filterObj) {
-    allNotifyDetail = (await getReserveItems(filterObj))
-      .filter((a) => a.inStatus === InBoundStatus.All)
-      .filter((x) => {
-        return x.outboundMethod !== '标准托盘' && x.outboundMethod !== '大件托盘'
-          ? true
-          : !!x.detailTray;
-      })
-      .map((it) => {
+    if (prop.model.length > 0) {
+      allNotifyDetail = (await getDetailListById(prop.model)).map((it) => {
         it.originId = it.id;
         return it;
       });
-    console.log(allNotifyDetail, 'detail');
+    } else {
+      allNotifyDetail = (await getReserveItems(filterObj))
+        .filter((a) => a.inStatus === InBoundStatus.All)
+        .filter((x) => {
+          return x.outboundMethod !== '标准托盘' && x.outboundMethod !== '大件托盘'
+            ? true
+            : !!x.detailTray;
+        })
+        .map((it) => {
+          it.originId = it.id;
+          return it;
+        });
+    }
   }
 
   async function init() {
@@ -187,7 +194,6 @@
       it.outboundId = outboundId;
       it.needOfferPrice = value.needOfferPrice;
     });
-    // await OutBoundPlanManager.add(value, allNotifyDetail);
     await afterPlanDetailAdded(allNotifyDetail);
     await safeScope(() => {
       emit('saved');
@@ -289,7 +295,6 @@
       field: 'pickUpPerson',
       label: '提货方',
       displayCondition(model) {
-        console.log(model.needCar, 'needCar');
         return model.needCar === '0';
       },
     },

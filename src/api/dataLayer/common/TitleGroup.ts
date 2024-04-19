@@ -219,6 +219,14 @@ export const operationTitleGroup = [
     key: 'realOutDate',
   },
   {
+    title: '预计取货时间',
+    key: 'pickUpDateTime',
+  },
+  {
+    title: '预约送货时间',
+    key: 'reservationGetProductTime',
+  },
+  {
     title: 'Halle',
     key: 'warehouseId',
   },
