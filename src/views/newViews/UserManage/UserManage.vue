@@ -2,21 +2,22 @@
   <n-card :bordered="false" class="proCard">
     <filter-bar
       v-if="finished"
-      :form-fields="filters"
       :default-value-model="filterObj"
+      :form-fields="filters"
       @clear="updateFilter(null)"
       @submit="updateFilter"
     >
-      <n-button type="primary" @click="showAdd" size="small">新建用户</n-button>
+      <n-button size="small" type="primary" @click="showAdd">新建用户</n-button>
+      <n-button size="small" type="primary" @click="showPowerModal = true">权限管理</n-button>
     </filter-bar>
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
+      v-model:checked-row-keys="checkedRows"
       :action-column="actionColumn"
       :columns="columns"
       :request="loadDataTable"
       :row-key="(row) => row.id"
-      v-model:checked-row-keys="checkedRows"
     />
 
     <n-modal
@@ -27,6 +28,15 @@
       title="新建/编辑用户"
     >
       <new-user :model="currentModel" @saved="reloadTable" />
+    </n-modal>
+    <n-modal
+      v-model:show="showPowerModal"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 600px; max-width: 600px"
+      title="权限管理"
+    >
+      <power-list />
     </n-modal>
   </n-card>
 </template>
@@ -40,12 +50,14 @@
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { UserManager } from '@/api/dataLayer/modules/user/user';
   import NewUser from '@/views/newViews/UserManage/NewUser.vue';
+  import PowerList from '@/views/newViews/UserManage/PowerList.vue';
 
   interface Prop {
     belongsToId?: string;
   }
 
   let finished = $ref(false);
+  let showPowerModal = $ref(false);
   const props = defineProps<Prop>();
   onMounted(() => {
     if (props.belongsToId) {

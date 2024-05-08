@@ -63,3 +63,117 @@ export const filters: FormField[] = [
     field: 'department',
   },
 ];
+
+export const powerList = [
+  {
+    label: '货柜预报',
+    key: 'forecastContainer',
+    children: [
+      { label: '新建货柜预报', key: 'newForecast' },
+      { label: '修改', key: 'forecastEdit' },
+      { label: '上传卸柜单', key: 'forecastUpload' },
+      { label: '卸柜', key: 'forecastDownload' },
+      { label: '生成卸柜单', key: 'forecastCreatFile' },
+      { label: '取消', key: 'forecastCancel' },
+      { label: '结算', key: 'forecastSettle' },
+    ],
+  },
+  {
+    label: '任务明细',
+    key: 'mission',
+    children: [
+      { label: '新建出库预报', key: 'newOutbound' },
+      { label: '审核', key: 'missionCheck' },
+      { label: '报价', key: 'missionPriceOffer' },
+      { label: '修改', key: 'missionEdit' },
+      { label: '时间线', key: 'missionTimeline' },
+      { label: 'POD', key: 'missionPOD' },
+      { label: '换单文件', key: 'missionChangeFile' },
+      { label: '托盘标签', key: 'missionTrayTag' },
+      { label: '操作文件', key: 'missionOperationFile' },
+      { label: '问题图片', key: 'missionProblemPic' },
+      { label: '添加托盘', key: 'missionAddTray' },
+    ],
+  },
+  {
+    label: '仓库明细',
+    key: 'storage',
+    children: [
+      {
+        label: '出库任务',
+        key: 'outMission',
+        children: [
+          { label: '上传装车单', key: 'outMissionUploadFile' },
+          { label: '装车', key: 'outMissionUpCar' },
+          { label: '生成装车单', key: 'outMissionCreatUpCarFile' },
+          { label: '修改', key: 'outMissionEdit' },
+          { label: '结算', key: 'outMissionSettle' },
+        ],
+      },
+      {
+        label: '库内操作',
+        key: 'inStorage',
+        children: [
+          { label: '修改', key: 'inStorageEdit' },
+          { label: '结算', key: 'inStorageSettle' },
+          { label: '时间线', key: 'inStorageTimeLine' },
+          { label: 'POD', key: 'inStoragePOD' },
+          { label: '操作文件', key: 'inStorageOperationFile' },
+          { label: '问题图片', key: 'inStorageProblemPic' },
+        ],
+      },
+    ],
+  },
+  {
+    label: '订车管理',
+    key: 'car',
+    children: [
+      {
+        label: '订车管理',
+        key: 'orderCar',
+        children: [
+          { label: '提单', key: 'orderCarOrder' },
+          { label: 'CMR', key: 'orderCarCMR' },
+          { label: 'POD', key: 'orderCarPOD' },
+          { label: '修改', key: 'orderCarEdit' },
+          { label: '报价', key: 'orderCarOffer' },
+          { label: '订车', key: 'orderCarBookingCar' },
+        ],
+      },
+      {
+        label: '订车明细',
+        key: 'carDetail',
+        children: [{ label: '审核', key: 'carDetailCheck' }],
+      },
+      {
+        label: '库外订车',
+        key: 'outStorageCar',
+        children: [{ label: '新建库外订车', key: 'outStorageCarAdd' }],
+      },
+    ],
+  },
+  {
+    label: '结算管理',
+    key: 'settlement',
+    children: [
+      {
+        label: '结算管理',
+        key: 'settlementManage',
+        children: [
+          { label: '合并对账', key: 'settlementManageMerge' },
+          { label: '修改', key: 'settlementManageEdit' },
+        ],
+      },
+      {
+        label: '对账管理',
+        key: 'billManage',
+        children: [
+          { label: '修改', key: 'billManageEdit' },
+          { label: '附件', key: 'billManageFile' },
+        ],
+      },
+    ],
+  },
+  // { label: '', key: '',  },
+  // { label: '', key: '',  },
+];
