@@ -91,10 +91,12 @@
   import { NButton } from 'naive-ui';
   import ShowContainerDetailDialog from '@/views/newViews/ReconciliationManage/ShowContainerDetailDialog.vue';
   import ShowDownProductsDetailDialog from '@/views/newViews/ReconciliationManage/ShowDownProductsDetailDialog.vue';
+  import { hasAuthPower } from '@/api/dataLayer/common/power';
 
   interface Prop {
     outId?: string;
   }
+  const props = defineProps<Prop>();
   let currentIds = $ref([]);
   let showDetailInfoDialog = $ref(false);
   let showDownProductsDetailInfoDialog = $ref(false);
@@ -263,7 +265,7 @@
   ];
 
   let finished = $ref(false);
-  const props = defineProps<Prop>();
+
   onMounted(() => {
     if (props.outId) {
       filterObj = { outId: props.outId };
@@ -354,7 +356,7 @@
     key: 'action',
     width: 60,
     render(record: any) {
-      const fileAction = (label, key, icon?: Component, editable = false) => {
+      const fileAction = (label, key, icon?: Component, power) => {
         return getFileActionButton(
           label,
           key,
@@ -362,7 +364,7 @@
           reloadTable,
           record,
           icon,
-          editable
+          power
         );
       };
       return h(TableAction as any, {
@@ -373,8 +375,11 @@
             onClick() {
               startEdit(record.id);
             },
+            ifShow: () => {
+              return hasAuthPower('billManageEdit');
+            },
           },
-          fileAction('附件', 'files', Folder32Filled, true),
+          fileAction('附件', 'files', Folder32Filled, 'billManageFile'),
         ],
       });
     },

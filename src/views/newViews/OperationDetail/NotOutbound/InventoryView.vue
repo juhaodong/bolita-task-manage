@@ -108,6 +108,7 @@
   import { getTableHeader } from '@/api/dataLayer/common/TableHeader';
   import TimeLine from '@/views/newViews/Missions/AlreadyWarehousing/TimeLine.vue';
   import { useUserStore } from '@/store/modules/user';
+  import { hasAuthPower } from '@/api/dataLayer/common/power';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -239,8 +240,16 @@
     key: 'action',
     width: 120,
     render(record: any) {
-      const fileAction = (label, key, icon?: Component) => {
-        return getFileActionButton(label, key, NotifyDetailManager, reloadTable, record, icon);
+      const fileAction = (label, key, icon?: Component, power) => {
+        return getFileActionButton(
+          label,
+          key,
+          NotifyDetailManager,
+          reloadTable,
+          record,
+          icon,
+          power
+        );
       };
       return h(TableAction as any, {
         style: 'button',
@@ -250,11 +259,17 @@
             onClick() {
               startEdit(record.id);
             },
+            ifShow: () => {
+              return hasAuthPower('inStorageEdit');
+            },
           },
           {
             label: '结算',
             onClick() {
               checkCashStatus(record.id);
+            },
+            ifShow: () => {
+              return hasAuthPower('inStorageSettle');
             },
           },
           {
@@ -263,6 +278,9 @@
               currentId = record.id;
               showTimeLine = true;
             },
+            ifShow: () => {
+              return hasAuthPower('inStorageTimeLine');
+            },
           },
           {
             label: '换单文件',
@@ -270,7 +288,7 @@
               return record?.['changeOrder']?.length > 0 ? 'success' : 'error';
             },
             ifShow: () => {
-              return record?.changeOrderFiles === '是';
+              return record?.changeOrderFiles === '是' && hasAuthPower('inStorageChangeFiles');
             },
             async onClick() {
               const upload = useUploadDialog();
@@ -286,9 +304,9 @@
               actionRef.value[0].reload();
             },
           },
-          fileAction('POD', 'POD'),
-          fileAction('操作文件', 'operationFiles'),
-          fileAction('问题图片', 'problemFiles'),
+          fileAction('POD', 'POD', '', 'inStoragePOD'),
+          fileAction('操作文件', 'operationFiles', '', 'inStorageOperationFile'),
+          fileAction('问题图片', 'problemFiles', '', 'inStorageProblemPic'),
           {
             label: '添加托盘',
             onClick() {
@@ -299,7 +317,10 @@
               return record.detailTray ? 'success' : 'error';
             },
             ifShow: () => {
-              return record.outboundMethod === '大件托盘' || record.outboundMethod === '标准托盘';
+              return (
+                (record.outboundMethod === '大件托盘' || record.outboundMethod === '标准托盘') &&
+                hasAuthPower('inStorageAddTray')
+              );
             },
           },
           {
@@ -337,7 +358,7 @@
               await reloadTable();
             },
             ifShow: () => {
-              return record.operateInStorage === '是';
+              return record.operateInStorage === '是' && hasAuthPower('inStorageTurnToOut');
             },
           },
         ],

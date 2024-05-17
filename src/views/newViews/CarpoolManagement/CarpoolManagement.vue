@@ -1,7 +1,12 @@
 <template>
   <n-card :bordered="false" class="proCard">
     <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
-      <n-button :disabled="priceRules" type="primary" @click="startShareCar('offer')">
+      <n-button
+        v-if="hasAuthPower('orderCarOffer')"
+        :disabled="priceRules"
+        type="primary"
+        @click="startShareCar('offer')"
+      >
         <template #icon>
           <n-icon>
             <Box20Filled />
@@ -9,7 +14,12 @@
         </template>
         报价
       </n-button>
-      <n-button :disabled="carRules" type="primary" @click="startShareCar('car')">
+      <n-button
+        v-if="hasAuthPower('orderCarBookingCar')"
+        :disabled="carRules"
+        type="primary"
+        @click="startShareCar('car')"
+      >
         <template #icon>
           <n-icon>
             <Box20Filled />
@@ -77,6 +87,7 @@
   import dayjs from 'dayjs';
   import EditOF from '@/views/newViews/OperationDetail/NotOutbound/EditOF.vue';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
+  import { hasAuthPower } from '@/api/dataLayer/common/power';
 
   const showModal = ref(false);
 
@@ -195,16 +206,8 @@
     key: 'action',
     width: 120,
     render(record: any) {
-      const fileAction = (label, key, disableClick, icon?: Component) => {
-        return getFileActionButtonByOutForecast(
-          label,
-          key,
-          reloadTable,
-          record,
-          icon,
-          true,
-          disableClick
-        );
+      const fileAction = (label, key, icon?: Component, power) => {
+        return getFileActionButtonByOutForecast(label, key, reloadTable, record, icon, power);
       };
       return h(TableAction as any, {
         style: 'button',
@@ -214,10 +217,13 @@
             onClick() {
               startEditOF(record.id);
             },
+            ifShow: () => {
+              return hasAuthPower('orderCarEdit');
+            },
           },
-          fileAction('提单', 'pickupFiles', !SubmitOrderOperate.value),
-          fileAction('POD', 'PODFiles', !PODOperate.value),
-          fileAction('CMR', 'CMRFiles', !BillOperate.value),
+          fileAction('提单', 'pickupFiles', '', 'orderCarOrder'),
+          fileAction('POD', 'PODFiles', '', 'orderCarPOD'),
+          fileAction('CMR', 'CMRFiles', '', 'orderCarCMR'),
         ],
       });
     },

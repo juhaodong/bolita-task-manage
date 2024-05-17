@@ -6,6 +6,7 @@ import { NInput, NText } from 'naive-ui';
 import { Model } from '@/api/dataLayer/common/GeneralModel';
 import { safeParseInt } from '@/store/utils/utils';
 import { updateOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+import { hasAuthPower } from '@/api/dataLayer/common/power';
 
 export const standardDateFormat = 'YYYY-MM-DD/HH:mm';
 export const dateFormat = 'DD/MM/YYYY';
@@ -254,6 +255,7 @@ export function getFileActionButton(
   reload: any,
   record: any,
   icon?: Component,
+  power?: string,
   editable = true,
   permissions = null
 ) {
@@ -262,6 +264,9 @@ export function getFileActionButton(
     icon: icon ?? null,
     highlight: () => {
       return record?.[key]?.length > 0 ? 'success' : 'default';
+    },
+    ifShow: () => {
+      return hasAuthPower(power);
     },
     async onClick() {
       const upload = useUploadDialog();

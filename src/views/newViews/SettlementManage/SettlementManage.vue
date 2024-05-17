@@ -7,7 +7,11 @@
       @clear="updateFilter(null)"
       @submit="updateFilter"
     >
-      <n-button :disabled="checkedRows.length == 0" @click="merge()">
+      <n-button
+        v-if="hasAuthPower('settlementManageMerge')"
+        :disabled="checkedRows.length == 0"
+        @click="merge()"
+      >
         <template #icon>
           <n-icon>
             <Box20Filled />
@@ -109,6 +113,7 @@
   import NotifyFeeDialog from '@/views/newViews/NotifyList/form/NotifyFeeDialog.vue';
   import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
   import { CashCollectionStatus } from '@/views/newViews/ReconciliationManage/columns';
+  import { hasAuthPower } from '@/api/dataLayer/common/power';
 
   interface Prop {
     outId?: string;
@@ -244,7 +249,11 @@
               startEdit(record.id);
             },
             ifShow: () => {
-              return typeMission === '货柜结算' && record.finalStatus !== '已对账';
+              return (
+                typeMission === '货柜结算' &&
+                record.finalStatus !== '已对账' &&
+                hasAuthPower('settlementManageEdit')
+              );
             },
           },
           {

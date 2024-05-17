@@ -9,7 +9,7 @@ const routes: Array<RouteRecordRaw> = [
     name: 'operationDetail',
     component: Layout,
     meta: {
-      title: '操作明细',
+      title: '仓库明细',
       sort: 3,
       isRoot: true,
       icon: renderIcon(Box),

@@ -73,6 +73,7 @@
     updateOutboundForecast,
   } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import { safeSumBy } from '@/store/utils/utils';
+  import { hasAuthPower } from '@/api/dataLayer/common/power';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -211,7 +212,10 @@
               await reloadTable();
             },
             ifShow: () => {
-              return record.inStatus === '存仓' || record.inStatus === '库内操作';
+              return (
+                (record.inStatus === '存仓' || record.inStatus === '库内操作') &&
+                hasAuthPower('carDetailCheck')
+              );
             },
           },
         ],

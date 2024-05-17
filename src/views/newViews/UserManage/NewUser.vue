@@ -11,8 +11,9 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { generateOptionFromArray } from '@/store/utils/utils';
-  import { UserType } from '@/views/newViews/UserManage/columns';
+  import { UserType, UserTypeByArray } from '@/views/newViews/UserManage/columns';
   import { UserManager } from '@/api/dataLayer/modules/user/user';
+  import { getUserTypePowerList } from '@/api/dataLayer/common/power';
 
   interface Props {
     model?: any;
@@ -88,6 +89,8 @@
   async function handleSubmit(values: any) {
     loading = true;
     await safeScope(async () => {
+      const res = UserTypeByArray.find((it) => it.label === values.userType);
+      values.authPower = (await getUserTypePowerList(res.value)) ?? [];
       if (prop?.model?.id) {
         await UserManager.editInternal(values, prop.model.id);
       } else {

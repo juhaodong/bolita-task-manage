@@ -10,7 +10,11 @@
           </template>
           选择表头显示
         </n-button>
-        <n-button v-if="typeMission === '整柜任务看板'" type="primary" @click="addTable">
+        <n-button
+          v-if="typeMission === '整柜任务看板' && hasAuthPower('missionOutboundAdd')"
+          type="primary"
+          @click="addTable"
+        >
           <template #icon>
             <n-icon>
               <Box20Filled />
@@ -18,7 +22,11 @@
           </template>
           新建出库计划
         </n-button>
-        <n-button v-if="typeMission === '审核看板'" type="primary" @click="checkDetailInfo">
+        <n-button
+          v-if="typeMission === '审核看板' && hasAuthPower('missionCheck')"
+          type="primary"
+          @click="checkDetailInfo"
+        >
           <template #icon>
             <n-icon>
               <Box20Filled />
@@ -26,7 +34,11 @@
           </template>
           审核
         </n-button>
-        <n-button v-if="typeMission === '报价看板'" type="primary" @click="showOfferPrice = true">
+        <n-button
+          v-if="typeMission === '报价看板' && hasAuthPower('missionPriceOffer')"
+          type="primary"
+          @click="showOfferPrice = true"
+        >
           <template #icon>
             <n-icon>
               <Box20Filled />
@@ -167,6 +179,7 @@
     planObj,
   } from '@/views/newViews/Missions/AlreadyWarehousing/selectionType';
   import OfferPriceDialog from '@/views/newViews/Missions/AlreadyWarehousing/OfferPriceDialog.vue';
+  import { hasAuthPower } from '@/api/dataLayer/common/power';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -368,8 +381,16 @@
     key: 'action',
     width: 120,
     render(record: any) {
-      const fileAction = (label, key, icon?: Component) => {
-        return getFileActionButton(label, key, NotifyDetailManager, reloadTable, record, icon);
+      const fileAction = (label, key, icon?: Component, power) => {
+        return getFileActionButton(
+          label,
+          key,
+          NotifyDetailManager,
+          reloadTable,
+          record,
+          icon,
+          power
+        );
       };
       return h(TableAction as any, {
         style: 'button',
@@ -379,11 +400,17 @@
             onClick() {
               startEdit(record.id);
             },
+            ifShow: () => {
+              return hasAuthPower('missionEdit');
+            },
           },
           {
             label: '结算',
             onClick() {
               checkCashStatus(record.id);
+            },
+            ifShow: () => {
+              return hasAuthPower('missionSettle');
             },
           },
           {
@@ -395,7 +422,7 @@
               return 'info';
             },
             ifShow: () => {
-              return record?.['needOfferPrice'] === '1';
+              return record?.['needOfferPrice'] === '1' && hasAuthPower('missionPriceOffer');
             },
           },
           {
@@ -404,6 +431,9 @@
               currentId = record.id;
               showTimeLine = true;
             },
+            ifShow: () => {
+              return hasAuthPower('missionTimeline');
+            },
           },
           {
             label: '换单文件',
@@ -411,7 +441,7 @@
               return record?.['changeOrder']?.length > 0 ? 'success' : 'error';
             },
             ifShow: () => {
-              return record?.changeOrderFiles === '是';
+              return record?.changeOrderFiles === '是' && hasAuthPower('missionChangeFile');
             },
             async onClick() {
               const upload = useUploadDialog();
@@ -442,7 +472,9 @@
             },
             ifShow: () => {
               return (
-                record?.deliveryMethod === 'FBA卡车派送' && record?.outboundMethod === '标准托盘'
+                record?.deliveryMethod === 'FBA卡车派送' &&
+                record?.outboundMethod === '标准托盘' &&
+                hasAuthPower('missionTrayTag')
               );
             },
             async onClick() {
@@ -464,9 +496,9 @@
               actionRef.value[0].reload();
             },
           },
-          fileAction('POD', 'POD'),
-          fileAction('操作文件', 'operationFiles'),
-          fileAction('问题图片', 'problemFiles'),
+          fileAction('POD', 'POD', '', 'missionPOD'),
+          fileAction('操作文件', 'operationFiles', '', 'missionOperationFile'),
+          fileAction('问题图片', 'problemFiles', '', 'missionProblemPic'),
           {
             label: '添加托盘',
             onClick() {
@@ -477,7 +509,10 @@
               return record.detailTray ? 'success' : 'error';
             },
             ifShow: () => {
-              return record.outboundMethod === '大件托盘' || record.outboundMethod === '标准托盘';
+              return (
+                (record.outboundMethod === '大件托盘' || record.outboundMethod === '标准托盘') &&
+                hasAuthPower('missionAddTray')
+              );
             },
           },
           {

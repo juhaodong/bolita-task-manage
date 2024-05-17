@@ -26,6 +26,7 @@ export interface IUserState {
   permissions: any[];
   info?: BaseUser;
   powerList: any[];
+  authPower: any[];
 }
 
 export const useUserStore = defineStore({
@@ -38,6 +39,7 @@ export const useUserStore = defineStore({
     permissions: [],
     powerList: [],
     info: storage.get(CURRENT_USER, {}),
+    authPower: [],
   }),
   getters: {
     getPowerList(): [any][] {
@@ -78,6 +80,9 @@ export const useUserStore = defineStore({
     setUserInfo(info?: BaseUser) {
       this.info = info;
     },
+    setAuthPower(list) {
+      this.authPower = list;
+    },
     // 登录
     async login(params: any) {
       const response = await login(params);
@@ -97,6 +102,7 @@ export const useUserStore = defineStore({
     // 获取用户信息
     async getInfo() {
       const { result } = await getUserInfoApi();
+      console.log(result, 'result');
       if (result.permissions && result.permissions.length) {
         const permissionsList = generateOptionFromArray(result.permissions);
         this.setPermissions(permissionsList);
@@ -105,6 +111,7 @@ export const useUserStore = defineStore({
         storage.set(CUSTOMER_ID, result.belongsToId);
         this.setPowerList(powerList);
         this.setUserInfo(result);
+        this.setAuthPower(result.authPower);
       } else {
         throw new Error('getInfo: permissionsList must be a non-null array !');
       }

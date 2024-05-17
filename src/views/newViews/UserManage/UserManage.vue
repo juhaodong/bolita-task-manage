@@ -36,7 +36,7 @@
       style="width: 90%; min-width: 600px; max-width: 600px"
       title="权限管理"
     >
-      <power-list />
+      <power-list :auth="authInfo" @saved="reloadTable" />
     </n-modal>
   </n-card>
 </template>
@@ -44,18 +44,75 @@
 <script lang="ts" setup>
   import { h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { columns, filters } from './columns';
+  import { filters } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import { UserManager } from '@/api/dataLayer/modules/user/user';
   import NewUser from '@/views/newViews/UserManage/NewUser.vue';
   import PowerList from '@/views/newViews/UserManage/PowerList.vue';
+  import { NButton } from 'naive-ui';
+  import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
 
   interface Prop {
     belongsToId?: string;
   }
-
+  const columns = [
+    {
+      title: '用户名',
+      key: 'userName',
+    },
+    {
+      title: '名称',
+      key: 'realName',
+    },
+    {
+      title: '公司',
+      key: 'company',
+    },
+    {
+      title: '部门',
+      key: 'department',
+    },
+    {
+      title: '用户类型',
+      key: 'userType',
+    },
+    {
+      title: '备注',
+      key: 'note',
+    },
+    {
+      title: '登录名',
+      key: 'loginName',
+    },
+    {
+      title: '密码',
+      key: 'password',
+    },
+    {
+      title: '查看权限',
+      key: 'actions',
+      render(row) {
+        return h(
+          NButton,
+          {
+            strong: true,
+            tertiary: true,
+            size: 'small',
+            onClick: () => {
+              console.log(row, 'row');
+              authInfo = row;
+              showPowerModal = true;
+            },
+          },
+          { default: () => '查看' }
+        );
+      },
+    },
+    timeColumn(),
+  ];
+  let authInfo = $ref([]);
   let finished = $ref(false);
   let showPowerModal = $ref(false);
   const props = defineProps<Prop>();
@@ -97,6 +154,7 @@
 
   function reloadTable() {
     actionRef.value.reload();
+    showPowerModal = false;
     showModal.value = false;
   }
 

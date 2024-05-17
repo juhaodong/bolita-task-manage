@@ -1,7 +1,9 @@
 <template>
   <n-card :bordered="false" class="proCard">
     <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
-      <n-button size="small" type="info" @click="addOut"> 外部仓库新建 </n-button>
+      <n-button v-if="hasAuthPower('outStorageCarAdd')" size="small" type="info" @click="addOut">
+        外部仓库新建
+      </n-button>
     </filter-bar>
     <div class="my-2"></div>
     <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
@@ -45,6 +47,7 @@
   import { getOutboundForecastByOut } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
+  import { hasAuthPower } from '@/api/dataLayer/common/power';
 
   const showModal = ref(false);
 
@@ -96,30 +99,21 @@
     width: 120,
     render(record: any) {
       const fileAction = (label, key, disableClick, icon?: Component) => {
-        return getFileActionButton(
-          label,
-          key,
-          CarpoolManager,
-          reloadTable,
-          record,
-          icon,
-          true,
-          disableClick
-        );
+        return getFileActionButton(label, key, CarpoolManager, reloadTable, record, icon);
       };
       return h(TableAction as any, {
         style: 'button',
         actions: [
           {
             label: '修改',
-            async onClick() {
+            onClick() {
               data = record;
               showModal.value = true;
-              console.log(record, 'record');
+            },
+            ifShow: () => {
+              return hasAuthPower('outStorageEdit');
             },
           },
-          fileAction('提单', 'pickupFiles', false),
-          fileAction('POD', 'PODFiles', false),
           {
             label: '已截停',
             highlight: () => {

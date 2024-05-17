@@ -121,7 +121,6 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { filters } from './columns';
   import {
-    dateShowInTable,
     getFileActionButton,
     statusColumnEasy,
     timeTableColumn,
@@ -160,8 +159,7 @@
   import { useUploadDialog } from '@/store/modules/uploadFileState';
   import LoadingCarDoc from '@/views/newViews/OperationDetail/NotOutbound/LoadingCarDoc.vue';
   import { useUserStore } from '@/store/modules/user';
-
-  const { hasPermission } = usePermission();
+  import { hasAuthPower } from '@/api/dataLayer/common/power';
 
   const showModal = ref(false);
   let showShareCarModel = $ref(false);
@@ -430,6 +428,9 @@
               }
               await actionRef.value[0].reload();
             },
+            ifShow: () => {
+              return hasAuthPower('outMissionUploadFile');
+            },
           },
           {
             label: '装车',
@@ -437,6 +438,9 @@
               currentInfo = record;
               currentId = record?.outboundDetailInfo;
               showLoadingCarListDialog = true;
+            },
+            ifShow: () => {
+              return hasAuthPower('outMissionUpCar');
             },
           },
           {
@@ -446,7 +450,7 @@
               showLoadingCarDoc = true;
             },
             ifShow: () => {
-              return !record?.unloadingFile;
+              return !record?.unloadingFile && hasAuthPower('outMissionCreatUpCarFile');
             },
           },
           {
@@ -454,12 +458,18 @@
             onClick() {
               startEditOF(record.id);
             },
+            ifShow: () => {
+              return hasAuthPower('outMissionEdit');
+            },
           },
           {
             label: '结算',
             onClick() {
               currentInfo = record;
               showFeeDialog = true;
+            },
+            ifShow: () => {
+              return hasAuthPower('outMissionSettle');
             },
           },
           {

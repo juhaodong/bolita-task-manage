@@ -1,53 +1,24 @@
-import { DataTableColumns } from 'naive-ui';
-import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-
-export const columns: DataTableColumns = [
-  {
-    title: '用户名',
-    key: 'userName',
-  },
-  {
-    title: '名称',
-    key: 'realName',
-  },
-  {
-    title: '公司',
-    key: 'company',
-  },
-  {
-    title: '部门',
-    key: 'department',
-  },
-  {
-    title: '用户类型',
-    key: 'userType',
-  },
-  {
-    title: '备注',
-    key: 'note',
-  },
-  {
-    title: '登录名',
-    key: 'loginName',
-  },
-  {
-    title: '密码',
-    key: 'password',
-  },
-  timeColumn(),
-];
 
 export enum UserType {
   Manager = '管理员',
   Customer = '客户',
-  CustomerManage = '客户管理员',
-  CustomerService = '客户服务',
-  Operator = '操作员',
-  Sales = '业务员',
-  Logistic = '物流',
-  Cash = '结算',
+  Storage = '仓库',
+  FrontOperations = '运营部前端',
+  BackendOperations = '运营部后端',
+  Logistic = '物流部',
+  Cash = '结算部门',
 }
+
+export const UserTypeByArray = [
+  { label: '管理员', value: 'Manager' },
+  { label: '客户', value: 'Customer' },
+  { label: '仓库', value: 'Storage' },
+  { label: '运营部前端', value: 'FrontOperations' },
+  { label: '运营部后端', value: 'BackendOperations' },
+  { label: '物流部', value: 'Logistic' },
+  { label: '结算部门', value: 'Cash' },
+];
 
 export const filters: FormField[] = [
   {
@@ -69,7 +40,7 @@ export const powerList = [
     label: '货柜预报',
     key: 'forecastContainer',
     children: [
-      { label: '新建货柜预报', key: 'newForecast' },
+      { label: '新建货柜预报', key: 'forecastAdd' },
       { label: '修改', key: 'forecastEdit' },
       { label: '上传卸柜单', key: 'forecastUpload' },
       { label: '卸柜', key: 'forecastDownload' },
@@ -82,9 +53,10 @@ export const powerList = [
     label: '任务明细',
     key: 'mission',
     children: [
-      { label: '新建出库预报', key: 'newOutbound' },
+      { label: '新建出库计划', key: 'missionOutboundAdd' },
       { label: '审核', key: 'missionCheck' },
       { label: '报价', key: 'missionPriceOffer' },
+      { label: '结算', key: 'missionSettle' },
       { label: '修改', key: 'missionEdit' },
       { label: '时间线', key: 'missionTimeline' },
       { label: 'POD', key: 'missionPOD' },
@@ -117,6 +89,9 @@ export const powerList = [
           { label: '修改', key: 'inStorageEdit' },
           { label: '结算', key: 'inStorageSettle' },
           { label: '时间线', key: 'inStorageTimeLine' },
+          { label: '换单文件', key: 'inStorageChangeFiles' },
+          { label: '添加托盘', key: 'inStorageAddTray' },
+          { label: '转库外', key: 'inStorageTurnToOut' },
           { label: 'POD', key: 'inStoragePOD' },
           { label: '操作文件', key: 'inStorageOperationFile' },
           { label: '问题图片', key: 'inStorageProblemPic' },
@@ -148,7 +123,10 @@ export const powerList = [
       {
         label: '库外订车',
         key: 'outStorageCar',
-        children: [{ label: '新建库外订车', key: 'outStorageCarAdd' }],
+        children: [
+          { label: '新建库外订车', key: 'outStorageCarAdd' },
+          { label: '修改', key: 'outStorageEdit' },
+        ],
       },
     ],
   },
@@ -174,6 +152,4 @@ export const powerList = [
       },
     ],
   },
-  // { label: '', key: '',  },
-  // { label: '', key: '',  },
 ];

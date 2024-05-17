@@ -1,7 +1,12 @@
 <template>
   <n-card :bordered="false" class="proCard">
     <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
-      <n-button size="small" type="info" @click="addTable(NotifyType.Container)">
+      <n-button
+        v-if="hasAuthPower('forecastAdd')"
+        size="small"
+        type="info"
+        @click="addTable(NotifyType.Container)"
+      >
         <template #icon>
           <n-icon>
             <Box20Filled />
@@ -126,7 +131,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, h, onMounted, reactive, ref } from 'vue';
+  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
@@ -151,6 +156,7 @@
   import UnloadingList from '@/views/newViews/ContainerForecast/form/UnloadingList.vue';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
   import { getTableHeader } from '@/api/dataLayer/common/TableHeader';
+  import { hasAuthPower } from '@/api/dataLayer/common/power';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
   let currentModel: any | null = $ref(null);
@@ -183,7 +189,6 @@
     const res = (await NotifyManager.load(filterObj)).filter(
       (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
     );
-    console.log(res, 'res');
     return res.sort(dateCompare('planArriveDateTime'));
   };
 
@@ -251,8 +256,8 @@
     key: 'action',
     width: 120,
     render(record: any) {
-      const fileAction = (label, key, icon?: Component) => {
-        return getFileActionButton(label, key, NotifyManager, reloadTable, record, icon);
+      const fileAction = (label, key, icon?: Component, power) => {
+        return getFileActionButton(label, key, NotifyManager, reloadTable, record, icon, power);
       };
       return h(TableAction as any, {
         style: 'button',
@@ -262,8 +267,11 @@
             onClick() {
               startEdit(record.id);
             },
+            ifShow: () => {
+              return hasAuthPower('forecastEdit');
+            },
           },
-          fileAction('上传卸柜单', 'unloadingFile'),
+          fileAction('上传卸柜单', 'unloadingFile', '', 'forecastUpload'),
           {
             label: '生成卸柜单',
             onClick() {
@@ -271,7 +279,7 @@
               showUnloadingList = true;
             },
             ifShow: () => {
-              return !record?.unloadingFile;
+              return hasAuthPower('forecastCreatFile') && !record?.unloadingFile;
             },
           },
           {
@@ -279,6 +287,9 @@
             onClick() {
               currentNotifyId = record.id!;
               showOperationTable = true;
+            },
+            ifShow: () => {
+              return hasAuthPower('forecastDownload');
             },
           },
           {
@@ -301,6 +312,9 @@
                 reloadTable();
               });
             },
+            ifShow: () => {
+              return hasAuthPower('forecastCancel');
+            },
           },
           {
             label: '结算',
@@ -308,6 +322,9 @@
               if (record?.editValue?.cashStatus == CashStatus.Done) {
                 return 'success';
               }
+            },
+            ifShow: () => {
+              return hasAuthPower('forecastSettle');
             },
             onClick() {
               currentNotifyId = record.id!;
