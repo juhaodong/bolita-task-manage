@@ -1,5 +1,5 @@
 <template>
-  <n-card :bordered="false" class="proCard">
+  <n-card v-if="hasAuthPower('outMissionView')" :bordered="false" class="proCard">
     <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
       <n-button type="primary" @click="selectedHeader">
         <template #icon>
@@ -113,6 +113,7 @@
       <loading-car-doc @save="reloadTable" :notify-id="currentNotifyId!" />
     </n-modal>
   </n-card>
+  <no-power-page v-else />
 </template>
 
 <script lang="ts" setup>
@@ -160,6 +161,7 @@
   import LoadingCarDoc from '@/views/newViews/OperationDetail/NotOutbound/LoadingCarDoc.vue';
   import { useUserStore } from '@/store/modules/user';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
+  import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
 
   const showModal = ref(false);
   let showShareCarModel = $ref(false);

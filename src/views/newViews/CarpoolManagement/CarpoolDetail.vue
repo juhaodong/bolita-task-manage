@@ -1,5 +1,5 @@
 <template>
-  <n-card :bordered="false" class="proCard">
+  <n-card v-if="hasAuthPower('carDetailView')" :bordered="false" class="proCard">
     <div>
       <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
         <n-button type="primary" @click="selectedHeader">
@@ -49,6 +49,7 @@
       </n-modal>
     </div>
   </n-card>
+  <no-power-page v-else />
 </template>
 
 <script lang="ts" setup>
@@ -74,6 +75,7 @@
   } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import { safeSumBy } from '@/store/utils/utils';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
+  import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);

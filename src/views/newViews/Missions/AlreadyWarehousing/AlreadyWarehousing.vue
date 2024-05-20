@@ -62,23 +62,26 @@
           :name="currentType"
           :tab="currentType"
         >
-          <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
-            <n-tab-pane
-              v-for="currentMonth in monthTab"
-              :key="currentMonth"
-              :name="currentMonth"
-              :tab="currentMonth"
-            >
-              <BasicTable
-                ref="actionRef"
-                v-model:checked-row-keys="checkedRows"
-                :actionColumn="actionColumn"
-                :columns="currentColumns"
-                :request="loadDataTable"
-                :row-key="(row) => row.id"
-              />
-            </n-tab-pane>
-          </n-tabs>
+          <div v-if="hasPagePower">
+            <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
+              <n-tab-pane
+                v-for="currentMonth in monthTab"
+                :key="currentMonth"
+                :name="currentMonth"
+                :tab="currentMonth"
+              >
+                <BasicTable
+                  ref="actionRef"
+                  v-model:checked-row-keys="checkedRows"
+                  :actionColumn="actionColumn"
+                  :columns="currentColumns"
+                  :request="loadDataTable"
+                  :row-key="(row) => row.id"
+                />
+              </n-tab-pane>
+            </n-tabs>
+          </div>
+          <no-power-page v-else />
         </n-tab-pane>
       </n-tabs>
       <n-modal
@@ -149,7 +152,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, h, onMounted, reactive, ref, watch } from 'vue';
+  import { Component, computed, h, onMounted, reactive, ref, watch } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { $ref } from 'vue/macros';
@@ -180,6 +183,7 @@
   } from '@/views/newViews/Missions/AlreadyWarehousing/selectionType';
   import OfferPriceDialog from '@/views/newViews/Missions/AlreadyWarehousing/OfferPriceDialog.vue';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
+  import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -208,6 +212,18 @@
   interface Prop {
     belongsToId?: string;
   }
+
+  const hasPagePower = computed(() => {
+    if (typeMission.value === '整柜任务看板') {
+      return hasAuthPower('missionAllView');
+    } else if (typeMission.value === '审核看板') {
+      return hasAuthPower('missionCheckView');
+    } else if (typeMission.value === '报价看板') {
+      return hasAuthPower('missionOfferView');
+    } else if (typeMission.value === '存仓看板') {
+      return hasAuthPower('missionStorageView');
+    }
+  });
 
   async function startEdit(id) {
     currentModel = await NotifyDetailManager.getById(id);
@@ -311,6 +327,7 @@
   watch(
     typeMission,
     async (value, oldValue) => {
+      console.log(value, 'value');
       if (value !== oldValue) {
         await reloadHeader();
       }

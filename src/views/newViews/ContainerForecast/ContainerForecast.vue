@@ -1,133 +1,136 @@
 <template>
-  <n-card :bordered="false" class="proCard">
-    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
-      <n-button
-        v-if="hasAuthPower('forecastAdd')"
-        size="small"
-        type="info"
-        @click="addTable(NotifyType.Container)"
+  <div>
+    <n-card v-if="hasAuthPower('forecastView')" :bordered="false" class="proCard">
+      <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
+        <n-button
+          v-if="hasAuthPower('forecastAdd')"
+          size="small"
+          type="info"
+          @click="addTable(NotifyType.Container)"
+        >
+          <template #icon>
+            <n-icon>
+              <Box20Filled />
+            </n-icon>
+          </template>
+          新建货柜预报
+        </n-button>
+        <n-button size="small" type="info" @click="downloadFiles">
+          <template #icon>
+            <n-icon>
+              <Box20Filled />
+            </n-icon>
+          </template>
+          卸柜业务流程
+        </n-button>
+        <n-button size="small" type="info" @click="downloadFiles">
+          <template #icon>
+            <n-icon>
+              <Box20Filled />
+            </n-icon>
+          </template>
+          货柜预报填写注意事项
+        </n-button>
+        <n-button size="small" type="info" @click="selectedHeader">
+          <template #icon>
+            <n-icon>
+              <Box20Filled />
+            </n-icon>
+          </template>
+          选择表头显示
+        </n-button>
+        <n-button size="small" @click="clearAllData()">
+          <template #icon>
+            <n-icon>
+              <TruckDelivery />
+            </n-icon>
+          </template>
+          清除数据
+        </n-button>
+      </filter-bar>
+      <div class="my-2"></div>
+      <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
+        <n-tab-pane
+          v-for="currentMonth in monthTab"
+          :key="currentMonth"
+          :name="currentMonth"
+          :tab="currentMonth"
+        >
+          <BasicTable
+            ref="actionRef"
+            :actionColumn="actionColumn"
+            :columns="currentColumns"
+            :request="loadDataTable"
+            :row-key="(row) => row.id"
+          />
+        </n-tab-pane>
+      </n-tabs>
+      <n-modal
+        v-model:show="showModal"
+        :show-icon="false"
+        :style="{ maxWidth: notifyType === NotifyType.TrayOrBox ? '1600px' : '800px' }"
+        preset="card"
+        style="width: 90%; min-width: 600px"
+        title="新建货柜预报"
       >
-        <template #icon>
-          <n-icon>
-            <Box20Filled />
-          </n-icon>
-        </template>
-        新建货柜预报
-      </n-button>
-      <n-button size="small" type="info" @click="downloadFiles">
-        <template #icon>
-          <n-icon>
-            <Box20Filled />
-          </n-icon>
-        </template>
-        卸柜业务流程
-      </n-button>
-      <n-button size="small" type="info" @click="downloadFiles">
-        <template #icon>
-          <n-icon>
-            <Box20Filled />
-          </n-icon>
-        </template>
-        货柜预报填写注意事项
-      </n-button>
-      <n-button size="small" type="info" @click="selectedHeader">
-        <template #icon>
-          <n-icon>
-            <Box20Filled />
-          </n-icon>
-        </template>
-        选择表头显示
-      </n-button>
-      <n-button size="small" @click="clearAllData()">
-        <template #icon>
-          <n-icon>
-            <TruckDelivery />
-          </n-icon>
-        </template>
-        清除数据
-      </n-button>
-    </filter-bar>
-    <div class="my-2"></div>
-    <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
-      <n-tab-pane
-        v-for="currentMonth in monthTab"
-        :key="currentMonth"
-        :name="currentMonth"
-        :tab="currentMonth"
-      >
-        <BasicTable
-          ref="actionRef"
-          :actionColumn="actionColumn"
-          :columns="currentColumns"
-          :request="loadDataTable"
-          :row-key="(row) => row.id"
+        <container-forecast-index
+          :current-model="currentModel"
+          :type="notifyType"
+          @saved="closeAddDialog"
         />
-      </n-tab-pane>
-    </n-tabs>
-    <n-modal
-      v-model:show="showModal"
-      :show-icon="false"
-      :style="{ maxWidth: notifyType === NotifyType.TrayOrBox ? '1600px' : '800px' }"
-      preset="card"
-      style="width: 90%; min-width: 600px"
-      title="新建货柜预报"
-    >
-      <container-forecast-index
-        :current-model="currentModel"
-        :type="notifyType"
-        @saved="closeAddDialog"
-      />
-    </n-modal>
-    <n-modal
-      v-model:show="showOperationTable"
-      :show-icon="false"
-      preset="dialog"
-      title="卸柜表"
-      style="width: 90%; min-width: 600px; max-width: 800px"
-    >
-      <notify-unload-form @save="reloadTable" :notify-id="currentNotifyId!" />
-    </n-modal>
-    <n-modal
-      v-model:show="showFeeDialog"
-      :show-icon="false"
-      preset="dialog"
-      title="费用表"
-      style="width: 90%; min-width: 600px; max-width: 800px"
-    >
-      <notify-fee-dialog :notify-id="currentNotifyId!" @save="reloadTable" />
-    </n-modal>
-    <n-modal
-      v-model:show="showWarehouseDialog"
-      :show-icon="false"
-      preset="dialog"
-      title="仓库信息"
-      style="width: 90%; min-width: 600px; max-width: 800px"
-    >
-      <warehouse-info-dialog :notify-id="currentNotifyId!" />
-    </n-modal>
-    <n-modal
-      v-model:show="showUnloadingList"
-      :show-icon="false"
-      preset="dialog"
-      title="卸柜单"
-      style="width: 90%; min-width: 600px; max-width: 1000px"
-    >
-      <unloading-list @save="reloadTable" :notify-id="currentNotifyId!" />
-    </n-modal>
-    <n-modal
-      v-model:show="showCurrentHeaderDataTable"
-      :show-icon="false"
-      preset="card"
-      style="width: 90%; min-width: 800px; max-width: 800px"
-      title="添加表头"
-    >
-      <selected-header-table
-        :all-columns="columns"
-        :type="'containerForecast'"
-        @saved="reloadHeader"
-      />
-    </n-modal>
-  </n-card>
+      </n-modal>
+      <n-modal
+        v-model:show="showOperationTable"
+        :show-icon="false"
+        preset="dialog"
+        title="卸柜表"
+        style="width: 90%; min-width: 600px; max-width: 800px"
+      >
+        <notify-unload-form @save="reloadTable" :notify-id="currentNotifyId!" />
+      </n-modal>
+      <n-modal
+        v-model:show="showFeeDialog"
+        :show-icon="false"
+        preset="dialog"
+        title="费用表"
+        style="width: 90%; min-width: 600px; max-width: 800px"
+      >
+        <notify-fee-dialog :notify-id="currentNotifyId!" @save="reloadTable" />
+      </n-modal>
+      <n-modal
+        v-model:show="showWarehouseDialog"
+        :show-icon="false"
+        preset="dialog"
+        title="仓库信息"
+        style="width: 90%; min-width: 600px; max-width: 800px"
+      >
+        <warehouse-info-dialog :notify-id="currentNotifyId!" />
+      </n-modal>
+      <n-modal
+        v-model:show="showUnloadingList"
+        :show-icon="false"
+        preset="dialog"
+        title="卸柜单"
+        style="width: 90%; min-width: 600px; max-width: 1000px"
+      >
+        <unloading-list @save="reloadTable" :notify-id="currentNotifyId!" />
+      </n-modal>
+      <n-modal
+        v-model:show="showCurrentHeaderDataTable"
+        :show-icon="false"
+        preset="card"
+        style="width: 90%; min-width: 800px; max-width: 800px"
+        title="添加表头"
+      >
+        <selected-header-table
+          :all-columns="columns"
+          :type="'containerForecast'"
+          @saved="reloadHeader"
+        />
+      </n-modal>
+    </n-card>
+    <no-power-page v-else />
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -157,6 +160,7 @@
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
   import { getTableHeader } from '@/api/dataLayer/common/TableHeader';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
+  import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
   let currentModel: any | null = $ref(null);

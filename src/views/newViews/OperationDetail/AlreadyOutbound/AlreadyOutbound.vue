@@ -1,16 +1,19 @@
 <template>
-  <n-card :bordered="false" class="proCard">
-    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter" />
-    <div class="my-2"></div>
-    <BasicTable
-      ref="actionRef"
-      v-model:checked-row-keys="checkedRows"
-      :actionColumn="actionColumn"
-      :columns="columns"
-      :request="loadDataTable"
-      :row-key="(row) => row.id"
-    />
-  </n-card>
+  <div>
+    <n-card v-if="hasAuthPower('outMissionView')" :bordered="false" class="proCard">
+      <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter" />
+      <div class="my-2"></div>
+      <BasicTable
+        ref="actionRef"
+        v-model:checked-row-keys="checkedRows"
+        :actionColumn="actionColumn"
+        :columns="columns"
+        :request="loadDataTable"
+        :row-key="(row) => row.id"
+      />
+    </n-card>
+    <no-power-page v-else />
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -21,11 +24,10 @@
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import { $ref } from 'vue/macros';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import { usePermission } from '@/hooks/web/usePermission';
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
   import { getOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
-
-  const { hasPermission } = usePermission();
+  import { hasAuthPower } from '@/api/dataLayer/common/power';
+  import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
 
   const showModal = ref(false);
   let showShareCarModel = $ref(false);

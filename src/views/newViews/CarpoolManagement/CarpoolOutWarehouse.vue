@@ -1,5 +1,5 @@
 <template>
-  <n-card :bordered="false" class="proCard">
+  <n-card v-if="hasAuthPower('outStorageView')" :bordered="false" class="proCard">
     <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
       <n-button v-if="hasAuthPower('outStorageCarAdd')" size="small" type="info" @click="addOut">
         外部仓库新建
@@ -32,6 +32,7 @@
       <new-out-car :data="data" @saved="reloadTable" />
     </n-modal>
   </n-card>
+  <no-power-page v-else />
 </template>
 
 <script lang="ts" setup>
@@ -48,6 +49,7 @@
   import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
+  import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
 
   const showModal = ref(false);
 

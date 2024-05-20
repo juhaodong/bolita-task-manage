@@ -47,6 +47,7 @@ export const powerList = [
       { label: '生成卸柜单', key: 'forecastCreatFile' },
       { label: '取消', key: 'forecastCancel' },
       { label: '结算', key: 'forecastSettle' },
+      { label: '浏览', key: 'forecastView' },
     ],
   },
   {
@@ -65,6 +66,10 @@ export const powerList = [
       { label: '操作文件', key: 'missionOperationFile' },
       { label: '问题图片', key: 'missionProblemPic' },
       { label: '添加托盘', key: 'missionAddTray' },
+      { label: '浏览整柜看板', key: 'missionAllView' },
+      { label: '浏览审核看板', key: 'missionCheckView' },
+      { label: '浏览报价看板', key: 'missionOfferView' },
+      { label: '浏览存仓看板', key: 'missionStorageView' },
     ],
   },
   {
@@ -80,6 +85,7 @@ export const powerList = [
           { label: '生成装车单', key: 'outMissionCreatUpCarFile' },
           { label: '修改', key: 'outMissionEdit' },
           { label: '结算', key: 'outMissionSettle' },
+          { label: '浏览', key: 'outMissionView' },
         ],
       },
       {
@@ -95,6 +101,7 @@ export const powerList = [
           { label: 'POD', key: 'inStoragePOD' },
           { label: '操作文件', key: 'inStorageOperationFile' },
           { label: '问题图片', key: 'inStorageProblemPic' },
+          { label: '浏览', key: 'inStorageView' },
         ],
       },
     ],
@@ -113,12 +120,16 @@ export const powerList = [
           { label: '修改', key: 'orderCarEdit' },
           { label: '报价', key: 'orderCarOffer' },
           { label: '订车', key: 'orderCarBookingCar' },
+          { label: '浏览', key: 'orderCarView' },
         ],
       },
       {
         label: '订车明细',
         key: 'carDetail',
-        children: [{ label: '审核', key: 'carDetailCheck' }],
+        children: [
+          { label: '审核', key: 'carDetailCheck' },
+          { label: '浏览', key: 'carDetailView' },
+        ],
       },
       {
         label: '库外订车',
@@ -126,6 +137,7 @@ export const powerList = [
         children: [
           { label: '新建库外订车', key: 'outStorageCarAdd' },
           { label: '修改', key: 'outStorageEdit' },
+          { label: '浏览', key: 'outStorageView' },
         ],
       },
     ],
@@ -140,6 +152,7 @@ export const powerList = [
         children: [
           { label: '合并对账', key: 'settlementManageMerge' },
           { label: '修改', key: 'settlementManageEdit' },
+          { label: '浏览', key: 'settlementManageView' },
         ],
       },
       {
@@ -148,6 +161,7 @@ export const powerList = [
         children: [
           { label: '修改', key: 'billManageEdit' },
           { label: '附件', key: 'billManageFile' },
+          { label: '浏览', key: 'billManageView' },
         ],
       },
     ],

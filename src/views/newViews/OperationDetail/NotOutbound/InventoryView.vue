@@ -1,5 +1,5 @@
 <template>
-  <n-card :bordered="false" class="proCard">
+  <n-card v-if="hasAuthPower('inStorageView')" :bordered="false" class="proCard">
     <div>
       <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
         <n-button type="primary" @click="selectedHeader">
@@ -85,6 +85,7 @@
       </n-modal>
     </div>
   </n-card>
+  <no-power-page v-else />
 </template>
 
 <script lang="ts" setup>
@@ -109,6 +110,7 @@
   import TimeLine from '@/views/newViews/Missions/AlreadyWarehousing/TimeLine.vue';
   import { useUserStore } from '@/store/modules/user';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
+  import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);

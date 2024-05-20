@@ -1,5 +1,5 @@
 <template>
-  <n-card :bordered="false" class="proCard">
+  <n-card v-if="hasAuthPower('billManageView')" :bordered="false" class="proCard">
     <filter-bar
       v-if="finished"
       :default-value-model="filterObj"
@@ -70,6 +70,7 @@
       <show-down-products-detail-dialog :ids="currentIds" />
     </n-modal>
   </n-card>
+  <no-power-page v-else />
 </template>
 
 <script lang="ts" setup>
@@ -92,6 +93,7 @@
   import ShowContainerDetailDialog from '@/views/newViews/ReconciliationManage/ShowContainerDetailDialog.vue';
   import ShowDownProductsDetailDialog from '@/views/newViews/ReconciliationManage/ShowDownProductsDetailDialog.vue';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
+  import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
 
   interface Prop {
     outId?: string;

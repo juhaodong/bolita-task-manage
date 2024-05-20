@@ -1,5 +1,5 @@
 <template>
-  <n-card :bordered="false" class="proCard">
+  <n-card v-if="hasAuthPower('settlementManageView')" :bordered="false" class="proCard">
     <filter-bar
       v-if="finished"
       :default-value-model="filterObj"
@@ -84,6 +84,7 @@
       <notify-fee-dialog :notify-id="currentNotifyId!" @save="reloadTable" />
     </n-modal>
   </n-card>
+  <no-power-page v-else />
 </template>
 
 <script lang="ts" setup>
@@ -114,6 +115,7 @@
   import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
   import { CashCollectionStatus } from '@/views/newViews/ReconciliationManage/columns';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
+  import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
 
   interface Prop {
     outId?: string;

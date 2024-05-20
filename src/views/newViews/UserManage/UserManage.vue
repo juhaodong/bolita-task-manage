@@ -8,7 +8,7 @@
       @submit="updateFilter"
     >
       <n-button size="small" type="primary" @click="showAdd">新建用户</n-button>
-      <n-button size="small" type="primary" @click="showPowerModal = true">权限管理</n-button>
+      <n-button size="small" type="primary" @click="powerManage">权限管理</n-button>
     </filter-bar>
     <div class="my-2"></div>
     <BasicTable
@@ -151,6 +151,11 @@
   }
 
   const actionRef = ref();
+
+  function powerManage() {
+    authInfo = [];
+    showPowerModal = true;
+  }
 
   function reloadTable() {
     actionRef.value.reload();
