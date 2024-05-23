@@ -60,7 +60,7 @@
       :show-icon="false"
       preset="card"
       style="width: 90%; min-width: 600px; max-width: 600px"
-      title="新建订车"
+      title="新建"
     >
       <new-carpool-management
         :merged-out-ids="checkedRows"

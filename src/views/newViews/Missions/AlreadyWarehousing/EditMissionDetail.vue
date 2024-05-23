@@ -187,13 +187,14 @@
   const emit = defineEmits(['saved']);
 
   async function handleSubmit(values: any) {
+    console.log(prop.model, 'model');
     loading = true;
     values.alreadyChanged = 1;
     let inStorageTime = prop.model?.storageTime ? prop.model?.storageTime : [];
     if (values.outboundMethod === '存仓') {
       values.inStatus = '存仓';
       inStorageTime.push({ storageTime: dayjs().format('YYYY-MM-DD HH:mm:ss') });
-      values.inStorageTime = inStorageTime;
+      values.storageTime = inStorageTime;
       if (prop.model?.outboundId) {
         let outboundInfo = await getOutboundForecastById(prop.model?.outboundId);
         outboundInfo.inStatus = '异常';
@@ -202,7 +203,7 @@
     } else if (values.outboundMethod !== '存仓' && prop.model?.outboundMethod === '存仓') {
       inStorageTime.push({ outBoundTime: dayjs().format('YYYY-MM-DD HH:mm:ss') });
       values.inStatus = '入库待出库';
-      values.inStorageTime = inStorageTime;
+      values.storageTime = inStorageTime;
     }
     const userInfo = useUserStore().info;
     let res = prop.model?.timeLine ? prop.model?.timeLine : [];

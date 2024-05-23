@@ -39,6 +39,10 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'volume',
     },
     {
+      label: '尺寸',
+      field: 'size',
+    },
+    {
       label: '客户备注',
       field: 'normalNote',
     },

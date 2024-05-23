@@ -23,14 +23,14 @@ export const columns: DataTableColumns = [
     title: '所属业务员',
     key: 'belongSalesMan',
   },
-  {
-    title: '使用系统',
-    key: 'useSystem',
-  },
-  {
-    title: '快速账号绑定',
-    key: 'quickBindAccount',
-  },
+  // {
+  //   title: '使用系统',
+  //   key: 'useSystem',
+  // },
+  // {
+  //   title: '快速账号绑定',
+  //   key: 'quickBindAccount',
+  // },
   statusColumnEasy({
     title: '状态',
     key: 'status',

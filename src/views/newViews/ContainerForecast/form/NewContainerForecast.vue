@@ -8,7 +8,11 @@
   import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/common';
   import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
-  import { asyncWarehouseList, generateOptionFromArray } from '@/store/utils/utils';
+  import {
+    asyncUserCustomer,
+    asyncWarehouseList,
+    generateOptionFromArray,
+  } from '@/store/utils/utils';
   import { reservationTimeList } from '@/views/newViews/ContainerForecast/columns';
 
   interface Props {
@@ -18,7 +22,7 @@
   const prop = defineProps<Props>();
 
   const schemas: FormFields = [
-    // asyncCustomerId(),
+    asyncUserCustomer(),
     {
       field: 'containerNo',
       label: '货柜号',

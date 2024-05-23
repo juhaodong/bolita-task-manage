@@ -33,9 +33,11 @@ export async function asyncFBACode(): Promise<FormField> {
 
 export async function asyncWarehouseList(): Promise<FormField> {
   const userStore = useUserStore();
-  const customerId = userStore.info?.belongsToId ?? '';
+  let customerId = '';
+  if (userStore.info?.customerIds.length === 1) {
+    customerId = userStore.info?.customerIds[0];
+  }
   const currentCustomer = (await CustomerManager.load()).find((it) => it.id === customerId) ?? '';
-  console.log(currentCustomer, 'currentCustomer');
   const warehouseList = await WarehouseManager.load();
   const list = warehouseList.map((it) => ({
     label: it.id,
@@ -68,6 +70,32 @@ export async function asyncFCAddress(): Promise<FormField> {
   };
 }
 
+export async function asyncUserCustomer(): Promise<FormField> {
+  const userStore = useUserStore();
+  const realCustomerList = userStore.info.customerIds;
+  const customerList = await CustomerManager.load();
+  const realList = [];
+  for (const customer of customerList) {
+    if (realCustomerList.includes(customer.id)) {
+      realList.push(customer);
+    }
+  }
+  const list = realList.map((it) => ({
+    label: it.customerName,
+    value: it.customerName,
+  }));
+  return {
+    field: 'customerName',
+    label: '客户',
+    required: false,
+    component: 'NSelect',
+    componentProps: {
+      options: list,
+    },
+    defaultValue: realList[0].customerName ?? '',
+  };
+}
+
 export async function asyncCustomer(): Promise<FormField> {
   const customerList = await CustomerManager.load();
   const list = customerList.map((it) => ({
@@ -77,8 +105,27 @@ export async function asyncCustomer(): Promise<FormField> {
   return {
     field: 'customerName',
     label: '客户',
+    required: false,
     component: 'NSelect',
     componentProps: {
+      options: list,
+    },
+  };
+}
+
+export async function asyncMultipleCustomer(): Promise<FormField> {
+  const customerList = await CustomerManager.load();
+  const list = customerList.map((it) => ({
+    label: it.customerName,
+    value: it.customerName,
+  }));
+  return {
+    field: 'customerName',
+    label: '客户',
+    required: false,
+    component: 'NSelect',
+    componentProps: {
+      multiple: true,
       options: list,
     },
   };
@@ -87,14 +134,15 @@ export async function asyncCustomer(): Promise<FormField> {
 export async function asyncCustomerId(): Promise<FormField> {
   const customerList = await CustomerManager.load();
   const list = customerList.map((it) => ({
-    label: it.customerName,
-    value: it.customerId,
+    label: it.id,
+    value: it.id,
   }));
   return {
     field: 'customerId',
     label: '客户',
     component: 'NSelect',
     componentProps: {
+      multiple: true,
       options: list,
     },
   };

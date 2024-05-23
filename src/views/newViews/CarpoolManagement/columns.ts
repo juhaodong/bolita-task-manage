@@ -160,31 +160,6 @@ export const filters: FormFields = [
   },
 ];
 
-export const offerSchemas: FormField[] = [
-  {
-    field: 'REF',
-    label: 'REF.',
-  },
-  {
-    field: 'suggestedPrice',
-    label: '建议报价',
-  },
-  {
-    field: 'costPrice',
-    label: '成本价',
-  },
-  {
-    field: 'externalPrice',
-    label: '对外报价',
-    disableCondition() {
-      return true;
-    },
-  },
-].map((it) => {
-  it.required = false;
-  return it;
-});
-
 export const carSchemas: FormField[] = [
   {
     field: 'ISA',

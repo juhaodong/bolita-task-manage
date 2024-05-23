@@ -41,6 +41,10 @@ export const columns: DataTableColumns<any> = [
     title: '总体积',
     key: 'volume',
   },
+  {
+    title: '尺寸',
+    key: 'size',
+  },
   statusColumnEasy({
     title: '状态',
     key: 'inStatus',

@@ -40,6 +40,11 @@ export const allTitleGroup = [
     tagType: 'warning',
   },
   {
+    title: '尺寸',
+    key: 'size',
+    tagType: 'warning',
+  },
+  {
     title: '状态',
     key: 'inStatus',
     tagType: 'warning',

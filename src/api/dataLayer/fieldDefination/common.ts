@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import {
   CustomerManager,
   FBACodeManager,
-  SalesManManager,
+  UserManager,
   WarehouseManager,
 } from '@/api/dataLayer/modules/user/user';
 import { keyBy } from 'lodash-es';
@@ -99,7 +99,7 @@ export async function asyncCustomerWarehouseFormField(multiple): Promise<FormFie
 }
 
 export async function asyncSalesManFormField(): Promise<FormField> {
-  const salesManList = await SalesManManager.load();
+  const salesManList = (await UserManager.load()).filter((it) => it.userType === '运营部前端');
   console.log(salesManList, 'list');
   const salesManIdList = salesManList.map((it) => ({
     label: it.realName,

@@ -116,12 +116,12 @@
               startEdit(record.id);
             },
           },
-          {
-            label: '用户',
-            onClick() {
-              wuDialog.startEdit(record.id);
-            },
-          },
+          // {
+          //   label: '用户',
+          //   onClick() {
+          //     wuDialog.startEdit(record.id);
+          //   },
+          // },
         ],
       });
     },

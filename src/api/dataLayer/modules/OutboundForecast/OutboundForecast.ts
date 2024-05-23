@@ -87,7 +87,7 @@ export async function updateTaskListAfterOfferPriceCar(id, offerInfo) {
       {
         offerPriceInfo: offerInfo,
         bookingCarTime: dayjs().format('YYYY-MM-DD'),
-        inStatus: OutPlanStatus.AlreadyBookingCar,
+        inStatus: OutPlanStatus.AlreadyOffer,
         id: taskId,
         timeLine: timeLineInfo,
       },

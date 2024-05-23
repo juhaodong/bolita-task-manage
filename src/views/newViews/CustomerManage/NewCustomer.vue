@@ -13,6 +13,7 @@
     asyncInventoryFormField,
     CustomerManager,
     customerStatusSelection,
+    UserManager,
   } from '@/api/dataLayer/modules/user/user';
   import { $ref } from 'vue/macros';
   import { asyncSalesManFormField } from '@/api/dataLayer/fieldDefination/common';
@@ -39,16 +40,16 @@
       field: 'warehouseId',
     }),
     asyncSalesManFormField(),
-    {
-      label: '使用系统',
-      field: 'useSystem',
-      required: false,
-    },
-    {
-      label: '快速账号绑定',
-      field: 'quickBindAccount',
-      required: false,
-    },
+    // {
+    //   label: '使用系统',
+    //   field: 'useSystem',
+    //   required: false,
+    // },
+    // {
+    //   label: '快速账号绑定',
+    //   field: 'quickBindAccount',
+    //   required: false,
+    // },
     customerStatusSelection,
     {
       label: '备注',
@@ -61,7 +62,9 @@
 
   async function handleSubmit(values: any) {
     loading = true;
-    // console.log(values);
+    values.belongSalesId = (await UserManager.load()).find(
+      (it) => it.realName === values.belongSalesMan
+    ).id;
     await safeScope(async () => {
       if (prop?.model?.id) {
         await CustomerManager.editInternal(values, prop.model.id);

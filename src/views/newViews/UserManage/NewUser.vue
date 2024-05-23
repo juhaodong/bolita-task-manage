@@ -10,9 +10,9 @@
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { generateOptionFromArray } from '@/store/utils/utils';
+  import { asyncMultipleCustomer, generateOptionFromArray } from '@/store/utils/utils';
   import { UserType, UserTypeByArray } from '@/views/newViews/UserManage/columns';
-  import { UserManager } from '@/api/dataLayer/modules/user/user';
+  import { CustomerManager, UserManager } from '@/api/dataLayer/modules/user/user';
   import { getUserTypePowerList } from '@/api/dataLayer/common/power';
 
   interface Props {
@@ -61,14 +61,12 @@
         options: generateOptionFromArray(availableUserType),
       },
     },
-    {
-      label: '所属',
-      field: 'belongsToId',
-      required: false,
-      disableCondition() {
-        return true;
-      },
-    },
+    asyncMultipleCustomer(),
+    // {
+    //   label: '所属',
+    //   field: 'belongsToId',
+    //   required: false,
+    // },
     {
       label: '备注',
       field: 'note',
@@ -90,7 +88,14 @@
     loading = true;
     await safeScope(async () => {
       const res = UserTypeByArray.find((it) => it.label === values.userType);
+      const CustomerList = await CustomerManager.load();
+      let ids = [];
+      for (const name of values.customerName) {
+        const id = CustomerList.find((it) => it.customerName === name).id;
+        ids.push(id);
+      }
       values.authPower = (await getUserTypePowerList(res.value)) ?? [];
+      values.customerIds = ids;
       if (prop?.model?.id) {
         await UserManager.editInternal(values, prop.model.id);
       } else {

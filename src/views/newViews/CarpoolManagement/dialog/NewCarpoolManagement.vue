@@ -9,7 +9,7 @@
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { carSchemas, offerSchemas } from '../columns';
+  import { carSchemas } from '../columns';
   import {
     updateOutboundForecast,
     updateTaskListAfterBookingCar,
@@ -18,6 +18,7 @@
   import dayjs from 'dayjs';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
   import { computed, onMounted } from 'vue';
+  import { FormField } from '@/views/bolita-views/composable/form-field-type';
 
   interface Props {
     model?: any;
@@ -34,17 +35,53 @@
     console.log(prop.model, 'model');
   });
 
+  const defaultRef = computed(() => {
+    if (prop.mergedOutIds?.length === 1) {
+      return prop.mergedOutIds[0];
+    } else {
+      return '';
+    }
+  });
+
   const realSchemas = computed(() => {
     return prop.typeName === 'offer' ? offerSchemas : carSchemas;
+  });
+
+  const offerSchemas: FormField[] = [
+    {
+      field: 'REF',
+      label: 'REF.',
+      defaultValue: defaultRef,
+    },
+    {
+      field: 'suggestedPrice',
+      label: '建议报价',
+    },
+    {
+      field: 'costPrice',
+      label: '成本价',
+    },
+    {
+      field: 'externalPrice',
+      label: '对外报价',
+      disableCondition() {
+        return true;
+      },
+    },
+  ].map((it) => {
+    it.required = false;
+    return it;
   });
 
   async function handleSubmit(values: any) {
     loading = true;
     if (prop.typeName === 'car') {
+      values.inStatus = '已定车';
       values.carStatus = CarStatus.Booked;
       values.inStatus = CarStatus.Booked;
       values.waitCar = 1;
     } else {
+      values.inStatus = '已报价';
       values.waitPrice = 1;
     }
     values.createBookCarTimestamp = dayjs().format('YYYY-MM-DD');

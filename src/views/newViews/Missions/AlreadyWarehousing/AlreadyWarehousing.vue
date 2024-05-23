@@ -235,7 +235,6 @@
   }
 
   async function startAddTray(id) {
-    console.log(id, 'id');
     addNewTrayDialog = true;
   }
 
@@ -294,14 +293,29 @@
         .filter((it) => it.offerPriceInfo)
         .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
     }
+    const ownedCustomerIds = useUserStore()?.info?.customerIds;
     allList.forEach((it) => {
-      const today = dayjs().format('YYYY-MM-DD');
-      if (it.inStatus === '全部出库' || it.inStatus === '等待审核' || it.inStatus === '等待入库') {
-        it.stayTime = '-';
+      let totalStorageTime = 0;
+      if (it.storageTime) {
+        if (it.storageTime.length % 2 === 0) {
+          it.storageTime.push({ outBoundTime: dayjs().format('YYYY-MM-DD HH:mm:ss') });
+        }
+        for (const itKey in it.storageTime) {
+          if (itKey % 2 === 1) {
+            totalStorageTime += dayjs(it.storageTime[itKey].outBoundTime).diff(
+              it.storageTime[itKey - 1].storageTime,
+              'hour'
+            );
+          }
+        }
+        it.stayTime = totalStorageTime;
       } else {
-        it.stayTime = dayjs(today).diff(it.arriveTime, 'day') + 1;
+        it.stayTime = '-';
       }
     });
+    if (ownedCustomerIds.length > 0) {
+      allList = allList.filter((it) => ownedCustomerIds.includes(it.customerId));
+    }
     return allList.sort(dateCompare('createTimestamp'));
   };
 

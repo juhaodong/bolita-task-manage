@@ -7,7 +7,7 @@
       class="mb-4"
     />
     <n-tree
-      v-if="!checkEditType || selectedType !== ''"
+      v-if="(!checkEditType || selectedType !== '') && !loading"
       :data="data"
       :default-checked-keys="selectedPower"
       :default-expanded-keys="defaultExpandedKeys"
@@ -43,10 +43,19 @@
     selectedList = options;
   }
 
+  let loading = $ref(false);
+
+  async function setTimeSleep() {
+    loading = true;
+    await setTimeout(() => {}, 50);
+    loading = false;
+  }
+
   watch(
     selectedType,
     async (value) => {
       userTypePowerKeysList = await getUserTypePowerList(value);
+      await setTimeSleep();
     },
     { immediate: true, deep: true }
   );
@@ -54,10 +63,6 @@
     if (props.auth.authPower) {
       return props.auth.authPower.filter((it) => !it?.children).map((it) => it.key) ?? [];
     } else {
-      console.log(
-        userTypePowerKeysList.filter((it) => !it?.children).map((it) => it.key),
-        '321'
-      );
       return userTypePowerKeysList.filter((it) => !it?.children).map((it) => it.key) ?? [];
     }
   });

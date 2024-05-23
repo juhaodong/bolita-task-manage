@@ -124,10 +124,10 @@
   async function saveNotify(value: any) {
     startLoading();
     const userStore = useUserStore();
-    value.customerId = userStore.info?.belongsToId ?? '';
+    const customerList = await CustomerManager.load();
+    const currentCustomer = customerList.find((it) => it.id === value.customerId) ?? '';
+    value.customerId = customerList.find((it) => it.customerName === value.customerName).id ?? '';
     value.notifyType = prop.type;
-    const currentCustomer =
-      (await CustomerManager.load()).find((it) => it.id === value.customerId) ?? '';
     value.salesName = currentCustomer.belongSalesMan ?? userStore.info?.userType;
     let taskList = [
       ...(await readFile(value.files?.[0].file, value.notifyType)),

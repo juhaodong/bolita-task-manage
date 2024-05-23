@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { computed, watchEffect } from 'vue';
+  import { computed, ref, watch, watchEffect } from 'vue';
   import { InBoundStatus, NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
   import {
     getNotifyDetailListByNotify,
@@ -12,7 +12,7 @@
     toastError,
     toastSuccess,
   } from '@/store/utils/utils';
-  import { timeDisplay, timeDisplayYMD } from '@/views/bolita-views/composable/useableColumns';
+  import { timeDisplay } from '@/views/bolita-views/composable/useableColumns';
   import { ResultEnum } from '@/store/enums/httpEnum';
   import dayjs from 'dayjs';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
@@ -80,12 +80,23 @@
   }
 
   let unloadPerson: string = $ref('');
-  let currentDate: any = $ref(null);
+  let currentDate: any = ref(null);
   let totalTime: string = $ref('');
 
   const canConfirm = computed(() => {
     return unloadPerson && canEdit;
   });
+
+  watch(
+    currentDate,
+    (value) => {
+      console.log(value, 'value');
+      if (value) {
+        totalTime = dayjs(value[1]).diff(value[0], 'hour') ?? '';
+      }
+    },
+    { immediate: true, deep: true }
+  );
 
   function allArrived() {
     currentTaskList.forEach((it) => {
@@ -130,6 +141,9 @@
           : listElement.operateInStorage === '是'
           ? '库内操作'
           : newInStatus;
+      if (editInfo.inStatus === '存仓') {
+        editInfo.storageTime = [{ storageTime: dayjs().format('YYYY-MM-DD HH:mm:ss') }];
+      }
       editInfo.arriveTime = dayjs().format('YYYY-MM-DD');
       let timeLineInfo = listElement.timeLine;
       timeLineInfo.unshift({
@@ -144,8 +158,6 @@
         break;
       }
     }
-    // const userStore = useUserStore();
-    // const allCustomer = (await SalesManManager.load())
     const res = await NotifyManager.edit(
       {
         // salesName: userStore?.info?.realName,
@@ -155,7 +167,7 @@
         inStatus: newInStatus,
         totalCount: totalTrayCount.value + totalContainerCount.value,
         unloadPerson: unloadPerson,
-        currentDate: currentDate ?? '',
+        currentDate: currentDate.value ?? [],
         totalTime: totalTime ?? '',
       },
       props.notifyId
@@ -204,7 +216,7 @@
         inStatus: newInStatus,
         totalCount: totalTrayCount.value + totalContainerCount.value,
         unloadPerson: unloadPerson,
-        currentDate: currentDate ?? '',
+        currentDate: currentDate.value ?? [],
         totalTime: totalTime ?? '',
       },
       props.notifyId
@@ -230,12 +242,15 @@
           {{ timeDisplay(notifyInfo?.reserveTime) }}
         </n-descriptions-item>
         <n-descriptions-item label="预报总数"> {{ notifyInfo?.arrivedCount }}</n-descriptions-item>
+        <!--        <n-descriptions-item label="实际卸柜日期">-->
+        <!--          <n-date-picker-->
+        <!--            v-model:value="currentDate"-->
+        <!--            :placeholder="timeDisplayYMD(notifyInfo?.currentDate)"-->
+        <!--            type="date"-->
+        <!--          />-->
+        <!--        </n-descriptions-item>-->
         <n-descriptions-item label="实际卸柜日期">
-          <n-date-picker
-            v-model:value="currentDate"
-            :placeholder="timeDisplayYMD(notifyInfo?.currentDate)"
-            type="date"
-          />
+          <n-date-picker v-model:value="currentDate" clearable type="datetimerange" />
         </n-descriptions-item>
         <n-descriptions-item label="卸柜时长">
           <n-input v-model:value="totalTime" :placeholder="notifyInfo?.totalTime" />
