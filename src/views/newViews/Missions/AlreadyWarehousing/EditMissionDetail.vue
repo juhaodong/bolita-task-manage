@@ -191,7 +191,7 @@
     loading = true;
     values.alreadyChanged = 1;
     let inStorageTime = prop.model?.storageTime ? prop.model?.storageTime : [];
-    if (values.outboundMethod === '存仓') {
+    if (values.outboundMethod === '存仓' && prop.model?.outboundMethod !== '存仓') {
       values.inStatus = '存仓';
       inStorageTime.push({ storageTime: dayjs().format('YYYY-MM-DD HH:mm:ss') });
       values.storageTime = inStorageTime;
@@ -201,7 +201,15 @@
         await updateOutboundForecast(prop.model?.outboundId, outboundInfo);
       }
     } else if (values.outboundMethod !== '存仓' && prop.model?.outboundMethod === '存仓') {
-      inStorageTime.push({ outBoundTime: dayjs().format('YYYY-MM-DD HH:mm:ss') });
+      const lastTimeInfo = inStorageTime.pop();
+      if (!lastTimeInfo.outBoundTime) {
+        lastTimeInfo.outBoundTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
+        lastTimeInfo.totalStorageTime = dayjs(lastTimeInfo.outBoundTime).diff(
+          lastTimeInfo.storageTime,
+          'hour'
+        );
+        inStorageTime.push(lastTimeInfo);
+      }
       values.inStatus = '入库待出库';
       values.storageTime = inStorageTime;
     }

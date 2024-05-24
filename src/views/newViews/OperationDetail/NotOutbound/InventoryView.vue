@@ -111,6 +111,7 @@
   import { useUserStore } from '@/store/modules/user';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
+  import { safeSumBy } from '@/store/utils/utils';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -157,20 +158,15 @@
       .filter((it) => it.inStatus === '存仓' || it.inStatus === '库内操作')
       .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
     allList.forEach((it) => {
-      let totalStorageTime = 0;
       if (it.storageTime) {
-        if (it.storageTime.length % 2 === 0) {
-          it.storageTime.push({ outBoundTime: dayjs().format('YYYY-MM-DD HH:mm:ss') });
+        const res = it.storageTime.pop();
+        if (!res.totalStorageTime) {
+          res.outBoundTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
+          res.totalStorageTime = dayjs(res.outBoundTime).diff(res.storageTime, 'hour');
         }
-        for (const itKey in it.storageTime) {
-          if (itKey % 2 === 1) {
-            totalStorageTime += dayjs(it.storageTime[itKey].outBoundTime).diff(
-              it.storageTime[itKey - 1].storageTime,
-              'hour'
-            );
-          }
-        }
-        it.stayTime = totalStorageTime;
+        it.storageTime.push(res);
+        const usefulTimeList = it.storageTime.filter((x) => x.totalStorageTime);
+        it.stayTime = safeSumBy(usefulTimeList, 'totalStorageTime');
       } else {
         it.stayTime = '-';
       }
