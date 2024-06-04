@@ -53,7 +53,7 @@
     }),
     {
       field: 'note',
-      label: '备注',
+      label: '预报备注',
       required: false,
     },
   ];
