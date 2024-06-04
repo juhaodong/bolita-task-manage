@@ -64,6 +64,7 @@
   import {
     asyncCustomer,
     asyncFCAddress,
+    asyncStorage,
     safeParseInt,
     safeSumBy,
     toastError,
@@ -311,6 +312,7 @@
       field: 'ticketId',
     },
     asyncFCAddress(),
+    asyncStorage(),
     {
       label: '物流方式',
       field: 'deliveryMethod',

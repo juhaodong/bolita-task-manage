@@ -20,8 +20,8 @@
       <recharge
         :battery="battery"
         :battery-status="batteryStatus"
-        :calc-discharging-time="calcDischargingTime"
         :calc-charging-time="calcChargingTime"
+        :calc-discharging-time="calcDischargingTime"
       />
 
       <div class="local-time">
@@ -46,21 +46,21 @@
         </n-avatar>
         <div class="username">{{ loginParams.username }}</div>
         <n-input
-          type="password"
-          autofocus
           v-model:value="loginParams.password"
-          @keyup.enter="onLogin"
+          autofocus
           placeholder="请输入登录密码"
+          type="password"
+          @keyup.enter="onLogin"
         >
           <template #suffix>
-            <n-icon @click="onLogin" style="cursor: pointer">
+            <n-icon style="cursor: pointer" @click="onLogin">
               <LoadingOutlined v-if="loginLoading" />
               <arrow-right-outlined v-else />
             </n-icon>
           </template>
         </n-input>
 
-        <div class="flex w-full" v-if="isLoginError">
+        <div v-if="isLoginError" class="flex w-full">
           <span class="text-red-500">{{ errorMsg }}</span>
         </div>
 
@@ -79,15 +79,15 @@
   import { ResultEnum } from '@/store/enums/httpEnum';
   import recharge from './Recharge.vue';
   import {
-    LockOutlined,
-    LoadingOutlined,
-    UserOutlined,
     ApiOutlined,
     ArrowRightOutlined,
+    LoadingOutlined,
+    LockOutlined,
+    UserOutlined,
     WifiOutlined,
   } from '@vicons/antd';
 
-  import { useRouter, useRoute } from 'vue-router';
+  import { useRoute, useRouter } from 'vue-router';
   import { useOnline } from '@/hooks/useOnline';
   import { useTime } from '@/hooks/useTime';
   import { useBattery } from '@/hooks/useBattery';
@@ -118,7 +118,7 @@
 
       const { battery, batteryStatus, calcDischargingTime, calcChargingTime } = useBattery();
       const userInfo: UserInfoType = userStore.getUserInfo || {};
-      const username = userInfo['username'] || '';
+      const username = userInfo['userName'] || '';
       const state = reactive({
         showLogin: false,
         loginLoading: false, // 正在登录

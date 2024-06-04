@@ -1,9 +1,5 @@
 import { DataTableColumns } from 'naive-ui';
-import {
-  selectedIdColumn,
-  statusColumnEasy,
-  timeColumn,
-} from '@/views/bolita-views/composable/useableColumns';
+import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
 import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
 import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
@@ -11,105 +7,99 @@ import { generateOptionFromArray } from '@/store/utils/utils';
 import { reservationTimeList } from '@/views/newViews/ContainerForecast/columns';
 
 export const columns: DataTableColumns<CarpoolManagementModel> = [
-  // {
-  //   title: '物流ID',
-  //   key: 'id',
-  // },
-  selectedIdColumn('物流ID', '/car/carBookingDetail', 'id'),
-  timeColumn('createBookCarTimestamp', '下单日期'),
-  statusColumnEasy({
-    title: '状态',
-    key: 'inStatus',
-  }),
+  timeColumn('realDate', '日期'),
   {
-    title: '出库方式',
-    key: 'deliveryMethod',
+    title: '渠道',
+    key: 'channel',
   },
   {
-    title: '运单号',
-    key: 'waybillId',
+    title: '约车类型',
+    key: 'carType',
   },
   {
-    title: '总托数',
-    key: 'trayNum',
+    title: '客户编号',
+    key: 'customerId',
   },
   {
-    title: '总件数',
-    key: 'containerNum',
+    title: '订单号',
+    key: 'orderId',
   },
   {
-    title: '对外报价',
-    key: 'totalOutOffer',
+    title: '托数(XP/FP)',
+    key: 'trayNumber',
   },
   {
-    title: '物流底价',
+    title: '箱数Kartons',
+    key: 'boxNumber',
+  },
+  {
+    title: '可堆叠',
+    key: 'stackable',
+  },
+  {
+    title: '是否需要卸货设备',
+    key: 'needEquipment',
+  },
+  {
+    title: '提货地址',
+    key: 'pickingAddress',
+  },
+  {
+    title: '送货地址',
+    key: 'sendingAddress',
+  },
+  {
+    title: '取货日期+时点',
+    key: 'pickingDate',
+  },
+  {
+    title: '送货日期+时点',
+    key: 'sendingDate',
+  },
+  {
+    title: '物流平台订单号',
+    key: 'platformOrderId',
+  },
+  {
+    title: '运营对外报价',
+    key: 'offerPrice',
+  },
+  {
+    title: 'POD',
+    key: 'POD',
+  },
+  {
+    title: 'cbm/尺寸/重量',
+    key: 'size',
+  },
+  {
+    title: '需求',
+    key: 'demand',
+  },
+  {
+    title: '询价需求',
+    key: 'priceDemand',
+  },
+  {
+    title: '是否有送仓文件',
+    key: 'warehouseDeliveryFile',
+  },
+  {
+    title: '物流公司',
+    key: 'logisticsCompany',
+  },
+  {
+    title: '成本底价',
     key: 'costPrice',
   },
   {
-    title: '建议报价',
-    key: 'suggestedPrice',
+    title: '物流建议报价',
+    key: 'logisticsPrice',
   },
-  {
-    title: '邮编',
-    key: 'postcode',
-  },
-  {
-    title: 'FC/送货地址',
-    key: 'FCAddress',
-  },
-  // {
-  //   title: 'PO',
-  //   key: 'PO',
-  // },
-  {
-    title: 'Ref',
-    key: 'REF',
-  },
-  {
-    title: 'ISA',
-    key: 'ISA',
-  },
-  {
-    title: 'AMZ-Sendungs ID',
-    key: 'AMZID',
-  },
-  {
-    title: '托盘',
-    key: 'trayNum',
-  },
-  timeColumn('reservationGetProductTime', '预约取货日期'),
-  {
-    title: '取货时间',
-    key: 'reservationGetProductDetailTime',
-  },
-  {
-    title: '报价',
-    key: 'orderCarPrice',
-  },
-  {
-    title: '城市',
-    key: 'city',
-  },
-  {
-    title: '街道',
-    key: 'street',
-  },
-  {
-    title: '地址附加',
-    key: 'appendAddress',
-  },
-  {
-    title: '门牌号',
-    key: 'houseNo',
-  },
-  {
-    title: '收件人',
-    key: 'contact',
-  },
-  {
-    title: '电话／邮箱',
-    key: 'email',
-  },
+  statusColumnEasy({
+    title: '状态',
+    key: 'status',
+  }),
   {
     title: '备注',
     key: 'note',
@@ -147,16 +137,28 @@ export const filters: FormFields = [
     field: 'settlement',
   },
   {
-    label: '过滤项',
-    field: 'filterTitle',
+    label: '过滤项1',
+    field: 'filterTitleOne',
     component: 'NSelect',
     componentProps: {
       options: generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title)),
     },
   },
   {
-    label: '过滤值',
-    field: 'filterKey',
+    label: '过滤值1',
+    field: 'filterKeyOne',
+  },
+  {
+    label: '过滤项2',
+    field: 'filterTitleTwo',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title)),
+    },
+  },
+  {
+    label: '过滤值2',
+    field: 'filterKeyTwo',
   },
 ];
 

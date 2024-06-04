@@ -265,7 +265,7 @@
               <th>预报 箱</th>
               <th style="width: 100px">入库 托</th>
               <th style="width: 100px">入库 箱</th>
-              <th>备注</th>
+              <th>仓库备注</th>
             </tr>
           </thead>
           <tbody v-if="currentTaskList">
@@ -314,9 +314,9 @@
         <div>
           <n-input v-model:value="unloadPerson" placeholder="卸柜人员" />
         </div>
-        <n-button v-if="showBtn" :disabled="!canEdit" secondary type="warning" @click="save"
-          >保存
-        </n-button>
+        <!--        <n-button v-if="showBtn" :disabled="!canEdit" secondary type="warning" @click="save"-->
+        <!--          >保存-->
+        <!--        </n-button>-->
         <n-button v-if="showBtn" :disabled="!canConfirm" type="primary" @click="confirm"
           >确认全部到货
         </n-button>

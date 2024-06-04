@@ -94,16 +94,28 @@ export const filters: FormField[] = [
     },
   },
   {
-    label: '过滤项',
-    field: 'filterTitle',
+    label: '过滤项1',
+    field: 'filterTitleOne',
     component: 'NSelect',
     componentProps: {
       options: generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title)),
     },
   },
   {
-    label: '过滤值',
-    field: 'filterKey',
+    label: '过滤值1',
+    field: 'filterKeyOne',
+  },
+  {
+    label: '过滤项2',
+    field: 'filterTitleTwo',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title)),
+    },
+  },
+  {
+    label: '过滤值2',
+    field: 'filterKeyTwo',
   },
 ];
 

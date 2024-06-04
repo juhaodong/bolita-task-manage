@@ -113,10 +113,19 @@
 
   function updateFilter(value) {
     if (value !== null) {
-      let { filterTitle, filterKey, ...NewObj } = value;
-      if (value['filterTitle'] && value['filterKey']) {
-        const res = columns.find((it) => it.title === value['filterTitle']).key;
-        NewObj[res] = value['filterKey'];
+      let { filterTitleOne, filterKeyOne, filterTitleTwo, filterKeyTwo, ...NewObj } = value;
+      if (
+        (value['filterTitleOne'] && value['filterKeyOne']) ||
+        (value['filterTitleTwo'] && value['filterKeyTwo'])
+      ) {
+        const keyOne = columns.find((it) => it.title === value['filterTitleOne']).key;
+        const keyTwo = columns.find((it) => it.title === value['filterTitleTwo']).key;
+        if (keyOne) {
+          NewObj[keyOne] = value['filterKeyOne'];
+        }
+        if (keyTwo) {
+          NewObj[keyTwo] = value['filterKeyTwo'];
+        }
       }
       filterObj = NewObj;
     } else {

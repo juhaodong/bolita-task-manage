@@ -349,21 +349,25 @@
   }
 
   function updateFilter(value) {
-    console.log(value, 'value');
     if (value !== null) {
-      let { filterTitle, filterKey, ...NewObj } = value;
-      console.log(NewObj, 'new');
-      if (value['filterTitle'] && value['filterKey']) {
-        console.log('123');
-        const res = operationColumns.find((it) => it.title === value['filterTitle']).key;
-        console.log(res, 'res');
-        NewObj[res] = value['filterKey'];
+      let { filterTitleOne, filterKeyOne, filterTitleTwo, filterKeyTwo, ...NewObj } = value;
+      if (
+        (value['filterTitleOne'] && value['filterKeyOne']) ||
+        (value['filterTitleTwo'] && value['filterKeyTwo'])
+      ) {
+        const keyOne = columns.find((it) => it.title === value['filterTitleOne']).key;
+        const keyTwo = columns.find((it) => it.title === value['filterTitleTwo']).key;
+        if (keyOne) {
+          NewObj[keyOne] = value['filterKeyOne'];
+        }
+        if (keyTwo) {
+          NewObj[keyTwo] = value['filterKeyTwo'];
+        }
       }
       filterObj = NewObj;
     } else {
       filterObj = null;
     }
-    console.log(filterObj, 'obj');
     reloadTable();
   }
 

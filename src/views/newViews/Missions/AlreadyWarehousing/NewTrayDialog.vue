@@ -76,10 +76,10 @@
   const prop = defineProps<Props>();
   let counter = 0;
   let trayList = reactive([]);
-  let FPAmount = $ref(null);
-  let XPAmount = $ref(null);
-  let KIAmount = $ref(null);
-  let KTAmount = $ref(null);
+  let FPAmount = $ref(0);
+  let XPAmount = $ref(0);
+  let KIAmount = $ref(0);
+  let KTAmount = $ref(0);
   let totalFP = $ref(null);
   let totalXP = $ref(null);
   let totalKI = $ref(null);

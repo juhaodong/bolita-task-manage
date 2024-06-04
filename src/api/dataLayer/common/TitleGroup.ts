@@ -150,6 +150,11 @@ export const allTitleGroup = [
     tagType: 'info',
   },
   {
+    title: '仓库备注',
+    key: 'note',
+    tagType: 'info',
+  },
+  {
     title: '分拣标识',
     key: 'sign',
     tagType: 'success',

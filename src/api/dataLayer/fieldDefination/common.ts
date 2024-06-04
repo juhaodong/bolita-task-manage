@@ -186,3 +186,7 @@ export const noteFormField = {
 export async function getFBACodeList() {
   return (await FBACodeManager.load()).map((it) => it.code);
 }
+
+export async function getStorageList() {
+  return (await WarehouseManager.load()).map((it) => it.id);
+}

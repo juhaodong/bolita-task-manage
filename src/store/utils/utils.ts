@@ -1,7 +1,7 @@
 import { ResultEnum } from '@/store/enums/httpEnum';
 import { sumBy } from 'lodash-es';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { getFBACodeList } from '@/api/dataLayer/fieldDefination/common';
+import { getFBACodeList, getStorageList } from '@/api/dataLayer/fieldDefination/common';
 import { CustomerManager, WarehouseManager } from '@/api/dataLayer/modules/user/user';
 import { useUserStore } from '@/store/modules/user';
 
@@ -63,6 +63,22 @@ export async function asyncFCAddress(): Promise<FormField> {
   return {
     field: 'FCAddress',
     label: 'FC/送货地址',
+    component: 'NSelect',
+    componentProps: {
+      options: list,
+    },
+  };
+}
+
+export async function asyncStorage(): Promise<FormField> {
+  const storageList = await getStorageList();
+  const list = storageList.map((it) => ({
+    label: it,
+    value: it,
+  }));
+  return {
+    field: 'warehouseId',
+    label: '仓库',
     component: 'NSelect',
     componentProps: {
       options: list,

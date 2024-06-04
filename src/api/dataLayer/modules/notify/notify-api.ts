@@ -24,6 +24,9 @@ export const NotifyManager = initModel({
     loader: getNotifyDetailListByNotify,
   },
   async afterAddHook(id, value, taskList) {
+    taskList.forEach((it) => {
+      it.warehouseId = value.warehouseId;
+    });
     await NotifyDetailManager.massiveAdd(taskList, id, value);
   },
 });
