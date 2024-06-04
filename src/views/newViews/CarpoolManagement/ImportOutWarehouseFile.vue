@@ -15,10 +15,7 @@
   const schemas: FormFields = [
     getFilesUploadFormField('files', false, () => {
       window.open(
-        'https://firebasestorage.googlea' +
-          'pis.com/v0/b/bolita-task-manage.appspot.' +
-          'com/o/%E8%B4%A7%E6%9F%9C%E6%A8%A1%E6%9D%BF' +
-          '.xlsx?alt=media&token=a5cfed10-917c-41dd-806d-5d9addd5156d'
+        'https://firebasestorage.googleapis.com/v0/b/bolita-task-manage.appspot.com/o/OutMoBan0604.xlsx?alt=media&token=6a2cecb4-fb67-4275-af20-3927fc2b4191'
       );
     }),
   ];
