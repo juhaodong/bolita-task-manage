@@ -138,7 +138,6 @@ export async function asyncMultipleCustomer(): Promise<FormField> {
   return {
     field: 'customerName',
     label: '客户',
-    required: false,
     component: 'NSelect',
     componentProps: {
       multiple: true,
