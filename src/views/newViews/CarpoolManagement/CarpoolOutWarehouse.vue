@@ -21,7 +21,7 @@
         <BasicTable
           ref="actionRef"
           :actionColumn="actionColumn"
-          :columns="columns"
+          :columns="outCarColumns"
           :request="loadDataTable"
           :row-key="(row) => row.id"
         />
@@ -61,7 +61,7 @@
 <script lang="ts" setup>
   import { Component, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { columns, filters } from './columns';
+  import { filters, outCarColumns } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
@@ -108,8 +108,8 @@
         (value['filterTitleOne'] && value['filterKeyOne']) ||
         (value['filterTitleTwo'] && value['filterKeyTwo'])
       ) {
-        const keyOne = columns.find((it) => it.title === value['filterTitleOne']).key;
-        const keyTwo = columns.find((it) => it.title === value['filterTitleTwo']).key;
+        const keyOne = outCarColumns.find((it) => it.title === value['filterTitleOne']).key;
+        const keyTwo = outCarColumns.find((it) => it.title === value['filterTitleTwo']).key;
         if (keyOne) {
           NewObj[keyOne] = value['filterKeyOne'];
         }

@@ -1,12 +1,16 @@
 import { DataTableColumns } from 'naive-ui';
-import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import {
+  selectedIdColumn,
+  statusColumnEasy,
+  timeColumn,
+} from '@/views/bolita-views/composable/useableColumns';
 import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
 import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { generateOptionFromArray } from '@/store/utils/utils';
 import { reservationTimeList } from '@/views/newViews/ContainerForecast/columns';
 
-export const columns: DataTableColumns<CarpoolManagementModel> = [
+export const outCarColumns: DataTableColumns<CarpoolManagementModel> = [
   timeColumn('realDate', '日期'),
   {
     title: '渠道',
@@ -100,6 +104,112 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
     title: '状态',
     key: 'status',
   }),
+  {
+    title: '备注',
+    key: 'note',
+  },
+];
+
+export const columns: DataTableColumns<CarpoolManagementModel> = [
+  // {
+  //   title: '物流ID',
+  //   key: 'id',
+  // },
+  selectedIdColumn('物流ID', '/car/carBookingDetail', 'id'),
+  timeColumn('createBookCarTimestamp', '下单日期'),
+  statusColumnEasy({
+    title: '状态',
+    key: 'inStatus',
+  }),
+  {
+    title: '出库方式',
+    key: 'deliveryMethod',
+  },
+  {
+    title: '运单号',
+    key: 'waybillId',
+  },
+  {
+    title: '总托数',
+    key: 'trayNum',
+  },
+  {
+    title: '总件数',
+    key: 'containerNum',
+  },
+  {
+    title: '对外报价',
+    key: 'totalOutOffer',
+  },
+  {
+    title: '物流底价',
+    key: 'costPrice',
+  },
+  {
+    title: '建议报价',
+    key: 'suggestedPrice',
+  },
+  {
+    title: '邮编',
+    key: 'postcode',
+  },
+  {
+    title: 'FC/送货地址',
+    key: 'FCAddress',
+  },
+  // {
+  //   title: 'PO',
+  //   key: 'PO',
+  // },
+  {
+    title: 'Ref',
+    key: 'REF',
+  },
+  {
+    title: 'ISA',
+    key: 'ISA',
+  },
+  {
+    title: 'AMZ-Sendungs ID',
+    key: 'AMZID',
+  },
+  {
+    title: '托盘',
+    key: 'trayNum',
+  },
+  timeColumn('reservationGetProductTime', '预约取货日期'),
+  {
+    title: '取货时间',
+    key: 'reservationGetProductDetailTime',
+  },
+  {
+    title: '报价',
+    key: 'orderCarPrice',
+  },
+  {
+    title: '城市',
+    key: 'city',
+  },
+  {
+    title: '街道',
+    key: 'street',
+  },
+  {
+    title: '地址附加',
+    key: 'appendAddress',
+  },
+  {
+    title: '门牌号',
+    key: 'houseNo',
+  },
+  {
+    title: '收件人',
+    key: 'contact',
+  },
+  {
+    title: '电话／邮箱',
+    key: 'email',
+  },
   {
     title: '备注',
     key: 'note',
