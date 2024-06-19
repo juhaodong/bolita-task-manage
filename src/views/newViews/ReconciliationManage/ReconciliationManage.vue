@@ -1,12 +1,54 @@
 <template>
   <n-card v-if="hasAuthPower('billManageView')" :bordered="false" class="proCard">
     <filter-bar
-      v-if="finished"
       :default-value-model="filterObj"
       :form-fields="filters"
       @clear="updateFilter(null)"
       @submit="updateFilter"
     />
+    <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
+      <n-card embedded size="small" style="max-width: 300px">
+        <div style="display: flex">
+          <n-select
+            v-model:value="optionOne"
+            :options="realOptions"
+            placeholder="过滤项1"
+            style="width: 130px"
+          />
+          <n-input
+            v-model:value="valueOne"
+            class="ml-2"
+            placeholder="过滤值1"
+            style="width: 130px"
+            type="text"
+          />
+        </div>
+      </n-card>
+      <n-card class="ml-2" embedded size="small" style="max-width: 300px">
+        <div style="display: flex">
+          <n-select
+            v-model:value="optionTwo"
+            :options="realOptions"
+            placeholder="过滤项2"
+            style="width: 130px"
+          />
+          <n-input
+            v-model:value="valueTwo"
+            class="ml-2"
+            placeholder="过滤值2"
+            style="width: 130px"
+            type="text"
+          />
+        </div>
+      </n-card>
+      <n-date-picker
+        v-model:value="dateRange"
+        :default-value="[dayjs().valueOf(), dayjs().valueOf()]"
+        class="ml-2"
+        clearable
+        type="daterange"
+      />
+    </div>
     <div class="my-2"></div>
     <n-tabs
       v-model:value="typeMission"
@@ -22,23 +64,14 @@
         :name="currentType"
         :tab="currentType"
       >
-        <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
-          <n-tab-pane
-            v-for="currentMonth in monthTab"
-            :key="currentMonth"
-            :name="currentMonth"
-            :tab="currentMonth"
-          >
-            <BasicTable
-              ref="actionRef"
-              v-model:checked-row-keys="checkedRows"
-              :action-column="typeMission === '货柜对账' ? actionColumn : actionColumnContainer"
-              :columns="typeMission === '货柜对账' ? columns : downProductsColumns"
-              :request="loadDataTable"
-              :row-key="(row) => row.id"
-            />
-          </n-tab-pane>
-        </n-tabs>
+        <BasicTable
+          ref="actionRef"
+          v-model:checked-row-keys="checkedRows"
+          :action-column="typeMission === '货柜对账' ? actionColumn : actionColumnContainer"
+          :columns="typeMission === '货柜对账' ? columns : downProductsColumns"
+          :request="loadDataTable"
+          :row-key="(row) => row.id"
+        />
       </n-tab-pane>
     </n-tabs>
 
@@ -74,7 +107,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, h, onMounted, reactive, ref } from 'vue';
+  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { filters } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
@@ -94,6 +127,8 @@
   import ShowDownProductsDetailDialog from '@/views/newViews/ReconciliationManage/ShowDownProductsDetailDialog.vue';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
+  import { valueOfToday } from '@/api/dataLayer/common/Date';
+  import { generateOptionFromArray } from '@/store/utils/utils';
 
   interface Prop {
     outId?: string;
@@ -266,13 +301,10 @@
     },
   ];
 
-  let finished = $ref(false);
-
   onMounted(() => {
     if (props.outId) {
       filterObj = { outId: props.outId };
     }
-    finished = true;
   });
   const showModal = ref(false);
   let checkedRows = $ref([]);
@@ -282,6 +314,11 @@
   let selectedMonth: any | null = $ref('');
   let currentModel: any | null = $ref(null);
   let allList: any | null = $ref([]);
+  let optionOne = $ref('');
+  let optionTwo = $ref('');
+  let valueOne = $ref('');
+  let valueTwo = $ref('');
+  let dateRange = $ref(valueOfToday);
 
   async function startEdit(id) {
     if (typeMission === '货柜对账') {
@@ -291,15 +328,19 @@
     }
     showModal.value = true;
   }
-
+  const realOptions = computed(() => {
+    return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
+  });
   const loadDataTable = async () => {
+    let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
+    let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
     if (typeMission === '货柜对账') {
       allList = (await FinanceManager.load(filterObj)).filter(
-        (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
+        (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       );
     } else {
       allList = (await FinanceContainerManager.load(filterObj)).filter(
-        (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
+        (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       );
     }
     console.log(allList, 'list');
@@ -309,14 +350,31 @@
   let filterObj: any | null = $ref(null);
 
   function updateFilter(value) {
-    filterObj = value;
+    if (value !== null) {
+      if (optionOne && valueOne) {
+        const keyOne = columns.find((it) => it.title === optionOne).key;
+
+        value[keyOne] = valueOne;
+      }
+      if (optionTwo && valueTwo) {
+        const keyTwo = columns.find((it) => it.title === optionTwo).key;
+        value[keyTwo] = valueTwo;
+      }
+      filterObj = value;
+    } else {
+      filterObj = null;
+      optionOne = '';
+      valueOne = '';
+      optionTwo = '';
+      valueTwo = '';
+      dateRange = valueOfToday;
+    }
     reloadTable();
   }
   onMounted(async () => {
     monthTab = OneYearMonthTab();
     typeMission = '货柜对账';
     selectedMonth = monthTab[0];
-    finished = true;
   });
 
   function showAdd() {

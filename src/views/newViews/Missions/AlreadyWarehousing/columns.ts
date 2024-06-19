@@ -80,10 +80,6 @@ export const columns: DataTableColumns<any> = [
   {
     title: '操作要求',
     key: 'operationRequire',
-    width: 500,
-    // ellipsis: {
-    //   tooltip: true,
-    // },
   },
   {
     title: '操作备注',
@@ -126,7 +122,7 @@ export const columns: DataTableColumns<any> = [
     key: 'arrivedTrayNum',
   },
   timeColumn('planArriveDateTime', '预期到仓日期'),
-  timeColumn('currentDate', '实际到仓日期'),
+  timeColumn('arriveTime', '实际到仓日期'),
   timeColumn('deliveryTime', '发货时间'),
   {
     title: 'Ref',
@@ -145,8 +141,16 @@ export const columns: DataTableColumns<any> = [
     key: 'package',
   },
   {
+    title: '托数',
+    key: 'industrialTrayNum',
+  },
+  {
     title: '品名',
     key: 'productName',
+  },
+  {
+    title: 'UN号',
+    key: 'UNNumber',
   },
   {
     title: '收件人',
@@ -161,27 +165,11 @@ export const columns: DataTableColumns<any> = [
     key: 'email',
   },
   {
-    title: '地址1',
-    key: 'address1',
-  },
-  {
-    title: '地址2',
-    key: 'address2',
-  },
-  {
-    title: '工业品国家',
-    key: 'industrialCountry',
-  },
-  {
-    title: '工业品城市',
-    key: 'industrialCity',
-  },
-  {
     title: '是否需要预约',
     key: 'needReserve',
   },
   {
-    title: '备注',
+    title: '工业品备注',
     key: 'industrialNote',
   },
 ];
@@ -229,29 +217,5 @@ export const filters: FormField[] = [
   {
     label: '票号',
     field: 'ticketId',
-  },
-  {
-    label: '过滤项1',
-    field: 'filterTitleOne',
-    component: 'NSelect',
-    componentProps: {
-      options: generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title)),
-    },
-  },
-  {
-    label: '过滤值1',
-    field: 'filterKeyOne',
-  },
-  {
-    label: '过滤项2',
-    field: 'filterTitleTwo',
-    component: 'NSelect',
-    componentProps: {
-      options: generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title)),
-    },
-  },
-  {
-    label: '过滤值2',
-    field: 'filterKeyTwo',
   },
 ];

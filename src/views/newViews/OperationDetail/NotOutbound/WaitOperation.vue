@@ -9,25 +9,67 @@
         </template>
         选择表头显示
       </n-button>
+      <n-button type="info" @click="downloadData">
+        <template #icon>
+          <n-icon>
+            <Box20Filled />
+          </n-icon>
+        </template>
+        下载
+      </n-button>
     </filter-bar>
+    <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
+      <n-card embedded size="small" style="max-width: 300px">
+        <div style="display: flex">
+          <n-select
+            placeholder="过滤项1"
+            style="width: 130px"
+            v-model:value="optionOne"
+            :options="realOptions"
+          />
+          <n-input
+            class="ml-2"
+            style="width: 130px"
+            v-model:value="valueOne"
+            type="text"
+            placeholder="过滤值1"
+          />
+        </div>
+      </n-card>
+      <n-card class="ml-2" embedded size="small" style="max-width: 300px">
+        <div style="display: flex">
+          <n-select
+            placeholder="过滤项2"
+            style="width: 130px"
+            v-model:value="optionTwo"
+            :options="realOptions"
+          />
+          <n-input
+            class="ml-2"
+            style="width: 130px"
+            v-model:value="valueTwo"
+            type="text"
+            placeholder="过滤值2"
+          />
+        </div>
+      </n-card>
+      <n-date-picker
+        :default-value="[dayjs().valueOf(), dayjs().valueOf()]"
+        class="ml-2"
+        v-model:value="dateRange"
+        type="daterange"
+        clearable
+      />
+    </div>
     <div class="my-2"></div>
-    <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
-      <n-tab-pane
-        v-for="currentMonth in monthTab"
-        :key="currentMonth"
-        :name="currentMonth"
-        :tab="currentMonth"
-      >
-        <BasicTable
-          ref="actionRef"
-          v-model:checked-row-keys="checkedRows"
-          :actionColumn="actionColumn"
-          :columns="currentColumns"
-          :request="loadDataTable"
-          :row-key="(row) => row.id"
-        />
-      </n-tab-pane>
-    </n-tabs>
+    <BasicTable
+      ref="actionRef"
+      v-model:checked-row-keys="checkedRows"
+      :actionColumn="actionColumn"
+      :columns="currentColumns"
+      :request="loadDataTable"
+      :row-key="(row) => row.id"
+    />
     <n-modal
       v-model:show="showOutboundOrderDetail"
       :show-icon="false"
@@ -118,7 +160,7 @@
 
 <script lang="ts" setup>
   import { Box20Filled } from '@vicons/fluent';
-  import { Component, h, onMounted, reactive, ref } from 'vue';
+  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { filters } from './columns';
   import {
@@ -162,6 +204,8 @@
   import { useUserStore } from '@/store/modules/user';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
+  import { valueOfToday } from '@/api/dataLayer/common/Date';
+  import { generateOptionFromArray } from '@/store/utils/utils';
 
   const showModal = ref(false);
   let showShareCarModel = $ref(false);
@@ -188,6 +232,12 @@
   let currentIds = $ref([]);
   let currentNotifyId: string | null = $ref(null);
   let showLoadingCarDoc = $ref(false);
+  let optionOne = $ref('');
+  let optionTwo = $ref('');
+  let valueOne = $ref('');
+  let valueTwo = $ref('');
+  let dateRange = $ref(valueOfToday);
+  import FileSaver from 'file-saver';
   const operationColumns = $ref([
     {
       title: 'ID',
@@ -271,6 +321,10 @@
   const actionRef = ref();
   let filterObj: any | null = $ref(null);
 
+  const realOptions = computed(() => {
+    return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
+  });
+
   async function reloadHeader() {
     currentColumns = [];
     currentHeader = await getTableHeader('operation');
@@ -282,9 +336,9 @@
     showCurrentHeaderDataTable = false;
   }
   const loadDataTable = async () => {
-    let allList = (await getOutboundForecast(filterObj)).filter(
-      (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
-    );
+    let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
+    let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
+    let allList = await getOutboundForecast(filterObj);
     currentList = allList.filter(
       (a) =>
         a.inStatus === CarStatus.Booked ||
@@ -292,8 +346,79 @@
         a.inStatus === CarStatus.NoNeed ||
         a.inStatus === '全部出库'
     );
-    return currentList.sort(dateCompare('createTimestamp'));
+    return currentList
+      .filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate)
+      .sort(dateCompare('createTimestamp'));
   };
+
+  async function downloadData() {
+    let selectedList = [];
+    selectedList = await loadDataTable();
+    let headerTitle = columns
+      .filter((it) => it.title)
+      .map((it) => it.title)
+      .join();
+    let dataStrings = [];
+    dataStrings.unshift(headerTitle);
+    selectedList.forEach((it) => {
+      const res = [
+        it.customerName ?? '',
+        it.containerId ?? '',
+        it.ticketId ?? '',
+        it.country ?? '',
+        it.number ?? '',
+        it.arrivedContainerNum ?? '',
+        it.weight ?? '',
+        it.volume ?? '',
+        it.size ?? '',
+        it.inStatus ?? '',
+        it.warehouseId ?? '',
+        it.stayTime ?? '',
+        it.deliveryIdIn ?? '',
+        it.normalNote ?? '',
+        it.FBADeliveryCode ?? '',
+        it.outboundMethod ?? '',
+        it.deliveryMethod ?? '',
+        it.operationRequire ?? '',
+        it.operationNote ?? '',
+        it.finalStatus ?? '',
+        it.PO ?? '',
+        it.FCAddress ?? '',
+        it.postcode ?? '',
+        it.inBoundDetailStatus ?? '',
+        it.changeOrderFiles ?? '',
+        it.transportationNote ?? '',
+        it.trayNum ?? '',
+        it.arrivedTrayNum ?? '',
+        dayjs(it.planArriveDateTime).format('YYYY-MM-DD') ?? '',
+        dayjs(it.currentDate[0]).format('YYYY-MM-DD') ?? '',
+        it.deliveryTime ? dayjs(it.deliveryTime).format('YYYY-MM-DD') : '',
+        it.Ref ?? '',
+        it.note ?? '',
+        it.sign ?? '',
+        it.package ?? '',
+        it.industrialTrayNum ?? '',
+        it.productName ?? '',
+        it.UNNumber ?? '',
+        it.recipient ?? '',
+        it.phone ?? '',
+        it.email ?? '',
+        it.needReserve ?? '',
+        it.industrialNote ?? '',
+      ];
+      dataStrings.push(res.join());
+    });
+    dataStrings = dataStrings.join('\n');
+    const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
+    FileSaver.saveAs(
+      blob,
+      dayjs(dateRange[0]).startOf('day').format('YYYY-MM-DD') +
+        '~' +
+        dayjs(dateRange[1]).endOf('day').format('YYYY-MM-DD') +
+        '出库看板' +
+        '.csv'
+    );
+  }
   let currentModel = $ref(null);
   function startEditOF(id) {
     editId = id;
@@ -308,7 +433,6 @@
 
   async function selectedHeader() {
     showCurrentHeaderDataTable = true;
-    console.log(columns, 'columns');
   }
   function reloadTable() {
     showModal.value = false;
@@ -316,7 +440,7 @@
     editOutboundForecast = false;
     showLoadingCarListDialog = false;
     showFeeDialog = false;
-    actionRef.value[0].reload();
+    actionRef.value.reload();
   }
 
   async function checkOutboundOrder(id) {
@@ -350,23 +474,23 @@
 
   function updateFilter(value) {
     if (value !== null) {
-      let { filterTitleOne, filterKeyOne, filterTitleTwo, filterKeyTwo, ...NewObj } = value;
-      if (
-        (value['filterTitleOne'] && value['filterKeyOne']) ||
-        (value['filterTitleTwo'] && value['filterKeyTwo'])
-      ) {
-        const keyOne = columns.find((it) => it.title === value['filterTitleOne']).key;
-        const keyTwo = columns.find((it) => it.title === value['filterTitleTwo']).key;
-        if (keyOne) {
-          NewObj[keyOne] = value['filterKeyOne'];
-        }
-        if (keyTwo) {
-          NewObj[keyTwo] = value['filterKeyTwo'];
-        }
+      if (optionOne && valueOne) {
+        const keyOne = columns.find((it) => it.title === optionOne).key;
+
+        value[keyOne] = valueOne;
       }
-      filterObj = NewObj;
+      if (optionTwo && valueTwo) {
+        const keyTwo = columns.find((it) => it.title === optionTwo).key;
+        value[keyTwo] = valueTwo;
+      }
+      filterObj = value;
     } else {
       filterObj = null;
+      optionOne = '';
+      valueOne = '';
+      optionTwo = '';
+      valueTwo = '';
+      dateRange = valueOfToday;
     }
     reloadTable();
   }

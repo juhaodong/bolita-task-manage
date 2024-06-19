@@ -121,6 +121,7 @@ export function initModel(g: GeneralModel): Model {
     for (let value of list) {
       value = await g.init(value, ...args);
       await generalInit(value, ...args);
+      value.id = currentMaxId.toString();
       ids.push(currentMaxId);
       batch.set(doc(collection(db, collectionName), prefix + currentMaxId), value);
       currentMaxId++;

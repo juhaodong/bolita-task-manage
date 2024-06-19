@@ -46,7 +46,58 @@
           </template>
           报价
         </n-button>
+        <n-button type="primary" @click="downloadData">
+          <template #icon>
+            <n-icon>
+              <Box20Filled />
+            </n-icon>
+          </template>
+          下载
+        </n-button>
       </filter-bar>
+      <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
+        <n-card embedded size="small" style="max-width: 300px">
+          <div style="display: flex">
+            <n-select
+              v-model:value="optionOne"
+              :options="realOptions"
+              placeholder="过滤项1"
+              style="width: 130px"
+            />
+            <n-input
+              v-model:value="valueOne"
+              class="ml-2"
+              placeholder="过滤值1"
+              style="width: 130px"
+              type="text"
+            />
+          </div>
+        </n-card>
+        <n-card class="ml-2" embedded size="small" style="max-width: 300px">
+          <div style="display: flex">
+            <n-select
+              v-model:value="optionTwo"
+              :options="realOptions"
+              placeholder="过滤项2"
+              style="width: 130px"
+            />
+            <n-input
+              v-model:value="valueTwo"
+              class="ml-2"
+              placeholder="过滤值2"
+              style="width: 130px"
+              type="text"
+            />
+          </div>
+        </n-card>
+        <n-date-picker
+          v-model:value="dateRange"
+          :default-value="[dayjs().valueOf(), dayjs().valueOf()]"
+          class="ml-2"
+          clearable
+          type="daterange"
+        />
+      </div>
       <div class="my-2"></div>
       <n-tabs
         v-model:value="typeMission"
@@ -63,23 +114,14 @@
           :tab="currentType"
         >
           <div v-if="hasPagePower">
-            <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
-              <n-tab-pane
-                v-for="currentMonth in monthTab"
-                :key="currentMonth"
-                :name="currentMonth"
-                :tab="currentMonth"
-              >
-                <BasicTable
-                  ref="actionRef"
-                  v-model:checked-row-keys="checkedRows"
-                  :actionColumn="actionColumn"
-                  :columns="currentColumns"
-                  :request="loadDataTable"
-                  :row-key="(row) => row.id"
-                />
-              </n-tab-pane>
-            </n-tabs>
+            <BasicTable
+              ref="actionRef"
+              v-model:checked-row-keys="checkedRows"
+              :actionColumn="actionColumn"
+              :columns="currentColumns"
+              :request="loadDataTable"
+              :row-key="(row) => row.id"
+            />
           </div>
           <no-power-page v-else />
         </n-tab-pane>
@@ -158,7 +200,10 @@
   import { $ref } from 'vue/macros';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
+  import {
+    getDetailListById,
+    NotifyDetailManager,
+  } from '@/api/dataLayer/modules/notify/notify-detail';
   import {
     InBoundDetailStatus,
     InBoundStatus,
@@ -166,7 +211,7 @@
   } from '@/api/dataLayer/modules/notify/notify-api';
   import { Box20Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
-  import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import { dateCompare } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
   import NewTotalFee from '@/views/newViews/SettlementManage/NewTotalFee.vue';
@@ -184,7 +229,9 @@
   import OfferPriceDialog from '@/views/newViews/Missions/AlreadyWarehousing/OfferPriceDialog.vue';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
-  import { safeSumBy } from '@/store/utils/utils';
+  import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
+  import { valueOfToday } from '@/api/dataLayer/common/Date';
+  import FileSaver from 'file-saver';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -194,7 +241,6 @@
   let checkedRows = $ref([]);
   let currentModel: any | null = $ref(null);
   let typeTab = $ref(['整柜任务看板', '审核看板', '报价看板', '存仓看板']);
-  let monthTab: any | null = $ref(null);
   let typeMission = ref('');
   let selectedMonth: any | null = $ref('');
   let currentData: any | null = $ref('');
@@ -208,11 +254,21 @@
   let showTimeLine = $ref(false);
   let currentWithOutSelection = $ref([]);
   let showOfferPrice = $ref(false);
+  let optionOne = $ref('');
+  let optionTwo = $ref('');
+  let valueOne = $ref('');
+  let valueTwo = $ref('');
+  let dateRange = $ref(valueOfToday);
+
   const actionRef = ref();
   const props = defineProps<Prop>();
   interface Prop {
     belongsToId?: string;
   }
+
+  const realOptions = computed(() => {
+    return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
+  });
 
   const hasPagePower = computed(() => {
     if (typeMission.value === '整柜任务看板') {
@@ -241,6 +297,80 @@
 
   function addTable() {
     showModal.value = true;
+  }
+
+  async function downloadData() {
+    let selectedList = [];
+    if (checkedRows.length > 0) {
+      selectedList = await getDetailListById(checkedRows);
+    } else {
+      selectedList = await loadDataTable();
+    }
+    console.log(selectedList, 'list');
+    let headerTitle = columns
+      .filter((it) => it.title)
+      .map((it) => it.title)
+      .join();
+    let dataStrings = [];
+    dataStrings.unshift(headerTitle);
+    selectedList.forEach((it) => {
+      const res = [
+        it.customerName ?? '',
+        it.containerId ?? '',
+        it.ticketId ?? '',
+        it.country ?? '',
+        it.number ?? '',
+        it.arrivedContainerNum ?? '',
+        it.weight ?? '',
+        it.volume ?? '',
+        it.size ?? '',
+        it.inStatus ?? '',
+        it.warehouseId ?? '',
+        it.stayTime ?? '',
+        it.deliveryIdIn ?? '',
+        it.normalNote ?? '',
+        it.FBADeliveryCode ?? '',
+        it.outboundMethod ?? '',
+        it.deliveryMethod ?? '',
+        it.operationRequire ?? '',
+        it.operationNote ?? '',
+        it.finalStatus ?? '',
+        it.PO ?? '',
+        it.FCAddress ?? '',
+        it.postcode ?? '',
+        it.inBoundDetailStatus ?? '',
+        it.changeOrderFiles ?? '',
+        it.transportationNote ?? '',
+        it.trayNum ?? '',
+        it.arrivedTrayNum ?? '',
+        it.planArriveDateTime ? dayjs(it.planArriveDateTime).format('YYYY-MM-DD') : '',
+        it.currentDate ? dayjs(it.currentDate[0]).format('YYYY-MM-DD') : '',
+        it.deliveryTime ? dayjs(it.deliveryTime).format('YYYY-MM-DD') : '',
+        it.Ref ?? '',
+        it.note ?? '',
+        it.sign ?? '',
+        it.package ?? '',
+        it.industrialTrayNum ?? '',
+        it.productName ?? '',
+        it.UNNumber ?? '',
+        it.recipient ?? '',
+        it.phone ?? '',
+        it.email ?? '',
+        it.needReserve ?? '',
+        it.industrialNote ?? '',
+      ];
+      dataStrings.push(res.join());
+    });
+    dataStrings = dataStrings.join('\n');
+    const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
+    FileSaver.saveAs(
+      blob,
+      dayjs(dateRange[0]).startOf('day').format('YYYY-MM-DD') +
+        '~' +
+        dayjs(dateRange[1]).endOf('day').format('YYYY-MM-DD') +
+        '任务明细' +
+        '.csv'
+    );
   }
 
   async function checkDetailInfo() {
@@ -277,22 +407,20 @@
   }
 
   const loadDataTable = async () => {
+    let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
+    let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
     if (typeMission.value === '整柜任务看板') {
-      allList = (await NotifyDetailManager.load(filterObj)).filter(
-        (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
-      );
+      allList = await NotifyDetailManager.load(filterObj);
     } else if (typeMission.value === '存仓看板') {
-      allList = (await NotifyDetailManager.load(filterObj))
-        .filter((it) => it.inStatus === '存仓')
-        .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
+      allList = (await NotifyDetailManager.load(filterObj)).filter((it) => it.inStatus === '存仓');
     } else if (typeMission.value === '审核看板') {
-      allList = (await NotifyDetailManager.load(filterObj))
-        .filter((it) => it.inStatus === '等待提交' || it.inStatus === '等待审核')
-        .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
+      allList = (await NotifyDetailManager.load(filterObj)).filter(
+        (it) => it.inStatus === '等待提交' || it.inStatus === '等待审核'
+      );
     } else if (typeMission.value === '报价看板') {
-      allList = (await NotifyDetailManager.load(filterObj))
-        .filter((it) => it.offerPriceInfo)
-        .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
+      allList = (await NotifyDetailManager.load(filterObj)).filter(
+        (it) => it.needOfferPrice === '1'
+      );
     }
     const ownedCustomerIds = useUserStore()?.info?.customerIds;
     allList.forEach((it) => {
@@ -312,28 +440,29 @@
     if (ownedCustomerIds.length > 0) {
       allList = allList.filter((it) => ownedCustomerIds.includes(it.customerId));
     }
-    return allList.sort(dateCompare('createTimestamp'));
+    return allList
+      .filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate)
+      .sort(dateCompare('createTimestamp'));
   };
 
   function updateFilter(value) {
     if (value !== null) {
-      let { filterTitleOne, filterKeyOne, filterTitleTwo, filterKeyTwo, ...NewObj } = value;
-      if (
-        (value['filterTitleOne'] && value['filterKeyOne']) ||
-        (value['filterTitleTwo'] && value['filterKeyTwo'])
-      ) {
-        const keyOne = columns.find((it) => it.title === value['filterTitleOne']).key;
-        const keyTwo = columns.find((it) => it.title === value['filterTitleTwo']).key;
-        if (keyOne) {
-          NewObj[keyOne] = value['filterKeyOne'];
-        }
-        if (keyTwo) {
-          NewObj[keyTwo] = value['filterKeyTwo'];
-        }
+      if (optionOne && valueOne) {
+        const keyOne = columns.find((it) => it.title === optionOne).key;
+        value[keyOne] = valueOne;
       }
-      filterObj = NewObj;
+      if (optionTwo && valueTwo) {
+        const keyTwo = columns.find((it) => it.title === optionTwo).key;
+        value[keyTwo] = valueTwo;
+      }
+      filterObj = value;
     } else {
       filterObj = null;
+      optionOne = '';
+      valueOne = '';
+      optionTwo = '';
+      valueTwo = '';
+      dateRange = valueOfToday;
     }
     reloadTable();
   }
@@ -346,7 +475,6 @@
   watch(
     typeMission,
     async (value, oldValue) => {
-      console.log(value, 'value');
       if (value !== oldValue) {
         await reloadHeader();
       }
@@ -399,8 +527,6 @@
   onMounted(async () => {
     await reloadHeader();
     typeMission.value = '整柜任务看板';
-    monthTab = OneYearMonthTab();
-    selectedMonth = monthTab[0];
     const res = getQueryString('containerId');
     if (res) {
       updateFilter({ containerId: res });

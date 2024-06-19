@@ -6,7 +6,6 @@ import {
 } from '@/views/bolita-views/composable/useableColumns';
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { generateOptionFromArray } from '@/store/utils/utils';
 
 export const columns: DataTableColumns<any> = [
   timeColumn('planArriveDateTime', '预计入库日期'),
@@ -60,7 +59,7 @@ export const filters: FormField[] = [
   },
   {
     label: '柜号',
-    field: 'customerName',
+    field: 'containerNo',
   },
   {
     label: '客户ID',
@@ -77,30 +76,6 @@ export const filters: FormField[] = [
   {
     label: '状态',
     field: 'status',
-  },
-  {
-    label: '过滤项1',
-    field: 'filterTitleOne',
-    component: 'NSelect',
-    componentProps: {
-      options: generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title)),
-    },
-  },
-  {
-    label: '过滤值1',
-    field: 'filterKeyOne',
-  },
-  {
-    label: '过滤项2',
-    field: 'filterTitleTwo',
-    component: 'NSelect',
-    componentProps: {
-      options: generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title)),
-    },
-  },
-  {
-    label: '过滤值2',
-    field: 'filterKeyTwo',
   },
 ];
 

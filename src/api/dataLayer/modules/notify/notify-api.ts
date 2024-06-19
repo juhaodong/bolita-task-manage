@@ -26,6 +26,7 @@ export const NotifyManager = initModel({
   async afterAddHook(id, value, taskList) {
     taskList.forEach((it) => {
       it.warehouseId = value.warehouseId;
+      it.inHouseTime = value.inHouseTime;
     });
     await NotifyDetailManager.massiveAdd(taskList, id, value);
   },
@@ -36,6 +37,7 @@ export enum InBoundStatus {
   Partial = '部分入库',
   Wait = '等待入库',
   WaitCheck = '等待审核',
+  WaitOperate = '入库待操作',
 }
 
 export enum InBoundDetailStatus {

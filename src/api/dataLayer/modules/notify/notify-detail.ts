@@ -64,6 +64,16 @@ export async function getDetailListById(ids) {
   return currentTaskList.flat();
 }
 
+export async function getDetailListByIdWithSearch(filterObj, ids) {
+  const currentTaskList = [];
+  const res = chunk(ids, 30);
+  for (const idList of res) {
+    const result = await NotifyDetailManager.load(filterObj, where('id', 'in', idList));
+    currentTaskList.push(result);
+  }
+  return currentTaskList.flat();
+}
+
 export async function getDownProductsDetailListById(ids) {
   return await CashManager.load(null, where('financeContainerId', '==', ids));
 }

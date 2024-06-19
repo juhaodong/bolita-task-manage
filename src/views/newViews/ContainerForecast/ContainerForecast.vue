@@ -15,22 +15,22 @@
           </template>
           新建货柜预报
         </n-button>
-        <n-button size="small" type="info" @click="downloadFiles">
-          <template #icon>
-            <n-icon>
-              <Box20Filled />
-            </n-icon>
-          </template>
-          卸柜业务流程
-        </n-button>
-        <n-button size="small" type="info" @click="downloadFiles">
-          <template #icon>
-            <n-icon>
-              <Box20Filled />
-            </n-icon>
-          </template>
-          货柜预报填写注意事项
-        </n-button>
+        <!--        <n-button size="small" type="info" @click="downloadFiles">-->
+        <!--          <template #icon>-->
+        <!--            <n-icon>-->
+        <!--              <Box20Filled />-->
+        <!--            </n-icon>-->
+        <!--          </template>-->
+        <!--          卸柜业务流程-->
+        <!--        </n-button>-->
+        <!--        <n-button size="small" type="info" @click="downloadFiles">-->
+        <!--          <template #icon>-->
+        <!--            <n-icon>-->
+        <!--              <Box20Filled />-->
+        <!--            </n-icon>-->
+        <!--          </template>-->
+        <!--          货柜预报填写注意事项-->
+        <!--        </n-button>-->
         <n-button size="small" type="info" @click="selectedHeader">
           <template #icon>
             <n-icon>
@@ -39,32 +39,74 @@
           </template>
           选择表头显示
         </n-button>
-        <n-button size="small" @click="clearAllData()">
+        <!--        <n-button size="small" @click="clearAllData()">-->
+        <!--          <template #icon>-->
+        <!--            <n-icon>-->
+        <!--              <TruckDelivery />-->
+        <!--            </n-icon>-->
+        <!--          </template>-->
+        <!--          清除数据-->
+        <!--        </n-button>-->
+        <n-button size="small" type="info" @click="downloadData">
           <template #icon>
             <n-icon>
-              <TruckDelivery />
+              <Box20Filled />
             </n-icon>
           </template>
-          清除数据
+          下载
         </n-button>
       </filter-bar>
+      <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
+        <n-card embedded size="small" style="max-width: 300px">
+          <div style="display: flex">
+            <n-select
+              placeholder="过滤项1"
+              style="width: 130px"
+              v-model:value="optionOne"
+              :options="realOptions"
+            />
+            <n-input
+              class="ml-2"
+              style="width: 130px"
+              v-model:value="valueOne"
+              type="text"
+              placeholder="过滤值1"
+            />
+          </div>
+        </n-card>
+        <n-card class="ml-2" embedded size="small" style="max-width: 300px">
+          <div style="display: flex">
+            <n-select
+              placeholder="过滤项2"
+              style="width: 130px"
+              v-model:value="optionTwo"
+              :options="realOptions"
+            />
+            <n-input
+              class="ml-2"
+              style="width: 130px"
+              v-model:value="valueTwo"
+              type="text"
+              placeholder="过滤值2"
+            />
+          </div>
+        </n-card>
+        <n-date-picker
+          :default-value="[dayjs().valueOf(), dayjs().valueOf()]"
+          class="ml-2"
+          v-model:value="dateRange"
+          type="daterange"
+          clearable
+        />
+      </div>
       <div class="my-2"></div>
-      <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
-        <n-tab-pane
-          v-for="currentMonth in monthTab"
-          :key="currentMonth"
-          :name="currentMonth"
-          :tab="currentMonth"
-        >
-          <BasicTable
-            ref="actionRef"
-            :actionColumn="actionColumn"
-            :columns="currentColumns"
-            :request="loadDataTable"
-            :row-key="(row) => row.id"
-          />
-        </n-tab-pane>
-      </n-tabs>
+      <BasicTable
+        ref="actionRef"
+        :actionColumn="actionColumn"
+        :columns="currentColumns"
+        :request="loadDataTable"
+        :row-key="(row) => row.id"
+      />
       <n-modal
         v-model:show="showModal"
         :show-icon="false"
@@ -128,6 +170,15 @@
           @saved="reloadHeader"
         />
       </n-modal>
+      <n-modal
+        v-model:show="showConfirmDialog"
+        :show-icon="false"
+        preset="card"
+        style="width: 90%; min-width: 400px; max-width: 400px"
+        title="请确认"
+      >
+        <confirm-dialog :title="'您确定要取消吗？'" @saved="confirmCancel" />
+      </n-modal>
     </n-card>
     <no-power-page v-else />
   </div>
@@ -149,25 +200,30 @@
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { clearAllData } from '@/api/dataLayer/clearAllData';
-  import { handleRequest, toastSuccess } from '@/store/utils/utils';
+  import { generateOptionFromArray, handleRequest, toastSuccess } from '@/store/utils/utils';
   import NotifyUnloadForm from '@/views/newViews/ContainerForecast/form/NotifyUnloadForm.vue';
   import NotifyFeeDialog from '@/views/newViews/ContainerForecast/form/NotifyFeeDialog.vue';
   import WarehouseInfoDialog from '@/views/newViews/ContainerForecast/form/WarehouseInfoDialog.vue';
   import ContainerForecastIndex from '@/views/newViews/ContainerForecast/form/ContainerForecastIndex.vue';
-  import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import { dateCompare } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import UnloadingList from '@/views/newViews/ContainerForecast/form/UnloadingList.vue';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
   import { getTableHeader } from '@/api/dataLayer/common/TableHeader';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
+  import { defaultToday, valueOfToday } from '@/api/dataLayer/common/Date';
+  import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
+  import FileSaver from 'file-saver';
+  import {
+    getNotifyDetailListByNotify,
+    NotifyDetailManager,
+  } from '@/api/dataLayer/modules/notify/notify-detail';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
   let currentModel: any | null = $ref(null);
   let showCurrentHeaderDataTable = $ref(false);
   const showModal = ref(false);
-  let selectedMonth: any | null = $ref('');
-  let monthTab: any | null = $ref(null);
   let showOperationTable = $ref(false);
   let currentNotifyId: string | null = $ref(null);
   let showWarehouseDialog = $ref(false);
@@ -176,6 +232,13 @@
   let showUnloadingList = $ref(false);
   let currentHeader = $ref([]);
   let currentColumns = $ref([]);
+  let optionOne = $ref('');
+  let optionTwo = $ref('');
+  let valueOne = $ref('');
+  let valueTwo = $ref('');
+  let dateRange = $ref(valueOfToday);
+  let showConfirmDialog = $ref(false);
+  let cancelId = $ref('');
 
   function addTable(type: NotifyType) {
     notifyType = type;
@@ -185,13 +248,17 @@
 
   onMounted(async () => {
     await reloadHeader();
-    monthTab = OneYearMonthTab();
-    selectedMonth = monthTab[0];
+  });
+
+  const realOptions = computed(() => {
+    return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
   });
 
   const loadDataTable = async () => {
+    let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
+    let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
     const res = (await NotifyManager.load(filterObj)).filter(
-      (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
+      (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
     );
     return res.sort(dateCompare('planArriveDateTime'));
   };
@@ -200,25 +267,78 @@
 
   function updateFilter(value) {
     if (value !== null) {
-      let { filterTitleOne, filterKeyOne, filterTitleTwo, filterKeyTwo, ...NewObj } = value;
-      if (
-        (value['filterTitleOne'] && value['filterKeyOne']) ||
-        (value['filterTitleTwo'] && value['filterKeyTwo'])
-      ) {
-        const keyOne = columns.find((it) => it.title === value['filterTitleOne']).key;
-        const keyTwo = columns.find((it) => it.title === value['filterTitleTwo']).key;
-        if (keyOne) {
-          NewObj[keyOne] = value['filterKeyOne'];
-        }
-        if (keyTwo) {
-          NewObj[keyTwo] = value['filterKeyTwo'];
-        }
+      if (optionOne && valueOne) {
+        const keyOne = columns.find((it) => it.title === optionOne).key;
+
+        value[keyOne] = valueOne;
       }
-      filterObj = NewObj;
+      if (optionTwo && valueTwo) {
+        const keyTwo = columns.find((it) => it.title === optionTwo).key;
+        value[keyTwo] = valueTwo;
+      }
+      filterObj = value;
     } else {
       filterObj = null;
+      optionOne = '';
+      valueOne = '';
+      optionTwo = '';
+      valueTwo = '';
+      dateRange = valueOfToday;
     }
     reloadTable();
+  }
+
+  async function confirmCancel() {
+    const res = await NotifyManager.edit(
+      {
+        inStatus: '已取消',
+      },
+      cancelId
+    );
+    const list = await getNotifyDetailListByNotify(cancelId);
+    console.log(list, 'list');
+    for (const item of list) {
+      item.inStatus = '已取消';
+      await NotifyDetailManager.edit(item, item.id);
+    }
+    await handleRequest(res, () => {
+      toastSuccess('success');
+      reloadTable();
+    });
+  }
+
+  async function downloadData() {
+    const selectedList = await loadDataTable();
+    console.log(columns, 'columns');
+    let headerTitle = columns.map((it) => it.title).join();
+    let dataStrings = [];
+    dataStrings.unshift(headerTitle);
+    selectedList.forEach((it) => {
+      const res = [
+        dayjs(it.planArriveDateTime).format('YYYY-MM-DD') ?? '',
+        it.inHouseTime ?? '',
+        it.containerNo ?? '',
+        it.customerName ?? '',
+        it.warehouseId ?? '',
+        it.arrivedCount ?? '',
+        it.inStatus ?? '',
+        it.unloadPerson ?? '',
+        it.salesName ?? '',
+        it.note ?? '',
+        it.containerFinalStatus ?? '',
+      ];
+      dataStrings.push(res.join());
+    });
+    dataStrings = dataStrings.join('\n');
+    const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
+    FileSaver.saveAs(
+      blob,
+      dayjs(dateRange[0]).startOf('day').format('YYYY-MM-DD') +
+        '~' +
+        dayjs(dateRange[1]).endOf('day').format('YYYY-MM-DD') +
+        '到货预报' +
+        '.csv'
+    );
   }
 
   async function reloadHeader() {
@@ -246,9 +366,10 @@
   }
 
   function reloadTable() {
-    actionRef.value[0].reload();
+    actionRef.value.reload();
     showOperationTable = false;
     showFeeDialog = false;
+    showConfirmDialog = false;
   }
 
   async function downloadFiles() {
@@ -313,16 +434,8 @@
           {
             label: '取消',
             async onClick() {
-              const res = await NotifyManager.edit(
-                {
-                  inStatus: '已取消',
-                },
-                record.id
-              );
-              await handleRequest(res, () => {
-                toastSuccess('success');
-                reloadTable();
-              });
+              cancelId = record.id;
+              showConfirmDialog = true;
             },
             ifShow: () => {
               return hasAuthPower('forecastCancel');

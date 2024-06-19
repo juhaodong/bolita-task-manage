@@ -48,7 +48,7 @@
     },
     getFilesUploadFormField('files', false, () => {
       window.open(
-        'https://firebasestorage.googleapis.com/v0/b/bolita-task-manage.appspot.com/o/MoBan0604.xlsx?alt=media&token=57d2b4bf-fbb8-440e-80a0-2da7bc291dd9'
+        'https://firebasestorage.googleapis.com/v0/b/bolita-task-manage.appspot.com/o/NotifyMoBan.xlsx?alt=media&token=12ccc420-eb09-4afb-9ad4-fff39da9da77'
       );
     }),
     {

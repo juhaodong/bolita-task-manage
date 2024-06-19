@@ -20,7 +20,7 @@ export async function addOutboundForecast(list) {
   list.containerNum = safeSumInt(currentTaskList, 'arrivedContainerNum');
   list.totalWeight = safeSumBy(currentTaskList, 'weight');
   list.totalVolume = safeSumBy(currentTaskList, 'volume');
-  list.createTimestamp = dayjs().format('YYYY-MM-DD HH:mm:ss');
+  list.createTimestamp = dayjs().valueOf();
   const id = await getCollectionNextId(OutboundForecast, 'OF');
   const purchaseRef = doc(db, OutboundForecast, id);
   await setDoc(purchaseRef, { ...list });

@@ -18,9 +18,9 @@ export type FormField = {
 };
 
 export function convertFormFieldToSchema(formField: FormField): FormSchema {
-  if (formField?.component === 'NSelect') {
-    formField.component = 'NAutoComplete';
-  }
+  // if (formField?.component === 'NSelect') {
+  //   formField.component = 'NAutoComplete';
+  // }
   const type = formField?.component ?? 'NInput';
   const verb = ['NInput', 'NInputNumber'].includes(type) ? '输入' : '选择';
   const shouldUseNumber = ['NInputNumber', 'NDatePicker'].includes(type);

@@ -20,6 +20,49 @@
         合并对账
       </n-button>
     </filter-bar>
+    <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
+      <n-card embedded size="small" style="max-width: 300px">
+        <div style="display: flex">
+          <n-select
+            placeholder="过滤项1"
+            style="width: 130px"
+            v-model:value="optionOne"
+            :options="realOptions"
+          />
+          <n-input
+            class="ml-2"
+            style="width: 130px"
+            v-model:value="valueOne"
+            type="text"
+            placeholder="过滤值1"
+          />
+        </div>
+      </n-card>
+      <n-card class="ml-2" embedded size="small" style="max-width: 300px">
+        <div style="display: flex">
+          <n-select
+            placeholder="过滤项2"
+            style="width: 130px"
+            v-model:value="optionTwo"
+            :options="realOptions"
+          />
+          <n-input
+            class="ml-2"
+            style="width: 130px"
+            v-model:value="valueTwo"
+            type="text"
+            placeholder="过滤值2"
+          />
+        </div>
+      </n-card>
+      <n-date-picker
+        :default-value="[dayjs().valueOf(), dayjs().valueOf()]"
+        class="ml-2"
+        v-model:value="dateRange"
+        type="daterange"
+        clearable
+      />
+    </div>
     <div class="my-2"></div>
     <n-tabs
       v-model:value="typeMission"
@@ -35,23 +78,14 @@
         :name="currentType"
         :tab="currentType"
       >
-        <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
-          <n-tab-pane
-            v-for="currentMonth in monthTab"
-            :key="currentMonth"
-            :name="currentMonth"
-            :tab="currentMonth"
-          >
-            <BasicTable
-              ref="actionRef"
-              v-model:checked-row-keys="checkedRows"
-              :action-column="actionColumn"
-              :columns="typeMission === '卸柜结算' ? columnsIn : columnsOut"
-              :request="loadDataTable"
-              :row-key="(row) => row.id"
-            />
-          </n-tab-pane>
-        </n-tabs>
+        <BasicTable
+          ref="actionRef"
+          v-model:checked-row-keys="checkedRows"
+          :action-column="actionColumn"
+          :columns="typeMission === '卸柜结算' ? columnsIn : columnsOut"
+          :request="loadDataTable"
+          :row-key="(row) => row.id"
+        />
       </n-tab-pane>
     </n-tabs>
 
@@ -88,7 +122,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, h, onMounted, reactive, ref } from 'vue';
+  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columnsIn, columnsOut, filters } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
@@ -102,7 +136,7 @@
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import { Box20Filled } from '@vicons/fluent';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { safeSumBy } from '@/store/utils/utils';
+  import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
   import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import {
     getSettlement,
@@ -116,6 +150,8 @@
   import { CashCollectionStatus } from '@/views/newViews/ReconciliationManage/columns';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
+  import { valueOfToday } from '@/api/dataLayer/common/Date';
+  import { columns } from '@/views/newViews/ContainerForecast/columns';
 
   interface Prop {
     outId?: string;
@@ -132,6 +168,11 @@
   let typeMission: any | null = $ref('');
   let currentData: any | null = $ref([]);
   let typeTab = $ref(['卸柜结算', '货柜结算']);
+  let optionOne = $ref('');
+  let optionTwo = $ref('');
+  let valueOne = $ref('');
+  let valueTwo = $ref('');
+  let dateRange = $ref(valueOfToday);
   onMounted(() => {
     monthTab = OneYearMonthTab();
     selectedMonth = monthTab[0];
@@ -148,14 +189,20 @@
     addNewFeeDialog = true;
   }
 
+  const realOptions = computed(() => {
+    return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
+  });
+
   const loadDataTable = async () => {
+    let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
+    let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
     if (typeMission === '货柜结算') {
       allList = (await getSettlement()).filter(
-        (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
+        (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       );
     } else {
       allList = (await CashManager.load()).filter(
-        (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
+        (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       );
     }
     console.log(allList, 'list');
@@ -165,7 +212,25 @@
   let filterObj: any | null = $ref(null);
 
   function updateFilter(value) {
-    filterObj = value;
+    if (value !== null) {
+      if (optionOne && valueOne) {
+        const keyOne = columns.find((it) => it.title === optionOne).key;
+
+        value[keyOne] = valueOne;
+      }
+      if (optionTwo && valueTwo) {
+        const keyTwo = columns.find((it) => it.title === optionTwo).key;
+        value[keyTwo] = valueTwo;
+      }
+      filterObj = value;
+    } else {
+      filterObj = null;
+      optionOne = '';
+      valueOne = '';
+      optionTwo = '';
+      valueTwo = '';
+      dateRange = valueOfToday;
+    }
     reloadTable();
   }
 

@@ -136,7 +136,7 @@ export const allTitleGroup = [
   },
   {
     title: '实际到仓日期',
-    key: 'currentDate',
+    key: 'arriveTime',
     tagType: 'info',
   },
   {
@@ -165,8 +165,18 @@ export const allTitleGroup = [
     tagType: 'success',
   },
   {
+    title: '托数',
+    key: 'industrialTrayNum',
+    tagType: 'success',
+  },
+  {
     title: '品名',
     key: 'productName',
+    tagType: 'success',
+  },
+  {
+    title: 'UN号',
+    key: 'UNNumber',
     tagType: 'success',
   },
   {
@@ -182,26 +192,6 @@ export const allTitleGroup = [
   {
     title: '邮箱',
     key: 'email',
-    tagType: 'success',
-  },
-  {
-    title: '地址1',
-    key: 'address1',
-    tagType: 'success',
-  },
-  {
-    title: '地址2',
-    key: 'address2',
-    tagType: 'success',
-  },
-  {
-    title: '工业品国家',
-    key: 'industrialCountry',
-    tagType: 'success',
-  },
-  {
-    title: '工业品城市',
-    key: 'industrialCity',
     tagType: 'success',
   },
   {

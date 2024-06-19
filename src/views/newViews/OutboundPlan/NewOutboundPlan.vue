@@ -4,7 +4,6 @@
       <template v-if="step == 0">
         <filter-bar :form-fields="filters" @clear="updateFilter" @submit="updateFilter" />
         <n-data-table
-          v-if="allNotifyDetail.length > 0"
           v-model:checked-row-keys="checkedRowKeys"
           :columns="columns"
           :data="allNotifyDetail"
@@ -58,13 +57,17 @@
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { h, onMounted, ref, watch } from 'vue';
   import { DataTableColumns, NButton } from 'naive-ui';
-  import { getDetailListById, getReserveItems } from '@/api/dataLayer/modules/notify/notify-detail';
+  import {
+    getDetailListByIdWithSearch,
+    getReserveItems,
+  } from '@/api/dataLayer/modules/notify/notify-detail';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import {
     asyncCustomer,
     asyncFCAddress,
     asyncStorage,
+    generateOptionFromArray,
     safeParseInt,
     safeSumBy,
     toastError,
@@ -99,7 +102,6 @@
   let selectedDeliveryMethod = $ref('');
   let selectedFCAddress = $ref('');
   onMounted(async () => {
-    console.log(prop.model, 'model');
     await init();
   });
   let allNotifyDetail: any[] = $ref([]);
@@ -134,8 +136,9 @@
   let step = $ref(0);
 
   async function updateFilter(filterObj) {
+    console.log(prop.model, '321');
     if (prop.model.length > 0) {
-      allNotifyDetail = (await getDetailListById(prop.model)).map((it) => {
+      allNotifyDetail = (await getDetailListByIdWithSearch(filterObj, prop.model)).map((it) => {
         it.originId = it.id;
         return it;
       });
@@ -151,6 +154,7 @@
           it.originId = it.id;
           return it;
         });
+      console.log(allNotifyDetail, 'detail');
     }
   }
 
@@ -318,7 +322,7 @@
       field: 'deliveryMethod',
       component: 'NSelect',
       componentProps: {
-        options: deliveryMethodList,
+        options: generateOptionFromArray(deliveryMethodList),
         multiple: true,
       },
     },
@@ -327,7 +331,7 @@
       field: 'outboundMethod',
       component: 'NSelect',
       componentProps: {
-        options: outboundMethodList,
+        options: generateOptionFromArray(outboundMethodList),
       },
     },
     {

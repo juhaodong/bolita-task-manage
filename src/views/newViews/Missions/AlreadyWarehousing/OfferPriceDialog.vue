@@ -36,6 +36,8 @@
     loading = true;
     await safeScope(async () => {
       for (const item of currentTaskList) {
+        item.inStatus = '待订车';
+        item.needOfferPrice = '2';
         await NotifyDetailManager.editInternal(item, item.id);
         const outboundDetail = await getOutboundForecastById(item.outboundId);
         const detailInfo = await getDetailListById(outboundDetail.outboundDetailInfo);
@@ -73,7 +75,7 @@
       </n-descriptions>
     </n-card>
     <n-space class="mt-4">
-      <n-button secondary type="primary" @click="confirm">确认结算</n-button>
+      <n-button secondary type="primary" @click="confirm">确认报价</n-button>
     </n-space>
   </div>
   <div v-else class="loader"> </div>

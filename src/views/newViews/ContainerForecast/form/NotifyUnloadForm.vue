@@ -144,7 +144,7 @@
       if (editInfo.inStatus === '存仓') {
         editInfo.storageTime = [{ storageTime: dayjs().format('YYYY-MM-DD HH:mm:ss') }];
       }
-      editInfo.arriveTime = dayjs().format('YYYY-MM-DD');
+      editInfo.arriveTime = dayjs(currentDate.value[0]).format('YYYY-MM-DD HH:mm:ss');
       let timeLineInfo = listElement.timeLine;
       timeLineInfo.unshift({
         operator: userInfo?.realName,
@@ -217,6 +217,7 @@
         totalCount: totalTrayCount.value + totalContainerCount.value,
         unloadPerson: unloadPerson,
         currentDate: currentDate.value ?? [],
+        currentArriveDate: currentDate.value,
         totalTime: totalTime ?? '',
       },
       props.notifyId
@@ -309,7 +310,7 @@
       </div>
       <n-space v-if="notifyInfo" :wrap-item="false" class="mt-4">
         <n-button v-print="'#print'" type="default">打印</n-button>
-        <n-button v-if="showBtn" secondary @click="allArrived">全部到齐</n-button>
+        <n-button secondary @click="allArrived">全部到齐</n-button>
         <div class="flex-grow"></div>
         <div>
           <n-input v-model:value="unloadPerson" placeholder="卸柜人员" />
@@ -317,9 +318,7 @@
         <!--        <n-button v-if="showBtn" :disabled="!canEdit" secondary type="warning" @click="save"-->
         <!--          >保存-->
         <!--        </n-button>-->
-        <n-button v-if="showBtn" :disabled="!canConfirm" type="primary" @click="confirm"
-          >确认全部到货
-        </n-button>
+        <n-button type="primary" @click="confirm">确认全部到货 </n-button>
       </n-space>
     </loading-frame>
   </div>

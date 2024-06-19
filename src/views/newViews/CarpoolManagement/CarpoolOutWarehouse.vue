@@ -3,30 +3,65 @@
     <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
       <n-button
         v-if="hasAuthPower('outStorageCarAdd')"
-        size="small"
         style="margin-left: 10px"
         type="primary"
         @click="ImportFilesDialog = true"
         >库外订车</n-button
       >
+      <n-button type="info" @click="downloadData"> 下载 </n-button>
     </filter-bar>
+    <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
+      <n-card embedded size="small" style="max-width: 300px">
+        <div style="display: flex">
+          <n-select
+            v-model:value="optionOne"
+            :options="realOptions"
+            placeholder="过滤项1"
+            style="width: 130px"
+          />
+          <n-input
+            v-model:value="valueOne"
+            class="ml-2"
+            placeholder="过滤值1"
+            style="width: 130px"
+            type="text"
+          />
+        </div>
+      </n-card>
+      <n-card class="ml-2" embedded size="small" style="max-width: 300px">
+        <div style="display: flex">
+          <n-select
+            v-model:value="optionTwo"
+            :options="realOptions"
+            placeholder="过滤项2"
+            style="width: 130px"
+          />
+          <n-input
+            v-model:value="valueTwo"
+            class="ml-2"
+            placeholder="过滤值2"
+            style="width: 130px"
+            type="text"
+          />
+        </div>
+      </n-card>
+      <n-date-picker
+        v-model:value="dateRange"
+        :default-value="[dayjs().valueOf(), dayjs().valueOf()]"
+        class="ml-2"
+        clearable
+        type="daterange"
+      />
+    </div>
     <div class="my-2"></div>
-    <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
-      <n-tab-pane
-        v-for="currentMonth in monthTab"
-        :key="currentMonth"
-        :name="currentMonth"
-        :tab="currentMonth"
-      >
-        <BasicTable
-          ref="actionRef"
-          :actionColumn="actionColumn"
-          :columns="outCarColumns"
-          :request="loadDataTable"
-          :row-key="(row) => row.id"
-        />
-      </n-tab-pane>
-    </n-tabs>
+    <BasicTable
+      ref="actionRef"
+      v-model:checked-row-keys="checkedRows"
+      :actionColumn="actionColumn"
+      :columns="outCarColumns"
+      :request="loadDataTable"
+      :row-key="(row) => row.id"
+    />
     <n-modal
       v-model:show="ImportFilesDialog"
       :show-icon="false"
@@ -59,7 +94,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, h, onMounted, reactive, ref } from 'vue';
+  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { filters, outCarColumns } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
@@ -74,6 +109,11 @@
   import OutCarDetail from '@/views/newViews/CarpoolManagement/OutCarDetail.vue';
   import OutWarehouseCarOffer from '@/views/newViews/CarpoolManagement/OutWarehouseCarOffer.vue';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
+  import { valueOfToday } from '@/api/dataLayer/common/Date';
+  import { generateOptionFromArray } from '@/store/utils/utils';
+  import { columns } from '@/views/newViews/ContainerForecast/columns';
+  import FileSaver from 'file-saver';
+  import { getOutWarehouseDetailListById } from '@/api/dataLayer/modules/GetListById';
 
   const showModal = ref(false);
 
@@ -82,18 +122,85 @@
   let currentModel: any | null = $ref(null);
   let paymentDialogShow: boolean = $ref(false);
   let selectedMonth: any | null = $ref('');
+  let checkedRows = $ref([]);
   let ImportFilesDialog = $ref(false);
   let editDetailModel = $ref(false);
   let monthTab: any | null = $ref(null);
   let currentId = $ref('');
   let showOfferPrice = $ref(false);
+  let optionOne = $ref('');
+  let optionTwo = $ref('');
+  let valueOne = $ref('');
+  let valueTwo = $ref('');
+  let dateRange = $ref(valueOfToday);
+
+  const realOptions = computed(() => {
+    return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
+  });
   const loadDataTable = async () => {
+    let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
+    let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
     const res = (await OutWarehouseManager.load())
-      .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth)
+      .filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate)
       .sort(dateCompare('realDate'));
     console.log(res, 'res');
     return res;
   };
+
+  async function downloadData() {
+    let selectedList = [];
+    if (checkedRows.length > 0) {
+      selectedList = await getOutWarehouseDetailListById(checkedRows);
+    } else {
+      selectedList = await loadDataTable();
+    }
+    let headerTitle = outCarColumns
+      .filter((it) => it.title)
+      .map((it) => it.title)
+      .join();
+    let dataStrings = [];
+    dataStrings.unshift(headerTitle);
+    selectedList.forEach((it) => {
+      const res = [
+        it.realDate ?? '',
+        it.channel ?? '',
+        it.carType ?? '',
+        it.customerId ?? '',
+        it.orderId ?? '',
+        it.trayNumber ?? '',
+        it.boxNumber ?? '',
+        it.stackable ?? '',
+        it.needEquipment ?? '',
+        it.pickingAddress ?? '',
+        it.sendingAddress ?? '',
+        it.pickingDate ?? '',
+        it.sendingDate ?? '',
+        it.platformOrderId ?? '',
+        it.offerPrice ?? '',
+        it.POD ?? '',
+        it.size ?? '',
+        it.demand ?? '',
+        it.priceDemand ?? '',
+        it.warehouseDeliveryFile ?? '',
+        it.logisticsCompany ?? '',
+        it.costPrice ?? '',
+        it.logisticsPrice ?? '',
+        it.status ?? '',
+        it.note ?? '',
+      ];
+      dataStrings.push(res.join());
+    });
+    dataStrings = dataStrings.join('\n');
+    const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
+    FileSaver.saveAs(
+      blob,
+      dayjs(dateRange[0]).startOf('day').format('YYYY-MM-DD') +
+        '~' +
+        dayjs(dateRange[1]).endOf('day').format('YYYY-MM-DD') +
+        '任务明细' +
+        '.csv'
+    );
+  }
 
   onMounted(async () => {
     monthTab = OneYearMonthTab();
@@ -103,29 +210,29 @@
 
   function updateFilter(value) {
     if (value !== null) {
-      let { filterTitleOne, filterKeyOne, filterTitleTwo, filterKeyTwo, ...NewObj } = value;
-      if (
-        (value['filterTitleOne'] && value['filterKeyOne']) ||
-        (value['filterTitleTwo'] && value['filterKeyTwo'])
-      ) {
-        const keyOne = outCarColumns.find((it) => it.title === value['filterTitleOne']).key;
-        const keyTwo = outCarColumns.find((it) => it.title === value['filterTitleTwo']).key;
-        if (keyOne) {
-          NewObj[keyOne] = value['filterKeyOne'];
-        }
-        if (keyTwo) {
-          NewObj[keyTwo] = value['filterKeyTwo'];
-        }
+      if (optionOne && valueOne) {
+        const keyOne = outCarColumns.find((it) => it.title === optionOne).key;
+
+        value[keyOne] = valueOne;
       }
-      filterObj = NewObj;
+      if (optionTwo && valueTwo) {
+        const keyTwo = outCarColumns.find((it) => it.title === optionTwo).key;
+        value[keyTwo] = valueTwo;
+      }
+      filterObj = value;
     } else {
       filterObj = null;
+      optionOne = '';
+      valueOne = '';
+      optionTwo = '';
+      valueTwo = '';
+      dateRange = valueOfToday;
     }
     reloadTable();
   }
 
   function reloadTable() {
-    actionRef.value[0].reload();
+    actionRef.value.reload();
     editDetailModel = false;
     showOfferPrice = false;
     ImportFilesDialog = false;

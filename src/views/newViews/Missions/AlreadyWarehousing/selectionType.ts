@@ -20,5 +20,12 @@ export const planObj = {
 
 export const offerObj = {
   type: 'selection',
-  disabled: (row) => false,
+  disabled: () => false,
+};
+
+export const inStorageObj = {
+  type: 'selection',
+  disabled: (row) => {
+    return row.inStatus !== '库内操作';
+  },
 };

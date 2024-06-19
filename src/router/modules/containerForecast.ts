@@ -23,14 +23,14 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('@/views/newViews/ContainerForecast/ContainerForecast.vue'),
       },
-      {
-        path: 'claimManage',
-        name: `claimManage`,
-        meta: {
-          title: '待认领管理',
-        },
-        component: () => import('@/views/newViews/ToBeClaimed/ToBeClaimed.vue'),
-      },
+      // {
+      //   path: 'claimManage',
+      //   name: `claimManage`,
+      //   meta: {
+      //     title: '待认领管理',
+      //   },
+      //   component: () => import('@/views/newViews/ToBeClaimed/ToBeClaimed.vue'),
+      // },
     ],
   },
 ];

@@ -88,30 +88,22 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       label: '库内操作',
       field: 'operateInStorage',
     },
-  ]);
-  builder.addAll([
-    {
-      label: '是否需要预约',
-      field: 'needReserve',
-    },
-    {
-      label: '危险品',
-      field: 'dangerousProduct',
-    },
-    {
-      label: '分拣标识',
-      field: 'sign',
-    },
     {
       label: '送货备注',
       field: 'transportationNote',
+    },
+  ]);
+  builder.addAll([
+    {
+      label: '分拣标识',
+      field: 'sign',
     },
     {
       label: '包装',
       field: 'package',
     },
     {
-      label: '工业品托数',
+      label: '托数',
       field: 'industrialTrayNum',
     },
     {
@@ -135,20 +127,8 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'email',
     },
     {
-      label: '地址1',
-      field: 'address1',
-    },
-    {
-      label: '地址2',
-      field: 'address2',
-    },
-    {
-      label: '工业品国家',
-      field: 'industrialCountry',
-    },
-    {
-      label: '工业品城市',
-      field: 'industrialCity',
+      label: '是否需要预约',
+      field: 'needReserve',
     },
     {
       label: '工业品备注',

@@ -10,25 +10,75 @@
           </template>
           选择表头显示
         </n-button>
+        <n-button type="primary" @click="finishedCancel">
+          <template #icon>
+            <n-icon>
+              <Box20Filled />
+            </n-icon>
+          </template>
+          操作完成
+        </n-button>
+        <n-button type="info" @click="downloadData">
+          <template #icon>
+            <n-icon>
+              <Box20Filled />
+            </n-icon>
+          </template>
+          下载
+        </n-button>
       </filter-bar>
+      <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
+        <n-card embedded size="small" style="max-width: 300px">
+          <div style="display: flex">
+            <n-select
+              v-model:value="optionOne"
+              :options="realOptions"
+              placeholder="过滤项1"
+              style="width: 130px"
+            />
+            <n-input
+              v-model:value="valueOne"
+              class="ml-2"
+              placeholder="过滤值1"
+              style="width: 130px"
+              type="text"
+            />
+          </div>
+        </n-card>
+        <n-card class="ml-2" embedded size="small" style="max-width: 300px">
+          <div style="display: flex">
+            <n-select
+              v-model:value="optionTwo"
+              :options="realOptions"
+              placeholder="过滤项2"
+              style="width: 130px"
+            />
+            <n-input
+              v-model:value="valueTwo"
+              class="ml-2"
+              placeholder="过滤值2"
+              style="width: 130px"
+              type="text"
+            />
+          </div>
+        </n-card>
+        <n-date-picker
+          v-model:value="dateRange"
+          :default-value="[dayjs().valueOf(), dayjs().valueOf()]"
+          class="ml-2"
+          clearable
+          type="daterange"
+        />
+      </div>
       <div class="my-2"></div>
-      <n-tabs v-model:value="selectedMonth" tab-style="min-width: 80px;" type="card">
-        <n-tab-pane
-          v-for="currentMonth in monthTab"
-          :key="currentMonth"
-          :name="currentMonth"
-          :tab="currentMonth"
-        >
-          <BasicTable
-            ref="actionRef"
-            v-model:checked-row-keys="checkedRows"
-            :actionColumn="actionColumn"
-            :columns="currentColumns"
-            :request="loadDataTable"
-            :row-key="(row) => row.id"
-          />
-        </n-tab-pane>
-      </n-tabs>
+      <BasicTable
+        ref="actionRef"
+        v-model:checked-row-keys="checkedRows"
+        :actionColumn="actionColumn"
+        :columns="currentColumns"
+        :request="loadDataTable"
+        :row-key="(row) => row.id"
+      />
       <n-modal
         v-model:show="showModal"
         :show-icon="false"
@@ -83,19 +133,31 @@
       >
         <time-line :ids="currentId" />
       </n-modal>
+      <n-modal
+        v-model:show="showConfirmDialog"
+        :show-icon="false"
+        preset="card"
+        style="width: 90%; min-width: 400px; max-width: 400px"
+        title="请确认"
+      >
+        <confirm-dialog :title="'您确定要执行这个操作吗？'" @saved="confirmCancel" />
+      </n-modal>
     </div>
   </n-card>
   <no-power-page v-else />
 </template>
 
 <script lang="ts" setup>
-  import { Component, h, onMounted, reactive, ref } from 'vue';
+  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
   import { $ref } from 'vue/macros';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
+  import {
+    getDetailListById,
+    NotifyDetailManager,
+  } from '@/api/dataLayer/modules/notify/notify-detail';
   import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import { Box20Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
@@ -111,7 +173,11 @@
   import { useUserStore } from '@/store/modules/user';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
-  import { safeSumBy } from '@/store/utils/utils';
+  import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
+  import { valueOfToday } from '@/api/dataLayer/common/Date';
+  import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
+  import { inStorageObj } from '@/views/newViews/Missions/AlreadyWarehousing/selectionType';
+  import FileSaver from 'file-saver';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -132,6 +198,13 @@
   let currentColumns = $ref([]);
   let currentId = $ref('');
   let showTimeLine = $ref(false);
+  let optionOne = $ref('');
+  let optionTwo = $ref('');
+  let valueOne = $ref('');
+  let valueTwo = $ref('');
+  let dateRange = $ref(valueOfToday);
+  let showConfirmDialog = $ref(false);
+  let cancelIds = $ref([]);
   const actionRef = ref();
   const props = defineProps<Prop>();
   interface Prop {
@@ -153,10 +226,16 @@
     addNewTrayDialog = true;
   }
 
+  const realOptions = computed(() => {
+    return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
+  });
+
   const loadDataTable = async () => {
-    allList = (await NotifyDetailManager.load(filterObj))
-      .filter((it) => it.inStatus === '存仓' || it.inStatus === '库内操作')
-      .filter((x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth);
+    let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
+    let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
+    allList = (await NotifyDetailManager.load(filterObj)).filter(
+      (it) => it.inStatus === '存仓' || it.inStatus === '库内操作'
+    );
     allList.forEach((it) => {
       if (it.storageTime) {
         const res = it.storageTime.pop();
@@ -171,28 +250,99 @@
         it.stayTime = '-';
       }
     });
-    return allList.sort(dateCompare('createTimestamp'));
+    return allList
+      .filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate)
+      .sort(dateCompare('createTimestamp'));
   };
+
+  async function downloadData() {
+    let selectedList = [];
+    selectedList = await loadDataTable();
+    let headerTitle = columns
+      .filter((it) => it.title)
+      .map((it) => it.title)
+      .join();
+    let dataStrings = [];
+    dataStrings.unshift(headerTitle);
+    selectedList.forEach((it) => {
+      const res = [
+        it.customerName ?? '',
+        it.containerId ?? '',
+        it.ticketId ?? '',
+        it.country ?? '',
+        it.number ?? '',
+        it.arrivedContainerNum ?? '',
+        it.weight ?? '',
+        it.volume ?? '',
+        it.size ?? '',
+        it.inStatus ?? '',
+        it.warehouseId ?? '',
+        it.stayTime ?? '',
+        it.deliveryIdIn ?? '',
+        it.normalNote ?? '',
+        it.FBADeliveryCode ?? '',
+        it.outboundMethod ?? '',
+        it.deliveryMethod ?? '',
+        it.operationRequire ?? '',
+        it.operationNote ?? '',
+        it.finalStatus ?? '',
+        it.PO ?? '',
+        it.FCAddress ?? '',
+        it.postcode ?? '',
+        it.inBoundDetailStatus ?? '',
+        it.changeOrderFiles ?? '',
+        it.transportationNote ?? '',
+        it.trayNum ?? '',
+        it.arrivedTrayNum ?? '',
+        dayjs(it.planArriveDateTime).format('YYYY-MM-DD') ?? '',
+        dayjs(it.currentDate[0]).format('YYYY-MM-DD') ?? '',
+        it.deliveryTime ? dayjs(it.deliveryTime).format('YYYY-MM-DD') : '',
+        it.Ref ?? '',
+        it.note ?? '',
+        it.sign ?? '',
+        it.package ?? '',
+        it.industrialTrayNum ?? '',
+        it.productName ?? '',
+        it.UNNumber ?? '',
+        it.recipient ?? '',
+        it.phone ?? '',
+        it.email ?? '',
+        it.needReserve ?? '',
+        it.industrialNote ?? '',
+      ];
+      dataStrings.push(res.join());
+    });
+    dataStrings = dataStrings.join('\n');
+    const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
+    FileSaver.saveAs(
+      blob,
+      dayjs(dateRange[0]).startOf('day').format('YYYY-MM-DD') +
+        '~' +
+        dayjs(dateRange[1]).endOf('day').format('YYYY-MM-DD') +
+        '库内操作' +
+        '.csv'
+    );
+  }
 
   function updateFilter(value) {
     if (value !== null) {
-      let { filterTitleOne, filterKeyOne, filterTitleTwo, filterKeyTwo, ...NewObj } = value;
-      if (
-        (value['filterTitleOne'] && value['filterKeyOne']) ||
-        (value['filterTitleTwo'] && value['filterKeyTwo'])
-      ) {
-        const keyOne = columns.find((it) => it.title === value['filterTitleOne']).key;
-        const keyTwo = columns.find((it) => it.title === value['filterTitleTwo']).key;
-        if (keyOne) {
-          NewObj[keyOne] = value['filterKeyOne'];
-        }
-        if (keyTwo) {
-          NewObj[keyTwo] = value['filterKeyTwo'];
-        }
+      if (optionOne && valueOne) {
+        const keyOne = columns.find((it) => it.title === optionOne).key;
+
+        value[keyOne] = valueOne;
       }
-      filterObj = NewObj;
+      if (optionTwo && valueTwo) {
+        const keyTwo = columns.find((it) => it.title === optionTwo).key;
+        value[keyTwo] = valueTwo;
+      }
+      filterObj = value;
     } else {
       filterObj = null;
+      optionOne = '';
+      valueOne = '';
+      optionTwo = '';
+      valueTwo = '';
+      dateRange = valueOfToday;
     }
     reloadTable();
   }
@@ -209,11 +359,8 @@
       const res = columns.find((it) => it.key === item.key);
       currentColumns.push(res);
     });
-    const selectionType = columns.find((x) => x.type === 'selection');
-    if (selectionType) {
-      currentColumns.unshift(selectionType);
-    }
     currentColumns = currentColumns.length > 0 ? currentColumns : columns;
+    currentColumns = [inStorageObj, ...currentColumns];
     showCurrentHeaderDataTable = false;
   }
 
@@ -223,7 +370,8 @@
     addNewFeeDialog = false;
     addNewTrayDialog = false;
     showCurrentHeaderDataTable = false;
-    await actionRef.value[0].reload();
+    showConfirmDialog = false;
+    await actionRef.value.reload();
   }
 
   function getQueryString(name) {
@@ -235,6 +383,33 @@
         ])[1].replace(/\+/g, '%20')
       ) || null
     );
+  }
+
+  function finishedCancel() {
+    cancelIds = checkedRows;
+    showConfirmDialog = true;
+  }
+
+  async function confirmCancel() {
+    const userInfo = useUserStore().info;
+    const currentList = await getDetailListById(cancelIds);
+    for (const currentItem of currentList) {
+      let timeInfo = currentItem.timeLine;
+      currentItem.operateInStorage = '否';
+      timeInfo.unshift({
+        operator: userInfo?.realName,
+        detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        note: '完成库内操作',
+      });
+      if (currentItem.outboundMethod !== '存仓') {
+        currentItem.inStatus = InBoundStatus.WaitOperate;
+      } else {
+        currentItem.inStatus = '存仓';
+      }
+      currentItem.timeLine = timeInfo;
+      await NotifyDetailManager.editInternal(currentItem, currentItem.id);
+    }
+    await reloadTable();
   }
 
   onMounted(async () => {
@@ -355,25 +530,14 @@
             },
           },
           {
-            label: '转库外',
+            label: '操作已完成',
             highlight: () => {
               return 'info';
             },
             async onClick() {
-              const userInfo = useUserStore().info;
-              let timeInfo = record.timeLine;
-              record.operateInStorage = '否';
-              timeInfo.unshift({
-                operator: userInfo?.realName,
-                detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-                note: '完成库内操作',
-              });
-              if (record.outboundMethod !== '存仓') {
-                record.inStatus = InBoundStatus.All;
-              }
-              record.timeLine = timeInfo;
-              await NotifyDetailManager.editInternal(record, record.id);
-              await reloadTable();
+              cancelIds = [];
+              cancelIds.push(record.id);
+              showConfirmDialog = true;
             },
             ifShow: () => {
               return record.operateInStorage === '是' && hasAuthPower('inStorageTurnToOut');

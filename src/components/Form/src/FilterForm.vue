@@ -68,6 +68,16 @@
                   v-bind="getComponentProps(schema)"
                 />
               </template>
+              <template v-else-if="schema.component === 'NSelect'">
+                <n-select
+                  v-model:value="formModel[schema.field]"
+                  :class="{ isFull: schema.isFull != false && getProps.isFull }"
+                  :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
+                  :get-show="() => true"
+                  filterable
+                  v-bind="getComponentProps(schema)"
+                />
+              </template>
               <component
                 :is="schema.component"
                 v-else
