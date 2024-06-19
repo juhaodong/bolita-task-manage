@@ -3,6 +3,10 @@ import { finalStatus, InBoundDetailStatus } from '@/api/dataLayer/modules/notify
 import { generateOptionFromArray } from '@/store/utils/utils';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import {
+  deliveryMethodList,
+  outboundMethodList,
+} from '@/api/dataLayer/modules/deliveryMethod/detail';
 
 export const columns: DataTableColumns<any> = [
   {
@@ -217,5 +221,21 @@ export const filters: FormField[] = [
   {
     label: '票号',
     field: 'ticketId',
+  },
+  {
+    label: '出库方式',
+    field: 'outboundMethod',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(outboundMethodList),
+    },
+  },
+  {
+    label: '物流渠道',
+    field: 'deliveryMethod',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(deliveryMethodList),
+    },
   },
 ];
