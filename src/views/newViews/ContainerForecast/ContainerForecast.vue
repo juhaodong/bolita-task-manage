@@ -210,7 +210,7 @@
   import UnloadingList from '@/views/newViews/ContainerForecast/form/UnloadingList.vue';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
   import { getTableHeader } from '@/api/dataLayer/common/TableHeader';
-  import { hasAuthPower } from '@/api/dataLayer/common/power';
+  import { getUserCustomerList, hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import { defaultToday, valueOfToday } from '@/api/dataLayer/common/Date';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
@@ -247,6 +247,7 @@
   }
 
   onMounted(async () => {
+    await getUserCustomerList();
     await reloadHeader();
   });
 
@@ -257,9 +258,10 @@
   const loadDataTable = async () => {
     let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
     let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-    const res = (await NotifyManager.load(filterObj)).filter(
-      (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
-    );
+    const customerId = await getUserCustomerList();
+    const res = (await NotifyManager.load(filterObj))
+      .filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate)
+      .filter((x) => customerId.includes(x.customerId));
     return res.sort(dateCompare('planArriveDateTime'));
   };
 
@@ -296,7 +298,6 @@
       cancelId
     );
     const list = await getNotifyDetailListByNotify(cancelId);
-    console.log(list, 'list');
     for (const item of list) {
       item.inStatus = '已取消';
       await NotifyDetailManager.edit(item, item.id);
@@ -309,7 +310,6 @@
 
   async function downloadData() {
     const selectedList = await loadDataTable();
-    console.log(columns, 'columns');
     let headerTitle = columns.map((it) => it.title).join();
     let dataStrings = [];
     dataStrings.unshift(headerTitle);

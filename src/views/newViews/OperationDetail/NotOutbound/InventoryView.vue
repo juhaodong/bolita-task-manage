@@ -171,7 +171,7 @@
   import { getTableHeader } from '@/api/dataLayer/common/TableHeader';
   import TimeLine from '@/views/newViews/Missions/AlreadyWarehousing/TimeLine.vue';
   import { useUserStore } from '@/store/modules/user';
-  import { hasAuthPower } from '@/api/dataLayer/common/power';
+  import { getUserCustomerList, hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
   import { valueOfToday } from '@/api/dataLayer/common/Date';
@@ -231,6 +231,7 @@
   });
 
   const loadDataTable = async () => {
+    const customerId = await getUserCustomerList();
     let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
     let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
     allList = (await NotifyDetailManager.load(filterObj)).filter(
@@ -251,6 +252,7 @@
       }
     });
     return allList
+      .filter((x) => customerId.includes(x.customerId))
       .filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate)
       .sort(dateCompare('createTimestamp'));
   };

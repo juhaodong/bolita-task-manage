@@ -227,7 +227,7 @@
     planObj,
   } from '@/views/newViews/Missions/AlreadyWarehousing/selectionType';
   import OfferPriceDialog from '@/views/newViews/Missions/AlreadyWarehousing/OfferPriceDialog.vue';
-  import { hasAuthPower } from '@/api/dataLayer/common/power';
+  import { getUserCustomerList, hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
   import { valueOfToday } from '@/api/dataLayer/common/Date';
@@ -422,7 +422,7 @@
         (it) => it.needOfferPrice === '1'
       );
     }
-    const ownedCustomerIds = useUserStore()?.info?.customerIds;
+    const ownedCustomerIds = await getUserCustomerList();
     allList.forEach((it) => {
       if (it.storageTime) {
         const res = it.storageTime.pop();
@@ -437,9 +437,7 @@
         it.stayTime = '-';
       }
     });
-    if (ownedCustomerIds.length > 0) {
-      allList = allList.filter((it) => ownedCustomerIds.includes(it.customerId));
-    }
+    allList = allList.filter((it) => ownedCustomerIds.includes(it.customerId));
     return allList
       .filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate)
       .sort(dateCompare('createTimestamp'));

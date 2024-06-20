@@ -17,3 +17,9 @@ export async function getUserTypePowerList(type) {
   const res = query(collectionRef);
   return (await resultOfId(res)).find((it) => it.id === type)?.list ?? [];
 }
+
+export async function getUserCustomerList() {
+  const res = useUserStore()?.info?.customerIds;
+  console.log(res, 'res');
+  return res;
+}
