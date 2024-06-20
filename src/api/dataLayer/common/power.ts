@@ -19,7 +19,5 @@ export async function getUserTypePowerList(type) {
 }
 
 export async function getUserCustomerList() {
-  const res = useUserStore()?.info?.customerIds;
-  console.log(res, 'res');
-  return res;
+  return useUserStore()?.info?.customerIds;
 }
