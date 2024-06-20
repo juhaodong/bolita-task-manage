@@ -247,7 +247,6 @@
   }
 
   onMounted(async () => {
-    await getUserCustomerList();
     await reloadHeader();
   });
 
