@@ -38,6 +38,15 @@
     >
       <power-list :auth="authInfo" @saved="reloadTable" />
     </n-modal>
+    <n-modal
+      v-model:show="showConfirmDialog"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 400px; max-width: 400px"
+      title="请确认"
+    >
+      <confirm-dialog :title="'您确定要删除吗？'" @saved="confirmRemove" />
+    </n-modal>
   </n-card>
 </template>
 
@@ -54,6 +63,7 @@
   import { NButton } from 'naive-ui';
   import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
   import Delete16Filled from '@vicons/fluent/es/Delete16Filled';
+  import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
 
   interface Prop {
     belongsToId?: string;
@@ -116,6 +126,8 @@
   let authInfo = $ref([]);
   let finished = $ref(false);
   let showPowerModal = $ref(false);
+  let showConfirmDialog = $ref(false);
+  let removeId = '';
   const props = defineProps<Prop>();
   onMounted(() => {
     if (props.belongsToId) {
@@ -151,6 +163,11 @@
     showModal.value = true;
   }
 
+  async function confirmRemove() {
+    await UserManager.remove(removeId);
+    reloadTable();
+  }
+
   const actionRef = ref();
 
   function powerManage() {
@@ -161,6 +178,7 @@
   function reloadTable() {
     actionRef.value.reload();
     showPowerModal = false;
+    showConfirmDialog = false;
     showModal.value = false;
   }
 
@@ -183,8 +201,8 @@
             label: '删除',
             icon: Delete16Filled,
             async onClick() {
-              await UserManager.remove(record.id);
-              reloadTable();
+              showConfirmDialog = true;
+              removeId = record.id;
             },
           },
         ],
