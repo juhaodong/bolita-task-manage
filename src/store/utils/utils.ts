@@ -31,12 +31,10 @@ export async function asyncFBACode(): Promise<FormField> {
   };
 }
 
-export async function asyncWarehouseList(): Promise<FormField> {
+export async function asyncWarehouseList(defaultValue): Promise<FormField> {
   const userStore = useUserStore();
   let customerId = '';
-  if (userStore.info?.customerIds.length === 1) {
-    customerId = userStore.info?.customerIds[0];
-  }
+  customerId = userStore.info?.customerIds[0] ?? '';
   const currentCustomer = (await CustomerManager.load()).find((it) => it.id === customerId) ?? '';
   const warehouseList = await WarehouseManager.load();
   const list = warehouseList.map((it) => ({
@@ -50,7 +48,7 @@ export async function asyncWarehouseList(): Promise<FormField> {
     componentProps: {
       options: list,
     },
-    defaultValue: currentCustomer.warehouseId ?? '',
+    defaultValue: defaultValue !== '' ? defaultValue : currentCustomer.warehouseId,
   };
 }
 
@@ -86,7 +84,7 @@ export async function asyncStorage(): Promise<FormField> {
   };
 }
 
-export async function asyncUserCustomer(): Promise<FormField> {
+export async function asyncUserCustomer(defaultValue): Promise<FormField> {
   const userStore = useUserStore();
   const realCustomerList = userStore.info.customerIds;
   const customerList = await CustomerManager.load();
@@ -108,7 +106,7 @@ export async function asyncUserCustomer(): Promise<FormField> {
     componentProps: {
       options: list,
     },
-    defaultValue: realList[0].customerName ?? '',
+    defaultValue: defaultValue !== '' ? defaultValue : realList[0].customerName,
   };
 }
 

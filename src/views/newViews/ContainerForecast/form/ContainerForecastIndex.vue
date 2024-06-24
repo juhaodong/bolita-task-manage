@@ -11,7 +11,7 @@
   import { useUserStore } from '@/store/modules/user';
   import readXlsxFile from 'read-excel-file';
   import { CustomerManager, FBACodeManager } from '@/api/dataLayer/modules/user/user';
-  import { difference, uniqBy } from 'lodash-es';
+  import { difference } from 'lodash-es';
   import { allDeliveryList, allKeysList } from '@/api/dataLayer/common/AllKeys';
   import { $ref } from 'vue/macros';
   import ErrorMessageDialog from '@/views/newViews/ContainerForecast/form/ErrorMessageDialog.vue';
@@ -25,6 +25,14 @@
   const prop = defineProps<Prop>();
   const emit = defineEmits(['saved']);
   let loading: boolean = $ref(false);
+  let defaultValue = {
+    customerName: '',
+    containerNo: '',
+    warehouseId: '',
+    planArriveDateTime: dayjs().valueOf(),
+    inHouseTime: '',
+    note: '',
+  };
 
   function startLoading() {
     loading = true;
@@ -101,12 +109,12 @@
           errorMessage.push({ index: index + 4, detail: realMessageDetail });
         }
       });
-      if (errorMessage.length > 0) {
-        errorMessage = uniqBy(errorMessage, (x) => {
-          `${x.index} + ${x.detail}`;
-        });
-        return [];
-      }
+      // if (errorMessage.length > 0) {
+      //   errorMessage = uniqBy(errorMessage, (x) => {
+      //     `${x.index} + ${x.detail}`;
+      //   });
+      //   return [];
+      // }
       if (rows.length > 0 && errors.length == 0) {
         rows.slice(2);
         return rows.map((it) => ({ ...it, arrivedCount: 0 }));
@@ -122,6 +130,8 @@
   }
 
   async function saveNotify(value: any) {
+    console.log(value, 'value');
+    defaultValue = value;
     startLoading();
     const userStore = useUserStore();
     const customerList = await CustomerManager.load();
@@ -149,7 +159,12 @@
 <template>
   <loading-frame :loading="loading">
     <template v-if="errorMessage.length === 0">
-      <new-container-forecast :model="currentModel" @closed="closeDialog" @submit="saveNotify" />
+      <new-container-forecast
+        :default-value="defaultValue"
+        :model="currentModel"
+        @closed="closeDialog"
+        @submit="saveNotify"
+      />
     </template>
     <template v-else>
       <error-message-dialog :error-message="errorMessage" @closed="closeDialog" />

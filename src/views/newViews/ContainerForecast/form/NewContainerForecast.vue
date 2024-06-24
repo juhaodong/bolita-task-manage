@@ -17,21 +17,24 @@
 
   interface Props {
     model?: any;
+    defaultValue: any;
   }
 
   const prop = defineProps<Props>();
 
   const schemas: FormFields = [
-    asyncUserCustomer(),
+    asyncUserCustomer(prop.defaultValue.customerName),
     {
       field: 'containerNo',
       label: '货柜号',
+      defaultValue: prop.defaultValue.containerNo,
     },
-    asyncWarehouseList(),
+    asyncWarehouseList(prop.defaultValue.warehouseId),
     {
       field: 'planArriveDateTime',
       component: 'NDatePicker',
       label: '预计到仓时间',
+      defaultValue: prop.defaultValue.planArriveDateTime,
       componentProps: {
         type: 'date',
         clearable: true,
@@ -41,7 +44,7 @@
       field: 'inHouseTime',
       label: '到达时间',
       component: 'NSelect',
-      defaultValue: '',
+      defaultValue: prop.defaultValue.inHouseTime,
       componentProps: {
         options: generateOptionFromArray(reservationTimeList),
       },
@@ -54,6 +57,7 @@
     {
       field: 'note',
       label: '预报备注',
+      defaultValue: prop.defaultValue.note,
       required: false,
     },
   ];
