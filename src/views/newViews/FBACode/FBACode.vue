@@ -1,12 +1,10 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <n-button size="small" type="primary" @click="showAdd">新建FBACode</n-button>
-    <!--    <n-button size="small" style="margin-left: 10px" type="primary" @click="downloadFBACode"-->
-    <!--      >下载FBACode</n-button-->
-    <!--    >-->
-    <n-button size="small" style="margin-left: 10px" type="primary" @click="ImportCode = true"
-      >导入FBACode</n-button
-    >
+    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
+      <n-button size="small" type="primary" @click="showAdd">新建FBACode</n-button>
+      <n-button size="small" type="primary" @click="downloadFBACode">下载FBACode</n-button>
+      <n-button size="small" type="primary" @click="ImportCode = true">导入FBACode</n-button>
+    </filter-bar>
     <BasicTable
       ref="actionRef"
       v-model:checked-row-keys="checkedRows"
@@ -39,7 +37,7 @@
 <script lang="ts" setup>
   import { h, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { columns } from './columns';
+  import { columns, filters } from './columns';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import Delete16Filled from '@vicons/fluent/es/Delete16Filled';
   import NewFBACode from '@/views/newViews/FBACode/NewFBACode.vue';
@@ -47,6 +45,7 @@
   import { FBACodeManager } from '@/api/dataLayer/modules/user/user';
   import FileSaver from 'file-saver';
   import ImportFBACodeFile from '@/views/newViews/FBACode/ImportFBACodeFile.vue';
+  import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
 
   const actionRef = ref();
   let currentModel: any | null = $ref(null);
@@ -86,6 +85,12 @@
     dataStrings = dataStrings.join('\n');
     const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
     FileSaver.saveAs(blob, 'FBACode.csv');
+  }
+
+  function updateFilter(value) {
+    console.log(value, 'value');
+    filterObj = value;
+    reloadTable();
   }
 
   async function startRemove(id) {

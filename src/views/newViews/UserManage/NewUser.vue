@@ -90,12 +90,14 @@
       const res = UserTypeByArray.find((it) => it.label === values.userType);
       const CustomerList = await CustomerManager.load();
       let ids = [];
-      for (const name of values.customerName) {
-        const id = CustomerList.find((it) => it.customerName === name).id;
-        ids.push(id);
+      if (values.customerName) {
+        for (const name of values.customerName) {
+          const id = CustomerList.find((it) => it.customerName === name).id;
+          ids.push(id);
+        }
+        values.customerIds = ids;
       }
       values.authPower = (await getUserTypePowerList(res.value)) ?? [];
-      values.customerIds = ids;
       if (prop?.model?.id) {
         await UserManager.editInternal(values, prop.model.id);
       } else {

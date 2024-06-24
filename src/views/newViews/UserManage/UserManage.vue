@@ -53,6 +53,7 @@
   import PowerList from '@/views/newViews/UserManage/PowerList.vue';
   import { NButton } from 'naive-ui';
   import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
+  import Delete16Filled from '@vicons/fluent/es/Delete16Filled';
 
   interface Prop {
     belongsToId?: string;
@@ -176,6 +177,14 @@
             icon: DocumentEdit16Filled,
             onClick() {
               startEdit(record.id);
+            },
+          },
+          {
+            label: '删除',
+            icon: Delete16Filled,
+            async onClick() {
+              await UserManager.remove(record.id);
+              reloadTable();
             },
           },
         ],

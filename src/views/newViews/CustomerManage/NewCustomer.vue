@@ -10,13 +10,15 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
   import {
-    asyncInventoryFormField,
     CustomerManager,
     customerStatusSelection,
     UserManager,
   } from '@/api/dataLayer/modules/user/user';
   import { $ref } from 'vue/macros';
-  import { asyncSalesManFormField } from '@/api/dataLayer/fieldDefination/common';
+  import {
+    asyncCustomerWarehouseFormField,
+    asyncSalesManFormField,
+  } from '@/api/dataLayer/fieldDefination/common';
 
   interface Props {
     model?: any;
@@ -35,10 +37,7 @@
       field: 'businessParty',
       required: false,
     },
-    asyncInventoryFormField({
-      label: '所属仓库',
-      field: 'warehouseId',
-    }),
+    asyncCustomerWarehouseFormField(false),
     asyncSalesManFormField(),
     // {
     //   label: '使用系统',
@@ -62,9 +61,11 @@
 
   async function handleSubmit(values: any) {
     loading = true;
-    values.belongSalesId = (await UserManager.load()).find(
-      (it) => it.realName === values.belongSalesMan
-    ).id;
+    values.belongSalesId =
+      (await UserManager.load()).find((it) => it.realName === values.belongSalesMan)?.id ?? '';
+    if (!values.belongSalesId) {
+      values.belongSalesMan = '';
+    }
     await safeScope(async () => {
       if (prop?.model?.id) {
         await CustomerManager.editInternal(values, prop.model.id);

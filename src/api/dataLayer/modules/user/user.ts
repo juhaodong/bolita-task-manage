@@ -90,7 +90,6 @@ export async function asyncInventoryFormField(
   } = { field: 'warehouseId', label: '仓库' }
 ): Promise<FormField> {
   const { field, label } = params;
-  const { hasPermission } = usePermission();
   const userList = (await WarehouseManager.load()).map((it) => ({
     label: it.companyName,
     value: it.id,
@@ -102,14 +101,6 @@ export async function asyncInventoryFormField(
     component: 'NSelect',
     componentProps: {
       options: userList,
-    },
-    displayCondition() {
-      return !hasPermission([
-        PermissionEnums.Operator,
-        PermissionEnums.Sales,
-        PermissionEnums.Logistic,
-        PermissionEnums.Cash,
-      ]);
     },
   };
 }
