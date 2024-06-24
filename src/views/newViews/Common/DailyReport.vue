@@ -111,7 +111,10 @@
       (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
     );
     res.forEach((x) => {
-      if (dayjs().valueOf() > dayjs(x.planArriveDateTime).endOf('day').valueOf()) {
+      if (
+        dayjs().valueOf() >
+        dayjs(dayjs(x.planArriveDateTime).format('YYYY-MM-DD') + ' ' + x.inHouseTime).valueOf()
+      ) {
         x.problem = 'Verp';
       }
       if (x.inStatus === '已取消') {
