@@ -78,6 +78,7 @@
         clearable
         type="daterange"
       />
+      <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />
     </div>
     <div class="my-2"></div>
     <BasicTable
@@ -154,6 +155,7 @@
   let optionTwo = $ref('');
   let valueOne = $ref('');
   let valueTwo = $ref('');
+  let showAll = $ref(false);
   let dateRange = $ref(valueOfToday);
   const loadDataTable = async () => {
     let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
@@ -161,6 +163,9 @@
     allList = (await getOutboundForecast(filterObj))
       .filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate)
       .sort(dateCompare('createBookCarTimestamp'));
+    if (!showAll) {
+      allList = allList.filter((a) => a.inStatus !== '已取消');
+    }
     return allList;
   };
   const actionRef = ref();

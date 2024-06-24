@@ -97,6 +97,7 @@
           clearable
           type="daterange"
         />
+        <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />
       </div>
       <div class="my-2"></div>
       <n-tabs
@@ -259,6 +260,7 @@
   let valueOne = $ref('');
   let valueTwo = $ref('');
   let dateRange = $ref(valueOfToday);
+  let showAll = $ref(false);
 
   const actionRef = ref();
   const props = defineProps<Prop>();
@@ -438,6 +440,9 @@
       }
     });
     allList = allList.filter((it) => ownedCustomerIds.includes(it.customerId));
+    if (!showAll) {
+      allList = allList.filter((a) => a.inStatus !== '已取消');
+    }
     return allList
       .filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate)
       .sort(dateCompare('createTimestamp'));

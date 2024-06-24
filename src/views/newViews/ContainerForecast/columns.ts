@@ -75,7 +75,7 @@ export const filters: FormField[] = [
   },
   {
     label: '状态',
-    field: 'status',
+    field: 'inStatus',
   },
 ];
 

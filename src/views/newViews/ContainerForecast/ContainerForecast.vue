@@ -15,22 +15,6 @@
           </template>
           新建货柜预报
         </n-button>
-        <!--        <n-button size="small" type="info" @click="downloadFiles">-->
-        <!--          <template #icon>-->
-        <!--            <n-icon>-->
-        <!--              <Box20Filled />-->
-        <!--            </n-icon>-->
-        <!--          </template>-->
-        <!--          卸柜业务流程-->
-        <!--        </n-button>-->
-        <!--        <n-button size="small" type="info" @click="downloadFiles">-->
-        <!--          <template #icon>-->
-        <!--            <n-icon>-->
-        <!--              <Box20Filled />-->
-        <!--            </n-icon>-->
-        <!--          </template>-->
-        <!--          货柜预报填写注意事项-->
-        <!--        </n-button>-->
         <n-button size="small" type="info" @click="selectedHeader">
           <template #icon>
             <n-icon>
@@ -39,14 +23,6 @@
           </template>
           选择表头显示
         </n-button>
-        <!--        <n-button size="small" @click="clearAllData()">-->
-        <!--          <template #icon>-->
-        <!--            <n-icon>-->
-        <!--              <TruckDelivery />-->
-        <!--            </n-icon>-->
-        <!--          </template>-->
-        <!--          清除数据-->
-        <!--        </n-button>-->
         <n-button size="small" type="info" @click="downloadData">
           <template #icon>
             <n-icon>
@@ -98,6 +74,7 @@
           type="daterange"
           clearable
         />
+        <n-checkbox v-model:checked="showAll" class="ml-2" size="large" label="全部" />
       </div>
       <div class="my-2"></div>
       <BasicTable
@@ -239,6 +216,7 @@
   let dateRange = $ref(valueOfToday);
   let showConfirmDialog = $ref(false);
   let cancelId = $ref('');
+  let showAll = $ref(false);
 
   function addTable(type: NotifyType) {
     notifyType = type;
@@ -258,9 +236,12 @@
     let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
     let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
     const customerId = await getUserCustomerList();
-    const res = (await NotifyManager.load(filterObj))
+    let res = (await NotifyManager.load(filterObj))
       .filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate)
       .filter((x) => customerId.includes(x.customerId));
+    if (!showAll) {
+      res = res.filter((a) => a.inStatus !== '已取消');
+    }
     return res.sort(dateCompare('planArriveDateTime'));
   };
 

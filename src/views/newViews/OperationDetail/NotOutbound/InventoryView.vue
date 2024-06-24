@@ -69,6 +69,7 @@
           clearable
           type="daterange"
         />
+        <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />
       </div>
       <div class="my-2"></div>
       <BasicTable
@@ -205,6 +206,7 @@
   let dateRange = $ref(valueOfToday);
   let showConfirmDialog = $ref(false);
   let cancelIds = $ref([]);
+  let showAll = $ref(false);
   const actionRef = ref();
   const props = defineProps<Prop>();
   interface Prop {
@@ -251,6 +253,9 @@
         it.stayTime = '-';
       }
     });
+    if (!showAll) {
+      allList = allList.filter((a) => a.inStatus !== '已取消');
+    }
     return allList
       .filter((x) => customerId.includes(x.customerId))
       .filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate)

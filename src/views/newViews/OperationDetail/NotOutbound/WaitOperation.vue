@@ -60,6 +60,7 @@
         type="daterange"
         clearable
       />
+      <n-checkbox v-model:checked="showAll" class="ml-2" size="large" label="全部" />
     </div>
     <div class="my-2"></div>
     <BasicTable
@@ -237,6 +238,7 @@
   let valueOne = $ref('');
   let valueTwo = $ref('');
   let dateRange = $ref(valueOfToday);
+  let showAll = $ref(false);
   import FileSaver from 'file-saver';
   const operationColumns = $ref([
     {
@@ -346,6 +348,9 @@
         a.inStatus === CarStatus.NoNeed ||
         a.inStatus === '全部出库'
     );
+    if (!showAll) {
+      currentList = currentList.filter((a) => a.inStatus !== '已取消');
+    }
     return currentList
       .filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate)
       .sort(dateCompare('createTimestamp'));
