@@ -34,7 +34,7 @@
   import { BasicTable } from '@/components/Table';
   import { valueOfToday } from '@/api/dataLayer/common/Date';
   import dayjs from 'dayjs';
-  import { ref, watch } from 'vue';
+  import { ref } from 'vue';
   import { getOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
   import { ReloadOutlined } from '@vicons/antd';
@@ -46,6 +46,10 @@
     {
       title: '货柜号',
       key: 'containerNo',
+    },
+    {
+      title: '问题',
+      key: 'problem',
     },
     {
       title: '仓库',
@@ -100,20 +104,24 @@
     },
   ];
 
-  watch(
-    dateRange,
-    async (value) => {
-      console.log(value, 'range');
-    },
-    { immediate: true, deep: true }
-  );
-
   const loadNotifyDataTable = async () => {
     let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
     let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-    return (await NotifyManager.load(null)).filter(
+    const res = (await NotifyManager.load(null)).filter(
       (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
     );
+    res.forEach((x) => {
+      if (dayjs().valueOf() > x.planArriveDateTime) {
+        x.problem = 'Verp';
+      }
+      if (x.inStatus === '已取消') {
+        x.problem = 'Absage';
+      }
+      if (x.number > 1300) {
+        x.problem = 'Schwer';
+      }
+    });
+    return res;
   };
 
   const loadOutboundDataTable = async () => {
