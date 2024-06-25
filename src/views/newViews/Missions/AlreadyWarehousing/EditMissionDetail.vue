@@ -108,6 +108,11 @@
       required: false,
     },
     {
+      label: '库内操作',
+      field: 'operateInStorage',
+      required: false,
+    },
+    {
       label: '托数',
       field: 'trayNum',
       required: false,
@@ -213,6 +218,15 @@
       values.inStatus = '入库待出库';
       values.storageTime = inStorageTime;
     }
+    if (prop.model?.inStatus === '等待审核' || prop.model?.inStatus === '等待提交') {
+      if (values.changeOrderFiles === '否' && prop.model?.changeOrderFiles === '是') {
+        values.inStatus = '等待审核';
+      }
+      if (values.changeOrderFiles === '是' && prop.model?.changeOrderFiles === '否') {
+        values.inStatus = '等待提交';
+      }
+    }
+
     const userInfo = useUserStore().info;
     let res = prop.model?.timeLine ? prop.model?.timeLine : [];
     res.unshift({

@@ -606,8 +606,7 @@
               return record?.['changeOrder']?.length > 0 ? 'success' : 'error';
             },
             ifShow: () => {
-              const res = record.operateInStorage === '否' && record.outboundMethod === '标准托盘';
-              return record?.changeOrderFiles === '是' && hasAuthPower('missionChangeFile') && res;
+              return record?.changeOrderFiles === '是' && hasAuthPower('missionChangeFile');
             },
             async onClick() {
               const upload = useUploadDialog();
