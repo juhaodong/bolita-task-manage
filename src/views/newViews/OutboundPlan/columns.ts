@@ -16,7 +16,7 @@ export const columns: DataTableColumns<OutboundPlanModel> = [
     key: 'customerName',
   },
   {
-    title: '业务员',
+    title: '用户名',
     key: 'salesName',
   },
   {

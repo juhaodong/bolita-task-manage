@@ -8,17 +8,14 @@
   const checkDialog = useUploadDialog();
   const field = [getFilesUploadFormField('files', false)];
   function deleteFiles(files) {
-    console.log(files, 'files123');
     checkDialog.deleteFile(files);
   }
-  console.log(checkDialog.disableClick, 'disable');
 </script>
 
 <template>
   <n-modal :show="checkDialog.show" @close="checkDialog.close()">
     <n-card :title="checkDialog.title" style="max-width: 700px">
       <append-file-list-display
-        :disable-click="checkDialog.disableClick"
         :files-url="checkDialog.currentFileUrls"
         @delete-file="deleteFiles"
       />

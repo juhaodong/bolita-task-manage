@@ -39,7 +39,7 @@ export const columns: DataTableColumns<any> = [
     key: 'unloadPerson',
   },
   {
-    title: '业务员',
+    title: '用户名',
     key: 'salesName',
   },
   {
@@ -66,7 +66,7 @@ export const filters: FormField[] = [
     field: 'customerName',
   },
   {
-    label: '业务员',
+    label: '用户名',
     field: 'salesName',
   },
   {
