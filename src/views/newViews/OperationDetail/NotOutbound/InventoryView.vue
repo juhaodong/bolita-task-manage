@@ -135,7 +135,7 @@
         style="width: 90%; min-width: 400px; max-width: 400px"
         title="请确认"
       >
-        <confirm-dialog :title="'您确定要执行这个操作吗？'" @saved="confirmCancel" />
+        <confirm-dialog :title="'您确定要执行这个操作吗？'" @saved="confirmFinish" />
       </n-modal>
     </div>
   </n-card>
@@ -229,7 +229,7 @@
   const loadDataTable = async () => {
     const customerId = await getUserCustomerList();
     allList = (await NotifyDetailManager.load(filterObj)).filter(
-      (it) => it.inStatus === '存仓' || it.inStatus === '库内操作'
+      (it) => it.inStatus === '存仓' || it.inStatus === '入库待操作'
     );
     allList.forEach((it) => {
       if (it.storageTime) {
@@ -388,7 +388,7 @@
     showConfirmDialog = true;
   }
 
-  async function confirmCancel() {
+  async function confirmFinish() {
     const userInfo = useUserStore().info;
     const currentList = await getDetailListById(cancelIds);
     for (const currentItem of currentList) {
@@ -400,7 +400,7 @@
         note: '完成库内操作',
       });
       if (currentItem.outboundMethod !== '存仓') {
-        currentItem.inStatus = InBoundStatus.WaitOperate;
+        currentItem.inStatus = InBoundStatus.All;
       } else {
         currentItem.inStatus = '存仓';
       }

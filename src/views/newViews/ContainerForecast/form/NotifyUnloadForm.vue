@@ -111,7 +111,6 @@
       currentTaskList[index].arrivedContainerNumEdit =
         it.arrivedContainerNum == 0 ? '' : it.arrivedContainerNum;
     });
-    console.log(currentTaskList, 'list');
   }
 
   function compareStatus(currentValue: string, limitValue: string) {
@@ -139,7 +138,7 @@
         listElement.outboundMethod === '存仓'
           ? '存仓'
           : listElement.operateInStorage === '是'
-          ? '库内操作'
+          ? '入库待操作'
           : newInStatus;
       if (editInfo.inStatus === '存仓') {
         editInfo.storageTime = [{ storageTime: dayjs().format('YYYY-MM-DD HH:mm:ss') }];
