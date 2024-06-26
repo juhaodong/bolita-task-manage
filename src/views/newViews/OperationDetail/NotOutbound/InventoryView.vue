@@ -62,13 +62,7 @@
             />
           </div>
         </n-card>
-        <n-date-picker
-          v-model:value="dateRange"
-          :default-value="[dayjs().valueOf(), dayjs().valueOf()]"
-          class="ml-2"
-          clearable
-          type="daterange"
-        />
+        <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
         <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />
       </div>
       <div class="my-2"></div>
@@ -203,7 +197,7 @@
   let optionTwo = $ref('');
   let valueOne = $ref('');
   let valueTwo = $ref('');
-  let dateRange = $ref(valueOfToday);
+  let dateRange = $ref(null);
   let showConfirmDialog = $ref(false);
   let cancelIds = $ref([]);
   let showAll = $ref(false);
@@ -234,8 +228,6 @@
 
   const loadDataTable = async () => {
     const customerId = await getUserCustomerList();
-    let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-    let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
     allList = (await NotifyDetailManager.load(filterObj)).filter(
       (it) => it.inStatus === '存仓' || it.inStatus === '库内操作'
     );
@@ -256,9 +248,15 @@
     if (!showAll) {
       allList = allList.filter((a) => a.inStatus !== '已取消');
     }
+    if (dateRange) {
+      let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
+      let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
+      allList = allList.filter(
+        (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
+      );
+    }
     return allList
       .filter((x) => customerId.includes(x.customerId))
-      .filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate)
       .sort(dateCompare('createTimestamp'));
   };
 
@@ -321,14 +319,7 @@
     });
     dataStrings = dataStrings.join('\n');
     const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
-    FileSaver.saveAs(
-      blob,
-      dayjs(dateRange[0]).startOf('day').format('YYYY-MM-DD') +
-        '~' +
-        dayjs(dateRange[1]).endOf('day').format('YYYY-MM-DD') +
-        '库内操作' +
-        '.csv'
-    );
+    FileSaver.saveAs(blob, '库内操作' + '.csv');
   }
 
   function updateFilter(value) {
@@ -349,7 +340,7 @@
       valueOne = '';
       optionTwo = '';
       valueTwo = '';
-      dateRange = valueOfToday;
+      dateRange = null;
     }
     reloadTable();
   }

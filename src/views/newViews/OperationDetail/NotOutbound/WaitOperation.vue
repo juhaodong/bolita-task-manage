@@ -53,13 +53,7 @@
           />
         </div>
       </n-card>
-      <n-date-picker
-        :default-value="[dayjs().valueOf(), dayjs().valueOf()]"
-        class="ml-2"
-        v-model:value="dateRange"
-        type="daterange"
-        clearable
-      />
+      <n-date-picker class="ml-2" v-model:value="dateRange" type="daterange" clearable />
       <n-checkbox v-model:checked="showAll" class="ml-2" size="large" label="全部" />
     </div>
     <div class="my-2"></div>
@@ -237,7 +231,7 @@
   let optionTwo = $ref('');
   let valueOne = $ref('');
   let valueTwo = $ref('');
-  let dateRange = $ref(valueOfToday);
+  let dateRange = $ref(null);
   let showAll = $ref(false);
   import FileSaver from 'file-saver';
   const operationColumns = $ref([
@@ -338,8 +332,6 @@
     showCurrentHeaderDataTable = false;
   }
   const loadDataTable = async () => {
-    let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-    let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
     let allList = await getOutboundForecast(filterObj);
     currentList = allList.filter(
       (a) =>
@@ -351,9 +343,14 @@
     if (!showAll) {
       currentList = currentList.filter((a) => a.inStatus !== '已取消');
     }
-    return currentList
-      .filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate)
-      .sort(dateCompare('createTimestamp'));
+    if (dateRange) {
+      let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
+      let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
+      currentList = currentList.filter(
+        (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
+      );
+    }
+    return currentList.sort(dateCompare('createTimestamp'));
   };
 
   async function downloadData() {
@@ -415,14 +412,7 @@
     });
     dataStrings = dataStrings.join('\n');
     const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
-    FileSaver.saveAs(
-      blob,
-      dayjs(dateRange[0]).startOf('day').format('YYYY-MM-DD') +
-        '~' +
-        dayjs(dateRange[1]).endOf('day').format('YYYY-MM-DD') +
-        '出库看板' +
-        '.csv'
-    );
+    FileSaver.saveAs(blob, '出库看板' + '.csv');
   }
   let currentModel = $ref(null);
   function startEditOF(id) {
@@ -495,7 +485,7 @@
       valueOne = '';
       optionTwo = '';
       valueTwo = '';
-      dateRange = valueOfToday;
+      dateRange = null;
     }
     reloadTable();
   }

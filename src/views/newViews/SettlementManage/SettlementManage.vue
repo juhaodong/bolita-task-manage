@@ -55,13 +55,7 @@
           />
         </div>
       </n-card>
-      <n-date-picker
-        :default-value="[dayjs().valueOf(), dayjs().valueOf()]"
-        class="ml-2"
-        v-model:value="dateRange"
-        type="daterange"
-        clearable
-      />
+      <n-date-picker class="ml-2" v-model:value="dateRange" type="daterange" clearable />
     </div>
     <div class="my-2"></div>
     <n-tabs
@@ -172,7 +166,7 @@
   let optionTwo = $ref('');
   let valueOne = $ref('');
   let valueTwo = $ref('');
-  let dateRange = $ref(valueOfToday);
+  let dateRange = $ref(null);
   onMounted(() => {
     monthTab = OneYearMonthTab();
     selectedMonth = monthTab[0];
@@ -194,18 +188,18 @@
   });
 
   const loadDataTable = async () => {
-    let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-    let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
     if (typeMission === '货柜结算') {
-      allList = (await getSettlement()).filter(
-        (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
-      );
+      allList = await getSettlement();
     } else {
-      allList = (await CashManager.load()).filter(
+      allList = await CashManager.load();
+    }
+    if (dateRange) {
+      let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
+      let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
+      allList = allList.filter(
         (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       );
     }
-    console.log(allList, 'list');
     return allList.sort(dateCompare('createTimestamp'));
   };
 
@@ -229,7 +223,7 @@
       valueOne = '';
       optionTwo = '';
       valueTwo = '';
-      dateRange = valueOfToday;
+      dateRange = null;
     }
     reloadTable();
   }

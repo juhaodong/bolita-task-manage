@@ -45,13 +45,7 @@
           />
         </div>
       </n-card>
-      <n-date-picker
-        v-model:value="dateRange"
-        :default-value="[dayjs().valueOf(), dayjs().valueOf()]"
-        class="ml-2"
-        clearable
-        type="daterange"
-      />
+      <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
     </div>
     <div class="my-2"></div>
     <BasicTable
@@ -132,18 +126,18 @@
   let optionTwo = $ref('');
   let valueOne = $ref('');
   let valueTwo = $ref('');
-  let dateRange = $ref(valueOfToday);
+  let dateRange = $ref(null);
 
   const realOptions = computed(() => {
     return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
   });
   const loadDataTable = async () => {
-    let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-    let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-    const res = (await OutWarehouseManager.load())
-      .filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate)
-      .sort(dateCompare('realDate'));
-    console.log(res, 'res');
+    let res = (await OutWarehouseManager.load()).sort(dateCompare('realDate'));
+    if (dateRange) {
+      let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
+      let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
+      res = res.filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate);
+    }
     return res;
   };
 
@@ -192,14 +186,7 @@
     });
     dataStrings = dataStrings.join('\n');
     const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
-    FileSaver.saveAs(
-      blob,
-      dayjs(dateRange[0]).startOf('day').format('YYYY-MM-DD') +
-        '~' +
-        dayjs(dateRange[1]).endOf('day').format('YYYY-MM-DD') +
-        '任务明细' +
-        '.csv'
-    );
+    FileSaver.saveAs(blob, '库外订车' + '.csv');
   }
 
   onMounted(async () => {
@@ -226,7 +213,7 @@
       valueOne = '';
       optionTwo = '';
       valueTwo = '';
-      dateRange = valueOfToday;
+      dateRange = null;
     }
     reloadTable();
   }

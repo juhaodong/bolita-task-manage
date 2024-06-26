@@ -41,13 +41,7 @@
           />
         </div>
       </n-card>
-      <n-date-picker
-        v-model:value="dateRange"
-        :default-value="[dayjs().valueOf(), dayjs().valueOf()]"
-        class="ml-2"
-        clearable
-        type="daterange"
-      />
+      <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
     </div>
     <div class="my-2"></div>
     <n-tabs
@@ -318,7 +312,7 @@
   let optionTwo = $ref('');
   let valueOne = $ref('');
   let valueTwo = $ref('');
-  let dateRange = $ref(valueOfToday);
+  let dateRange = $ref(null);
 
   async function startEdit(id) {
     if (typeMission === '货柜对账') {
@@ -332,14 +326,15 @@
     return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
   });
   const loadDataTable = async () => {
-    let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-    let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
     if (typeMission === '货柜对账') {
-      allList = (await FinanceManager.load(filterObj)).filter(
-        (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
-      );
+      allList = await FinanceManager.load(filterObj);
     } else {
-      allList = (await FinanceContainerManager.load(filterObj)).filter(
+      allList = await FinanceContainerManager.load(filterObj);
+    }
+    if (dateRange) {
+      let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
+      let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
+      allList = allList.filter(
         (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       );
     }
@@ -367,7 +362,7 @@
       valueOne = '';
       optionTwo = '';
       valueTwo = '';
-      dateRange = valueOfToday;
+      dateRange = null;
     }
     reloadTable();
   }

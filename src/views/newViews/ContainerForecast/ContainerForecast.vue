@@ -67,13 +67,7 @@
             />
           </div>
         </n-card>
-        <n-date-picker
-          :default-value="[dayjs().valueOf(), dayjs().valueOf()]"
-          class="ml-2"
-          v-model:value="dateRange"
-          type="daterange"
-          clearable
-        />
+        <n-date-picker class="ml-2" v-model:value="dateRange" type="daterange" clearable />
         <n-checkbox v-model:checked="showAll" class="ml-2" size="large" label="全部" />
       </div>
       <div class="my-2"></div>
@@ -213,7 +207,7 @@
   let optionTwo = $ref('');
   let valueOne = $ref('');
   let valueTwo = $ref('');
-  let dateRange = $ref(valueOfToday);
+  let dateRange = $ref(null);
   let showConfirmDialog = $ref(false);
   let cancelId = $ref('');
   let showAll = $ref(false);
@@ -233,14 +227,17 @@
   });
 
   const loadDataTable = async () => {
-    let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-    let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
     const customerId = await getUserCustomerList();
-    let res = (await NotifyManager.load(filterObj))
-      .filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate)
-      .filter((x) => customerId.includes(x.customerId));
+    let res = (await NotifyManager.load(filterObj)).filter((x) =>
+      customerId.includes(x.customerId)
+    );
     if (!showAll) {
       res = res.filter((a) => a.inStatus !== '已取消');
+    }
+    if (dateRange) {
+      let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
+      let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
+      res = res.filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate);
     }
     return res.sort(dateCompare('planArriveDateTime'));
   };
@@ -265,7 +262,7 @@
       valueOne = '';
       optionTwo = '';
       valueTwo = '';
-      dateRange = valueOfToday;
+      dateRange = null;
     }
     reloadTable();
   }
@@ -311,14 +308,7 @@
     });
     dataStrings = dataStrings.join('\n');
     const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
-    FileSaver.saveAs(
-      blob,
-      dayjs(dateRange[0]).startOf('day').format('YYYY-MM-DD') +
-        '~' +
-        dayjs(dateRange[1]).endOf('day').format('YYYY-MM-DD') +
-        '到货预报' +
-        '.csv'
-    );
+    FileSaver.saveAs(blob, '到货预报' + '.csv');
   }
 
   async function reloadHeader() {
