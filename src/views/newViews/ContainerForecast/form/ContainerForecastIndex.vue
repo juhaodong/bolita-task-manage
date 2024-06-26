@@ -92,11 +92,9 @@
             }
           }
         }
-        if (it.outboundMethod === '标准托盘' && it.deliveryMethod === 'FBA卡车派送') {
-          it.changeOrderFiles = '否';
-        }
         if (it.changeOrderFiles === '是') {
           it.inStatus = InBoundDetailStatus.WaitSubmit;
+          it.operateInStorage = '是';
         } else {
           it.inStatus = InBoundDetailStatus.WaitCheck;
         }
