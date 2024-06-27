@@ -219,10 +219,10 @@
       values.storageTime = inStorageTime;
     }
     if (prop.model?.inStatus === '等待审核' || prop.model?.inStatus === '等待提交') {
-      if (values.changeOrderFiles === '否' && prop.model?.changeOrderFiles === '是') {
+      if (values.changeOrderFiles === '否') {
         values.inStatus = '等待审核';
       }
-      if (values.changeOrderFiles === '是' && prop.model?.changeOrderFiles === '否') {
+      if (values.changeOrderFiles === '是') {
         values.inStatus = '等待提交';
       }
     }
