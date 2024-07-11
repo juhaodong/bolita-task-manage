@@ -12,7 +12,7 @@
     toastError,
     toastSuccess,
   } from '@/store/utils/utils';
-  import { timeDisplay } from '@/views/bolita-views/composable/useableColumns';
+  import { timeDisplayYMD } from '@/views/bolita-views/composable/useableColumns';
   import { ResultEnum } from '@/store/enums/httpEnum';
   import dayjs from 'dayjs';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
@@ -72,6 +72,7 @@
   async function reload() {
     if (props.notifyId != null) {
       notifyInfo = await NotifyManager.getById(props.notifyId);
+      console.log(notifyInfo, 'info');
       currentTaskList = await getNotifyDetailListByNotify(props.notifyId);
       emit('refresh');
       unloadPerson = notifyInfo?.unloadPerson ?? '';
@@ -239,7 +240,7 @@
 
         <n-descriptions-item label="客户ID"> {{ notifyInfo?.customerId }}</n-descriptions-item>
         <n-descriptions-item label="预约日期时间">
-          {{ timeDisplay(notifyInfo?.reserveTime) }}
+          {{ timeDisplayYMD(notifyInfo?.planArriveDateTime) }}/{{ notifyInfo?.inHouseTime }}
         </n-descriptions-item>
         <n-descriptions-item label="预报总数"> {{ notifyInfo?.arrivedCount }}</n-descriptions-item>
         <!--        <n-descriptions-item label="实际卸柜日期">-->
