@@ -324,7 +324,6 @@
       });
 
       const handleKeydown = (event) => {
-        console.log(event.key);
         if (event.key === 'Enter') {
           handleSubmit();
         } else if (event.key === 'Escape') {

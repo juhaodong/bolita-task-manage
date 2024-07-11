@@ -520,7 +520,7 @@
   onMounted(async () => {
     await reloadHeader();
     typeMission.value = '整柜任务看板';
-    const res = getQueryString('containerId');
+    const res = getQueryString('containerNo');
     if (res) {
       updateFilter({ containerId: res });
     } else {
