@@ -20,6 +20,7 @@
   import { useUserStore } from '@/store/modules/user';
   import { NotifyListPower } from '@/api/dataLayer/common/PowerModel';
   import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
+  import { $ref } from 'vue/macros';
 
   interface Props {
     notifyId: string;
@@ -127,6 +128,7 @@
   async function confirm() {
     loading = true;
     const newInStatus = InBoundStatus.All;
+    let request = [];
     for (const listElement of currentTaskList) {
       const editInfo: any = {
         arrivedTrayNum: listElement.arrivedTrayNumEdit ?? 0,
@@ -152,12 +154,14 @@
         note: '卸柜并入库',
       });
       editInfo.timeLine = timeLineInfo;
-      const res = await NotifyDetailManager.edit(editInfo, listElement.id);
-      if (res.code != ResultEnum.SUCCESS) {
-        toastError(res.message);
-        break;
-      }
+      request.push(NotifyDetailManager.edit(editInfo, listElement.id));
+      // const res = await NotifyDetailManager.edit(editInfo, listElement.id);
+      // if (res.code != ResultEnum.SUCCESS) {
+      //   toastError(res.message);
+      //   break;
+      // }
     }
+    await Promise.all(request);
     const res = await NotifyManager.edit(
       {
         // salesName: userStore?.info?.realName,
