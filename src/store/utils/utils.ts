@@ -14,6 +14,15 @@ export function generateOptionFromArray(arr?: any[]) {
   );
 }
 
+export function generateOptionFromTimeArray(arr?: any[]) {
+  return (
+    arr?.map((it) => ({
+      label: it.start,
+      value: it.start,
+    })) ?? []
+  );
+}
+
 export async function asyncFBACode(): Promise<FormField> {
   const FBACodeList = await getFBACodeList();
   const list = FBACodeList.map((it) => ({

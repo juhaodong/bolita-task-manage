@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { computed, ref, watch, watchEffect } from 'vue';
+  import { computed, watchEffect } from 'vue';
   import { InBoundStatus, NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
   import {
     getNotifyDetailListByNotify,
@@ -13,7 +13,6 @@
     toastSuccess,
   } from '@/store/utils/utils';
   import { timeDisplayYMD } from '@/views/bolita-views/composable/useableColumns';
-  import { ResultEnum } from '@/store/enums/httpEnum';
   import dayjs from 'dayjs';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { usePermission } from '@/hooks/web/usePermission';
@@ -21,6 +20,7 @@
   import { NotifyListPower } from '@/api/dataLayer/common/PowerModel';
   import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import { $ref } from 'vue/macros';
+  import { ResultEnum } from '@/store/enums/httpEnum';
 
   interface Props {
     notifyId: string;
@@ -82,23 +82,25 @@
   }
 
   let unloadPerson: string = $ref('');
-  let currentDate: any = ref(null);
-  let totalTime: string = $ref('');
+  let startTime: any = $ref(null);
+  let endTime: any = $ref(null);
+  let realDate: any = $ref(null);
 
-  const canConfirm = computed(() => {
-    return unloadPerson && canEdit;
+  const totalTime = $computed(() => {
+    const res = dayjs(realDate).format('YYYY-MM-DD');
+    const currentEndDateTime = res + ' ' + endTime;
+    const currentStartDateTime = res + ' ' + startTime;
+    const result = dayjs(currentEndDateTime).diff(currentStartDateTime, 'hour') + 1;
+    if (result) {
+      return result;
+    } else {
+      return '';
+    }
   });
 
-  watch(
-    currentDate,
-    (value) => {
-      console.log(value, 'value');
-      if (value) {
-        totalTime = dayjs(value[1]).diff(value[0], 'hour') ?? '';
-      }
-    },
-    { immediate: true, deep: true }
-  );
+  const canSave = $computed(() => {
+    return realDate && startTime && endTime && unloadPerson;
+  });
 
   function allArrived() {
     currentTaskList.forEach((it) => {
@@ -124,12 +126,16 @@
   }
 
   let loading: boolean = $ref(false);
+  let log: string = $ref('');
 
   async function confirm() {
     loading = true;
     const newInStatus = InBoundStatus.All;
     let request = [];
+    let i = 0;
     for (const listElement of currentTaskList) {
+      i = i + 1;
+      log = '正在加载' + '第' + i + '票货物,共' + currentTaskList.length + '票' + `<br>`;
       const editInfo: any = {
         arrivedTrayNum: listElement.arrivedTrayNumEdit ?? 0,
         arrivedContainerNum: listElement.arrivedContainerNumEdit ?? 0,
@@ -146,7 +152,7 @@
       if (editInfo.inStatus === '存仓') {
         editInfo.storageTime = [{ storageTime: dayjs().format('YYYY-MM-DD HH:mm:ss') }];
       }
-      editInfo.arriveTime = dayjs(currentDate.value[0]).format('YYYY-MM-DD HH:mm:ss');
+      editInfo.arriveTime = dayjs(realDate).format('YYYY-MM-DD') + startTime;
       let timeLineInfo = listElement.timeLine;
       timeLineInfo.unshift({
         operator: userInfo?.realName,
@@ -155,12 +161,13 @@
       });
       editInfo.timeLine = timeLineInfo;
       request.push(NotifyDetailManager.edit(editInfo, listElement.id));
-      // const res = await NotifyDetailManager.edit(editInfo, listElement.id);
-      // if (res.code != ResultEnum.SUCCESS) {
-      //   toastError(res.message);
-      //   break;
-      // }
+      const res = await NotifyDetailManager.edit(editInfo, listElement.id);
+      if (res.code != ResultEnum.SUCCESS) {
+        toastError(res.message);
+        break;
+      }
     }
+    log += '正在处理数据';
     await Promise.all(request);
     const res = await NotifyManager.edit(
       {
@@ -171,63 +178,16 @@
         inStatus: newInStatus,
         totalCount: totalTrayCount.value + totalContainerCount.value,
         unloadPerson: unloadPerson,
-        currentDate: currentDate.value ?? [],
-        totalTime: totalTime ?? '',
+        currentDate: realDate,
+        unloadStartTime: startTime,
+        unloadEndTime: endTime,
+        totalTime: totalTime,
       },
       props.notifyId
     );
+
     await handleRequest(res, () => {
       toastSuccess('success');
-      emit('save');
-    });
-    loading = false;
-  }
-
-  async function save() {
-    loading = true;
-    for (const listElement of currentTaskList) {
-      if (
-        listElement.arrivedTrayNumEdit != listElement.arrivedTrayNum ||
-        listElement.arrivedContainerNumEdit != listElement.arrivedContainerNum
-      ) {
-        const editInfo: any = {
-          arrivedTrayNum: listElement?.arrivedTrayNumEdit ?? 0,
-          arrivedContainerNum: listElement?.arrivedContainerNumEdit ?? 0,
-          note: listElement.note,
-        };
-        if (listElement.arrivedTrayNumEdit == listElement.trayNum) {
-          editInfo.instorageTrayNum = listElement?.arrivedTrayNumEdit ?? 0;
-        }
-        if (listElement.arrivedContainerNumEdit == listElement.containerNum) {
-          editInfo.instorageContainerNum = listElement?.arrivedContainerNumEdit ?? 0;
-        }
-
-        const res = await NotifyDetailManager.edit(editInfo, listElement.id);
-        if (res.code != ResultEnum.SUCCESS) {
-          toastError(res.message);
-          break;
-        }
-      }
-    }
-    const newInStatus =
-      totalContainerCount.value + totalTrayCount.value ==
-      totalArrivedTrayCount.value + totalArrivedContainerCount.value
-        ? InBoundStatus.All
-        : InBoundStatus.Partial;
-    const res = await NotifyManager.edit(
-      {
-        arrivedCount: totalArrivedTrayCount.value + totalArrivedContainerCount.value,
-        inStatus: newInStatus,
-        totalCount: totalTrayCount.value + totalContainerCount.value,
-        unloadPerson: unloadPerson,
-        currentDate: currentDate.value ?? [],
-        currentArriveDate: currentDate.value,
-        totalTime: totalTime ?? '',
-      },
-      props.notifyId
-    );
-    await handleRequest(res, () => {
-      toastSuccess('sucees');
       emit('save');
     });
     loading = false;
@@ -236,7 +196,7 @@
 
 <template>
   <div id="print" class="mt-8">
-    <loading-frame :loading="loading">
+    <loading-frame :loading="loading" :title="log">
       <n-descriptions v-if="notifyInfo" :columns="2" bordered label-placement="left">
         <n-descriptions-item label="货柜号">
           {{ notifyInfo?.containerNo }}
@@ -247,18 +207,20 @@
           {{ timeDisplayYMD(notifyInfo?.planArriveDateTime) }}/{{ notifyInfo?.inHouseTime }}
         </n-descriptions-item>
         <n-descriptions-item label="预报总数"> {{ notifyInfo?.arrivedCount }}</n-descriptions-item>
-        <!--        <n-descriptions-item label="实际卸柜日期">-->
-        <!--          <n-date-picker-->
-        <!--            v-model:value="currentDate"-->
-        <!--            :placeholder="timeDisplayYMD(notifyInfo?.currentDate)"-->
-        <!--            type="date"-->
-        <!--          />-->
-        <!--        </n-descriptions-item>-->
         <n-descriptions-item label="实际卸柜日期">
-          <n-date-picker v-model:value="currentDate" clearable type="datetimerange" />
+          <n-date-picker v-model:value="realDate" type="date" />
         </n-descriptions-item>
+        <!--        <n-descriptions-item label="实际卸柜日期">-->
+        <!--          <n-date-picker v-model:value="currentDate" clearable type="date" />-->
+        <!--        </n-descriptions-item>-->
         <n-descriptions-item label="卸柜时长">
-          <n-input v-model:value="totalTime" :placeholder="notifyInfo?.totalTime" />
+          <n-input v-model:value="totalTime" disabled />
+        </n-descriptions-item>
+        <n-descriptions-item label="卸柜起始时间">
+          <n-time-picker v-model:formatted-value="startTime" value-format="HH:mm:ss" />
+        </n-descriptions-item>
+        <n-descriptions-item label="卸柜结束时间">
+          <n-time-picker v-model:formatted-value="endTime" value-format="HH:mm:ss" />
         </n-descriptions-item>
       </n-descriptions>
       <div class="mt-4 noMaxHeight" style="max-height: 800px; overflow-y: scroll">
@@ -319,10 +281,7 @@
         <div>
           <n-input v-model:value="unloadPerson" placeholder="卸柜人员" />
         </div>
-        <!--        <n-button v-if="showBtn" :disabled="!canEdit" secondary type="warning" @click="save"-->
-        <!--          >保存-->
-        <!--        </n-button>-->
-        <n-button type="primary" @click="confirm">确认全部到货 </n-button>
+        <n-button :disabled="!canSave" type="primary" @click="confirm">确认全部到货 </n-button>
       </n-space>
     </loading-frame>
   </div>

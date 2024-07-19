@@ -1,6 +1,11 @@
 <template>
   <n-card class="proCard">
-    <normal-form :default-value-model="model" :form-fields="schemas" @submit="handleSubmit" />
+    <template v-if="step === 1">
+      <normal-form :default-value-model="model" :form-fields="schemas" @submit="handleSubmit" />
+    </template>
+    <template v-else>
+      <normal-form :default-value-model="model" :form-fields="schemas" @submit="handleSubmit" />
+    </template>
   </n-card>
 </template>
 <script lang="ts" setup>
@@ -19,6 +24,8 @@
     model?: any;
     defaultValue: any;
   }
+
+  let step = $ref(1);
 
   const prop = defineProps<Props>();
 
@@ -47,6 +54,10 @@
       defaultValue: prop.defaultValue.inHouseTime,
       componentProps: {
         options: generateOptionFromArray(reservationTimeList),
+      },
+      onFormUpdate(value) {
+        if (value.warehouseId) {
+        }
       },
     },
     getFilesUploadFormField('files', false, () => {
