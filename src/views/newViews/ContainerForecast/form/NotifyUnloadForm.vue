@@ -90,7 +90,8 @@
     const res = dayjs(realDate).format('YYYY-MM-DD');
     const currentEndDateTime = res + ' ' + endTime;
     const currentStartDateTime = res + ' ' + startTime;
-    const result = dayjs(currentEndDateTime).diff(currentStartDateTime, 'hour') + 1;
+    const result = Math.ceil(dayjs(currentEndDateTime).diff(currentStartDateTime, 'minute') / 60);
+    console.log(result, 'result');
     if (result) {
       return result;
     } else {
@@ -139,7 +140,8 @@
       const editInfo: any = {
         arrivedTrayNum: listElement.arrivedTrayNumEdit ?? 0,
         arrivedContainerNum: listElement.arrivedContainerNumEdit ?? 0,
-        note: listElement.note,
+        note: listElement.note ?? '',
+        warehouseLocation: listElement.warehouseLocation ?? '',
       };
       editInfo.instorageTrayNum = listElement.arrivedTrayNumEdit ?? 0;
       editInfo.instorageContainerNum = listElement.arrivedContainerNumEdit ?? 0;
@@ -152,7 +154,7 @@
       if (editInfo.inStatus === '存仓') {
         editInfo.storageTime = [{ storageTime: dayjs().format('YYYY-MM-DD HH:mm:ss') }];
       }
-      editInfo.arriveTime = dayjs(realDate).format('YYYY-MM-DD') + startTime;
+      editInfo.arriveTime = dayjs(realDate).format('YYYY-MM-DD') + '' + startTime;
       let timeLineInfo = listElement.timeLine;
       timeLineInfo.unshift({
         operator: userInfo?.realName,
@@ -232,6 +234,7 @@
               <th>预报 箱</th>
               <th style="width: 100px">入库 托</th>
               <th style="width: 100px">入库 箱</th>
+              <th>库位</th>
               <th>仓库备注</th>
             </tr>
           </thead>
@@ -260,6 +263,13 @@
               </td>
               <td>
                 <n-input v-model:value="item.note" :disabled="!canEdit" placeholder="" />
+              </td>
+              <td>
+                <n-input
+                  v-model:value="item.warehouseLocation"
+                  :disabled="!canEdit"
+                  placeholder=""
+                />
               </td>
             </tr>
           </tbody>

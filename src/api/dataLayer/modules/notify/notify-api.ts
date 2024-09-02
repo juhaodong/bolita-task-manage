@@ -3,11 +3,10 @@ import {
   NotifyDetailManager,
 } from '@/api/dataLayer/modules/notify/notify-detail';
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
-import { notifyPath, taskListPath } from '@/api/dataLayer/modules/notify/path';
 import { safeParseInt } from '@/store/utils/utils';
 
 export const NotifyManager = initModel({
-  collectionName: notifyPath,
+  collectionName: 'testNotify',
   init(value, taskList) {
     // const totalTrayNumber = taskList.reduce((sum, i) => sum + safeParseInt(i?.trayNum), 0);
     const totalNumber = taskList.reduce((sum, i) => sum + safeParseInt(i?.number), 0);
@@ -20,7 +19,7 @@ export const NotifyManager = initModel({
     return Object.assign(info, value);
   },
   cascadeManager: {
-    collectionName: taskListPath,
+    collectionName: 'testTaskList',
     loader: getNotifyDetailListByNotify,
   },
   async afterAddHook(id, value, taskList) {

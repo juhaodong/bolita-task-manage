@@ -31,6 +31,14 @@
           </template>
           下载
         </n-button>
+        <n-button size="small" type="info" @click="downloadFbaCode">
+          <template #icon>
+            <n-icon>
+              <Box20Filled />
+            </n-icon>
+          </template>
+          下载FBACode
+        </n-button>
       </filter-bar>
       <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
         <n-card embedded size="small" style="max-width: 300px">
@@ -283,6 +291,12 @@
       toastSuccess('success');
       reloadTable();
     });
+  }
+
+  async function downloadFbaCode() {
+    window.open(
+      'https://firebasestorage.googleapis.com/v0/b/bolita-task-manage.appspot.com/o/FbaCode.xlsx?alt=media&token=87d3478d-6148-41b4-ab71-fbfec6529cc1'
+    );
   }
 
   async function downloadData() {

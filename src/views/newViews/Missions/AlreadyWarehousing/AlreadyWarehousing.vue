@@ -54,6 +54,14 @@
           </template>
           下载
         </n-button>
+        <n-button type="primary" @click="merge">
+          <template #icon>
+            <n-icon>
+              <Box20Filled />
+            </n-icon>
+          </template>
+          合并
+        </n-button>
       </filter-bar>
       <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
         <n-card embedded size="small" style="max-width: 300px">
@@ -184,6 +192,15 @@
       >
         <offer-price-dialog :ids="checkedRows" @save="reloadTable" />
       </n-modal>
+      <n-modal
+        v-model:show="mergeDialog"
+        :show-icon="false"
+        preset="card"
+        style="width: 90%; min-width: 1000px; max-width: 1000px"
+        title="合并"
+      >
+        <merge-dialog @save="reloadTable" />
+      </n-modal>
     </div>
   </n-card>
 </template>
@@ -227,6 +244,7 @@
   import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
   import { valueOfToday } from '@/api/dataLayer/common/Date';
   import FileSaver from 'file-saver';
+  import MergeDialog from '@/views/newViews/Missions/AlreadyWarehousing/MergeDialog.vue';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -255,6 +273,7 @@
   let valueTwo = $ref('');
   let dateRange = $ref(null);
   let showAll = $ref(false);
+  let mergeDialog = $ref(false);
 
   const actionRef = ref();
   const props = defineProps<Prop>();
@@ -295,6 +314,10 @@
     showModal.value = true;
   }
 
+  function merge() {
+    mergeDialog = true;
+  }
+
   async function downloadData() {
     let selectedList = [];
     if (checkedRows.length > 0) {
@@ -302,7 +325,6 @@
     } else {
       selectedList = await loadDataTable();
     }
-    console.log(selectedList, 'list');
     let headerTitle = columns
       .filter((it) => it.title)
       .map((it) => it.title)

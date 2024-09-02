@@ -1,7 +1,6 @@
 import { orderBy, where } from 'firebase/firestore';
 import { NotifyManager, OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
-import { taskListPath } from '@/api/dataLayer/modules/notify/path';
 import { chunk } from 'lodash-es';
 import { CashManager } from '@/api/dataLayer/modules/cash/cash';
 import { useUserStore } from '@/store/modules/user';
@@ -19,13 +18,12 @@ export async function getReserveItems(filterObj?: any) {
   return await NotifyDetailManager.load(
     filterObj,
     orderBy('arriveTime', 'desc'),
-
     where('arriveTime', '!=', 0)
   );
 }
 
 export const NotifyDetailManager = initModel({
-  collectionName: taskListPath,
+  collectionName: 'testTaskList',
   async init(taskInfo, notifyId, customerId) {
     const userInfo = useUserStore().info;
     taskInfo.arrivedContainerNum = 0;
@@ -51,6 +49,13 @@ export const NotifyDetailManager = initModel({
   joinManager: {
     key: 'notifyId',
     loader: () => NotifyManager.load(null),
+  },
+});
+
+export const NotifyDetailMergeManager = initModel({
+  collectionName: 'testTaskList',
+  init(value): any {
+    return value;
   },
 });
 

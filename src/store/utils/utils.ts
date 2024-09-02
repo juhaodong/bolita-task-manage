@@ -73,6 +73,7 @@ export async function asyncFCAddress(): Promise<FormField> {
     component: 'NSelect',
     componentProps: {
       options: list,
+      multiple: true,
     },
   };
 }

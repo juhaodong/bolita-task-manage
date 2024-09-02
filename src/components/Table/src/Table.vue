@@ -5,9 +5,9 @@
       <template v-if="title">
         <div class="table-toolbar-left-title">
           {{ title }}
-          <n-tooltip trigger="hover" v-if="titleTooltip">
+          <n-tooltip v-if="titleTooltip" trigger="hover">
             <template #trigger>
-              <n-icon size="18" class="ml-1 text-gray-400 cursor-pointer">
+              <n-icon class="ml-1 text-gray-400 cursor-pointer" size="18">
                 <QuestionCircleOutlined />
               </n-icon>
             </template>
@@ -27,15 +27,15 @@
   <div class="s-table">
     <div style="overflow-x: scroll">
       <div style="width: fit-content">
-        <n-data-table virtual-scroll ref="tableElRef" v-bind="getBindValues" :striped="true">
-          <template #[item]="data" v-for="item in Object.keys($slots)" :key="item">
+        <n-data-table ref="tableElRef" :striped="true" v-bind="getBindValues" virtual-scroll>
+          <template v-for="item in Object.keys($slots)" :key="item" #[item]="data">
             <slot :name="item" v-bind="data"></slot>
           </template>
         </n-data-table>
       </div>
     </div>
   </div>
-  <n-space class="mt-2" align="center">
+  <n-space align="center" class="mt-2">
     <n-tag class="ml-2"> 共计 {{ getBindValues.data.length }} 条数据</n-tag>
     <n-divider vertical />
     <n-tooltip trigger="hover">
@@ -49,7 +49,7 @@
       <span>刷新</span>
     </n-tooltip>
     <!--表格设置单独抽离成组件-->
-    <ColumnSetting />
+    <!--    <ColumnSetting />-->
   </n-space>
 </template>
 

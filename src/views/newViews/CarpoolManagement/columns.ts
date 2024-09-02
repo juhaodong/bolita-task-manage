@@ -115,6 +115,9 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
   //   title: '物流ID',
   //   key: 'id',
   // },
+  {
+    type: 'selection',
+  },
   selectedIdColumn('物流ID', '/car/carBookingDetail', 'id'),
   timeColumn('createBookCarTimestamp', '下单日期'),
   statusColumnEasy({

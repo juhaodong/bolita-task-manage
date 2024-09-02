@@ -144,6 +144,7 @@ export function initModel(g: GeneralModel): Model {
       }
       const t = await g.init(value, ...args);
       const id = await generalAdd(t, g.collectionName, g?.idPrefix, ...args);
+      console.log(id, 'id');
       if (g.afterAddHook) {
         await g.afterAddHook(id, t, ...args);
       }
