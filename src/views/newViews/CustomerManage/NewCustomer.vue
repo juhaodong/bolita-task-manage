@@ -9,25 +9,32 @@
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import {
-    CustomerManager,
-    customerStatusSelection,
-    UserManager,
-  } from '@/api/dataLayer/modules/user/user';
+  import { customerStatusSelection } from '@/api/dataLayer/modules/user/user';
   import { $ref } from 'vue/macros';
   import {
     asyncCustomerWarehouseFormField,
     asyncSalesManFormField,
   } from '@/api/dataLayer/fieldDefination/common';
+  import { addOrUpdateCustomer } from '@/api/newDataLayer/Customer/Customer';
 
   interface Props {
     model?: any;
-    salesManList: [];
   }
 
   let loading: boolean = $ref(false);
   const prop = defineProps<Props>();
   const schemas: FormFields = [
+    {
+      label: 'id',
+      field: 'id',
+      required: false,
+      disableCondition: () => {
+        return prop.model?.id;
+      },
+      displayCondition: () => {
+        return prop.model?.id;
+      },
+    },
     {
       label: '客户名称',
       field: 'customerName',
@@ -50,28 +57,21 @@
     //   required: false,
     // },
     customerStatusSelection,
-    {
-      label: '备注',
-      field: 'note',
-      required: false,
-    },
   ];
 
   const emit = defineEmits(['saved']);
 
   async function handleSubmit(values: any) {
     loading = true;
-    values.belongSalesId =
-      (await UserManager.load()).find((it) => it.realName === values.belongSalesMan)?.id ?? '';
-    if (!values.belongSalesId) {
-      values.belongSalesMan = '';
-    }
+    // values.belongSalesId =
+    //   (await UserManager.load()).find((it) => it.realName === values.belongSalesMan)?.id ?? '';
+    // if (!values.belongSalesId) {
+    //   values.belongSalesMan = '';
+    // }
+    console.log(values, 'values');
+    values.belongSalesMan = '';
     await safeScope(async () => {
-      if (prop?.model?.id) {
-        await CustomerManager.editInternal(values, prop.model.id);
-      } else {
-        await CustomerManager.addInternal(values);
-      }
+      await addOrUpdateCustomer(values);
       emit('saved', values);
     });
     loading = false;

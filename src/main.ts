@@ -4,6 +4,7 @@ import { setupDirectives, setupNaive, setupNaiveDiscreteApi } from '@/store/plug
 import App from './App.vue';
 import router, { setupRouter } from './router';
 import { setupStore } from '@/store';
+import hillo from 'hillo';
 
 async function bootstrap() {
   const app = createApp(App);
@@ -37,8 +38,13 @@ async function bootstrap() {
   const meta = document.createElement('meta');
   meta.name = 'naive-ui-style';
   document.head.appendChild(meta);
+  await loadConfig();
 
   app.mount('#app', true);
+}
+
+export async function loadConfig() {
+  hillo.initial('https://bolita-test.aaden.io/');
 }
 
 void bootstrap();

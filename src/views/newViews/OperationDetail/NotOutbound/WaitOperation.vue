@@ -234,6 +234,11 @@
   let dateRange = $ref(null);
   let showAll = $ref(false);
   import FileSaver from 'file-saver';
+  import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
+  import {
+    getOutboundForecastList,
+    getOutboundForecastListByFilter,
+  } from '@/api/newDataLayer/WaitOperation/WaitOperation';
   const operationColumns = $ref([
     {
       title: 'ID',
@@ -323,16 +328,27 @@
 
   async function reloadHeader() {
     currentColumns = [];
-    currentHeader = await getTableHeader('operation');
+    currentHeader = (await getTableHeaderGroupItemList('operation')).tableHeaderItems;
     currentHeader.forEach((item) => {
-      const res = operationColumns.find((it) => it.key === item.key);
+      const res = operationColumns.find((it) => it.key === item.itemKey);
       currentColumns.push(res);
     });
     currentColumns = currentColumns.length > 0 ? currentColumns : operationColumns;
     showCurrentHeaderDataTable = false;
   }
   const loadDataTable = async () => {
-    let allList = await getOutboundForecast(filterObj);
+    let currentFilter = [];
+    if (filterObj) {
+      const res = Object.keys(filterObj);
+      for (const filterItem of res) {
+        currentFilter.push({
+          field: filterItem,
+          op: filterObj[filterItem] ? '==' : '!=',
+          value: filterObj[filterItem] ?? '',
+        });
+      }
+    }
+    let allList = await getOutboundForecastListByFilter(currentFilter);
     currentList = allList.filter(
       (a) =>
         a.inStatus === CarStatus.Booked ||
@@ -436,35 +452,6 @@
     showLoadingCarListDialog = false;
     showFeeDialog = false;
     actionRef.value.reload();
-  }
-
-  async function checkOutboundOrder(id) {
-    const res = currentList.find((it) => it.id === id);
-    currentData = res.outboundDetailInfo;
-    const customerColor = groupBy(currentData, 'customerName');
-    const containColor = groupBy(currentData, 'containerId');
-    let customerIndex = 0;
-    let containIndex = 0;
-    for (const item in customerColor) {
-      const customerColorIndex = customerIndex % randomCustomerColorList.length;
-      customerColor[item].forEach(
-        (x) => (x.customerColor = randomCustomerColorList[customerColorIndex])
-      );
-      customerIndex = customerIndex + 1;
-    }
-    for (const item in containColor) {
-      const containColorIndex = containIndex % randomContainColorList.length;
-      containColor[item].forEach(
-        (x) => (x.containColor = randomContainColorList[containColorIndex])
-      );
-      containIndex = containIndex + 1;
-    }
-    currentDeliveryMethod = res.deliveryDetail;
-    AMZID = res.AMZID;
-    pickDate = dayjs(res.reservationGetProductTime).format('YYYY-MM-DD');
-    FBACode = res.FBACode;
-    RefCode = res.REF;
-    showOutboundOrderDetail = true;
   }
 
   function updateFilter(value) {

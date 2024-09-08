@@ -4,7 +4,7 @@ import { db } from '@/store/plugins/firebase';
 import { resultOfId } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
 
 export function hasAuthPower(power) {
-  const res = useUserStore()?.info?.authPower.map((it) => it.key);
+  const res = useUserStore()?.info?.powerTypeItems.map((it) => it.itemKey);
   return res.includes(power);
 }
 export const PowerTypeList = 'PowerTypeList';

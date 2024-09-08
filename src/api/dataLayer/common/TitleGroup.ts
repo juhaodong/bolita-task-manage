@@ -1,330 +1,335 @@
 export const allTitleGroup = [
   {
     title: '客户ID',
-    key: 'customerName',
+    itemKey: 'customerName',
     tagType: 'warning',
   },
   {
     title: '柜号',
-    key: 'containerId',
+    itemKey: 'containerId',
     tagType: 'warning',
   },
   {
     title: '票号',
-    key: 'ticketId',
+    itemKey: 'ticketId',
     tagType: 'warning',
   },
   {
     title: '国家',
-    key: 'country',
+    itemKey: 'country',
     tagType: 'warning',
   },
   {
     title: '预报件数',
-    key: 'number',
+    itemKey: 'number',
     tagType: 'warning',
   },
   {
     title: '预报托数',
-    key: 'trayNum',
+    itemKey: 'trayNum',
     tagType: 'warning',
   },
   {
     title: '总实重',
-    key: 'weight',
+    itemKey: 'weight',
     tagType: 'warning',
   },
   {
     title: '总体积',
-    key: 'volume',
+    itemKey: 'volume',
     tagType: 'warning',
   },
   {
     title: '尺寸',
-    key: 'size',
+    itemKey: 'size',
     tagType: 'warning',
   },
   {
     title: '状态',
-    key: 'inStatus',
+    itemKey: 'inStatus',
     tagType: 'warning',
   },
   {
     title: '基础备注',
-    key: 'normalNote',
+    itemKey: 'normalNote',
     tagType: 'warning',
   },
   {
     title: 'FBA/快递单号',
-    key: 'FBADeliveryCode',
+    itemKey: 'FBADeliveryCode',
     tagType: 'warning',
   },
   {
     title: '出库方式',
-    key: 'outboundMethod',
+    itemKey: 'outboundMethod',
     tagType: 'warning',
   },
   {
     title: '物流渠道',
-    key: 'deliveryMethod',
+    itemKey: 'deliveryMethod',
     tagType: 'warning',
   },
   {
     title: '操作要求',
-    key: 'operationRequire',
+    itemKey: 'operationRequire',
     tagType: 'warning',
   },
   {
     title: '操作备注',
-    key: 'operationNote',
+    itemKey: 'operationNote',
     tagType: 'warning',
   },
   {
     title: '结算状态',
-    key: 'finalStatus',
+    itemKey: 'finalStatus',
     tagType: 'warning',
   },
   {
     title: 'PO',
-    key: 'PO',
+    itemKey: 'PO',
     tagType: 'warning',
   },
   {
     title: 'FC/送货地址',
-    key: 'FCAddress',
+    itemKey: 'FCAddress',
     tagType: 'warning',
   },
   {
     title: '邮编',
-    key: 'postcode',
+    itemKey: 'postcode',
     tagType: 'warning',
   },
   {
     title: '换单文件',
-    key: 'changeOrderFiles',
+    itemKey: 'changeOrderFiles',
     tagType: 'warning',
   },
   {
     title: '送货备注',
-    key: 'transportationNote',
+    itemKey: 'transportationNote',
     tagType: 'info',
   },
   {
     title: '实际件数',
-    key: 'arrivedContainerNum',
+    itemKey: 'arrivedContainerNum',
     tagType: 'info',
   },
   {
     title: '实际托数',
-    key: 'arrivedTrayNum',
+    itemKey: 'arrivedTrayNum',
     tagType: 'info',
   },
   {
     title: '仓库',
-    key: 'warehouseId',
+    itemKey: 'warehouseId',
     tagType: 'info',
   },
   {
     title: '留仓时间',
-    key: 'stayTime',
+    itemKey: 'stayTime',
     tagType: 'info',
   },
   {
     title: '预期到仓日期',
-    key: 'planArriveDateTime',
+    itemKey: 'planArriveDateTime',
     tagType: 'info',
   },
   {
     title: '实际到仓日期',
-    key: 'arriveTime',
+    itemKey: 'arriveTime',
     tagType: 'info',
   },
   {
     title: '发货时间',
-    key: 'deliveryTime',
+    itemKey: 'deliveryTime',
     tagType: 'info',
   },
   {
     title: 'Ref',
-    key: 'Ref',
+    itemKey: 'Ref',
     tagType: 'info',
   },
   {
     title: '仓库备注',
-    key: 'note',
+    itemKey: 'note',
     tagType: 'info',
   },
   {
     title: '分拣标识',
-    key: 'sign',
+    itemKey: 'sign',
     tagType: 'success',
   },
   {
     title: '包装',
-    key: 'package',
+    itemKey: 'package',
     tagType: 'success',
   },
   {
     title: '托数',
-    key: 'industrialTrayNum',
+    itemKey: 'industrialTrayNum',
     tagType: 'success',
   },
   {
     title: '品名',
-    key: 'productName',
+    itemKey: 'productName',
     tagType: 'success',
   },
   {
     title: 'UN号',
-    key: 'UNNumber',
+    itemKey: 'UNNumber',
     tagType: 'success',
   },
   {
     title: '收件人',
-    key: 'recipient',
+    itemKey: 'recipient',
     tagType: 'success',
   },
   {
     title: '电话',
-    key: 'phone',
+    itemKey: 'phone',
     tagType: 'success',
   },
   {
     title: '邮箱',
-    key: 'email',
+    itemKey: 'email',
     tagType: 'success',
   },
   {
     title: '是否需要预约',
-    key: 'needReserve',
+    itemKey: 'needReserve',
     tagType: 'success',
   },
   {
     title: '工业品备注',
-    key: 'industrialNote',
+    itemKey: 'industrialNote',
     tagType: 'success',
   },
 ].map((it, index) => {
   it.sort = index;
+  it.description = 'taskList';
   return it;
 });
 
 export const operationTitleGroup = [
   {
     title: 'ID',
-    key: 'id',
+    itemKey: 'id',
   },
   {
     title: '出库日期',
-    key: 'realOutDate',
+    itemKey: 'realOutDate',
   },
   {
     title: '预计取货时间',
-    key: 'pickUpDateTime',
+    itemKey: 'pickUpDateTime',
   },
   {
     title: '预约送货时间',
-    key: 'reservationGetProductTime',
+    itemKey: 'reservationGetProductTime',
   },
   {
     title: 'Halle',
-    key: 'warehouseId',
+    itemKey: 'warehouseId',
   },
   {
     title: '详情',
-    key: 'actions',
+    itemKey: 'actions',
   },
   {
     title: '状态',
-    key: 'inStatus',
+    itemKey: 'inStatus',
   },
   {
     title: 'Ref',
-    key: 'REF',
+    itemKey: 'REF',
   },
   {
     title: 'ISA',
-    key: 'ISA',
+    itemKey: 'ISA',
   },
   {
     title: 'AMZ-Sendungs ID',
-    key: 'AMZID',
+    itemKey: 'AMZID',
   },
   {
     title: 'Kunden',
-    key: 'customerId',
+    itemKey: 'customerId',
   },
   {
     title: 'FC/送货地址',
-    key: 'FCAddress',
+    itemKey: 'FCAddress',
   },
   {
     title: '物流方式',
-    key: 'deliveryMethod',
+    itemKey: 'deliveryMethod',
   },
   {
     title: '邮编',
-    key: 'postcode',
+    itemKey: 'postcode',
   },
   // {
   //   title: '订车状态',
-  //   key: 'carStatus',
+  //   itemKey: 'carStatus',
   // },
   {
     title: '操作人',
-    key: 'outOperatePerson',
+    itemKey: 'outOperatePerson',
   },
 ].map((it, index) => {
   it.sort = index;
+  it.description = 'operation';
+  it.tagType = '';
   return it;
 });
 
 export const containerForecastTitleGroup = [
   {
     title: '预计入库日期',
-    key: 'planArriveDateTime',
+    itemKey: 'planArriveDateTime',
   },
   {
     title: '预计时间',
-    key: 'inHouseTime',
+    itemKey: 'inHouseTime',
   },
   {
     title: '柜号',
-    key: 'containerNo',
+    itemKey: 'containerNo',
   },
   {
     title: '客户ID',
-    key: 'customerName',
+    itemKey: 'customerName',
   },
   {
     title: '仓库',
-    key: 'warehouseId',
+    itemKey: 'warehouseId',
   },
   {
     title: '数量',
-    key: 'arrivedCount',
+    itemKey: 'arrivedCount',
   },
   {
     title: '状态',
-    key: 'inStatus',
+    itemKey: 'inStatus',
   },
   {
     title: '操作人',
-    key: 'unloadPerson',
+    itemKey: 'unloadPerson',
   },
   {
     title: '用户名',
-    key: 'salesName',
+    itemKey: 'salesName',
   },
   {
     title: '备注',
-    key: 'note',
+    itemKey: 'note',
   },
   {
     title: '结算状态',
-    key: 'containerFinalStatus',
+    itemKey: 'containerFinalStatus',
   },
 ].map((it, index) => {
   it.sort = index;
+  it.description = 'containerForecast';
+  it.tagType = '';
   return it;
 });

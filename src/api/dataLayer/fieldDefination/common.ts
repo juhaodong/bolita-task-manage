@@ -5,7 +5,6 @@ import dayjs from 'dayjs';
 import {
   CustomerManager,
   FBACodeManager,
-  UserManager,
   WarehouseManager,
 } from '@/api/dataLayer/modules/user/user';
 import { keyBy } from 'lodash-es';
@@ -13,6 +12,8 @@ import { storage } from '@/store/utils/Storage';
 import { CUSTOMER_ID } from '@/store/mutation-types';
 import { useUserStore } from '@/store/modules/user';
 import { generateOptionFromArray } from '@/store/utils/utils';
+import { getUserList } from '@/api/newDataLayer/User/User';
+import { getInventoryList } from '@/api/newDataLayer/Warehouse/Warehouse';
 
 export function getFilesUploadFormField(
   key = 'files',
@@ -81,9 +82,9 @@ export async function asyncCustomerFormField(): Promise<FormField> {
 }
 
 export async function asyncCustomerWarehouseFormField(multiple): Promise<FormField> {
-  const warehouseList = await WarehouseManager.load();
+  const warehouseList = await getInventoryList();
   const warehouseIdList = warehouseList.map((it) => ({
-    label: it.id,
+    label: it.name,
     value: it.id,
   }));
   return {
@@ -99,14 +100,14 @@ export async function asyncCustomerWarehouseFormField(multiple): Promise<FormFie
 }
 
 export async function asyncSalesManFormField(): Promise<FormField> {
-  const salesManList = (await UserManager.load()).filter((it) => it.userType === '运营部前端');
+  const salesManList = (await getUserList()).filter((it) => it.userType === '运营部前端');
   console.log(salesManList, 'list');
   const salesManIdList = salesManList.map((it) => ({
     label: it.realName,
-    value: it.realName,
+    value: it.id,
   }));
   return {
-    field: 'belongSalesMan',
+    field: 'belongSalesId',
     label: '业务员',
     component: 'NSelect',
     componentProps: {

@@ -1,9 +1,11 @@
 import { collection, query, where } from 'firebase/firestore';
 import { db, executeQuery } from '@/store/plugins/firebase';
 import { Result, resultError, resultSuccess } from '@/store/request/_util';
-import { ACCESS_TOKEN } from '@/store/mutation-types';
+import { ACCESS_TOKEN, CURRENT_USER } from '@/store/mutation-types';
 import { storage } from '@/store/utils/Storage';
 import { CustomerManager, salesMan, userPath } from '@/api/dataLayer/modules/user/user';
+import { getUserByLoginName } from '@/api/newDataLayer/User/User';
+import { useUserStore } from '@/store/modules/user';
 
 export enum PermissionEnums {
   Manager = '管理员',
@@ -29,12 +31,12 @@ export type BaseUser = {
 };
 
 export async function login(params: { username: string; password: string }) {
-  const exist = (await findUserWithLoginName(params.username)).find(
-    (it) => it.password === params.password
-  );
-  if (exist) {
-    const res = await getUserInfo(exist.token);
-    return resultSuccess(res.result);
+  const exist = await getUserByLoginName(params.username);
+  if (exist.password === params.password) {
+    useUserStore().setUserInfo(exist);
+    const ex = 30 * 24 * 60 * 60;
+    storage.set(CURRENT_USER, exist, ex);
+    return resultSuccess('登录成功');
   } else {
     return resultError('用户不存在');
   }

@@ -173,6 +173,7 @@
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
   import { inStorageObj } from '@/views/newViews/Missions/AlreadyWarehousing/selectionType';
   import FileSaver from 'file-saver';
+  import { getTaskListByFilter } from '@/api/newDataLayer/TaskList/TaskList';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -227,8 +228,19 @@
   });
 
   const loadDataTable = async () => {
+    let currentFilter = [];
+    if (filterObj) {
+      const res = Object.keys(filterObj);
+      for (const filterItem of res) {
+        currentFilter.push({
+          field: filterItem,
+          op: filterObj[filterItem] ? '==' : '!=',
+          value: filterObj[filterItem] ?? '',
+        });
+      }
+    }
     const customerId = await getUserCustomerList();
-    allList = (await NotifyDetailManager.load(filterObj)).filter(
+    allList = (await getTaskListByFilter(filterObj)).filter(
       (it) => it.inStatus === '存仓' || it.inStatus === '入库待操作'
     );
     allList.forEach((it) => {

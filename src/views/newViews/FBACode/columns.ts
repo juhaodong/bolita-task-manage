@@ -1,7 +1,7 @@
 import { DataTableColumns } from 'naive-ui';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { FBACodeManager } from '@/api/dataLayer/modules/user/user';
 import { uniq } from 'lodash-es';
+import { getFBACodeList } from '@/api/newDataLayer/FBACode/FBACode';
 
 export const columns: DataTableColumns<FBACode> = [
   {
@@ -63,5 +63,5 @@ export async function asyncFBACodeKey(field, label): Promise<FormField> {
 }
 
 export async function getFBACodeKeyInfo(key) {
-  return uniq((await FBACodeManager.load()).map((it) => it[key]));
+  return uniq((await getFBACodeList()).map((it) => it[key]));
 }

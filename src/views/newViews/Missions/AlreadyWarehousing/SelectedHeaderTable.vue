@@ -34,13 +34,12 @@
 <script lang="ts" setup>
   import { computed, onMounted } from 'vue';
   import { $ref } from 'vue/macros';
-  import { getTableHeader, setTableHeader } from '@/api/dataLayer/common/TableHeader';
   import _, { differenceWith, sortBy } from 'lodash';
+  import { getTableHeaderItemList } from '@/api/newDataLayer/Header/Header';
   import {
-    allTitleGroup,
-    containerForecastTitleGroup,
-    operationTitleGroup,
-  } from '@/api/dataLayer/common/TitleGroup';
+    addOrUpdateTableHeaderGroupItem,
+    getTableHeaderGroupItemList,
+  } from '@/api/newDataLayer/Header/HeaderGroup';
 
   interface Props {
     allColumns?: any;
@@ -51,13 +50,30 @@
   let currentHeaderList = $ref([]);
   const prop = defineProps<Props>();
   const waitForUseList = computed(() => {
-    if (prop.type === 'mission' || prop.type === 'carDetail') {
-      return differenceWith(allTitleGroup, currentHeaderList, _.isEqual);
+    let res = [];
+    if (prop.type === 'taskList') {
+      res = differenceWith(
+        allHeaderList.filter((it) => it.description === 'taskList'),
+        currentHeaderList,
+        _.isEqual
+      );
     } else if (prop.type === 'operation') {
-      return differenceWith(operationTitleGroup, currentHeaderList, _.isEqual);
+      res = differenceWith(
+        allHeaderList.filter((it) => it.description === 'operation'),
+        currentHeaderList,
+        _.isEqual
+      );
+      res = sortBy(res, 'sort');
+      return res;
     } else if (prop.type === 'containerForecast') {
-      return differenceWith(containerForecastTitleGroup, currentHeaderList, _.isEqual);
+      res = differenceWith(
+        allHeaderList.filter((it) => it.description === 'containerForecast'),
+        currentHeaderList,
+        _.isEqual
+      );
     }
+    res = sortBy(res, 'sort');
+    return res;
   });
   onMounted(async () => {
     await reload();
@@ -70,12 +86,15 @@
     currentHeaderList = currentHeaderList.filter((it) => it.title !== item.title);
     currentHeaderList = sortBy(currentHeaderList, 'sort');
   }
+  let groupInfo = $ref({});
   async function reload() {
-    allHeaderList = prop.allColumns.slice(1);
-    currentHeaderList = await getTableHeader(prop.type);
+    allHeaderList = await getTableHeaderItemList();
+    groupInfo = await getTableHeaderGroupItemList(prop.type);
+    currentHeaderList = sortBy(groupInfo.tableHeaderItems, 'sort');
   }
   async function save() {
-    await setTableHeader(prop.type, currentHeaderList);
+    groupInfo.tableHeaderItemIds = currentHeaderList.map((it) => it.id);
+    await addOrUpdateTableHeaderGroupItem(groupInfo);
     emit('saved');
   }
 </script>

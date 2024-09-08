@@ -1,10 +1,37 @@
 <template>
   <n-card class="proCard">
     <template v-if="step === 1">
-      <normal-form :default-value-model="model" :form-fields="schemas" @submit="handleSubmit" />
+      <normal-form
+        :default-value-model="model"
+        :form-fields="schemas"
+        @cancel="resetForm"
+        @submit="handleSubmit"
+      />
     </template>
     <template v-else>
-      <normal-form :default-value-model="model" :form-fields="schemas" @submit="handleSubmit" />
+      <div style="display: flex; margin-bottom: 20px">
+        <n-space>
+          <n-radio-group v-model:value="usefulTimeSpan">
+            <n-radio
+              v-for="(item, index) in currentTimeList"
+              :key="index"
+              :disabled="item.useLogLength > currentWarehouse.useAmount"
+              :value="item.time"
+              size="large"
+            >
+              {{ item.time }}
+            </n-radio>
+          </n-radio-group>
+        </n-space>
+      </div>
+      <n-button
+        :disabled="!usefulTimeSpan"
+        style="margin-right: 20px"
+        type="success"
+        @click="submit"
+        >上传</n-button
+      >
+      <n-button type="info" @click="step = 1">返回</n-button>
     </template>
   </n-card>
 </template>
@@ -12,13 +39,16 @@
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/common';
   import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
+  import { asyncUserCustomer, asyncWarehouseList } from '@/store/utils/utils';
+  import { $ref } from 'vue/macros';
   import {
-    asyncUserCustomer,
-    asyncWarehouseList,
-    generateOptionFromArray,
-  } from '@/store/utils/utils';
-  import { reservationTimeList } from '@/views/newViews/ContainerForecast/columns';
+    getCurrentWarehouseUseTimespan,
+    getInventoryByName,
+  } from '@/api/newDataLayer/Warehouse/Warehouse';
+  import { computed } from 'vue';
+  import { getInventoryUseLogListByInventoryId } from '@/api/newDataLayer/Warehouse/UseLog';
+  import dayjs from 'dayjs';
+  import { groupBy } from 'lodash';
 
   interface Props {
     model?: any;
@@ -26,38 +56,45 @@
   }
 
   let step = $ref(1);
+  let usefulTimeSpan = $ref('');
 
   const prop = defineProps<Props>();
 
+  const currentTimeList = computed(() => {
+    return currentWarehouse?.useTimeSpan.split(',').map((it) => {
+      return { time: it, useLogLength: selectedWarehouseLog[it]?.length ?? 0 };
+    });
+  });
+
   const schemas: FormFields = [
-    asyncUserCustomer(prop.defaultValue.customerName),
+    {
+      label: 'id',
+      field: 'id',
+      required: false,
+      disableCondition: () => {
+        return prop.model?.id;
+      },
+      displayCondition: () => {
+        return prop.model?.id;
+      },
+    },
+    asyncUserCustomer(prop.model ? prop.model.customerName : prop.defaultValue.customerName),
     {
       field: 'containerNo',
       label: '货柜号',
-      defaultValue: prop.defaultValue.containerNo,
+      defaultValue: prop.model ? prop.model.containerNo : prop.defaultValue.containerNo,
     },
-    asyncWarehouseList(prop.defaultValue.warehouseId),
+    asyncWarehouseList(prop.model ? prop.model.warehouseId : prop.defaultValue.warehouseId),
     {
       field: 'planArriveDateTime',
       component: 'NDatePicker',
       label: '预计到仓时间',
-      defaultValue: prop.defaultValue.planArriveDateTime,
+      defaultValue: prop.model
+        ? prop.model.planArriveDateTime
+        : prop.defaultValue.planArriveDateTime,
       componentProps: {
         type: 'date',
         clearable: true,
-      },
-    },
-    {
-      field: 'inHouseTime',
-      label: '到达时间',
-      component: 'NSelect',
-      defaultValue: prop.defaultValue.inHouseTime,
-      componentProps: {
-        options: generateOptionFromArray(reservationTimeList),
-      },
-      onFormUpdate(value) {
-        if (value.warehouseId) {
-        }
       },
     },
     getFilesUploadFormField('files', false, () => {
@@ -68,20 +105,35 @@
     {
       field: 'note',
       label: '预报备注',
-      defaultValue: prop.defaultValue.note,
+      defaultValue: prop.model ? prop.model.note : prop.defaultValue.note,
       required: false,
     },
   ];
 
   const emit = defineEmits(['submit', 'closed']);
+
+  let currentWarehouse = $ref({});
+  let currentData = $ref({});
+  let selectedWarehouseLog = $ref({});
+
   async function handleSubmit(values: any) {
+    const warehouseInfo = await getInventoryByName(values.warehouseId);
+    const wareHouseId = warehouseInfo.id;
+    const totalLog = (
+      await getInventoryUseLogListByInventoryId(wareHouseId, values.planArriveDateTime)
+    ).map((it) => {
+      it.inHouseTime = dayjs(it.useAtTimestamp).format('HH:mm');
+      return it;
+    });
+    selectedWarehouseLog = groupBy(totalLog, 'inHouseTime');
+    currentWarehouse = await getCurrentWarehouseUseTimespan(values.warehouseId);
+    currentData = values;
+    step = 2;
+  }
+  async function submit() {
+    currentData.inHouseTime = usefulTimeSpan;
     await safeScope(async () => {
-      if (prop?.model?.id) {
-        await NotifyManager.editInternal(values, prop.model.id);
-        emit('closed');
-      } else {
-        emit('submit', values);
-      }
+      emit('submit', currentData);
     });
   }
 </script>

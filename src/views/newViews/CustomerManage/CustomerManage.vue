@@ -35,7 +35,7 @@
       style="width: 90%; min-width: 600px; max-width: 600px"
       title="新建/编辑客户"
     >
-      <new-customer :model="currentModel" :sales-man-list="salesManList" @saved="reloadTable" />
+      <new-customer :model="currentModel" @saved="reloadTable" />
     </n-modal>
   </n-card>
 </template>
@@ -47,21 +47,20 @@
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
-  import { CustomerManager, SalesManManager } from '@/api/dataLayer/modules/user/user';
   import NewCustomer from '@/views/newViews/CustomerManage/NewCustomer.vue';
   import { useEditOrganizationUserDialog } from '@/views/newViews/WarehouseManage/WarehouseUserDialog';
   import UserManage from '@/views/newViews/UserManage/UserManage.vue';
+  import { getCustomerById, getCustomerList } from '@/api/newDataLayer/Customer/Customer';
+  import { getWarehouseNameById } from '@/api/newDataLayer/Warehouse/Warehouse';
+  import { getUserNameById } from '@/api/newDataLayer/User/User';
 
   interface Prop {
     outId?: string;
   }
 
   let finished = $ref(false);
-  let salesManList = $ref([]);
   const props = defineProps<Prop>();
   onMounted(async () => {
-    salesManList = (await SalesManManager.load()).map((it) => it.realName);
-    console.log(salesManList, 'list');
     if (props.outId) {
       filterObj = { outId: props.outId };
     }
@@ -72,14 +71,16 @@
   let currentModel: any | null = $ref(null);
 
   async function startEdit(id) {
-    currentModel = await CustomerManager.getById(id);
-    console.log(currentModel);
+    currentModel = await getCustomerById(id);
     showModal.value = true;
   }
 
   const loadDataTable = async () => {
-    const res = await CustomerManager.load(filterObj);
-    console.log(res, 'res');
+    const res = await getCustomerList();
+    for (const item of res) {
+      item.warehouseId = await getWarehouseNameById(item.warehouseId);
+      item.belongSalesMan = await getUserNameById(item.belongSalesId);
+    }
     return res;
   };
 
@@ -116,12 +117,6 @@
               startEdit(record.id);
             },
           },
-          // {
-          //   label: '用户',
-          //   onClick() {
-          //     wuDialog.startEdit(record.id);
-          //   },
-          // },
         ],
       });
     },

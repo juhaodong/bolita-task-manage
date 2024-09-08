@@ -2,8 +2,6 @@ import type { RouteRecordRaw } from 'vue-router';
 import { isNavigationFailure, Router } from 'vue-router';
 import { useUser } from '@/store/modules/user';
 import { useAsyncRoute } from '@/store/modules/asyncRoute';
-import { ACCESS_TOKEN } from '@/store/mutation-types';
-import { storage } from '@/store/utils/Storage';
 import { PageEnum } from '@/store/enums/pageEnum';
 import { ErrorPageRoute } from '@/router/base';
 
@@ -28,28 +26,28 @@ export function createRouterGuards(router: Router) {
       return;
     }
 
-    const token = storage.get(ACCESS_TOKEN);
-    console.log(token);
-    if (!token) {
-      // You can access without permissions. You need to set the routing meta.ignoreAuth to true
-      if (to.meta.ignoreAuth) {
-        next();
-        return;
-      }
-      // redirect login page
-      const redirectData: { path: string; replace: boolean; query?: Recordable<string> } = {
-        path: LOGIN_PATH,
-        replace: true,
-      };
-      if (to.path) {
-        redirectData.query = {
-          ...redirectData.query,
-          redirect: to.path,
-        };
-      }
-      next(redirectData);
-      return;
-    }
+    // const token = storage.get(ACCESS_TOKEN);
+    // console.log(token);
+    // if (!token) {
+    //   // You can access without permissions. You need to set the routing meta.ignoreAuth to true
+    //   if (to.meta.ignoreAuth) {
+    //     next();
+    //     return;
+    //   }
+    //   // redirect login page
+    //   const redirectData: { path: string; replace: boolean; query?: Recordable<string> } = {
+    //     path: LOGIN_PATH,
+    //     replace: true,
+    //   };
+    //   if (to.path) {
+    //     redirectData.query = {
+    //       ...redirectData.query,
+    //       redirect: to.path,
+    //     };
+    //   }
+    //   next(redirectData);
+    //   return;
+    // }
 
     if (asyncRouteStore.getIsDynamicRouteAdded) {
       next();

@@ -198,6 +198,18 @@
     getNotifyDetailListByNotify,
     NotifyDetailManager,
   } from '@/api/dataLayer/modules/notify/notify-detail';
+  import {
+    addOrUpdateNotify,
+    getNotifyById,
+    getNotifyList,
+    getNotifyListByFilter,
+  } from '@/api/newDataLayer/Notify/Notify';
+  import { getWarehouseNameById } from '@/api/newDataLayer/Warehouse/Warehouse';
+  import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
+  import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
+  import { addOrUpdateTask, getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
+  import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
+  import { useUserStore } from '@/store/modules/user';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
   let currentModel: any | null = $ref(null);
@@ -217,7 +229,7 @@
   let valueTwo = $ref('');
   let dateRange = $ref(null);
   let showConfirmDialog = $ref(false);
-  let cancelId = $ref('');
+  let cancelRecord = $ref('');
   let showAll = $ref(false);
 
   function addTable(type: NotifyType) {
@@ -235,8 +247,19 @@
   });
 
   const loadDataTable = async () => {
+    let currentFilter = [];
+    if (filterObj) {
+      const res = Object.keys(filterObj);
+      for (const filterItem of res) {
+        currentFilter.push({
+          field: filterItem,
+          op: filterObj[filterItem] ? '==' : '!=',
+          value: filterObj[filterItem] ?? '',
+        });
+      }
+    }
     const customerId = await getUserCustomerList();
-    let res = (await NotifyManager.load(filterObj)).filter((x) =>
+    let res = (await getNotifyListByFilter(currentFilter)).filter((x) =>
       customerId.includes(x.customerId)
     );
     if (!showAll) {
@@ -246,6 +269,9 @@
       let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
       let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
       res = res.filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate);
+    }
+    for (const item of res) {
+      item.warehouseId = await getWarehouseNameById(item.warehouseId);
     }
     return res.sort(dateCompare('planArriveDateTime'));
   };
@@ -276,16 +302,19 @@
   }
 
   async function confirmCancel() {
-    const res = await NotifyManager.edit(
-      {
-        inStatus: '已取消',
-      },
-      cancelId
-    );
-    const list = await getNotifyDetailListByNotify(cancelId);
+    const userInfo = useUserStore().info;
+    cancelRecord.inStatus = '已取消';
+    const res = await addOrUpdateNotify(cancelRecord);
+    const list = await getTaskListByNotifyId(cancelRecord.id);
     for (const item of list) {
       item.inStatus = '已取消';
-      await NotifyDetailManager.edit(item, item.id);
+      await addOrUpdateTask(item);
+      await addOrUpdateTaskTimeLine({
+        bolitaTaskId: item.id,
+        operator: userInfo?.realName,
+        detailTime: dayjs().valueOf(),
+        note: '进行了审核',
+      });
     }
     await handleRequest(res, () => {
       toastSuccess('success');
@@ -327,9 +356,10 @@
 
   async function reloadHeader() {
     currentColumns = [];
-    currentHeader = await getTableHeader('containerForecast');
+    currentHeader = (await getTableHeaderGroupItemList('containerForecast')).tableHeaderItems;
+    console.log(currentHeader, 'header');
     currentHeader.forEach((item) => {
-      const res = columns.find((it) => it.key === item.key);
+      const res = columns.find((it) => it.key === item.itemKey);
       currentColumns.push(res);
     });
     const selectionType = columns.find((x) => x.type === 'selection');
@@ -341,7 +371,7 @@
   }
 
   async function startEdit(id) {
-    currentModel = await NotifyManager.getById(id);
+    currentModel = await getNotifyById(id);
     showModal.value = true;
   }
 
@@ -374,20 +404,20 @@
     width: 120,
     render(record: any) {
       const fileAction = (label, key, icon?: Component, power) => {
-        return getFileActionButton(label, key, NotifyManager, reloadTable, record, icon, power);
+        return getFileActionButton(label, key, 'Notify', reloadTable, record, icon, power);
       };
       return h(TableAction as any, {
         style: 'button',
         actions: [
-          {
-            label: '修改',
-            onClick() {
-              startEdit(record.id);
-            },
-            ifShow: () => {
-              return hasAuthPower('forecastEdit');
-            },
-          },
+          // {
+          //   label: '修改',
+          //   onClick() {
+          //     startEdit(record.id);
+          //   },
+          //   ifShow: () => {
+          //     return hasAuthPower('forecastEdit');
+          //   },
+          // },
           fileAction('上传卸柜单', 'unloadingFile', '', 'forecastUpload'),
           {
             label: '生成卸柜单',
@@ -418,7 +448,7 @@
           {
             label: '取消',
             async onClick() {
-              cancelId = record.id;
+              cancelRecord = record;
               showConfirmDialog = true;
             },
             ifShow: () => {

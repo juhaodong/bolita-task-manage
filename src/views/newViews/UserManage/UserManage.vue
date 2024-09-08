@@ -57,13 +57,13 @@
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
-  import { UserManager } from '@/api/dataLayer/modules/user/user';
   import NewUser from '@/views/newViews/UserManage/NewUser.vue';
   import PowerList from '@/views/newViews/UserManage/PowerList.vue';
   import { NButton } from 'naive-ui';
   import { timeColumn } from '@/views/bolita-views/composable/useableColumns';
   import Delete16Filled from '@vicons/fluent/es/Delete16Filled';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
+  import { deleteUser, getUserById, getUserList } from '@/api/newDataLayer/User/User';
 
   interface Prop {
     belongsToId?: string;
@@ -88,10 +88,6 @@
     {
       title: '用户类型',
       key: 'userType',
-    },
-    {
-      title: '备注',
-      key: 'note',
     },
     {
       title: '登录名',
@@ -140,12 +136,13 @@
   let currentModel: any | null = $ref(null);
 
   async function startEdit(id) {
-    currentModel = await UserManager.getById(id);
+    currentModel = await getUserById(id);
+    currentModel.customerIds = currentModel.customerIds.split(',');
     showModal.value = true;
   }
 
   const loadDataTable = async () => {
-    return await UserManager.load(filterObj);
+    return await getUserList();
   };
 
   let filterObj: any | null = $ref(null);
@@ -164,7 +161,7 @@
   }
 
   async function confirmRemove() {
-    await UserManager.remove(removeId);
+    await deleteUser(removeId);
     reloadTable();
   }
 

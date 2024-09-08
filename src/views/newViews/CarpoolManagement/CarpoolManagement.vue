@@ -120,7 +120,6 @@
   import { getFileActionButtonByOutForecast } from '@/views/bolita-views/composable/useableColumns';
   import { useUserStore } from '@/store/modules/user';
   import { CarpoolManagementPower } from '@/api/dataLayer/common/PowerModel';
-  import { getOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import EditOF from '@/views/newViews/OperationDetail/NotOutbound/EditOF.vue';
@@ -131,6 +130,7 @@
   import { generateOptionFromArray } from '@/store/utils/utils';
   import FileSaver from 'file-saver';
   import { getDetailListById } from '@/api/dataLayer/modules/notify/notify-detail';
+  import { getOutboundForecastListByFilter } from '@/api/newDataLayer/CarManage/CarManage';
 
   const showModal = ref(false);
 
@@ -152,7 +152,20 @@
   let showAll = $ref(false);
   let dateRange = $ref(null);
   const loadDataTable = async () => {
-    allList = (await getOutboundForecast(filterObj)).sort(dateCompare('createBookCarTimestamp'));
+    let currentFilter = [];
+    if (filterObj) {
+      const res = Object.keys(filterObj);
+      for (const filterItem of res) {
+        currentFilter.push({
+          field: filterItem,
+          op: filterObj[filterItem] ? '==' : '!=',
+          value: filterObj[filterItem] ?? '',
+        });
+      }
+    }
+    allList = (await getOutboundForecastListByFilter(currentFilter)).sort(
+      dateCompare('createBookCarTimestamp')
+    );
     if (!showAll) {
       allList = allList.filter((a) => a.inStatus !== '已取消');
     }

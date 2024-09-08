@@ -9,7 +9,9 @@
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { WarehouseManager } from '@/api/dataLayer/modules/user/user';
+  import { generateOptionFromTimeArray } from '@/store/utils/utils';
+  import { timeArrays } from '@/api/newDataLayer/Common/Common';
+  import { addOrUpdateInventory } from '@/api/newDataLayer/Warehouse/Warehouse';
 
   interface Props {
     model?: any;
@@ -19,11 +21,18 @@
   const prop = defineProps<Props>();
   const schemas: FormFields = [
     {
-      label: '仓库ID',
+      label: 'id',
       field: 'id',
       disableCondition: () => {
         return prop.model?.id;
       },
+      displayCondition: () => {
+        return prop.model?.id;
+      },
+    },
+    {
+      label: '仓库ID',
+      field: 'name',
     },
     {
       label: '公司名称',
@@ -32,51 +41,48 @@
     {
       label: '国家',
       field: 'country',
+      defaultValue: '',
       required: false,
     },
     {
       label: '地址',
       field: 'address',
+      defaultValue: '',
       required: false,
     },
     {
       label: '面积',
       field: 'area',
+      defaultValue: '',
       required: false,
     },
     {
-      label: '结算方式',
-      field: 'settlementMethod',
+      label: '开放时间',
+      field: 'useTimeSpan',
+      component: 'NSelect',
+      componentProps: {
+        options: generateOptionFromTimeArray(timeArrays),
+        multiple: true,
+      },
+      defaultValue: [],
       required: false,
     },
     {
-      label: '使用系统',
-      field: 'useSystem',
-      required: false,
-    },
-    {
-      label: '快递账号',
-      field: 'courierAccount',
-      required: false,
-    },
-    {
-      label: '备注',
-      field: 'note',
-      required: false,
+      label: '开放库位',
+      field: 'useAmount',
+      defaultValue: '1',
     },
   ];
 
   const emit = defineEmits(['saved']);
 
   async function handleSubmit(values: any) {
+    console.log(values, 'value');
+    values.useTimeSpan = values.useTimeSpan.join(',');
     loading = true;
     await safeScope(async () => {
-      if (prop?.model?.id) {
-        await WarehouseManager.editInternal(values, prop.model.id);
-      } else {
-        await WarehouseManager.addInternal(values);
-      }
-      emit('saved', values);
+      await addOrUpdateInventory(values);
+      emit('saved');
     });
     loading = false;
   }

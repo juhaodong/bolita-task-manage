@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { getFileListUrl } from '@/store/plugins/firebase';
+import { saveFiles } from '@/api/newDataLayer/Notify/Notify';
 
 export interface UploadResult {
   checkPassed: boolean;
@@ -48,11 +48,11 @@ export const useUploadDialog = defineStore('uploadFileDialog', {
     async confirm(value: any) {
       if (this.resolve != null) {
         if (value?.files?.length > 0) {
-          value.files = await getFileListUrl(value.files);
+          value.files = await saveFiles(value.files);
         }
         this.resolve({
           checkPassed: true,
-          files: this.currentFileUrls ? this.currentFileUrls.concat(value.files) : value.files,
+          files: this.currentFileUrls ? this.currentFileUrls.join(value.files) : value.files,
         });
         this.show = false;
       }

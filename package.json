@@ -55,7 +55,8 @@
     "vue-types": "^4.2.1",
     "vue3-print-nb": "^0.1.4",
     "downloadjs": "^1.4.7",
-    "file-saver": "^2.0.5"
+    "file-saver": "^2.0.5",
+    "hillo": "^2.0.32"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.2.0",

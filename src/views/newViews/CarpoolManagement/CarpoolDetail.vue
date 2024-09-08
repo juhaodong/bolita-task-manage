@@ -73,7 +73,7 @@
         style="width: 90%; min-width: 800px; max-width: 800px"
         title="添加表头"
       >
-        <selected-header-table :all-columns="columns" :type="'carDetail'" @saved="reloadHeader" />
+        <selected-header-table :all-columns="columns" :type="'taskList'" @saved="reloadHeader" />
       </n-modal>
       <n-modal
         v-model:show="editDetailModel"
@@ -115,6 +115,7 @@
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import { valueOfToday } from '@/api/dataLayer/common/Date';
   import FileSaver from 'file-saver';
+  import { getTaskListByFilter } from '@/api/newDataLayer/TaskList/TaskList';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -220,7 +221,18 @@
   });
 
   const loadDataTable = async () => {
-    allList = (await NotifyDetailManager.load(filterObj)).filter((a) => a.outboundId);
+    let currentFilter = [];
+    if (filterObj) {
+      const res = Object.keys(filterObj);
+      for (const filterItem of res) {
+        currentFilter.push({
+          field: filterItem,
+          op: filterObj[filterItem] ? '==' : '!=',
+          value: filterObj[filterItem] ?? '',
+        });
+      }
+    }
+    allList = (await getTaskListByFilter(currentFilter)).filter((a) => a.outboundId);
     if (!showAll) {
       allList = allList.filter((a) => a.inStatus !== '已取消');
     }

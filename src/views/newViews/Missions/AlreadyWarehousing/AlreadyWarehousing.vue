@@ -172,7 +172,7 @@
         style="width: 90%; min-width: 800px; max-width: 800px"
         title="添加表头"
       >
-        <selected-header-table :all-columns="columns" :type="'mission'" @saved="reloadHeader" />
+        <selected-header-table :all-columns="columns" :type="'taskList'" @saved="reloadHeader" />
       </n-modal>
       <n-modal
         v-model:show="showTimeLine"
@@ -201,6 +201,15 @@
       >
         <merge-dialog @save="reloadTable" />
       </n-modal>
+      <n-modal
+        v-model:show="showCheckDialog"
+        :show-icon="false"
+        preset="card"
+        style="width: 90%; min-width: 600px; max-width: 600px"
+        title="请确认"
+      >
+        <loading-frame :loading="checkLoading" :title="log" />
+      </n-modal>
     </div>
   </n-card>
 </template>
@@ -216,11 +225,7 @@
     getDetailListById,
     NotifyDetailManager,
   } from '@/api/dataLayer/modules/notify/notify-detail';
-  import {
-    InBoundDetailStatus,
-    InBoundStatus,
-    NotifyManager,
-  } from '@/api/dataLayer/modules/notify/notify-api';
+  import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import { Box20Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import { dateCompare } from '@/api/dataLayer/common/MonthDatePick';
@@ -230,7 +235,6 @@
   import { useUploadDialog } from '@/store/modules/uploadFileState';
   import NewTrayDialog from '@/views/newViews/Missions/AlreadyWarehousing/NewTrayDialog.vue';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
-  import { getTableHeader } from '@/api/dataLayer/common/TableHeader';
   import TimeLine from '@/views/newViews/Missions/AlreadyWarehousing/TimeLine.vue';
   import { useUserStore } from '@/store/modules/user';
   import {
@@ -245,6 +249,11 @@
   import { valueOfToday } from '@/api/dataLayer/common/Date';
   import FileSaver from 'file-saver';
   import MergeDialog from '@/views/newViews/Missions/AlreadyWarehousing/MergeDialog.vue';
+  import { addOrUpdateTask, getTaskList } from '@/api/newDataLayer/TaskList/TaskList';
+  import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
+  import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
+  import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
+  import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -274,6 +283,9 @@
   let dateRange = $ref(null);
   let showAll = $ref(false);
   let mergeDialog = $ref(false);
+  let checkLoading = $ref(false);
+  let showCheckDialog = $ref(false);
+  let log = $ref('');
 
   const actionRef = ref();
   const props = defineProps<Prop>();
@@ -385,19 +397,25 @@
   }
 
   async function checkDetailInfo() {
+    checkLoading = true;
+    showCheckDialog = true;
+    let i = 0;
     for (const rows of checkedRows) {
+      i = i + 1;
+      log = '正在审核' + '第' + i + '票货物,共' + checkedRows.length + '票' + `<br>`;
       const res = allList.find((it) => it.id === rows);
       if (res) {
         res.inStatus = InBoundStatus.Wait;
         res.checkedTime = dayjs().format('YYYY-MM-DD');
         const userInfo = useUserStore().info;
-        res.timeLine.unshift({
+        await addOrUpdateTaskTimeLine({
+          bolitaTaskId: res.id,
           operator: userInfo?.realName,
-          detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+          detailTime: dayjs().valueOf(),
           note: '进行了审核',
         });
-        await NotifyDetailManager.editInternal(res, rows);
-        const containerForecastInfo = await NotifyManager.getById(res.notifyId);
+        await addOrUpdateTask(res);
+        const containerForecastInfo = await getNotifyById(res.notifyId);
         if (containerForecastInfo.inStatus === InBoundStatus.WaitCheck) {
           const allDetailList = allList
             .filter((x) => x.notifyId === res.notifyId)
@@ -408,7 +426,7 @@
             );
           if (allDetailList.length === 0) {
             containerForecastInfo.inStatus = InBoundStatus.Wait;
-            await NotifyManager.editInternal(containerForecastInfo, containerForecastInfo.id);
+            await addOrUpdateNotify(containerForecastInfo);
           }
         }
       }
@@ -419,17 +437,15 @@
 
   const loadDataTable = async () => {
     if (typeMission.value === '整柜任务看板') {
-      allList = await NotifyDetailManager.load(filterObj);
+      allList = await getTaskList();
     } else if (typeMission.value === '存仓看板') {
-      allList = (await NotifyDetailManager.load(filterObj)).filter((it) => it.inStatus === '存仓');
+      allList = (await getTaskList()).filter((it) => it.inStatus === '存仓');
     } else if (typeMission.value === '审核看板') {
-      allList = (await NotifyDetailManager.load(filterObj)).filter(
+      allList = (await getTaskList()).filter(
         (it) => it.inStatus === '等待提交' || it.inStatus === '等待审核'
       );
     } else if (typeMission.value === '报价看板') {
-      allList = (await NotifyDetailManager.load(filterObj)).filter(
-        (it) => it.needOfferPrice === '1'
-      );
+      allList = (await getTaskList()).filter((it) => it.needOfferPrice === '1');
     }
     const ownedCustomerIds = await getUserCustomerList();
     allList.forEach((it) => {
@@ -499,9 +515,9 @@
 
   async function reloadHeader() {
     currentWithOutSelection = [];
-    currentHeader = await getTableHeader('mission');
+    currentHeader = (await getTableHeaderGroupItemList('taskList')).tableHeaderItems;
     currentHeader.forEach((item) => {
-      const res = columns.find((it) => it.key === item.key);
+      const res = columns.find((it) => it.key === item.itemKey);
       currentWithOutSelection.push(res);
     });
     currentWithOutSelection =
@@ -525,6 +541,8 @@
     addNewTrayDialog = false;
     showCurrentHeaderDataTable = false;
     showOfferPrice = false;
+    checkLoading = false;
+    showCheckDialog = false;
     await actionRef.value[0].reload();
   }
 

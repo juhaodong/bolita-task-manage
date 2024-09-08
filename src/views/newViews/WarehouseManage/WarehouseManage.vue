@@ -45,10 +45,10 @@
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
-  import { WarehouseManager } from '@/api/dataLayer/modules/user/user';
   import NewInventory from '@/views/newViews/WarehouseManage/WarehouseForm.vue';
   import { useEditOrganizationUserDialog } from '@/views/newViews/WarehouseManage/WarehouseUserDialog';
   import UserManage from '@/views/newViews/UserManage/UserManage.vue';
+  import { getInventoryById, getInventoryList } from '@/api/newDataLayer/Warehouse/Warehouse';
 
   let finished = $ref(false);
 
@@ -57,13 +57,13 @@
   let currentModel: any | null = $ref(null);
 
   async function startEdit(id) {
-    currentModel = await WarehouseManager.getById(id);
+    currentModel = await getInventoryById(id);
+    currentModel.useTimeSpan = currentModel.useTimeSpan.split(',');
     showModal.value = true;
   }
 
   const loadDataTable = async () => {
-    const res = await WarehouseManager.load(filterObj);
-    console.log(res, 'res');
+    const res = await getInventoryList();
     return res;
   };
 

@@ -5,7 +5,7 @@ import { FormField } from '@/views/bolita-views/composable/form-field-type';
 export const columns: DataTableColumns<InventoryManage> = [
   {
     title: '仓库ID',
-    key: 'id',
+    key: 'name',
   },
   {
     title: '公司名称',
@@ -24,22 +24,14 @@ export const columns: DataTableColumns<InventoryManage> = [
     key: 'area',
   },
   {
-    title: '结算方式',
-    key: 'settlementMethod',
+    title: '开放时间',
+    key: 'useTimeSpan',
   },
   {
-    title: '使用系统',
-    key: 'useSystem',
+    title: '开放库位',
+    key: 'useAmount',
   },
-  {
-    title: '快递账号',
-    key: 'courierAccount',
-  },
-  {
-    title: '备注',
-    key: 'note',
-  },
-  timeColumn('creatTime', '创建日期'),
+  timeColumn('createTimestamp', '创建日期'),
 ];
 
 export const filters: FormField[] = [

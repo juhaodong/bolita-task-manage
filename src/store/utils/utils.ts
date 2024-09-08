@@ -2,8 +2,14 @@ import { ResultEnum } from '@/store/enums/httpEnum';
 import { sumBy } from 'lodash-es';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { getFBACodeList, getStorageList } from '@/api/dataLayer/fieldDefination/common';
-import { CustomerManager, WarehouseManager } from '@/api/dataLayer/modules/user/user';
+import { CustomerManager } from '@/api/dataLayer/modules/user/user';
 import { useUserStore } from '@/store/modules/user';
+import {
+  getCustomerById,
+  getCustomerList,
+  getCustomerListByIds,
+} from '@/api/newDataLayer/Customer/Customer';
+import { getInventoryList, getWarehouseNameById } from '@/api/newDataLayer/Warehouse/Warehouse';
 
 export function generateOptionFromArray(arr?: any[]) {
   return (
@@ -43,11 +49,11 @@ export async function asyncFBACode(): Promise<FormField> {
 export async function asyncWarehouseList(defaultValue): Promise<FormField> {
   const userStore = useUserStore();
   let customerId = '';
-  customerId = userStore.info?.customerIds[0] ?? '';
-  const currentCustomer = (await CustomerManager.load()).find((it) => it.id === customerId) ?? '';
-  const warehouseList = await WarehouseManager.load();
+  customerId = userStore.info?.customerIds.split(',')[0] ?? '';
+  const currentCustomer = (await getCustomerById(customerId)) ?? '';
+  const warehouseList = await getInventoryList();
   const list = warehouseList.map((it) => ({
-    label: it.id,
+    label: it.name,
     value: it.id,
   }));
   return {
@@ -57,7 +63,8 @@ export async function asyncWarehouseList(defaultValue): Promise<FormField> {
     componentProps: {
       options: list,
     },
-    defaultValue: defaultValue !== '' ? defaultValue : currentCustomer.warehouseId,
+    defaultValue:
+      defaultValue !== '' ? defaultValue : await getWarehouseNameById(currentCustomer.warehouseId),
   };
 }
 
@@ -96,27 +103,20 @@ export async function asyncStorage(): Promise<FormField> {
 
 export async function asyncUserCustomer(defaultValue): Promise<FormField> {
   const userStore = useUserStore();
-  const realCustomerList = userStore.info.customerIds;
-  const customerList = await CustomerManager.load();
-  const realList = [];
-  for (const customer of customerList) {
-    if (realCustomerList.includes(customer.id)) {
-      realList.push(customer);
-    }
-  }
-  const list = realList.map((it) => ({
+  const customerList = await getCustomerListByIds(userStore.info.customerIds);
+  const list = customerList.map((it) => ({
     label: it.customerName,
-    value: it.customerName,
+    value: it.id,
   }));
   return {
-    field: 'customerName',
+    field: 'customerId',
     label: '客户',
     required: false,
     component: 'NSelect',
     componentProps: {
       options: list,
     },
-    defaultValue: defaultValue !== '' ? defaultValue : realList[0].customerName,
+    defaultValue: defaultValue !== '' ? defaultValue : customerList[0].id,
   };
 }
 
@@ -138,13 +138,13 @@ export async function asyncCustomer(): Promise<FormField> {
 }
 
 export async function asyncMultipleCustomer(): Promise<FormField> {
-  const customerList = await CustomerManager.load();
+  const customerList = await getCustomerList();
   const list = customerList.map((it) => ({
     label: it.customerName,
-    value: it.customerName,
+    value: it.id,
   }));
   return {
-    field: 'customerName',
+    field: 'customerIds',
     label: '客户',
     component: 'NSelect',
     required: false,

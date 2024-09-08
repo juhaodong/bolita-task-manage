@@ -1,21 +1,30 @@
 <script lang="ts" setup>
   import {
     InBoundDetailStatus,
-    NotifyManager,
+    InBoundStatus,
     NotifyType,
   } from '@/api/dataLayer/modules/notify/notify-api';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { getNeededColumnByNotifyType } from '@/api/dataLayer/modules/notify/NotifyRepository';
   import NewContainerForecast from '@/views/newViews/ContainerForecast/form/NewContainerForecast.vue';
-  import { handleRequest } from '@/store/utils/utils';
   import { useUserStore } from '@/store/modules/user';
   import readXlsxFile from 'read-excel-file';
-  import { CustomerManager, FBACodeManager } from '@/api/dataLayer/modules/user/user';
   import { difference } from 'lodash-es';
   import { allDeliveryList, allKeysList } from '@/api/dataLayer/common/AllKeys';
   import { $ref } from 'vue/macros';
   import ErrorMessageDialog from '@/views/newViews/ContainerForecast/form/ErrorMessageDialog.vue';
   import dayjs from 'dayjs';
+  import { addOrUpdateNotify, saveFiles } from '@/api/newDataLayer/Notify/Notify';
+  import { getCustomerById } from '@/api/newDataLayer/Customer/Customer';
+  import { getUserNameById } from '@/api/newDataLayer/User/User';
+  import { getFBACodeList } from '@/api/newDataLayer/FBACode/FBACode';
+  import { getInventoryByName } from '@/api/newDataLayer/Warehouse/Warehouse';
+  import {
+    addOrUpdateInventoryUseLog,
+    getCurrentLogTime,
+  } from '@/api/newDataLayer/Warehouse/UseLog';
+  import { addOrUpdateTask } from '@/api/newDataLayer/TaskList/TaskList';
+  import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
 
   interface Prop {
     currentModel?: any;
@@ -32,6 +41,62 @@
     planArriveDateTime: dayjs().valueOf(),
     inHouseTime: '',
     note: '',
+  };
+
+  const defaultTask = {
+    FBADeliveryCode: '',
+    FCAddress: '',
+    PO: '',
+    arriveTime: '',
+    arrivedContainerNum: 0,
+    arrivedCount: 0,
+    arrivedTrayNum: 0,
+    cashStatus: '',
+    changeOrderFiles: '',
+    containerId: '',
+    country: '',
+    customerId: '',
+    customerName: '',
+    deliveryMethod: '',
+    files: '',
+    inHouseTime: '',
+    inStatus: '',
+    inStorageContainerNum: 0,
+    inStorageTrayNum: 0,
+    note: '',
+    notifyId: '',
+    notifyType: '',
+    number: 0,
+    operateInStorage: '',
+    operationRequire: '',
+    outboundMethod: '',
+    outPrice: '',
+    planArriveDateTime: dayjs().valueOf(),
+    salesName: '',
+    size: '',
+    stayTime: '',
+    storagePosition: '',
+    timeLine: [],
+    uploadFileTime: '',
+    volume: 0.0,
+    warehouseId: '',
+    weight: 0.0,
+    ticketId: '',
+    trayNum: '',
+    normalNote: '',
+    postcode: '',
+    operationNote: '',
+    transportationNote: '',
+    sign: '',
+    packing: '',
+    industrialTrayNum: '',
+    productName: '',
+    UNNumber: '',
+    recipient: '',
+    phone: '',
+    email: '',
+    needReserve: '',
+    industrialNote: '',
   };
 
   function startLoading() {
@@ -53,8 +118,9 @@
         return [it.title, { prop: it.key }];
       })
     );
-    const allFBACodeList = await FBACodeManager.load();
+    const allFBACodeList = await getFBACodeList();
     try {
+      let currentRows = [];
       let { rows, errors } = await readXlsxFile(file, { schema });
       rows = rows.slice(2);
       rows.forEach((it, index) => {
@@ -98,6 +164,7 @@
         } else {
           it.inStatus = InBoundDetailStatus.WaitCheck;
         }
+        currentRows.push(Object.assign({}, defaultTask, it));
         if (res.length > 0) {
           const realMessageDetail = [];
           res.forEach((it) => {
@@ -107,15 +174,8 @@
           errorMessage.push({ index: index + 4, detail: realMessageDetail });
         }
       });
-      // if (errorMessage.length > 0) {
-      //   errorMessage = uniqBy(errorMessage, (x) => {
-      //     `${x.index} + ${x.detail}`;
-      //   });
-      //   return [];
-      // }
-      if (rows.length > 0 && errors.length == 0) {
-        rows.slice(2);
-        return rows.map((it) => ({ ...it, arrivedCount: 0 }));
+      if (currentRows.length > 0 && errors.length == 0) {
+        return currentRows;
       }
     } catch (e: any) {
       console.log(e?.message);
@@ -131,21 +191,61 @@
     defaultValue = value;
     startLoading();
     const userStore = useUserStore();
-    const customerList = await CustomerManager.load();
-    const currentCustomer = customerList.find((it) => it.id === value.customerId) ?? '';
-    value.customerId = customerList.find((it) => it.customerName === value.customerName).id ?? '';
+
+    const currentCustomer = (await getCustomerById(value.customerId)) ?? '';
+    value.customerName = currentCustomer.customerName ?? '';
     value.notifyType = prop.type;
-    value.salesName = currentCustomer.belongSalesMan ?? userStore.info?.userName;
+    value.unloadingFile = '';
+    value.salesName =
+      (await getUserNameById(currentCustomer.belongSalesId)) ?? userStore.info?.userName;
+    value.cashStatus = '';
+    value.inStatus = InBoundStatus.WaitCheck;
+    value.warehouseId = (await getInventoryByName(value.warehouseId)).id;
     let taskList = [
       ...(await readFile(value.files?.[0].file, value.notifyType)),
       ...(value?.trayTaskList ?? []),
     ];
-    delete value.uploadFile;
+    // value.arrivedCount = safeSumBy(taskList);
+
+    if (value.files) {
+      value.files = await saveFiles(value.files);
+    } else {
+      value.files = '';
+    }
     if (errorMessage.length === 0) {
-      const res = await NotifyManager.add(value, taskList);
-      await handleRequest(res, async () => {
-        emit('saved');
+      const res = await addOrUpdateNotify(value);
+      await addOrUpdateInventoryUseLog({
+        notifyId: res.data.id,
+        inventoryId: value.warehouseId,
+        useAtTimestamp: getCurrentLogTime(value.planArriveDateTime, value.inHouseTime),
       });
+      let quest = [];
+      for (const item of taskList) {
+        item.customerName = value.customerName;
+        item.customerId = value.customerId;
+        item.warehouseId = value.warehouseId;
+        item.inHouseTime = value.inHouseTime;
+        item.notifyId = res.data.id;
+        item.files = value.files;
+        item.planArriveDateTime = value.planArriveDateTime;
+        quest.push(addOrUpdateTask(item));
+      }
+      const result = await Promise.all(quest);
+      const ids = result.map((it) => it.data.id);
+      let idQuest = [];
+      const userInfo = useUserStore().info;
+      for (const id of ids) {
+        idQuest.push(
+          addOrUpdateTaskTimeLine({
+            bolitaTaskId: id,
+            operator: userInfo?.realName,
+            detailTime: dayjs().valueOf(),
+            note: '新建货柜预报',
+          })
+        );
+      }
+      await Promise.all(idQuest);
+      emit('saved');
     } else {
       // emit('saved');
     }

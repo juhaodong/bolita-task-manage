@@ -10,6 +10,7 @@
       v-model:checked-row-keys="checkedRows"
       :action-column="actionColumn"
       :columns="columns"
+      :pagination="paginationReactive"
       :request="loadDataTable"
       :row-key="(row) => row.id"
     />
@@ -42,10 +43,14 @@
   import Delete16Filled from '@vicons/fluent/es/Delete16Filled';
   import NewFBACode from '@/views/newViews/FBACode/NewFBACode.vue';
   import { $ref } from 'vue/macros';
-  import { FBACodeManager } from '@/api/dataLayer/modules/user/user';
   import FileSaver from 'file-saver';
   import ImportFBACodeFile from '@/views/newViews/FBACode/ImportFBACodeFile.vue';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
+  import {
+    deleteFBACode,
+    getFbaCodeById,
+    getFBACodeListByFilter,
+  } from '@/api/newDataLayer/FBACode/FBACode';
 
   const actionRef = ref();
   let currentModel: any | null = $ref(null);
@@ -59,7 +64,18 @@
     showModal.value = true;
   }
   const loadDataTable = async () => {
-    FBACodeList = await FBACodeManager.load(filterObj);
+    let currentFilter = [];
+    if (filterObj) {
+      const res = Object.keys(filterObj);
+      for (const filterItem of res) {
+        currentFilter.push({
+          field: filterItem,
+          op: filterObj[filterItem] ? '==' : '!=',
+          value: filterObj[filterItem] ?? '',
+        });
+      }
+    }
+    FBACodeList = await getFBACodeListByFilter(currentFilter);
     return FBACodeList;
   };
 
@@ -72,7 +88,7 @@
   }
 
   async function startEdit(id) {
-    currentModel = await FBACodeManager.getById(id);
+    currentModel = await getFbaCodeById(id);
     showModal.value = true;
   }
 
@@ -88,13 +104,12 @@
   }
 
   function updateFilter(value) {
-    console.log(value, 'value');
     filterObj = value;
     reloadTable();
   }
 
   async function startRemove(id) {
-    currentModel = await FBACodeManager.remove(id);
+    currentModel = await deleteFBACode(id);
     reloadTable();
   }
 

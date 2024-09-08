@@ -12,8 +12,10 @@
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { asyncMultipleCustomer, generateOptionFromArray } from '@/store/utils/utils';
   import { UserType, UserTypeByArray } from '@/views/newViews/UserManage/columns';
-  import { CustomerManager, UserManager } from '@/api/dataLayer/modules/user/user';
-  import { getUserTypePowerList } from '@/api/dataLayer/common/power';
+  import { getPowerTypeByName } from '@/api/newDataLayer/Power/Power';
+  import { $ref } from 'vue/macros';
+  import { addOrUpdateUser } from '@/api/newDataLayer/User/User';
+  import { flatChildrenById } from '@/api/newDataLayer/Power/PowerItems';
 
   interface Props {
     model?: any;
@@ -22,18 +24,20 @@
   let loading: boolean = $ref(false);
   const prop = defineProps<Props>();
   const availableUserType = $computed(() => {
-    const id = prop?.model?.belongsToId;
-    if (id) {
-      if (id.startsWith('W')) {
-        return [UserType.Operator, UserType.Sales];
-      } else if (id.startsWith('C')) {
-        return [UserType.CustomerService, UserType.CustomerManage];
-      }
-    } else {
-      return Object.values(UserType);
-    }
+    return Object.values(UserType);
   });
   const schemas: FormField[] = [
+    {
+      label: 'id',
+      field: 'id',
+      required: false,
+      disableCondition: () => {
+        return prop.model?.id;
+      },
+      displayCondition: () => {
+        return prop.model?.id;
+      },
+    },
     {
       label: '用户名',
       field: 'userName',
@@ -62,16 +66,6 @@
       },
     },
     asyncMultipleCustomer(),
-    // {
-    //   label: '所属',
-    //   field: 'belongsToId',
-    //   required: false,
-    // },
-    {
-      label: '备注',
-      field: 'note',
-      required: false,
-    },
     {
       label: '登录名',
       field: 'loginName',
@@ -88,22 +82,29 @@
     loading = true;
     await safeScope(async () => {
       const res = UserTypeByArray.find((it) => it.label === values.userType);
-      const CustomerList = await CustomerManager.load();
-      let ids = [];
-      if (values.customerName) {
-        for (const name of values.customerName) {
-          const id = CustomerList.find((it) => it.customerName === name).id;
-          ids.push(id);
-        }
-        values.customerIds = ids;
-      }
-      values.authPower = (await getUserTypePowerList(res.value)) ?? [];
-      if (prop?.model?.id) {
-        await UserManager.editInternal(values, prop.model.id);
-      } else {
-        await UserManager.addInternal(values);
-      }
-      emit('saved', values);
+      console.log(res, 'res');
+      // const CustomerList = await CustomerManager.load();
+      // let ids = [];
+      // if (values.customerName) {
+      //   for (const name of values.customerName) {
+      //     const id = CustomerList.find((it) => it.customerName === name).id;
+      //     ids.push(id);
+      //   }
+      //   values.customerIds = ids;
+      // }
+      values.company = values.company ?? '';
+      values.token = values.token ?? '';
+      values.department = values.department ?? '';
+      values.customerName = values.customerName ?? '';
+      values.customerIds = values.customerIds.join(',') ?? '';
+      values.realName = values.realName ?? '';
+      console.log(await getPowerTypeByName(res.label));
+      const allPowerList = (await getPowerTypeByName(res.label)) ?? [];
+      console.log(allPowerList, 'all');
+      values.powerTypeItemIds = flatChildrenById(allPowerList);
+      console.log(values, 'values');
+      await addOrUpdateUser(values);
+      emit('saved');
     });
     loading = false;
   }

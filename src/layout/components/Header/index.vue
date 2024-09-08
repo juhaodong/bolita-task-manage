@@ -161,13 +161,13 @@
       const dialog = useDialog();
       const { navMode, navTheme, headerSetting, menuSetting, crumbsSetting } = useProjectSetting();
 
-      const { realName, permissions } = userStore?.info || {};
-      console.log(userStore.info);
+      const { realName, userType } = userStore?.info || {};
+      console.log(userStore.info, '321');
 
       const drawerSetting = ref();
 
       const state = reactive({
-        username: realName + '/[' + permissions + ']' ?? '',
+        username: realName + '/[' + userType + ']' ?? '',
         fullscreenIcon: 'FullscreenOutlined',
         navMode,
         navTheme,

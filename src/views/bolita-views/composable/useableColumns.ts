@@ -3,7 +3,6 @@ import dayjs from 'dayjs';
 import { useUploadDialog } from '@/store/modules/uploadFileState';
 import { RouterLink } from 'vue-router';
 import { NInput, NText } from 'naive-ui';
-import { Model } from '@/api/dataLayer/common/GeneralModel';
 import { safeParseInt } from '@/store/utils/utils';
 import { updateOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
 import { hasAuthPower } from '@/api/dataLayer/common/power';
@@ -251,7 +250,7 @@ export function editableColumn(
 export function getFileActionButton(
   label: string,
   key: string,
-  manager: Model,
+  manager: string,
   reload: any,
   record: any,
   icon?: Component,
@@ -275,7 +274,8 @@ export function getFileActionButton(
         const obj = {};
         obj[key] = files.files;
         console.log(files.files[0]);
-        await manager.editInternal(obj, record.id);
+        const functionName = 'addOrUpdate' + manager;
+        new Function(record, `return ${functionName}(record)`)(record);
       }
       reload();
     },

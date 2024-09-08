@@ -15,31 +15,36 @@
       block-line
       cascade
       checkable
+      key-field="itemKey"
+      label-field="label"
       @update:checked-keys="updateCheckedKeys"
     />
     <n-button @click="savePower">保存</n-button>
   </n-card>
 </template>
 <script lang="ts" setup>
-  import { powerList, UserTypeByArray } from '@/views/newViews/UserManage/columns';
+  import { UserTypeByArray } from '@/views/newViews/UserManage/columns';
   import { TreeOption } from 'naive-ui';
   import { $ref } from 'vue/macros';
-  import { UserManager } from '@/api/dataLayer/modules/user/user';
-  import { computed, ref, watch } from 'vue';
-  import { getUserTypePowerList, setPowerType } from '@/api/dataLayer/common/power';
+  import { computed, onMounted, ref, watch } from 'vue';
+  import { flatChildrenById, getPowerItemsList } from '@/api/newDataLayer/Power/PowerItems';
+  import { addOrUpdatePowerType, getPowerTypeByKey } from '@/api/newDataLayer/Power/Power';
+  import { addOrUpdateUser } from '@/api/newDataLayer/User/User';
 
   interface Prop {
     auth?: any;
   }
   let selectedType = ref('');
   let userTypePowerKeysList = $ref([]);
+  let powerType = ref({});
   const props = defineProps<Prop>();
-  const data = $ref(powerList);
+  let data = $ref([]);
   let selectedList = $ref([]);
   const checkEditType = computed(() => {
     return props.auth.length <= 0;
   });
   function updateCheckedKeys(keys: Array<string | number>, options: Array<TreeOption | null>) {
+    console.log(options, 'options');
     selectedList = options;
   }
 
@@ -51,36 +56,67 @@
     loading = false;
   }
 
+  onMounted(async () => {
+    data = await getPowerItemsList();
+    console.log(data, 'data');
+  });
+
   watch(
     selectedType,
     async (value) => {
-      userTypePowerKeysList = await getUserTypePowerList(value);
+      powerType.value = await getPowerTypeByKey(value);
+      console.log(powerType.value, 'value');
+      userTypePowerKeysList = powerType.value?.list;
       await setTimeSleep();
     },
     { immediate: true, deep: true }
   );
   const selectedPower = computed(() => {
-    if (props.auth.authPower) {
-      return props.auth.authPower.filter((it) => !it?.children).map((it) => it.key) ?? [];
+    if (props.auth.powerTypeItems) {
+      return (
+        props.auth.powerTypeItems
+          .filter((it) => it?.children.length === 0)
+          .map((it) => it.itemKey) ?? []
+      );
     } else {
-      return userTypePowerKeysList.filter((it) => !it?.children).map((it) => it.key) ?? [];
+      return (
+        userTypePowerKeysList.filter((it) => it?.children.length === 0).map((it) => it.itemKey) ??
+        []
+      );
     }
   });
   const defaultExpandedKeys = computed(() => {
-    if (props.auth.authPower) {
-      return props.auth.authPower.filter((it) => it?.children).map((it) => it.key) ?? [];
+    if (props.auth.powerTypeItems) {
+      return (
+        props.auth.powerTypeItems.filter((it) => it?.children.length > 0).map((it) => it.itemKey) ??
+        []
+      );
     } else {
-      return userTypePowerKeysList.filter((it) => it?.children).map((it) => it.key) ?? [];
+      return (
+        userTypePowerKeysList.filter((it) => it?.children.length > 0).map((it) => it.itemKey) ?? []
+      );
     }
   });
   const emit = defineEmits(['saved']);
   async function savePower() {
     if (checkEditType.value) {
-      await setPowerType(selectedType.value, selectedList);
+      const res = UserTypeByArray.find((it) => it.value === selectedType.value);
+      const obj = {
+        name: res.label,
+        typeKey: res.value,
+        powerTypeItemIds:
+          selectedList.length > 0
+            ? selectedList.map((it) => it.id)
+            : powerType.value.list.map((it) => it.id),
+      };
+      if (powerType.value.id) {
+        obj.id = powerType.value.id;
+      }
+      await addOrUpdatePowerType(obj);
     } else {
       const realInfo = props.auth;
-      realInfo.authPower = selectedList;
-      await UserManager.edit(realInfo, realInfo.id);
+      realInfo.powerTypeItemIds = flatChildrenById(selectedList);
+      await addOrUpdateUser(realInfo);
     }
     emit('saved');
   }

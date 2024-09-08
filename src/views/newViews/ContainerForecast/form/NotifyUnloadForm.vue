@@ -1,10 +1,7 @@
 <script lang="ts" setup>
   import { computed, watchEffect } from 'vue';
   import { InBoundStatus, NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
-  import {
-    getNotifyDetailListByNotify,
-    NotifyDetailManager,
-  } from '@/api/dataLayer/modules/notify/notify-detail';
+  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
   import {
     handleRequest,
     safeParseInt,
@@ -21,6 +18,8 @@
   import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import { $ref } from 'vue/macros';
   import { ResultEnum } from '@/store/enums/httpEnum';
+  import { getNotifyById } from '@/api/newDataLayer/Notify/Notify';
+  import { getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
 
   interface Props {
     notifyId: string;
@@ -72,9 +71,9 @@
 
   async function reload() {
     if (props.notifyId != null) {
-      notifyInfo = await NotifyManager.getById(props.notifyId);
+      notifyInfo = await getNotifyById(props.notifyId);
       console.log(notifyInfo, 'info');
-      currentTaskList = await getNotifyDetailListByNotify(props.notifyId);
+      currentTaskList = await getTaskListByNotifyId(props.notifyId);
       emit('refresh');
       unloadPerson = notifyInfo?.unloadPerson ?? '';
       loadAll();

@@ -100,7 +100,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
     },
     {
       label: '包装',
-      field: 'package',
+      field: 'packing',
     },
     {
       label: '托数',
