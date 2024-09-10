@@ -250,7 +250,7 @@ export function editableColumn(
 export function getFileActionButton(
   label: string,
   key: string,
-  manager: string,
+  manager: Function,
   reload: any,
   record: any,
   icon?: Component,
@@ -271,11 +271,8 @@ export function getFileActionButton(
       const upload = useUploadDialog();
       const files = await upload.upload(record[key], undefined, editable);
       if (files.checkPassed) {
-        const obj = {};
-        obj[key] = files.files;
-        console.log(files.files[0]);
-        const functionName = 'addOrUpdate' + manager;
-        new Function(record, `return ${functionName}(record)`)(record);
+        record[key] = files.files;
+        await manager(record);
       }
       reload();
     },

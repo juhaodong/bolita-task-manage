@@ -70,6 +70,7 @@
     // }
     console.log(values, 'values');
     values.belongSalesMan = '';
+    values.businessParty = values.businessParty ?? '';
     await safeScope(async () => {
       await addOrUpdateCustomer(values);
       emit('saved', values);

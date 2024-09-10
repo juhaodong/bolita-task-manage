@@ -1,14 +1,7 @@
 <script lang="ts" setup>
   import { computed, watchEffect } from 'vue';
-  import { InBoundStatus, NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
-  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
-  import {
-    handleRequest,
-    safeParseInt,
-    safeSumInt,
-    toastError,
-    toastSuccess,
-  } from '@/store/utils/utils';
+  import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import { handleRequest, safeParseInt, safeSumInt, toastSuccess } from '@/store/utils/utils';
   import { timeDisplayYMD } from '@/views/bolita-views/composable/useableColumns';
   import dayjs from 'dayjs';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
@@ -17,9 +10,9 @@
   import { NotifyListPower } from '@/api/dataLayer/common/PowerModel';
   import { PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
   import { $ref } from 'vue/macros';
-  import { ResultEnum } from '@/store/enums/httpEnum';
-  import { getNotifyById } from '@/api/newDataLayer/Notify/Notify';
-  import { getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
+  import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
+  import { addOrUpdateTask, getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
+  import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
 
   interface Props {
     notifyId: string;
@@ -73,7 +66,8 @@
     if (props.notifyId != null) {
       notifyInfo = await getNotifyById(props.notifyId);
       console.log(notifyInfo, 'info');
-      currentTaskList = await getTaskListByNotifyId(props.notifyId);
+      currentTaskList = await getTaskListByNotifyId(notifyInfo.id);
+      console.log(currentTaskList, 'list');
       emit('refresh');
       unloadPerson = notifyInfo?.unloadPerson ?? '';
       loadAll();
@@ -136,56 +130,54 @@
     for (const listElement of currentTaskList) {
       i = i + 1;
       log = '正在加载' + '第' + i + '票货物,共' + currentTaskList.length + '票' + `<br>`;
-      const editInfo: any = {
-        arrivedTrayNum: listElement.arrivedTrayNumEdit ?? 0,
-        arrivedContainerNum: listElement.arrivedContainerNumEdit ?? 0,
-        note: listElement.note ?? '',
-        warehouseLocation: listElement.warehouseLocation ?? '',
-      };
-      editInfo.instorageTrayNum = listElement.arrivedTrayNumEdit ?? 0;
-      editInfo.instorageContainerNum = listElement.arrivedContainerNumEdit ?? 0;
-      editInfo.inStatus =
+      listElement.arrivedTrayNum = listElement.arrivedTrayNumEdit ?? 0;
+      listElement.arrivedContainerNum = listElement.arrivedContainerNumEdit ?? 0;
+      listElement.note = listElement.note ?? '';
+      listElement.warehouseLocation = listElement.warehouseLocation ?? '';
+      listElement.instorageTrayNum = listElement.arrivedTrayNumEdit ?? 0;
+      listElement.instorageContainerNum = listElement.arrivedContainerNumEdit ?? 0;
+      listElement.inStatus =
         listElement.outboundMethod === '存仓'
           ? '存仓'
           : listElement.operateInStorage === '是'
           ? '入库待操作'
           : newInStatus;
-      if (editInfo.inStatus === '存仓') {
-        editInfo.storageTime = [{ storageTime: dayjs().format('YYYY-MM-DD HH:mm:ss') }];
+      listElement.arriveTime = dayjs(realDate).format('YYYY-MM-DD') + '' + startTime;
+      listElement.customerId = listElement.customer.id;
+      listElement.inventoryId = listElement.inventory.id;
+      if (listElement.inStatus === '存仓') {
+        await addOrUpdateTaskTimeLine({
+          useType: 'storage',
+          bolitaTaskId: listElement.id,
+          operator: userInfo?.realName,
+          detailTime: dayjs().valueOf(),
+          note: '开始存仓',
+        });
       }
-      editInfo.arriveTime = dayjs(realDate).format('YYYY-MM-DD') + '' + startTime;
-      let timeLineInfo = listElement.timeLine;
-      timeLineInfo.unshift({
+      await addOrUpdateTaskTimeLine({
+        useType: 'normal',
+        bolitaTaskId: listElement.id,
         operator: userInfo?.realName,
-        detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        detailTime: dayjs().valueOf(),
         note: '卸柜并入库',
       });
-      editInfo.timeLine = timeLineInfo;
-      request.push(NotifyDetailManager.edit(editInfo, listElement.id));
-      const res = await NotifyDetailManager.edit(editInfo, listElement.id);
-      if (res.code != ResultEnum.SUCCESS) {
-        toastError(res.message);
-        break;
-      }
+      request.push(addOrUpdateTask(listElement));
     }
     log += '正在处理数据';
     await Promise.all(request);
-    const res = await NotifyManager.edit(
-      {
-        // salesName: userStore?.info?.realName,
-        arrivedCount: totalArrivedTrayCount.value + '托' + totalArrivedContainerCount.value + '箱',
-        trayArrivedCount: totalArrivedTrayCount.value,
-        containerArrivedCount: totalArrivedContainerCount.value,
-        inStatus: newInStatus,
-        totalCount: totalTrayCount.value + totalContainerCount.value,
-        unloadPerson: unloadPerson,
-        currentDate: realDate,
-        unloadStartTime: startTime,
-        unloadEndTime: endTime,
-        totalTime: totalTime,
-      },
-      props.notifyId
-    );
+    (notifyInfo.arrivedCount =
+      totalArrivedTrayCount.value + '托' + totalArrivedContainerCount.value + '箱'),
+      (notifyInfo.inStatus = newInStatus),
+      (notifyInfo.unloadPerson = unloadPerson),
+      (notifyInfo.totalCount = totalTrayCount.value + totalContainerCount.value),
+      (notifyInfo.realDate = realDate),
+      (notifyInfo.unloadStartTime = startTime),
+      (notifyInfo.unloadEndTime = endTime),
+      (notifyInfo.totalTime = totalTime);
+    notifyInfo.customerId = notifyInfo.customer.id;
+    notifyInfo.inventoryId = notifyInfo.inventory.id;
+
+    const res = await addOrUpdateNotify(notifyInfo);
 
     await handleRequest(res, () => {
       toastSuccess('success');
@@ -203,7 +195,9 @@
           {{ notifyInfo?.containerNo }}
         </n-descriptions-item>
 
-        <n-descriptions-item label="客户ID"> {{ notifyInfo?.customerId }}</n-descriptions-item>
+        <n-descriptions-item label="客户ID">
+          {{ notifyInfo?.customer.customerName }}</n-descriptions-item
+        >
         <n-descriptions-item label="预约日期时间">
           {{ timeDisplayYMD(notifyInfo?.planArriveDateTime) }}/{{ notifyInfo?.inHouseTime }}
         </n-descriptions-item>

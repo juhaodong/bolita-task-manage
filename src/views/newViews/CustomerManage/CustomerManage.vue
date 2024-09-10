@@ -51,7 +51,6 @@
   import { useEditOrganizationUserDialog } from '@/views/newViews/WarehouseManage/WarehouseUserDialog';
   import UserManage from '@/views/newViews/UserManage/UserManage.vue';
   import { getCustomerById, getCustomerList } from '@/api/newDataLayer/Customer/Customer';
-  import { getWarehouseNameById } from '@/api/newDataLayer/Warehouse/Warehouse';
   import { getUserNameById } from '@/api/newDataLayer/User/User';
 
   interface Prop {
@@ -78,7 +77,6 @@
   const loadDataTable = async () => {
     const res = await getCustomerList();
     for (const item of res) {
-      item.warehouseId = await getWarehouseNameById(item.warehouseId);
       item.belongSalesMan = await getUserNameById(item.belongSalesId);
     }
     return res;

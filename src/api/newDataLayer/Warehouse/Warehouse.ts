@@ -45,11 +45,12 @@ export async function deleteInventory(id) {
 }
 
 export async function getWarehouseNameById(id) {
+  console.log(id, 'id');
   return (await getInventoryById(id)).name;
 }
 
-export async function getCurrentWarehouseUseTimespan(name) {
-  return await getInventoryByName(name);
+export async function getCurrentWarehouseUseTimespan(id) {
+  return await getInventoryById(id);
 }
 
 export function generateOptionFromTimeSpan(arr?: any[]) {

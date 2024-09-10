@@ -17,7 +17,7 @@ export const columns: DataTableColumns = [
   },
   {
     title: '所属仓库',
-    key: 'warehouseId',
+    key: 'inventory.name',
   },
   {
     title: '所属业务员',

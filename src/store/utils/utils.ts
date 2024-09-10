@@ -9,7 +9,7 @@ import {
   getCustomerList,
   getCustomerListByIds,
 } from '@/api/newDataLayer/Customer/Customer';
-import { getInventoryList, getWarehouseNameById } from '@/api/newDataLayer/Warehouse/Warehouse';
+import { getInventoryList } from '@/api/newDataLayer/Warehouse/Warehouse';
 
 export function generateOptionFromArray(arr?: any[]) {
   return (
@@ -56,15 +56,15 @@ export async function asyncWarehouseList(defaultValue): Promise<FormField> {
     label: it.name,
     value: it.id,
   }));
+  console.log(list, 'list');
   return {
-    field: 'warehouseId',
+    field: 'inventoryId',
     label: '仓库',
     component: 'NSelect',
     componentProps: {
       options: list,
     },
-    defaultValue:
-      defaultValue !== '' ? defaultValue : await getWarehouseNameById(currentCustomer.warehouseId),
+    defaultValue: defaultValue !== '' ? defaultValue : currentCustomer.inventory.id,
   };
 }
 

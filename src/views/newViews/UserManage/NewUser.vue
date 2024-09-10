@@ -82,27 +82,15 @@
     loading = true;
     await safeScope(async () => {
       const res = UserTypeByArray.find((it) => it.label === values.userType);
-      console.log(res, 'res');
-      // const CustomerList = await CustomerManager.load();
-      // let ids = [];
-      // if (values.customerName) {
-      //   for (const name of values.customerName) {
-      //     const id = CustomerList.find((it) => it.customerName === name).id;
-      //     ids.push(id);
-      //   }
-      //   values.customerIds = ids;
-      // }
       values.company = values.company ?? '';
       values.token = values.token ?? '';
       values.department = values.department ?? '';
-      values.customerName = values.customerName ?? '';
-      values.customerIds = values.customerIds.join(',') ?? '';
+      values.customerName = values?.customerName ?? '';
+      values.customerIds = values?.customerIds ? values?.customerIds.join(',') : '';
       values.realName = values.realName ?? '';
       console.log(await getPowerTypeByName(res.label));
       const allPowerList = (await getPowerTypeByName(res.label)) ?? [];
-      console.log(allPowerList, 'all');
       values.powerTypeItemIds = flatChildrenById(allPowerList);
-      console.log(values, 'values');
       await addOrUpdateUser(values);
       emit('saved');
     });

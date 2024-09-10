@@ -406,14 +406,16 @@
       const res = allList.find((it) => it.id === rows);
       if (res) {
         res.inStatus = InBoundStatus.Wait;
-        res.checkedTime = dayjs().format('YYYY-MM-DD');
         const userInfo = useUserStore().info;
         await addOrUpdateTaskTimeLine({
+          useType: 'normal',
           bolitaTaskId: res.id,
           operator: userInfo?.realName,
           detailTime: dayjs().valueOf(),
           note: '进行了审核',
         });
+        res.customerId = res.customer.id;
+        res.inventoryId = res.inventory.id;
         await addOrUpdateTask(res);
         const containerForecastInfo = await getNotifyById(res.notifyId);
         if (containerForecastInfo.inStatus === InBoundStatus.WaitCheck) {
@@ -426,6 +428,8 @@
             );
           if (allDetailList.length === 0) {
             containerForecastInfo.inStatus = InBoundStatus.Wait;
+            containerForecastInfo.customerId = containerForecastInfo.customer.id;
+            containerForecastInfo.inventoryId = containerForecastInfo.inventory.id;
             await addOrUpdateNotify(containerForecastInfo);
           }
         }
@@ -447,7 +451,9 @@
     } else if (typeMission.value === '报价看板') {
       allList = (await getTaskList()).filter((it) => it.needOfferPrice === '1');
     }
+    console.log(allList, 'allList');
     const ownedCustomerIds = await getUserCustomerList();
+    allList = allList.filter((it) => ownedCustomerIds.includes(it.customer.id));
     allList.forEach((it) => {
       if (it.storageTime) {
         const res = it.storageTime.pop();
@@ -462,7 +468,7 @@
         it.stayTime = '-';
       }
     });
-    allList = allList.filter((it) => ownedCustomerIds.includes(it.customerId));
+
     if (!showAll) {
       allList = allList.filter((a) => a.inStatus !== '已取消');
     }
@@ -577,15 +583,7 @@
     width: 120,
     render(record: any) {
       const fileAction = (label, key, icon?: Component, power) => {
-        return getFileActionButton(
-          label,
-          key,
-          NotifyDetailManager,
-          reloadTable,
-          record,
-          icon,
-          power
-        );
+        return getFileActionButton(label, key, addOrUpdateTask, reloadTable, record, icon, power);
       };
       return h(TableAction as any, {
         style: 'button',
@@ -643,19 +641,20 @@
               const files = await upload.upload(record['changeOrder']);
               const userInfo = useUserStore().info;
               if (files.checkPassed) {
-                const obj = {};
-                obj['changeOrder'] = files.files;
+                record['changeOrder'] = files.files;
                 if (!record.arriveTime) {
-                  obj['inStatus'] = InBoundDetailStatus.WaitCheck;
+                  record['inStatus'] = InBoundDetailStatus.WaitCheck;
                 }
-                let res = record.timeLine;
-                res.unshift({
+                await addOrUpdateTaskTimeLine({
+                  useType: 'storage',
+                  bolitaTaskId: record.id,
                   operator: userInfo?.realName,
-                  detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                  detailTime: dayjs().valueOf(),
                   note: '提交了换单文件',
                 });
-                obj['timeLine'] = res;
-                await NotifyDetailManager.editInternal(obj, record.id);
+                record.customerId = record.customer.id;
+                record.inventoryId = record.inventory.id;
+                await addOrUpdateTask(record);
               }
               actionRef.value[0].reload();
             },

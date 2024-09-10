@@ -41,10 +41,7 @@
   import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { asyncUserCustomer, asyncWarehouseList } from '@/store/utils/utils';
   import { $ref } from 'vue/macros';
-  import {
-    getCurrentWarehouseUseTimespan,
-    getInventoryByName,
-  } from '@/api/newDataLayer/Warehouse/Warehouse';
+  import { getCurrentWarehouseUseTimespan } from '@/api/newDataLayer/Warehouse/Warehouse';
   import { computed } from 'vue';
   import { getInventoryUseLogListByInventoryId } from '@/api/newDataLayer/Warehouse/UseLog';
   import dayjs from 'dayjs';
@@ -117,16 +114,16 @@
   let selectedWarehouseLog = $ref({});
 
   async function handleSubmit(values: any) {
-    const warehouseInfo = await getInventoryByName(values.warehouseId);
-    const wareHouseId = warehouseInfo.id;
+    console.log(values, 'values');
     const totalLog = (
-      await getInventoryUseLogListByInventoryId(wareHouseId, values.planArriveDateTime)
+      await getInventoryUseLogListByInventoryId(values.inventoryId, values.planArriveDateTime)
     ).map((it) => {
       it.inHouseTime = dayjs(it.useAtTimestamp).format('HH:mm');
       return it;
     });
     selectedWarehouseLog = groupBy(totalLog, 'inHouseTime');
-    currentWarehouse = await getCurrentWarehouseUseTimespan(values.warehouseId);
+    currentWarehouse = await getCurrentWarehouseUseTimespan(values.inventoryId);
+    console.log(currentWarehouse, 'house');
     currentData = values;
     step = 2;
   }

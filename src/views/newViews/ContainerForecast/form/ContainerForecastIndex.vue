@@ -18,13 +18,13 @@
   import { getCustomerById } from '@/api/newDataLayer/Customer/Customer';
   import { getUserNameById } from '@/api/newDataLayer/User/User';
   import { getFBACodeList } from '@/api/newDataLayer/FBACode/FBACode';
-  import { getInventoryByName } from '@/api/newDataLayer/Warehouse/Warehouse';
   import {
     addOrUpdateInventoryUseLog,
     getCurrentLogTime,
   } from '@/api/newDataLayer/Warehouse/UseLog';
   import { addOrUpdateTask } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
+  import { safeSumBy } from '@/store/utils/utils';
 
   interface Prop {
     currentModel?: any;
@@ -97,6 +97,11 @@
     email: '',
     needReserve: '',
     industrialNote: '',
+    POD: '',
+    operationFiles: '',
+    problemFiles: '',
+    trayFiles: '',
+    changeOrder: '',
   };
 
   function startLoading() {
@@ -193,37 +198,43 @@
     const userStore = useUserStore();
 
     const currentCustomer = (await getCustomerById(value.customerId)) ?? '';
-    value.customerName = currentCustomer.customerName ?? '';
+    // value.customerName = currentCustomer.customerName ?? '';
     value.notifyType = prop.type;
     value.unloadingFile = '';
+    value.totalTime = '';
+    value.unloadEndTime = '';
+    value.unloadStartTime = '';
+    value.realDate = '';
+    value.totalCount = '';
     value.salesName =
       (await getUserNameById(currentCustomer.belongSalesId)) ?? userStore.info?.userName;
     value.cashStatus = '';
     value.inStatus = InBoundStatus.WaitCheck;
-    value.warehouseId = (await getInventoryByName(value.warehouseId)).id;
     let taskList = [
       ...(await readFile(value.files?.[0].file, value.notifyType)),
       ...(value?.trayTaskList ?? []),
     ];
-    // value.arrivedCount = safeSumBy(taskList);
+    console.log(taskList, 'list');
+    value.arrivedCount = safeSumBy(taskList, 'number').toString();
 
     if (value.files) {
       value.files = await saveFiles(value.files);
     } else {
       value.files = '';
     }
+    console.log(value, 'value');
     if (errorMessage.length === 0) {
       const res = await addOrUpdateNotify(value);
       await addOrUpdateInventoryUseLog({
         notifyId: res.data.id,
-        inventoryId: value.warehouseId,
+        inventoryId: value.inventoryId,
         useAtTimestamp: getCurrentLogTime(value.planArriveDateTime, value.inHouseTime),
       });
       let quest = [];
       for (const item of taskList) {
-        item.customerName = value.customerName;
+        // item.customerName = value.customerName;
         item.customerId = value.customerId;
-        item.warehouseId = value.warehouseId;
+        item.inventoryId = value.inventoryId;
         item.inHouseTime = value.inHouseTime;
         item.notifyId = res.data.id;
         item.files = value.files;
@@ -237,6 +248,7 @@
       for (const id of ids) {
         idQuest.push(
           addOrUpdateTaskTimeLine({
+            useType: 'normal',
             bolitaTaskId: id,
             operator: userInfo?.realName,
             detailTime: dayjs().valueOf(),

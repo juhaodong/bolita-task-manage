@@ -260,8 +260,9 @@
     }
     const customerId = await getUserCustomerList();
     let res = (await getNotifyListByFilter(currentFilter)).filter((x) =>
-      customerId.includes(x.customerId)
+      customerId.includes(x.customer.id)
     );
+    console.log(res, 'res');
     if (!showAll) {
       res = res.filter((a) => a.inStatus !== '已取消');
     }
@@ -269,9 +270,6 @@
       let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
       let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
       res = res.filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate);
-    }
-    for (const item of res) {
-      item.warehouseId = await getWarehouseNameById(item.warehouseId);
     }
     return res.sort(dateCompare('planArriveDateTime'));
   };
@@ -310,10 +308,11 @@
       item.inStatus = '已取消';
       await addOrUpdateTask(item);
       await addOrUpdateTaskTimeLine({
+        useType: 'normal',
         bolitaTaskId: item.id,
         operator: userInfo?.realName,
         detailTime: dayjs().valueOf(),
-        note: '进行了审核',
+        note: '取消',
       });
     }
     await handleRequest(res, () => {
@@ -404,7 +403,7 @@
     width: 120,
     render(record: any) {
       const fileAction = (label, key, icon?: Component, power) => {
-        return getFileActionButton(label, key, 'Notify', reloadTable, record, icon, power);
+        return getFileActionButton(label, key, addOrUpdateNotify, reloadTable, record, icon, power);
       };
       return h(TableAction as any, {
         style: 'button',

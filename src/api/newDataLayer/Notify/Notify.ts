@@ -21,7 +21,7 @@ export async function getNotifyById(id) {
 }
 
 export async function addOrUpdateNotify(item) {
-  return await hillo.jsonPost(typeName + '/addOrUpdate', {
+  return await hillo.jsonPost(typeName + '/addOrUpdateWithRef', {
     ...item,
   });
 }

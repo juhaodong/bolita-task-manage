@@ -35,7 +35,7 @@ export async function getCustomerListByIds(ids) {
 }
 
 export async function addOrUpdateCustomer(item) {
-  return await hillo.jsonPost(typeName + '/addOrUpdate', {
+  return await hillo.jsonPost(typeName + '/addOrUpdateWithRef', {
     ...item,
   });
 }

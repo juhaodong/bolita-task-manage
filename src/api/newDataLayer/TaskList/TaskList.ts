@@ -19,7 +19,7 @@ export async function getTaskListByNotifyId(id) {
     await hillo.jsonPost(typeName + '/list', {
       criteria: [
         {
-          field: 'id',
+          field: 'notifyId',
           op: '==',
           value: id,
         },
@@ -29,7 +29,7 @@ export async function getTaskListByNotifyId(id) {
 }
 
 export async function addOrUpdateTask(item) {
-  return await hillo.jsonPost(typeName + '/addOrUpdate', {
+  return await hillo.jsonPost(typeName + '/addOrUpdateWithRef', {
     ...item,
   });
 }

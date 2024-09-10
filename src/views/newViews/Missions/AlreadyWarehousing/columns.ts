@@ -55,7 +55,7 @@ export const columns: DataTableColumns<any> = [
   }),
   {
     title: '仓库',
-    key: 'warehouseId',
+    key: 'inventory.name',
   },
   {
     title: '留仓时间',
