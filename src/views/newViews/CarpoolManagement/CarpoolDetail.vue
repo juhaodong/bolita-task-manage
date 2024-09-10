@@ -101,21 +101,19 @@
     NotifyDetailManager,
   } from '@/api/dataLayer/modules/notify/notify-detail';
   import { Box20Filled } from '@vicons/fluent';
-  import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
-  import { getTableHeader } from '@/api/dataLayer/common/TableHeader';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
-  import {
-    getOutboundForecastById,
-    updateOutboundForecast,
-  } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import { updateOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import { valueOfToday } from '@/api/dataLayer/common/Date';
   import FileSaver from 'file-saver';
   import { getTaskListByFilter } from '@/api/newDataLayer/TaskList/TaskList';
+  import { getOutboundForecastById } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -243,7 +241,8 @@
         (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       );
     }
-    return allList.sort(dateCompare('createTimestamp'));
+    console.log(allList, 'list');
+    return allList;
   };
 
   function updateFilter(value) {
@@ -271,15 +270,16 @@
 
   async function reloadHeader() {
     currentColumns = [];
-    currentHeader = await getTableHeader('carDetail');
+    currentHeader = (await getTableHeaderGroupItemList('taskList')).tableHeaderItems;
     currentHeader.forEach((item) => {
-      const res = columns.find((it) => it.key === item.key);
+      const res = columns.find((it) => it.key === item.itemKey);
       currentColumns.push(res);
     });
     const selectionType = columns.find((x) => x.type === 'selection');
     if (selectionType) {
       currentColumns.unshift(selectionType);
     }
+    console.log(currentColumns, 'current');
     currentColumns = currentColumns.length > 0 ? currentColumns : columns;
     showCurrentHeaderDataTable = false;
   }

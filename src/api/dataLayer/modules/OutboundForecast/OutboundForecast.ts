@@ -8,6 +8,7 @@ import { OutPlanStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import { useUserStore } from '@/store/modules/user';
 import { addOrUpdateTask, getTaskListById } from '@/api/newDataLayer/TaskList/TaskList';
 import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
+import { getOutboundForecastById } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
 
 export const OutboundForecast = 'OutboundForecast';
 export const OutWareHouse = 'OutWareHouse';
@@ -46,14 +47,8 @@ export async function getOutboundForecast(filterObj) {
   }
 }
 
-export async function getOutboundForecastById(id) {
-  const collectionRef = collection(db, OutboundForecast);
-  const res = query(collectionRef);
-  return (await resultOfId(res)).find((it) => it.id === id);
-}
-
 export async function updateTaskListAfterBookingCar(id) {
-  const taskListIds = (await getOutboundForecastById(id)).outboundDetailInfo;
+  const taskListIds = (await getOutboundForecastById(id)).outboundDetailInfo.split(',');
   const userInfo = useUserStore().info;
   for (const taskId of taskListIds) {
     const res = await getTaskListById(taskId);
@@ -72,7 +67,7 @@ export async function updateTaskListAfterBookingCar(id) {
 }
 
 export async function updateTaskListAfterOfferPriceCar(id, priceInfo) {
-  const taskListIds = (await getOutboundForecastById(id)).outboundDetailInfo;
+  const taskListIds = (await getOutboundForecastById(id)).outboundDetailInfo.split(',');
   const userInfo = useUserStore().info;
   for (const taskId of taskListIds) {
     const res = await getTaskListById(taskId);

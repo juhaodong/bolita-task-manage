@@ -238,6 +238,7 @@
       const detailInfoById = allList.find((it) => it.id === id);
       res.push(detailInfoById);
     }
+    console.log(res, 'res');
     return res;
   });
   const priceRules = computed(() => {
@@ -248,8 +249,8 @@
   const carRules = computed(() => {
     return (
       checkedRows.length < 1 ||
-      realDetailInfoById?.value.filter((it) => it.waitCar).length !== 0 ||
-      realDetailInfoById?.value.filter((it) => it.waitPrice === 1).length !== checkedRows.length
+      realDetailInfoById?.value.filter((it) => it.waitCar === '1').length !== 0 ||
+      realDetailInfoById?.value.filter((it) => it.waitPrice === '1').length !== checkedRows.length
     );
   });
 

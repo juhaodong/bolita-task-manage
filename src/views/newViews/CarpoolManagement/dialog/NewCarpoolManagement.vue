@@ -18,7 +18,10 @@
     updateTaskListAfterBookingCar,
     updateTaskListAfterOfferPriceCar,
   } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
-  import { getOutboundForecastById } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import {
+    addOrUpdateOutboundForecast,
+    getOutboundForecastById,
+  } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
 
   interface Props {
     model?: any;
@@ -79,17 +82,15 @@
       values.inStatus = '已定车';
       values.carStatus = CarStatus.Booked;
       values.inStatus = CarStatus.Booked;
-      values.waitCar = 1;
+      values.waitCar = '1';
       values.bookCarTimestamp = dayjs().valueOf();
     } else {
       values.inStatus = '已报价';
-      values.waitPrice = 1;
+      values.waitPrice = '1';
     }
-    console.log(values, 'values');
     await safeScope(async () => {
       for (const id of prop.mergedOutIds) {
         const outboundForecastInfo = await getOutboundForecastById(id);
-        await outboundForecastInfo(outboundForecastInfo);
         if (prop.typeName === 'car') {
           outboundForecastInfo.AMZID = values.AMZID;
           outboundForecastInfo.ISA = values.ISA;
@@ -100,7 +101,7 @@
           outboundForecastInfo.reservationGetProductDetailTime =
             values.reservationGetProductDetailTime;
           outboundForecastInfo.reservationGetProductTime = values.reservationGetProductTime;
-          outboundForecastInfo.waitCar = values.waitCar;
+          outboundForecastInfo.waitCar = '1';
           outboundForecastInfo.waybillId = values.waybillId;
           await updateTaskListAfterBookingCar(id);
         } else {
@@ -108,9 +109,10 @@
           outboundForecastInfo.costPrice = values.costPrice;
           outboundForecastInfo.inStatus = values.inStatus;
           outboundForecastInfo.suggestedPrice = values.suggestedPrice;
-          outboundForecastInfo.waitPrice = values.waitPrice;
+          outboundForecastInfo.waitPrice = '1';
           await updateTaskListAfterOfferPriceCar(id, values);
         }
+        await addOrUpdateOutboundForecast(outboundForecastInfo);
       }
       emit('saved', values);
     });

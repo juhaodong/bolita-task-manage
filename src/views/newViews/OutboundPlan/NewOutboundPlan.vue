@@ -210,6 +210,9 @@
       outboundDetailInfo: allNotifyDetail.map((it) => it.id).join(','),
       totalVolume: safeSumBy(allNotifyDetail, 'volume'),
       totalWeight: safeSumBy(allNotifyDetail, 'weight'),
+      waitPrice: '',
+      waitCar: '',
+      totalOutOffer: '',
     };
     const outboundId = (await addOrUpdateOutboundForecast(res)).data.id;
     allNotifyDetail.forEach((it) => {

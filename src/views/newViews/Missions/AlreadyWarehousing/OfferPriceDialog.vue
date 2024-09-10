@@ -1,15 +1,12 @@
 <script lang="ts" setup>
   import { onMounted } from 'vue';
-  import {
-    getDetailListById,
-    NotifyDetailManager,
-  } from '@/api/dataLayer/modules/notify/notify-detail';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import {
-    getOutboundForecastById,
-    updateOutboundForecast,
-  } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import { safeSumBy } from '@/store/utils/utils';
+  import {
+    addOrUpdateOutboundForecast,
+    getOutboundForecastById,
+  } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import { addOrUpdateTask, getTaskListByIds } from '@/api/newDataLayer/TaskList/TaskList';
 
   interface Props {
     ids: string;
@@ -28,7 +25,8 @@
 
   async function reload() {
     if (props.ids != null) {
-      currentTaskList = await getDetailListById(props.ids);
+      currentTaskList = await getTaskListByIds(props.ids);
+      console.log(currentTaskList, 'list');
       emit('refresh');
     }
   }
@@ -38,13 +36,15 @@
       for (const item of currentTaskList) {
         item.inStatus = '待订车';
         item.needOfferPrice = '2';
-        await NotifyDetailManager.editInternal(item, item.id);
+        item.customerId = item.customer.id;
+        item.inventoryId = item.inventory.id;
+        await addOrUpdateTask(item);
         const outboundDetail = await getOutboundForecastById(item.outboundId);
-        const detailInfo = await getDetailListById(outboundDetail.outboundDetailInfo);
+        const detailInfo = await getTaskListByIds(outboundDetail.outboundDetailInfo.split(','));
         const getOutOfferList = detailInfo.filter((it) => !it.outPrice);
         if (getOutOfferList.length === 0) {
           outboundDetail.totalOutOffer = safeSumBy(detailInfo, 'outPrice');
-          await updateOutboundForecast(item.outboundId, outboundDetail);
+          await addOrUpdateOutboundForecast(outboundDetail);
         }
       }
       loading = false;
@@ -61,14 +61,12 @@
           {{ item?.ticketId }}
         </n-descriptions-item>
         <n-descriptions-item :span="2" label="Ref.">
-          {{ item?.offerPriceInfo?.REF }}
+          {{ item?.REF }}
         </n-descriptions-item>
         <n-descriptions-item :span="2" label="建议报价">
-          {{ item?.offerPriceInfo?.suggestedPrice }}</n-descriptions-item
+          {{ item?.suggestedPrice }}</n-descriptions-item
         >
-        <n-descriptions-item :span="2" label="物流底价">
-          {{ item?.offerPriceInfo?.costPrice }}</n-descriptions-item
-        >
+        <n-descriptions-item :span="2" label="物流底价"> {{ item?.costPrice }}</n-descriptions-item>
         <n-descriptions-item :span="2" label="对外报价">
           <n-input v-model:value="item.outPrice"
         /></n-descriptions-item>

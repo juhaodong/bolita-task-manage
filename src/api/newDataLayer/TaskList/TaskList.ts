@@ -54,6 +54,20 @@ export async function getTaskListById(id) {
         },
       ],
     })
+  ).data.content[0];
+}
+
+export async function getTaskListByIds(ids) {
+  return (
+    await hillo.jsonPost(typeName + '/list', {
+      criteria: [
+        {
+          field: 'id',
+          op: 'in',
+          value: ids,
+        },
+      ],
+    })
   ).data.content;
 }
 

@@ -17,10 +17,8 @@
   } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
   import dayjs from 'dayjs';
   import { useUserStore } from '@/store/modules/user';
-  import {
-    getOutboundForecastById,
-    updateOutboundForecast,
-  } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import { updateOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import { getOutboundForecastById } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
 
   interface Props {
     model?: any;

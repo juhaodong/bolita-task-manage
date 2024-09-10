@@ -7,7 +7,7 @@
   import { DataTableColumns } from 'naive-ui';
   import { flatMap, groupBy } from 'lodash';
   import FileSaver from 'file-saver';
-  import { getOutboundForecastById } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import { getOutboundForecastById } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
 
   interface Props {
     notifyId: string;
