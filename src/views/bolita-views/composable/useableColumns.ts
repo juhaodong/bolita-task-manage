@@ -126,7 +126,7 @@ export function selectedIdColumn(title, targetPage, keyName) {
   return {
     title: title,
     key: keyName,
-    width: 60,
+    width: 200,
     render(record) {
       return h(
         RouterLink,
@@ -272,6 +272,8 @@ export function getFileActionButton(
       const files = await upload.upload(record[key], undefined, editable);
       if (files.checkPassed) {
         record[key] = files.files;
+        record.customerId = record.customer.id;
+        record.inventoryId = record.inventory.id;
         await manager(record);
       }
       reload();
@@ -298,7 +300,6 @@ export function getFileActionButtonByOutForecast(
     async onClick() {
       const upload = useUploadDialog();
       const files = await upload.upload(record[key], undefined, editable);
-      console.log(files, 'files');
       if (files.checkPassed) {
         const obj = {};
         obj[key] = files.files;

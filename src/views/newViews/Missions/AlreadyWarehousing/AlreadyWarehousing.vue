@@ -451,7 +451,6 @@
     } else if (typeMission.value === '报价看板') {
       allList = (await getTaskList()).filter((it) => it.needOfferPrice === '1');
     }
-    console.log(allList, 'allList');
     const ownedCustomerIds = await getUserCustomerList();
     allList = allList.filter((it) => ownedCustomerIds.includes(it.customer.id));
     allList.forEach((it) => {
@@ -676,16 +675,17 @@
               const files = await upload.upload(record['trayFiles']);
               const userInfo = useUserStore().info;
               if (files.checkPassed) {
-                const obj = {};
-                obj['trayFiles'] = files.files;
-                let res = record.timeLine;
-                res.unshift({
+                record['trayFiles'] = files.files;
+                await addOrUpdateTaskTimeLine({
+                  useType: 'storage',
+                  bolitaTaskId: record.id,
                   operator: userInfo?.realName,
-                  detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                  detailTime: dayjs().valueOf(),
                   note: '提交了托盘标签',
                 });
-                obj['timeLine'] = res;
-                await NotifyDetailManager.editInternal(obj, record.id);
+                record.customerId = record.customer.id;
+                record.inventoryId = record.inventory.id;
+                await addOrUpdateTask(record);
               }
               actionRef.value[0].reload();
             },
@@ -716,7 +716,9 @@
             },
             async onClick() {
               record.alreadyChanged = 0;
-              await NotifyDetailManager.editInternal(record, record.id);
+              record.customerId = record.customer.id;
+              record.inventoryId = record.inventory.id;
+              await addOrUpdateTask(record.id);
             },
             ifShow: () => {
               return record.alreadyChanged;

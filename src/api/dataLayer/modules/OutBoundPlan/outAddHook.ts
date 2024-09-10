@@ -1,44 +1,37 @@
-import {
-  InBoundStatus,
-  NotifyManager,
-  OutPlanStatus,
-  OutStatus,
-} from '@/api/dataLayer/modules/notify/notify-api';
-import {
-  getNotifyDetailListByNotify,
-  NotifyDetailManager,
-} from '@/api/dataLayer/modules/notify/notify-detail';
+import { InBoundStatus, OutPlanStatus, OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import dayjs from 'dayjs';
 import { useUserStore } from '@/store/modules/user';
 import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
+import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
+import { addOrUpdateTask, getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
+import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
 
 export async function afterPlanDetailAdded(planDetails) {
-  const notifyIds: any = {};
+  const notifyIds = [];
   const userInfo = useUserStore().info;
-  const updateValue = planDetails.map((detail) => {
-    notifyIds[detail?.notifyId] = detail?.notifyId;
-    const timeLineInfo = detail.timeLine;
-    timeLineInfo.unshift({
+  const quest = planDetails.map(async (detail) => {
+    notifyIds.push(detail?.notifyId);
+    detail.inStatus =
+      detail.carStatus === CarStatus.NoNeed ? CarStatus.NoNeed : OutPlanStatus.AlreadyPlan;
+    await addOrUpdateTask(detail);
+    await addOrUpdateTaskTimeLine({
+      useType: 'normal',
+      bolitaTaskId: detail.id,
       operator: userInfo?.realName,
-      detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      detailTime: dayjs().valueOf(),
       note: '提交了出库计划',
     });
-    return {
-      needOfferPrice: detail.needOfferPrice,
-      createPlanTime: dayjs().format('YYYY-MM-DD'),
-      inStatus:
-        detail.carStatus === CarStatus.NoNeed ? CarStatus.NoNeed : OutPlanStatus.AlreadyPlan,
-      id: detail.originId,
-      outboundId: detail.outboundId,
-      timeLine: timeLineInfo,
-    };
   });
-  await NotifyDetailManager.massiveUpdate(updateValue);
+  await Promise.all(quest);
   for (const id of Object.values(notifyIds)) {
-    const details = await getNotifyDetailListByNotify(id);
+    const details = await getTaskListByNotifyId(id);
+    const notifyDetail = await getNotifyById(id);
     const res = details.filter((it) => it.inStatus !== InBoundStatus.All);
+    notifyDetail.inventoryId = notifyDetail.inventory.id;
+    notifyDetail.customerId = notifyDetail.customer.id;
     if (res.length > 0) {
-      await NotifyManager.editInternal({ inStatus: OutStatus.Partial }, id);
+      notifyDetail.inStatus = OutStatus.Partial;
+      await addOrUpdateNotify(notifyDetail);
     }
   }
 }

@@ -10,15 +10,15 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { carSchemas } from '../columns';
-  import {
-    updateOutboundForecast,
-    updateTaskListAfterBookingCar,
-    updateTaskListAfterOfferPriceCar,
-  } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import dayjs from 'dayjs';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
   import { computed, onMounted } from 'vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
+  import {
+    updateTaskListAfterBookingCar,
+    updateTaskListAfterOfferPriceCar,
+  } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import { getOutboundForecastById } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
 
   interface Props {
     model?: any;
@@ -80,18 +80,35 @@
       values.carStatus = CarStatus.Booked;
       values.inStatus = CarStatus.Booked;
       values.waitCar = 1;
+      values.bookCarTimestamp = dayjs().valueOf();
     } else {
       values.inStatus = '已报价';
       values.waitPrice = 1;
     }
-    values.createBookCarTimestamp = dayjs().format('YYYY-MM-DD');
+    console.log(values, 'values');
     await safeScope(async () => {
       for (const id of prop.mergedOutIds) {
+        const outboundForecastInfo = await getOutboundForecastById(id);
+        await outboundForecastInfo(outboundForecastInfo);
         if (prop.typeName === 'car') {
-          await updateOutboundForecast(id, values);
+          outboundForecastInfo.AMZID = values.AMZID;
+          outboundForecastInfo.ISA = values.ISA;
+          outboundForecastInfo.bookCarTimestamp = values.bookCarTimestamp;
+          outboundForecastInfo.inStatus = values.inStatus;
+          outboundForecastInfo.carStatus = values.carStatus;
+          outboundForecastInfo.note = values.note;
+          outboundForecastInfo.reservationGetProductDetailTime =
+            values.reservationGetProductDetailTime;
+          outboundForecastInfo.reservationGetProductTime = values.reservationGetProductTime;
+          outboundForecastInfo.waitCar = values.waitCar;
+          outboundForecastInfo.waybillId = values.waybillId;
           await updateTaskListAfterBookingCar(id);
         } else {
-          await updateOutboundForecast(id, values);
+          outboundForecastInfo.REF = values.REF;
+          outboundForecastInfo.costPrice = values.costPrice;
+          outboundForecastInfo.inStatus = values.inStatus;
+          outboundForecastInfo.suggestedPrice = values.suggestedPrice;
+          outboundForecastInfo.waitPrice = values.waitPrice;
           await updateTaskListAfterOfferPriceCar(id, values);
         }
       }

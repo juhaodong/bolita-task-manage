@@ -14,12 +14,41 @@ export async function getTaskListByFilter(filter) {
   ).data.content;
 }
 
+export async function getTaskListByIdsAndFilter(ids, filter) {
+  return (
+    await hillo.jsonPost(typeName + '/list', {
+      criteria: [
+        {
+          field: 'id',
+          op: 'in',
+          value: ids,
+        },
+        ...filter,
+      ],
+    })
+  ).data.content;
+}
+
 export async function getTaskListByNotifyId(id) {
   return (
     await hillo.jsonPost(typeName + '/list', {
       criteria: [
         {
           field: 'notifyId',
+          op: '==',
+          value: id,
+        },
+      ],
+    })
+  ).data.content;
+}
+
+export async function getTaskListById(id) {
+  return (
+    await hillo.jsonPost(typeName + '/list', {
+      criteria: [
+        {
+          field: 'id',
           op: '==',
           value: id,
         },

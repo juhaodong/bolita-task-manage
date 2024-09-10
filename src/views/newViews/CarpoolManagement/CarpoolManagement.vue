@@ -111,7 +111,7 @@
 
 <script lang="ts" setup>
   import { Box20Filled } from '@vicons/fluent';
-  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
+  import { Component, computed, h, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
@@ -119,8 +119,7 @@
   import { CarpoolManager } from '@/api/dataLayer/modules/logistic/carpool';
   import { getFileActionButtonByOutForecast } from '@/views/bolita-views/composable/useableColumns';
   import { useUserStore } from '@/store/modules/user';
-  import { CarpoolManagementPower } from '@/api/dataLayer/common/PowerModel';
-  import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import { dateCompare } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import EditOF from '@/views/newViews/OperationDetail/NotOutbound/EditOF.vue';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
@@ -176,6 +175,7 @@
         (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       );
     }
+    console.log(allList, 'list');
     return allList;
   };
   const actionRef = ref();
@@ -228,11 +228,6 @@
     const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
     FileSaver.saveAs(blob, '订车管理' + '.csv');
   }
-
-  onMounted(async () => {
-    monthTab = OneYearMonthTab();
-    selectedMonth = monthTab[0];
-  });
   const realOptions = computed(() => {
     return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
   });
@@ -298,9 +293,6 @@
     paymentDialogShow = false;
     editOutboundForecast = false;
   }
-  async function addOut() {
-    showModal.value = true;
-  }
 
   function saved() {
     reloadTable();
@@ -311,22 +303,8 @@
     showModal.value = true;
   }
 
-  async function doPayment(id) {
-    currentModel = await CarpoolManager.getById(id);
-    paymentDialogShow = true;
-  }
-
   const AccountPowerList = computed(() => {
     return useUserStore()?.info?.powerList;
-  });
-  const SubmitOrderOperate = computed(() => {
-    return AccountPowerList.value.includes(CarpoolManagementPower.SubmitOrder);
-  });
-  const PODOperate = computed(() => {
-    return AccountPowerList.value.includes(CarpoolManagementPower.POD);
-  });
-  const BillOperate = computed(() => {
-    return AccountPowerList.value.includes(CarpoolManagementPower.Bill);
   });
   function startEditOF(id) {
     editId = id;

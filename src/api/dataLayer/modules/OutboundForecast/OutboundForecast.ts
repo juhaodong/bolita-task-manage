@@ -6,6 +6,8 @@ import dayjs from 'dayjs';
 import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
 import { OutPlanStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import { useUserStore } from '@/store/modules/user';
+import { addOrUpdateTask, getTaskListById } from '@/api/newDataLayer/TaskList/TaskList';
+import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
 
 export const OutboundForecast = 'OutboundForecast';
 export const OutWareHouse = 'OutWareHouse';
@@ -54,44 +56,43 @@ export async function updateTaskListAfterBookingCar(id) {
   const taskListIds = (await getOutboundForecastById(id)).outboundDetailInfo;
   const userInfo = useUserStore().info;
   for (const taskId of taskListIds) {
-    const res = await NotifyDetailManager.getById(taskId);
-    const timeLineInfo = res.timeLine;
-    timeLineInfo.unshift({
+    const res = await getTaskListById(taskId);
+    await addOrUpdateTaskTimeLine({
+      useType: 'normal',
+      bolitaTaskId: taskId,
       operator: userInfo?.realName,
-      detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-      note: '已定车',
+      detailTime: dayjs().valueOf(),
+      note: '完成订车',
     });
-    await NotifyDetailManager.massiveUpdate([
-      {
-        bookingCarTime: dayjs().format('YYYY-MM-DD'),
-        inStatus: OutPlanStatus.AlreadyBookingCar,
-        id: taskId,
-        timeLine: timeLineInfo,
-      },
-    ]);
+    res.inStatus = '已定车';
+    res.inventoryId = res.inventory.id;
+    res.customerId = res.customer.id;
+    await addOrUpdateTask(res);
   }
 }
 
-export async function updateTaskListAfterOfferPriceCar(id, offerInfo) {
+export async function updateTaskListAfterOfferPriceCar(id, priceInfo) {
   const taskListIds = (await getOutboundForecastById(id)).outboundDetailInfo;
   const userInfo = useUserStore().info;
   for (const taskId of taskListIds) {
-    const res = await NotifyDetailManager.getById(taskId);
-    const timeLineInfo = res.timeLine;
-    timeLineInfo.unshift({
+    const res = await getTaskListById(taskId);
+    await addOrUpdateTaskTimeLine({
+      useType: 'normal',
+      bolitaTaskId: taskId,
       operator: userInfo?.realName,
-      detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-      note: '提交了物流报价',
+      detailTime: dayjs().valueOf(),
+      note: '完成报价',
     });
-    await NotifyDetailManager.massiveUpdate([
-      {
-        offerPriceInfo: offerInfo,
-        bookingCarTime: dayjs().format('YYYY-MM-DD'),
-        inStatus: OutPlanStatus.AlreadyOffer,
-        id: taskId,
-        timeLine: timeLineInfo,
-      },
-    ]);
+    res.inStatus = '已报价';
+    res.inventoryId = res.inventory.id;
+    res.customerId = res.customer.id;
+    res.bookingCarTime = dayjs().format('YYYY-MM-DD');
+    res.REF = priceInfo.REF;
+    res.costPrice = priceInfo.costPrice;
+    res.inStatus = priceInfo.inStatus;
+    res.suggestedPrice = priceInfo.suggestedPrice;
+    res.waitPrice = priceInfo.waitPrice;
+    await addOrUpdateTask(res);
   }
 }
 

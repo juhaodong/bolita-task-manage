@@ -102,6 +102,16 @@
     problemFiles: '',
     trayFiles: '',
     changeOrder: '',
+    detailTray: '',
+    trayType: '',
+    alreadyChanged: 0,
+    outboundId: '',
+    needOfferPrice: '',
+    waitPrice: '',
+    suggestedPrice: '',
+    costPrice: '',
+    REF: '',
+    bookingCarTime: '',
   };
 
   function startLoading() {

@@ -121,13 +121,13 @@ export async function asyncUserCustomer(defaultValue): Promise<FormField> {
 }
 
 export async function asyncCustomer(): Promise<FormField> {
-  const customerList = await CustomerManager.load();
+  const customerList = await getCustomerList();
   const list = customerList.map((it) => ({
     label: it.customerName,
-    value: it.customerName,
+    value: it.id,
   }));
   return {
-    field: 'customerName',
+    field: 'customer',
     label: '客户',
     required: false,
     component: 'NSelect',

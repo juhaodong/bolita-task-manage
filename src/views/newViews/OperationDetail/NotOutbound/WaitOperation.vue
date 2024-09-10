@@ -235,10 +235,7 @@
   let showAll = $ref(false);
   import FileSaver from 'file-saver';
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
-  import {
-    getOutboundForecastList,
-    getOutboundForecastListByFilter,
-  } from '@/api/newDataLayer/WaitOperation/WaitOperation';
+  import { getOutboundForecastListByFilter } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   const operationColumns = $ref([
     {
       title: 'ID',
@@ -349,6 +346,7 @@
       }
     }
     let allList = await getOutboundForecastListByFilter(currentFilter);
+    console.log(allList, 'list');
     currentList = allList.filter(
       (a) =>
         a.inStatus === CarStatus.Booked ||

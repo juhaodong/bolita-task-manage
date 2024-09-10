@@ -1,7 +1,7 @@
 <template>
   <n-card class="proCard">
     <loading-frame :loading="loading">
-      <template v-if="step == 0">
+      <template v-if="step === 0">
         <filter-bar :form-fields="filters" @clear="updateFilter" @submit="updateFilter" />
         <n-data-table
           v-model:checked-row-keys="checkedRowKeys"
@@ -57,10 +57,6 @@
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { h, onMounted, ref, watch } from 'vue';
   import { DataTableColumns, NButton } from 'naive-ui';
-  import {
-    getDetailListByIdWithSearch,
-    getReserveItems,
-  } from '@/api/dataLayer/modules/notify/notify-detail';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import {
@@ -78,11 +74,15 @@
     deliveryMethodList,
     outboundMethodList,
   } from '@/api/dataLayer/modules/deliveryMethod/detail';
-  import { addOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import DetailInfo from '@/views/newViews/Missions/AlreadyWarehousing/DetailInfo.vue';
   import { $ref } from 'vue/macros';
   import { afterPlanDetailAdded } from '@/api/dataLayer/modules/OutBoundPlan/outAddHook';
   import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import {
+    getTaskListByFilter,
+    getTaskListByIdsAndFilter,
+  } from '@/api/newDataLayer/TaskList/TaskList';
+  import { addOrUpdateOutboundForecast } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
 
   interface Props {
     model?: any;
@@ -136,23 +136,30 @@
   let step = $ref(0);
 
   async function updateFilter(filterObj) {
-    console.log(prop.model, '321');
+    let currentFilter = [];
+    if (filterObj) {
+      const res = Object.keys(filterObj);
+      for (const filterItem of res) {
+        currentFilter.push({
+          field: filterItem,
+          op: filterObj[filterItem]
+            ? filterItem === 'customer' || filterItem === 'inventory'
+              ? 'belongs to'
+              : '=='
+            : '!=',
+          value: filterObj[filterItem] ?? '',
+        });
+      }
+    }
     if (prop.model.length > 0) {
-      allNotifyDetail = (await getDetailListByIdWithSearch(filterObj, prop.model)).map((it) => {
-        it.originId = it.id;
-        return it;
-      });
+      allNotifyDetail = await getTaskListByIdsAndFilter(prop.model, currentFilter);
     } else {
-      allNotifyDetail = (await getReserveItems(filterObj))
-        .filter((a) => a.inStatus === InBoundStatus.All)
+      allNotifyDetail = (await getTaskListByFilter(currentFilter))
+        .filter((a) => a.inStatus === InBoundStatus.WaitOperate)
         .filter((x) => {
           return x.outboundMethod !== '标准托盘' && x.outboundMethod !== '大件托盘'
             ? true
             : !!x.detailTray;
-        })
-        .map((it) => {
-          it.originId = it.id;
-          return it;
         });
       console.log(allNotifyDetail, 'detail');
     }
@@ -178,6 +185,20 @@
     step = 1;
   }
 
+  const defaultOutboundForecast = {
+    outboundDetailInfo: '',
+    FCAddress: '',
+    containerNum: 0,
+    deliveryMethod: '',
+    inStatus: '',
+    needCar: '',
+    needOfferPrice: '',
+    postcode: '',
+    totalVolume: '',
+    totalWeight: '',
+    trayNum: '',
+  };
+
   async function saveOutboundPlan(value) {
     loading = true;
     const res = {
@@ -186,10 +207,14 @@
       postcode: selectedPostcode ?? '',
       ...value,
       inStatus: value.needCar === '1' ? CarStatus.UnAble : CarStatus.NoNeed,
-      outboundDetailInfo: allNotifyDetail.map((it) => it.id),
+      outboundDetailInfo: allNotifyDetail.map((it) => it.id).join(','),
+      totalVolume: safeSumBy(allNotifyDetail, 'volume'),
+      totalWeight: safeSumBy(allNotifyDetail, 'weight'),
     };
-    const outboundId = await addOutboundForecast(res);
+    const outboundId = (await addOrUpdateOutboundForecast(res)).data.id;
     allNotifyDetail.forEach((it) => {
+      it.customerId = it.customer.id;
+      it.inventoryId = it.inventory.id;
       it.needCar = value.needCar;
       if (it.needCar === '1') {
         it.carStatus = CarStatus.UnAble;
