@@ -47,12 +47,11 @@ export const useUploadDialog = defineStore('uploadFileDialog', {
     },
     async confirm(value: any) {
       if (this.resolve != null) {
-        if (value?.files?.length > 0) {
-          value.files = await saveFiles(value.files);
-        }
+        let newFiles = '';
+        newFiles = await saveFiles(value.files);
         this.resolve({
           checkPassed: true,
-          files: this.currentFileUrls ? this.currentFileUrls.join(value.files) : value.files,
+          files: this.currentFileUrls ? this.currentFileUrls + ',' + newFiles : newFiles,
         });
         this.show = false;
       }

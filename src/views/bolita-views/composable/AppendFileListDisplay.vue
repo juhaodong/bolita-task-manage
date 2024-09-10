@@ -2,19 +2,27 @@
   import { getFileNameAndTypeForFirebaseLink } from '@/store/utils/utils';
   import { DeleteOutlined, FileTextOutlined, LinkOutlined } from '@vicons/antd';
   import { downloadFile } from '@/store/plugins/firebase';
+  import { computed } from 'vue';
 
   const emit = defineEmits(['deleteFile']);
 
   function deleteFile(files) {
     emit('deleteFile', files);
   }
+  const currentFiles = computed(() => {
+    let res = [];
+    if (props.filesUrl) {
+      res = props.filesUrl.split(',');
+    }
+    return res;
+  });
 
-  defineProps({ filesUrl: Array, disableClick: null });
+  const props = defineProps({ filesUrl: Array, disableClick: null });
 </script>
 
 <template>
-  <n-list v-if="filesUrl?.length > 0" hoverable>
-    <n-list-item v-for="f in filesUrl" :key="f">
+  <n-list v-if="currentFiles?.length > 0" hoverable>
+    <n-list-item v-for="f in currentFiles" :key="f">
       <template #prefix>
         <n-icon size="18">
           <file-text-outlined />
