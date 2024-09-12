@@ -18,22 +18,22 @@
         </div>
         <div class="mt-8">
           <n-grid :cols="3" x-gap="12">
-            <n-gi class="textStyle"> 规格 </n-gi>
-            <n-gi class="textStyle"> 数量 </n-gi>
             <n-gi class="textStyle"> 类别 </n-gi>
+            <n-gi class="textStyle"> 数量 </n-gi>
+            <n-gi class="textStyle"> 规格 </n-gi>
           </n-grid>
 
           <div v-for="(a, index) in trayList" :key="a.key" class="d-flex align-center mb-1">
             <div style="display: flex">
               <n-grid :cols="3" x-gap="12">
                 <n-gi>
-                  <n-select v-model:value="a.type" :options="trayType" placeholder="类别" />
+                  <n-select v-model:value="a.trayType" :options="trayType" placeholder="类别" />
                 </n-gi>
                 <n-gi>
                   <n-input v-model:value="a.amount" placeholder="数量" />
                 </n-gi>
                 <n-gi>
-                  <n-input v-model:value="a.norms" placeholder="规格" />
+                  <n-input v-model:value="a.size" placeholder="规格" />
                 </n-gi>
               </n-grid>
               <n-icon class="mt-1" size="24px" @click="trayList.splice(index, 1)">
@@ -64,7 +64,8 @@
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import Delete16Filled from '@vicons/fluent/es/Delete16Filled';
   import { assign } from 'lodash';
-  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
+  import { addOrUpdateTaskTrayItem } from '@/api/newDataLayer/TrayItem/TrayItem';
+  import { addOrUpdateTask } from '@/api/newDataLayer/TaskList/TaskList';
 
   interface Props {
     currentData?: any[];
@@ -85,9 +86,9 @@
   let totalKI = $ref(null);
   let totalKT = $ref(null);
   let defaultList = {
-    type: '',
+    trayType: '',
     amount: '',
-    norms: '',
+    size: '',
   };
   let currentInfo = $ref([]);
 
@@ -103,7 +104,8 @@
   }
 
   async function reload() {
-    const currentInfo = prop.currentData.detailTray;
+    console.log(prop.currentData, 'currentData');
+    const currentInfo = prop.currentData.trayItems;
     if (currentInfo) {
       trayList = assign(trayList, currentInfo);
     }
@@ -131,7 +133,7 @@
     ([tray]) => {
       //
       const emptyInbound = tray.filter(
-        (it) => it.type === '' && it.amount === '' && it.norms === ''
+        (it) => it.trayType === '' && it.amount === '' && it.size === ''
       ).length;
       if (emptyInbound === 0) {
         tray.push(createDefaultList());
@@ -140,19 +142,19 @@
         trayList = tray;
       }
       totalFP = safeSumBy(
-        trayList.filter((a) => a.type === 'FP'),
+        trayList.filter((a) => a.trayType === 'FP'),
         'amount'
       );
       totalXP = safeSumBy(
-        trayList.filter((a) => a.type === 'XP'),
+        trayList.filter((a) => a.trayType === 'XP'),
         'amount'
       );
       totalKI = safeSumBy(
-        trayList.filter((a) => a.type === 'KI'),
+        trayList.filter((a) => a.trayType === 'KI'),
         'amount'
       );
       totalKT = safeSumBy(
-        trayList.filter((a) => a.type === 'KT'),
+        trayList.filter((a) => a.trayType === 'KT'),
         'amount'
       );
     },
@@ -162,13 +164,12 @@
     }
   );
 
-  const emit = defineEmits(['saved']);
+  const emit = defineEmits(['save']);
 
   async function handleSubmit() {
     loading = true;
     await safeScope(async () => {
       const res = prop.currentData;
-      res.arrivedTrayNum = totalFP + totalKI + totalXP + totalKT;
       let trayType = '';
       if (parseFloat(totalFP) > 0) {
         trayType = trayType + 'FP/';
@@ -183,9 +184,21 @@
         trayType = trayType + 'XP/';
       }
       res.trayType = trayType;
-      res.detailTray = trayList;
-      await NotifyDetailManager.edit(res, res.id);
-      emit('saved');
+      res.customerId = res.customer.id;
+      res.inventoryId = res.inventory.id;
+      await addOrUpdateTask(res);
+      const currentList = trayList.filter((it) => it.amount);
+      let quest = [];
+      for (const item of currentList) {
+        quest.push(
+          addOrUpdateTaskTrayItem({
+            ...item,
+            bolitaTaskId: prop.currentData.id,
+          })
+        );
+      }
+      await Promise.all(quest);
+      emit('save');
     });
     loading = false;
   }

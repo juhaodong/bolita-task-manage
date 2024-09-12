@@ -26,19 +26,19 @@ export const columnsIn: DataTableColumns = [
   },
   {
     title: '客户ID',
-    key: 'customerId',
+    key: 'customer.customerName',
   },
   {
     title: '卸柜费',
-    key: 'amount',
+    key: 'unloadingFee',
   },
   {
     title: '其他费',
-    key: 'otherPrice',
+    key: 'otherFee',
   },
   {
     title: '总费用',
-    key: 'subtotal',
+    key: 'totalFee',
   },
 ];
 
@@ -46,54 +46,45 @@ export const columnsOut: DataTableColumns = [
   {
     type: 'selection',
     disabled(row: any) {
-      return (
-        row?.finalStatus === '已对账' ||
-        row?.finalStatus === '待确认' ||
-        row?.finalStatus === '已结算'
-      );
+      return row?.status === '已对账' || row?.status === '待确认' || row?.status === '已结算';
     },
   },
   timeColumn('createTimestamp', '创建日期'),
-  timeColumn('updateTimestamp', '修改日期'),
   statusColumnEasy({
     title: '结算状态',
-    key: 'finalStatus',
+    key: 'status',
   }),
   {
-    title: '货柜号',
-    key: 'containerId',
+    title: '票号',
+    key: 'ticketId',
   },
   {
     title: '客户ID',
-    key: 'customerId',
+    key: 'customer.customerName',
   },
   {
     title: '入库费',
-    key: 'inboundTotal',
+    key: 'inboundFee',
   },
   {
     title: '出库费',
-    key: 'outboundTotal',
+    key: 'outboundFee',
   },
   {
     title: '操作费',
-    key: 'operateTotal',
+    key: 'operateFee',
   },
   {
     title: '特殊操作费',
-    key: 'specialOperateTotal',
+    key: 'specialOperateFee',
   },
   {
     title: '物流费',
-    key: 'deliveryTotal',
+    key: 'deliveryFee',
   },
   {
     title: '耗材费',
-    key: 'consumablesTotal',
-  },
-  {
-    title: '总费用',
-    key: 'totalPrice',
+    key: 'consumablesFee',
   },
 ];
 

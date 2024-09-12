@@ -15,6 +15,15 @@ export async function getTaskListByFilter(filter) {
   ).data.content;
 }
 
+export async function getTaskListByFilterWithPagination(filter, pagination) {
+  return (
+    await hillo.jsonPost(typeName + '/list', {
+      ...pagination,
+      criteria: filter,
+    })
+  ).data;
+}
+
 export async function getTaskListByIdsAndFilter(ids, filter) {
   return (
     await hillo.jsonPost(typeName + '/list', {

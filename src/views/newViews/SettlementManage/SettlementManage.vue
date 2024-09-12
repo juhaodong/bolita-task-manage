@@ -203,7 +203,7 @@
         (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       );
     }
-    return allList.sort(dateCompare('createTimestamp'));
+    return allList;
   };
 
   let filterObj: any | null = $ref(null);

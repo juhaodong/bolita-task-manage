@@ -63,6 +63,25 @@
     currentModel = null;
     showModal.value = true;
   }
+
+  const paginationReactive = reactive({
+    defaultPage: 1,
+    pageNumber: 0,
+    pageSize: 10,
+    defaultPageSize: 10,
+    showSizePicker: true,
+    pageSizes: [10, 50, 100],
+    onChange: (page: number) => {
+      paginationReactive.pageNumber = page - 1;
+      reloadTable();
+    },
+    onUpdatePageSize: (pageSize: number) => {
+      paginationReactive.pageSize = pageSize;
+      paginationReactive.pageNumber = 0;
+      reloadTable();
+    },
+  });
+
   const loadDataTable = async () => {
     let currentFilter = [];
     if (filterObj) {
@@ -75,8 +94,26 @@
         });
       }
     }
-    FBACodeList = await getFBACodeListByFilter(currentFilter);
-    return FBACodeList;
+    const res = await getFBACodeListByFilter(currentFilter, paginationReactive);
+    FBACodeList = res.content;
+    const totalCount = res.page.totalElements;
+    let fakeListStart = [];
+    let fakeListEnd = [];
+    if (paginationReactive.pageNumber > 0) {
+      fakeListStart = Array(paginationReactive.pageNumber * paginationReactive.pageSize)
+        .fill(null)
+        .map((it, index) => {
+          return { key: index };
+        });
+    }
+    if (paginationReactive.pageSize < totalCount) {
+      fakeListEnd = Array(totalCount - paginationReactive.pageSize * paginationReactive.pageNumber)
+        .fill(null)
+        .map((it, index) => {
+          return { key: index };
+        });
+    }
+    return fakeListStart.concat(FBACodeList.concat(fakeListEnd));
   };
 
   let filterObj: any | null = $ref(null);

@@ -262,7 +262,6 @@
     let res = (await getNotifyListByFilter(currentFilter)).filter((x) =>
       customerId.includes(x.customer.id)
     );
-    console.log(res, 'res');
     if (!showAll) {
       res = res.filter((a) => a.inStatus !== '已取消');
     }

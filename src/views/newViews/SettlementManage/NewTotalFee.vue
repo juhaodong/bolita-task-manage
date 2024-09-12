@@ -387,7 +387,7 @@
   let taskSettlementInfo = $ref([]);
 
   async function reload() {
-    taskSettlementInfo = (await getSettlementByTaskId(prop.currentData.id))[0];
+    taskSettlementInfo = (await getSettlementByTaskId(prop.currentData.id))[0] ?? prop.currentData;
     currentInfo = taskSettlementInfo?.settlementItems ?? [];
     console.log(taskSettlementInfo, 'info');
     if (currentInfo) {

@@ -57,17 +57,18 @@
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { h, onMounted, ref, watch } from 'vue';
   import { DataTableColumns, NButton } from 'naive-ui';
-  import {
-    NotifyDetailManager,
-    NotifyDetailMergeManager,
-  } from '@/api/dataLayer/modules/notify/notify-detail';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { asyncFCAddress, safeSumBy } from '@/store/utils/utils';
   import DetailInfo from '@/views/newViews/Missions/AlreadyWarehousing/DetailInfo.vue';
   import { $ref } from 'vue/macros';
   import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
-  import { getTaskListByFilter, getTaskListByIds } from '@/api/newDataLayer/TaskList/TaskList';
+  import {
+    addOrUpdateTask,
+    defaultTask,
+    getTaskListByFilter,
+    getTaskListByIds,
+  } from '@/api/newDataLayer/TaskList/TaskList';
 
   interface Props {
     model?: any;
@@ -93,7 +94,6 @@
   let loading: boolean = $ref(false);
 
   watch(checkedRowKeys, async (val) => {
-    console.log(val, 'val');
     let realList = [];
     if (val.length > 0) {
       selectedCountry = allNotifyDetail.find((it) => it.id === val[0]).country;
@@ -140,9 +140,7 @@
   }
 
   async function confirmSelection() {
-    console.log(checkedRowKeys.value, 'checkedRowKeys');
     const currentList = await getTaskListByIds(checkedRowKeys.value);
-    console.log(currentList, 'rse');
     const mergeItem = Object.assign({}, currentList[0]);
     mergeItem.number = totalNumber.value;
     mergeItem.volume = totalVolume.value;
@@ -150,13 +148,27 @@
     mergeItem.ticketId = currentList.map((it) => it.ticketId).join('#');
     mergeItem.FBADeliveryCode = currentList.map((it) => it.FBADeliveryCode).join('#');
     mergeItem.PO = currentList.map((it) => it.PO).join('#');
-    mergeItem.mergedId = currentList.map((it) => it.id);
+    mergeItem.mergedId = currentList.map((it) => it.id).join(',');
+    const currentObj = Object.assign(defaultTask, mergeItem);
+    currentObj.customerId = currentObj.customer.id;
+    currentObj.inventoryId = currentObj.inventory.id;
+    delete currentObj.id;
+    await addOrUpdateTask(currentObj);
+    // const userInfo = useUserStore().info;
     for (const item of currentList) {
       item.inStatus = '已合并';
-      await NotifyDetailManager.edit(item, item.id);
+      item.customerId = item.customer.id;
+      item.inventoryId = item.inventory.id;
+      // await addOrUpdateTaskTimeLine({
+      //   useType: 'normal',
+      //   bolitaTaskId: item.id,
+      //   operator: userInfo?.realName,
+      //   detailTime: dayjs().valueOf(),
+      //   note: '被合并',
+      // });
+      await addOrUpdateTask(item);
     }
-    await NotifyDetailMergeManager.add(mergeItem);
-    console.log(mergeItem, 'merge');
+    emit('saved');
   }
 
   async function init() {

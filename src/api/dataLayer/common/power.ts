@@ -19,5 +19,5 @@ export async function getUserTypePowerList(type) {
 }
 
 export async function getUserCustomerList() {
-  return useUserStore()?.info?.customerIds;
+  return useUserStore()?.info?.customerIds.split(',') ?? [];
 }

@@ -99,7 +99,7 @@
           </div>
         </n-card>
         <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
-        <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />
+        <!--        <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />-->
       </div>
       <div class="my-2"></div>
       <n-tabs
@@ -122,8 +122,10 @@
               v-model:checked-row-keys="checkedRows"
               :actionColumn="actionColumn"
               :columns="currentColumns"
+              :pagination="paginationReactive"
               :request="loadDataTable"
               :row-key="(row) => row.id"
+              @update:page="handlePageChange"
             />
           </div>
           <no-power-page v-else />
@@ -190,7 +192,7 @@
         style="width: 90%; min-width: 800px; max-width: 800px"
         title="报价表"
       >
-        <offer-price-dialog :ids="checkedRows" @save="reloadTable" />
+        <offer-price-dialog :ids="checkedRows" @saved="reloadTable" />
       </n-modal>
       <n-modal
         v-model:show="mergeDialog"
@@ -225,7 +227,6 @@
   import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import { Box20Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
-  import { dateCompare } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
   import NewTotalFee from '@/views/newViews/SettlementManage/NewTotalFee.vue';
@@ -243,12 +244,11 @@
   import { getUserCustomerList, hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
-  import { valueOfToday } from '@/api/dataLayer/common/Date';
   import FileSaver from 'file-saver';
   import MergeDialog from '@/views/newViews/Missions/AlreadyWarehousing/MergeDialog.vue';
   import {
     addOrUpdateTask,
-    getTaskList,
+    getTaskListByFilterWithPagination,
     getTaskListById,
   } from '@/api/newDataLayer/TaskList/TaskList';
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
@@ -442,20 +442,90 @@
     await reloadTable();
   }
 
+  const paginationReactive = reactive({
+    defaultPage: 1,
+    pageNumber: 0,
+    pageSize: 10,
+    defaultPageSize: 10,
+    showSizePicker: true,
+    pageSizes: [10, 20, 50, 100],
+    onChange: (page: number) => {
+      console.log(page, 'pgae');
+      paginationReactive.pageNumber = page - 1;
+      reloadTable();
+    },
+    onUpdatePageSize: (pageSize: number) => {
+      console.log(pageSize, 'pageSize');
+      paginationReactive.pageSize = pageSize;
+      paginationReactive.pageNumber = 0;
+      reloadTable();
+    },
+  });
+
   const loadDataTable = async () => {
-    if (typeMission.value === '整柜任务看板') {
-      allList = await getTaskList();
-    } else if (typeMission.value === '存仓看板') {
-      allList = (await getTaskList()).filter((it) => it.inStatus === '存仓');
-    } else if (typeMission.value === '审核看板') {
-      allList = (await getTaskList()).filter(
-        (it) => it.inStatus === '等待提交' || it.inStatus === '等待审核'
-      );
-    } else if (typeMission.value === '报价看板') {
-      allList = (await getTaskList()).filter((it) => it.needOfferPrice === '1');
+    let currentFilter = [];
+    if (filterObj) {
+      const res = Object.keys(filterObj);
+      for (const filterItem of res) {
+        currentFilter.push({
+          field: filterItem,
+          op: filterObj[filterItem] ? '==' : '!=',
+          value: filterObj[filterItem] ?? '',
+        });
+      }
     }
+    if (typeMission.value === '整柜任务看板') {
+    } else if (typeMission.value === '存仓看板') {
+      currentFilter.push({ field: 'inStatus', op: 'in', value: ['存仓'] });
+    } else if (typeMission.value === '审核看板') {
+      currentFilter.push({ field: 'inStatus', op: 'in', value: ['等待提交', '等待审核'] });
+    } else if (typeMission.value === '报价看板') {
+      currentFilter.push({ field: 'needOfferPrice', op: '==', value: '1' });
+    }
+
     const ownedCustomerIds = await getUserCustomerList();
-    allList = allList.filter((it) => ownedCustomerIds.includes(it.customer.id));
+    currentFilter.push({ field: 'customer', op: 'belongs to many', value: ownedCustomerIds });
+    // if (!showAll) {
+    //   const oldValue = currentFilter.find((it) => it.field === 'inStatus')?.value;
+    //   console.log(oldValue, 'old');
+    //   const currentValue = oldValue ? oldValue.push('已取消') : ['已取消'];
+    //   console.log(currentValue, 'value');
+    //   currentFilter = currentFilter.filter((it) => it.field !== 'inStatus');
+    //   currentFilter.push({
+    //     field: 'inStatus',
+    //     op: 'in',
+    //     value: currentValue,
+    //   });
+    // }
+    // if (dateRange) {
+    //   let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
+    //   let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
+    //   allList = allList.filter(
+    //     (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
+    //   );
+    // }
+    console.log(currentFilter, 'currentFilter');
+    const res = await getTaskListByFilterWithPagination(currentFilter, paginationReactive);
+    allList = res.content;
+    const totalCount = res.page.totalElements;
+    console.log(totalCount, 'count');
+    let fakeListStart = [];
+    let fakeListEnd = [];
+    if (paginationReactive.pageNumber > 0) {
+      fakeListStart = Array(paginationReactive.pageNumber * paginationReactive.pageSize)
+        .fill(null)
+        .map((it, index) => {
+          return { key: index };
+        });
+    }
+    if (paginationReactive.pageSize < totalCount) {
+      fakeListEnd = Array(totalCount - paginationReactive.pageSize * paginationReactive.pageNumber)
+        .fill(null)
+        .map((it, index) => {
+          return { key: index };
+        });
+    }
+
     allList.forEach((it) => {
       if (it.storageTime) {
         const res = it.storageTime.pop();
@@ -470,18 +540,7 @@
         it.stayTime = '-';
       }
     });
-
-    if (!showAll) {
-      allList = allList.filter((a) => a.inStatus !== '已取消');
-    }
-    if (dateRange) {
-      let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-      let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-      allList = allList.filter(
-        (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
-      );
-    }
-    return allList.sort(dateCompare('createTimestamp'));
+    return fakeListStart.concat(allList.concat(fakeListEnd));
   };
 
   function updateFilter(value) {
