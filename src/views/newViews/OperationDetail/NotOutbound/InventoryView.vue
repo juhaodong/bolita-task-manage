@@ -156,7 +156,7 @@
   import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import { Box20Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
-  import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
   import NewTotalFee from '@/views/newViews/SettlementManage/NewTotalFee.vue';
@@ -267,9 +267,7 @@
         (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       );
     }
-    return allList
-      .filter((x) => customerId.includes(x.customerId))
-      .sort(dateCompare('createTimestamp'));
+    return allList.filter((x) => customerId.includes(x.customerId));
   };
 
   async function downloadData() {

@@ -167,7 +167,7 @@ export function timeTableColumn(keyName, title, timeFormat = dateFormat) {
   return {
     title: title,
     key: keyName,
-    width: 110,
+    width: 200,
     render(record) {
       const display = record[keyName] ? dayjs(record[keyName]).format(timeFormat) : '-';
       return h('div', display);

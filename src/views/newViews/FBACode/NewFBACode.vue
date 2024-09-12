@@ -29,6 +29,9 @@
       disableCondition: () => {
         return prop.model?.id;
       },
+      displayCondition: () => {
+        return prop.model?.id;
+      },
     },
     {
       label: 'FBA码',

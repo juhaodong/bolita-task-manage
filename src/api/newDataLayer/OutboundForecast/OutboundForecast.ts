@@ -37,14 +37,3 @@ export async function getOutboundForecastListByFilter(filter) {
 export async function deleteOutboundForecast(id) {
   return await hillo.jsonPost(typeName + '/deleteById/' + id, {});
 }
-
-export async function saveFiles(file) {
-  const filesUrl = [];
-  for (const item of file) {
-    const res = await hillo.postWithUploadFile('https://cloud-v2.aaden.io/uploadFile', {
-      file: item.file,
-    });
-    filesUrl.push(res);
-  }
-  return filesUrl.join(',');
-}

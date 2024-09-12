@@ -146,6 +146,8 @@
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import { valueOfToday } from '@/api/dataLayer/common/Date';
   import { columns } from '@/views/newViews/ContainerForecast/columns';
+  import { getNotifySettlement } from '@/api/newDataLayer/NotifySettlement/NotifySettlement';
+  import { getSettlementList } from '@/api/newDataLayer/TaskListSettlement/TaskListSettlement';
 
   interface Prop {
     outId?: string;
@@ -189,10 +191,11 @@
 
   const loadDataTable = async () => {
     if (typeMission === '货柜结算') {
-      allList = await getSettlement();
+      allList = await getSettlementList();
     } else {
-      allList = await CashManager.load();
+      allList = await getNotifySettlement();
     }
+    console.log(allList, 'list');
     if (dateRange) {
       let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
       let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];

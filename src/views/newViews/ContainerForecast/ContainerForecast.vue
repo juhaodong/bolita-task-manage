@@ -322,9 +322,7 @@
   }
 
   async function downloadFbaCode() {
-    window.open(
-      'https://firebasestorage.googleapis.com/v0/b/bolita-task-manage.appspot.com/o/FbaCode.xlsx?alt=media&token=87d3478d-6148-41b4-ab71-fbfec6529cc1'
-    );
+    window.open('https://aaden-storage.s3.eu-central-1.amazonaws.com/FbaCode.xlsx');
   }
 
   async function downloadData() {
@@ -441,7 +439,8 @@
           {
             label: '预报文件',
             onClick() {
-              window.open(record.files[0]);
+              const files = record.files.split(',');
+              window.open(files[0]);
             },
           },
           {
@@ -466,6 +465,7 @@
             },
             onClick() {
               currentNotifyId = record.id!;
+              console.log(currentNotifyId, 'id');
               showFeeDialog = true;
             },
           },

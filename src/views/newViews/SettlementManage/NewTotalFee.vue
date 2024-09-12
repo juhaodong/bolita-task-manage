@@ -2,13 +2,15 @@
   <div class="mt-8">
     <div>
       <n-grid :cols="6" item-responsive>
-        <n-grid-item class="font-bold" span="2"> 客户:{{ currentData?.customerId }} </n-grid-item>
+        <n-grid-item class="font-bold" span="2">
+          客户:{{ currentData?.customer.customerName }}
+        </n-grid-item>
         <n-grid-item
           class="font-bold"
           span="2"
           style="display: flex; justify-content: center; align-items: center"
         >
-          柜号{{ currentData?.containerId }}
+          柜号:{{ currentData?.containerId }}
         </n-grid-item>
         <n-grid-item
           class="font-bold"
@@ -37,7 +39,11 @@
             <div style="display: flex">
               <n-grid :cols="6" x-gap="12">
                 <n-gi span="2">
-                  <n-select v-model:value="a.type" :options="inboundType" placeholder="type" />
+                  <n-select
+                    v-model:value="a.settlementType"
+                    :options="inboundType"
+                    placeholder="settlementType"
+                  />
                 </n-gi>
                 <n-gi>
                   <n-input v-model:value="a.price" placeholder="price" />
@@ -76,7 +82,11 @@
             <div style="display: flex">
               <n-grid :cols="6" x-gap="12">
                 <n-gi span="2">
-                  <n-select v-model:value="b.type" :options="outboundType" placeholder="type" />
+                  <n-select
+                    v-model:value="b.settlementType"
+                    :options="outboundType"
+                    placeholder="settlementType"
+                  />
                 </n-gi>
                 <n-gi>
                   <n-input v-model:value="b.price" placeholder="price" />
@@ -115,7 +125,11 @@
             <div style="display: flex">
               <n-grid :cols="6" x-gap="12">
                 <n-gi span="2">
-                  <n-select v-model:value="b.type" :options="operateType" placeholder="type" />
+                  <n-select
+                    v-model:value="b.settlementType"
+                    :options="operateType"
+                    placeholder="settlementType"
+                  />
                 </n-gi>
                 <n-gi>
                   <n-input v-model:value="b.price" placeholder="price" />
@@ -159,9 +173,9 @@
               <n-grid :cols="6" x-gap="12">
                 <n-gi span="2">
                   <n-select
-                    v-model:value="b.type"
+                    v-model:value="b.settlementType"
                     :options="specialOperationType"
-                    placeholder="type"
+                    placeholder="settlementType"
                   />
                 </n-gi>
                 <n-gi>
@@ -202,11 +216,11 @@
             <div style="display: flex">
               <n-grid :cols="8" x-gap="12">
                 <n-gi span="2">
-                  <n-select v-model:value="b.method" :options="allDelivery" placeholder="method" />
+                  <n-select v-model:value="b.mode" :options="allDelivery" placeholder="method" />
                 </n-gi>
                 <n-gi span="2">
                   <n-select
-                    v-model:value="b.type"
+                    v-model:value="b.settlementType"
                     :options="
                       b.method === '快递'
                         ? expressDelivery
@@ -214,7 +228,7 @@
                         ? directDelivery
                         : [{ label: '', value: '' }]
                     "
-                    placeholder="type"
+                    placeholder="settlementType"
                   />
                 </n-gi>
                 <n-gi>
@@ -254,7 +268,7 @@
             <div style="display: flex">
               <n-grid :cols="6" x-gap="12">
                 <n-gi span="2">
-                  <n-input v-model:value="a.type" placeholder="type" />
+                  <n-input v-model:value="a.settlementType" placeholder="settlementType" />
                 </n-gi>
                 <n-gi>
                   <n-input v-model:value="a.price" placeholder="price" />
@@ -276,7 +290,7 @@
           </div>
         </div>
       </n-card>
-      <n-card :bordered="false" class="mt-4" embedded title="📕 附件">
+      <n-card v-if="taskSettlementInfo" :bordered="false" class="mt-4" embedded title="📕 附件">
         <n-button type="info" @click="uploadFiles">检查文件</n-button>
       </n-card>
     </div>
@@ -289,17 +303,14 @@
   import { onMounted, reactive, watch } from 'vue';
   import { $ref } from 'vue/macros';
   import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
-  import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import {
-    addSettlement,
-    getSettlement,
-    updateSettlement,
-  } from '@/api/dataLayer/common/SettlementType';
-  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
   import Delete16Filled from '@vicons/fluent/es/Delete16Filled';
   import { assign } from 'lodash';
-  import dayjs from 'dayjs';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
+  import {
+    addOrUpdateSettlement,
+    getSettlementByTaskId,
+  } from '@/api/newDataLayer/TaskListSettlement/TaskListSettlement';
+  import { addOrUpdateSettlementItem } from '@/api/newDataLayer/TaskListSettlementItem/TaskListSettlementItem';
 
   interface Props {
     currentData?: any[];
@@ -342,19 +353,23 @@
   let specialOperateTotal = $ref('');
   let consumablesTotal = $ref('');
   let defaultList = {
-    type: '',
+    name: '',
+    settlementType: '',
     price: '',
     amount: '',
     total: '',
     note: '',
+    mode: '',
   };
   let defaultDeliveryList = {
+    name: '',
     method: '',
-    type: '',
+    settlementType: '',
     price: '',
     amount: '',
     total: '',
     note: '',
+    mode: '',
   };
   let currentInfo = $ref([]);
 
@@ -369,27 +384,48 @@
     return obj;
   }
 
+  let taskSettlementInfo = $ref([]);
+
   async function reload() {
-    currentInfo = (await getSettlement()).find((it) => it.ticketId === prop.currentData.ticketId);
+    taskSettlementInfo = (await getSettlementByTaskId(prop.currentData.id))[0];
+    currentInfo = taskSettlementInfo?.settlementItems ?? [];
+    console.log(taskSettlementInfo, 'info');
     if (currentInfo) {
-      inboundFeeList = assign(inboundFeeList, currentInfo?.inbound);
-      outboundFeeList = assign(outboundFeeList, currentInfo?.outbound);
-      operateFeeList = assign(operateFeeList, currentInfo?.operate);
-      specialOperateFeeList = assign(specialOperateFeeList, currentInfo?.specialOperate);
-      deliveryFeeList = assign(deliveryFeeList, currentInfo?.delivery);
-      consumablesList = assign(consumablesList, currentInfo?.consumables);
+      inboundFeeList = assign(
+        inboundFeeList,
+        currentInfo.filter((it) => it.name === 'inbound')
+      );
+      outboundFeeList = assign(
+        outboundFeeList,
+        currentInfo.filter((it) => it.name === 'outbound')
+      );
+      operateFeeList = assign(
+        operateFeeList,
+        currentInfo.filter((it) => it.name === 'operate')
+      );
+      specialOperateFeeList = assign(
+        specialOperateFeeList,
+        currentInfo.filter((it) => it.name === 'specialOperate')
+      );
+      deliveryFeeList = assign(
+        deliveryFeeList,
+        currentInfo.filter((it) => it.name === 'delivery')
+      );
+      consumablesList = assign(
+        consumablesList,
+        currentInfo.filter((it) => it.name === 'consumables')
+      );
     }
   }
 
   async function uploadFiles() {
-    const realCurrentData = await NotifyDetailManager.getById(prop.currentData.id);
     const upload = useUploadDialog();
-    const files = await upload.upload(realCurrentData['settlementFiles']);
-    const currentFiles = realCurrentData.settlementFiles.concat(files.files);
+    const files = await upload.upload(taskSettlementInfo['problemFiles']);
     if (files.checkPassed) {
-      const obj = {};
-      obj['settlementFiles'] = currentFiles;
-      await NotifyDetailManager.editInternal(obj, realCurrentData.id);
+      taskSettlementInfo['problemFiles'] = files.files;
+      taskSettlementInfo.customerId = taskSettlementInfo.customer.id;
+      taskSettlementInfo.bolitaTaskId = prop.currentData.id;
+      await addOrUpdateSettlement(taskSettlementInfo);
     }
   }
 
@@ -419,10 +455,11 @@
     ([inbound, outbound, operate, specialOperate, delivery, consumables]) => {
       //
       inbound.forEach((it) => {
+        it.name = 'inbound';
         it.total = it.price * it.amount;
       });
       const emptyInbound = inbound.filter(
-        (it) => it.type === '' && it.price === '' && it.amount === ''
+        (it) => it.settlementType === '' && it.price === '' && it.amount === ''
       ).length;
       inboundTotal = safeSumBy(inbound, 'total');
       if (emptyInbound === 0) {
@@ -433,11 +470,12 @@
       }
       //
       outbound.forEach((it) => {
+        it.name = 'outbound';
         it.total = it.price * it.amount;
       });
       outboundTotal = safeSumBy(outbound, 'total');
       const emptyOutbound = outbound.filter(
-        (it) => it.type === '' && it.price === '' && it.amount === ''
+        (it) => it.settlementType === '' && it.price === '' && it.amount === ''
       ).length;
       if (emptyOutbound === 0) {
         outbound.push(createDefaultList());
@@ -447,11 +485,12 @@
       }
       //
       operate.forEach((it) => {
+        it.name = 'operate';
         it.total = it.price * it.amount;
       });
       operateTotal = safeSumBy(operate, 'total');
       const emptyOperate = operate.filter(
-        (it) => it.type === '' && it.price === '' && it.amount === ''
+        (it) => it.settlementType === '' && it.price === '' && it.amount === ''
       ).length;
       if (emptyOperate === 0) {
         operate.push(createDefaultList());
@@ -461,11 +500,12 @@
       }
       //
       specialOperate.forEach((it) => {
+        it.name = 'specialOperate';
         it.total = it.price * it.amount;
       });
       specialOperateTotal = safeSumBy(specialOperate, 'total');
       const emptySpecialOperate = specialOperate.filter(
-        (it) => it.type === '' && it.price === '' && it.amount === ''
+        (it) => it.settlementType === '' && it.price === '' && it.amount === ''
       ).length;
       if (emptySpecialOperate === 0) {
         specialOperate.push(createDefaultList());
@@ -475,11 +515,12 @@
       }
       //
       delivery.forEach((it) => {
+        it.name = 'delivery';
         it.total = it.price * it.amount;
       });
       deliveryTotal = safeSumBy(delivery, 'total');
       const emptyExpress = delivery.filter(
-        (it) => it.type === '' && it.price === '' && it.amount === ''
+        (it) => it.settlementType === '' && it.price === '' && it.amount === ''
       ).length;
       if (emptyExpress === 0) {
         delivery.push(createDefaultDeliveryList());
@@ -489,11 +530,12 @@
       }
       //
       consumables.forEach((it) => {
+        it.name = 'consumables';
         it.total = it.price * it.amount;
       });
       consumablesTotal = safeSumBy(consumables, 'total');
       const emptyConsumables = consumables.filter(
-        (it) => it.type === '' && it.price === '' && it.amount === ''
+        (it) => it.settlementType === '' && it.price === '' && it.amount === ''
       ).length;
       if (emptyConsumables === 0) {
         consumables.push(createDefaultList());
@@ -512,53 +554,49 @@
 
   async function handleSubmit() {
     loading = true;
-    inboundFeeList = inboundFeeList.splice(0, inboundFeeList.length - 1);
-    outboundFeeList = outboundFeeList.splice(0, outboundFeeList.length - 1);
-    operateFeeList = operateFeeList.splice(0, operateFeeList.length - 1);
-    specialOperateFeeList = specialOperateFeeList.splice(0, specialOperateFeeList.length - 1);
-    deliveryFeeList = deliveryFeeList.splice(0, deliveryFeeList.length - 1);
-    consumablesList = consumablesList.splice(0, consumablesList.length - 1);
-
-    const res = {
-      detailInfo: prop?.currentData,
-      customerId: prop?.currentData?.customerId ?? '',
-      ticketId: prop?.currentData?.ticketId ?? '',
-      containerId: prop?.currentData?.containerId ?? '',
-      inboundTotal: inboundTotal,
-      inbound: inboundFeeList,
-      outboundTotal: outboundTotal,
-      outbound: outboundFeeList,
-      operateTotal: operateTotal,
-      operate: operateFeeList,
-      specialOperateTotal: specialOperateTotal,
-      specialOperate: specialOperateFeeList,
-      deliveryTotal: deliveryTotal,
-      delivery: deliveryFeeList,
-      consumablesTotal: consumablesTotal,
-      consumables: consumablesList,
-      totalPrice:
-        inboundTotal +
-        outboundTotal +
-        operateTotal +
-        specialOperateTotal +
-        deliveryTotal +
-        consumablesTotal,
+    let inboundList = inboundFeeList.splice(0, inboundFeeList.length - 1);
+    let outboundList = outboundFeeList.splice(0, outboundFeeList.length - 1);
+    let operateList = operateFeeList.splice(0, operateFeeList.length - 1);
+    let specialOperateList = specialOperateFeeList.splice(0, specialOperateFeeList.length - 1);
+    let deliveryList = deliveryFeeList.splice(0, deliveryFeeList.length - 1);
+    let allConsumablesList = consumablesList.splice(0, consumablesList.length - 1);
+    console.log(inboundFeeList, outboundFeeList, '321');
+    const result = {
+      status: '已结算',
+      ticketId: prop.currentData.ticketId,
+      inboundFee: inboundTotal ?? 0,
+      outboundFee: outboundTotal ?? 0,
+      operateFee: operateTotal ?? 0,
+      specialOperateFee: specialOperateTotal ?? 0,
+      deliveryFee: deliveryTotal ?? 0,
+      consumablesFee: consumablesTotal ?? 0,
+      problemFiles: '',
+      bolitaTaskId: prop.currentData.id,
+      customerId: prop.currentData.customer.id,
     };
-    const notifyDetail = prop.currentData;
-    notifyDetail.finalStatus = '已结算';
+    if (taskSettlementInfo) {
+      result.id = taskSettlementInfo.id;
+    }
+    const res = await addOrUpdateSettlement(result);
 
-    await safeScope(async () => {
-      if (currentInfo) {
-        res.updateTimestamp = dayjs().format('YYYY-MM-DD HH:mm:ss');
-        await updateSettlement(currentInfo.id, res);
-        await NotifyDetailManager.edit(notifyDetail, notifyDetail.id);
-      } else {
-        res.createTimestamp = dayjs().format('YYYY-MM-DD HH:mm:ss');
-        await addSettlement(res);
-        await NotifyDetailManager.edit(notifyDetail, notifyDetail.id);
-      }
-      emit('saved');
+    let allItemList = [
+      ...inboundList,
+      ...outboundList,
+      ...operateList,
+      ...specialOperateList,
+      ...deliveryList,
+      ...allConsumablesList,
+    ];
+    allItemList.forEach((it) => {
+      it.settlementId = res.data.id;
     });
+    console.log(allItemList, 'allItemList');
+    let quest = [];
+    for (const item of allItemList) {
+      quest.push(addOrUpdateSettlementItem(item));
+    }
+    await Promise.all(quest);
+    emit('saved');
     loading = false;
   }
 </script>

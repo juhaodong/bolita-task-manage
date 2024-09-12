@@ -1,14 +1,16 @@
 <script lang="ts" setup>
-  import { computed, reactive, watchEffect } from 'vue';
-  import { CashStatus, NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
-  import { getNotifyDetailListByNotify } from '@/api/dataLayer/modules/notify/notify-detail';
-  import { safeParseFloat, safeParseInt } from '@/store/utils/utils';
+  import { computed, onMounted, reactive } from 'vue';
+  import { safeParseFloat } from '@/store/utils/utils';
   import { cloneDeep } from 'lodash-es';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { OperationType, saveCash } from '@/api/dataLayer/modules/cash/cash';
-  import { NotifyListPower } from '@/api/dataLayer/common/PowerModel';
-  import { useUserStore } from '@/store/modules/user';
-  import { CustomerManager } from '@/api/dataLayer/modules/user/user';
+  import { getNotifyById } from '@/api/newDataLayer/Notify/Notify';
+  import { getCustomerById } from '@/api/newDataLayer/Customer/Customer';
+  import { getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
+  import {
+    addOrUpdateNotifySettlement,
+    getNotifySettlementByNotifyId,
+  } from '@/api/newDataLayer/NotifySettlement/NotifySettlement';
+  import { $ref } from 'vue/macros';
 
   interface Props {
     notifyId: string;
@@ -20,104 +22,52 @@
   let currentTaskList: any[] = $ref([]);
   const defaultExtraInfo = {
     note: '',
-    otherPrice: '',
-    inboundPrice: '',
-    traySinglePrice: '',
-    containerSinglePrice: '',
-    trayNote: '',
-    containerNote: '',
-    feeNote: '',
-    finalPrice: '',
+    unloadingFee: '',
+    otherFee: '',
+    status: '',
+    totalFee: '',
+    customerId: '',
+    notifyId: '',
   };
   const extraInfo = reactive(defaultExtraInfo);
 
   const emit = defineEmits(['close', 'refresh', 'save']);
-  watchEffect(async () => {
+
+  onMounted(async () => {
     await reload();
   });
 
-  const totalArrivedContainerCount = computed(() => {
-    return currentTaskList.reduce((sum, i) => sum + safeParseInt(i?.arrivedContainerNum) || 0, 0);
-  });
-  const totalArrivedTrayCount = computed(() => {
-    return currentTaskList.reduce((sum, i) => sum + safeParseInt(i?.arrivedTrayNum), 0);
-  });
-  const AccountPowerList = computed(() => {
-    return useUserStore()?.info?.powerList;
-  });
-  const saveBtn = computed(() => {
-    return AccountPowerList.value.includes(NotifyListPower.CostSave);
-  });
-  const confirmBtn = computed(() => {
-    return AccountPowerList.value.includes(NotifyListPower.CostConfirm);
-  });
-  const customerPower = computed(() => {
-    return AccountPowerList.value.includes(NotifyListPower.editFee);
+  const totalPrice = computed(() => {
+    return safeParseFloat(extraInfo.unloadingFee) + safeParseFloat(extraInfo.otherFee);
   });
 
-  const totalPrice = computed(() => {
-    return safeParseFloat(extraInfo.inboundPrice) + safeParseFloat(extraInfo.otherPrice);
-  });
+  let settlementInfo = $ref([]);
 
   async function reload() {
     if (props.notifyId != null) {
-      notifyDetail = await NotifyManager.getById(props.notifyId);
-      customerInfoany = await CustomerManager.getById(notifyDetail?.customerId);
-      currentTaskList = await getNotifyDetailListByNotify(props.notifyId);
+      settlementInfo = await getNotifySettlementByNotifyId(props.notifyId);
+      if (settlementInfo.length > 0) {
+        extraInfo.otherFee = settlementInfo[0].otherFee;
+        extraInfo.unloadingFee = settlementInfo[0].unloadingFee;
+        extraInfo.note = settlementInfo[0].note;
+        extraInfo.id = settlementInfo[0].id;
+      }
+      notifyDetail = await getNotifyById(props.notifyId);
+      customerInfoany = await getCustomerById(notifyDetail?.customer.id);
+      currentTaskList = await getTaskListByNotifyId(props.notifyId);
       Object.assign(extraInfo, cloneDeep(notifyDetail?.extraInfo ?? defaultExtraInfo));
+      console.log(notifyDetail, 'detail');
       emit('refresh');
     }
   }
   async function confirm() {
     await safeScope(async () => {
-      await NotifyManager.edit(
-        {
-          containerFinalStatus: CashStatus.Done,
-          finalPrice: extraInfo.finalPrice,
-        },
-        props.notifyId
-      );
-      await saveCash(
-        {
-          customerId: notifyDetail?.customerId,
-          containerNo: notifyDetail?.containerNo,
-          operationId: props.notifyId,
-          operationType: OperationType.In,
-          amount: extraInfo.inboundPrice,
-          note: extraInfo.note,
-          otherPrice: extraInfo.otherPrice,
-          containerFinalStatus: CashStatus.Done,
-          subtotal: safeParseFloat(extraInfo.inboundPrice) + safeParseFloat(extraInfo.otherPrice),
-        },
-        notifyDetail?.outCashId
-      );
-      emit('save');
-    });
-  }
-
-  async function save() {
-    const editValue: any = {
-      extraInfo,
-      cashStatus: CashStatus.WaitConfirm,
-    };
-
-    await safeScope(async () => {
-      editValue.containerFinalStatus = CashStatus.WaitConfirm;
-      editValue.inboundFinalPrice = extraInfo.finalPrice;
-      editValue.outCashId = await saveCash(
-        {
-          customerId: notifyDetail?.customerId,
-          containerNo: notifyDetail?.containerNo,
-          operationId: props.notifyId,
-          operationType: OperationType.In,
-          amount: extraInfo.inboundPrice,
-          note: extraInfo.note,
-          subtotal: safeParseFloat(extraInfo.inboundPrice) + safeParseFloat(extraInfo.otherPrice),
-          otherPrice: extraInfo.otherPrice,
-        },
-        notifyDetail?.outCashId
-      );
-      await NotifyManager.edit(editValue, props.notifyId);
+      console.log(extraInfo, 'extraInfo');
+      extraInfo.status = '已结算';
+      extraInfo.notifyId = props.notifyId;
+      extraInfo.customerId = notifyDetail.customer.id;
+      extraInfo.totalFee = totalPrice.value;
+      await addOrUpdateNotifySettlement(extraInfo);
       emit('save');
     });
   }
@@ -133,35 +83,20 @@
         {{ customerInfoany?.customerName }}</n-descriptions-item
       >
       <n-descriptions-item :span="2" label="卸柜费">
-        <n-input v-model:value="extraInfo.inboundPrice" :disabled="!customerPower" />
+        <n-input v-model:value="extraInfo.unloadingFee" />
       </n-descriptions-item>
       <n-descriptions-item :span="2" label="其他费用">
-        <n-input v-model:value="extraInfo.otherPrice" :disabled="!customerPower" />
+        <n-input v-model:value="extraInfo.otherFee" />
       </n-descriptions-item>
       <n-descriptions-item :span="2" label="费用总额">
         <n-input v-model:value="totalPrice" disabled />
       </n-descriptions-item>
       <n-descriptions-item :span="2" label="备注">
-        <n-input v-model:value="extraInfo.note" :disabled="!customerPower" />
+        <n-input v-model:value="extraInfo.note" />
       </n-descriptions-item>
     </n-descriptions>
     <n-space class="mt-4">
-      <n-button
-        v-if="saveBtn"
-        :disabled="!extraInfo.inboundPrice"
-        secondary
-        type="warning"
-        @click="save"
-        >保存结算</n-button
-      >
-      <n-button
-        v-if="confirmBtn"
-        :disabled="notifyDetail?.cashStatus !== CashStatus.WaitConfirm"
-        secondary
-        type="primary"
-        @click="confirm"
-        >确认结算</n-button
-      >
+      <n-button secondary type="primary" @click="confirm">确认结算</n-button>
     </n-space>
   </div>
 </template>

@@ -57,10 +57,12 @@ export const useUploadDialog = defineStore('uploadFileDialog', {
       }
     },
     async deleteFile(file) {
+      console.log(this.currentFileUrls, 'file');
+      const allFiles = this.currentFileUrls.split(',');
       if (this.resolve != null) {
         this.resolve({
           checkPassed: true,
-          files: this.currentFileUrls.filter((it) => it !== file),
+          files: allFiles.filter((it) => it !== file).join(','),
         });
         this.show = false;
       }

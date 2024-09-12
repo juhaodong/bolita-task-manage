@@ -15,15 +15,10 @@ export const columnsIn: DataTableColumns = [
       );
     },
   },
-  {
-    title: '结算ID',
-    key: 'id',
-  },
   timeColumn('createTimestamp', '创建日期'),
-  timeColumn('updateTimestamp', '修改日期'),
   statusColumnEasy({
     title: '结算状态',
-    key: 'finalStatus',
+    key: 'status',
   }),
   {
     title: '货柜号',
@@ -57,10 +52,6 @@ export const columnsOut: DataTableColumns = [
         row?.finalStatus === '已结算'
       );
     },
-  },
-  {
-    title: '结算ID',
-    key: 'id',
   },
   timeColumn('createTimestamp', '创建日期'),
   timeColumn('updateTimestamp', '修改日期'),

@@ -58,8 +58,6 @@
   import { h, onMounted, ref, watch } from 'vue';
   import { DataTableColumns, NButton } from 'naive-ui';
   import {
-    getDetailListByIdWithSearch,
-    getReserveItems,
     NotifyDetailManager,
     NotifyDetailMergeManager,
   } from '@/api/dataLayer/modules/notify/notify-detail';
@@ -69,6 +67,7 @@
   import DetailInfo from '@/views/newViews/Missions/AlreadyWarehousing/DetailInfo.vue';
   import { $ref } from 'vue/macros';
   import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import { getTaskListByFilter, getTaskListByIds } from '@/api/newDataLayer/TaskList/TaskList';
 
   interface Props {
     model?: any;
@@ -123,18 +122,26 @@
   let step = $ref(0);
 
   async function updateFilter(filterObj) {
-    allNotifyDetail = (await getReserveItems(filterObj))
-      .filter((a) => a.inStatus === InBoundStatus.All)
-      .map((it) => {
-        it.originId = it.id;
-        return it;
-      });
+    let currentFilter = [];
+    if (filterObj) {
+      const res = Object.keys(filterObj);
+      for (const filterItem of res) {
+        currentFilter.push({
+          field: filterItem,
+          op: filterObj[filterItem] ? '==' : '!=',
+          value: filterObj[filterItem] ?? '',
+        });
+      }
+    }
+    allNotifyDetail = (await getTaskListByFilter(currentFilter)).filter(
+      (a) => a.inStatus === InBoundStatus.WaitOperate
+    );
     console.log(allNotifyDetail, 'all');
   }
 
   async function confirmSelection() {
     console.log(checkedRowKeys.value, 'checkedRowKeys');
-    const currentList = await getDetailListByIdWithSearch(null, checkedRowKeys.value);
+    const currentList = await getTaskListByIds(checkedRowKeys.value);
     console.log(currentList, 'rse');
     const mergeItem = Object.assign({}, currentList[0]);
     mergeItem.number = totalNumber.value;
@@ -144,7 +151,6 @@
     mergeItem.FBADeliveryCode = currentList.map((it) => it.FBADeliveryCode).join('#');
     mergeItem.PO = currentList.map((it) => it.PO).join('#');
     mergeItem.mergedId = currentList.map((it) => it.id);
-    z;
     for (const item of currentList) {
       item.inStatus = '已合并';
       await NotifyDetailManager.edit(item, item.id);

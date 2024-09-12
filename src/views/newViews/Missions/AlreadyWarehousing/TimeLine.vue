@@ -1,17 +1,14 @@
 <script lang="ts" setup>
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { onMounted } from 'vue';
-  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
   import { $ref } from 'vue/macros';
+  import { timeTableColumn } from '@/views/bolita-views/composable/useableColumns';
 
   interface Props {
-    ids: [];
+    info: [];
   }
   const columns = $ref([
-    {
-      title: '时间',
-      key: 'detailTime',
-    },
+    timeTableColumn('detailTime', '时间', 'YYYY-MM-DD HH:mm:ss'),
     {
       title: '操作人员',
       key: 'operator',
@@ -21,14 +18,12 @@
       key: 'note',
     },
   ]);
-  let dataInfo = $ref([]);
-
   let currentItems = $ref([]);
   const props = defineProps<Props>();
   async function reload() {
-    currentItems = await NotifyDetailManager.getById(props.ids);
-    dataInfo = currentItems.timeLine;
-    console.log(dataInfo, 'info');
+    loading = true;
+    currentItems = props.info.timelines.filter((it) => it.useType === 'normal');
+    loading = false;
   }
   onMounted(async () => {
     await reload();
@@ -39,7 +34,7 @@
 <template>
   <div>
     <loading-frame :loading="loading">
-      <n-data-table :bordered="false" :columns="columns" :data="dataInfo" />
+      <n-data-table :bordered="false" :columns="columns" :data="currentItems" />
     </loading-frame>
   </div>
 </template>

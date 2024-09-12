@@ -1,8 +1,6 @@
 <script lang="ts" setup>
   import { computed, h, watchEffect } from 'vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
-  import { getNotifyDetailListByNotify } from '@/api/dataLayer/modules/notify/notify-detail';
   import { dayjsDateByYMD } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import { DataTableColumns, NTag } from 'naive-ui';
@@ -10,6 +8,8 @@
   import FileSaver from 'file-saver';
   import { randomContainColorList } from '@/api/dataLayer/common/ColorList';
   import { safeSumBy } from '@/store/utils/utils';
+  import { getNotifyById } from '@/api/newDataLayer/Notify/Notify';
+  import { getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
 
   interface Props {
     notifyId: string;
@@ -33,8 +33,8 @@
 
   async function reload() {
     if (props.notifyId != null) {
-      notifyInfo = await NotifyManager.getById(props.notifyId);
-      const res = await getNotifyDetailListByNotify(props.notifyId);
+      notifyInfo = await getNotifyById(props.notifyId);
+      const res = await getTaskListByNotifyId(props.notifyId);
       res.forEach((it) => {
         if (it.outboundMethod === '存仓') {
           it.Anmerkung = 'Im Lager';
@@ -148,7 +148,7 @@
           {{ notifyInfo?.arrivedCount }}</n-descriptions-item
         >
         <n-descriptions-item label="Name des Kunden:">
-          {{ notifyInfo?.customerId }}</n-descriptions-item
+          {{ notifyInfo?.customer.customerName }}</n-descriptions-item
         >
         <n-descriptions-item label="Ankunftszeit:"> {{ planArriveTime }}</n-descriptions-item>
       </n-descriptions>

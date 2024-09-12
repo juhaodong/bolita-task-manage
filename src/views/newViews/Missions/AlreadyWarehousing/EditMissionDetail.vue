@@ -9,16 +9,20 @@
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
-  import { generateOptionFromArray } from '@/store/utils/utils';
+  import { asyncUserCustomer, generateOptionFromArray } from '@/store/utils/utils';
   import {
     allDeliveryMethod,
     allOutboundMethod,
   } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
   import dayjs from 'dayjs';
   import { useUserStore } from '@/store/modules/user';
-  import { updateOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
-  import { getOutboundForecastById } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import {
+    addOrUpdateOutboundForecast,
+    getOutboundForecastById,
+  } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
+  import { keys } from 'lodash';
+  import { addOrUpdateTask } from '@/api/newDataLayer/TaskList/TaskList';
 
   interface Props {
     model?: any;
@@ -28,10 +32,17 @@
   const prop = defineProps<Props>();
   const schemas: FormFields = [
     {
-      label: '客户ID',
-      field: 'customerName',
+      label: 'id',
+      field: 'id',
       required: false,
+      disableCondition: () => {
+        return prop.model?.id;
+      },
+      displayCondition: () => {
+        return prop.model?.id;
+      },
     },
+    asyncUserCustomer(prop.model.customerId),
     {
       label: '柜号',
       field: 'containerId',
@@ -191,30 +202,33 @@
 
   async function handleSubmit(values: any) {
     console.log(prop.model, 'model');
+    const waitEdit = prop.model;
     loading = true;
     values.alreadyChanged = 1;
-    let inStorageTime = prop.model?.storageTime ? prop.model?.storageTime : [];
+    let userInfo = useUserStore().info;
     if (values.outboundMethod === '存仓' && prop.model?.outboundMethod !== '存仓') {
       values.inStatus = '存仓';
-      inStorageTime.push({ storageTime: dayjs().format('YYYY-MM-DD HH:mm:ss') });
-      values.storageTime = inStorageTime;
+      await addOrUpdateTaskTimeLine({
+        useType: 'storage',
+        bolitaTaskId: values.id,
+        operator: userInfo?.realName,
+        detailTime: dayjs().valueOf(),
+        note: '转为存仓',
+      });
       if (prop.model?.outboundId) {
         let outboundInfo = await getOutboundForecastById(prop.model?.outboundId);
         outboundInfo.inStatus = '异常';
-        await updateOutboundForecast(prop.model?.outboundId, outboundInfo);
+        await addOrUpdateOutboundForecast(outboundInfo);
       }
     } else if (values.outboundMethod !== '存仓' && prop.model?.outboundMethod === '存仓') {
-      const lastTimeInfo = inStorageTime.pop();
-      if (!lastTimeInfo.outBoundTime) {
-        lastTimeInfo.outBoundTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
-        lastTimeInfo.totalStorageTime = dayjs(lastTimeInfo.outBoundTime).diff(
-          lastTimeInfo.storageTime,
-          'hour'
-        );
-        inStorageTime.push(lastTimeInfo);
-      }
+      await addOrUpdateTaskTimeLine({
+        useType: 'storage',
+        bolitaTaskId: values.id,
+        operator: userInfo?.realName,
+        detailTime: dayjs().valueOf(),
+        note: '存仓转出',
+      });
       values.inStatus = '入库待出库';
-      values.storageTime = inStorageTime;
     }
     if (prop.model?.inStatus === '等待审核' || prop.model?.inStatus === '等待提交') {
       if (values.changeOrderFiles === '否') {
@@ -224,21 +238,26 @@
         values.inStatus = '等待提交';
       }
     }
-
-    const userInfo = useUserStore().info;
-    let res = prop.model?.timeLine ? prop.model?.timeLine : [];
-    res.unshift({
-      operator: userInfo?.realName,
-      detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-      note: '修改了具体信息',
-    });
-    values.timeLine = res;
-    await safeScope(async () => {
-      if (prop?.model?.id) {
-        await NotifyDetailManager.editInternal(values, prop.model.id);
-      } else {
-        await NotifyDetailManager.addInternal(values);
+    const valuesKeys = keys(values);
+    let editLabel = [];
+    let allItemInfo = schemas.filter((x) => x.field);
+    for (const valuesKey of valuesKeys) {
+      if (values[valuesKey] !== prop.model[valuesKey]) {
+        const res = allItemInfo.find((it) => it.field === valuesKey) ?? '';
+        if (res) {
+          editLabel.push(res.label);
+        }
       }
+    }
+    await addOrUpdateTaskTimeLine({
+      useType: 'normal',
+      bolitaTaskId: values.id,
+      operator: userInfo?.realName,
+      detailTime: dayjs().valueOf(),
+      note: '修改了' + editLabel.join(','),
+    });
+    await safeScope(async () => {
+      await addOrUpdateTask(Object.assign(waitEdit, values));
       emit('saved', values);
     });
     loading = false;

@@ -181,7 +181,7 @@
         style="width: 90%; min-width: 800px; max-width: 800px"
         title="时间线"
       >
-        <time-line :ids="currentId" />
+        <time-line :info="currentInfo" />
       </n-modal>
       <n-modal
         v-model:show="showOfferPrice"
@@ -221,10 +221,7 @@
   import { $ref } from 'vue/macros';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import {
-    getDetailListById,
-    NotifyDetailManager,
-  } from '@/api/dataLayer/modules/notify/notify-detail';
+  import { getDetailListById } from '@/api/dataLayer/modules/notify/notify-detail';
   import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import { Box20Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
@@ -249,7 +246,11 @@
   import { valueOfToday } from '@/api/dataLayer/common/Date';
   import FileSaver from 'file-saver';
   import MergeDialog from '@/views/newViews/Missions/AlreadyWarehousing/MergeDialog.vue';
-  import { addOrUpdateTask, getTaskList } from '@/api/newDataLayer/TaskList/TaskList';
+  import {
+    addOrUpdateTask,
+    getTaskList,
+    getTaskListById,
+  } from '@/api/newDataLayer/TaskList/TaskList';
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
@@ -272,7 +273,7 @@
   let showCurrentHeaderDataTable = $ref(false);
   let currentHeader = $ref([]);
   let currentColumns = $ref([]);
-  let currentId = $ref('');
+  let currentInfo = $ref('');
   let showTimeLine = $ref(false);
   let currentWithOutSelection = $ref([]);
   let showOfferPrice = $ref(false);
@@ -310,7 +311,9 @@
   });
 
   async function startEdit(id) {
-    currentModel = await NotifyDetailManager.getById(id);
+    currentModel = await getTaskListById(id);
+    currentModel.customerId = currentModel.customer.id;
+    currentModel.inventoryId = currentModel.inventory.id;
     editDetailModel.value = true;
   }
 
@@ -620,7 +623,7 @@
           {
             label: '时间线',
             onClick() {
-              currentId = record.id;
+              currentInfo = record;
               showTimeLine = true;
             },
             ifShow: () => {
@@ -718,7 +721,7 @@
               record.alreadyChanged = 0;
               record.customerId = record.customer.id;
               record.inventoryId = record.inventory.id;
-              await addOrUpdateTask(record.id);
+              await addOrUpdateTask(record);
             },
             ifShow: () => {
               return record.alreadyChanged;
