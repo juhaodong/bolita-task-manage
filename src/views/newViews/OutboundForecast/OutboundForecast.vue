@@ -74,7 +74,6 @@
   import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
   import {
     getOutboundForecast,
-    getOutboundForecastById,
     updateOutboundForecast,
     updateTaskListConfirmOut,
   } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
@@ -90,6 +89,7 @@
   import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
+  import { getOutboundForecastById } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
 
   const { hasPermission } = usePermission();
 
