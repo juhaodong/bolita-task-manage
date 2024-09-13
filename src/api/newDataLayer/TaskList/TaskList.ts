@@ -161,4 +161,5 @@ export const defaultTask = {
   REF: '',
   bookingCarTime: '',
   mergedId: '',
+  waitCar: '',
 };

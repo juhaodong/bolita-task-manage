@@ -117,7 +117,7 @@
         style="width: 90%; min-width: 800px; max-width: 800px"
         title="添加表头"
       >
-        <selected-header-table :all-columns="columns" :type="'mission'" @saved="reloadHeader" />
+        <selected-header-table :all-columns="columns" :type="'taskList'" @saved="reloadHeader" />
       </n-modal>
       <n-modal
         v-model:show="showTimeLine"
@@ -149,21 +149,15 @@
   import { $ref } from 'vue/macros';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import {
-    getDetailListById,
-    NotifyDetailManager,
-  } from '@/api/dataLayer/modules/notify/notify-detail';
-  import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
+  import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import { Box20Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
-  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
   import NewTotalFee from '@/views/newViews/SettlementManage/NewTotalFee.vue';
-  import { useUploadDialog } from '@/store/modules/uploadFileState';
   import NewTrayDialog from '@/views/newViews/Missions/AlreadyWarehousing/NewTrayDialog.vue';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
-  import { getTableHeader } from '@/api/dataLayer/common/TableHeader';
   import TimeLine from '@/views/newViews/Missions/AlreadyWarehousing/TimeLine.vue';
   import { useUserStore } from '@/store/modules/user';
   import { getUserCustomerList, hasAuthPower } from '@/api/dataLayer/common/power';
@@ -173,7 +167,13 @@
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
   import { inStorageObj } from '@/views/newViews/Missions/AlreadyWarehousing/selectionType';
   import FileSaver from 'file-saver';
-  import { getTaskListByFilter } from '@/api/newDataLayer/TaskList/TaskList';
+  import {
+    addOrUpdateTask,
+    getTaskListByFilter,
+    getTaskListByIds,
+  } from '@/api/newDataLayer/TaskList/TaskList';
+  import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
+  import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -362,9 +362,9 @@
 
   async function reloadHeader() {
     currentColumns = [];
-    currentHeader = await getTableHeader('mission');
+    currentHeader = (await getTableHeaderGroupItemList('taskList')).tableHeaderItems;
     currentHeader.forEach((item) => {
-      const res = columns.find((it) => it.key === item.key);
+      const res = columns.find((it) => it.key === item.itemKey);
       currentColumns.push(res);
     });
     currentColumns = currentColumns.length > 0 ? currentColumns : columns;
@@ -400,39 +400,35 @@
 
   async function confirmFinish() {
     const userInfo = useUserStore().info;
-    const currentList = await getDetailListById(cancelIds);
+    const currentList = await getTaskListByIds(cancelIds);
     for (const currentItem of currentList) {
-      let timeInfo = currentItem.timeLine;
       currentItem.operateInStorage = '否';
-      timeInfo.unshift({
-        operator: userInfo?.realName,
-        detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-        note: '完成库内操作',
-      });
       if (currentItem.outboundMethod !== '存仓') {
         currentItem.inStatus = InBoundStatus.All;
       } else {
         currentItem.inStatus = '存仓';
       }
-      currentItem.timeLine = timeInfo;
-      await NotifyDetailManager.editInternal(currentItem, currentItem.id);
+      currentItem.customerId = currentItem.customer.id;
+      currentItem.inventoryId = currentItem.inventory.id;
+      await addOrUpdateTaskTimeLine({
+        useType: 'normal',
+        bolitaTaskId: currentItem.id,
+        operator: userInfo?.realName,
+        detailTime: dayjs().valueOf(),
+        note: '完成库内操作',
+      });
+      await addOrUpdateTask(currentItem);
     }
     await reloadTable();
   }
 
   onMounted(async () => {
     await reloadHeader();
-    monthTab = OneYearMonthTab();
-    typeMission = '整柜任务看板';
-    selectedMonth = monthTab[0];
     const res = getQueryString('containerId');
     if (res) {
       updateFilter({ containerId: res });
     } else {
       await reloadTable();
-    }
-    if (props.belongsToId) {
-      filterObj = { belongsToId: props.belongsToId };
     }
   });
 
@@ -455,88 +451,6 @@
       return h(TableAction as any, {
         style: 'button',
         actions: [
-          {
-            label: '修改',
-            onClick() {
-              startEdit(record.id);
-            },
-            ifShow: () => {
-              return hasAuthPower('inStorageEdit');
-            },
-          },
-          {
-            label: '结算',
-            onClick() {
-              checkCashStatus(record.id);
-            },
-            ifShow: () => {
-              return hasAuthPower('inStorageSettle');
-            },
-          },
-          {
-            label: '时间线',
-            onClick() {
-              currentId = record.id;
-              showTimeLine = true;
-            },
-            ifShow: () => {
-              return hasAuthPower('inStorageTimeLine');
-            },
-          },
-          {
-            label: '换单文件',
-            highlight: () => {
-              return record?.['changeOrder']?.length > 0 ? 'success' : 'error';
-            },
-            ifShow: () => {
-              return record?.changeOrderFiles === '是' && hasAuthPower('inStorageChangeFiles');
-            },
-            async onClick() {
-              const upload = useUploadDialog();
-              const files = await upload.upload(record['changeOrder']);
-              if (files.checkPassed) {
-                const obj = {};
-                obj['changeOrder'] = files.files;
-                if (!record.arriveTime) {
-                  obj['inStatus'] = InBoundDetailStatus.WaitCheck;
-                }
-                await NotifyDetailManager.editInternal(obj, record.id);
-              }
-              actionRef.value[0].reload();
-            },
-          },
-          fileAction('POD', 'POD', '', 'inStoragePOD'),
-          fileAction('操作文件', 'operationFiles', '', 'inStorageOperationFile'),
-          fileAction('问题图片', 'problemFiles', '', 'inStorageProblemPic'),
-          {
-            label: '添加托盘',
-            onClick() {
-              recordData = record;
-              startAddTray(record.id);
-            },
-            highlight: () => {
-              return record.detailTray ? 'success' : 'error';
-            },
-            ifShow: () => {
-              return (
-                (record.outboundMethod === '大件托盘' || record.outboundMethod === '标准托盘') &&
-                hasAuthPower('inStorageAddTray')
-              );
-            },
-          },
-          {
-            label: '信息已变更',
-            highlight: () => {
-              return 'error';
-            },
-            async onClick() {
-              record.alreadyChanged = 0;
-              await NotifyDetailManager.editInternal(record, record.id);
-            },
-            ifShow: () => {
-              return record.alreadyChanged;
-            },
-          },
           {
             label: '操作已完成',
             highlight: () => {

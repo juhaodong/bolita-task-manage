@@ -366,8 +366,8 @@
     showCurrentHeaderDataTable = false;
   }
 
-  async function startEdit(id) {
-    currentModel = await getNotifyById(id);
+  async function startEdit(record) {
+    currentModel = record;
     showModal.value = true;
   }
 
@@ -405,15 +405,15 @@
       return h(TableAction as any, {
         style: 'button',
         actions: [
-          // {
-          //   label: '修改',
-          //   onClick() {
-          //     startEdit(record.id);
-          //   },
-          //   ifShow: () => {
-          //     return hasAuthPower('forecastEdit');
-          //   },
-          // },
+          {
+            label: '修改',
+            onClick() {
+              startEdit(record);
+            },
+            ifShow: () => {
+              return hasAuthPower('forecastEdit');
+            },
+          },
           fileAction('上传卸柜单', 'unloadingFile', '', 'forecastUpload'),
           {
             label: '生成卸柜单',

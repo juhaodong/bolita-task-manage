@@ -104,7 +104,6 @@
   }
 
   async function reload() {
-    console.log(prop.currentData, 'currentData');
     const currentInfo = prop.currentData.trayItems;
     if (currentInfo) {
       trayList = assign(trayList, currentInfo);

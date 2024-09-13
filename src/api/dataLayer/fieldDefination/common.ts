@@ -24,6 +24,7 @@ export function getFilesUploadFormField(
     field: key,
     label: '附件',
     component: 'NUpload',
+    defaultValue: [],
     componentProps: {
       multiple: true,
       uploadTemplate,

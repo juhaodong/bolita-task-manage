@@ -22,7 +22,11 @@
     addOrUpdateInventoryUseLog,
     getCurrentLogTime,
   } from '@/api/newDataLayer/Warehouse/UseLog';
-  import { addOrUpdateTask, defaultTask } from '@/api/newDataLayer/TaskList/TaskList';
+  import {
+    addOrUpdateTask,
+    defaultTask,
+    getTaskListByNotifyId,
+  } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { safeSumBy } from '@/store/utils/utils';
 
@@ -35,9 +39,9 @@
   const emit = defineEmits(['saved']);
   let loading: boolean = $ref(false);
   let defaultValue = {
-    customerName: '',
+    customerId: '',
     containerNo: '',
-    warehouseId: '',
+    inventoryId: '',
     planArriveDateTime: dayjs().valueOf(),
     inHouseTime: '',
     note: '',
@@ -134,72 +138,83 @@
   async function saveNotify(value: any) {
     defaultValue = value;
     startLoading();
-    const userStore = useUserStore();
-
-    const currentCustomer = (await getCustomerById(value.customerId)) ?? '';
-    // value.customerName = currentCustomer.customerName ?? '';
-    value.notifyType = prop.type;
-    value.unloadingFile = '';
-    value.totalTime = '';
-    value.unloadEndTime = '';
-    value.unloadStartTime = '';
-    value.realDate = '';
-    value.totalCount = '';
-    value.salesName =
-      (await getUserNameById(currentCustomer.belongSalesId)) ?? userStore.info?.userName;
-    value.cashStatus = '';
-    value.inStatus = InBoundStatus.WaitCheck;
-    let taskList = [
-      ...(await readFile(value.files?.[0].file, value.notifyType)),
-      ...(value?.trayTaskList ?? []),
-    ];
-    console.log(taskList, 'list');
-    value.arrivedCount = safeSumBy(taskList, 'number').toString();
-
-    if (value.files) {
-      value.files = await saveFiles(value.files);
-    } else {
-      value.files = '';
-    }
-    console.log(value, 'value');
-    if (errorMessage.length === 0) {
-      const res = await addOrUpdateNotify(value);
-      await addOrUpdateInventoryUseLog({
-        notifyId: res.data.id,
-        inventoryId: value.inventoryId,
-        useAtTimestamp: getCurrentLogTime(value.planArriveDateTime, value.inHouseTime),
-      });
-      let quest = [];
-      for (const item of taskList) {
-        // item.customerName = value.customerName;
-        item.customerId = value.customerId;
-        item.inventoryId = value.inventoryId;
-        item.inHouseTime = value.inHouseTime;
-        item.notifyId = res.data.id;
-        item.files = value.files;
-        item.planArriveDateTime = value.planArriveDateTime;
-        quest.push(addOrUpdateTask(item));
+    if (value?.id) {
+      await addOrUpdateNotify(value);
+      const taskList = await getTaskListByNotifyId(value.id);
+      for (const task of taskList) {
+        task.customerId = value.customerId;
+        task.inventoryId = value.inventoryId;
+        task.inHouseTime = value.inHouseTime;
+        await addOrUpdateTask(task);
       }
-      const result = await Promise.all(quest);
-      const ids = result.map((it) => it.data.id);
-      let idQuest = [];
-      const userInfo = useUserStore().info;
-      for (const id of ids) {
-        idQuest.push(
-          addOrUpdateTaskTimeLine({
-            useType: 'normal',
-            bolitaTaskId: id,
-            operator: userInfo?.realName,
-            detailTime: dayjs().valueOf(),
-            note: '新建货柜预报',
-          })
-        );
-      }
-      await Promise.all(idQuest);
-      emit('saved');
     } else {
-      // emit('saved');
+      const userStore = useUserStore();
+
+      const currentCustomer = (await getCustomerById(value.customerId)) ?? '';
+      // value.customerName = currentCustomer.customerName ?? '';
+      value.notifyType = prop.type;
+      value.unloadingFile = '';
+      value.totalTime = '';
+      value.unloadEndTime = '';
+      value.unloadStartTime = '';
+      value.realDate = '';
+      value.totalCount = '';
+      value.operationalRemarks = '';
+      value.salesName =
+        (await getUserNameById(currentCustomer.belongSalesId)) ?? userStore.info?.userName;
+      value.cashStatus = '';
+      value.inStatus = InBoundStatus.WaitCheck;
+      let taskList = [
+        ...(await readFile(value.files?.[0].file, value.notifyType)),
+        ...(value?.trayTaskList ?? []),
+      ];
+      console.log(taskList, 'list');
+      value.arrivedCount = safeSumBy(taskList, 'number').toString();
+
+      if (value.files) {
+        value.files = await saveFiles(value.files);
+      } else {
+        value.files = '';
+      }
+      console.log(value, 'value');
+      if (errorMessage.length === 0) {
+        const res = await addOrUpdateNotify(value);
+        await addOrUpdateInventoryUseLog({
+          notifyId: res.data.id,
+          inventoryId: value.inventoryId,
+          useAtTimestamp: getCurrentLogTime(value.planArriveDateTime, value.inHouseTime),
+        });
+        let quest = [];
+        for (const item of taskList) {
+          // item.customerName = value.customerName;
+          item.customerId = value.customerId;
+          item.inventoryId = value.inventoryId;
+          item.inHouseTime = value.inHouseTime;
+          item.notifyId = res.data.id;
+          item.files = value.files;
+          item.planArriveDateTime = value.planArriveDateTime;
+          quest.push(addOrUpdateTask(item));
+        }
+        const result = await Promise.all(quest);
+        const ids = result.map((it) => it.data.id);
+        let idQuest = [];
+        const userInfo = useUserStore().info;
+        for (const id of ids) {
+          idQuest.push(
+            addOrUpdateTaskTimeLine({
+              useType: 'normal',
+              bolitaTaskId: id,
+              operator: userInfo?.realName,
+              detailTime: dayjs().valueOf(),
+              note: '新建货柜预报',
+            })
+          );
+        }
+        await Promise.all(idQuest);
+      }
     }
+
+    emit('saved');
     stop();
   }
 </script>
