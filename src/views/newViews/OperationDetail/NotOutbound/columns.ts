@@ -19,28 +19,16 @@ export const columns: DataTableColumns<any> = [
     key: 'id',
   },
   {
-    title: '出库日期',
-    key: 'realOutDate',
-  },
-  {
-    title: 'Halle',
-    key: 'warehouseId',
-  },
-  {
-    title: '取货时间',
-    key: 'warehouseId',
-  },
-  {
     title: 'Ref',
-    key: 'REF',
+    key: 'ref',
   },
   {
     title: 'ISA',
-    key: 'ISA',
+    key: 'isd',
   },
   {
     title: 'AMZ-Sendungs ID',
-    key: 'AMZID',
+    key: 'amzId',
   },
   {
     title: 'Kunden',

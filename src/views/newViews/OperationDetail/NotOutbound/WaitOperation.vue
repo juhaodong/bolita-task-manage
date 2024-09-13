@@ -247,10 +247,6 @@
     },
     timeTableColumn('pickUpDateTime', '预计取货时间'),
     timeTableColumn('reservationGetProductTime', '预约送货时间'),
-    {
-      title: 'Halle',
-      key: 'warehouseId',
-    },
     statusColumnEasy({
       title: '状态',
       key: 'inStatus',
@@ -278,23 +274,19 @@
     },
     {
       title: 'Ref',
-      key: 'REF',
+      key: 'ref',
     },
     {
       title: 'ISA',
-      key: 'ISA',
+      key: 'isa',
     },
     {
       title: 'AMZ-Sendungs ID',
-      key: 'AMZID',
-    },
-    {
-      title: 'Kunden',
-      key: 'customerId',
+      key: 'amzid',
     },
     {
       title: 'FC/送货地址',
-      key: 'FCAddress',
+      key: 'fcaddress',
     },
     {
       title: '物流方式',
@@ -330,6 +322,7 @@
       const res = operationColumns.find((it) => it.key === item.itemKey);
       currentColumns.push(res);
     });
+    console.log(currentColumns, 'currentColumns');
     currentColumns = currentColumns.length > 0 ? currentColumns : operationColumns;
     showCurrentHeaderDataTable = false;
   }
@@ -337,11 +330,12 @@
     let currentFilter = [];
     if (filterObj) {
       const res = Object.keys(filterObj);
+
       for (const filterItem of res) {
         currentFilter.push({
           field: filterItem,
-          op: filterObj[filterItem] ? '==' : '!=',
-          value: filterObj[filterItem] ?? '',
+          op: filterObj[filterItem] ? 'like' : '!=',
+          value: '%' + filterObj[filterItem] + '%' ?? '',
         });
       }
     }

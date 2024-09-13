@@ -92,8 +92,8 @@
       for (const id of prop.mergedOutIds) {
         const outboundForecastInfo = await getOutboundForecastById(id);
         if (prop.typeName === 'car') {
-          outboundForecastInfo.AMZID = values.AMZID;
-          outboundForecastInfo.ISA = values.ISA;
+          outboundForecastInfo.amzid = values.AMZID;
+          outboundForecastInfo.isa = values.ISA;
           outboundForecastInfo.bookCarTimestamp = values.bookCarTimestamp;
           outboundForecastInfo.inStatus = values.inStatus;
           outboundForecastInfo.carStatus = values.carStatus;
@@ -105,7 +105,7 @@
           outboundForecastInfo.waybillId = values.waybillId;
           await updateTaskListAfterBookingCar(id);
         } else {
-          outboundForecastInfo.REF = values.REF;
+          outboundForecastInfo.ref = values.REF;
           outboundForecastInfo.costPrice = values.costPrice;
           outboundForecastInfo.inStatus = values.inStatus;
           outboundForecastInfo.suggestedPrice = values.suggestedPrice;

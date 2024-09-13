@@ -82,7 +82,10 @@
     getTaskListByFilter,
     getTaskListByIdsAndFilter,
   } from '@/api/newDataLayer/TaskList/TaskList';
-  import { addOrUpdateOutboundForecast } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import {
+    addOrUpdateOutboundForecast,
+    defaultOutboundList,
+  } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
 
   interface Props {
     model?: any;
@@ -139,15 +142,12 @@
     let currentFilter = [];
     if (filterObj) {
       const res = Object.keys(filterObj);
+
       for (const filterItem of res) {
         currentFilter.push({
           field: filterItem,
-          op: filterObj[filterItem]
-            ? filterItem === 'customer' || filterItem === 'inventory'
-              ? 'belongs to'
-              : '=='
-            : '!=',
-          value: filterObj[filterItem] ?? '',
+          op: filterObj[filterItem] ? 'like' : '!=',
+          value: '%' + filterObj[filterItem] + '%' ?? '',
         });
       }
     }
@@ -210,11 +210,9 @@
       outboundDetailInfo: allNotifyDetail.map((it) => it.id).join(','),
       totalVolume: safeSumBy(allNotifyDetail, 'volume'),
       totalWeight: safeSumBy(allNotifyDetail, 'weight'),
-      waitPrice: '',
-      waitCar: '',
-      totalOutOffer: '',
     };
-    const outboundId = (await addOrUpdateOutboundForecast(res)).data.id;
+    const currentInfo = Object.assign(defaultOutboundList, res);
+    const outboundId = (await addOrUpdateOutboundForecast(currentInfo)).data.id;
     allNotifyDetail.forEach((it) => {
       it.customerId = it.customer.id;
       it.inventoryId = it.inventory.id;

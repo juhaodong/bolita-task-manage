@@ -67,7 +67,7 @@
 
   const loadDataTable = async () => {
     const res = await SalesManManager.load(filterObj);
-    console.log(res, 'res');
+
     return res;
   };
 

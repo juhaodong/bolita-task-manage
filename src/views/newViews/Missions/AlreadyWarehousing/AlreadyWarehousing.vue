@@ -466,11 +466,12 @@
     let currentFilter = [];
     if (filterObj) {
       const res = Object.keys(filterObj);
+
       for (const filterItem of res) {
         currentFilter.push({
           field: filterItem,
-          op: filterObj[filterItem] ? '==' : '!=',
-          value: filterObj[filterItem] ?? '',
+          op: filterObj[filterItem] ? 'like' : '!=',
+          value: '%' + filterObj[filterItem] + '%' ?? '',
         });
       }
     }
@@ -484,7 +485,7 @@
     }
 
     const ownedCustomerIds = await getUserCustomerList();
-    currentFilter.push({ field: 'customer', op: 'belongs to many', value: ownedCustomerIds });
+    currentFilter.push({ field: 'customer.id', op: 'in', value: ownedCustomerIds });
     // if (!showAll) {
     //   const oldValue = currentFilter.find((it) => it.field === 'inStatus')?.value;
     //   console.log(oldValue, 'old');
@@ -497,13 +498,16 @@
     //     value: currentValue,
     //   });
     // }
-    // if (dateRange) {
-    //   let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-    //   let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-    //   allList = allList.filter(
-    //     (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
-    //   );
-    // }
+    if (dateRange) {
+      console.log(dateRange, 'range');
+      currentFilter.push({ field: 'planArriveDateTime', op: '>=', value: dateRange[0] });
+      currentFilter.push({ field: 'planArriveDateTime', op: '<=', value: dateRange[1] });
+      // let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
+      // let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
+      // allList = allList.filter(
+      //   (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
+      // );
+    }
     console.log(currentFilter, 'currentFilter');
     const res = await getTaskListByFilterWithPagination(currentFilter, paginationReactive);
     allList = res.content;

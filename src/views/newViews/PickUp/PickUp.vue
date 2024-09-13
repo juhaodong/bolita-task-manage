@@ -89,7 +89,7 @@
     const res = (await PickUpPlanManager.load(filterObj)).filter(
       (x) => dayjs(x.createTimestamp).format('YYYY-MM') === selectedMonth
     );
-    console.log(res, 'res');
+
     return res;
   };
 

@@ -1,7 +1,6 @@
 import { ResultEnum } from '@/store/enums/httpEnum';
 import { sumBy } from 'lodash-es';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { getFBACodeList, getStorageList } from '@/api/dataLayer/fieldDefination/common';
 import { CustomerManager } from '@/api/dataLayer/modules/user/user';
 import { useUserStore } from '@/store/modules/user';
 import {
@@ -10,6 +9,7 @@ import {
   getCustomerListByIds,
 } from '@/api/newDataLayer/Customer/Customer';
 import { getInventoryList } from '@/api/newDataLayer/Warehouse/Warehouse';
+import { getFBACodeList } from '@/api/newDataLayer/FBACode/FBACode';
 
 export function generateOptionFromArray(arr?: any[]) {
   return (
@@ -71,11 +71,11 @@ export async function asyncWarehouseList(defaultValue): Promise<FormField> {
 export async function asyncFCAddress(): Promise<FormField> {
   const FBACodeList = await getFBACodeList();
   const list = FBACodeList.map((it) => ({
-    label: it,
-    value: it,
+    label: it.code,
+    value: it.id,
   }));
   return {
-    field: 'FCAddress',
+    field: 'fcaddress',
     label: 'FC/送货地址',
     component: 'NSelect',
     componentProps: {
@@ -86,13 +86,13 @@ export async function asyncFCAddress(): Promise<FormField> {
 }
 
 export async function asyncStorage(): Promise<FormField> {
-  const storageList = await getStorageList();
+  const storageList = await getInventoryList();
   const list = storageList.map((it) => ({
-    label: it,
-    value: it,
+    label: it.name,
+    value: it.id,
   }));
   return {
-    field: 'warehouseId',
+    field: 'inventory.id',
     label: '仓库',
     component: 'NSelect',
     componentProps: {

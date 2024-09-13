@@ -17,7 +17,7 @@
   let outPrice = $ref('');
   let loading = $ref(false);
 
-  const emit = defineEmits(['close', 'refresh', 'save']);
+  const emit = defineEmits(['close', 'refresh', 'saved']);
 
   onMounted(() => {
     reload();
@@ -48,7 +48,7 @@
         }
       }
       loading = false;
-      emit('save');
+      emit('saved');
     });
   }
 </script>

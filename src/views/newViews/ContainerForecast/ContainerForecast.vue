@@ -250,11 +250,12 @@
     let currentFilter = [];
     if (filterObj) {
       const res = Object.keys(filterObj);
+
       for (const filterItem of res) {
         currentFilter.push({
           field: filterItem,
-          op: filterObj[filterItem] ? '==' : '!=',
-          value: filterObj[filterItem] ?? '',
+          op: filterObj[filterItem] ? 'like' : '!=',
+          value: '%' + filterObj[filterItem] + '%' ?? '',
         });
       }
     }
@@ -363,6 +364,7 @@
       currentColumns.unshift(selectionType);
     }
     currentColumns = currentColumns.length > 0 ? currentColumns : columns;
+    console.log(currentColumns, '123');
     showCurrentHeaderDataTable = false;
   }
 

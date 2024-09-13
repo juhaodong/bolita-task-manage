@@ -16,7 +16,6 @@
       </n-button>
       <n-button
         v-if="hasAuthPower('orderCarBookingCar')"
-        :disabled="carRules"
         type="primary"
         @click="startShareCar('car')"
       >
@@ -157,8 +156,8 @@
       for (const filterItem of res) {
         currentFilter.push({
           field: filterItem,
-          op: filterObj[filterItem] ? '==' : '!=',
-          value: filterObj[filterItem] ?? '',
+          op: filterObj[filterItem] ? 'like' : '!=',
+          value: '%' + filterObj[filterItem] + '%' ?? '',
         });
       }
     }
@@ -238,7 +237,7 @@
       const detailInfoById = allList.find((it) => it.id === id);
       res.push(detailInfoById);
     }
-    console.log(res, 'res');
+
     return res;
   });
   const priceRules = computed(() => {
