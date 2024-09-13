@@ -310,25 +310,25 @@
         ],
       },
     },
-    {
-      field: 'pickUpDateTime',
-      component: 'NDatePicker',
-      label: '提货日期',
-      componentProps: {
-        type: 'date',
-        clearable: true,
-      },
-      displayCondition(model) {
-        return model.needCar === '0';
-      },
-    },
-    {
-      field: 'pickUpPerson',
-      label: '提货方',
-      displayCondition(model) {
-        return model.needCar === '0';
-      },
-    },
+    // {
+    //   field: 'pickUpDateTime',
+    //   component: 'NDatePicker',
+    //   label: '提货日期',
+    //   componentProps: {
+    //     type: 'date',
+    //     clearable: true,
+    //   },
+    //   displayCondition(model) {
+    //     return model.needCar === '0';
+    //   },
+    // },
+    // {
+    //   field: 'pickUpPerson',
+    //   label: '提货方',
+    //   displayCondition(model) {
+    //     return model.needCar === '0';
+    //   },
+    // },
   ];
 
   const filters: FormField[] = [
