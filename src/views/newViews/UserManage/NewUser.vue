@@ -89,10 +89,9 @@
       values.customerName = values?.customerName ?? '';
       values.customerIds = values?.customerIds ? values?.customerIds.join(',') : '';
       values.realName = values.realName ?? '';
-      if (values.customerIds === '') {
+      if (values.customerIds === 'all') {
         values.customerIds = (await getCustomerList()).map((it) => it.id).join(',');
       }
-      console.log(await getPowerTypeByName(res.label));
       const allPowerList = (await getPowerTypeByName(res.label)) ?? [];
       values.powerTypeItemIds = flatChildrenById(allPowerList);
       await addOrUpdateUser(values);

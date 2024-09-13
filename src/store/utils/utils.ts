@@ -143,6 +143,7 @@ export async function asyncMultipleCustomer(): Promise<FormField> {
     label: it.customerName,
     value: it.id,
   }));
+  list.unshift({ label: '全部', value: 'all' });
   return {
     field: 'customerIds',
     label: '客户',
