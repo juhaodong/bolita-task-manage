@@ -44,39 +44,39 @@
         <n-card embedded size="small" style="max-width: 300px">
           <div style="display: flex">
             <n-select
-              placeholder="过滤项1"
-              style="width: 130px"
               v-model:value="optionOne"
               :options="realOptions"
+              placeholder="过滤项1"
+              style="width: 130px"
             />
             <n-input
-              class="ml-2"
-              style="width: 130px"
               v-model:value="valueOne"
-              type="text"
+              class="ml-2"
               placeholder="过滤值1"
+              style="width: 130px"
+              type="text"
             />
           </div>
         </n-card>
         <n-card class="ml-2" embedded size="small" style="max-width: 300px">
           <div style="display: flex">
             <n-select
-              placeholder="过滤项2"
-              style="width: 130px"
               v-model:value="optionTwo"
               :options="realOptions"
+              placeholder="过滤项2"
+              style="width: 130px"
             />
             <n-input
-              class="ml-2"
-              style="width: 130px"
               v-model:value="valueTwo"
-              type="text"
+              class="ml-2"
               placeholder="过滤值2"
+              style="width: 130px"
+              type="text"
             />
           </div>
         </n-card>
-        <n-date-picker class="ml-2" v-model:value="dateRange" type="daterange" clearable />
-        <n-checkbox v-model:checked="showAll" class="ml-2" size="large" label="全部" />
+        <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
+        <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />
       </div>
       <div class="my-2"></div>
       <BasicTable
@@ -104,17 +104,17 @@
         v-model:show="showOperationTable"
         :show-icon="false"
         preset="dialog"
-        title="卸柜表"
         style="width: 90%; min-width: 600px; max-width: 800px"
+        title="卸柜表"
       >
-        <notify-unload-form @save="reloadTable" :notify-id="currentNotifyId!" />
+        <notify-unload-form :notify-id="currentNotifyId!" @save="reloadTable" />
       </n-modal>
       <n-modal
         v-model:show="showFeeDialog"
         :show-icon="false"
         preset="dialog"
-        title="费用表"
         style="width: 90%; min-width: 600px; max-width: 800px"
+        title="费用表"
       >
         <notify-fee-dialog :notify-id="currentNotifyId!" @save="reloadTable" />
       </n-modal>
@@ -122,8 +122,8 @@
         v-model:show="showWarehouseDialog"
         :show-icon="false"
         preset="dialog"
-        title="仓库信息"
         style="width: 90%; min-width: 600px; max-width: 800px"
+        title="仓库信息"
       >
         <warehouse-info-dialog :notify-id="currentNotifyId!" />
       </n-modal>
@@ -131,10 +131,10 @@
         v-model:show="showUnloadingList"
         :show-icon="false"
         preset="dialog"
-        title="卸柜单"
         style="width: 90%; min-width: 600px; max-width: 1000px"
+        title="卸柜单"
       >
-        <unloading-list @save="reloadTable" :notify-id="currentNotifyId!" />
+        <unloading-list :notify-id="currentNotifyId!" @save="reloadTable" />
       </n-modal>
       <n-modal
         v-model:show="showCurrentHeaderDataTable"
@@ -168,17 +168,10 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
-  import {
-    CashStatus,
-    InBoundStatus,
-    NotifyManager,
-    NotifyType,
-  } from '@/api/dataLayer/modules/notify/notify-api';
+  import { CashStatus, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
   import { $ref } from 'vue/macros';
-  import { TruckDelivery } from '@vicons/tabler';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import { clearAllData } from '@/api/dataLayer/clearAllData';
   import { generateOptionFromArray, handleRequest, toastSuccess } from '@/store/utils/utils';
   import NotifyUnloadForm from '@/views/newViews/ContainerForecast/form/NotifyUnloadForm.vue';
   import NotifyFeeDialog from '@/views/newViews/ContainerForecast/form/NotifyFeeDialog.vue';
@@ -188,25 +181,13 @@
   import dayjs from 'dayjs';
   import UnloadingList from '@/views/newViews/ContainerForecast/form/UnloadingList.vue';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
-  import { getTableHeader } from '@/api/dataLayer/common/TableHeader';
   import { getUserCustomerList, hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
-  import { defaultToday, valueOfToday } from '@/api/dataLayer/common/Date';
+  import { valueOfToday } from '@/api/dataLayer/common/Date';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
   import FileSaver from 'file-saver';
-  import {
-    getNotifyDetailListByNotify,
-    NotifyDetailManager,
-  } from '@/api/dataLayer/modules/notify/notify-detail';
-  import {
-    addOrUpdateNotify,
-    getNotifyById,
-    getNotifyList,
-    getNotifyListByFilter,
-  } from '@/api/newDataLayer/Notify/Notify';
-  import { getWarehouseNameById } from '@/api/newDataLayer/Warehouse/Warehouse';
+  import { addOrUpdateNotify, getNotifyListByFilter } from '@/api/newDataLayer/Notify/Notify';
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
-  import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { addOrUpdateTask, getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { useUserStore } from '@/store/modules/user';
@@ -260,9 +241,11 @@
       }
     }
     const customerId = await getUserCustomerList();
-    let res = (await getNotifyListByFilter(currentFilter)).filter((x) =>
-      customerId.includes(x.customer.id)
-    );
+    let res =
+      (await getNotifyListByFilter(currentFilter))
+        .filter((it) => it.customer)
+        .filter((x) => customerId.includes(x.customer.id)) ?? [];
+
     if (!showAll) {
       res = res.filter((a) => a.inStatus !== '已取消');
     }

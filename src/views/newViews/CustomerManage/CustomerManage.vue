@@ -71,6 +71,7 @@
 
   async function startEdit(id) {
     currentModel = await getCustomerById(id);
+    currentModel.inventoryId = currentModel.inventory.id;
     showModal.value = true;
   }
 

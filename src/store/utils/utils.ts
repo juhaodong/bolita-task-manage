@@ -64,7 +64,7 @@ export async function asyncWarehouseList(defaultValue): Promise<FormField> {
     componentProps: {
       options: list,
     },
-    defaultValue: defaultValue !== '' ? defaultValue : currentCustomer.inventory.id,
+    defaultValue: defaultValue !== '' ? defaultValue : currentCustomer?.inventory?.id ?? '',
   };
 }
 
