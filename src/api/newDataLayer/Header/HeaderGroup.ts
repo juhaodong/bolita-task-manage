@@ -1,8 +1,10 @@
 import hillo from 'hillo';
+import { useUserStore } from '@/store/modules/user';
 
 const typeName = 'tableHeader';
 
 export async function getTableHeaderGroupItemList(name) {
+  const userId = useUserStore().info.id;
   return (
     await hillo.jsonPost(typeName + '/list', {
       criteria: [
@@ -10,6 +12,11 @@ export async function getTableHeaderGroupItemList(name) {
           field: 'name',
           op: '==',
           value: name,
+        },
+        {
+          field: 'userId',
+          op: '==',
+          value: userId,
         },
       ],
     })

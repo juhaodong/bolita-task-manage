@@ -508,11 +508,9 @@
       //   (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       // );
     }
-    console.log(currentFilter, 'currentFilter');
     const res = await getTaskListByFilterWithPagination(currentFilter, paginationReactive);
     allList = res.content;
     const totalCount = res.page.totalElements;
-    console.log(totalCount, 'count');
     let fakeListStart = [];
     let fakeListEnd = [];
     if (paginationReactive.pageNumber > 0) {
@@ -586,7 +584,9 @@
 
   async function reloadHeader() {
     currentWithOutSelection = [];
-    currentHeader = (await getTableHeaderGroupItemList('taskList')).tableHeaderItems;
+    currentHeader = JSON.parse(
+      (await getTableHeaderGroupItemList('taskList'))?.headerItemJson ?? []
+    );
     currentHeader.forEach((item) => {
       const res = columns.find((it) => it.key === item.itemKey);
       currentWithOutSelection.push(res);

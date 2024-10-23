@@ -22,39 +22,39 @@
       <n-card embedded size="small" style="max-width: 300px">
         <div style="display: flex">
           <n-select
-            placeholder="过滤项1"
-            style="width: 130px"
             v-model:value="optionOne"
             :options="realOptions"
+            placeholder="过滤项1"
+            style="width: 130px"
           />
           <n-input
-            class="ml-2"
-            style="width: 130px"
             v-model:value="valueOne"
-            type="text"
+            class="ml-2"
             placeholder="过滤值1"
+            style="width: 130px"
+            type="text"
           />
         </div>
       </n-card>
       <n-card class="ml-2" embedded size="small" style="max-width: 300px">
         <div style="display: flex">
           <n-select
-            placeholder="过滤项2"
-            style="width: 130px"
             v-model:value="optionTwo"
             :options="realOptions"
+            placeholder="过滤项2"
+            style="width: 130px"
           />
           <n-input
-            class="ml-2"
-            style="width: 130px"
             v-model:value="valueTwo"
-            type="text"
+            class="ml-2"
             placeholder="过滤值2"
+            style="width: 130px"
+            type="text"
           />
         </div>
       </n-card>
-      <n-date-picker class="ml-2" v-model:value="dateRange" type="daterange" clearable />
-      <n-checkbox v-model:checked="showAll" class="ml-2" size="large" label="全部" />
+      <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
+      <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />
     </div>
     <div class="my-2"></div>
     <BasicTable
@@ -144,10 +144,10 @@
       v-model:show="showLoadingCarDoc"
       :show-icon="false"
       preset="dialog"
-      title="装车单"
       style="width: 90%; min-width: 600px; max-width: 1000px"
+      title="装车单"
     >
-      <loading-car-doc @save="reloadTable" :notify-id="currentNotifyId!" />
+      <loading-car-doc :notify-id="currentNotifyId!" @save="reloadTable" />
     </n-modal>
   </n-card>
   <no-power-page v-else />
@@ -165,28 +165,18 @@
   } from '@/views/bolita-views/composable/useableColumns';
   import { $ref } from 'vue/macros';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import { usePermission } from '@/hooks/web/usePermission';
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
-  import {
-    getOutboundForecast,
-    updateOutboundForecast,
-  } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import { updateOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import OutboundOrder from '@/views/newViews/OutboundForecast/OutboundOrder.vue';
-  import { groupBy } from 'lodash';
-  import {
-    randomContainColorList,
-    randomCustomerColorList,
-  } from '@/api/dataLayer/common/ColorList';
   import EditOF from '@/views/newViews/OperationDetail/NotOutbound/EditOF.vue';
   import LoadingCarList from '@/views/newViews/OperationDetail/NotOutbound/LoadingCarList.vue';
   import OutBoundFeeDialog from '@/views/newViews/OperationDetail/NotOutbound/OutBoundFeeDialog.vue';
   import { NButton } from 'naive-ui';
   import { columns } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
-  import { getTableHeader } from '@/api/dataLayer/common/TableHeader';
   import DetailInfoDialog from '@/views/newViews/OperationDetail/NotOutbound/DetailInfoDialog.vue';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
   import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
@@ -201,6 +191,9 @@
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import { valueOfToday } from '@/api/dataLayer/common/Date';
   import { generateOptionFromArray } from '@/store/utils/utils';
+  import FileSaver from 'file-saver';
+  import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
+  import { getOutboundForecastListByFilter } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
 
   const showModal = ref(false);
   let showShareCarModel = $ref(false);
@@ -233,9 +226,6 @@
   let valueTwo = $ref('');
   let dateRange = $ref(null);
   let showAll = $ref(false);
-  import FileSaver from 'file-saver';
-  import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
-  import { getOutboundForecastListByFilter } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   const operationColumns = $ref([
     {
       title: 'ID',
@@ -244,6 +234,14 @@
     {
       title: '出库日期',
       key: 'realOutDate',
+    },
+    {
+      title: '仓库',
+      key: 'inventory.name',
+    },
+    {
+      title: 'Kunden',
+      key: 'customerId',
     },
     timeTableColumn('pickUpDateTime', '预计取货时间'),
     timeTableColumn('reservationGetProductTime', '预约送货时间'),
@@ -262,9 +260,7 @@
             tertiary: true,
             size: 'small',
             onClick: () => {
-              console.log(row, 'row');
               currentIds = row.outboundDetailInfo;
-              console.log(currentIds, 'currentIds');
               showDetailInfoDialog = true;
             },
           },
@@ -317,12 +313,15 @@
 
   async function reloadHeader() {
     currentColumns = [];
-    currentHeader = (await getTableHeaderGroupItemList('operation')).tableHeaderItems;
+    currentHeader = JSON.parse(
+      (await getTableHeaderGroupItemList('operation'))?.headerItemJson ?? []
+    );
+    console.log(currentHeader, 'header');
     currentHeader.forEach((item) => {
       const res = operationColumns.find((it) => it.key === item.itemKey);
+      console.log(res, item, '321');
       currentColumns.push(res);
     });
-    console.log(currentColumns, 'currentColumns');
     currentColumns = currentColumns.length > 0 ? currentColumns : operationColumns;
     showCurrentHeaderDataTable = false;
   }

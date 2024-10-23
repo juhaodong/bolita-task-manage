@@ -121,9 +121,7 @@
       },
     },
     getFilesUploadFormField('files', false, () => {
-      window.open(
-        'https://firebasestorage.googleapis.com/v0/b/bolita-task-manage.appspot.com/o/NotifyMoBan.xlsx?alt=media&token=12ccc420-eb09-4afb-9ad4-fff39da9da77'
-      );
+      window.open('https://aaden-storage.s3.eu-central-1.amazonaws.com/NotifyMoBan.xlsx');
     }),
     {
       field: 'note',

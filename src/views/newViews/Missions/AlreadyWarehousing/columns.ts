@@ -15,7 +15,7 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: '客户ID',
-    key: 'customerName',
+    key: 'customer.customerName',
   },
   {
     title: '柜号',
@@ -99,7 +99,7 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: 'FC/送货地址',
-    key: 'FCAddress',
+    key: 'fcaddress',
   },
   {
     title: '邮编',
@@ -130,7 +130,7 @@ export const columns: DataTableColumns<any> = [
   timeColumn('deliveryTime', '发货时间'),
   {
     title: 'Ref',
-    key: 'Ref',
+    key: 'ref',
   },
   {
     title: '仓库备注',
@@ -216,7 +216,7 @@ export const filters: FormField[] = [
   },
   {
     label: '货柜号',
-    field: 'containerNo',
+    field: 'containerId',
   },
   {
     label: '票号',

@@ -1,18 +1,18 @@
 <template>
-  <n-form v-bind="getBindValue" :model="formModel" ref="formElRef">
+  <n-form ref="formElRef" :model="formModel" v-bind="getBindValue">
     <n-grid v-bind="getGrid" x-gap="8">
       <template v-for="g in groupedSchema" :key="g.group">
-        <n-gi :span="24" v-if="showGroupHeader">
+        <n-gi v-if="showGroupHeader" :span="24">
           <n-h4>{{ g.group }}</n-h4>
         </n-gi>
-        <n-gi v-bind="schema.giProps" v-for="schema in g.schema" :key="schema.field">
+        <n-gi v-for="schema in g.schema" :key="schema.field" v-bind="schema.giProps">
           <n-form-item :label="schema.label" :path="schema.field">
             <!--标签名右侧温馨提示-->
-            <template #label v-if="schema.labelMessage">
+            <template v-if="schema.labelMessage" #label>
               {{ schema.label }}
-              <n-tooltip trigger="hover" :style="schema.labelMessageStyle">
+              <n-tooltip :style="schema.labelMessageStyle" trigger="hover">
                 <template #trigger>
-                  <n-icon size="18" class="cursor-pointer text-gray-400">
+                  <n-icon class="cursor-pointer text-gray-400" size="18">
                     <QuestionCircleOutlined />
                   </n-icon>
                 </template>
@@ -23,9 +23,9 @@
             <!--判断插槽-->
             <template v-if="schema.slot">
               <slot
-                :name="schema.slot"
-                :model="formModel"
                 :field="schema.field"
+                :model="formModel"
+                :name="schema.slot"
                 :value="formModel[schema.field]"
               ></slot>
             </template>
@@ -37,8 +37,8 @@
                   <n-checkbox
                     v-for="item in schema.componentProps.options"
                     :key="item.value"
-                    :value="item.value"
                     :label="item.label"
+                    :value="item.value"
                   />
                 </n-space>
               </n-checkbox-group>
@@ -68,9 +68,9 @@
                   <n-button> 上传文件</n-button>
                 </n-upload>
                 <n-button
-                  type="info"
-                  dashed
                   v-if="getComponentProps(schema).uploadTemplate"
+                  dashed
+                  type="info"
                   @click="getComponentProps(schema).uploadTemplate"
                   >下载上传模板
                 </n-button>
@@ -78,28 +78,38 @@
             </template>
             <template v-else-if="schema.component === 'NAutoComplete'">
               <n-select
-                :get-show="() => true"
-                :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
-                v-bind="getComponentProps(schema)"
                 v-model:value="formModel[schema.field]"
                 :class="{ isFull: schema.isFull != false && getProps.isFull }"
+                :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
+                :get-show="() => true"
+                v-bind="getComponentProps(schema)"
+              />
+            </template>
+            <template v-else-if="schema.component === 'NSelect'">
+              <n-select
+                v-model:value="formModel[schema.field]"
+                :class="{ isFull: schema.isFull != false && getProps.isFull }"
+                :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
+                :get-show="() => true"
+                filterable
+                v-bind="getComponentProps(schema)"
               />
             </template>
             <!--动态渲染表单组件-->
             <component
-              v-else
-              :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
-              v-bind="getComponentProps(schema)"
               :is="schema.component"
+              v-else
               v-model:value="formModel[schema.field]"
               :class="{ isFull: schema.isFull != false && getProps.isFull }"
+              :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
+              v-bind="getComponentProps(schema)"
             />
             <!--组件后面的内容-->
             <template v-if="schema.suffix">
               <slot
-                :name="schema.suffix"
-                :model="formModel"
                 :field="schema.field"
+                :model="formModel"
+                :name="schema.suffix"
                 :value="formModel[schema.field]"
               ></slot>
             </template>
@@ -108,18 +118,18 @@
       </template>
 
       <!--提交 重置 展开 收起 按钮-->
-      <n-gi :span="isInline ? '' : 24" :suffix="isInline ? true : false" #="{ overflow }">
+      <n-gi #="{ overflow }" :span="isInline ? '' : 24" :suffix="isInline ? true : false">
         <slot name="extra"></slot>
         <n-space
-          align="center"
           :justify="isInline ? 'end' : 'start'"
           :style="{ 'margin-left': `${isInline ? 12 : getProps.labelWidth}px` }"
+          align="center"
         >
           <n-button
             v-if="getProps.showActionButtonGroup && getProps.showSubmitButton"
+            :loading="loadingSub"
             v-bind="getSubmitBtnOptions"
             @click="handleSubmit"
-            :loading="loadingSub"
             >{{ getProps.submitButtonText }}
           </n-button>
           <n-button
@@ -130,17 +140,17 @@
           </n-button>
           <slot></slot>
           <n-button
-            type="primary"
-            text
-            icon-placement="right"
             v-if="isInline && getProps.showAdvancedButton"
+            icon-placement="right"
+            text
+            type="primary"
             @click="unfoldToggle"
           >
             <template #icon>
-              <n-icon size="14" class="unfold-icon" v-if="overflow">
+              <n-icon v-if="overflow" class="unfold-icon" size="14">
                 <DownOutlined />
               </n-icon>
-              <n-icon size="14" class="unfold-icon" v-else>
+              <n-icon v-else class="unfold-icon" size="14">
                 <UpOutlined />
               </n-icon>
             </template>

@@ -40,6 +40,7 @@
     addOrUpdateTableHeaderGroupItem,
     getTableHeaderGroupItemList,
   } from '@/api/newDataLayer/Header/HeaderGroup';
+  import { useUserStore } from '@/store/modules/user';
 
   interface Props {
     allColumns?: any;
@@ -63,7 +64,6 @@
         currentHeaderList,
         _.isEqual
       );
-      res = sortBy(res, 'sort');
       return res;
     } else if (prop.type === 'containerForecast') {
       res = differenceWith(
@@ -80,20 +80,28 @@
   });
   async function selectedTag(item) {
     currentHeaderList.push(item);
-    currentHeaderList = sortBy(currentHeaderList, 'sort');
   }
   function deletedTag(item) {
     currentHeaderList = currentHeaderList.filter((it) => it.title !== item.title);
-    currentHeaderList = sortBy(currentHeaderList, 'sort');
   }
   let groupInfo = $ref({});
   async function reload() {
     allHeaderList = await getTableHeaderItemList();
     groupInfo = await getTableHeaderGroupItemList(prop.type);
-    currentHeaderList = sortBy(groupInfo.tableHeaderItems, 'sort');
+    currentHeaderList = JSON.parse(groupInfo.headerItemJson);
   }
   async function save() {
-    groupInfo.tableHeaderItemIds = currentHeaderList.map((it) => it.id);
+    if (groupInfo) {
+      groupInfo.tableHeaderItemIds = currentHeaderList ? currentHeaderList.map((it) => it.id) : [];
+      groupInfo.headerItemJson = JSON.stringify(currentHeaderList);
+    } else {
+      groupInfo = {
+        name: prop.type,
+        userId: useUserStore().info.id,
+        tableHeaderItemIds: currentHeaderList.map((it) => it.id),
+        headerItemJson: JSON.stringify(currentHeaderList),
+      };
+    }
     await addOrUpdateTableHeaderGroupItem(groupInfo);
     emit('saved');
   }

@@ -336,8 +336,9 @@
 
   async function reloadHeader() {
     currentColumns = [];
-    currentHeader = (await getTableHeaderGroupItemList('containerForecast')).tableHeaderItems;
-    console.log(currentHeader, 'header');
+    currentHeader = JSON.parse(
+      (await getTableHeaderGroupItemList('containerForecast'))?.headerItemJson ?? []
+    );
     currentHeader.forEach((item) => {
       const res = columns.find((it) => it.key === item.itemKey);
       currentColumns.push(res);
@@ -347,7 +348,6 @@
       currentColumns.unshift(selectionType);
     }
     currentColumns = currentColumns.length > 0 ? currentColumns : columns;
-    console.log(currentColumns, '123');
     showCurrentHeaderDataTable = false;
   }
 
