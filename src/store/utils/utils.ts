@@ -105,11 +105,6 @@ export async function asyncUserCustomer(defaultValue): Promise<FormField> {
   const userStore = useUserStore();
   const idArray = userStore.info.customerIds.split(',');
   const customerList = await getCustomerListByIds(idArray);
-  console.log(
-    userStore.info.customerIds,
-    await getCustomerListByIds(userStore.info.customerIds),
-    '321'
-  );
   const list = customerList.map((it) => ({
     label: it.customerName,
     value: it.id,
