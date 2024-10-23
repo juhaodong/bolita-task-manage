@@ -103,21 +103,43 @@ export async function asyncStorage(): Promise<FormField> {
 
 export async function asyncUserCustomer(defaultValue): Promise<FormField> {
   const userStore = useUserStore();
-  const customerList = await getCustomerListByIds(userStore.info.customerIds);
+  const idArray = userStore.info.customerIds.split(',');
+  const customerList = await getCustomerListByIds(idArray);
+  console.log(
+    userStore.info.customerIds,
+    await getCustomerListByIds(userStore.info.customerIds),
+    '321'
+  );
   const list = customerList.map((it) => ({
     label: it.customerName,
     value: it.id,
   }));
-  return {
-    field: 'customerId',
-    label: '客户',
-    required: false,
-    component: 'NSelect',
-    componentProps: {
-      options: list,
-    },
-    defaultValue: defaultValue !== '' ? defaultValue : customerList[0].id,
-  };
+  if (userStore.info?.userType === '客户') {
+    return {
+      field: 'customerId',
+      label: '客户',
+      required: false,
+      component: 'NSelect',
+      componentProps: {
+        options: list,
+      },
+      defaultValue: defaultValue !== '' ? defaultValue : customerList[0].id,
+      disableCondition: () => {
+        return true;
+      },
+    };
+  } else {
+    return {
+      field: 'customerId',
+      label: '客户',
+      required: false,
+      component: 'NSelect',
+      componentProps: {
+        options: list,
+      },
+      defaultValue: defaultValue !== '' ? defaultValue : customerList[0].id,
+    };
+  }
 }
 
 export async function asyncCustomer(): Promise<FormField> {
