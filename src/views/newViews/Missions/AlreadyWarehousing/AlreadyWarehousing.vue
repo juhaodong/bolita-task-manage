@@ -511,6 +511,7 @@
     const res = await getTaskListByFilterWithPagination(currentFilter, paginationReactive);
     allList = res.content;
     const totalCount = res.page.totalElements;
+    console.log(totalCount, 'count');
     let fakeListStart = [];
     let fakeListEnd = [];
     if (paginationReactive.pageNumber > 0) {
@@ -521,7 +522,9 @@
         });
     }
     if (paginationReactive.pageSize < totalCount) {
-      fakeListEnd = Array(totalCount - paginationReactive.pageSize * paginationReactive.pageNumber)
+      fakeListEnd = Array(
+        totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1)
+      )
         .fill(null)
         .map((it, index) => {
           return { key: index };

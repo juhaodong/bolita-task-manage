@@ -191,6 +191,7 @@
   import { addOrUpdateTask, getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { useUserStore } from '@/store/modules/user';
+  import { currentBaseImageUrl } from '@/api/dataLayer/fieldDefination/common';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
   let currentModel: any | null = $ref(null);
@@ -305,7 +306,9 @@
   }
 
   async function downloadFbaCode() {
-    window.open('https://aaden-storage.s3.eu-central-1.amazonaws.com/FbaCode.xlsx');
+    window.open(
+      currentBaseImageUrl + 'https://aaden-storage.s3.eu-central-1.amazonaws.com/FbaCode.xlsx'
+    );
   }
 
   async function downloadData() {

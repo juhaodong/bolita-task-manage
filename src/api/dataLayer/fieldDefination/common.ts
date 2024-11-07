@@ -192,3 +192,5 @@ export async function getFBACodeList() {
 export async function getStorageList() {
   return (await WarehouseManager.load()).map((it) => it.id);
 }
+
+export const currentBaseImageUrl = 'https://cloud-v2.aaden.io/downloadFile?fileUrl=';

@@ -168,7 +168,6 @@
         ...(await readFile(value.files?.[0].file, value.notifyType)),
         ...(value?.trayTaskList ?? []),
       ];
-      console.log(taskList, 'list');
       value.arrivedCount = safeSumBy(taskList, 'number').toString();
 
       if (value.files) {

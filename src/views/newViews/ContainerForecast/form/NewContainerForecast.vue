@@ -47,7 +47,10 @@
 </template>
 <script lang="ts" setup>
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
-  import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/common';
+  import {
+    currentBaseImageUrl,
+    getFilesUploadFormField,
+  } from '@/api/dataLayer/fieldDefination/common';
   import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
   import {
     asyncUserCustomer,
@@ -121,7 +124,9 @@
       },
     },
     getFilesUploadFormField('files', false, () => {
-      window.open('https://aaden-storage.s3.eu-central-1.amazonaws.com/NotifyMoBan.xlsx');
+      window.open(
+        currentBaseImageUrl + 'https://aaden-storage.s3.eu-central-1.amazonaws.com/NotifyMoBan.xlsx'
+      );
     }),
     {
       field: 'note',
@@ -183,7 +188,6 @@
   let selectedWarehouseLog = $ref({});
 
   async function handleSubmit(values: any) {
-    console.log(values, 'values');
     const totalLog = (
       await getInventoryUseLogListByInventoryId(values.inventoryId, values.planArriveDateTime)
     ).map((it) => {
@@ -192,10 +196,8 @@
     });
     selectedWarehouseLog = groupBy(totalLog, 'inHouseTime');
     currentWarehouse = await getCurrentWarehouseUseTimespan(values.inventoryId);
-    console.log(currentWarehouse, 'house');
     if (prop.model?.id) {
       currentData = Object.assign(prop.model, values);
-      console.log('333');
     } else {
       currentData = values;
     }
