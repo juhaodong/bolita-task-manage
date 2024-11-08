@@ -166,7 +166,7 @@
     }
   );
 
-  const emit = defineEmits(['save']);
+  const emit = defineEmits(['saved']);
 
   async function handleSubmit() {
     loading = true;
@@ -201,7 +201,7 @@
         );
       }
       await Promise.all(quest);
-      emit('save');
+      emit('saved');
     });
     loading = false;
   }
