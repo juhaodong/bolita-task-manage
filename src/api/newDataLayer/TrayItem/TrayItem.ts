@@ -13,5 +13,5 @@ export async function addOrUpdateTaskTrayItem(item) {
 }
 
 export async function deleteTaskTrayItem(id) {
-  return await hillo.jsonPost(typeName + '/deleteById/' + id, {});
+  return await hillo.jsonPost(typeName + '/deleteByBolitaTaskId/' + id, {});
 }

@@ -64,7 +64,10 @@
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import Delete16Filled from '@vicons/fluent/es/Delete16Filled';
   import { assign } from 'lodash';
-  import { addOrUpdateTaskTrayItem } from '@/api/newDataLayer/TrayItem/TrayItem';
+  import {
+    addOrUpdateTaskTrayItem,
+    deleteTaskTrayItem,
+  } from '@/api/newDataLayer/TrayItem/TrayItem';
   import { addOrUpdateTask } from '@/api/newDataLayer/TaskList/TaskList';
 
   interface Props {
@@ -186,6 +189,7 @@
       res.customerId = res.customer.id;
       res.inventoryId = res.inventory.id;
       await addOrUpdateTask(res);
+      await deleteTaskTrayItem(res.id);
       const currentList = trayList.filter((it) => it.amount);
       let quest = [];
       for (const item of currentList) {
