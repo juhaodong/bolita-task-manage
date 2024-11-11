@@ -151,7 +151,13 @@
   let showAll = $ref(false);
   let dateRange = $ref(null);
   const loadDataTable = async () => {
-    let currentFilter = [];
+    let currentFilter = [
+      {
+        field: 'inStatus',
+        op: '!=',
+        value: '无需订车',
+      },
+    ];
     if (filterObj) {
       const res = Object.keys(filterObj);
       for (const filterItem of res) {
@@ -175,6 +181,7 @@
         (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       );
     }
+    console.log(allList, 'list');
     return allList;
   };
   const actionRef = ref();

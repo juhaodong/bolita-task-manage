@@ -3,7 +3,7 @@
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { safeSumBy } from '@/store/utils/utils';
   import {
-    addOrUpdateOutboundForecast,
+    addOrUpdateWithRefOutboundForecast,
     getOutboundForecastById,
   } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import { addOrUpdateTask, getTaskListByIds } from '@/api/newDataLayer/TaskList/TaskList';
@@ -44,7 +44,7 @@
         const getOutOfferList = detailInfo.filter((it) => !it.outPrice);
         if (getOutOfferList.length === 0) {
           outboundDetail.totalOutOffer = safeSumBy(detailInfo, 'outPrice');
-          await addOrUpdateOutboundForecast(outboundDetail);
+          await addOrUpdateWithRefOutboundForecast(outboundDetail);
         }
       }
       loading = false;
@@ -61,7 +61,7 @@
           {{ item?.ticketId }}
         </n-descriptions-item>
         <n-descriptions-item :span="2" label="Ref.">
-          {{ item?.REF }}
+          {{ item?.outboundId }}
         </n-descriptions-item>
         <n-descriptions-item :span="2" label="建议报价">
           {{ item?.suggestedPrice }}</n-descriptions-item

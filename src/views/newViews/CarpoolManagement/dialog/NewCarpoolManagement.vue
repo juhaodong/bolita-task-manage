@@ -19,7 +19,7 @@
     updateTaskListAfterOfferPriceCar,
   } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import {
-    addOrUpdateOutboundForecast,
+    addOrUpdateWithRefOutboundForecast,
     getOutboundForecastById,
   } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
 
@@ -92,8 +92,8 @@
       for (const id of prop.mergedOutIds) {
         const outboundForecastInfo = await getOutboundForecastById(id);
         if (prop.typeName === 'car') {
-          outboundForecastInfo.amzid = values.AMZID;
-          outboundForecastInfo.isa = values.ISA;
+          outboundForecastInfo.AMZID = values.AMZID;
+          outboundForecastInfo.ISA = values.ISA;
           outboundForecastInfo.bookCarTimestamp = values.bookCarTimestamp;
           outboundForecastInfo.inStatus = values.inStatus;
           outboundForecastInfo.carStatus = values.carStatus;
@@ -105,14 +105,17 @@
           outboundForecastInfo.waybillId = values.waybillId;
           await updateTaskListAfterBookingCar(id);
         } else {
-          outboundForecastInfo.ref = values.REF;
+          console.log(values, 'value');
+          outboundForecastInfo.REF = values.REF.toString();
           outboundForecastInfo.costPrice = values.costPrice;
           outboundForecastInfo.inStatus = values.inStatus;
           outboundForecastInfo.suggestedPrice = values.suggestedPrice;
           outboundForecastInfo.waitPrice = '1';
           await updateTaskListAfterOfferPriceCar(id, values);
         }
-        await addOrUpdateOutboundForecast(outboundForecastInfo);
+        outboundForecastInfo.customerId = outboundForecastInfo.customer.id;
+        outboundForecastInfo.inventoryId = outboundForecastInfo.inventory.id;
+        await addOrUpdateWithRefOutboundForecast(outboundForecastInfo);
       }
       emit('saved', values);
     });
