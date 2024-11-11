@@ -8,10 +8,10 @@ export const checkedObj = {
 export const planObj = {
   type: 'selection',
   disabled: (row) => {
-    if (row.inStatus === InBoundStatus.WaitOperate) {
-      if (row.outboundMethod === '标准托盘' && !row.detailTray) {
+    if (row.inStatus === InBoundStatus.WaitOperate || row.inStatus === InBoundStatus.All) {
+      if (row.outboundMethod === '标准托盘' && row.trayItems.length === 0) {
         return true;
-      } else return row.outboundMethod === '大件托盘' && !row.detailTray;
+      } else return row.outboundMethod === '大件托盘' && row.trayItems.length === 0;
     } else {
       return true;
     }

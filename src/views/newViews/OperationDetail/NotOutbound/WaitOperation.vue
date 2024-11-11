@@ -168,7 +168,7 @@
   import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
   import { updateOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
-  import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import { dateCompare } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import OutboundOrder from '@/views/newViews/OutboundForecast/OutboundOrder.vue';
   import EditOF from '@/views/newViews/OperationDetail/NotOutbound/EditOF.vue';
@@ -241,7 +241,7 @@
     },
     {
       title: 'Kunden',
-      key: 'customerId',
+      key: 'customer.customerName',
     },
     timeTableColumn('pickUpDateTime', '预计取货时间'),
     timeTableColumn('reservationGetProductTime', '预约送货时间'),
@@ -319,7 +319,6 @@
     console.log(currentHeader, 'header');
     currentHeader.forEach((item) => {
       const res = operationColumns.find((it) => it.key === item.itemKey);
-      console.log(res, item, '321');
       currentColumns.push(res);
     });
     currentColumns = currentColumns.length > 0 ? currentColumns : operationColumns;
@@ -475,9 +474,7 @@
 
   onMounted(async () => {
     await reloadHeader();
-    monthTab = OneYearMonthTab();
     typeMission = '出库任务看板';
-    selectedMonth = monthTab[0];
   });
 
   const actionColumn = reactive({

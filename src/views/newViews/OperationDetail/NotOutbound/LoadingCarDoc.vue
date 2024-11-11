@@ -1,13 +1,14 @@
 <script lang="ts" setup>
   import { computed, watchEffect } from 'vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { getDetailListById } from '@/api/dataLayer/modules/notify/notify-detail';
   import { dayjsDateByYMD } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import { DataTableColumns } from 'naive-ui';
   import { flatMap, groupBy } from 'lodash';
   import FileSaver from 'file-saver';
   import { getOutboundForecastById } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import { getTaskListByIds } from '@/api/newDataLayer/TaskList/TaskList';
+  import { timeDisplayYMD } from '@/views/bolita-views/composable/useableColumns';
 
   interface Props {
     notifyId: string;
@@ -26,16 +27,18 @@
   });
 
   async function reload() {
+    console.log('333');
     if (props.notifyId != null) {
       outboundInfo = await getOutboundForecastById(props.notifyId);
-      const res = await getDetailListById(outboundInfo.outboundDetailInfo);
-      currentTaskList = flatMap(groupBy(res, 'FCAddress'));
+      const detailInfo = await getTaskListByIds(outboundInfo.outboundDetailInfo.split(','));
+      console.log(outboundInfo, 'info');
+      console.log(detailInfo, 'detailInfo');
+      currentTaskList = flatMap(groupBy(detailInfo, 'FCAddress'));
       emit('refresh');
     }
   }
 
   async function downloadUnloadingFile() {
-    console.log(outboundInfo, 'info');
     let headerTitle = ['Ref,Name des Kunden,Gesamtmenge,Ankunftszeit'];
     let headerDate = [
       outboundInfo?.REF,
@@ -54,7 +57,7 @@
         '',
         '',
         '',
-        it.warehouseId,
+        it.inventory.name,
         it.containerId,
       ];
       dataStrings.push(res.join());
@@ -72,7 +75,7 @@
     { title: 'R/F', key: 'fakeDate' },
     { title: 'Pal Menge', key: 'fakeDate' },
     { title: 'Pal Type', key: 'fakeDate' },
-    { title: 'Lager', key: 'warehouseId', width: 200 },
+    { title: 'Lager', key: 'inventory.name', width: 200 },
     { title: 'Contaniner nr.', key: 'containerId' },
   ]);
 
@@ -87,13 +90,13 @@
           {{ outboundInfo?.REF ?? outboundInfo?.id }}
         </n-descriptions-item>
         <n-descriptions-item label="Gesamtmenge:">
-          {{ outboundInfo?.containerNum }}</n-descriptions-item
+          {{ outboundInfo?.totalNumber }}</n-descriptions-item
         >
         <n-descriptions-item label="Name des Kunden:">
-          {{ outboundInfo?.customerId }}</n-descriptions-item
+          {{ outboundInfo?.customer.customerName }}</n-descriptions-item
         >
         <n-descriptions-item label="Abfahrtszeit:">
-          {{ outboundInfo?.createBookCarTimestamp }}</n-descriptions-item
+          {{ timeDisplayYMD(outboundInfo?.bookCarTimestamp) }}</n-descriptions-item
         >
       </n-descriptions>
       <n-data-table

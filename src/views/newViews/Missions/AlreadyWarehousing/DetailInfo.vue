@@ -14,11 +14,13 @@
   <div id="print" class="mt-8">
     <loading-frame :loading="loading">
       <n-descriptions :columns="2" bordered label-placement="left">
-        <n-descriptions-item label="客户"> {{ currentDate?.customerName }} </n-descriptions-item>
+        <n-descriptions-item label="客户">
+          {{ currentDate?.customer.customerName }}
+        </n-descriptions-item>
         <n-descriptions-item label="国家"> {{ currentDate?.country }} </n-descriptions-item>
         <n-descriptions-item label="票号"> {{ currentDate?.ticketId }} </n-descriptions-item>
         <n-descriptions-item label="柜号"> {{ currentDate?.containerId }} </n-descriptions-item>
-        <n-descriptions-item label="仓库"> {{ currentDate?.warehouseId }} </n-descriptions-item>
+        <n-descriptions-item label="仓库"> {{ currentDate?.inventory.name }} </n-descriptions-item>
         <n-descriptions-item label="箱数"> {{ currentDate?.number }} </n-descriptions-item>
         <n-descriptions-item label="重量"> {{ currentDate?.weight }} </n-descriptions-item>
         <n-descriptions-item label="体积"> {{ currentDate?.volume }} </n-descriptions-item>

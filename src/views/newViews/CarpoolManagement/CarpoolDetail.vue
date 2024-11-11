@@ -55,7 +55,6 @@
           </div>
         </n-card>
         <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
-        <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />
       </div>
       <div class="my-2"></div>
       <BasicTable
@@ -109,7 +108,6 @@
   import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
-  import { valueOfToday } from '@/api/dataLayer/common/Date';
   import FileSaver from 'file-saver';
   import { getTaskListByFilter } from '@/api/newDataLayer/TaskList/TaskList';
   import { getOutboundForecastById } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
@@ -135,11 +133,6 @@
   let showAll = $ref(false);
 
   const actionRef = ref();
-  const props = defineProps<Prop>();
-  interface Prop {
-    belongsToId?: string;
-  }
-
   async function selectedHeader() {
     showCurrentHeaderDataTable = true;
   }
@@ -209,17 +202,18 @@
     const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
     FileSaver.saveAs(blob, '订车明细' + '.csv');
   }
-
-  async function startEdit(id) {
-    currentModel = await NotifyDetailManager.getById(id);
-    editDetailModel.value = true;
-  }
   const realOptions = computed(() => {
     return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
   });
 
   const loadDataTable = async () => {
-    let currentFilter = [];
+    let currentFilter = [
+      {
+        field: 'outboundId',
+        op: '!=',
+        value: '',
+      },
+    ];
     if (filterObj) {
       const res = Object.keys(filterObj);
       for (const filterItem of res) {
@@ -230,10 +224,7 @@
         });
       }
     }
-    allList = (await getTaskListByFilter(currentFilter)).filter((a) => a.outboundId);
-    if (!showAll) {
-      allList = allList.filter((a) => a.inStatus !== '已取消');
-    }
+    allList = await getTaskListByFilter(currentFilter);
     if (dateRange) {
       let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
       let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
@@ -241,7 +232,6 @@
         (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       );
     }
-    console.log(allList, 'list');
     return allList;
   };
 
@@ -270,7 +260,9 @@
 
   async function reloadHeader() {
     currentColumns = [];
-    currentHeader = (await getTableHeaderGroupItemList('taskList')).tableHeaderItems;
+    currentHeader = JSON.parse(
+      (await getTableHeaderGroupItemList('taskList'))?.headerItemJson ?? []
+    );
     currentHeader.forEach((item) => {
       const res = columns.find((it) => it.key === item.itemKey);
       currentColumns.push(res);
@@ -279,7 +271,6 @@
     if (selectionType) {
       currentColumns.unshift(selectionType);
     }
-    console.log(currentColumns, 'current');
     currentColumns = currentColumns.length > 0 ? currentColumns : columns;
     showCurrentHeaderDataTable = false;
   }
@@ -311,9 +302,6 @@
       updateFilter({ outboundId: res });
     } else {
       await reloadTable();
-    }
-    if (props.belongsToId) {
-      filterObj = { belongsToId: props.belongsToId };
     }
   });
 

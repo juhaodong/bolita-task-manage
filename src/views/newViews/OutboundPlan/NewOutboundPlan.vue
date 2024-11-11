@@ -83,7 +83,7 @@
     getTaskListByIdsAndFilter,
   } from '@/api/newDataLayer/TaskList/TaskList';
   import {
-    addOrUpdateOutboundForecast,
+    addOrUpdateWithRefOutboundForecast,
     defaultOutboundList,
   } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
 
@@ -155,11 +155,11 @@
       allNotifyDetail = await getTaskListByIdsAndFilter(prop.model, currentFilter);
     } else {
       allNotifyDetail = (await getTaskListByFilter(currentFilter))
-        .filter((a) => a.inStatus === InBoundStatus.WaitOperate)
+        .filter((a) => a.inStatus === InBoundStatus.WaitOperate || a.inStatus === InBoundStatus.All)
         .filter((x) => {
           return x.outboundMethod !== '标准托盘' && x.outboundMethod !== '大件托盘'
             ? true
-            : !!x.detailTray;
+            : !!x.trayItems;
         });
       console.log(allNotifyDetail, 'detail');
     }
@@ -210,9 +210,12 @@
       outboundDetailInfo: allNotifyDetail.map((it) => it.id).join(','),
       totalVolume: safeSumBy(allNotifyDetail, 'volume'),
       totalWeight: safeSumBy(allNotifyDetail, 'weight'),
+      totalNumber: safeSumBy(allNotifyDetail, 'number'),
+      customerId: allNotifyDetail[0].customer.id,
+      inventoryId: allNotifyDetail[0].inventory.id,
     };
     const currentInfo = Object.assign(defaultOutboundList, res);
-    const outboundId = (await addOrUpdateOutboundForecast(currentInfo)).data.id;
+    const outboundId = (await addOrUpdateWithRefOutboundForecast(currentInfo)).data.id;
     allNotifyDetail.forEach((it) => {
       it.customerId = it.customer.id;
       it.inventoryId = it.inventory.id;
@@ -260,6 +263,7 @@
             size: 'small',
             onClick: () => {
               currentDate.value = row;
+              console.log(currentDate.value, 'value');
               showDetailInfo = true;
             },
           },
@@ -279,7 +283,7 @@
     { title: '预计出库方式', key: 'outboundMethod' },
     { title: '物流方式', key: 'deliveryMethod' },
     { title: 'FBA单号', key: 'FBADeliveryCode' },
-    { title: '仓库', key: 'warehouseId' },
+    { title: '仓库', key: 'inventory.name' },
   ]);
   const searchSchema: FormField[] = [
     { label: '入库ID', field: 'notifyId' },

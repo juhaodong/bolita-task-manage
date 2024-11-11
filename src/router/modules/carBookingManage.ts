@@ -31,22 +31,22 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('@/views/newViews/CarpoolManagement/CarpoolDetail.vue'),
       },
-      {
-        path: 'carBookingOut',
-        name: `carBookingOut`,
-        meta: {
-          title: '库外订车',
-        },
-        component: () => import('@/views/newViews/CarpoolManagement/CarpoolOutWarehouse.vue'),
-      },
-      {
-        path: 'logisticService',
-        name: `logisticService`,
-        meta: {
-          title: '物流售后',
-        },
-        component: () => import('@/views/newViews/LogisticsService/LogisticsService.vue'),
-      },
+      // {
+      //   path: 'carBookingOut',
+      //   name: `carBookingOut`,
+      //   meta: {
+      //     title: '库外订车',
+      //   },
+      //   component: () => import('@/views/newViews/CarpoolManagement/CarpoolOutWarehouse.vue'),
+      // },
+      // {
+      //   path: 'logisticService',
+      //   name: `logisticService`,
+      //   meta: {
+      //     title: '物流售后',
+      //   },
+      //   component: () => import('@/views/newViews/LogisticsService/LogisticsService.vue'),
+      // },
     ],
   },
 ];

@@ -499,7 +499,6 @@
     //   });
     // }
     if (dateRange) {
-      console.log(dateRange, 'range');
       currentFilter.push({ field: 'planArriveDateTime', op: '>=', value: dateRange[0] });
       currentFilter.push({ field: 'planArriveDateTime', op: '<=', value: dateRange[1] });
       // let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
@@ -511,7 +510,6 @@
     const res = await getTaskListByFilterWithPagination(currentFilter, paginationReactive);
     allList = res.content;
     const totalCount = res.page.totalElements;
-    console.log(totalCount, 'count');
     let fakeListStart = [];
     let fakeListEnd = [];
     if (paginationReactive.pageNumber > 0) {
@@ -769,7 +767,7 @@
               startAddTray(record.id);
             },
             highlight: () => {
-              return record.detailTray ? 'success' : 'error';
+              return record.trayItems.length > 0 ? 'success' : 'error';
             },
             ifShow: () => {
               return (

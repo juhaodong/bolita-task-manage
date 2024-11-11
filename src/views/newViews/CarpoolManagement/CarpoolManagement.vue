@@ -16,6 +16,7 @@
       </n-button>
       <n-button
         v-if="hasAuthPower('orderCarBookingCar')"
+        :disabled="carRules"
         type="primary"
         @click="startShareCar('car')"
       >
@@ -174,7 +175,6 @@
         (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       );
     }
-    console.log(allList, 'list');
     return allList;
   };
   const actionRef = ref();
@@ -237,7 +237,6 @@
       const detailInfoById = allList.find((it) => it.id === id);
       res.push(detailInfoById);
     }
-
     return res;
   });
   const priceRules = computed(() => {

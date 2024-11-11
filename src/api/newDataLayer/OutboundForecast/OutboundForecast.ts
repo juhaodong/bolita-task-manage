@@ -26,6 +26,12 @@ export async function addOrUpdateOutboundForecast(item) {
   });
 }
 
+export async function addOrUpdateWithRefOutboundForecast(item) {
+  return await hillo.jsonPost(typeName + '/addOrUpdateWithRef', {
+    ...item,
+  });
+}
+
 export async function getOutboundForecastListByFilter(filter) {
   return (
     await hillo.jsonPost(typeName + '/list', {

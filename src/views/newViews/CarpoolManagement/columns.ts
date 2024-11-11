@@ -138,7 +138,7 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
   },
   {
     title: '总件数',
-    key: 'containerNum',
+    key: 'totalNumber',
   },
   {
     title: '对外报价',
@@ -158,7 +158,7 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
   },
   {
     title: 'FC/送货地址',
-    key: 'FCAddress',
+    key: 'fcaddress',
   },
   // {
   //   title: 'PO',
@@ -166,15 +166,15 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
   // },
   {
     title: 'Ref',
-    key: 'REF',
+    key: 'ref',
   },
   {
     title: 'ISA',
-    key: 'ISA',
+    key: 'isa',
   },
   {
     title: 'AMZ-Sendungs ID',
-    key: 'AMZID',
+    key: 'amzid',
   },
   {
     title: '托盘',

@@ -1,10 +1,6 @@
 <script lang="ts" setup>
   import { computed, watchEffect } from 'vue';
   import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
-  import {
-    getDetailListById,
-    NotifyDetailManager,
-  } from '@/api/dataLayer/modules/notify/notify-detail';
   import { safeParseInt, safeSumInt, toastError, toastSuccess } from '@/store/utils/utils';
   import { timeDisplay, timeDisplayYMD } from '@/views/bolita-views/composable/useableColumns';
   import { ResultEnum } from '@/store/enums/httpEnum';
@@ -13,7 +9,7 @@
   import { usePermission } from '@/hooks/web/usePermission';
   import { useUserStore } from '@/store/modules/user';
   import { $ref } from 'vue/macros';
-  import { updateOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import { addOrUpdateTask, getTaskListByIds } from '@/api/newDataLayer/TaskList/TaskList';
 
   interface Props {
     outboundInfo: [];
@@ -50,12 +46,10 @@
   });
 
   async function reload() {
-    if (props.id != null) {
-      currentOutBoundInfo = props.outboundInfo;
-      currentTaskList = await getDetailListById(props.id);
-      outOperatePerson = currentOutBoundInfo?.outOperatePerson ?? '';
-      loadAll();
-    }
+    currentOutBoundInfo = props.outboundInfo;
+    currentTaskList = await getTaskListByIds(currentOutBoundInfo.outboundDetailInfo.split(','));
+    outOperatePerson = currentOutBoundInfo?.outOperatePerson ?? '';
+    loadAll();
   }
 
   let outOperatePerson: string = $ref('');
@@ -75,6 +69,7 @@
       currentTaskList[index].outContainerNumEdit =
         it.outContainerNum == 0 ? '' : it.outContainerNum;
     });
+    console.log(currentTaskList, 'list');
   }
 
   let loading: boolean = $ref(false);
@@ -83,59 +78,26 @@
     loading = true;
     const newInStatus = OutStatus.uploadCar;
     for (const listElement of currentTaskList) {
-      const editInfo: any = {
-        outTrayNum: listElement?.outTrayNumEdit ?? 0,
-        outContainerNum: listElement?.outContainerNumEdit ?? 0,
-      };
-      editInfo.inStatus = newInStatus;
-      editInfo.OutBoundTime = dayjs().valueOf();
-      const res = await NotifyDetailManager.edit(editInfo, listElement.id);
+      listElement.outTrayNum = listElement?.outTrayNumEdit ?? 0;
+      listElement.outContainerNum = listElement?.outContainerNumEdit ?? 0;
+      listElement.inStatus = newInStatus;
+      listElement.OutBoundTime = dayjs().valueOf();
+      const res = await addOrUpdateTask(listElement);
       if (res.code != ResultEnum.SUCCESS) {
         toastError(res.message);
         break;
       }
     }
-    await updateOutboundForecast(props.outboundInfo?.id, {
-      outCount: totalOutTrayCount.value + '托' + totalOutContainerCount.value + '箱',
-      inStatus: newInStatus,
-      trayOutCount: totalOutTrayCount.value,
-      containerOutCount: totalOutContainerCount.value,
-      outOperatePerson: outOperatePerson,
-      currentOutDate: currentDate ?? dayjs().format('YYYY-MM-DD'),
-      outTotalTime: totalTime ?? '',
-    });
+    // await updateOutboundForecast(props.outboundInfo?.id, {
+    //   outCount: totalOutTrayCount.value + '托' + totalOutContainerCount.value + '箱',
+    //   inStatus: newInStatus,
+    //   trayOutCount: totalOutTrayCount.value,
+    //   containerOutCount: totalOutContainerCount.value,
+    //   outOperatePerson: outOperatePerson,
+    //   currentOutDate: currentDate ?? dayjs().format('YYYY-MM-DD'),
+    //   outTotalTime: totalTime ?? '',
+    // });
     toastSuccess('success');
-    emit('save');
-    loading = false;
-  }
-
-  async function save() {
-    loading = true;
-    for (const listElement of currentTaskList) {
-      if (
-        listElement.outTrayNumEdit != listElement.outTrayNum ||
-        listElement.outContainerNumEdit != listElement.outContainerNum
-      ) {
-        const editInfo: any = {
-          outTrayNum: listElement?.outTrayNumEdit ?? 0,
-          outContainerNum: listElement?.outContainerNumEdit ?? 0,
-        };
-        const res = await NotifyDetailManager.edit(editInfo, listElement.id);
-        if (res.code != ResultEnum.SUCCESS) {
-          toastError(res.message);
-          break;
-        }
-      }
-    }
-    const newInStatus = OutStatus.Wait;
-    await updateOutboundForecast(props.outboundInfo?.id, {
-      outCount: totalOutTrayCount.value + '托' + totalOutContainerCount.value + '箱',
-      inStatus: newInStatus,
-      outOperatePerson: outOperatePerson,
-      currentOutDate: currentDate ?? dayjs().format('YYYY-MM-DD'),
-      outTotalTime: totalTime ?? '',
-    });
-    toastSuccess('sucees');
     emit('save');
     loading = false;
   }
@@ -208,7 +170,6 @@
         <div>
           <n-input v-model:value="outOperatePerson" placeholder="装柜人员" />
         </div>
-        <n-button secondary type="warning" @click="save">保存 </n-button>
         <n-button type="primary" @click="confirm">确认装车 </n-button>
       </n-space>
     </loading-frame>
