@@ -113,8 +113,6 @@
           outboundForecastInfo.waitPrice = '1';
           await updateTaskListAfterOfferPriceCar(id, values);
         }
-        outboundForecastInfo.customerId = outboundForecastInfo.customer.id;
-        outboundForecastInfo.inventoryId = outboundForecastInfo.inventory.id;
         await addOrUpdateWithRefOutboundForecast(outboundForecastInfo);
       }
       emit('saved', values);

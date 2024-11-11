@@ -585,6 +585,7 @@
 
   async function reloadHeader() {
     currentWithOutSelection = [];
+    currentHeader = [];
     currentHeader = JSON.parse(
       (await getTableHeaderGroupItemList('taskList'))?.headerItemJson ?? []
     );
