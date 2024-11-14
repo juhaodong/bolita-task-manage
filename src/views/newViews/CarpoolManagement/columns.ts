@@ -217,7 +217,10 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
     title: '备注',
     key: 'note',
   },
-];
+].map((it) => {
+  it.resizable = true;
+  return it;
+});
 
 export type CarpoolManagementModel = {
   carpoolId: string;

@@ -272,6 +272,9 @@
       currentColumns.unshift(selectionType);
     }
     currentColumns = currentColumns.length > 0 ? currentColumns : columns;
+    currentColumns.forEach((item) => {
+      item.resizable = true;
+    });
     showCurrentHeaderDataTable = false;
   }
 

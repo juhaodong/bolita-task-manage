@@ -149,9 +149,7 @@
       }
     } else {
       const userStore = useUserStore();
-
       const currentCustomer = (await getCustomerById(value.customerId)) ?? '';
-      // value.customerName = currentCustomer.customerName ?? '';
       value.notifyType = prop.type;
       value.unloadingFile = '';
       value.totalTime = '';
@@ -175,7 +173,6 @@
       } else {
         value.files = '';
       }
-      console.log(value, 'value');
       if (errorMessage.length === 0) {
         const res = await addOrUpdateNotify(value);
         await addOrUpdateInventoryUseLog({
@@ -192,6 +189,9 @@
           item.notifyId = res.data.id;
           item.files = value.files;
           item.planArriveDateTime = value.planArriveDateTime;
+          item.outBoundTime = '';
+          item.outContainerNum = '';
+          item.outTrayNum = '';
           quest.push(addOrUpdateTask(item));
         }
         const result = await Promise.all(quest);

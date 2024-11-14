@@ -159,15 +159,13 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { filters } from './columns';
   import {
-    getFileActionButton,
+    getFileActionButtonByOutForecast,
     statusColumnEasy,
     timeTableColumn,
   } from '@/views/bolita-views/composable/useableColumns';
   import { $ref } from 'vue/macros';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import { OutBoundDetailManager } from '@/api/dataLayer/modules/OutBoundPlan/outboundDetail';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
-  import { updateOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import { dateCompare } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import OutboundOrder from '@/views/newViews/OutboundForecast/OutboundOrder.vue';
@@ -179,21 +177,18 @@
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
   import DetailInfoDialog from '@/views/newViews/OperationDetail/NotOutbound/DetailInfoDialog.vue';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
-  import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
-  import {
-    getDetailListById,
-    NotifyDetailManager,
-  } from '@/api/dataLayer/modules/notify/notify-detail';
-  import { useUploadDialog } from '@/store/modules/uploadFileState';
   import LoadingCarDoc from '@/views/newViews/OperationDetail/NotOutbound/LoadingCarDoc.vue';
-  import { useUserStore } from '@/store/modules/user';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import { valueOfToday } from '@/api/dataLayer/common/Date';
   import { generateOptionFromArray } from '@/store/utils/utils';
   import FileSaver from 'file-saver';
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
-  import { getOutboundForecastListByFilter } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import {
+    addOrUpdateWithRefOutboundForecast,
+    getOutboundForecastListByFilter,
+  } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import { useUploadDialog } from '@/store/modules/uploadFileState';
 
   const showModal = ref(false);
   let showShareCarModel = $ref(false);
@@ -316,12 +311,14 @@
     currentHeader = JSON.parse(
       (await getTableHeaderGroupItemList('operation'))?.headerItemJson ?? []
     );
-    console.log(currentHeader, 'header');
     currentHeader.forEach((item) => {
       const res = operationColumns.find((it) => it.key === item.itemKey);
       currentColumns.push(res);
     });
     currentColumns = currentColumns.length > 0 ? currentColumns : operationColumns;
+    currentColumns.forEach((item) => {
+      item.resizable = true;
+    });
     showCurrentHeaderDataTable = false;
   }
   const loadDataTable = async () => {
@@ -482,16 +479,8 @@
     key: 'action',
     width: 120,
     render(record) {
-      const fileAction = (label, key, icon?: Component, editable = false) => {
-        return getFileActionButton(
-          label,
-          key,
-          OutBoundDetailManager,
-          reloadTable,
-          record,
-          icon,
-          editable
-        );
+      const fileAction = (label, key, icon?: Component, power) => {
+        return getFileActionButtonByOutForecast(label, key, reloadTable, record, icon, power);
       };
       return h(TableAction as any, {
         style: 'button',
@@ -502,31 +491,34 @@
               return record?.['loadingCarDoc']?.length > 0 ? 'success' : 'error';
             },
             async onClick() {
+              console.log(record, 'record');
               const upload = useUploadDialog();
               const files = await upload.upload(record['loadingCarDoc']);
               if (files.checkPassed) {
-                const obj = {};
-                obj['loadingCarDoc'] = files.files;
-                obj['inStatus'] = OutStatus.All;
-                obj['realOutDate'] = dayjs().format('YYYY-MM-DD');
-                await updateOutboundForecast(record.id, obj);
-                const userInfo = useUserStore().info;
-                const taskList = await getDetailListById(record.outboundDetailInfo);
-                for (const task of taskList) {
-                  let timeLineInfo = task.timeLine;
-                  timeLineInfo.unshift({
-                    operator: userInfo?.realName,
-                    detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-                    note: '已出库',
-                  });
-                  task.loadingCarDoc = files.files;
-                  task.inStatus = OutStatus.All;
-                  task.realOutDate = dayjs().format('YYYY-MM-DD');
-                  task.timeLine = timeLineInfo;
-                  await NotifyDetailManager.editInternal(task, task.id);
-                }
+                record.loadingCarDoc = files.files;
+                await addOrUpdateWithRefOutboundForecast(record);
+                // const obj = {};
+                // obj['loadingCarDoc'] = files.files;
+                // obj['inStatus'] = OutStatus.All;
+                // obj['realOutDate'] = dayjs().format('YYYY-MM-DD');
+                // await updateOutboundForecast(record.id, obj);
+                // const userInfo = useUserStore().info;
+                // const taskList = await getDetailListById(record.outboundDetailInfo);
+                // for (const task of taskList) {
+                //   let timeLineInfo = task.timeLine;
+                //   timeLineInfo.unshift({
+                //     operator: userInfo?.realName,
+                //     detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                //     note: '已出库',
+                //   });
+                //   task.loadingCarDoc = files.files;
+                //   task.inStatus = OutStatus.All;
+                //   task.realOutDate = dayjs().format('YYYY-MM-DD');
+                //   task.timeLine = timeLineInfo;
+                //   await NotifyDetailManager.editInternal(task, task.id);
+                // }
               }
-              await actionRef.value[0].reload();
+              await actionRef.value.reload();
             },
             ifShow: () => {
               return hasAuthPower('outMissionUploadFile');
@@ -553,6 +545,8 @@
               return !record?.unloadingFile && hasAuthPower('outMissionCreatUpCarFile');
             },
           },
+          fileAction('POD', 'PODFiles', '', 'orderCarPOD'),
+          fileAction('CMR', 'CMRFiles', '', 'orderCarCMR'),
           {
             label: '修改',
             onClick() {

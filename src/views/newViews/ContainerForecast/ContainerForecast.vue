@@ -158,6 +158,15 @@
       >
         <confirm-dialog :title="'您确定要取消吗？'" @saved="confirmCancel" />
       </n-modal>
+      <n-modal
+        v-model:show="showConfirmUnloading"
+        :show-icon="false"
+        preset="card"
+        style="width: 90%; min-width: 400px; max-width: 400px"
+        title="请确认"
+      >
+        <confirm-dialog :title="'确认货柜到库？'" @saved="confirmUnloading" />
+      </n-modal>
     </n-card>
     <no-power-page v-else />
   </div>
@@ -168,7 +177,7 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { Box20Filled } from '@vicons/fluent';
-  import { CashStatus, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
+  import { CashStatus, InBoundStatus, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
   import { $ref } from 'vue/macros';
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
@@ -212,7 +221,9 @@
   let dateRange = $ref(null);
   let showConfirmDialog = $ref(false);
   let cancelRecord = $ref('');
+  let currentRecord = $ref({});
   let showAll = $ref(false);
+  let showConfirmUnloading = $ref(false);
 
   function addTable(type: NotifyType) {
     notifyType = type;
@@ -228,6 +239,27 @@
     return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
   });
 
+  async function confirmUnloading() {
+    const userInfo = useUserStore().info;
+    currentRecord.inStatus = '等待卸柜';
+    const res = await addOrUpdateNotify(currentRecord);
+    const list = await getTaskListByNotifyId(currentRecord.id);
+    for (const item of list) {
+      item.inStatus = '等待卸柜';
+      await addOrUpdateTask(item);
+      await addOrUpdateTaskTimeLine({
+        useType: 'normal',
+        bolitaTaskId: item.id,
+        operator: userInfo?.realName,
+        detailTime: dayjs().valueOf(),
+        note: '仓库接收,等待卸柜',
+      });
+    }
+    await handleRequest(res, () => {
+      toastSuccess('success');
+      reloadTable();
+    });
+  }
   const loadDataTable = async () => {
     let currentFilter = [];
     if (filterObj) {
@@ -351,6 +383,9 @@
       currentColumns.unshift(selectionType);
     }
     currentColumns = currentColumns.length > 0 ? currentColumns : columns;
+    currentColumns.forEach((item) => {
+      item.resizable = true;
+    });
     showCurrentHeaderDataTable = false;
   }
 
@@ -368,6 +403,7 @@
     showOperationTable = false;
     showFeeDialog = false;
     showConfirmDialog = false;
+    showConfirmUnloading = false;
   }
 
   async function downloadFiles() {
@@ -416,8 +452,28 @@
           {
             label: '卸柜',
             onClick() {
-              currentNotifyId = record.id!;
-              showOperationTable = true;
+              if (
+                record?.inStatus === InBoundStatus.WaitCheck ||
+                record?.inStatus === InBoundStatus.Wait
+              ) {
+                currentRecord = record;
+                showConfirmUnloading = true;
+              } else if (record?.inStatus === InBoundStatus.WaitUnloading) {
+                currentNotifyId = record.id!;
+                showOperationTable = true;
+              }
+            },
+            highlight: () => {
+              if (
+                record?.inStatus === InBoundStatus.WaitCheck ||
+                record?.inStatus === InBoundStatus.Wait
+              ) {
+                return 'error';
+              } else if (record?.inStatus === InBoundStatus.WaitUnloading) {
+                return 'info';
+              } else {
+                return 'success';
+              }
             },
             ifShow: () => {
               return hasAuthPower('forecastDownload');

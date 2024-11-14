@@ -2,7 +2,8 @@ import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/noti
 
 export const checkedObj = {
   type: 'selection',
-  disabled: (row) => row.inStatus !== InBoundDetailStatus.WaitCheck,
+  disabled: (row) =>
+    row.inStatus !== InBoundDetailStatus.WaitCheck && row.inStatus !== InBoundStatus.WaitUnloading,
 };
 
 export const planObj = {

@@ -21,6 +21,7 @@ export const columns: DataTableColumns<any> = [
   {
     title: '客户ID',
     key: 'customer.customerName',
+    resizable: true,
   },
   {
     title: '仓库',

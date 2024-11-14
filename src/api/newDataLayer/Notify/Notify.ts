@@ -21,6 +21,10 @@ export async function getNotifyById(id) {
 }
 
 export async function addOrUpdateNotify(item) {
+  if (item.customer || item.inventory) {
+    item.customerId = item.customer.id;
+    item.inventoryId = item.inventory.id;
+  }
   return await hillo.jsonPost(typeName + '/addOrUpdateWithRef', {
     ...item,
   });

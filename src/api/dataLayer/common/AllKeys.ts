@@ -23,6 +23,10 @@ export const allKeysList = [
     label: '总体积',
     field: 'volume',
   },
+  {
+    label: '尺寸',
+    field: 'size',
+  },
   // {
   //   label: 'FBA单号',
   //   field: 'FBADeliveryCode',
@@ -31,10 +35,10 @@ export const allKeysList = [
   //   label: 'PO',
   //   field: 'PO',
   // },
-  // {
-  //   label: 'FC/送货地址',
-  //   field: 'FCAddress',
-  // },
+  {
+    label: 'FC/送货地址',
+    field: 'FCAddress',
+  },
   {
     label: '出库方式',
     field: 'outboundMethod',

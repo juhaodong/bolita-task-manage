@@ -84,4 +84,10 @@ export const defaultOutboundList = {
   waitCar: '',
   totalOutOffer: '',
   bookCarTimestamp: 0,
+  PODFiles: '',
+  CMRFiles: '',
+  pickupFiles: '',
+  unloadingFile: '',
+  loadingCarDoc: '',
+  alreadyChanged: '',
 };

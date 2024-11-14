@@ -479,7 +479,11 @@
     } else if (typeMission.value === '存仓看板') {
       currentFilter.push({ field: 'inStatus', op: 'in', value: ['存仓'] });
     } else if (typeMission.value === '审核看板') {
-      currentFilter.push({ field: 'inStatus', op: 'in', value: ['等待提交', '等待审核'] });
+      currentFilter.push({
+        field: 'inStatus',
+        op: 'in',
+        value: ['等待提交', '等待审核', '等待卸柜'],
+      });
     } else if (typeMission.value === '报价看板') {
       currentFilter.push({ field: 'needOfferPrice', op: '==', value: '1' });
     }
@@ -604,6 +608,9 @@
     } else {
       currentColumns = [...currentWithOutSelection];
     }
+    currentColumns.forEach((item) => {
+      item.resizable = true;
+    });
     showCurrentHeaderDataTable = false;
   }
 

@@ -35,6 +35,7 @@ export enum InBoundStatus {
   All = '入库待出库',
   Partial = '部分入库',
   Wait = '等待入库',
+  WaitUnloading = '等待卸柜',
   WaitCheck = '等待审核',
   WaitOperate = '入库待操作',
 }

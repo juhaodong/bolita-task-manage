@@ -181,7 +181,6 @@
         (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       );
     }
-    console.log(allList, 'list');
     return allList;
   };
   const actionRef = ref();
@@ -338,8 +337,6 @@
             },
           },
           fileAction('提单', 'pickupFiles', '', 'orderCarOrder'),
-          fileAction('POD', 'PODFiles', '', 'orderCarPOD'),
-          fileAction('CMR', 'CMRFiles', '', 'orderCarCMR'),
         ],
       });
     },

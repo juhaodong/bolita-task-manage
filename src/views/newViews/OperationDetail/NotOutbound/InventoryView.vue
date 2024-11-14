@@ -215,11 +215,9 @@
 
   async function selectedHeader() {
     showCurrentHeaderDataTable = true;
-    console.log(columns, 'columns');
   }
 
   async function startAddTray(id) {
-    console.log(id, 'id');
     addNewTrayDialog = true;
   }
 
@@ -370,6 +368,9 @@
     });
     currentColumns = currentColumns.length > 0 ? currentColumns : columns;
     currentColumns = [inStorageObj, ...currentColumns];
+    currentColumns.forEach((item) => {
+      item.resizable = true;
+    });
     showCurrentHeaderDataTable = false;
   }
 

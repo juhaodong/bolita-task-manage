@@ -69,7 +69,6 @@
       currentTaskList[index].outContainerNumEdit =
         it.outContainerNum == 0 ? '' : it.outContainerNum;
     });
-    console.log(currentTaskList, 'list');
   }
 
   let loading: boolean = $ref(false);
@@ -167,9 +166,9 @@
       <n-space v-if="currentOutBoundInfo" :wrap-item="false" class="mt-4">
         <n-button secondary @click="allOut">全部装柜</n-button>
         <div class="flex-grow"></div>
-        <div>
-          <n-input v-model:value="outOperatePerson" placeholder="装柜人员" />
-        </div>
+        <!--        <div>-->
+        <!--          <n-input v-model:value="outOperatePerson" placeholder="装柜人员" />-->
+        <!--        </div>-->
         <n-button type="primary" @click="confirm">确认装车 </n-button>
       </n-space>
     </loading-frame>

@@ -82,6 +82,10 @@ export async function getTaskListByIds(ids) {
 }
 
 export async function addOrUpdateTask(item) {
+  if (item.customer || item.inventory) {
+    item.customerId = item.customer.id;
+    item.inventoryId = item.inventory.id;
+  }
   return await hillo.jsonPost(typeName + '/addOrUpdateWithRef', {
     ...item,
   });
