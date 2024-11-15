@@ -35,9 +35,9 @@
   import { valueOfToday } from '@/api/dataLayer/common/Date';
   import dayjs from 'dayjs';
   import { ref } from 'vue';
-  import { getOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
-  import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
   import { ReloadOutlined } from '@vicons/antd';
+  import { getOutboundForecastList } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import { getNotifyList } from '@/api/newDataLayer/Notify/Notify';
 
   let dateRange = $ref(valueOfToday);
   const actionNotifyRef = ref();
@@ -53,11 +53,11 @@
     },
     {
       title: '仓库',
-      key: 'warehouseId',
+      key: 'inventory.name',
     },
     {
       title: '客户ID',
-      key: 'customerName',
+      key: 'customer.customerName',
     },
     {
       title: '预约到仓时间',
@@ -71,10 +71,6 @@
       title: '整柜数量',
       key: 'arrivedCount',
     },
-    // {
-    //   title: '卸货单',
-    //   key: 'unloadingFile',
-    // },
   ];
 
   const outboundColumns = [
@@ -107,7 +103,7 @@
   const loadNotifyDataTable = async () => {
     let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
     let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-    const res = (await NotifyManager.load(null)).filter(
+    const res = (await getNotifyList()).filter(
       (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
     );
     res.forEach((x) => {
@@ -130,7 +126,7 @@
   const loadOutboundDataTable = async () => {
     let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
     let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-    return (await getOutboundForecast(null)).filter(
+    return (await getOutboundForecastList()).filter(
       (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
     );
   };
