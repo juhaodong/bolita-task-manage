@@ -189,6 +189,9 @@
     getOutboundForecastListByFilter,
   } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
+  import { addOrUpdateTask, getTaskListByOutboundId } from '@/api/newDataLayer/TaskList/TaskList';
+  import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
+  import { useUserStore } from '@/store/modules/user';
 
   const showModal = ref(false);
   let showShareCarModel = $ref(false);
@@ -341,7 +344,8 @@
         a.inStatus === CarStatus.Booked ||
         a.inStatus === '已装车' ||
         a.inStatus === CarStatus.NoNeed ||
-        a.inStatus === '全部出库'
+        a.inStatus === '全部出库' ||
+        a.inStatus === '已完成'
     );
     if (!showAll) {
       currentList = currentList.filter((a) => a.inStatus !== '已取消');
@@ -491,7 +495,6 @@
               return record?.['loadingCarDoc']?.length > 0 ? 'success' : 'error';
             },
             async onClick() {
-              console.log(record, 'record');
               const upload = useUploadDialog();
               const files = await upload.upload(record['loadingCarDoc']);
               if (files.checkPassed) {
@@ -546,7 +549,39 @@
             },
           },
           fileAction('POD', 'PODFiles', '', 'orderCarPOD'),
-          fileAction('CMR', 'CMRFiles', '', 'orderCarCMR'),
+          {
+            label: 'CMR',
+            highlight: () => {
+              return record?.['cmrfiles']?.length > 0 ? 'success' : 'error';
+            },
+            async onClick() {
+              const upload = useUploadDialog();
+              const files = await upload.upload(record['cmrfiles']);
+              if (files.checkPassed) {
+                record.CMRFiles = files.files;
+                record.inStatus = '已完成';
+                await addOrUpdateWithRefOutboundForecast(record);
+                const taskList = await getTaskListByOutboundId(record.id);
+                for (const item of taskList) {
+                  item.cmrfiles = files.files;
+                  item.inStatus = '已完成';
+                  await addOrUpdateTask(item);
+                  const userInfo = useUserStore().info;
+                  await addOrUpdateTaskTimeLine({
+                    useType: 'normal',
+                    bolitaTaskId: item.id,
+                    operator: userInfo?.realName,
+                    detailTime: dayjs().valueOf(),
+                    note: '已装车，已完成',
+                  });
+                }
+              }
+              await actionRef.value.reload();
+            },
+            ifShow: () => {
+              return hasAuthPower('outMissionUploadFile');
+            },
+          },
           {
             label: '修改',
             onClick() {

@@ -785,6 +785,25 @@
             },
           },
           {
+            label: 'CMR',
+            highlight: () => {
+              return record?.['cmrfiles']?.length > 0 ? 'success' : 'error';
+            },
+            async onClick() {
+              console.log(record, 'record');
+              const upload = useUploadDialog();
+              const files = await upload.upload(record['cmrfiles']);
+              if (files.checkPassed) {
+                record.cmrfiles = files.files;
+                await addOrUpdateTask(record);
+              }
+              await actionRef.value.reload();
+            },
+            ifShow: () => {
+              return hasAuthPower('outMissionUploadFile');
+            },
+          },
+          {
             label: '信息已变更',
             highlight: () => {
               return 'error';

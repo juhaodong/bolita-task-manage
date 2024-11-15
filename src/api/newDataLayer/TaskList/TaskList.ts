@@ -53,6 +53,20 @@ export async function getTaskListByNotifyId(id) {
   ).data.content;
 }
 
+export async function getTaskListByOutboundId(id) {
+  return (
+    await hillo.jsonPost(typeName + '/list', {
+      criteria: [
+        {
+          field: 'outboundId',
+          op: '==',
+          value: id,
+        },
+      ],
+    })
+  ).data.content;
+}
+
 export async function getTaskListById(id) {
   return (
     await hillo.jsonPost(typeName + '/list', {

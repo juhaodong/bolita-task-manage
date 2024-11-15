@@ -192,6 +192,7 @@
           item.outBoundTime = '';
           item.outContainerNum = '';
           item.outTrayNum = '';
+          item.cmrfiles = '';
           quest.push(addOrUpdateTask(item));
         }
         const result = await Promise.all(quest);

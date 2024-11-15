@@ -4,8 +4,8 @@ import { useUploadDialog } from '@/store/modules/uploadFileState';
 import { RouterLink } from 'vue-router';
 import { NInput, NText } from 'naive-ui';
 import { safeParseInt } from '@/store/utils/utils';
-import { updateOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
 import { hasAuthPower } from '@/api/dataLayer/common/power';
+import { addOrUpdateWithRefOutboundForecast } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
 
 export const standardDateFormat = 'YYYY-MM-DD/HH:mm';
 export const dateFormat = 'DD/MM/YYYY';
@@ -301,10 +301,8 @@ export function getFileActionButtonByOutForecast(
       const upload = useUploadDialog();
       const files = await upload.upload(record[key], undefined, editable);
       if (files.checkPassed) {
-        const obj = {};
-        obj[key] = files.files;
-        console.log(files.files[0]);
-        await updateOutboundForecast(record.id, obj);
+        record[key] = files.files;
+        await addOrUpdateWithRefOutboundForecast(record);
       }
       reload();
     },
