@@ -56,7 +56,6 @@ export async function asyncWarehouseList(defaultValue): Promise<FormField> {
     label: it.name,
     value: it.id,
   }));
-  console.log(list, 'list');
   return {
     field: 'inventoryId',
     label: '仓库',
@@ -76,6 +75,23 @@ export async function asyncFCAddress(): Promise<FormField> {
   }));
   return {
     field: 'fcaddress',
+    label: 'FC/送货地址',
+    component: 'NSelect',
+    componentProps: {
+      options: list,
+      multiple: true,
+    },
+  };
+}
+
+export async function asyncFCAddressByFilter(): Promise<FormField> {
+  const FBACodeList = await getFBACodeList();
+  const list = FBACodeList.map((it) => ({
+    label: it.code,
+    value: it.code,
+  }));
+  return {
+    field: 'FCAddress',
     label: 'FC/送货地址',
     component: 'NSelect',
     componentProps: {

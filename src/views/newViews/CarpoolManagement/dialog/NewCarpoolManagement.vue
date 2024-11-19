@@ -103,9 +103,13 @@
           outboundForecastInfo.reservationGetProductTime = values.reservationGetProductTime;
           outboundForecastInfo.waitCar = '1';
           outboundForecastInfo.waybillId = values.waybillId;
+          if (!outboundForecastInfo.REF) {
+            outboundForecastInfo.REF = outboundForecastInfo.ref
+              ? outboundForecastInfo.ref
+              : outboundForecastInfo.id;
+          }
           await updateTaskListAfterBookingCar(id);
         } else {
-          console.log(values, 'value');
           outboundForecastInfo.REF = values.REF.toString();
           outboundForecastInfo.costPrice = values.costPrice;
           outboundForecastInfo.inStatus = values.inStatus;

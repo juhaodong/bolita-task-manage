@@ -450,12 +450,10 @@
     showSizePicker: true,
     pageSizes: [10, 20, 50, 100],
     onChange: (page: number) => {
-      console.log(page, 'pgae');
       paginationReactive.pageNumber = page - 1;
       reloadTable();
     },
     onUpdatePageSize: (pageSize: number) => {
-      console.log(pageSize, 'pageSize');
       paginationReactive.pageSize = pageSize;
       paginationReactive.pageNumber = 0;
       reloadTable();
@@ -482,7 +480,7 @@
       currentFilter.push({
         field: 'inStatus',
         op: 'in',
-        value: ['等待提交', '等待审核', '等待卸柜'],
+        value: ['等待提交', '等待审核'],
       });
     } else if (typeMission.value === '报价看板') {
       currentFilter.push({ field: 'needOfferPrice', op: '==', value: '1' });
@@ -561,6 +559,12 @@
         value[keyTwo] = valueTwo;
       }
       filterObj = value;
+      Object.keys(filterObj).forEach((key) => {
+        if (key === 'fcaddress') {
+          filterObj['FCAddress'] = filterObj[key];
+          delete filterObj[key];
+        }
+      });
     } else {
       filterObj = null;
       optionOne = '';

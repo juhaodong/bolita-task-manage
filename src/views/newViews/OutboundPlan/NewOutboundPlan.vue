@@ -61,7 +61,7 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import {
     asyncCustomer,
-    asyncFCAddress,
+    asyncFCAddressByFilter,
     asyncStorage,
     generateOptionFromArray,
     safeParseInt,
@@ -142,10 +142,9 @@
     let currentFilter = [];
     if (filterObj) {
       const res = Object.keys(filterObj);
-
-      for (const filterItem of res) {
+      for (let filterItem of res) {
         currentFilter.push({
-          field: filterItem,
+          field: filterItem === 'fcaddress' ? 'FCAddress' : filterItem,
           op: filterObj[filterItem] ? 'like' : '!=',
           value: '%' + filterObj[filterItem] + '%' ?? '',
         });
@@ -161,7 +160,6 @@
             ? true
             : !!x.trayItems;
         });
-      console.log(allNotifyDetail, 'detail');
     }
   }
 
@@ -263,7 +261,6 @@
             size: 'small',
             onClick: () => {
               currentDate.value = row;
-              console.log(currentDate.value, 'value');
               showDetailInfo = true;
             },
           },
@@ -345,7 +342,7 @@
       label: '票号',
       field: 'ticketId',
     },
-    asyncFCAddress(),
+    asyncFCAddressByFilter(),
     asyncStorage(),
     {
       label: '物流方式',

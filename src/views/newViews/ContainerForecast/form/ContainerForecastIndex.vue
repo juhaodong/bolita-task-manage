@@ -126,6 +126,7 @@
         return currentRows;
       }
     } catch (e: any) {
+      errorMessage.push({ detail: '文件上传错误' + e?.message });
       console.log(e?.message);
     }
     return [];
@@ -169,7 +170,11 @@
       value.arrivedCount = safeSumBy(taskList, 'number').toString();
 
       if (value.files) {
-        value.files = await saveFiles(value.files);
+        try {
+          value.files = await saveFiles(value.files);
+        } catch (e) {
+          errorMessage.push({ detail: '文件上传错误' + e?.message });
+        }
       } else {
         value.files = '';
       }
@@ -211,10 +216,9 @@
           );
         }
         await Promise.all(idQuest);
+        emit('saved');
       }
     }
-
-    emit('saved');
     stop();
   }
 </script>

@@ -247,14 +247,17 @@
   });
   const priceRules = computed(() => {
     return (
-      checkedRows.length < 1 || realDetailInfoById?.value.filter((it) => it.waitPrice).length !== 0
+      checkedRows.length < 1 ||
+      realDetailInfoById?.value.filter((it) => it.waitPrice).length !== 0 ||
+      realDetailInfoById?.value.filter((it) => it.needOfferPrice === '0').length !== 0
     );
   });
   const carRules = computed(() => {
     return (
       checkedRows.length < 1 ||
       realDetailInfoById?.value.filter((it) => it.waitCar === '1').length !== 0 ||
-      realDetailInfoById?.value.filter((it) => it.waitPrice === '1').length !== checkedRows.length
+      realDetailInfoById?.value.filter((it) => it.waitPrice === '1' || it.needOfferPrice === '0')
+        .length !== checkedRows.length
     );
   });
 

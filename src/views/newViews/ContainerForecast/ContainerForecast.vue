@@ -167,6 +167,15 @@
       >
         <confirm-dialog :title="'确认货柜到库？'" @saved="confirmUnloading" />
       </n-modal>
+      <n-modal
+        v-model:show="showNeedCheckDialog"
+        :show-icon="false"
+        preset="card"
+        style="width: 90%; min-width: 400px; max-width: 400px"
+        title="请确认"
+      >
+        <confirm-dialog :title="'请先审核完所有任务！'" @saved="showNeedCheckDialog = false" />
+      </n-modal>
     </n-card>
     <no-power-page v-else />
   </div>
@@ -224,6 +233,7 @@
   let currentRecord = $ref({});
   let showAll = $ref(false);
   let showConfirmUnloading = $ref(false);
+  let showNeedCheckDialog = $ref(false);
 
   function addTable(type: NotifyType) {
     notifyType = type;
@@ -394,6 +404,19 @@
     showModal.value = true;
   }
 
+  async function checkContainerStatus(record) {
+    if (record?.inStatus === InBoundStatus.Wait) {
+      currentRecord = record;
+      showConfirmUnloading = true;
+    } else if (record?.inStatus === InBoundStatus.WaitUnloading) {
+      currentNotifyId = record.id!;
+      showOperationTable = true;
+    } else if (record?.inStatus === InBoundStatus.WaitCheck) {
+      console.log('321');
+      showNeedCheckDialog = true;
+    }
+  }
+
   async function selectedHeader() {
     showCurrentHeaderDataTable = true;
   }
@@ -452,16 +475,7 @@
           {
             label: '卸柜',
             onClick() {
-              if (
-                record?.inStatus === InBoundStatus.WaitCheck ||
-                record?.inStatus === InBoundStatus.Wait
-              ) {
-                currentRecord = record;
-                showConfirmUnloading = true;
-              } else if (record?.inStatus === InBoundStatus.WaitUnloading) {
-                currentNotifyId = record.id!;
-                showOperationTable = true;
-              }
+              checkContainerStatus(record);
             },
             highlight: () => {
               if (

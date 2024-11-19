@@ -91,12 +91,8 @@
       key: 'reservationGetProductDetailTime',
     },
     {
-      title: '报价',
-      key: 'totalOutOffer',
-    },
-    {
       title: '总件数',
-      key: 'containerNum',
+      key: 'totalNumber',
     },
   ];
 
@@ -126,9 +122,15 @@
   const loadOutboundDataTable = async () => {
     let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
     let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-    return (await getOutboundForecastList()).filter(
+    const res = (await getOutboundForecastList()).filter(
       (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
     );
+    res.forEach((it) => {
+      if (!it.REF) {
+        it.REF = it.ref ? it.ref : it.id;
+      }
+    });
+    return res;
   };
 
   function reload() {
