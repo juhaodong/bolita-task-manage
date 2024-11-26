@@ -19,7 +19,11 @@ export function timeDisplay(time) {
 }
 
 export function timeDisplayYMD(time) {
-  return dayjs(time).format('YYYY-MM-DD');
+  if (time) {
+    return dayjs(time).format('YYYY-MM-DD');
+  } else {
+    return '';
+  }
 }
 
 function hashCode(str) {

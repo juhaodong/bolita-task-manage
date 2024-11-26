@@ -173,8 +173,14 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
     key: 'isa',
   },
   {
-    title: 'AMZ-Sendungs ID',
+    title: '物流公司',
+    key: 'logisticsCompany',
+    width: 100,
+  },
+  {
+    title: 'AX4 Nr./AMZ/车队',
     key: 'amzid',
+    width: 200,
   },
   {
     title: '托盘',
@@ -185,34 +191,34 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
     title: '取货时间',
     key: 'reservationGetProductDetailTime',
   },
-  {
-    title: '报价',
-    key: 'orderCarPrice',
-  },
-  {
-    title: '城市',
-    key: 'city',
-  },
-  {
-    title: '街道',
-    key: 'street',
-  },
-  {
-    title: '地址附加',
-    key: 'appendAddress',
-  },
-  {
-    title: '门牌号',
-    key: 'houseNo',
-  },
-  {
-    title: '收件人',
-    key: 'contact',
-  },
-  {
-    title: '电话／邮箱',
-    key: 'email',
-  },
+  // {
+  //   title: '报价',
+  //   key: 'orderCarPrice',
+  // },
+  // {
+  //   title: '城市',
+  //   key: 'city',
+  // },
+  // {
+  //   title: '街道',
+  //   key: 'street',
+  // },
+  // {
+  //   title: '地址附加',
+  //   key: 'appendAddress',
+  // },
+  // {
+  //   title: '门牌号',
+  //   key: 'houseNo',
+  // },
+  // {
+  //   title: '收件人',
+  //   key: 'contact',
+  // },
+  // {
+  //   title: '电话／邮箱',
+  //   key: 'email',
+  // },
   {
     title: '备注',
     key: 'note',

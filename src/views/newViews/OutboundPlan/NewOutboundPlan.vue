@@ -19,6 +19,7 @@
           justify="space-between"
         >
           <div>已经选择{{ checkedRowKeys.length }}条记录</div>
+          <div>当前过滤项:{{ warnMessage }}</div>
           <div>总数量: {{ totalNumber }}</div>
           <div>总重量: {{ totalWeight }}</div>
           <div>总体积: {{ totalVolume }}</div>
@@ -109,6 +110,7 @@
   });
   let allNotifyDetail: any[] = $ref([]);
   let loading: boolean = $ref(false);
+  let warnMessage = $ref('');
 
   watch(checkedRowKeys, async (val) => {
     let realList = [];
@@ -122,6 +124,7 @@
           b.deliveryMethod === selectedDeliveryMethod &&
           b.FCAddress === selectedFCAddress
       );
+      warnMessage = '物流方式 | FC/送货地址 | 邮箱';
     } else {
       await updateFilter(null);
       selectedPostcode = '';
@@ -240,6 +243,7 @@
     },
     { title: '票号', key: 'ticketId' },
     { title: '柜号', key: 'containerId' },
+    { title: '仓库', key: 'inventory.name' },
     { title: '托数', key: 'arrivedTrayNum' },
     { title: '箱数', key: 'arrivedContainerNum' },
     { title: '重量', key: 'weight' },

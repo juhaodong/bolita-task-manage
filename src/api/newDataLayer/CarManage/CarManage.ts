@@ -14,8 +14,26 @@ export async function getOutboundForecastListByFilter(filter) {
   ).data.content;
 }
 
+export async function getOutboundForecastListById(id) {
+  return (
+    await hillo.jsonPost(typeName + '/list', {
+      criteria: [
+        {
+          field: 'id',
+          op: '==',
+          value: id,
+        },
+      ],
+    })
+  ).data.content[0];
+}
+
 export async function addOrUpdateOutboundForecast(item) {
-  return await hillo.jsonPost(typeName + '/addOrUpdate', {
+  if (item.customer || item.inventory) {
+    item.customerId = item.customer.id;
+    item.inventoryId = item.inventory.id;
+  }
+  return await hillo.jsonPost(typeName + '/addOrUpdateWithRef', {
     ...item,
   });
 }

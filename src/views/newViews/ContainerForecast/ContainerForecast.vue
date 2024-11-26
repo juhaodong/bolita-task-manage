@@ -252,6 +252,7 @@
   async function confirmUnloading() {
     const userInfo = useUserStore().info;
     currentRecord.inStatus = '等待卸柜';
+    currentRecord.arrivedInventoryTime = dayjs().valueOf();
     const res = await addOrUpdateNotify(currentRecord);
     const list = await getTaskListByNotifyId(currentRecord.id);
     for (const item of list) {
@@ -412,7 +413,6 @@
       currentNotifyId = record.id!;
       showOperationTable = true;
     } else if (record?.inStatus === InBoundStatus.WaitCheck) {
-      console.log('321');
       showNeedCheckDialog = true;
     }
   }

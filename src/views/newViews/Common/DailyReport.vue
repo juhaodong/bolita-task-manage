@@ -71,7 +71,14 @@
       title: '整柜数量',
       key: 'arrivedCount',
     },
-  ];
+    {
+      title: '备注',
+      key: 'note',
+    },
+  ].map((it) => {
+    it.resizable = true;
+    return it;
+  });
 
   const outboundColumns = [
     {
@@ -94,7 +101,10 @@
       title: '总件数',
       key: 'totalNumber',
     },
-  ];
+  ].map((it) => {
+    it.resizable = true;
+    return it;
+  });
 
   const loadNotifyDataTable = async () => {
     let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
@@ -116,6 +126,7 @@
         x.problem = 'Schwer';
       }
     });
+    console.log(res, 'res');
     return res;
   };
 

@@ -12,7 +12,7 @@
   import { carSchemas } from '../columns';
   import dayjs from 'dayjs';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
-  import { computed, onMounted } from 'vue';
+  import { computed, onMounted, ref } from 'vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import {
     updateTaskListAfterBookingCar,
@@ -22,6 +22,7 @@
     addOrUpdateWithRefOutboundForecast,
     getOutboundForecastById,
   } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import { getOutboundForecastListById } from '@/api/newDataLayer/CarManage/CarManage';
 
   interface Props {
     model?: any;
@@ -31,11 +32,13 @@
 
   let loading: boolean = $ref(false);
   const prop = defineProps<Props>();
+  let currentInfo = ref({});
 
   const emit = defineEmits(['saved']);
 
   onMounted(async () => {
-    console.log(prop.model, 'model');
+    currentInfo.value = await getOutboundForecastListById(...prop.mergedOutIds);
+    console.log(currentInfo.value, 'info');
   });
 
   const defaultRef = computed(() => {

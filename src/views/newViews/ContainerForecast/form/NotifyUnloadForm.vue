@@ -65,9 +65,8 @@
   async function reload() {
     if (props.notifyId != null) {
       notifyInfo = await getNotifyById(props.notifyId);
-      console.log(notifyInfo, 'info');
+      console.log(notifyInfo, ' info');
       currentTaskList = await getTaskListByNotifyId(notifyInfo.id);
-      console.log(currentTaskList, 'list');
       emit('refresh');
       unloadPerson = notifyInfo?.unloadPerson ?? '';
       loadAll();
@@ -200,6 +199,9 @@
         >
         <n-descriptions-item label="预约日期时间">
           {{ timeDisplayYMD(notifyInfo?.planArriveDateTime) }}/{{ notifyInfo?.inHouseTime }}
+        </n-descriptions-item>
+        <n-descriptions-item label="实际入库日期">
+          {{ timeDisplayYMD(notifyInfo?.arrivedInventoryTime) ?? '' }}
         </n-descriptions-item>
         <n-descriptions-item label="预报总数"> {{ notifyInfo?.arrivedCount }}</n-descriptions-item>
         <n-descriptions-item label="实际卸柜日期">

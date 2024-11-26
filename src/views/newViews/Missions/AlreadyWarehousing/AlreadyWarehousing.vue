@@ -263,7 +263,7 @@
   let addNewFeeDialog = $ref(false);
   let checkedRows = $ref([]);
   let currentModel: any | null = $ref(null);
-  let typeTab = $ref(['整柜任务看板', '审核看板', '报价看板', '存仓看板']);
+  let typeTab = $ref(['整柜任务看板', '审核看板', '存仓看板']);
   let typeMission = ref('');
   let selectedMonth: any | null = $ref('');
   let currentData: any | null = $ref('');
@@ -684,18 +684,18 @@
               return hasAuthPower('missionSettle');
             },
           },
-          {
-            label: '请报价',
-            onClick() {
-              checkCashStatus(record.id);
-            },
-            highlight: () => {
-              return 'info';
-            },
-            ifShow: () => {
-              return record?.['needOfferPrice'] === '1' && hasAuthPower('missionPriceOffer');
-            },
-          },
+          // {
+          //   label: '请报价',
+          //   onClick() {
+          //     checkCashStatus(record.id);
+          //   },
+          //   highlight: () => {
+          //     return 'info';
+          //   },
+          //   ifShow: () => {
+          //     return record?.['needOfferPrice'] === '1' && hasAuthPower('missionPriceOffer');
+          //   },
+          // },
           {
             label: '时间线',
             onClick() {

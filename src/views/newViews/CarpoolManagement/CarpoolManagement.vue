@@ -1,32 +1,26 @@
 <template>
   <n-card v-if="hasAuthPower('orderCarView')" :bordered="false" class="proCard">
     <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
-      <n-button
-        v-if="hasAuthPower('orderCarOffer')"
-        :disabled="priceRules"
-        type="primary"
-        @click="startShareCar('offer')"
-      >
-        <template #icon>
-          <n-icon>
-            <Box20Filled />
-          </n-icon>
-        </template>
-        报价
-      </n-button>
-      <n-button
-        v-if="hasAuthPower('orderCarBookingCar')"
-        :disabled="carRules"
-        type="primary"
-        @click="startShareCar('car')"
-      >
-        <template #icon>
-          <n-icon>
-            <Box20Filled />
-          </n-icon>
-        </template>
-        订车
-      </n-button>
+      <!--      <n-button v-if="hasAuthPower('orderCarOffer')" type="primary" @click="startShareCar('offer')">-->
+      <!--        <template #icon>-->
+      <!--          <n-icon>-->
+      <!--            <Box20Filled />-->
+      <!--          </n-icon>-->
+      <!--        </template>-->
+      <!--        报价-->
+      <!--      </n-button>-->
+      <!--      <n-button-->
+      <!--        v-if="hasAuthPower('orderCarBookingCar')"-->
+      <!--        type="primary"-->
+      <!--        @click="startShareCar('car')"-->
+      <!--      >-->
+      <!--        <template #icon>-->
+      <!--          <n-icon>-->
+      <!--            <Box20Filled />-->
+      <!--          </n-icon>-->
+      <!--        </template>-->
+      <!--        订车-->
+      <!--      </n-button>-->
       <n-button type="info" @click="downloadData">
         <template #icon>
           <n-icon>
@@ -105,6 +99,24 @@
         @saved="saveShareCar"
       />
     </n-modal>
+    <n-modal
+      v-model:show="offerDialog"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 600px; max-width: 600px"
+      title="对外报价"
+    >
+      <offer-customer-dialog :info="currentInfo" @saved="saved" />
+    </n-modal>
+    <n-modal
+      v-model:show="carDialog"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 600px; max-width: 600px"
+      title="订车信息"
+    >
+      <booking-car-dialog :info="currentInfo" @saved="saved" />
+    </n-modal>
   </n-card>
   <no-power-page v-else />
 </template>
@@ -130,6 +142,8 @@
   import FileSaver from 'file-saver';
   import { getDetailListById } from '@/api/dataLayer/modules/notify/notify-detail';
   import { getOutboundForecastListByFilter } from '@/api/newDataLayer/CarManage/CarManage';
+  import OfferCustomerDialog from '@/views/newViews/CarpoolManagement/dialog/OfferCustomerDialog.vue';
+  import BookingCarDialog from '@/views/newViews/CarpoolManagement/dialog/BookingCarDialog.vue';
 
   const showModal = ref(false);
 
@@ -150,6 +164,9 @@
   let valueTwo = $ref('');
   let showAll = $ref(false);
   let dateRange = $ref(null);
+  let currentInfo = $ref({});
+  let offerDialog = $ref(false);
+  let carDialog = $ref(false);
   const loadDataTable = async () => {
     let currentFilter = [
       {
@@ -262,8 +279,9 @@
   });
 
   function startShareCar(item) {
-    typeName = item;
-    showShareCarModel = true;
+    // typeName = item;
+    // showShareCarModel = true;
+    carDialog = true;
   }
 
   async function saveShareCar() {
@@ -300,6 +318,8 @@
     showShareCarModel = false;
     paymentDialogShow = false;
     editOutboundForecast = false;
+    offerDialog = false;
+    carDialog = false;
   }
 
   function saved() {
@@ -331,12 +351,17 @@
         style: 'button',
         actions: [
           {
-            label: '修改',
-            onClick() {
-              startEditOF(record.id);
+            label: '对外报价',
+            onclick: () => {
+              currentInfo = record;
+              offerDialog = true;
             },
-            ifShow: () => {
-              return hasAuthPower('orderCarEdit');
+          },
+          {
+            label: '订车',
+            onclick: () => {
+              currentInfo = record;
+              carDialog = true;
             },
           },
           fileAction('提单', 'pickupFiles', '', 'orderCarOrder'),

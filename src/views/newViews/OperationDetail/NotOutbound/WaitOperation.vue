@@ -583,15 +583,6 @@
             },
           },
           {
-            label: '修改',
-            onClick() {
-              startEditOF(record.id);
-            },
-            ifShow: () => {
-              return hasAuthPower('outMissionEdit');
-            },
-          },
-          {
             label: '结算',
             onClick() {
               currentInfo = record;

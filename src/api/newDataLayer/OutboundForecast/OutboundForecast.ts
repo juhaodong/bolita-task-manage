@@ -90,4 +90,5 @@ export const defaultOutboundList = {
   unloadingFile: '',
   loadingCarDoc: '',
   alreadyChanged: '',
+  logisticsCompany: '',
 };

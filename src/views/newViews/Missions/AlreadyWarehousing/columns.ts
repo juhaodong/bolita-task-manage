@@ -212,7 +212,7 @@ export const filters: FormField[] = [
   },
   {
     label: '仓库',
-    field: 'warehouseId',
+    field: 'inventory.id',
   },
   {
     label: '货柜号',
