@@ -73,7 +73,7 @@
         <n-input v-model:value="item.price" />
       </n-descriptions-item>
       <n-descriptions-item :span="2" label="总价">
-        <n-input v-model:value="totalPrice" disabled />
+        <n-input v-model:value="totalPrice" />
       </n-descriptions-item>
     </n-descriptions>
     <n-button style="margin-top: 10px" type="info" @click="savePrice">确认</n-button>

@@ -29,7 +29,9 @@
     logisticsCompany = prop.info.logisticsCompany ?? 'DHL Freight';
     ISA = prop.info.ISA ?? '';
     waybillId = prop.info.waybillId ?? '';
-    reservationGetProductTime = parseFloat(prop.info.reservationGetProductTime) ?? null;
+    reservationGetProductTime = prop.info.reservationGetProductTime
+      ? parseFloat(prop.info.reservationGetProductTime)
+      : new Date();
     reservationGetProductDetailTime = prop.info.reservationGetProductDetailTime ?? '';
     AMZID = prop.info.AMZID ?? '';
     note = prop.info.note ?? '';
