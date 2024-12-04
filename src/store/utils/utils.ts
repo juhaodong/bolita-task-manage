@@ -160,7 +160,7 @@ export async function asyncCustomer(): Promise<FormField> {
     value: it.id,
   }));
   return {
-    field: 'customer',
+    field: 'customer.id',
     label: '客户',
     required: false,
     component: 'NSelect',

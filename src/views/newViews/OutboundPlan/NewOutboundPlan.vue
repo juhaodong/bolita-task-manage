@@ -241,6 +241,7 @@
       type: 'selection',
       key: 'selection',
     },
+    { title: '客户', key: 'customer.customerName' },
     { title: '票号', key: 'ticketId' },
     { title: '柜号', key: 'containerId' },
     { title: '仓库', key: 'inventory.name' },
