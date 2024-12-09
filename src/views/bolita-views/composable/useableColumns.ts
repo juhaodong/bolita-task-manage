@@ -69,7 +69,7 @@ export function timeWarnColumn(key = 'usefulTimeRange', title = '时效') {
   };
 }
 
-export function storageTimeWarnColumn(key = 'stayTime', title = '时效') {
+export function storageTimeWarnColumn(key = 'stayTime', title = '留仓时间') {
   return {
     title: title,
     key: key,

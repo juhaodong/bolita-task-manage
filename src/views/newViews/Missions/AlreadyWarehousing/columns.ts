@@ -2,7 +2,11 @@ import { DataTableColumns } from 'naive-ui';
 import { finalStatus, InBoundDetailStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import { generateOptionFromArray } from '@/store/utils/utils';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+import {
+  statusColumnEasy,
+  storageTimeWarnColumn,
+  timeColumn,
+} from '@/views/bolita-views/composable/useableColumns';
 import {
   deliveryMethodList,
   outboundMethodList,
@@ -58,10 +62,7 @@ export const columns: DataTableColumns<any> = [
     title: '仓库',
     key: 'inventory.name',
   },
-  {
-    title: '留仓时间',
-    key: 'stayTime',
-  },
+  storageTimeWarnColumn('stayTime', '留仓时间'),
   {
     title: '运单号',
     key: 'deliveryIdIn',

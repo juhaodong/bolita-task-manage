@@ -223,7 +223,6 @@
   import { $ref } from 'vue/macros';
   import {
     getFileActionButton,
-    storageTimeWarnColumn,
     timeWarnColumn,
   } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
@@ -506,7 +505,6 @@
         }
       }
     }
-    console.log(currentFilter, 'filter');
     if (typeMission.value === '整柜任务看板') {
     } else if (typeMission.value === '存仓看板') {
       currentFilter.push({ field: 'inStatus', op: 'in', value: ['存仓'] });
@@ -656,7 +654,6 @@
       currentColumns = [offerObj, ...currentWithOutSelection];
     } else {
       currentColumns = [...currentWithOutSelection];
-      currentColumns.unshift(storageTimeWarnColumn());
     }
     currentColumns.forEach((item) => {
       item.resizable = true;
