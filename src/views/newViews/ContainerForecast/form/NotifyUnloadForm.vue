@@ -141,7 +141,7 @@
           : listElement.operateInStorage === '是'
           ? '入库待操作'
           : newInStatus;
-      listElement.arriveTime = dayjs(realDate).format('YYYY-MM-DD') + '' + startTime;
+      listElement.arriveTime = dayjs(realDate).format('YYYY-MM-DD') + ' ' + startTime;
       listElement.customerId = listElement.customer.id;
       listElement.inventoryId = listElement.inventory.id;
       if (listElement.inStatus === '存仓') {
@@ -210,14 +210,14 @@
         <!--        <n-descriptions-item label="实际卸柜日期">-->
         <!--          <n-date-picker v-model:value="currentDate" clearable type="date" />-->
         <!--        </n-descriptions-item>-->
-        <n-descriptions-item label="卸柜时长">
-          <n-input v-model:value="totalTime" disabled />
-        </n-descriptions-item>
         <n-descriptions-item label="卸柜起始时间">
           <n-time-picker v-model:formatted-value="startTime" value-format="HH:mm:ss" />
         </n-descriptions-item>
         <n-descriptions-item label="卸柜结束时间">
           <n-time-picker v-model:formatted-value="endTime" value-format="HH:mm:ss" />
+        </n-descriptions-item>
+        <n-descriptions-item label="卸柜时长">
+          <n-input v-model:value="totalTime" disabled />
         </n-descriptions-item>
       </n-descriptions>
       <div class="mt-4 noMaxHeight" style="max-height: 800px; overflow-y: scroll">

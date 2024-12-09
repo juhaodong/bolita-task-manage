@@ -7,6 +7,7 @@
           v-model:checked-row-keys="checkedRowKeys"
           :columns="columns"
           :data="allNotifyDetail"
+          :loading="tableLoading"
           :row-key="(row) => row.id"
           class="mt-4"
           max-height="450"
@@ -87,6 +88,7 @@
     addOrUpdateWithRefOutboundForecast,
     defaultOutboundList,
   } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import dayjs from 'dayjs';
 
   interface Props {
     model?: any;
@@ -111,8 +113,10 @@
   let allNotifyDetail: any[] = $ref([]);
   let loading: boolean = $ref(false);
   let warnMessage = $ref('');
+  let tableLoading = $ref(false);
 
   watch(checkedRowKeys, async (val) => {
+    console.log(val, 'val');
     let realList = [];
     if (val.length > 0) {
       selectedDeliveryMethod = allNotifyDetail.find((it) => it.id === val[0]).deliveryMethod;
@@ -126,10 +130,12 @@
       );
       warnMessage = '物流方式 | FC/送货地址 | 邮箱';
     } else {
+      tableLoading = true;
       await updateFilter(null);
       selectedPostcode = '';
       selectedDeliveryMethod = '';
       selectedFCAddress = '';
+      tableLoading = false;
     }
     for (const item of val) {
       realList.push(allNotifyDetail.find((it) => it.id === item));
@@ -228,6 +234,7 @@
       }
       it.outboundId = outboundId;
       it.needOfferPrice = value.needOfferPrice;
+      it.usefulTimeRange = dayjs().diff(dayjs(it.arriveTime), 'day') ?? '-';
     });
     await afterPlanDetailAdded(allNotifyDetail);
     await safeScope(() => {

@@ -6,6 +6,20 @@ export async function getTaskListTimeLine() {
   return (await hillo.jsonPost(typeName + '/list', {})).data.content;
 }
 
+export async function getTaskListTimeLineById(id) {
+  return (
+    await hillo.jsonPost(typeName + '/list', {
+      criteria: [
+        {
+          field: 'id',
+          op: '==',
+          value: id,
+        },
+      ],
+    })
+  ).data.content;
+}
+
 export async function addOrUpdateTaskTimeLine(item) {
   return await hillo.jsonPost(typeName + '/addOrUpdateWithParentId', {
     ...item,

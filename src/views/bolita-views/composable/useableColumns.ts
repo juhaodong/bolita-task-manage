@@ -20,6 +20,7 @@ export function timeDisplay(time) {
 
 export function timeDisplayYMD(time) {
   if (time) {
+    time = parseFloat(time);
     return dayjs(time).format('YYYY-MM-DD');
   } else {
     return '';
@@ -56,6 +57,65 @@ export function colorColumn(
     },
   };
 }
+
+export function timeWarnColumn(key = 'usefulTimeRange', title = '时效') {
+  return {
+    title: title,
+    key: key,
+    render(record) {
+      const display = record.usefulTimeRange ?? '';
+      return timeWarnColorfulRender(display);
+    },
+  };
+}
+
+export function storageTimeWarnColumn(key = 'stayTime', title = '时效') {
+  return {
+    title: title,
+    key: key,
+    render(record) {
+      const display = record.stayTime ?? '';
+      return inStorageWarnColorfulRender(display);
+    },
+  };
+}
+
+const timeWarnColorfulRender = (text) =>
+  text
+    ? h(
+        'div',
+        {
+          style: {
+            width: 'min-content',
+            fontSize: '20px',
+            padding: '2px 4px',
+            background:
+              text >= '15' ? '#EF5350' : text >= '7' && text < '15' ? '#FFFF00' : '#76FF03',
+            border: '1px solid ',
+          },
+          class: 'whitespace-nowrap',
+        },
+        text
+      )
+    : h('div');
+
+const inStorageWarnColorfulRender = (text) =>
+  text
+    ? h(
+        'div',
+        {
+          style: {
+            width: 'min-content',
+            fontSize: '20px',
+            padding: '2px 4px',
+            background: text >= '15' ? '#EF5350' : '#76FF03',
+            border: '1px solid ',
+          },
+          class: 'whitespace-nowrap',
+        },
+        text
+      )
+    : h('div');
 
 export function statusColumn(title = '状态', key = 'status') {
   return {

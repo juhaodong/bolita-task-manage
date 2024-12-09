@@ -221,7 +221,11 @@
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from './columns';
   import { $ref } from 'vue/macros';
-  import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
+  import {
+    getFileActionButton,
+    storageTimeWarnColumn,
+    timeWarnColumn,
+  } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { getDetailListById } from '@/api/dataLayer/modules/notify/notify-detail';
   import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
@@ -243,7 +247,7 @@
   import OfferPriceDialog from '@/views/newViews/Missions/AlreadyWarehousing/OfferPriceDialog.vue';
   import { getUserCustomerList, hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
-  import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
+  import { generateOptionFromArray } from '@/store/utils/utils';
   import FileSaver from 'file-saver';
   import MergeDialog from '@/views/newViews/Missions/AlreadyWarehousing/MergeDialog.vue';
   import {
@@ -464,15 +468,45 @@
     let currentFilter = [];
     if (filterObj) {
       const res = Object.keys(filterObj);
+      console.log(res, 'res');
 
       for (const filterItem of res) {
-        currentFilter.push({
-          field: filterItem,
-          op: filterObj[filterItem] ? 'like' : '!=',
-          value: '%' + filterObj[filterItem] + '%' ?? '',
-        });
+        if (filterItem === 'usefulTimeRange') {
+          console.log(filterObj[filterItem]);
+          if (filterObj[filterItem] === '红色') {
+            currentFilter.push({
+              field: filterItem,
+              op: '>=',
+              value: '15',
+            });
+          } else if (filterObj[filterItem] === '黄色') {
+            currentFilter.push({
+              field: filterItem,
+              op: '>=',
+              value: '7',
+            });
+            currentFilter.push({
+              field: filterItem,
+              op: '<',
+              value: '15',
+            });
+          } else {
+            currentFilter.push({
+              field: filterItem,
+              op: '<',
+              value: '7',
+            });
+          }
+        } else {
+          currentFilter.push({
+            field: filterItem,
+            op: filterObj[filterItem] ? 'like' : '!=',
+            value: '%' + filterObj[filterItem] + '%' ?? '',
+          });
+        }
       }
     }
+    console.log(currentFilter, 'filter');
     if (typeMission.value === '整柜任务看板') {
     } else if (typeMission.value === '存仓看板') {
       currentFilter.push({ field: 'inStatus', op: 'in', value: ['存仓'] });
@@ -530,25 +564,31 @@
           return { key: index };
         });
     }
-
     allList.forEach((it) => {
-      if (it.storageTime) {
-        const res = it.storageTime.pop();
-        if (!res.totalStorageTime) {
-          res.outBoundTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
-          res.totalStorageTime = dayjs(res.outBoundTime).diff(res.storageTime, 'hour');
+      const storageTime = it.timelines.filter((x) => x.useType === 'storage');
+      let stayTime = '';
+      if (storageTime) {
+        for (let i = 0; i < storageTime.length - 1; i += 2) {
+          stayTime =
+            stayTime +
+            dayjs(storageTime[i].detailTime).diff(dayjs(storageTime[i + 1].detailTime), 'day');
         }
-        it.storageTime.push(res);
-        const usefulTimeList = it.storageTime.filter((x) => x.totalStorageTime);
-        it.stayTime = safeSumBy(usefulTimeList, 'totalStorageTime');
+        const timeListLength = storageTime.length;
+        if (timeListLength % 2 !== 0) {
+          stayTime =
+            stayTime + dayjs().diff(dayjs(storageTime[timeListLength - 1].detailTime), 'day');
+        }
+        it.stayTime = stayTime;
       } else {
         it.stayTime = '-';
       }
     });
+
     return fakeListStart.concat(allList.concat(fakeListEnd));
   };
 
   function updateFilter(value) {
+    console.log(value, 'value');
     if (value !== null) {
       if (optionOne && valueOne) {
         const keyOne = columns.find((it) => it.title === optionOne).key;
@@ -603,14 +643,20 @@
     });
     currentWithOutSelection =
       currentWithOutSelection.length > 0 ? currentWithOutSelection : columns;
+
+    const userInfo = useUserStore().info;
     if (typeMission.value === '整柜任务看板') {
       currentColumns = [planObj, ...currentWithOutSelection];
+      if (userInfo.userType !== '客户') {
+        currentColumns.unshift(timeWarnColumn());
+      }
     } else if (typeMission.value === '审核看板') {
       currentColumns = [checkedObj, ...currentWithOutSelection];
     } else if (typeMission.value === '报价看板') {
       currentColumns = [offerObj, ...currentWithOutSelection];
     } else {
       currentColumns = [...currentWithOutSelection];
+      currentColumns.unshift(storageTimeWarnColumn());
     }
     currentColumns.forEach((item) => {
       item.resizable = true;
@@ -724,7 +770,7 @@
                   record['inStatus'] = InBoundDetailStatus.WaitCheck;
                 }
                 await addOrUpdateTaskTimeLine({
-                  useType: 'storage',
+                  useType: 'normal',
                   bolitaTaskId: record.id,
                   operator: userInfo?.realName,
                   detailTime: dayjs().valueOf(),
@@ -756,7 +802,7 @@
               if (files.checkPassed) {
                 record['trayFiles'] = files.files;
                 await addOrUpdateTaskTimeLine({
-                  useType: 'storage',
+                  useType: 'normal',
                   bolitaTaskId: record.id,
                   operator: userInfo?.realName,
                   detailTime: dayjs().valueOf(),
@@ -794,7 +840,6 @@
               return record?.['cmrfiles']?.length > 0 ? 'success' : 'error';
             },
             async onClick() {
-              console.log(record, 'record');
               const upload = useUploadDialog();
               const files = await upload.upload(record['cmrfiles']);
               if (files.checkPassed) {

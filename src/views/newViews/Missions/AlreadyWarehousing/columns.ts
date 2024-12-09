@@ -6,6 +6,7 @@ import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/us
 import {
   deliveryMethodList,
   outboundMethodList,
+  usefulTimeList,
 } from '@/api/dataLayer/modules/deliveryMethod/detail';
 
 export const columns: DataTableColumns<any> = [
@@ -236,6 +237,14 @@ export const filters: FormField[] = [
     component: 'NSelect',
     componentProps: {
       options: generateOptionFromArray(deliveryMethodList),
+    },
+  },
+  {
+    label: '时效',
+    field: 'usefulTimeRange',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromArray(usefulTimeList),
     },
   },
 ];

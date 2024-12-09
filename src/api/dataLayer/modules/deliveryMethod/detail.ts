@@ -62,3 +62,5 @@ export function shouldUseFBACode(model) {
 export const outboundMethodList = ['散货', '标准托盘', '大件托盘', '存仓'];
 
 export const deliveryMethodList = ['FBA卡车派送', 'DHL', 'DPD', 'UPS', 'GLS', '其他', '客户自提'];
+
+export const usefulTimeList = ['红色', '黄色', '绿色'];
