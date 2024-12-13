@@ -89,8 +89,7 @@ const timeWarnColorfulRender = (text) =>
             width: 'min-content',
             fontSize: '20px',
             padding: '2px 4px',
-            background:
-              text >= '15' ? '#EF5350' : text >= '7' && text < '15' ? '#FFFF00' : '#76FF03',
+            background: text >= 15 ? '#EF5350' : text >= 7 && text < 15 ? '#FFFF00' : '#76FF03',
             border: '1px solid ',
           },
           class: 'whitespace-nowrap',

@@ -382,9 +382,9 @@
 
   async function reloadHeader() {
     currentColumns = [];
-    currentHeader = JSON.parse(
-      (await getTableHeaderGroupItemList('containerForecast'))?.headerItemJson ?? []
-    );
+    currentHeader = (await getTableHeaderGroupItemList('containerForecast'))
+      ? JSON.parse((await getTableHeaderGroupItemList('containerForecast'))?.headerItemJson)
+      : [];
     currentHeader.forEach((item) => {
       const res = columns.find((it) => it.key === item.itemKey);
       currentColumns.push(res);

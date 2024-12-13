@@ -62,8 +62,10 @@
         v-model:checked-row-keys="checkedRows"
         :actionColumn="actionColumn"
         :columns="currentColumns"
+        :pagination="paginationReactive"
         :request="loadDataTable"
         :row-key="(row) => row.id"
+        @update:page="handlePageChange"
       />
       <n-modal
         v-model:show="showCurrentHeaderDataTable"
@@ -100,7 +102,6 @@
     NotifyDetailManager,
   } from '@/api/dataLayer/modules/notify/notify-detail';
   import { Box20Filled } from '@vicons/fluent';
-  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
@@ -109,7 +110,7 @@
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import FileSaver from 'file-saver';
-  import { getTaskListByFilter } from '@/api/newDataLayer/TaskList/TaskList';
+  import { getTaskListByFilterWithPagination } from '@/api/newDataLayer/TaskList/TaskList';
   import { getOutboundForecastById } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
 
@@ -206,25 +207,78 @@
     return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
   });
 
+  const paginationReactive = reactive({
+    defaultPage: 1,
+    pageNumber: 0,
+    pageSize: 10,
+    defaultPageSize: 10,
+    showSizePicker: true,
+    pageSizes: [10, 20, 50, 100],
+    onChange: (page: number) => {
+      paginationReactive.pageNumber = page - 1;
+      reloadTable();
+    },
+    onUpdatePageSize: (pageSize: number) => {
+      paginationReactive.pageSize = pageSize;
+      paginationReactive.pageNumber = 0;
+      reloadTable();
+    },
+  });
+
   const loadDataTable = async () => {
-    let currentFilter = [
-      {
+    let currentFilter = [];
+    if (filterObj) {
+      const res = Object.keys(filterObj);
+      if (!res.includes('outboundId')) {
+        currentFilter.push({
+          field: 'outboundId',
+          op: '!=',
+          value: '',
+        });
+      }
+      for (const filterItem of res) {
+        if (filterItem === 'outboundId') {
+          currentFilter.push({
+            field: filterItem,
+            op: '==',
+            value: filterObj[filterItem],
+          });
+        } else {
+          currentFilter.push({
+            field: filterItem,
+            op: filterObj[filterItem] ? 'like' : '!=',
+            value: '%' + filterObj[filterItem] + '%' ?? '',
+          });
+        }
+      }
+    } else {
+      currentFilter.push({
         field: 'outboundId',
         op: '!=',
         value: '',
-      },
-    ];
-    if (filterObj) {
-      const res = Object.keys(filterObj);
-      for (const filterItem of res) {
-        currentFilter.push({
-          field: filterItem,
-          op: filterObj[filterItem] ? 'like' : '!=',
-          value: '%' + filterObj[filterItem] + '%' ?? '',
-        });
-      }
+      });
     }
-    allList = await getTaskListByFilter(currentFilter);
+    const result = await getTaskListByFilterWithPagination(currentFilter, paginationReactive);
+    allList = result.content;
+    const totalCount = result.page.totalElements;
+    let fakeListStart = [];
+    let fakeListEnd = [];
+    if (paginationReactive.pageNumber > 0) {
+      fakeListStart = Array(paginationReactive.pageNumber * paginationReactive.pageSize)
+        .fill(null)
+        .map((it, index) => {
+          return { key: index };
+        });
+    }
+    if (paginationReactive.pageSize < totalCount) {
+      fakeListEnd = Array(
+        totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1)
+      )
+        .fill(null)
+        .map((it, index) => {
+          return { key: index };
+        });
+    }
     if (dateRange) {
       let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
       let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
@@ -232,7 +286,7 @@
         (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       );
     }
-    return allList;
+    return fakeListStart.concat(allList.concat(fakeListEnd));
   };
 
   function updateFilter(value) {
@@ -260,16 +314,18 @@
 
   async function reloadHeader() {
     currentColumns = [];
-    currentHeader = JSON.parse(
-      (await getTableHeaderGroupItemList('taskList'))?.headerItemJson ?? []
-    );
+    currentHeader = (await getTableHeaderGroupItemList('taskList'))
+      ? JSON.parse((await getTableHeaderGroupItemList('taskList'))?.headerItemJson)
+      : [];
     currentHeader.forEach((item) => {
       const res = columns.find((it) => it.key === item.itemKey);
       currentColumns.push(res);
     });
-    const selectionType = columns.find((x) => x.type === 'selection');
-    if (selectionType) {
-      currentColumns.unshift(selectionType);
+    if (currentColumns.length > 0) {
+      const selectionType = columns.find((x) => x.type === 'selection');
+      if (selectionType) {
+        currentColumns.unshift(selectionType);
+      }
     }
     currentColumns = currentColumns.length > 0 ? currentColumns : columns;
     currentColumns.forEach((item) => {
@@ -298,11 +354,11 @@
 
   onMounted(async () => {
     await reloadHeader();
-    monthTab = OneYearMonthTab();
-    selectedMonth = monthTab[0];
     const res = getQueryString('id');
     if (res) {
-      updateFilter({ outboundId: res });
+      setTimeout(() => {
+        updateFilter({ outboundId: res });
+      }, 500);
     } else {
       await reloadTable();
     }

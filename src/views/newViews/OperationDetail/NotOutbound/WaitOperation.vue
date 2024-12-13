@@ -311,9 +311,9 @@
 
   async function reloadHeader() {
     currentColumns = [];
-    currentHeader = JSON.parse(
-      (await getTableHeaderGroupItemList('operation'))?.headerItemJson ?? []
-    );
+    currentHeader = (await getTableHeaderGroupItemList('operation'))
+      ? JSON.parse((await getTableHeaderGroupItemList('operation'))?.headerItemJson)
+      : [];
     currentHeader.forEach((item) => {
       const res = operationColumns.find((it) => it.key === item.itemKey);
       currentColumns.push(res);

@@ -121,6 +121,7 @@ export async function asyncUserCustomer(defaultValue): Promise<FormField> {
   const userStore = useUserStore();
   const idArray = userStore.info.customerIds.split(',');
   const customerList = await getCustomerListByIds(idArray);
+  const currentValue = customerList[0]?.id ?? '';
   const list = customerList.map((it) => ({
     label: it.customerName,
     value: it.id,
@@ -134,7 +135,7 @@ export async function asyncUserCustomer(defaultValue): Promise<FormField> {
       componentProps: {
         options: list,
       },
-      defaultValue: defaultValue !== '' ? defaultValue : customerList[0].id,
+      defaultValue: defaultValue !== '' ? defaultValue : currentValue,
       disableCondition: () => {
         return true;
       },
@@ -148,7 +149,7 @@ export async function asyncUserCustomer(defaultValue): Promise<FormField> {
       componentProps: {
         options: list,
       },
-      defaultValue: defaultValue !== '' ? defaultValue : customerList[0].id,
+      defaultValue: defaultValue !== '' ? defaultValue : currentValue,
     };
   }
 }

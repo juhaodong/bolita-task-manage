@@ -3,6 +3,7 @@ import {
   selectedIdColumn,
   statusColumnEasy,
   timeColumn,
+  timeTableColumn,
 } from '@/views/bolita-views/composable/useableColumns';
 import { getDatePickerFormField } from '@/api/dataLayer/fieldDefination/common';
 import { FormFields } from '@/api/dataLayer/common/GeneralModel';
@@ -186,7 +187,7 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
     title: '托盘',
     key: 'trayNum',
   },
-  timeColumn('reservationGetProductTime', '预约取货日期'),
+  timeTableColumn('reservationGetProductTime', '预约取货日期'),
   {
     title: '取货时间',
     key: 'reservationGetProductDetailTime',

@@ -464,11 +464,10 @@
   });
 
   const loadDataTable = async () => {
+    console.log('321');
     let currentFilter = [];
     if (filterObj) {
       const res = Object.keys(filterObj);
-      console.log(res, 'res');
-
       for (const filterItem of res) {
         if (filterItem === 'usefulTimeRange') {
           console.log(filterObj[filterItem]);
@@ -476,24 +475,24 @@
             currentFilter.push({
               field: filterItem,
               op: '>=',
-              value: '15',
+              value: 15,
             });
           } else if (filterObj[filterItem] === '黄色') {
             currentFilter.push({
               field: filterItem,
               op: '>=',
-              value: '7',
+              value: 7,
             });
             currentFilter.push({
               field: filterItem,
               op: '<',
-              value: '15',
+              value: 15,
             });
           } else {
             currentFilter.push({
               field: filterItem,
               op: '<',
-              value: '7',
+              value: 7,
             });
           }
         } else {
@@ -586,7 +585,6 @@
   };
 
   function updateFilter(value) {
-    console.log(value, 'value');
     if (value !== null) {
       if (optionOne && valueOne) {
         const keyOne = columns.find((it) => it.title === optionOne).key;
@@ -632,9 +630,9 @@
   async function reloadHeader() {
     currentWithOutSelection = [];
     currentHeader = [];
-    currentHeader = JSON.parse(
-      (await getTableHeaderGroupItemList('taskList'))?.headerItemJson ?? []
-    );
+    currentHeader = (await getTableHeaderGroupItemList('taskList'))
+      ? JSON.parse((await getTableHeaderGroupItemList('taskList'))?.headerItemJson)
+      : [];
     currentHeader.forEach((item) => {
       const res = columns.find((it) => it.key === item.itemKey);
       currentWithOutSelection.push(res);
@@ -692,9 +690,6 @@
       updateFilter({ containerId: res });
     } else {
       await reloadTable();
-    }
-    if (props.belongsToId) {
-      filterObj = { belongsToId: props.belongsToId };
     }
   });
 

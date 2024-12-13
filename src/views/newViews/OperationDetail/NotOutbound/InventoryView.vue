@@ -361,7 +361,9 @@
 
   async function reloadHeader() {
     currentColumns = [];
-    currentHeader = (await getTableHeaderGroupItemList('taskList')).tableHeaderItems;
+    currentHeader = (await getTableHeaderGroupItemList('taskList'))
+      ? JSON.parse((await getTableHeaderGroupItemList('taskList'))?.headerItemJson)
+      : [];
     currentHeader.forEach((item) => {
       const res = columns.find((it) => it.key === item.itemKey);
       currentColumns.push(res);
