@@ -29,6 +29,11 @@ export async function getCustomerListByIds(ids) {
           op: 'in',
           value: ids,
         },
+        {
+          field: 'status',
+          op: '!=',
+          value: '停止',
+        },
       ],
     })
   ).data.content;
