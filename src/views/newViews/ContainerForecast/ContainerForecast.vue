@@ -210,6 +210,7 @@
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { useUserStore } from '@/store/modules/user';
   import { currentBaseImageUrl } from '@/api/dataLayer/fieldDefination/common';
+  import { useUploadDialog } from '@/store/modules/uploadFileState';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
   let currentModel: any | null = $ref(null);
@@ -296,9 +297,25 @@
     if (dateRange) {
       let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
       let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-      res = res.filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate);
+      let currentList = [];
+      res.forEach((it) => {
+        if (it.realDate) {
+          if (parseInt(it.realDate) > startDate && parseInt(it.realDate) < endDate) {
+            currentList.push(it);
+          }
+        } else {
+          if (
+            parseInt(it.planArriveDateTime) > startDate &&
+            parseInt(it.planArriveDateTime) < endDate
+          ) {
+            currentList.push(it);
+          }
+        }
+      });
+      return currentList.sort(dateCompare('planArriveDateTime'));
+    } else {
+      return res.sort(dateCompare('planArriveDateTime'));
     }
-    return res.sort(dateCompare('planArriveDateTime'));
   };
 
   const actionRef = ref();
@@ -494,6 +511,24 @@
             },
           },
           {
+            label: '卸柜照片',
+            highlight: () => {
+              return record?.['unloadingPic']?.length > 0 ? 'success' : 'error';
+            },
+            async onClick() {
+              const upload = useUploadDialog();
+              const files = await upload.upload(record['unloadingPic']);
+              if (files.checkPassed) {
+                record.unloadingPic = files.files;
+                await addOrUpdateNotify(record);
+              }
+              await actionRef.value.reload();
+            },
+            ifShow: () => {
+              return hasAuthPower('outMissionUploadFile');
+            },
+          },
+          {
             label: '预报文件',
             onClick() {
               const files = record.files.split(',');
@@ -522,7 +557,6 @@
             },
             onClick() {
               currentNotifyId = record.id!;
-              console.log(currentNotifyId, 'id');
               showFeeDialog = true;
             },
           },

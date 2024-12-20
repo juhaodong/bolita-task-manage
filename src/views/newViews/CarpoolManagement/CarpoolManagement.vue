@@ -66,7 +66,7 @@
         </div>
       </n-card>
       <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
-      <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />
+      <!--      <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />-->
     </div>
     <div class="my-2"></div>
     <BasicTable
@@ -144,6 +144,8 @@
   import { getOutboundForecastListByFilter } from '@/api/newDataLayer/CarManage/CarManage';
   import OfferCustomerDialog from '@/views/newViews/CarpoolManagement/dialog/OfferCustomerDialog.vue';
   import BookingCarDialog from '@/views/newViews/CarpoolManagement/dialog/BookingCarDialog.vue';
+  import { useUploadDialog } from '@/store/modules/uploadFileState';
+  import { addOrUpdateWithRefOutboundForecast } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
 
   const showModal = ref(false);
 
@@ -186,11 +188,11 @@
       }
     }
     allList = (await getOutboundForecastListByFilter(currentFilter)).sort(
-      dateCompare('createBookCarTimestamp')
+      dateCompare('createTimestamp')
     );
-    if (!showAll) {
-      allList = allList.filter((a) => a.inStatus !== '已取消');
-    }
+    // if (!showAll) {
+    //   allList = allList.filter((a) => a.inStatus !== '已取消');
+    // }
     if (dateRange) {
       let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
       let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
@@ -252,30 +254,6 @@
   }
   const realOptions = computed(() => {
     return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
-  });
-
-  const realDetailInfoById = computed(() => {
-    let res = [];
-    for (const id of checkedRows) {
-      const detailInfoById = allList.find((it) => it.id === id);
-      res.push(detailInfoById);
-    }
-    return res;
-  });
-  const priceRules = computed(() => {
-    return (
-      checkedRows.length < 1 ||
-      realDetailInfoById?.value.filter((it) => it.waitPrice).length !== 0 ||
-      realDetailInfoById?.value.filter((it) => it.needOfferPrice === '0').length !== 0
-    );
-  });
-  const carRules = computed(() => {
-    return (
-      checkedRows.length < 1 ||
-      realDetailInfoById?.value.filter((it) => it.waitCar === '1').length !== 0 ||
-      realDetailInfoById?.value.filter((it) => it.waitPrice === '1' || it.needOfferPrice === '0')
-        .length !== checkedRows.length
-    );
   });
 
   function startShareCar(item) {
@@ -362,6 +340,24 @@
             onclick: () => {
               currentInfo = record;
               carDialog = true;
+            },
+          },
+          {
+            label: 'POD',
+            highlight: () => {
+              return record?.['podfiles']?.length > 0 ? 'success' : 'error';
+            },
+            async onClick() {
+              const upload = useUploadDialog();
+              const files = await upload.upload(record['podfiles']);
+              if (files.checkPassed) {
+                record.PODFiles = files.files;
+                await addOrUpdateWithRefOutboundForecast(record);
+              }
+              await actionRef.value.reload();
+            },
+            ifShow: () => {
+              return hasAuthPower('orderCarPOD');
             },
           },
           fileAction('提单', 'pickupFiles', '', 'orderCarOrder'),

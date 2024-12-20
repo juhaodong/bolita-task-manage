@@ -54,7 +54,6 @@
         </div>
       </n-card>
       <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
-      <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />
     </div>
     <div class="my-2"></div>
     <BasicTable
@@ -223,7 +222,6 @@
   let valueOne = $ref('');
   let valueTwo = $ref('');
   let dateRange = $ref(null);
-  let showAll = $ref(false);
   const operationColumns = $ref([
     {
       title: 'ID',
@@ -338,7 +336,6 @@
       }
     }
     let allList = await getOutboundForecastListByFilter(currentFilter);
-    console.log(allList, 'list');
     currentList = allList.filter(
       (a) =>
         a.inStatus === CarStatus.Booked ||
@@ -347,9 +344,6 @@
         a.inStatus === '全部出库' ||
         a.inStatus === '已完成'
     );
-    if (!showAll) {
-      currentList = currentList.filter((a) => a.inStatus !== '已取消');
-    }
     if (dateRange) {
       let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
       let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
@@ -500,26 +494,6 @@
               if (files.checkPassed) {
                 record.loadingCarDoc = files.files;
                 await addOrUpdateWithRefOutboundForecast(record);
-                // const obj = {};
-                // obj['loadingCarDoc'] = files.files;
-                // obj['inStatus'] = OutStatus.All;
-                // obj['realOutDate'] = dayjs().format('YYYY-MM-DD');
-                // await updateOutboundForecast(record.id, obj);
-                // const userInfo = useUserStore().info;
-                // const taskList = await getDetailListById(record.outboundDetailInfo);
-                // for (const task of taskList) {
-                //   let timeLineInfo = task.timeLine;
-                //   timeLineInfo.unshift({
-                //     operator: userInfo?.realName,
-                //     detailTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-                //     note: '已出库',
-                //   });
-                //   task.loadingCarDoc = files.files;
-                //   task.inStatus = OutStatus.All;
-                //   task.realOutDate = dayjs().format('YYYY-MM-DD');
-                //   task.timeLine = timeLineInfo;
-                //   await NotifyDetailManager.editInternal(task, task.id);
-                // }
               }
               await actionRef.value.reload();
             },
@@ -548,9 +522,9 @@
               return !record?.unloadingFile && hasAuthPower('outMissionCreatUpCarFile');
             },
           },
-          fileAction('POD', 'PODFiles', '', 'orderCarPOD'),
+
           {
-            label: 'CMR',
+            label: '装车照片',
             highlight: () => {
               return record?.['cmrfiles']?.length > 0 ? 'success' : 'error';
             },
@@ -582,16 +556,16 @@
               return hasAuthPower('outMissionUploadFile');
             },
           },
-          {
-            label: '结算',
-            onClick() {
-              currentInfo = record;
-              showFeeDialog = true;
-            },
-            ifShow: () => {
-              return hasAuthPower('outMissionSettle');
-            },
-          },
+          // {
+          //   label: '结算',
+          //   onClick() {
+          //     currentInfo = record;
+          //     showFeeDialog = true;
+          //   },
+          //   ifShow: () => {
+          //     return hasAuthPower('outMissionSettle');
+          //   },
+          // },
           {
             label: '信息已变更',
             highlight: () => {

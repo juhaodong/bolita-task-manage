@@ -44,18 +44,18 @@
         cashStatus: CashStatus.Done,
         finalPrice: extraInfo.finalPrice,
       });
-      await saveCash(
-        {
-          ref: currentOutBoundInfo?.ref ?? '',
-          operationId: currentOutBoundInfo.id,
-          operationType: OperationType.Out,
-          amount: extraInfo.outPrice,
-          note: extraInfo.outPriceNote,
-          subtotal: safeParseFloat(extraInfo.outPrice) + safeParseFloat(extraInfo.outOtherPrice),
-          outOtherPrice: extraInfo.outOtherPrice,
-        },
-        currentOutBoundInfo?.outCashId
-      );
+      // await saveCash(
+      //   {
+      //     ref: currentOutBoundInfo?.ref ?? '',
+      //     operationId: currentOutBoundInfo.id,
+      //     operationType: OperationType.Out,
+      //     amount: extraInfo.outPrice,
+      //     note: extraInfo.outPriceNote,
+      //     subtotal: safeParseFloat(extraInfo.outPrice) + safeParseFloat(extraInfo.outOtherPrice),
+      //     outOtherPrice: extraInfo.outOtherPrice,
+      //   },
+      //   currentOutBoundInfo?.outCashId
+      // );
       emit('save');
     });
   }

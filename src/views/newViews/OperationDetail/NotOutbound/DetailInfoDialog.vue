@@ -1,8 +1,8 @@
 <script lang="ts" setup>
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { onMounted } from 'vue';
-  import { getDetailListById } from '@/api/dataLayer/modules/notify/notify-detail';
   import { $ref } from 'vue/macros';
+  import { getTaskListByIds } from '@/api/newDataLayer/TaskList/TaskList';
 
   interface Props {
     ids: [];
@@ -11,7 +11,7 @@
   let currentItems = $ref([]);
   const props = defineProps<Props>();
   async function reload() {
-    currentItems = await getDetailListById(props.ids);
+    currentItems = await getTaskListByIds(props.ids.split(','));
   }
   onMounted(async () => {
     await reload();

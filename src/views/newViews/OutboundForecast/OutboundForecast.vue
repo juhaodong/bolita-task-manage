@@ -229,7 +229,7 @@
         actions: [
           fileAction('提单文件', 'files'),
           fileAction('POD', 'POD'),
-          fileAction('CMR', 'CMRFilesOut'),
+          fileAction('装车照片', 'CMRFilesOut'),
           {
             label: '出库单',
             onClick() {

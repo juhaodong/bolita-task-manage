@@ -286,7 +286,7 @@
         <div>
           <n-input v-model:value="unloadPerson" placeholder="卸柜人员" />
         </div>
-        <n-button :disabled="!canSave" type="primary" @click="confirm">确认全部到货 </n-button>
+        <n-button :disabled="!canSave" type="primary" @click="confirm">确认</n-button>
       </n-space>
     </loading-frame>
   </div>

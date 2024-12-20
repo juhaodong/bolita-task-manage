@@ -62,8 +62,8 @@
             />
           </div>
         </n-card>
-        <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
-        <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />
+        <!--        <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />-->
+        <!--        <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />-->
       </div>
       <div class="my-2"></div>
       <BasicTable
@@ -162,7 +162,7 @@
   import { useUserStore } from '@/store/modules/user';
   import { getUserCustomerList, hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
-  import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
+  import { generateOptionFromArray } from '@/store/utils/utils';
   import { valueOfToday } from '@/api/dataLayer/common/Date';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
   import { inStorageObj } from '@/views/newViews/Missions/AlreadyWarehousing/selectionType';
@@ -201,7 +201,6 @@
   let dateRange = $ref(null);
   let showConfirmDialog = $ref(false);
   let cancelIds = $ref([]);
-  let showAll = $ref(false);
   const actionRef = ref();
   const props = defineProps<Prop>();
   interface Prop {
@@ -226,7 +225,13 @@
   });
 
   const loadDataTable = async () => {
-    let currentFilter = [];
+    let currentFilter = [
+      {
+        field: 'inStatus',
+        op: 'in',
+        value: ['存仓', '入库待操作'],
+      },
+    ];
     if (filterObj) {
       const res = Object.keys(filterObj);
 
@@ -239,26 +244,27 @@
       }
     }
     const customerId = await getUserCustomerList();
-    allList = (await getTaskListByFilter(filterObj)).filter(
-      (it) => it.inStatus === '存仓' || it.inStatus === '入库待操作'
-    );
+    currentFilter.push({ field: 'customer.id', op: 'in', value: customerId });
+    allList = await getTaskListByFilter(currentFilter);
     allList.forEach((it) => {
-      if (it.storageTime) {
-        const res = it.storageTime.pop();
-        if (!res.totalStorageTime) {
-          res.outBoundTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
-          res.totalStorageTime = dayjs(res.outBoundTime).diff(res.storageTime, 'hour');
+      const storageTime = it.timelines.filter((x) => x.useType === 'storage');
+      let stayTime = '';
+      if (storageTime) {
+        for (let i = 0; i < storageTime.length - 1; i += 2) {
+          stayTime =
+            stayTime +
+            dayjs(storageTime[i].detailTime).diff(dayjs(storageTime[i + 1].detailTime), 'day');
         }
-        it.storageTime.push(res);
-        const usefulTimeList = it.storageTime.filter((x) => x.totalStorageTime);
-        it.stayTime = safeSumBy(usefulTimeList, 'totalStorageTime');
+        const timeListLength = storageTime.length;
+        if (timeListLength % 2 !== 0) {
+          stayTime =
+            stayTime + dayjs().diff(dayjs(storageTime[timeListLength - 1].detailTime), 'day');
+        }
+        it.stayTime = stayTime;
       } else {
         it.stayTime = '-';
       }
     });
-    if (!showAll) {
-      allList = allList.filter((a) => a.inStatus !== '已取消');
-    }
     if (dateRange) {
       let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
       let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
@@ -266,7 +272,7 @@
         (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       );
     }
-    return allList.filter((x) => customerId.includes(x.customerId));
+    return allList;
   };
 
   async function downloadData() {

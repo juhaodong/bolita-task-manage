@@ -56,13 +56,23 @@
       field: 'country',
     },
     {
-      label: '托数',
+      label: '预计托数',
       field: 'trayNum',
       required: false,
     },
     {
-      label: '件数',
+      label: '实际到达托数',
+      field: 'arrivedTrayNum',
+      required: false,
+    },
+    {
+      label: '预计件数',
       field: 'number',
+      required: false,
+    },
+    {
+      label: '实际到达件数',
+      field: 'arrivedContainerNum',
       required: false,
     },
     {
@@ -114,17 +124,24 @@
     {
       label: '换单文件',
       field: 'changeOrderFiles',
-      required: false,
+      component: 'NSelect',
+      componentProps: {
+        options: [
+          { label: '是', value: '是' },
+          { label: '否', value: '否' },
+        ],
+      },
     },
     {
       label: '库内操作',
       field: 'operateInStorage',
-      required: false,
-    },
-    {
-      label: '托数',
-      field: 'trayNum',
-      required: false,
+      component: 'NSelect',
+      componentProps: {
+        options: [
+          { label: '是', value: '是' },
+          { label: '否', value: '否' },
+        ],
+      },
     },
     {
       label: '备注/库位',

@@ -2,7 +2,6 @@
   import { computed, watchEffect } from 'vue';
   import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import { safeParseInt, safeSumInt, toastError, toastSuccess } from '@/store/utils/utils';
-  import { timeDisplay, timeDisplayYMD } from '@/views/bolita-views/composable/useableColumns';
   import { ResultEnum } from '@/store/enums/httpEnum';
   import dayjs from 'dayjs';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
@@ -10,6 +9,7 @@
   import { useUserStore } from '@/store/modules/user';
   import { $ref } from 'vue/macros';
   import { addOrUpdateTask, getTaskListByIds } from '@/api/newDataLayer/TaskList/TaskList';
+  import { addOrUpdateWithRefOutboundForecast } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
 
   interface Props {
     outboundInfo: [];
@@ -25,6 +25,8 @@
   const props = defineProps<Props>();
   let currentTaskList: any[] = $ref([]);
   let currentOutBoundInfo = $ref([]);
+  let startTime: any = $ref(null);
+  let endTime: any = $ref(null);
 
   const emit = defineEmits(['close', 'refresh', 'save']);
   watchEffect(async () => {
@@ -49,12 +51,14 @@
     currentOutBoundInfo = props.outboundInfo;
     currentTaskList = await getTaskListByIds(currentOutBoundInfo.outboundDetailInfo.split(','));
     outOperatePerson = currentOutBoundInfo?.outOperatePerson ?? '';
+    currentDate = currentOutBoundInfo.outDate ?? new Date();
+    startTime = currentOutBoundInfo.outStartTime;
+    endTime = currentOutBoundInfo.outEndTime;
     loadAll();
   }
 
   let outOperatePerson: string = $ref('');
   let currentDate: any = $ref(null);
-  let totalTime: string = $ref('');
 
   function allOut() {
     currentTaskList.forEach((it) => {
@@ -73,6 +77,18 @@
 
   let loading: boolean = $ref(false);
 
+  const totalTime = $computed(() => {
+    const res = dayjs(currentDate).format('YYYY-MM-DD');
+    const currentEndDateTime = res + ' ' + endTime;
+    const currentStartDateTime = res + ' ' + startTime;
+    const result = Math.ceil(dayjs(currentEndDateTime).diff(currentStartDateTime, 'minute') / 60);
+    if (result) {
+      return result;
+    } else {
+      return '';
+    }
+  });
+
   async function confirm() {
     loading = true;
     const newInStatus = OutStatus.uploadCar;
@@ -87,6 +103,12 @@
         break;
       }
     }
+    currentOutBoundInfo.outDate = currentDate;
+    currentOutBoundInfo.outStartTime = startTime;
+    currentOutBoundInfo.outEndTime = endTime;
+    currentOutBoundInfo.outTotalTime = totalTime;
+    currentOutBoundInfo.outOperatePerson = outOperatePerson;
+    await addOrUpdateWithRefOutboundForecast(currentOutBoundInfo);
     // await updateOutboundForecast(props.outboundInfo?.id, {
     //   outCount: totalOutTrayCount.value + '托' + totalOutContainerCount.value + '箱',
     //   inStatus: newInStatus,
@@ -107,23 +129,25 @@
     <loading-frame :loading="loading">
       <n-descriptions v-if="currentOutBoundInfo" :columns="2" bordered label-placement="left">
         <n-descriptions-item label="Ref.">
-          {{ currentOutBoundInfo.REF ?? currentOutBoundInfo.id }}
+          {{ currentOutBoundInfo.REF ? currentOutBoundInfo.REF : currentOutBoundInfo.id }}
         </n-descriptions-item>
         <n-descriptions-item label="预报总数">
-          {{ currentOutBoundInfo?.containerNum }}</n-descriptions-item
+          {{ currentOutBoundInfo?.totalNumber }}</n-descriptions-item
         >
-        <n-descriptions-item label="预约日期时间">
-          {{ timeDisplay(currentOutBoundInfo?.pickUpDateTime) }}
+        <!--        <n-descriptions-item label="预约日期时间">-->
+        <!--          {{ timeDisplay(currentOutBoundInfo?.pickUpDateTime) }}-->
+        <!--        </n-descriptions-item>-->
+        <n-descriptions-item label="实际装柜日期">
+          <n-date-picker v-model:value="currentDate" type="date" />
+        </n-descriptions-item>
+        <n-descriptions-item label="装柜起始时间">
+          <n-time-picker v-model:formatted-value="startTime" value-format="HH:mm:ss" />
+        </n-descriptions-item>
+        <n-descriptions-item label="装柜结束时间">
+          <n-time-picker v-model:formatted-value="endTime" value-format="HH:mm:ss" />
         </n-descriptions-item>
         <n-descriptions-item label="装柜时长">
-          <n-input v-model:value="totalTime" :placeholder="currentOutBoundInfo?.outTotalTime" />
-        </n-descriptions-item>
-        <n-descriptions-item label="实际装柜日期">
-          <n-date-picker
-            v-model:value="currentDate"
-            :placeholder="timeDisplayYMD(currentOutBoundInfo?.currentOutDate)"
-            type="date"
-          />
+          <n-input v-model:value="totalTime" disabled />
         </n-descriptions-item>
       </n-descriptions>
       <div class="mt-4 noMaxHeight" style="max-height: 800px; overflow-y: scroll">
@@ -166,9 +190,9 @@
       <n-space v-if="currentOutBoundInfo" :wrap-item="false" class="mt-4">
         <n-button secondary @click="allOut">全部装柜</n-button>
         <div class="flex-grow"></div>
-        <!--        <div>-->
-        <!--          <n-input v-model:value="outOperatePerson" placeholder="装柜人员" />-->
-        <!--        </div>-->
+        <div>
+          <n-input v-model:value="outOperatePerson" placeholder="装柜人员" />
+        </div>
         <n-button type="primary" @click="confirm">确认装车 </n-button>
       </n-space>
     </loading-frame>

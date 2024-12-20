@@ -107,7 +107,7 @@ const inStorageWarnColorfulRender = (text) =>
             width: 'min-content',
             fontSize: '20px',
             padding: '2px 4px',
-            background: text >= '15' ? '#EF5350' : '#76FF03',
+            background: text >= 15 ? '#EF5350' : '#76FF03',
             border: '1px solid ',
           },
           class: 'whitespace-nowrap',
@@ -277,7 +277,8 @@ export function communicateColumn(keyName = 'createTimestamp', title = '创建�
     key: keyName,
     width: 160,
     render(record) {
-      const display = record[keyName] ? dayjs(record[keyName]).format(standardDateFormat) : '-';
+      const display =
+        record[keyName] === '' ? dayjs(record[keyName]).format(standardDateFormat) : '-';
       return h('div', display);
     },
   };

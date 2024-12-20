@@ -464,7 +464,6 @@
   });
 
   const loadDataTable = async () => {
-    console.log('321');
     let currentFilter = [];
     if (filterObj) {
       const res = Object.keys(filterObj);
@@ -827,7 +826,7 @@
             },
           },
           {
-            label: 'CMR',
+            label: '装车照片',
             highlight: () => {
               return record?.['cmrfiles']?.length > 0 ? 'success' : 'error';
             },
