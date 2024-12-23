@@ -222,9 +222,9 @@
                   <n-select
                     v-model:value="b.settlementType"
                     :options="
-                      b.method === '快递'
+                      b.mode === '快递'
                         ? expressDelivery
-                        : b.method === '直送'
+                        : b.mode === '直送'
                         ? directDelivery
                         : [{ label: '', value: '' }]
                     "
