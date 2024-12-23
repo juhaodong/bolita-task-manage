@@ -1,7 +1,13 @@
 <script lang="ts" setup>
   import { computed, watchEffect } from 'vue';
   import { OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
-  import { safeParseInt, safeSumInt, toastError, toastSuccess } from '@/store/utils/utils';
+  import {
+    safeParseInt,
+    safeSumBy,
+    safeSumInt,
+    toastError,
+    toastSuccess,
+  } from '@/store/utils/utils';
   import { ResultEnum } from '@/store/enums/httpEnum';
   import dayjs from 'dayjs';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
@@ -88,6 +94,14 @@
       return '';
     }
   });
+  const totalArrived = computed(() => {
+    return (
+      safeSumBy(currentTaskList, 'arrivedTrayNum') +
+      '托' +
+      safeSumBy(currentTaskList, 'arrivedContainerNum') +
+      '箱'
+    );
+  });
 
   async function confirm() {
     loading = true;
@@ -131,9 +145,7 @@
         <n-descriptions-item label="Ref.">
           {{ currentOutBoundInfo.REF ? currentOutBoundInfo.REF : currentOutBoundInfo.id }}
         </n-descriptions-item>
-        <n-descriptions-item label="预报总数">
-          {{ currentOutBoundInfo?.totalNumber }}</n-descriptions-item
-        >
+        <n-descriptions-item label="预报总数"> {{ totalArrived }}</n-descriptions-item>
         <!--        <n-descriptions-item label="预约日期时间">-->
         <!--          {{ timeDisplay(currentOutBoundInfo?.pickUpDateTime) }}-->
         <!--        </n-descriptions-item>-->

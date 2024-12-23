@@ -56,7 +56,6 @@
       customerInfoany = await getCustomerById(notifyDetail?.customer.id);
       currentTaskList = await getTaskListByNotifyId(props.notifyId);
       Object.assign(extraInfo, cloneDeep(notifyDetail?.extraInfo ?? defaultExtraInfo));
-      console.log(notifyDetail, 'detail');
       emit('refresh');
     }
   }

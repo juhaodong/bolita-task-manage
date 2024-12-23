@@ -11,8 +11,8 @@ export async function getNotifySettlementByNotifyId(id) {
     await hillo.jsonPost(typeName + '/list', {
       criteria: [
         {
-          field: 'notify',
-          op: 'belongs to',
+          field: 'notify.id',
+          op: '==',
           value: id,
         },
       ],
