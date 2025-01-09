@@ -348,7 +348,7 @@
       let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
       let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
       currentList = currentList.filter(
-        (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
+        (it) => it.reservationGetProductTime > startDate && it.reservationGetProductTime < endDate
       );
     }
     return currentList.sort(dateCompare('createTimestamp'));

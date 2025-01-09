@@ -96,7 +96,6 @@ export async function asyncFCAddressByFilter(): Promise<FormField> {
     component: 'NSelect',
     componentProps: {
       options: list,
-      multiple: true,
     },
   };
 }

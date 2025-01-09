@@ -2,7 +2,7 @@
   <n-card class="proCard">
     <loading-frame :loading="loading">
       <template v-if="step === 0">
-        <filter-bar :form-fields="filters" @clear="updateFilter" @submit="updateFilter" />
+        <filter-bar :form-fields="filters" @clear="clearCheckRow" @submit="submitSearch" />
         <n-data-table
           v-model:checked-row-keys="checkedRowKeys"
           :columns="columns"
@@ -116,7 +116,6 @@
   let tableLoading = $ref(false);
 
   watch(checkedRowKeys, async (val) => {
-    console.log(val, 'val');
     let realList = [];
     if (val.length > 0) {
       selectedDeliveryMethod = allNotifyDetail.find((it) => it.id === val[0]).deliveryMethod;
@@ -131,7 +130,9 @@
       warnMessage = '物流方式 | FC/送货地址 | 邮箱';
     } else {
       tableLoading = true;
-      await updateFilter(null);
+      if (autoOperation) {
+        await updateFilter(null);
+      }
       selectedPostcode = '';
       selectedDeliveryMethod = '';
       selectedFCAddress = '';
@@ -146,7 +147,16 @@
   });
 
   let step = $ref(0);
-
+  let autoOperation = $ref(true);
+  async function submitSearch(filterObj) {
+    autoOperation = false;
+    await clearCheckRow();
+    await updateFilter(filterObj);
+    autoOperation = true;
+  }
+  async function clearCheckRow() {
+    checkedRowKeys.value = [];
+  }
   async function updateFilter(filterObj) {
     let currentFilter = [];
     if (filterObj) {
@@ -162,13 +172,16 @@
     if (prop.model.length > 0) {
       allNotifyDetail = await getTaskListByIdsAndFilter(prop.model, currentFilter);
     } else {
-      allNotifyDetail = (await getTaskListByFilter(currentFilter))
-        .filter((a) => a.inStatus === InBoundStatus.WaitOperate || a.inStatus === InBoundStatus.All)
-        .filter((x) => {
-          return x.outboundMethod !== '标准托盘' && x.outboundMethod !== '大件托盘'
-            ? true
-            : !!x.trayItems;
-        });
+      currentFilter.push({
+        field: 'inStatus',
+        op: 'in',
+        value: [InBoundStatus.WaitOperate, InBoundStatus.All],
+      });
+      allNotifyDetail = (await getTaskListByFilter(currentFilter)).filter((x) => {
+        return x.outboundMethod !== '标准托盘' && x.outboundMethod !== '大件托盘'
+          ? true
+          : !!x.trayItems;
+      });
     }
   }
 
