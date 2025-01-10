@@ -10,6 +10,7 @@ import {
 } from '@/api/newDataLayer/Customer/Customer';
 import { getInventoryList } from '@/api/newDataLayer/Warehouse/Warehouse';
 import { getFBACodeList } from '@/api/newDataLayer/FBACode/FBACode';
+import { getUserById } from '@/api/newDataLayer/User/User';
 
 export function generateOptionFromArray(arr?: any[]) {
   return (
@@ -118,8 +119,8 @@ export async function asyncStorage(): Promise<FormField> {
 
 export async function asyncUserCustomer(defaultValue): Promise<FormField> {
   const userStore = useUserStore();
-  const idArray = userStore.info.customerIds.split(',');
-  const customerList = await getCustomerListByIds(idArray);
+  const currentUser = await getUserById(userStore.info.id);
+  const customerList = await getCustomerListByIds(currentUser.customerIds.split(','));
   const currentValue = customerList[0]?.id ?? '';
   const list = customerList.map((it) => ({
     label: it.customerName,
