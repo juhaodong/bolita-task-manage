@@ -59,7 +59,7 @@
   import { DataTableColumns, NButton } from 'naive-ui';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { asyncFCAddress, safeSumBy } from '@/store/utils/utils';
+  import { asyncFCAddressByFilter, safeSumBy } from '@/store/utils/utils';
   import DetailInfo from '@/views/newViews/Missions/AlreadyWarehousing/DetailInfo.vue';
   import { $ref } from 'vue/macros';
   import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
@@ -125,18 +125,20 @@
     let currentFilter = [];
     if (filterObj) {
       const res = Object.keys(filterObj);
-      for (const filterItem of res) {
+      for (let filterItem of res) {
         currentFilter.push({
-          field: filterItem,
-          op: filterObj[filterItem] ? '==' : '!=',
-          value: filterObj[filterItem] ?? '',
+          field: filterItem === 'fcaddress' ? 'FCAddress' : filterItem,
+          op: filterObj[filterItem] ? 'like' : '!=',
+          value: '%' + filterObj[filterItem] + '%' ?? '',
         });
       }
     }
-    allNotifyDetail = (await getTaskListByFilter(currentFilter)).filter(
-      (a) => a.inStatus === InBoundStatus.WaitOperate
-    );
-    console.log(allNotifyDetail, 'all');
+    currentFilter.push({
+      field: 'inStatus',
+      op: '==',
+      value: InBoundStatus.WaitOperate,
+    });
+    allNotifyDetail = await getTaskListByFilter(currentFilter);
   }
 
   async function confirmSelection() {
@@ -222,7 +224,7 @@
       label: '票号',
       field: 'ticketId',
     },
-    asyncFCAddress(),
+    asyncFCAddressByFilter(),
   ];
 </script>
 

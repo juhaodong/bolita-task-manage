@@ -212,6 +212,15 @@
       >
         <loading-frame :loading="checkLoading" :title="log" />
       </n-modal>
+      <n-modal
+        v-model:show="splitTaskDialog"
+        :show-icon="false"
+        preset="card"
+        style="width: 90%; min-width: 600px; max-width: 600px"
+        title="拆分"
+      >
+        <split-task-dialog :info="currentInfo" @saved="reloadTable" />
+      </n-modal>
     </div>
   </n-card>
 </template>
@@ -258,6 +267,7 @@
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
+  import SplitTaskDialog from '@/views/newViews/Missions/AlreadyWarehousing/SplitTaskDialog.vue';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -290,6 +300,7 @@
   let checkLoading = $ref(false);
   let showCheckDialog = $ref(false);
   let log = $ref('');
+  let splitTaskDialog = $ref(false);
 
   const actionRef = ref();
   const props = defineProps<Prop>();
@@ -552,13 +563,15 @@
         });
     }
     if (paginationReactive.pageSize < totalCount) {
-      fakeListEnd = Array(
-        totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1)
-      )
-        .fill(null)
-        .map((it, index) => {
-          return { key: index };
-        });
+      if (totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1) > 0) {
+        fakeListEnd = Array(
+          totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1)
+        )
+          .fill(null)
+          .map((it, index) => {
+            return { key: index };
+          });
+      }
     }
     allList.forEach((it) => {
       const storageTime = it.timelines.filter((x) => x.useType === 'storage');
@@ -579,7 +592,6 @@
         it.stayTime = '-';
       }
     });
-
     return fakeListStart.concat(allList.concat(fakeListEnd));
   };
 
@@ -667,6 +679,7 @@
     showOfferPrice = false;
     checkLoading = false;
     showCheckDialog = false;
+    splitTaskDialog = false;
     await actionRef.value[0].reload();
   }
 
@@ -719,6 +732,16 @@
             },
             ifShow: () => {
               return hasAuthPower('missionSettle');
+            },
+          },
+          {
+            label: '拆分',
+            onClick() {
+              currentInfo = record;
+              splitTaskDialog = true;
+            },
+            ifShow: () => {
+              return hasAuthPower('missionEdit');
             },
           },
           // {
