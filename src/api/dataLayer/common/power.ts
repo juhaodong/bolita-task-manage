@@ -2,6 +2,7 @@ import { useUserStore } from '@/store/modules/user';
 import { collection, doc, query, setDoc } from 'firebase/firestore';
 import { db } from '@/store/plugins/firebase';
 import { resultOfId } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+import { getUserById } from '@/api/newDataLayer/User/User';
 
 export function hasAuthPower(power) {
   const res = useUserStore()?.info?.powerTypeItems.map((it) => it.itemKey) ?? [];
@@ -28,5 +29,6 @@ export async function getUserTypePowerList(type) {
 }
 
 export async function getUserCustomerList() {
-  return useUserStore()?.info?.customerIds.split(',') ?? [];
+  const currentUser = await getUserById(useUserStore()?.info?.id);
+  return currentUser.customerIds.split(',');
 }
