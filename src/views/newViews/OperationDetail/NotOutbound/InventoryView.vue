@@ -150,7 +150,7 @@
   import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
-  import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import { Box20Filled } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import dayjs from 'dayjs';
@@ -174,6 +174,7 @@
   } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
+  import { useUploadDialog } from '@/store/modules/uploadFileState';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -229,7 +230,7 @@
       {
         field: 'inStatus',
         op: 'in',
-        value: ['存仓', '入库待操作'],
+        value: ['入库待操作'],
       },
     ];
     if (filterObj) {
@@ -448,15 +449,7 @@
     width: 120,
     render(record: any) {
       const fileAction = (label, key, icon?: Component, power) => {
-        return getFileActionButton(
-          label,
-          key,
-          NotifyDetailManager,
-          reloadTable,
-          record,
-          icon,
-          power
-        );
+        return getFileActionButton(label, key, addOrUpdateTask, reloadTable, record, icon, power);
       };
       return h(TableAction as any, {
         style: 'button',
@@ -475,6 +468,40 @@
               return record.operateInStorage === '是' && hasAuthPower('inStorageTurnToOut');
             },
           },
+          {
+            label: '换单文件',
+            highlight: () => {
+              return record?.['changeOrder']?.length > 0 ? 'success' : 'error';
+            },
+            ifShow: () => {
+              return record?.changeOrderFiles === '是' && hasAuthPower('missionChangeFile');
+            },
+            async onClick() {
+              const upload = useUploadDialog();
+              const files = await upload.upload(record['changeOrder']);
+              const userInfo = useUserStore().info;
+              if (files.checkPassed) {
+                record['changeOrder'] = files.files;
+                if (!record.arriveTime) {
+                  record['inStatus'] = InBoundDetailStatus.WaitCheck;
+                }
+                await addOrUpdateTaskTimeLine({
+                  useType: 'normal',
+                  bolitaTaskId: record.id,
+                  operator: userInfo?.realName,
+                  detailTime: dayjs().valueOf(),
+                  note: '提交了换单文件',
+                });
+                record.customerId = record.customer.id;
+                record.inventoryId = record.inventory.id;
+                await addOrUpdateTask(record);
+              }
+              actionRef.value[0].reload();
+            },
+          },
+          fileAction('POD', 'POD', '', 'missionPOD'),
+          fileAction('操作文件', 'operationFiles', '', 'missionOperationFile'),
+          fileAction('问题图片', 'problemFiles', '', 'missionProblemPic'),
         ],
       });
     },

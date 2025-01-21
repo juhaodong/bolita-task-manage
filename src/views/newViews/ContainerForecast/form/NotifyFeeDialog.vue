@@ -3,7 +3,7 @@
   import { safeParseFloat } from '@/store/utils/utils';
   import { cloneDeep } from 'lodash-es';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { getNotifyById } from '@/api/newDataLayer/Notify/Notify';
+  import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
   import { getCustomerById } from '@/api/newDataLayer/Customer/Customer';
   import { getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
   import {
@@ -53,6 +53,7 @@
         extraInfo.id = settlementInfo[0].id;
       }
       notifyDetail = await getNotifyById(props.notifyId);
+      console.log(notifyDetail, 'detail');
       customerInfoany = await getCustomerById(notifyDetail?.customer.id);
       currentTaskList = await getTaskListByNotifyId(props.notifyId);
       Object.assign(extraInfo, cloneDeep(notifyDetail?.extraInfo ?? defaultExtraInfo));
@@ -61,11 +62,12 @@
   }
   async function confirm() {
     await safeScope(async () => {
-      console.log(extraInfo, 'extraInfo');
+      notifyDetail.inStatus = '已结算';
       extraInfo.status = '已结算';
       extraInfo.notifyId = props.notifyId;
       extraInfo.customerId = notifyDetail.customer.id;
       extraInfo.totalFee = totalPrice.value;
+      await addOrUpdateNotify(notifyDetail);
       await addOrUpdateNotifySettlement(extraInfo);
       emit('save');
     });

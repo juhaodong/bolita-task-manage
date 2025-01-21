@@ -52,3 +52,12 @@ export async function saveFiles(file) {
   }
   return filesUrl.join(',');
 }
+
+export const notifyStatusList = [
+  '等待入库',
+  '等待审核',
+  '入库待出库',
+  '部分操作',
+  '全部出库',
+  '已结算',
+];

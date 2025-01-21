@@ -151,6 +151,7 @@
     } else {
       const userStore = useUserStore();
       const currentCustomer = (await getCustomerById(value.customerId)) ?? '';
+      value.containerNo = value.containerNo.trim();
       value.notifyType = prop.type;
       value.unloadingFile = '';
       value.totalTime = '';
