@@ -148,6 +148,7 @@
         task.inHouseTime = value.inHouseTime;
         await addOrUpdateTask(task);
       }
+      emit('saved');
     } else {
       const userStore = useUserStore();
       const currentCustomer = (await getCustomerById(value.customerId)) ?? '';
