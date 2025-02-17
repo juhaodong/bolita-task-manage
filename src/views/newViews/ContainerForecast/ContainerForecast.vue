@@ -291,7 +291,11 @@
       (await getNotifyListByFilter(currentFilter))
         .filter((it) => it.customer)
         .filter((x) => customerId.includes(x.customer.id)) ?? [];
-
+    res.forEach((a) => {
+      if (a.totalCount) {
+        a.arrivedCount = a.arrivedCount + '(' + a.totalCount + ')';
+      }
+    });
     if (!showAll) {
       res = res.filter((a) => a.inStatus !== '已取消');
     }
