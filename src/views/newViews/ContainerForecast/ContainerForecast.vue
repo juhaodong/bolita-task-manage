@@ -211,6 +211,7 @@
   import { useUserStore } from '@/store/modules/user';
   import { currentBaseImageUrl } from '@/api/dataLayer/fieldDefination/common';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
+  import * as XLSX from 'xlsx';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
   let currentModel: any | null = $ref(null);
@@ -373,11 +374,11 @@
 
   async function downloadData() {
     const selectedList = await loadDataTable();
-    let headerTitle = columns.map((it) => it.title).join();
-    let dataStrings = [];
-    dataStrings.unshift(headerTitle);
+    let headerTitle = columns.map((it) => it.title);
+    let data = [];
+    data.unshift(headerTitle);
     selectedList.forEach((it) => {
-      const res = [
+      const row = [
         dayjs(it.planArriveDateTime).format('YYYY-MM-DD') ?? '',
         it.inHouseTime ?? '',
         it.containerNo ?? '',
@@ -390,11 +391,21 @@
         it.note ?? '',
         it.containerFinalStatus ?? '',
       ];
-      dataStrings.push(res.join());
+      data.push(row);
     });
-    dataStrings = dataStrings.join('\n');
-    const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
-    FileSaver.saveAs(blob, '到货预报' + '.csv');
+    // 创建一个工作簿
+    const workbook = XLSX.utils.book_new();
+    // 将数据转换为工作表
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    // 将工作表添加到工作簿
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    // 生成Excel文件
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+    // 保存文件
+    FileSaver.saveAs(blob, '到货预报.xlsx');
   }
 
   async function reloadHeader() {

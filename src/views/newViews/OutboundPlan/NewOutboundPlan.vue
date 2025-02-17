@@ -141,7 +141,7 @@
     for (const item of val) {
       realList.push(allNotifyDetail.find((it) => it.id === item));
     }
-    totalNumber.value = safeSumBy(realList, 'number').toFixed(3);
+    totalNumber.value = safeSumBy(realList, 'arrivedContainerNum').toFixed(3);
     totalVolume.value = safeSumBy(realList, 'volume').toFixed(3);
     totalWeight.value = safeSumBy(realList, 'weight').toFixed(3);
   });

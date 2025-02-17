@@ -144,8 +144,23 @@
       },
     },
     {
-      label: '备注/库位',
-      field: 'warehouseId',
+      label: '仓库备注',
+      field: 'note',
+      required: false,
+    },
+    {
+      label: '库位',
+      field: 'warehouseLocation',
+      required: false,
+    },
+    {
+      label: '送货备注',
+      field: 'transportationNote',
+      required: false,
+    },
+    {
+      label: '操作备注',
+      field: 'operationNote',
       required: false,
     },
     {

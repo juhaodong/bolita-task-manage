@@ -140,12 +140,12 @@
   import { valueOfToday } from '@/api/dataLayer/common/Date';
   import { generateOptionFromArray } from '@/store/utils/utils';
   import FileSaver from 'file-saver';
-  import { getDetailListById } from '@/api/dataLayer/modules/notify/notify-detail';
   import { getOutboundForecastListByFilter } from '@/api/newDataLayer/CarManage/CarManage';
   import OfferCustomerDialog from '@/views/newViews/CarpoolManagement/dialog/OfferCustomerDialog.vue';
   import BookingCarDialog from '@/views/newViews/CarpoolManagement/dialog/BookingCarDialog.vue';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
   import { addOrUpdateWithRefOutboundForecast } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import * as XLSX from 'xlsx';
 
   const showModal = ref(false);
 
@@ -206,26 +206,19 @@
 
   async function downloadData() {
     let selectedList = [];
-    if (checkedRows.length > 0) {
-      selectedList = await getDetailListById(checkedRows);
-    } else {
-      selectedList = await loadDataTable();
-    }
-    let headerTitle = columns
-      .filter((it) => it.title)
-      .map((it) => it.title)
-      .join();
-    let dataStrings = [];
-    dataStrings.unshift(headerTitle);
+    selectedList = await loadDataTable();
+    let headerTitle = columns.filter((it) => it.title).map((it) => it.title);
+    let data = [];
+    data.unshift(headerTitle);
     selectedList.forEach((it) => {
       const res = [
         it.id ?? '',
-        it.createBookCarTimestamp ?? '',
+        it.createTimestamp ? dayjs(parseFloat(it.createTimestamp)).format('YYYY-MM-DD') : '',
         it.inStatus ?? '',
         it.deliveryMethod ?? '',
         it.waybillId ?? '',
         it.trayNum ?? '',
-        it.containerNum ?? '',
+        it.totalNumber ?? '',
         it.totalOutOffer ?? '',
         it.costPrice ?? '',
         it.suggestedPrice ?? '',
@@ -233,24 +226,30 @@
         it.FCAddress ?? '',
         it.REF ?? '',
         it.ISA ?? '',
-        it.AMZID ?? '',
+        it.logisticsCompany ?? '',
+        it.amzid ?? '',
         it.trayNum ?? '',
-        it.reservationGetProductTime ?? '',
+        it.reservationGetProductTime
+          ? dayjs(parseFloat(it.reservationGetProductTime)).format('YYYY-MM-DD')
+          : '',
         it.reservationGetProductDetailTime ?? '',
-        it.orderCarPrice ?? '',
-        it.city ?? '',
-        it.street ?? '',
-        it.appendAddress ?? '',
-        it.houseNo ?? '',
-        it.contact ?? '',
-        it.email ?? '',
         it.note ?? '',
       ];
-      dataStrings.push(res.join());
+      data.push(res);
     });
-    dataStrings = dataStrings.join('\n');
-    const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
-    FileSaver.saveAs(blob, '订车管理' + '.csv');
+    // 创建一个工作簿
+    const workbook = XLSX.utils.book_new();
+    // 将数据转换为工作表
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    // 将工作表添加到工作簿
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    // 生成Excel文件
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+    // 保存文件
+    FileSaver.saveAs(blob, '订车管理.xlsx');
   }
   const realOptions = computed(() => {
     return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));

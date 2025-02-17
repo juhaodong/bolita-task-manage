@@ -233,7 +233,6 @@
           {
             label: '出库单',
             onClick() {
-              console.log('123');
               checkOutboundOrder(record.id);
             },
           },

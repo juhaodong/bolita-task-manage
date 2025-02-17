@@ -124,12 +124,17 @@ export const columns: DataTableColumns<any> = [
     key: 'trayNum',
   },
   {
+    title: '托盘规格',
+    key: 'trayDisplay',
+  },
+  {
     title: '实际托数',
     key: 'arrivedTrayNum',
   },
   timeColumn('planArriveDateTime', '预期到仓日期'),
   timeColumn('arriveTime', '实际到仓日期'),
   timeColumn('deliveryTime', '发货时间'),
+  timeColumn('outBoundTime', '预计取货时间'),
   {
     title: 'Ref',
     key: 'ref',
@@ -137,6 +142,10 @@ export const columns: DataTableColumns<any> = [
   {
     title: '仓库备注',
     key: 'note',
+  },
+  {
+    title: '库位',
+    key: 'warehouseLocation',
   },
   {
     title: '分拣标识',

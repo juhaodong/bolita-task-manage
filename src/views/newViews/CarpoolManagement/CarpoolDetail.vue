@@ -113,6 +113,7 @@
   import { getTaskListByFilterWithPagination } from '@/api/newDataLayer/TaskList/TaskList';
   import { getOutboundForecastById } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
+  import * as XLSX from 'xlsx';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -140,68 +141,74 @@
 
   async function downloadData() {
     let selectedList = [];
-    if (checkedRows.length > 0) {
-      selectedList = await getDetailListById(checkedRows);
-    } else {
-      selectedList = await loadDataTable();
-    }
-    let headerTitle = columns
-      .filter((it) => it.title)
-      .map((it) => it.title)
-      .join();
-    let dataStrings = [];
-    dataStrings.unshift(headerTitle);
+    selectedList = await loadDataTable();
+    let headerTitle = columns.filter((it) => it.title).map((it) => it.title);
+    let data = [];
+    data.unshift(headerTitle);
     selectedList.forEach((it) => {
       const res = [
-        it.customerName ?? '',
-        it.containerId ?? '',
-        it.ticketId ?? '',
-        it.country ?? '',
-        it.number ?? '',
-        it.arrivedContainerNum ?? '',
-        it.weight ?? '',
-        it.volume ?? '',
-        it.size ?? '',
-        it.inStatus ?? '',
-        it.warehouseId ?? '',
-        it.stayTime ?? '',
-        it.deliveryIdIn ?? '',
-        it.normalNote ?? '',
-        it.FBADeliveryCode ?? '',
-        it.outboundMethod ?? '',
-        it.deliveryMethod ?? '',
-        it.operationRequire ?? '',
-        it.operationNote ?? '',
-        it.finalStatus ?? '',
-        it.PO ?? '',
-        it.FCAddress ?? '',
-        it.postcode ?? '',
-        it.inBoundDetailStatus ?? '',
-        it.changeOrderFiles ?? '',
-        it.transportationNote ?? '',
-        it.trayNum ?? '',
-        it.arrivedTrayNum ?? '',
-        dayjs(it.planArriveDateTime).format('YYYY-MM-DD') ?? '',
-        dayjs(it.currentDate[0]).format('YYYY-MM-DD') ?? '',
-        it.deliveryTime ? dayjs(it.deliveryTime).format('YYYY-MM-DD') : '',
-        it.Ref ?? '',
-        it.note ?? '',
-        it.sign ?? '',
-        it.package ?? '',
-        it.industrialTrayNum ?? '',
-        it.productName ?? '',
-        it.UNNumber ?? '',
-        it.recipient ?? '',
-        it.phone ?? '',
-        it.email ?? '',
-        it.needReserve ?? '',
-        it.industrialNote ?? '',
+        it.customer?.customerName ?? '', //客户
+        it.containerId ?? '', //柜号
+        it.ticketId ?? '', //票号
+        it.country ?? '', //国家
+        it.number ?? '', //预报件数
+        it.arrivedContainerNum ?? '', // 实际件数
+        it.weight ?? '', //总实重
+        it.volume ?? '', //总体积
+        it.size ?? '', //尺寸
+        it.inStatus ?? '', //状态
+        it.inventory?.name ?? '', //仓库
+        it.stayTime ?? '', //留仓时间
+        it.deliveryIdIn ?? '', //运单号
+        it.normalNote ?? '', //客户备注
+        it.FBADeliveryCode ?? '', //FBA单号
+        it.outboundMethod ?? '', //出库方式
+        it.deliveryMethod ?? '', //物流渠道
+        it.operationRequire ?? '', //操作要求
+        it.operationNote ?? '', //操作备注
+        it.finalStatus ?? '', //结算状态
+        it.PO ?? '', //PO
+        it.FCAddress ?? '', //FC/送货地址
+        it.postcode ?? '', //邮编
+        it.inBoundDetailStatus ?? '', //审核状态
+        it.changeOrderFiles ?? '', //换单文件
+        it.transportationNote ?? '', //送货备注
+        it.trayNum ?? '', //预报托数
+        it.trayDisplay ?? '', //托盘规格
+        it.arrivedTrayNum ?? '', //实际托数
+        it.planArriveDateTime ? dayjs(it.planArriveDateTime).format('YYYY-MM-DD') : '', //预期到仓日期
+        it.currentDate ? dayjs(it.currentDate[0]).format('YYYY-MM-DD') : '', //实际到仓日期
+        it.deliveryTime ? dayjs(it.deliveryTime).format('YYYY-MM-DD') : '', //发货时间
+        it.outBoundTime ? dayjs(it.outBoundTime).format('YYYY-MM-DD HH:ss:mm') : '', //预计取货时间
+        it.Ref ?? '', //REF
+        it.note ?? '', //仓库备注
+        it.warehouseLocation ?? '', //库位
+        it.sign ?? '', //分拣标识
+        it.package ?? '', //包装
+        it.industrialTrayNum ?? '', //托数
+        it.productName ?? '', //品名
+        it.UNNumber ?? '', //UN号
+        it.recipient ?? '', //收件人
+        it.phone ?? '', //电话
+        it.email ?? '', //邮箱
+        it.needReserve ?? '', //是否需要预约
+        it.industrialNote ?? '', //工业品备注
       ];
-      dataStrings.push(res.join());
+      data.push(res);
     });
-    dataStrings = dataStrings.join('\n');
-    const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
-    FileSaver.saveAs(blob, '订车明细' + '.csv');
+    // 创建一个工作簿
+    const workbook = XLSX.utils.book_new();
+    // 将数据转换为工作表
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    // 将工作表添加到工作簿
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    // 生成Excel文件
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+    // 保存文件
+    FileSaver.saveAs(blob, '订车明细.xlsx');
   }
   const realOptions = computed(() => {
     return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));

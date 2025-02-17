@@ -35,9 +35,12 @@
     "blueimp-md5": "^2.19.0",
     "date-fns": "^2.29.3",
     "dayjs": "^1.11.9",
+    "downloadjs": "^1.4.7",
     "echarts": "^5.4.0",
     "element-resize-detector": "^1.2.4",
+    "file-saver": "^2.0.5",
     "firebase": "^9.23.0",
+    "hillo": "^2.0.32",
     "js-file-downloader": "^1.1.25",
     "json-as-xlsx": "^2.5.3",
     "lodash": "^4.17.21",
@@ -54,9 +57,7 @@
     "vue-router": "^4.1.6",
     "vue-types": "^4.2.1",
     "vue3-print-nb": "^0.1.4",
-    "downloadjs": "^1.4.7",
-    "file-saver": "^2.0.5",
-    "hillo": "^2.0.32"
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.2.0",

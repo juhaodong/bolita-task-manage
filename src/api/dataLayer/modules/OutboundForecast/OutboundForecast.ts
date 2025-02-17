@@ -66,6 +66,31 @@ export async function updateTaskListAfterBookingCar(id) {
   }
 }
 
+export async function updateTaskListAfterBookingCarWithInfo(id, info) {
+  console.log(info, 'info');
+  const taskListIds = (await getOutboundForecastById(id)).outboundDetailInfo.split(',');
+  const userInfo = useUserStore().info;
+  for (const taskId of taskListIds) {
+    const res = await getTaskListById(taskId);
+    await addOrUpdateTaskTimeLine({
+      useType: 'normal',
+      bolitaTaskId: taskId,
+      operator: userInfo?.realName,
+      detailTime: dayjs().valueOf(),
+      note: '完成订车',
+    });
+    res.ref = info.REF;
+    res.outBoundTime =
+      dayjs(parseFloat(info.reservationGetProductTime)).format('YYYY-MM-DD') +
+      ' ' +
+      info.reservationGetProductDetailTime; // 预计取货时间
+    res.inStatus = '已定车';
+    res.inventoryId = res.inventory.id;
+    res.customerId = res.customer.id;
+    await addOrUpdateTask(res);
+  }
+}
+
 export async function updateTaskListAfterOfferPriceCar(id, priceInfo) {
   const taskListIds = (await getOutboundForecastById(id)).outboundDetailInfo.split(',');
   const userInfo = useUserStore().info;

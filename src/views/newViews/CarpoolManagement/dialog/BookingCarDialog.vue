@@ -5,7 +5,7 @@
   import { reservationTimeList } from '@/views/newViews/ContainerForecast/columns';
   import dayjs from 'dayjs';
   import { addOrUpdateWithRefOutboundForecast } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
-  import { updateTaskListAfterBookingCar } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import { updateTaskListAfterBookingCarWithInfo } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
 
   interface Props {
     info?: any;
@@ -69,7 +69,7 @@
       return;
     }
     let outboundForecastInfo = prop.info;
-    await updateTaskListAfterBookingCar(outboundForecastInfo.id);
+    await updateTaskListAfterBookingCarWithInfo(outboundForecastInfo.id, outboundForecastInfo);
     outboundForecastInfo.AMZID = AMZID;
     outboundForecastInfo.ISA = ISA;
     outboundForecastInfo.bookCarTimestamp = dayjs().valueOf();

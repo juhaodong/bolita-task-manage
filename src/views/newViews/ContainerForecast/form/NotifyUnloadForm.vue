@@ -168,7 +168,7 @@
       totalArrivedTrayCount.value + '托' + totalArrivedContainerCount.value + '箱'),
       (notifyInfo.inStatus = newInStatus),
       (notifyInfo.unloadPerson = unloadPerson),
-      (notifyInfo.totalCount = totalTrayCount.value + totalContainerCount.value),
+      (notifyInfo.totalCount = totalTrayCount.value + '托' + totalContainerCount.value + '箱'),
       (notifyInfo.realDate = realDate),
       (notifyInfo.unloadStartTime = startTime),
       (notifyInfo.unloadEndTime = endTime),
@@ -257,14 +257,14 @@
                 />
               </td>
               <td>
-                <n-input v-model:value="item.note" :disabled="!canEdit" placeholder="" />
-              </td>
-              <td>
                 <n-input
                   v-model:value="item.warehouseLocation"
                   :disabled="!canEdit"
                   placeholder=""
                 />
+              </td>
+              <td>
+                <n-input v-model:value="item.note" :disabled="!canEdit" placeholder="" />
               </td>
             </tr>
           </tbody>

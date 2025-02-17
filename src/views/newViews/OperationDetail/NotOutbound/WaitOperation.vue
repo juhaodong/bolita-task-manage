@@ -191,6 +191,7 @@
   import { addOrUpdateTask, getTaskListByOutboundId } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { useUserStore } from '@/store/modules/user';
+  import * as XLSX from 'xlsx';
 
   const showModal = ref(false);
   let showShareCarModel = $ref(false);
@@ -227,10 +228,11 @@
       title: 'ID',
       key: 'id',
     },
-    {
-      title: '出库日期',
-      key: 'realOutDate',
-    },
+    timeTableColumn('realOutDate', '出库日期'),
+    // {
+    //   title: '出库日期',
+    //   key: 'realOutDate',
+    // },
     {
       title: '仓库',
       key: 'inventory.name',
@@ -351,69 +353,55 @@
         (it) => it.reservationGetProductTime > startDate && it.reservationGetProductTime < endDate
       );
     }
+    console.log(
+      currentList.filter((it) => it.realOutDate),
+      '321'
+    );
     return currentList.sort(dateCompare('createTimestamp'));
   };
 
   async function downloadData() {
     let selectedList = [];
     selectedList = await loadDataTable();
-    let headerTitle = columns
-      .filter((it) => it.title)
-      .map((it) => it.title)
-      .join();
-    let dataStrings = [];
-    dataStrings.unshift(headerTitle);
+    let headerTitle = operationColumns
+      .filter((it) => it.title && it.title !== '详情')
+      .map((it) => it.title);
+    let data = [];
+    data.unshift(headerTitle);
     selectedList.forEach((it) => {
       const res = [
-        it.customerName ?? '',
-        it.containerId ?? '',
-        it.ticketId ?? '',
-        it.country ?? '',
-        it.number ?? '',
-        it.arrivedContainerNum ?? '',
-        it.weight ?? '',
-        it.volume ?? '',
-        it.size ?? '',
+        it.id ?? '',
+        it.realOutDate ?? '',
+        it.inventory.name ?? '',
+        it.customer.customerName ?? '',
+        it.pickUpDateTime ? dayjs(parseFloat(it.pickUpDateTime)).format('YYYY-MM-DD') : '',
+        it.reservationGetProductTime
+          ? dayjs(parseFloat(it.reservationGetProductTime)).format('YYYY-MM-DD')
+          : '',
         it.inStatus ?? '',
-        it.warehouseId ?? '',
-        it.stayTime ?? '',
-        it.deliveryIdIn ?? '',
-        it.normalNote ?? '',
-        it.FBADeliveryCode ?? '',
-        it.outboundMethod ?? '',
+        it.ref ?? '',
+        it.isa ?? '',
+        it.amzid ?? '',
+        it.fcaddress ?? '',
         it.deliveryMethod ?? '',
-        it.operationRequire ?? '',
-        it.operationNote ?? '',
-        it.finalStatus ?? '',
-        it.PO ?? '',
-        it.FCAddress ?? '',
         it.postcode ?? '',
-        it.inBoundDetailStatus ?? '',
-        it.changeOrderFiles ?? '',
-        it.transportationNote ?? '',
-        it.trayNum ?? '',
-        it.arrivedTrayNum ?? '',
-        dayjs(it.planArriveDateTime).format('YYYY-MM-DD') ?? '',
-        dayjs(it.currentDate[0]).format('YYYY-MM-DD') ?? '',
-        it.deliveryTime ? dayjs(it.deliveryTime).format('YYYY-MM-DD') : '',
-        it.Ref ?? '',
-        it.note ?? '',
-        it.sign ?? '',
-        it.package ?? '',
-        it.industrialTrayNum ?? '',
-        it.productName ?? '',
-        it.UNNumber ?? '',
-        it.recipient ?? '',
-        it.phone ?? '',
-        it.email ?? '',
-        it.needReserve ?? '',
-        it.industrialNote ?? '',
+        it.outOperatePerson ?? '',
       ];
-      dataStrings.push(res.join());
+      data.push(res);
     });
-    dataStrings = dataStrings.join('\n');
-    const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
-    FileSaver.saveAs(blob, '出库看板' + '.csv');
+    // 创建一个工作簿
+    const workbook = XLSX.utils.book_new();
+    // 将数据转换为工作表
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    // 将工作表添加到工作簿
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    // 生成Excel文件
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+    // 保存文件
+    FileSaver.saveAs(blob, '出库看板.xlsx');
   }
   let currentModel = $ref(null);
   function startEditOF(id) {
@@ -534,11 +522,13 @@
               if (files.checkPassed) {
                 record.CMRFiles = files.files;
                 record.inStatus = '已完成';
+                record.realOutDate = dayjs().valueOf();
                 await addOrUpdateWithRefOutboundForecast(record);
                 const taskList = await getTaskListByOutboundId(record.id);
                 for (const item of taskList) {
                   item.cmrfiles = files.files;
                   item.inStatus = '已完成';
+                  item.deliveryTime = dayjs().valueOf();
                   await addOrUpdateTask(item);
                   const userInfo = useUserStore().info;
                   await addOrUpdateTaskTimeLine({

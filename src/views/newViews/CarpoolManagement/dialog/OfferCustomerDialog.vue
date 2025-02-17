@@ -37,6 +37,7 @@
         task.inStatus = '已报价';
         task.waitPrice = '1';
         task.outPrice = item.price / item.value.length;
+        task.REF = REF.toString();
         await addOrUpdateTask(task);
       }
     }
