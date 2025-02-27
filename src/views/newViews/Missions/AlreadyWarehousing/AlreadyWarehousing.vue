@@ -834,6 +834,10 @@
           filterObj['FCAddress'] = filterObj[key];
           delete filterObj[key];
         }
+        if (key === 'ref') {
+          filterObj['REF'] = filterObj[key];
+          delete filterObj[key];
+        }
       });
     } else {
       filterObj = null;

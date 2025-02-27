@@ -1,6 +1,6 @@
 import { DataTableColumns } from 'naive-ui';
 import { finalStatus, InBoundDetailStatus } from '@/api/dataLayer/modules/notify/notify-api';
-import { generateOptionFromArray } from '@/store/utils/utils';
+import { asyncStorage, generateOptionFromArray } from '@/store/utils/utils';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import {
   statusColumnEasy,
@@ -222,10 +222,7 @@ export const filters: FormField[] = [
       options: generateOptionFromArray(Object.values(finalStatus)),
     },
   },
-  {
-    label: '仓库',
-    field: 'inventory.id',
-  },
+  asyncStorage(),
   {
     label: '货柜号',
     field: 'containerId',
