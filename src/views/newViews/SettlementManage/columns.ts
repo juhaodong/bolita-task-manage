@@ -21,10 +21,6 @@ export const columnsIn: DataTableColumns = [
     key: 'status',
   }),
   {
-    title: '货柜号',
-    key: 'containerNo',
-  },
-  {
     title: '客户ID',
     key: 'customer.customerName',
   },

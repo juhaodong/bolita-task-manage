@@ -24,38 +24,38 @@
       <n-card embedded size="small" style="max-width: 300px">
         <div style="display: flex">
           <n-select
-            placeholder="过滤项1"
-            style="width: 130px"
             v-model:value="optionOne"
             :options="realOptions"
+            placeholder="过滤项1"
+            style="width: 130px"
           />
           <n-input
-            class="ml-2"
-            style="width: 130px"
             v-model:value="valueOne"
-            type="text"
+            class="ml-2"
             placeholder="过滤值1"
+            style="width: 130px"
+            type="text"
           />
         </div>
       </n-card>
       <n-card class="ml-2" embedded size="small" style="max-width: 300px">
         <div style="display: flex">
           <n-select
-            placeholder="过滤项2"
-            style="width: 130px"
             v-model:value="optionTwo"
             :options="realOptions"
+            placeholder="过滤项2"
+            style="width: 130px"
           />
           <n-input
-            class="ml-2"
-            style="width: 130px"
             v-model:value="valueTwo"
-            type="text"
+            class="ml-2"
             placeholder="过滤值2"
+            style="width: 130px"
+            type="text"
           />
         </div>
       </n-card>
-      <n-date-picker class="ml-2" v-model:value="dateRange" type="daterange" clearable />
+      <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
     </div>
     <div class="my-2"></div>
     <n-tabs
@@ -103,20 +103,20 @@
       <new-settlement :model="currentModel" @saved="reloadTable" />
     </n-modal>
     <n-modal
-      v-model:show="showFeeDialog"
+      v-model:show="showNotifyDetail"
       :show-icon="false"
       preset="dialog"
       style="width: 90%; min-width: 600px; max-width: 800px"
-      title="费用表"
+      title="货柜详情"
     >
-      <notify-fee-dialog :notify-id="currentNotifyId!" @save="reloadTable" />
+      <notify-detail :current-date="currentNotify!" @save="reloadTable" />
     </n-modal>
   </n-card>
   <no-power-page v-else />
 </template>
 
 <script lang="ts" setup>
-  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
+  import { computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columnsIn, columnsOut, filters } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
@@ -127,27 +127,21 @@
     FinanceManager,
   } from '@/api/dataLayer/modules/cash/cash';
   import NewSettlement from '@/views/newViews/SettlementManage/NewSettlement.vue';
-  import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import { Box20Filled } from '@vicons/fluent';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
-  import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
-  import {
-    getSettlement,
-    getSettlementById,
-    updateSettlement,
-  } from '@/api/dataLayer/common/SettlementType';
+  import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
+  import { getSettlementById, updateSettlement } from '@/api/dataLayer/common/SettlementType';
   import NewTotalFee from '@/views/newViews/SettlementManage/NewTotalFee.vue';
   import dayjs from 'dayjs';
-  import NotifyFeeDialog from '@/views/newViews/NotifyList/form/NotifyFeeDialog.vue';
-  import { NotifyManager } from '@/api/dataLayer/modules/notify/notify-api';
-  import { CashCollectionStatus } from '@/views/newViews/ReconciliationManage/columns';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import { valueOfToday } from '@/api/dataLayer/common/Date';
   import { columns } from '@/views/newViews/ContainerForecast/columns';
   import { getNotifySettlement } from '@/api/newDataLayer/NotifySettlement/NotifySettlement';
   import { getSettlementList } from '@/api/newDataLayer/TaskListSettlement/TaskListSettlement';
+  import { getNotifyById } from '@/api/newDataLayer/Notify/Notify';
+  import NotifyDetail from '@/views/newViews/SettlementManage/NotifyDetail.vue';
 
   interface Prop {
     outId?: string;
@@ -160,7 +154,7 @@
   let selectedMonth: any | null = $ref('');
   let monthTab: any | null = $ref(null);
   let allList: any | null = $ref([]);
-  let currentNotifyId: string | null = $ref(null);
+  let currentNotify: string | null = $ref(null);
   let typeMission: any | null = $ref('');
   let currentData: any | null = $ref([]);
   let typeTab = $ref(['卸柜结算', '货柜结算']);
@@ -169,6 +163,7 @@
   let valueOne = $ref('');
   let valueTwo = $ref('');
   let dateRange = $ref(null);
+  let showNotifyDetail = $ref(false);
   onMounted(() => {
     monthTab = OneYearMonthTab();
     selectedMonth = monthTab[0];
@@ -307,6 +302,16 @@
       return h(TableAction as any, {
         style: 'button',
         actions: [
+          {
+            label: '查看',
+            async onClick() {
+              currentNotify = await getNotifyById(record.notify);
+              showNotifyDetail = true;
+            },
+            ifShow: () => {
+              return typeMission === '卸柜结算';
+            },
+          },
           {
             label: '修改',
             onClick() {
