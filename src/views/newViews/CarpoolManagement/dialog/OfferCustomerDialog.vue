@@ -5,6 +5,8 @@
   import { safeSumBy } from '@/store/utils/utils';
   import { addOrUpdateOutboundForecast } from '@/api/newDataLayer/CarManage/CarManage';
   import { $ref } from 'vue/macros';
+  import { getFBACodeList } from '@/api/newDataLayer/FBACode/FBACode';
+  import dayjs from 'dayjs';
 
   interface Props {
     info?: any;
@@ -17,7 +19,17 @@
   let costPrice = $ref('');
   onMounted(async () => {
     const res = await getTaskListByOutboundId(prop.info.id);
-    REF = prop.info.id;
+    const fbaCodeList = await getFBACodeList();
+    const todayDisplay = dayjs().format('DDMMYY');
+    if (prop.info.REF) {
+      REF = prop.info.REF;
+    } else {
+      if (fbaCodeList.find((it) => it.code === prop.info.FCAddress)) {
+        REF = prop.info.FCAddress + '-HW' + todayDisplay + '-' + prop.info.id;
+      } else {
+        REF = prop.info.postcode + '-HW' + todayDisplay + '-' + prop.info.id;
+      }
+    }
     suggestedPrice = prop.info.suggestedPrice ?? '';
     costPrice = prop.info.costPrice ?? '';
     currentInfo.value = Object.entries(groupBy(res, 'customer.customerName')).map(
