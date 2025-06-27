@@ -1,59 +1,31 @@
 <template>
   <n-card v-if="hasAuthPower('outMissionView')" :bordered="false" class="proCard">
-    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
-      <n-button type="primary" @click="selectedHeader">
+    <filter-bar
+      v-model="filterItems"
+      v-model:dateRange="dateRange"
+      v-model:showAll="showAll"
+      :columns="operationColumns"
+      @clear="updateFilter(null)"
+      @submit="updateFilter"
+      @filter-change="updateFilterWithItems"
+    />
+    <div class="mt-2">
+      <n-button class="action-button" size="small" type="info" @click="selectedHeader">
         <template #icon>
           <n-icon>
-            <Box20Filled />
+            <TableSettings20Regular />
           </n-icon>
         </template>
         选择表头显示
       </n-button>
-      <n-button type="info" @click="downloadData">
+      <n-button class="action-button" size="small" type="success" @click="downloadData">
         <template #icon>
           <n-icon>
-            <Box20Filled />
+            <ArrowDownload20Regular />
           </n-icon>
         </template>
         下载
       </n-button>
-    </filter-bar>
-    <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
-      <n-card embedded size="small" style="max-width: 300px">
-        <div style="display: flex">
-          <n-select
-            v-model:value="optionOne"
-            :options="realOptions"
-            placeholder="过滤项1"
-            style="width: 130px"
-          />
-          <n-input
-            v-model:value="valueOne"
-            class="ml-2"
-            placeholder="过滤值1"
-            style="width: 130px"
-            type="text"
-          />
-        </div>
-      </n-card>
-      <n-card class="ml-2" embedded size="small" style="max-width: 300px">
-        <div style="display: flex">
-          <n-select
-            v-model:value="optionTwo"
-            :options="realOptions"
-            placeholder="过滤项2"
-            style="width: 130px"
-          />
-          <n-input
-            v-model:value="valueTwo"
-            class="ml-2"
-            placeholder="过滤值2"
-            style="width: 130px"
-            type="text"
-          />
-        </div>
-      </n-card>
-      <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
     </div>
     <div class="my-2"></div>
     <BasicTable
@@ -153,12 +125,19 @@
 </template>
 
 <script lang="ts" setup>
-  import { Box20Filled } from '@vicons/fluent';
-  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
-  import { BasicTable, TableAction } from '@/components/Table';
-  import { filters } from './columns';
   import {
-    getFileActionButtonByOutForecast,
+    ArrowDownload20Regular,
+    ArrowUpload20Regular,
+    Box20Filled,
+    DocumentAdd20Regular,
+    DocumentEdit20Regular,
+    Image20Regular,
+    Payment20Regular,
+    TableSettings20Regular,
+  } from '@vicons/fluent';
+  import { computed, h, onMounted, reactive, ref } from 'vue';
+  import { BasicTable, TableAction } from '@/components/Table';
+  import {
     statusColumnEasy,
     timeTableColumn,
   } from '@/views/bolita-views/composable/useableColumns';
@@ -171,8 +150,8 @@
   import EditOF from '@/views/newViews/OperationDetail/NotOutbound/EditOF.vue';
   import LoadingCarList from '@/views/newViews/OperationDetail/NotOutbound/LoadingCarList.vue';
   import OutBoundFeeDialog from '@/views/newViews/OperationDetail/NotOutbound/OutBoundFeeDialog.vue';
-  import { NButton } from 'naive-ui';
-  import { columns } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
+  import { NButton, NIcon, NTooltip } from 'naive-ui';
+  import { generateOptionFromArray, toastSuccess } from '@/store/utils/utils';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
   import DetailInfoDialog from '@/views/newViews/OperationDetail/NotOutbound/DetailInfoDialog.vue';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
@@ -180,7 +159,6 @@
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import { valueOfToday } from '@/api/dataLayer/common/Date';
-  import { generateOptionFromArray } from '@/store/utils/utils';
   import FileSaver from 'file-saver';
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
   import {
@@ -223,6 +201,8 @@
   let valueOne = $ref('');
   let valueTwo = $ref('');
   let dateRange = $ref(null);
+  let showAll = $ref(false);
+  let filterItems = $ref([]);
   const operationColumns = $ref([
     {
       title: 'ID',
@@ -306,7 +286,7 @@
   let filterObj: any | null = $ref(null);
 
   const realOptions = computed(() => {
-    return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
+    return generateOptionFromArray(operationColumns.filter((it) => it.key).map((it) => it.title));
   });
 
   async function reloadHeader() {
@@ -427,15 +407,20 @@
     actionRef.value.reload();
   }
 
+  function updateFilterWithItems(value) {
+    filterObj = value;
+    reloadTable();
+  }
+
   function updateFilter(value) {
     if (value !== null) {
       if (optionOne && valueOne) {
-        const keyOne = columns.find((it) => it.title === optionOne).key;
+        const keyOne = operationColumns.find((it) => it.title === optionOne).key;
 
         value[keyOne] = valueOne;
       }
       if (optionTwo && valueTwo) {
-        const keyTwo = columns.find((it) => it.title === optionTwo).key;
+        const keyTwo = operationColumns.find((it) => it.title === optionTwo).key;
         value[keyTwo] = valueTwo;
       }
       filterObj = value;
@@ -446,6 +431,8 @@
       optionTwo = '';
       valueTwo = '';
       dateRange = null;
+      filterItems = [];
+      showAll = false;
     }
     reloadTable();
   }
@@ -463,34 +450,62 @@
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
-    width: 120,
+    width: 200,
     render(record) {
-      const fileAction = (label, key, icon?: Component, power) => {
-        return getFileActionButtonByOutForecast(label, key, reloadTable, record, icon, power);
+      // Custom file action with icon
+      const iconFileAction = (label, key, icon, power) => {
+        return {
+          icon: renderIconWithTooltip(icon, label),
+          onClick: async () => {
+            try {
+              const upload = useUploadDialog();
+              const files = await upload.upload(record[key]);
+              if (files.checkPassed) {
+                record[key] = files.files;
+                await addOrUpdateWithRefOutboundForecast(record);
+                toastSuccess('上传成功');
+                reloadTable();
+              }
+            } catch (error) {
+              console.error('上传失败:', error);
+            }
+          },
+          ifShow: () => {
+            return hasAuthPower(power);
+          },
+        };
       };
+
       return h(TableAction as any, {
-        style: 'button',
+        style: 'text',
         actions: [
           {
-            label: '上传装车单',
-            highlight: () => {
-              return record?.['loadingCarDoc']?.length > 0 ? 'success' : 'error';
-            },
-            async onClick() {
-              const upload = useUploadDialog();
-              const files = await upload.upload(record['loadingCarDoc']);
-              if (files.checkPassed) {
-                record.loadingCarDoc = files.files;
-                await addOrUpdateWithRefOutboundForecast(record);
-              }
-              await actionRef.value.reload();
+            icon: renderIconWithTooltip(DocumentEdit20Regular, '修改'),
+            onClick() {
+              startEditOF(record.id);
             },
             ifShow: () => {
-              return hasAuthPower('outMissionUploadFile');
+              return hasAuthPower('outMissionEdit');
+            },
+          },
+          iconFileAction(
+            '上传装车单',
+            'loadingCarDoc',
+            ArrowUpload20Regular,
+            'outMissionUploadFile'
+          ),
+          {
+            icon: renderIconWithTooltip(DocumentAdd20Regular, '生成装车单'),
+            onClick() {
+              currentNotifyId = record.id!;
+              showLoadingCarDoc = true;
+            },
+            ifShow: () => {
+              return !record?.unloadingFile && hasAuthPower('outMissionCreatUpCarFile');
             },
           },
           {
-            label: '装车',
+            icon: renderIconWithTooltip(Box20Filled, '装车'),
             onClick() {
               currentInfo = record;
               currentId = record?.outboundDetailInfo;
@@ -501,18 +516,7 @@
             },
           },
           {
-            label: '生成装车单',
-            onClick() {
-              currentNotifyId = record.id!;
-              showLoadingCarDoc = true;
-            },
-            ifShow: () => {
-              return !record?.unloadingFile && hasAuthPower('outMissionCreatUpCarFile');
-            },
-          },
-
-          {
-            label: '装车照片',
+            icon: renderIconWithTooltip(Image20Regular, '装车照片'),
             highlight: () => {
               return record?.['cmrfiles']?.length > 0 ? 'success' : 'error';
             },
@@ -546,18 +550,18 @@
               return hasAuthPower('outMissionUploadFile');
             },
           },
-          // {
-          //   label: '结算',
-          //   onClick() {
-          //     currentInfo = record;
-          //     showFeeDialog = true;
-          //   },
-          //   ifShow: () => {
-          //     return hasAuthPower('outMissionSettle');
-          //   },
-          // },
           {
-            label: '信息已变更',
+            icon: renderIconWithTooltip(Payment20Regular, '结算'),
+            onClick() {
+              currentInfo = record;
+              showFeeDialog = true;
+            },
+            ifShow: () => {
+              return hasAuthPower('outMissionSettle');
+            },
+          },
+          {
+            icon: renderIconWithTooltip(Box20Filled, '信息已变更'),
             highlight: () => {
               return 'error';
             },
@@ -573,6 +577,41 @@
   function addTable() {
     showModal.value = true;
   }
+
+  // Helper function to render icon with tooltip
+  const renderIconWithTooltip = (icon, tooltip) => {
+    return () =>
+      h(
+        NTooltip,
+        { trigger: 'hover', placement: 'top' },
+        {
+          trigger: () => h(NIcon, { size: 18, class: 'action-icon' }, { default: () => h(icon) }),
+          default: () => tooltip,
+        }
+      );
+  };
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+  .action-button {
+    margin-right: 8px;
+  }
+
+  /* Styles for action icons */
+  :deep(.action-icon) {
+    margin: 0 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  :deep(.n-icon) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  :deep(.n-tooltip) {
+    max-width: 200px;
+    word-break: keep-all;
+  }
+</style>

@@ -1,135 +1,126 @@
 <template>
-  <n-card v-if="hasAuthPower('orderCarView')" :bordered="false" class="proCard">
-    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
-      <!--      <n-button v-if="hasAuthPower('orderCarOffer')" type="primary" @click="startShareCar('offer')">-->
-      <!--        <template #icon>-->
-      <!--          <n-icon>-->
-      <!--            <Box20Filled />-->
-      <!--          </n-icon>-->
-      <!--        </template>-->
-      <!--        报价-->
-      <!--      </n-button>-->
-      <!--      <n-button-->
-      <!--        v-if="hasAuthPower('orderCarBookingCar')"-->
-      <!--        type="primary"-->
-      <!--        @click="startShareCar('car')"-->
-      <!--      >-->
-      <!--        <template #icon>-->
-      <!--          <n-icon>-->
-      <!--            <Box20Filled />-->
-      <!--          </n-icon>-->
-      <!--        </template>-->
-      <!--        订车-->
-      <!--      </n-button>-->
-      <n-button type="info" @click="downloadData">
-        <template #icon>
-          <n-icon>
-            <Box20Filled />
-          </n-icon>
-        </template>
-        下载
-      </n-button>
-    </filter-bar>
-    <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
-      <n-card embedded size="small" style="max-width: 300px">
-        <div style="display: flex">
-          <n-select
-            v-model:value="optionOne"
-            :options="realOptions"
-            placeholder="过滤项1"
-            style="width: 130px"
-          />
-          <n-input
-            v-model:value="valueOne"
-            class="ml-2"
-            placeholder="过滤值1"
-            style="width: 130px"
-            type="text"
-          />
-        </div>
-      </n-card>
-      <n-card class="ml-2" embedded size="small" style="max-width: 300px">
-        <div style="display: flex">
-          <n-select
-            v-model:value="optionTwo"
-            :options="realOptions"
-            placeholder="过滤项2"
-            style="width: 130px"
-          />
-          <n-input
-            v-model:value="valueTwo"
-            class="ml-2"
-            placeholder="过滤值2"
-            style="width: 130px"
-            type="text"
-          />
-        </div>
-      </n-card>
-      <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
-      <!--      <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />-->
-    </div>
-    <div class="my-2"></div>
-    <BasicTable
-      ref="actionRef"
-      v-model:checked-row-keys="checkedRows"
-      :actionColumn="actionColumn"
-      :columns="columns"
-      :request="loadDataTable"
-      :row-key="(row) => row.id"
-    />
-    <n-modal
-      v-model:show="editOutboundForecast"
-      :show-icon="false"
-      preset="card"
-      style="width: 90%; min-width: 600px; max-width: 600px"
-      title="编辑"
-    >
-      <edit-o-f :id="editId" @saved="saved" />
-    </n-modal>
-    <n-modal
-      v-model:show="showShareCarModel"
-      :show-icon="false"
-      preset="card"
-      style="width: 90%; min-width: 600px; max-width: 600px"
-      title="新建"
-    >
-      <new-carpool-management
-        :merged-out-ids="checkedRows"
-        :type-name="typeName"
-        @saved="saveShareCar"
+  <div>
+    <n-card v-if="hasAuthPower('orderCarView')" :bordered="false" class="proCard">
+      <filter-bar
+        v-model="filterItems"
+        v-model:dateRange="dateRange"
+        v-model:showAll="showAll"
+        :columns="columns"
+        @clear="updateFilter(null)"
+        @submit="updateFilter"
+        @filter-change="updateFilterWithItems"
       />
-    </n-modal>
-    <n-modal
-      v-model:show="offerDialog"
-      :show-icon="false"
-      preset="card"
-      style="width: 90%; min-width: 600px; max-width: 600px"
-      title="对外报价"
-    >
-      <offer-customer-dialog :info="currentInfo" @saved="saved" />
-    </n-modal>
-    <n-modal
-      v-model:show="carDialog"
-      :show-icon="false"
-      preset="card"
-      style="width: 90%; min-width: 600px; max-width: 600px"
-      title="订车信息"
-    >
-      <booking-car-dialog :info="currentInfo" @saved="saved" />
-    </n-modal>
-  </n-card>
-  <no-power-page v-else />
+      <div class="mt-2">
+        <n-button class="action-button" size="small" type="info" @click="downloadData">
+          <template #icon>
+            <n-icon>
+              <ArrowDownload20Regular />
+            </n-icon>
+          </template>
+          下载
+        </n-button>
+      </div>
+      <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
+        <n-card embedded size="small" style="max-width: 300px">
+          <div style="display: flex">
+            <n-select
+              v-model:value="optionOne"
+              :options="realOptions"
+              placeholder="过滤项1"
+              style="width: 130px"
+            />
+            <n-input
+              v-model:value="valueOne"
+              class="ml-2"
+              placeholder="过滤值1"
+              style="width: 130px"
+              type="text"
+            />
+          </div>
+        </n-card>
+        <n-card class="ml-2" embedded size="small" style="max-width: 300px">
+          <div style="display: flex">
+            <n-select
+              v-model:value="optionTwo"
+              :options="realOptions"
+              placeholder="过滤项2"
+              style="width: 130px"
+            />
+            <n-input
+              v-model:value="valueTwo"
+              class="ml-2"
+              placeholder="过滤值2"
+              style="width: 130px"
+              type="text"
+            />
+          </div>
+        </n-card>
+        <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
+        <!--      <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />-->
+      </div>
+      <div class="my-2"></div>
+      <BasicTable
+        ref="actionRef"
+        v-model:checked-row-keys="checkedRows"
+        :actionColumn="actionColumn"
+        :columns="columns"
+        :request="loadDataTable"
+        :row-key="(row) => row.id"
+      />
+      <n-modal
+        v-model:show="editOutboundForecast"
+        :show-icon="false"
+        preset="card"
+        style="width: 90%; min-width: 600px; max-width: 600px"
+        title="编辑"
+      >
+        <edit-o-f :id="editId" @saved="saved" />
+      </n-modal>
+      <n-modal
+        v-model:show="showShareCarModel"
+        :show-icon="false"
+        preset="card"
+        style="width: 90%; min-width: 600px; max-width: 600px"
+        title="新建"
+      >
+        <new-carpool-management
+          :merged-out-ids="checkedRows"
+          :type-name="typeName"
+          @saved="saveShareCar"
+        />
+      </n-modal>
+      <n-modal
+        v-model:show="offerDialog"
+        :show-icon="false"
+        preset="card"
+        style="width: 90%; min-width: 600px; max-width: 600px"
+        title="对外报价"
+      >
+        <offer-customer-dialog :info="currentInfo" @saved="saved" />
+      </n-modal>
+      <n-modal
+        v-model:show="carDialog"
+        :show-icon="false"
+        preset="card"
+        style="width: 90%; min-width: 600px; max-width: 600px"
+        title="订车信息"
+      >
+        <booking-car-dialog :info="currentInfo" @saved="saved" />
+      </n-modal>
+    </n-card>
+    <no-power-page v-else />
+  </div>
 </template>
 
 <script lang="ts" setup>
-  import { Box20Filled } from '@vicons/fluent';
-  import { Component, computed, h, reactive, ref } from 'vue';
+  import { ArrowDownload20Regular, Box20Filled } from '@vicons/fluent';
+  import { computed, h, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { columns, filters } from './columns';
+  import { NIcon, NTooltip } from 'naive-ui';
+  import { columns } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import { CarpoolManager } from '@/api/dataLayer/modules/logistic/carpool';
-  import { getFileActionButtonByOutForecast } from '@/views/bolita-views/composable/useableColumns';
   import { useUserStore } from '@/store/modules/user';
   import { dateCompare } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
@@ -169,6 +160,7 @@
   let currentInfo = $ref({});
   let offerDialog = $ref(false);
   let carDialog = $ref(false);
+  let filterItems = $ref<Array<{ option: string; value: string }>>([]);
   const loadDataTable = async () => {
     let currentFilter = [
       {
@@ -289,6 +281,11 @@
     reloadTable();
   }
 
+  function updateFilterWithItems(value) {
+    filterObj = value;
+    reloadTable();
+  }
+
   function reloadTable() {
     actionRef.value.reload();
     showModal.value = false;
@@ -308,6 +305,19 @@
     showModal.value = true;
   }
 
+  // Helper function to render icon with tooltip
+  const renderIconWithTooltip = (icon, tooltip) => {
+    return () =>
+      h(
+        NTooltip,
+        { trigger: 'hover', placement: 'top' },
+        {
+          trigger: () => h(NIcon, { size: 18, class: 'action-icon' }, { default: () => h(icon) }),
+          default: () => tooltip,
+        }
+      );
+  };
+
   const AccountPowerList = computed(() => {
     return useUserStore()?.info?.powerList;
   });
@@ -319,30 +329,50 @@
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
-    width: 120,
+    width: 200,
     render(record: any) {
-      const fileAction = (label, key, icon?: Component, power) => {
-        return getFileActionButtonByOutForecast(label, key, reloadTable, record, icon, power);
+      // Custom file action with icon
+      const iconFileAction = (label, key, icon, power) => {
+        return {
+          icon: renderIconWithTooltip(icon, label),
+          onClick: async () => {
+            try {
+              const upload = useUploadDialog();
+              const files = await upload.upload(record[key]);
+              if (files.checkPassed) {
+                record[key] = files.files;
+                await addOrUpdateWithRefOutboundForecast(record);
+                reloadTable();
+              }
+            } catch (error) {
+              console.error('上传失败:', error);
+            }
+          },
+          ifShow: () => {
+            return hasAuthPower(power);
+          },
+        };
       };
+
       return h(TableAction as any, {
-        style: 'button',
+        style: 'text',
         actions: [
           {
-            label: '对外报价',
-            onclick: () => {
+            icon: renderIconWithTooltip(Box20Filled, '对外报价'),
+            onClick() {
               currentInfo = record;
               offerDialog = true;
             },
           },
           {
-            label: '订车',
-            onclick: () => {
+            icon: renderIconWithTooltip(Box20Filled, '订车'),
+            onClick() {
               currentInfo = record;
               carDialog = true;
             },
           },
           {
-            label: 'POD',
+            icon: renderIconWithTooltip(Box20Filled, 'POD'),
             highlight: () => {
               return record?.['podfiles']?.length > 0 ? 'success' : 'error';
             },
@@ -359,11 +389,49 @@
               return hasAuthPower('orderCarPOD');
             },
           },
-          fileAction('提单', 'pickupFiles', '', 'orderCarOrder'),
+          iconFileAction('提单', 'pickupFiles', Box20Filled, 'orderCarOrder'),
         ],
       });
     },
   });
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+  .action-button {
+    margin-right: 8px;
+  }
+
+  .filter-container {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  .filter-card {
+    max-width: 300px;
+  }
+
+  .filter-row {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Styles for action icons */
+  :deep(.action-icon) {
+    margin: 0 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  :deep(.n-icon) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  :deep(.n-tooltip) {
+    max-width: 200px;
+    word-break: keep-all;
+  }
+</style>

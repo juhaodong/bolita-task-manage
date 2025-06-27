@@ -1,11 +1,21 @@
 <template>
   <div>
     <n-card v-if="hasAuthPower('forecastView')" :bordered="false" class="proCard">
-      <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
+      <filter-bar
+        v-model="filterItems"
+        v-model:dateRange="dateRange"
+        v-model:showAll="showAll"
+        :columns="columns"
+        @clear="updateFilter(null)"
+        @submit="updateFilter"
+        @filter-change="updateFilterWithItems"
+      />
+      <div class="mt-2">
         <n-button
           v-if="hasAuthPower('forecastAdd')"
+          class="action-button"
           size="small"
-          type="info"
+          type="primary"
           @click="addTable(NotifyType.Container)"
         >
           <template #icon>
@@ -15,70 +25,31 @@
           </template>
           新建货柜预报
         </n-button>
-        <n-button size="small" type="info" @click="selectedHeader">
+        <n-button class="action-button" size="small" type="info" @click="selectedHeader">
           <template #icon>
             <n-icon>
-              <Box20Filled />
+              <TableSettings20Regular />
             </n-icon>
           </template>
           选择表头显示
         </n-button>
-        <n-button size="small" type="info" @click="downloadData">
+        <n-button class="action-button" size="small" type="success" @click="downloadData">
           <template #icon>
             <n-icon>
-              <Box20Filled />
+              <ArrowDownload20Regular />
             </n-icon>
           </template>
           下载
         </n-button>
-        <n-button size="small" type="info" @click="downloadFbaCode">
+        <n-button class="action-button" size="small" type="warning" @click="downloadFbaCode">
           <template #icon>
             <n-icon>
-              <Box20Filled />
+              <DocumentPdf20Regular />
             </n-icon>
           </template>
           下载FBACode
         </n-button>
-      </filter-bar>
-      <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
-        <n-card embedded size="small" style="max-width: 300px">
-          <div style="display: flex">
-            <n-select
-              v-model:value="optionOne"
-              :options="realOptions"
-              placeholder="过滤项1"
-              style="width: 130px"
-            />
-            <n-input
-              v-model:value="valueOne"
-              class="ml-2"
-              placeholder="过滤值1"
-              style="width: 130px"
-              type="text"
-            />
-          </div>
-        </n-card>
-        <n-card class="ml-2" embedded size="small" style="max-width: 300px">
-          <div style="display: flex">
-            <n-select
-              v-model:value="optionTwo"
-              :options="realOptions"
-              placeholder="过滤项2"
-              style="width: 130px"
-            />
-            <n-input
-              v-model:value="valueTwo"
-              class="ml-2"
-              placeholder="过滤值2"
-              style="width: 130px"
-              type="text"
-            />
-          </div>
-        </n-card>
-        <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
-        <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />
       </div>
-      <div class="my-2"></div>
       <BasicTable
         ref="actionRef"
         :actionColumn="actionColumn"
@@ -90,8 +61,8 @@
         v-model:show="showModal"
         :show-icon="false"
         :style="{ maxWidth: notifyType === NotifyType.TrayOrBox ? '1600px' : '800px' }"
+        class="modal-large"
         preset="card"
-        style="width: 90%; min-width: 600px"
         title="新建货柜预报"
       >
         <container-forecast-index
@@ -103,8 +74,8 @@
       <n-modal
         v-model:show="showOperationTable"
         :show-icon="false"
+        class="modal-medium"
         preset="dialog"
-        style="width: 90%; min-width: 600px; max-width: 800px"
         title="卸柜表"
       >
         <notify-unload-form :notify-id="currentNotifyId!" @save="reloadTable" />
@@ -112,8 +83,8 @@
       <n-modal
         v-model:show="showFeeDialog"
         :show-icon="false"
+        class="modal-medium"
         preset="dialog"
-        style="width: 90%; min-width: 600px; max-width: 800px"
         title="费用表"
       >
         <notify-fee-dialog :notify-id="currentNotifyId!" @save="reloadTable" />
@@ -121,8 +92,8 @@
       <n-modal
         v-model:show="showWarehouseDialog"
         :show-icon="false"
+        class="modal-medium"
         preset="dialog"
-        style="width: 90%; min-width: 600px; max-width: 800px"
         title="仓库信息"
       >
         <warehouse-info-dialog :notify-id="currentNotifyId!" />
@@ -130,8 +101,8 @@
       <n-modal
         v-model:show="showUnloadingList"
         :show-icon="false"
+        class="modal-large"
         preset="dialog"
-        style="width: 90%; min-width: 600px; max-width: 1000px"
         title="卸柜单"
       >
         <unloading-list :notify-id="currentNotifyId!" @save="reloadTable" />
@@ -139,8 +110,8 @@
       <n-modal
         v-model:show="showCurrentHeaderDataTable"
         :show-icon="false"
+        class="modal-medium"
         preset="card"
-        style="width: 90%; min-width: 800px; max-width: 800px"
         title="添加表头"
       >
         <selected-header-table
@@ -152,8 +123,8 @@
       <n-modal
         v-model:show="showConfirmDialog"
         :show-icon="false"
+        class="modal-small"
         preset="card"
-        style="width: 90%; min-width: 400px; max-width: 400px"
         title="请确认"
       >
         <confirm-dialog :title="'您确定要取消吗？'" @saved="confirmCancel" />
@@ -161,8 +132,8 @@
       <n-modal
         v-model:show="showConfirmUnloading"
         :show-icon="false"
+        class="modal-small"
         preset="card"
-        style="width: 90%; min-width: 400px; max-width: 400px"
         title="请确认"
       >
         <confirm-dialog :title="'确认货柜到库？'" @saved="confirmUnloading" />
@@ -170,8 +141,8 @@
       <n-modal
         v-model:show="showNeedCheckDialog"
         :show-icon="false"
+        class="modal-small"
         preset="card"
-        style="width: 90%; min-width: 400px; max-width: 400px"
         title="请确认"
       >
         <confirm-dialog :title="'请先审核完所有任务！'" @saved="showNeedCheckDialog = false" />
@@ -182,13 +153,25 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
+  import { computed, h, onMounted, reactive, ref } from 'vue';
+  import { NIcon, NTooltip } from 'naive-ui';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { columns, filters } from './columns';
-  import { Box20Filled } from '@vicons/fluent';
+  import { columns } from './columns';
+  import {
+    ArrowDownload20Regular,
+    ArrowUpload20Regular,
+    Box20Filled,
+    Delete20Regular,
+    Document20Regular,
+    DocumentAdd20Regular,
+    DocumentEdit20Regular,
+    DocumentPdf20Regular,
+    Image20Regular,
+    Payment20Regular,
+    TableSettings20Regular,
+  } from '@vicons/fluent';
   import { CashStatus, InBoundStatus, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
   import { $ref } from 'vue/macros';
-  import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { generateOptionFromArray, handleRequest, toastSuccess } from '@/store/utils/utils';
   import NotifyUnloadForm from '@/views/newViews/ContainerForecast/form/NotifyUnloadForm.vue';
@@ -236,6 +219,7 @@
   let showAll = $ref(false);
   let showConfirmUnloading = $ref(false);
   let showNeedCheckDialog = $ref(false);
+  let filterItems = $ref<Array<{ option: string; value: string }>>([]);
 
   function addTable(type: NotifyType) {
     notifyType = type;
@@ -252,122 +236,175 @@
   });
 
   async function confirmUnloading() {
-    const userInfo = useUserStore().info;
-    currentRecord.inStatus = '等待卸柜';
-    currentRecord.arrivedInventoryTime = dayjs().valueOf();
-    const res = await addOrUpdateNotify(currentRecord);
-    const list = await getTaskListByNotifyId(currentRecord.id);
-    for (const item of list) {
-      item.inStatus = '等待卸柜';
-      await addOrUpdateTask(item);
-      await addOrUpdateTaskTimeLine({
-        useType: 'normal',
-        bolitaTaskId: item.id,
-        operator: userInfo?.realName,
-        detailTime: dayjs().valueOf(),
-        note: '仓库接收,等待卸柜',
+    try {
+      // Get current user info
+      const userInfo = useUserStore().info;
+
+      // Update notify status and arrival time
+      currentRecord.inStatus = '等待卸柜';
+      currentRecord.arrivedInventoryTime = dayjs().valueOf();
+
+      // Save notify changes
+      const res = await addOrUpdateNotify(currentRecord);
+
+      // Get and update all related tasks
+      const list = await getTaskListByNotifyId(currentRecord.id);
+
+      // Process each task in parallel
+      const taskUpdates = list.map(async (item) => {
+        // Update task status
+        item.inStatus = '等待卸柜';
+        await addOrUpdateTask(item);
+
+        // Add timeline entry
+        await addOrUpdateTaskTimeLine({
+          useType: 'normal',
+          bolitaTaskId: item.id,
+          operator: userInfo?.realName,
+          detailTime: dayjs().valueOf(),
+          note: '仓库接收,等待卸柜',
+        });
       });
+
+      // Wait for all task updates to complete
+      await Promise.all(taskUpdates);
+
+      // Handle response and reload table
+      await handleRequest(res, () => {
+        toastSuccess('操作成功');
+        reloadTable();
+      });
+
+      // Close confirmation dialog
+      showConfirmUnloading = false;
+    } catch (error) {
+      console.error('操作失败:', error);
     }
-    await handleRequest(res, () => {
-      toastSuccess('success');
-      reloadTable();
-    });
   }
   const loadDataTable = async () => {
-    let currentFilter = [];
-    if (filterObj) {
-      const res = Object.keys(filterObj);
-
-      for (const filterItem of res) {
-        currentFilter.push({
+    // Build filter criteria
+    const currentFilter = filterObj
+      ? Object.keys(filterObj).map((filterItem) => ({
           field: filterItem,
           op: filterObj[filterItem] ? 'like' : '!=',
-          value: '%' + filterObj[filterItem] + '%' ?? '',
-        });
-      }
-    }
+          value: `%${filterObj[filterItem] || ''}%`,
+        }))
+      : [];
+
+    // Get customer list and filter data
     const customerId = await getUserCustomerList();
-    let res =
-      (await getNotifyListByFilter(currentFilter))
-        .filter((it) => it.customer)
-        .filter((x) => customerId.includes(x.customer.id)) ?? [];
-    res.forEach((a) => {
-      if (a.totalCount) {
-        a.arrivedCount = a.arrivedCount + '(' + a.totalCount + ')';
+    let data = await getNotifyListByFilter(currentFilter);
+
+    // Apply filters
+    let res = data.filter((it) => it.customer && customerId.includes(it.customer.id)) || [];
+
+    // Format count display
+    res.forEach((item) => {
+      if (item.totalCount) {
+        item.arrivedCount = `${item.arrivedCount}(${item.totalCount})`;
       }
     });
+
+    // Filter canceled items if not showing all
     if (!showAll) {
-      res = res.filter((a) => a.inStatus !== '已取消');
+      res = res.filter((item) => item.inStatus !== '已取消');
     }
+
+    // Apply date range filter if present
     if (dateRange) {
-      let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-      let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-      let currentList = [];
-      res.forEach((it) => {
-        if (it.realDate) {
-          if (parseInt(it.realDate) > startDate && parseInt(it.realDate) < endDate) {
-            currentList.push(it);
-          }
-        } else {
-          if (
-            parseInt(it.planArriveDateTime) > startDate &&
-            parseInt(it.planArriveDateTime) < endDate
-          ) {
-            currentList.push(it);
-          }
-        }
+      const startDate = dayjs(dateRange[0]).startOf('day').valueOf() || valueOfToday[0];
+      const endDate = dayjs(dateRange[1]).endOf('day').valueOf() || valueOfToday[1];
+
+      res = res.filter((item) => {
+        const dateToCheck = item.realDate
+          ? parseInt(item.realDate)
+          : parseInt(item.planArriveDateTime);
+
+        return dateToCheck > startDate && dateToCheck < endDate;
       });
-      return currentList.sort(dateCompare('planArriveDateTime'));
-    } else {
-      return res.sort(dateCompare('planArriveDateTime'));
     }
+
+    // Sort and return results
+    return res.sort(dateCompare('planArriveDateTime'));
   };
 
   const actionRef = ref();
 
   function updateFilter(value) {
     if (value !== null) {
+      // Apply additional filters from the filter inputs
       if (optionOne && valueOne) {
-        const keyOne = columns.find((it) => it.title === optionOne).key;
+        const keyOne = columns.find((it) => it.title === optionOne)?.key;
+        if (keyOne) {
+          value[keyOne] = valueOne;
+        }
+      }
 
-        value[keyOne] = valueOne;
-      }
       if (optionTwo && valueTwo) {
-        const keyTwo = columns.find((it) => it.title === optionTwo).key;
-        value[keyTwo] = valueTwo;
+        const keyTwo = columns.find((it) => it.title === optionTwo)?.key;
+        if (keyTwo) {
+          value[keyTwo] = valueTwo;
+        }
       }
+
       filterObj = value;
     } else {
+      // Reset all filters
       filterObj = null;
       optionOne = '';
       valueOne = '';
       optionTwo = '';
       valueTwo = '';
       dateRange = null;
+      filterItems = [];
     }
+
+    // Reload the table with the new filters
     reloadTable();
   }
 
   async function confirmCancel() {
-    const userInfo = useUserStore().info;
-    cancelRecord.inStatus = '已取消';
-    const res = await addOrUpdateNotify(cancelRecord);
-    const list = await getTaskListByNotifyId(cancelRecord.id);
-    for (const item of list) {
-      item.inStatus = '已取消';
-      await addOrUpdateTask(item);
-      await addOrUpdateTaskTimeLine({
-        useType: 'normal',
-        bolitaTaskId: item.id,
-        operator: userInfo?.realName,
-        detailTime: dayjs().valueOf(),
-        note: '取消',
+    try {
+      // Get current user info
+      const userInfo = useUserStore().info;
+
+      // Update notify status
+      cancelRecord.inStatus = '已取消';
+      const res = await addOrUpdateNotify(cancelRecord);
+
+      // Get and update all related tasks
+      const list = await getTaskListByNotifyId(cancelRecord.id);
+
+      // Process each task
+      const taskUpdates = list.map(async (item) => {
+        // Update task status
+        item.inStatus = '已取消';
+        await addOrUpdateTask(item);
+
+        // Add timeline entry
+        await addOrUpdateTaskTimeLine({
+          useType: 'normal',
+          bolitaTaskId: item.id,
+          operator: userInfo?.realName,
+          detailTime: dayjs().valueOf(),
+          note: '取消',
+        });
       });
+
+      // Wait for all task updates to complete
+      await Promise.all(taskUpdates);
+
+      // Handle response and reload table
+      await handleRequest(res, () => {
+        toastSuccess('取消成功');
+        reloadTable();
+      });
+
+      // Close confirmation dialog
+      showConfirmDialog = false;
+    } catch (error) {
+      console.error('取消失败:', error);
     }
-    await handleRequest(res, () => {
-      toastSuccess('success');
-      reloadTable();
-    });
   }
 
   async function downloadFbaCode() {
@@ -377,59 +414,97 @@
   }
 
   async function downloadData() {
-    const selectedList = await loadDataTable();
-    let headerTitle = columns.map((it) => it.title);
-    let data = [];
-    data.unshift(headerTitle);
-    selectedList.forEach((it) => {
-      const row = [
-        dayjs(it.planArriveDateTime).format('YYYY-MM-DD') ?? '',
-        it.inHouseTime ?? '',
-        it.containerNo ?? '',
-        it.customerName ?? '',
-        it.warehouseId ?? '',
-        it.arrivedCount ?? '',
-        it.inStatus ?? '',
-        it.unloadPerson ?? '',
-        it.salesName ?? '',
-        it.note ?? '',
-        it.containerFinalStatus ?? '',
-      ];
-      data.push(row);
-    });
-    // 创建一个工作簿
-    const workbook = XLSX.utils.book_new();
-    // 将数据转换为工作表
-    const worksheet = XLSX.utils.aoa_to_sheet(data);
-    // 将工作表添加到工作簿
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+    try {
+      // Get filtered data
+      const selectedList = await loadDataTable();
 
-    // 生成Excel文件
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+      // Create header row from column titles
+      const headerTitle = columns.map((it) => it.title);
 
-    // 保存文件
-    FileSaver.saveAs(blob, '到货预报.xlsx');
+      // Create data array with header row
+      const data = [headerTitle];
+
+      // Add data rows
+      selectedList.forEach((item) => {
+        const row = [
+          dayjs(item.planArriveDateTime).format('YYYY-MM-DD') || '',
+          item.inHouseTime || '',
+          item.containerNo || '',
+          item.customerName || '',
+          item.warehouseId || '',
+          item.arrivedCount || '',
+          item.inStatus || '',
+          item.unloadPerson || '',
+          item.salesName || '',
+          item.note || '',
+          item.containerFinalStatus || '',
+        ];
+        data.push(row);
+      });
+
+      // Create workbook and worksheet
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+      // Generate Excel file
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+      // Save file
+      FileSaver.saveAs(blob, '到货预报.xlsx');
+
+      toastSuccess('下载成功');
+    } catch (error) {
+      console.error('下载失败:', error);
+    }
   }
 
   async function reloadHeader() {
-    currentColumns = [];
-    currentHeader = (await getTableHeaderGroupItemList('containerForecast'))
-      ? JSON.parse((await getTableHeaderGroupItemList('containerForecast'))?.headerItemJson)
-      : [];
-    currentHeader.forEach((item) => {
-      const res = columns.find((it) => it.key === item.itemKey);
-      currentColumns.push(res);
-    });
-    const selectionType = columns.find((x) => x.type === 'selection');
-    if (selectionType) {
-      currentColumns.unshift(selectionType);
+    try {
+      // Reset columns
+      currentColumns = [];
+
+      // Get header configuration
+      const headerConfig = await getTableHeaderGroupItemList('containerForecast');
+
+      // Parse header items or use empty array if not found
+      currentHeader = headerConfig ? JSON.parse(headerConfig.headerItemJson || '[]') : [];
+
+      // Map header items to columns
+      if (currentHeader.length > 0) {
+        currentHeader.forEach((item) => {
+          const matchedColumn = columns.find((col) => col.key === item.itemKey);
+          if (matchedColumn) {
+            currentColumns.push(matchedColumn);
+          }
+        });
+      }
+
+      // Add selection column if exists
+      const selectionType = columns.find((col) => col.type === 'selection');
+      if (selectionType) {
+        currentColumns.unshift(selectionType);
+      }
+
+      // Use default columns if no custom columns defined
+      if (currentColumns.length === 0) {
+        currentColumns = [...columns];
+      }
+
+      // Make all columns resizable
+      currentColumns.forEach((item) => {
+        item.resizable = true;
+      });
+
+      // Close header selection dialog
+      showCurrentHeaderDataTable = false;
+    } catch (error) {
+      console.error('加载表头失败:', error);
+      currentColumns = [...columns]; // Fallback to default columns
     }
-    currentColumns = currentColumns.length > 0 ? currentColumns : columns;
-    currentColumns.forEach((item) => {
-      item.resizable = true;
-    });
-    showCurrentHeaderDataTable = false;
   }
 
   async function startEdit(record) {
@@ -453,6 +528,11 @@
     showCurrentHeaderDataTable = true;
   }
 
+  function updateFilterWithItems(value) {
+    filterObj = value;
+    reloadTable();
+  }
+
   function reloadTable() {
     actionRef.value.reload();
     showOperationTable = false;
@@ -473,19 +553,57 @@
     showModal.value = false;
   }
 
+  // Helper function to render icon with tooltip
+  const renderIconWithTooltip = (icon, tooltip) => {
+    return () =>
+      h(
+        NTooltip,
+        { trigger: 'hover', placement: 'top' },
+        {
+          trigger: () => h(NIcon, { size: 18, class: 'action-icon' }, { default: () => h(icon) }),
+          default: () => tooltip,
+        }
+      );
+  };
+
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
-    width: 120,
+    width: 200,
     render(record: any) {
-      const fileAction = (label, key, icon?: Component, power) => {
-        return getFileActionButton(label, key, addOrUpdateNotify, reloadTable, record, icon, power);
+      // const fileAction = (label, key, icon?: Component, power) => {
+      //   return getFileActionButton(label, key, addOrUpdateNotify, reloadTable, record, icon, power);
+      // };
+
+      // Custom file action with icon
+      const iconFileAction = (label, key, icon, power) => {
+        return {
+          icon: renderIconWithTooltip(icon, label),
+          onClick: async () => {
+            try {
+              const upload = useUploadDialog();
+              const files = await upload.upload(record[key]);
+              if (files.checkPassed) {
+                record[key] = files.files;
+                await addOrUpdateNotify(record);
+                toastSuccess('上传成功');
+                reloadTable();
+              }
+            } catch (error) {
+              console.error('上传失败:', error);
+            }
+          },
+          ifShow: () => {
+            return hasAuthPower(power);
+          },
+        };
       };
+
       return h(TableAction as any, {
-        style: 'button',
+        style: 'text',
         actions: [
           {
-            label: '修改',
+            icon: renderIconWithTooltip(DocumentEdit20Regular, '修改'),
             onClick() {
               startEdit(record);
             },
@@ -493,9 +611,9 @@
               return hasAuthPower('forecastEdit');
             },
           },
-          fileAction('上传卸柜单', 'unloadingFile', '', 'forecastUpload'),
+          iconFileAction('上传卸柜单', 'unloadingFile', ArrowUpload20Regular, 'forecastUpload'),
           {
-            label: '生成卸柜单',
+            icon: renderIconWithTooltip(DocumentAdd20Regular, '生成卸柜单'),
             onClick() {
               currentNotifyId = record.id!;
               showUnloadingList = true;
@@ -505,7 +623,7 @@
             },
           },
           {
-            label: '卸柜',
+            icon: renderIconWithTooltip(Box20Filled, '卸柜'),
             onClick() {
               checkContainerStatus(record);
             },
@@ -526,7 +644,7 @@
             },
           },
           {
-            label: '卸柜照片',
+            icon: renderIconWithTooltip(Image20Regular, '卸柜照片'),
             highlight: () => {
               return record?.['unloadingPic']?.length > 0 ? 'success' : 'error';
             },
@@ -544,14 +662,14 @@
             },
           },
           {
-            label: '预报文件',
+            icon: renderIconWithTooltip(Document20Regular, '预报文件'),
             onClick() {
               const files = record.files.split(',');
               window.open(files[0]);
             },
           },
           {
-            label: '取消',
+            icon: renderIconWithTooltip(Delete20Regular, '取消'),
             async onClick() {
               cancelRecord = record;
               showConfirmDialog = true;
@@ -561,7 +679,7 @@
             },
           },
           {
-            label: '结算',
+            icon: renderIconWithTooltip(Payment20Regular, '结算'),
             highlight: () => {
               if (record?.editValue?.cashStatus == CashStatus.Done) {
                 return 'success';
@@ -581,4 +699,59 @@
   });
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+  .action-button {
+    margin-right: 8px;
+  }
+
+  .filter-container {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  .filter-card {
+    max-width: 300px;
+  }
+
+  .filter-row {
+    display: flex;
+    align-items: center;
+  }
+
+  .modal-small {
+    width: 90%;
+    min-width: 400px;
+    max-width: 400px;
+  }
+
+  .modal-medium {
+    width: 90%;
+    min-width: 600px;
+    max-width: 800px;
+  }
+
+  .modal-large {
+    width: 90%;
+    min-width: 600px;
+  }
+
+  /* Styles for action icons */
+  :deep(.action-icon) {
+    margin: 0 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  :deep(.n-icon) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  :deep(.n-tooltip) {
+    max-width: 200px;
+    word-break: keep-all;
+  }
+</style>

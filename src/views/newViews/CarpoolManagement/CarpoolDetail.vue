@@ -1,60 +1,42 @@
 <template>
   <n-card v-if="hasAuthPower('carDetailView')" :bordered="false" class="proCard">
     <div>
-      <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
-        <n-button type="primary" @click="selectedHeader">
+      <filter-bar
+        v-model="filterItems"
+        v-model:dateRange="dateRange"
+        v-model:showAll="showAll"
+        :columns="columns"
+        @clear="updateFilter(null)"
+        @submit="updateFilter"
+        @filter-change="updateFilterWithItems"
+      />
+      <div class="mt-2">
+        <n-button
+          class="action-button"
+          size="small"
+          type="primary"
+          @click="selectedHeader"
+        >
           <template #icon>
             <n-icon>
-              <Box20Filled />
+              <TableSettings20Regular />
             </n-icon>
           </template>
           选择表头显示
         </n-button>
-        <n-button type="info" @click="downloadData">
+        <n-button
+          class="action-button"
+          size="small"
+          type="success"
+          @click="downloadData"
+        >
           <template #icon>
             <n-icon>
-              <Box20Filled />
+              <ArrowDownload20Regular />
             </n-icon>
           </template>
           下载
         </n-button>
-      </filter-bar>
-      <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
-        <n-card embedded size="small" style="max-width: 300px">
-          <div style="display: flex">
-            <n-select
-              v-model:value="optionOne"
-              :options="realOptions"
-              placeholder="过滤项1"
-              style="width: 130px"
-            />
-            <n-input
-              v-model:value="valueOne"
-              class="ml-2"
-              placeholder="过滤值1"
-              style="width: 130px"
-              type="text"
-            />
-          </div>
-        </n-card>
-        <n-card class="ml-2" embedded size="small" style="max-width: 300px">
-          <div style="display: flex">
-            <n-select
-              v-model:value="optionTwo"
-              :options="realOptions"
-              placeholder="过滤项2"
-              style="width: 130px"
-            />
-            <n-input
-              v-model:value="valueTwo"
-              class="ml-2"
-              placeholder="过滤值2"
-              style="width: 130px"
-              type="text"
-            />
-          </div>
-        </n-card>
-        <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
       </div>
       <div class="my-2"></div>
       <BasicTable
@@ -101,12 +83,19 @@
     getDetailListById,
     NotifyDetailManager,
   } from '@/api/dataLayer/modules/notify/notify-detail';
-  import { Box20Filled } from '@vicons/fluent';
+  import { 
+    ArrowDownload20Regular,
+    Box20Filled, 
+    TableSettings20Regular,
+    DocumentEdit20Regular,
+    CheckmarkCircle20Regular
+  } from '@vicons/fluent';
+  import { NIcon, NTooltip } from 'naive-ui';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
   import { updateOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
-  import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
+  import { generateOptionFromArray, safeSumBy, toastSuccess } from '@/store/utils/utils';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import FileSaver from 'file-saver';
@@ -133,6 +122,7 @@
   let valueTwo = $ref('');
   let dateRange = $ref(null);
   let showAll = $ref(false);
+  let filterItems = $ref<Array<{ option: string; value: string }>>([]);
 
   const actionRef = ref();
   async function selectedHeader() {
@@ -299,13 +289,16 @@
   function updateFilter(value) {
     if (value !== null) {
       if (optionOne && valueOne) {
-        const keyOne = columns.find((it) => it.title === optionOne).key;
-
-        value[keyOne] = valueOne;
+        const keyOne = columns.find((it) => it.title === optionOne)?.key;
+        if (keyOne) {
+          value[keyOne] = valueOne;
+        }
       }
       if (optionTwo && valueTwo) {
-        const keyTwo = columns.find((it) => it.title === optionTwo).key;
-        value[keyTwo] = valueTwo;
+        const keyTwo = columns.find((it) => it.title === optionTwo)?.key;
+        if (keyTwo) {
+          value[keyTwo] = valueTwo;
+        }
       }
       filterObj = value;
       Object.keys(filterObj).forEach((key) => {
@@ -325,7 +318,13 @@
       optionTwo = '';
       valueTwo = '';
       dateRange = null;
+      filterItems = [];
     }
+    reloadTable();
+  }
+
+  function updateFilterWithItems(value) {
+    filterObj = value;
     reloadTable();
   }
 
@@ -381,19 +380,29 @@
     }
   });
 
+  // Helper function to render icon with tooltip
+  const renderIconWithTooltip = (icon, tooltip) => {
+    return () =>
+      h(
+        NTooltip,
+        { trigger: 'hover', placement: 'top' },
+        {
+          trigger: () => h(NIcon, { size: 18, class: 'action-icon' }, { default: () => h(icon) }),
+          default: () => tooltip,
+        }
+      );
+  };
+
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
     width: 120,
     render(record: any) {
-      const fileAction = (label, key, icon?: Component) => {
-        return getFileActionButton(label, key, NotifyDetailManager, reloadTable, record, icon);
-      };
       return h(TableAction as any, {
-        style: 'button',
+        style: 'text',
         actions: [
           {
-            label: '审核',
+            icon: renderIconWithTooltip(CheckmarkCircle20Regular, '审核'),
             async onClick() {
               let outboundInfo = await getOutboundForecastById(record.outboundId);
               outboundInfo.outboundDetailInfo = outboundInfo.outboundDetailInfo.filter(
@@ -419,6 +428,7 @@
               outboundInfo.totalWeight = safeSumBy(currentList, 'weight') ?? 0;
               outboundInfo.containerNum = safeSumBy(currentList, 'arrivedContainerNum') ?? 0;
               await updateOutboundForecast(outboundInfo.id, outboundInfo);
+              toastSuccess('审核成功');
               await reloadTable();
             },
             ifShow: () => {
@@ -434,4 +444,26 @@
   });
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+  .action-button {
+    margin-right: 8px;
+  }
+
+  /* Styles for action icons */
+  :deep(.action-icon) {
+    margin: 0 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  :deep(.n-icon) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  :deep(.n-tooltip) {
+    max-width: 200px;
+    word-break: keep-all;
+  }
+</style>

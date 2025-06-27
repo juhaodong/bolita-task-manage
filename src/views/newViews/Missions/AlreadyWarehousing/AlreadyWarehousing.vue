@@ -1,8 +1,17 @@
 <template>
   <n-card :bordered="false" class="proCard">
     <div>
-      <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
-        <n-button type="primary" @click="selectedHeader">
+      <filter-bar
+        v-model="filterItems"
+        v-model:dateRange="dateRange"
+        v-model:showAll="showAll"
+        :columns="columns"
+        @clear="updateFilter(null)"
+        @submit="updateFilter"
+        @filter-change="updateFilterWithItems"
+      />
+      <div class="mt-2">
+        <n-button class="action-button" size="small" type="info" @click="selectedHeader">
           <template #icon>
             <n-icon>
               <Box20Filled />
@@ -12,7 +21,9 @@
         </n-button>
         <n-button
           v-if="typeMission === '整柜任务看板' && hasAuthPower('missionOutboundAdd')"
-          type="primary"
+          class="action-button"
+          size="small"
+          type="success"
           @click="addTable"
         >
           <template #icon>
@@ -24,6 +35,8 @@
         </n-button>
         <n-button
           v-if="typeMission === '审核看板' && hasAuthPower('missionCheck')"
+          class="action-button"
+          size="small"
           type="primary"
           @click="checkDetailInfo"
         >
@@ -36,7 +49,9 @@
         </n-button>
         <n-button
           v-if="typeMission === '报价看板' && hasAuthPower('missionPriceOffer')"
-          type="primary"
+          class="action-button"
+          size="small"
+          type="warning"
           @click="showOfferPrice = true"
         >
           <template #icon>
@@ -46,7 +61,7 @@
           </template>
           报价
         </n-button>
-        <n-button type="primary" @click="downloadData">
+        <n-button class="action-button" size="small" type="default" @click="downloadData">
           <template #icon>
             <n-icon>
               <Box20Filled />
@@ -54,7 +69,7 @@
           </template>
           下载
         </n-button>
-        <n-button type="primary" @click="merge">
+        <n-button class="action-button" size="small" type="error" @click="merge">
           <template #icon>
             <n-icon>
               <Box20Filled />
@@ -62,46 +77,8 @@
           </template>
           合并
         </n-button>
-      </filter-bar>
-      <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
-        <n-card embedded size="small" style="max-width: 300px">
-          <div style="display: flex">
-            <n-select
-              v-model:value="optionOne"
-              :options="realOptions"
-              placeholder="过滤项1"
-              style="width: 130px"
-            />
-            <n-input
-              v-model:value="valueOne"
-              class="ml-2"
-              placeholder="过滤值1"
-              style="width: 130px"
-              type="text"
-            />
-          </div>
-        </n-card>
-        <n-card class="ml-2" embedded size="small" style="max-width: 300px">
-          <div style="display: flex">
-            <n-select
-              v-model:value="optionTwo"
-              :options="realOptions"
-              placeholder="过滤项2"
-              style="width: 130px"
-            />
-            <n-input
-              v-model:value="valueTwo"
-              class="ml-2"
-              placeholder="过滤值2"
-              style="width: 130px"
-              type="text"
-            />
-          </div>
-        </n-card>
-        <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
-        <!--        <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />-->
       </div>
-      <div class="my-2"></div>
+
       <n-tabs
         v-model:value="typeMission"
         animated
@@ -228,7 +205,7 @@
 <script lang="ts" setup>
   import { Component, computed, h, onMounted, reactive, ref, watch } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { columns, filters } from './columns';
+  import { columns } from './columns';
   import { $ref } from 'vue/macros';
   import {
     getFileActionButton,
@@ -239,7 +216,18 @@
   } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
-  import { Box20Filled } from '@vicons/fluent';
+  import { 
+    ArrowDownload20Regular,
+    ArrowUpload20Regular,
+    Box20Filled,
+    Delete20Regular,
+    Document20Regular,
+    DocumentEdit20Regular,
+    Image20Regular,
+    Payment20Regular,
+    TableSettings20Regular,
+    Clock20Regular
+  } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
@@ -270,7 +258,7 @@
   import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import SplitTaskDialog from '@/views/newViews/Missions/AlreadyWarehousing/SplitTaskDialog.vue';
-  import { NButton, NInput, useDialog } from 'naive-ui';
+  import { NButton, NIcon, NInput, NTooltip, useDialog } from 'naive-ui';
   import * as XLSX from 'xlsx';
 
   const showModal = ref(false);
@@ -557,6 +545,11 @@
 
   function merge() {
     mergeDialog = true;
+  }
+
+  function updateFilterWithItems(value) {
+    filterObj = value;
+    reloadTable();
   }
 
   async function downloadData() {
@@ -932,19 +925,52 @@
     }
   });
 
+  // Helper function to render icon with tooltip
+  const renderIconWithTooltip = (icon, tooltip) => {
+    return () =>
+      h(
+        NTooltip,
+        { trigger: 'hover', placement: 'top' },
+        {
+          trigger: () => h(NIcon, { size: 18, class: 'action-icon' }, { default: () => h(icon) }),
+          default: () => tooltip,
+        }
+      );
+  };
+
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
-    width: 120,
+    width: 200,
     render(record: any) {
-      const fileAction = (label, key, icon?: Component, power) => {
-        return getFileActionButton(label, key, addOrUpdateTask, reloadTable, record, icon, power);
+      // Custom file action with icon
+      const iconFileAction = (label, key, icon, power) => {
+        return {
+          icon: renderIconWithTooltip(icon, label),
+          onClick: async () => {
+            try {
+              const upload = useUploadDialog();
+              const files = await upload.upload(record[key]);
+              if (files.checkPassed) {
+                record[key] = files.files;
+                await addOrUpdateTask(record);
+                reloadTable();
+              }
+            } catch (error) {
+              console.error('上传失败:', error);
+            }
+          },
+          ifShow: () => {
+            return hasAuthPower(power);
+          },
+        };
       };
+
       return h(TableAction as any, {
-        style: 'button',
+        style: 'text',
         actions: [
           {
-            label: '修改',
+            icon: renderIconWithTooltip(DocumentEdit20Regular, '修改'),
             onClick() {
               startEdit(record.id);
             },
@@ -953,7 +979,7 @@
             },
           },
           {
-            label: '结算',
+            icon: renderIconWithTooltip(Payment20Regular, '结算'),
             onClick() {
               checkCashStatus(record.id);
             },
@@ -962,7 +988,7 @@
             },
           },
           {
-            label: '拆分',
+            icon: renderIconWithTooltip(Delete20Regular, '拆分'),
             onClick() {
               currentInfo = record;
               splitTaskDialog = true;
@@ -972,7 +998,7 @@
             },
           },
           // {
-          //   label: '请报价',
+          //   icon: renderIconWithTooltip(Document20Regular, '请报价'),
           //   onClick() {
           //     checkCashStatus(record.id);
           //   },
@@ -984,7 +1010,7 @@
           //   },
           // },
           {
-            label: '时间线',
+            icon: renderIconWithTooltip(Clock20Regular, '时间线'),
             onClick() {
               currentInfo = record;
               showTimeLine = true;
@@ -994,7 +1020,7 @@
             },
           },
           {
-            label: '换单文件',
+            icon: renderIconWithTooltip(Document20Regular, '换单文件'),
             highlight: () => {
               return record?.['changeOrder']?.length > 0 ? 'success' : 'error';
             },
@@ -1025,7 +1051,7 @@
             },
           },
           {
-            label: '托盘标签',
+            icon: renderIconWithTooltip(Document20Regular, '托盘标签'),
             highlight: () => {
               return record?.['trayFiles']?.length > 0 ? 'success' : 'error';
             },
@@ -1056,11 +1082,11 @@
               actionRef.value[0].reload();
             },
           },
-          fileAction('POD', 'POD', '', 'missionPOD'),
-          fileAction('操作文件', 'operationFiles', '', 'missionOperationFile'),
-          fileAction('问题图片', 'problemFiles', '', 'missionProblemPic'),
+          iconFileAction('POD', 'POD', Document20Regular, 'missionPOD'),
+          iconFileAction('操作文件', 'operationFiles', Document20Regular, 'missionOperationFile'),
+          iconFileAction('问题图片', 'problemFiles', Image20Regular, 'missionProblemPic'),
           {
-            label: '添加托盘',
+            icon: renderIconWithTooltip(Box20Filled, '添加托盘'),
             onClick() {
               recordData = record;
               startAddTray(record.id);
@@ -1076,7 +1102,7 @@
             },
           },
           {
-            label: '装车照片',
+            icon: renderIconWithTooltip(Image20Regular, '装车照片'),
             highlight: () => {
               return record?.['cmrfiles']?.length > 0 ? 'success' : 'error';
             },
@@ -1087,14 +1113,14 @@
                 record.cmrfiles = files.files;
                 await addOrUpdateTask(record);
               }
-              await actionRef.value.reload();
+              await actionRef.value[0].reload();
             },
             ifShow: () => {
               return hasAuthPower('outMissionUploadFile');
             },
           },
           {
-            label: '信息已变更',
+            icon: renderIconWithTooltip(Document20Regular, '信息已变更'),
             highlight: () => {
               return 'error';
             },
@@ -1114,4 +1140,26 @@
   });
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+  .action-button {
+    margin-right: 8px;
+  }
+
+  /* Styles for action icons */
+  :deep(.action-icon) {
+    margin: 0 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  :deep(.n-icon) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  :deep(.n-tooltip) {
+    max-width: 200px;
+    word-break: keep-all;
+  }
+</style>

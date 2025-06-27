@@ -2,14 +2,23 @@
   <n-card v-if="hasAuthPower('settlementManageView')" :bordered="false" class="proCard">
     <filter-bar
       v-if="finished"
+      v-model="filterItems"
+      v-model:dateRange="dateRange"
+      v-model:showAll="showAll"
+      :columns="columns"
       :default-value-model="filterObj"
       :form-fields="filters"
       @clear="updateFilter(null)"
       @submit="updateFilter"
-    >
+      @filter-change="updateFilterWithItems"
+    />
+    <div class="mt-2">
       <n-button
         v-if="hasAuthPower('settlementManageMerge')"
         :disabled="checkedRows.length == 0"
+        class="action-button"
+        size="small"
+        type="primary"
         @click="merge()"
       >
         <template #icon>
@@ -19,43 +28,6 @@
         </template>
         合并对账
       </n-button>
-    </filter-bar>
-    <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
-      <n-card embedded size="small" style="max-width: 300px">
-        <div style="display: flex">
-          <n-select
-            v-model:value="optionOne"
-            :options="realOptions"
-            placeholder="过滤项1"
-            style="width: 130px"
-          />
-          <n-input
-            v-model:value="valueOne"
-            class="ml-2"
-            placeholder="过滤值1"
-            style="width: 130px"
-            type="text"
-          />
-        </div>
-      </n-card>
-      <n-card class="ml-2" embedded size="small" style="max-width: 300px">
-        <div style="display: flex">
-          <n-select
-            v-model:value="optionTwo"
-            :options="realOptions"
-            placeholder="过滤项2"
-            style="width: 130px"
-          />
-          <n-input
-            v-model:value="valueTwo"
-            class="ml-2"
-            placeholder="过滤值2"
-            style="width: 130px"
-            type="text"
-          />
-        </div>
-      </n-card>
-      <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
     </div>
     <div class="my-2"></div>
     <n-tabs
@@ -127,7 +99,12 @@
     FinanceManager,
   } from '@/api/dataLayer/modules/cash/cash';
   import NewSettlement from '@/views/newViews/SettlementManage/NewSettlement.vue';
-  import { Box20Filled } from '@vicons/fluent';
+  import {
+    Box20Filled,
+    Document20Regular,
+    DocumentEdit20Regular,
+    Payment20Regular,
+  } from '@vicons/fluent';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
   import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
@@ -142,6 +119,7 @@
   import { getSettlementList } from '@/api/newDataLayer/TaskListSettlement/TaskListSettlement';
   import { getNotifyById } from '@/api/newDataLayer/Notify/Notify';
   import NotifyDetail from '@/views/newViews/SettlementManage/NotifyDetail.vue';
+  import { NIcon, NTooltip } from 'naive-ui';
 
   interface Prop {
     outId?: string;
@@ -164,6 +142,8 @@
   let valueTwo = $ref('');
   let dateRange = $ref(null);
   let showNotifyDetail = $ref(false);
+  let filterItems = $ref<Array<{ option: string; value: string }>>([]);
+  let showAll = $ref(false);
   onMounted(() => {
     monthTab = OneYearMonthTab();
     selectedMonth = monthTab[0];
@@ -206,13 +186,16 @@
   function updateFilter(value) {
     if (value !== null) {
       if (optionOne && valueOne) {
-        const keyOne = columns.find((it) => it.title === optionOne).key;
-
-        value[keyOne] = valueOne;
+        const keyOne = columns.find((it) => it.title === optionOne)?.key;
+        if (keyOne) {
+          value[keyOne] = valueOne;
+        }
       }
       if (optionTwo && valueTwo) {
-        const keyTwo = columns.find((it) => it.title === optionTwo).key;
-        value[keyTwo] = valueTwo;
+        const keyTwo = columns.find((it) => it.title === optionTwo)?.key;
+        if (keyTwo) {
+          value[keyTwo] = valueTwo;
+        }
       }
       filterObj = value;
     } else {
@@ -222,9 +205,29 @@
       optionTwo = '';
       valueTwo = '';
       dateRange = null;
+      filterItems = [];
+      showAll = false;
     }
     reloadTable();
   }
+
+  function updateFilterWithItems(value) {
+    filterObj = value;
+    reloadTable();
+  }
+
+  // Helper function to render icon with tooltip
+  const renderIconWithTooltip = (icon, tooltip) => {
+    return () =>
+      h(
+        NTooltip,
+        { trigger: 'hover', placement: 'top' },
+        {
+          trigger: () => h(NIcon, { size: 18, class: 'action-icon' }, { default: () => h(icon) }),
+          default: () => tooltip,
+        }
+      );
+  };
 
   const actionRef = ref();
 
@@ -297,13 +300,13 @@
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
-    width: 60,
+    width: 200,
     render(record: any) {
       return h(TableAction as any, {
-        style: 'button',
+        style: 'text',
         actions: [
           {
-            label: '查看',
+            icon: renderIconWithTooltip(Document20Regular, '查看'),
             async onClick() {
               currentNotify = await getNotifyById(record.notify);
               showNotifyDetail = true;
@@ -313,7 +316,7 @@
             },
           },
           {
-            label: '修改',
+            icon: renderIconWithTooltip(DocumentEdit20Regular, '修改'),
             onClick() {
               startEdit(record.id);
             },
@@ -326,7 +329,7 @@
             },
           },
           {
-            label: '已对账',
+            icon: renderIconWithTooltip(Payment20Regular, '已对账'),
             highlight: () => {
               return 'success';
             },
@@ -340,4 +343,55 @@
   });
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+  .action-button {
+    margin-right: 8px;
+  }
+
+  .filter-container {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  .filter-card {
+    max-width: 300px;
+  }
+
+  .filter-row {
+    display: flex;
+    align-items: center;
+  }
+
+  .ml-2 {
+    margin-left: 8px;
+  }
+
+  .mt-2 {
+    margin-top: 8px;
+  }
+
+  .my-2 {
+    margin-top: 8px;
+    margin-bottom: 8px;
+  }
+
+  /* Styles for action icons */
+  :deep(.action-icon) {
+    margin: 0 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  :deep(.n-icon) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  :deep(.n-tooltip) {
+    max-width: 200px;
+    word-break: keep-all;
+  }
+</style>

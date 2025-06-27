@@ -1,16 +1,35 @@
 <template>
   <n-card v-if="hasAuthPower('inStorageView')" :bordered="false" class="proCard">
     <div>
-      <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
-        <n-button type="primary" @click="selectedHeader">
+      <filter-bar
+        v-model="filterItems"
+        v-model:dateRange="dateRange"
+        v-model:showAll="showAll"
+        :columns="columns"
+        @clear="updateFilter(null)"
+        @submit="updateFilter"
+        @filter-change="updateFilterWithItems"
+      />
+      <div class="mt-2">
+        <n-button
+          class="action-button"
+          size="small"
+          type="primary"
+          @click="selectedHeader"
+        >
           <template #icon>
             <n-icon>
-              <Box20Filled />
+              <TableSettings20Regular />
             </n-icon>
           </template>
           选择表头显示
         </n-button>
-        <n-button type="primary" @click="finishedCancel">
+        <n-button
+          class="action-button"
+          size="small"
+          type="primary"
+          @click="finishedCancel"
+        >
           <template #icon>
             <n-icon>
               <Box20Filled />
@@ -18,52 +37,19 @@
           </template>
           操作完成
         </n-button>
-        <n-button type="info" @click="downloadData">
+        <n-button
+          class="action-button"
+          size="small"
+          type="success"
+          @click="downloadData"
+        >
           <template #icon>
             <n-icon>
-              <Box20Filled />
+              <ArrowDownload20Regular />
             </n-icon>
           </template>
           下载
         </n-button>
-      </filter-bar>
-      <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
-        <n-card embedded size="small" style="max-width: 300px">
-          <div style="display: flex">
-            <n-select
-              v-model:value="optionOne"
-              :options="realOptions"
-              placeholder="过滤项1"
-              style="width: 130px"
-            />
-            <n-input
-              v-model:value="valueOne"
-              class="ml-2"
-              placeholder="过滤值1"
-              style="width: 130px"
-              type="text"
-            />
-          </div>
-        </n-card>
-        <n-card class="ml-2" embedded size="small" style="max-width: 300px">
-          <div style="display: flex">
-            <n-select
-              v-model:value="optionTwo"
-              :options="realOptions"
-              placeholder="过滤项2"
-              style="width: 130px"
-            />
-            <n-input
-              v-model:value="valueTwo"
-              class="ml-2"
-              placeholder="过滤值2"
-              style="width: 130px"
-              type="text"
-            />
-          </div>
-        </n-card>
-        <!--        <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />-->
-        <!--        <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />-->
       </div>
       <div class="my-2"></div>
       <BasicTable
@@ -144,6 +130,7 @@
 
 <script lang="ts" setup>
   import { Component, computed, h, onMounted, reactive, ref } from 'vue';
+  import { NIcon, NTooltip } from 'naive-ui';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns, filters } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
   import { $ref } from 'vue/macros';
@@ -151,7 +138,14 @@
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
   import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
-  import { Box20Filled } from '@vicons/fluent';
+  import { 
+    ArrowDownload20Regular,
+    Box20Filled,
+    TableSettings20Regular,
+    DocumentEdit20Regular,
+    Image20Regular,
+    Document20Regular
+  } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
@@ -203,6 +197,8 @@
   let dateRange = $ref(null);
   let showConfirmDialog = $ref(false);
   let cancelIds = $ref([]);
+  let showAll = $ref(false);
+  let filterItems = $ref<Array<{ option: string; value: string }>>([]);
   const actionRef = ref();
   const props = defineProps<Prop>();
   interface Prop {
@@ -351,24 +347,39 @@
 
   function updateFilter(value) {
     if (value !== null) {
+      // Apply additional filters from the filter inputs
       if (optionOne && valueOne) {
-        const keyOne = columns.find((it) => it.title === optionOne).key;
+        const keyOne = columns.find((it) => it.title === optionOne)?.key;
+        if (keyOne) {
+          value[keyOne] = valueOne;
+        }
+      }
 
-        value[keyOne] = valueOne;
-      }
       if (optionTwo && valueTwo) {
-        const keyTwo = columns.find((it) => it.title === optionTwo).key;
-        value[keyTwo] = valueTwo;
+        const keyTwo = columns.find((it) => it.title === optionTwo)?.key;
+        if (keyTwo) {
+          value[keyTwo] = valueTwo;
+        }
       }
+
       filterObj = value;
     } else {
+      // Reset all filters
       filterObj = null;
       optionOne = '';
       valueOne = '';
       optionTwo = '';
       valueTwo = '';
       dateRange = null;
+      filterItems = [];
     }
+
+    // Reload the table with the new filters
+    reloadTable();
+  }
+
+  function updateFilterWithItems(value) {
+    filterObj = value;
     reloadTable();
   }
 
@@ -444,6 +455,19 @@
     await reloadTable();
   }
 
+  // Helper function to render icon with tooltip
+  const renderIconWithTooltip = (icon, tooltip) => {
+    return () =>
+      h(
+        NTooltip,
+        { trigger: 'hover', placement: 'top' },
+        {
+          trigger: () => h(NIcon, { size: 18, class: 'action-icon' }, { default: () => h(icon) }),
+          default: () => tooltip,
+        }
+      );
+  };
+
   onMounted(async () => {
     await reloadHeader();
     const res = getQueryString('containerId');
@@ -457,16 +481,36 @@
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
-    width: 120,
+    width: 200,
     render(record: any) {
-      const fileAction = (label, key, icon?: Component, power) => {
-        return getFileActionButton(label, key, addOrUpdateTask, reloadTable, record, icon, power);
+      // Custom file action with icon
+      const iconFileAction = (label, key, icon, power) => {
+        return {
+          icon: renderIconWithTooltip(icon, label),
+          onClick: async () => {
+            try {
+              const upload = useUploadDialog();
+              const files = await upload.upload(record[key]);
+              if (files.checkPassed) {
+                record[key] = files.files;
+                await addOrUpdateTask(record);
+                reloadTable();
+              }
+            } catch (error) {
+              console.error('上传失败:', error);
+            }
+          },
+          ifShow: () => {
+            return hasAuthPower(power);
+          },
+        };
       };
+
       return h(TableAction as any, {
-        style: 'button',
+        style: 'text',
         actions: [
           {
-            label: '操作已完成',
+            icon: renderIconWithTooltip(Box20Filled, '操作已完成'),
             highlight: () => {
               return 'info';
             },
@@ -480,7 +524,7 @@
             },
           },
           {
-            label: '换单文件',
+            icon: renderIconWithTooltip(Document20Regular, '换单文件'),
             highlight: () => {
               return record?.['changeOrder']?.length > 0 ? 'success' : 'error';
             },
@@ -507,16 +551,72 @@
                 record.inventoryId = record.inventory.id;
                 await addOrUpdateTask(record);
               }
-              actionRef.value[0].reload();
+              actionRef.value.reload();
             },
           },
-          fileAction('POD', 'POD', '', 'missionPOD'),
-          fileAction('操作文件', 'operationFiles', '', 'missionOperationFile'),
-          fileAction('问题图片', 'problemFiles', '', 'missionProblemPic'),
+          iconFileAction('POD', 'POD', Document20Regular, 'missionPOD'),
+          iconFileAction('操作文件', 'operationFiles', DocumentEdit20Regular, 'missionOperationFile'),
+          iconFileAction('问题图片', 'problemFiles', Image20Regular, 'missionProblemPic'),
         ],
       });
     },
   });
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+  .action-button {
+    margin-right: 8px;
+  }
+
+  .filter-container {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  .filter-card {
+    max-width: 300px;
+  }
+
+  .filter-row {
+    display: flex;
+    align-items: center;
+  }
+
+  .modal-small {
+    width: 90%;
+    min-width: 400px;
+    max-width: 400px;
+  }
+
+  .modal-medium {
+    width: 90%;
+    min-width: 600px;
+    max-width: 800px;
+  }
+
+  .modal-large {
+    width: 90%;
+    min-width: 600px;
+    max-width: 1200px;
+  }
+
+  /* Styles for action icons */
+  :deep(.action-icon) {
+    margin: 0 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  :deep(.n-icon) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  :deep(.n-tooltip) {
+    max-width: 200px;
+    word-break: keep-all;
+  }
+</style>
