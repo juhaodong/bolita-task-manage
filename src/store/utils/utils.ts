@@ -241,9 +241,25 @@ export async function handleRequest(res, action) {
 export function getFileNameAndTypeForFirebaseLink(firebaseLink: string) {
   const res = firebaseLink.split('?')[0];
   const name = res.split('%2F').pop();
+
+  // Determine file type based on extension
+  let type = '';
+  if (name) {
+    const extension = name.split('.').pop()?.toLowerCase();
+    if (extension) {
+      // Check if it's an image file
+      if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(extension)) {
+        type = 'image';
+      } else if (['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'].includes(extension)) {
+        type = extension;
+      } else {
+        type = 'other';
+      }
+    }
+  }
   return {
     name: name,
-    type: '',
+    type: type,
   };
 }
 

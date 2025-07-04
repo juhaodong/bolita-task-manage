@@ -203,12 +203,11 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, computed, h, onMounted, reactive, ref, watch } from 'vue';
+  import { computed, h, onMounted, reactive, ref, watch } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns } from './columns';
   import { $ref } from 'vue/macros';
   import {
-    getFileActionButton,
     statusColumnEasy,
     storageTimeWarnColumn,
     timeColumn,
@@ -216,17 +215,14 @@
   } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
-  import { 
-    ArrowDownload20Regular,
-    ArrowUpload20Regular,
+  import {
     Box20Filled,
+    Clock20Regular,
     Delete20Regular,
     Document20Regular,
     DocumentEdit20Regular,
     Image20Regular,
     Payment20Regular,
-    TableSettings20Regular,
-    Clock20Regular
   } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import dayjs from 'dayjs';

@@ -185,102 +185,30 @@ export function getNeededColumnByOutWarehouseCar() {
 function getOutCarFieldBuilder() {
   const builder = formFieldBuilder();
   builder.addAll([
-    {
-      label: '日期',
-      field: 'date',
-    },
-    {
-      label: '渠道',
-      field: 'channel',
-    },
-    {
-      label: '约车类型',
-      field: 'carType',
-    },
-    {
-      label: '客户编号',
-      field: 'customerId',
-    },
-    {
-      label: '订单号',
-      field: 'orderId',
-    },
-    {
-      label: '托数(XP/FP)',
-      field: 'trayNumber',
-    },
-    {
-      label: '箱数Kartons',
-      field: 'boxNumber',
-    },
-    {
-      label: '可堆叠',
-      field: 'stackable',
-    },
-    {
-      label: '是否需要卸货设备',
-      field: 'needEquipment',
-    },
-    {
-      label: '提货地址',
-      field: 'pickingAddress',
-    },
-    {
-      label: '送货地址',
-      field: 'sendingAddress',
-    },
-    {
-      label: '取货日期+时点',
-      field: 'pickingDate',
-    },
-    {
-      label: '送货日期+时点',
-      field: 'sendingDate',
-    },
-    {
-      label: '物流平台订单号',
-      field: 'platformOrderId',
-    },
-    {
-      label: '运营对外报价',
-      field: 'offerPrice',
-    },
-    {
-      label: 'POD',
-      field: 'POD',
-    },
-    {
-      label: 'cbm/尺寸/重量',
-      field: 'size',
-    },
-    {
-      label: '需求',
-      field: 'demand',
-    },
-    {
-      label: '询价需求',
-      field: 'priceDemand',
-    },
-    {
-      label: '是否有送仓文件',
-      field: 'warehouseDeliveryFile',
-    },
-    {
-      label: '物流公司',
-      field: 'logisticsCompany',
-    },
-    {
-      label: '成本底价',
-      field: 'costPrice',
-    },
-    {
-      label: '物流建议报价',
-      field: 'logisticsPrice',
-    },
-    {
-      label: '备注',
-      field: 'note',
-    },
+    { label: '日期', field: 'orderDate' },
+    { label: '渠道', field: 'channelType' },
+    { label: '约车类型', field: 'vehicleType' },
+    { label: '客户编号', field: 'customer' },
+    { label: '订单号', field: 'orderNumber' },
+    { label: '托数(XP/FP)', field: 'trayCount' },
+    { label: '箱数Kartons', field: 'boxCount' },
+    { label: '可堆叠', field: 'stackable' },
+    { label: '是否需要卸货设备', field: 'unloadingEquipmentRequired' },
+    { label: '提货地址', field: 'pickupAddress' },
+    { label: '送货地址', field: 'deliveryAddress' },
+    { label: '送货日期+时点', field: 'pickupDate' },
+    { label: '取货日期+时点', field: 'deliveryDate' },
+    { label: '物流平台订单号', field: 'logisticsOrderNumber' },
+    { label: '运营对外报价', field: 'publicQuotation' },
+    { label: 'cbm/尺寸/重量', field: 'dimensions' },
+    { label: '需求', field: 'requirements' },
+    { label: '询价需求', field: 'inquiryRequirements' },
+    { label: '是否有送仓文件', field: 'hasWarehouseDocuments' },
+    { label: '物流公司', field: 'logisticsCompany' },
+    { label: '成本底价', field: 'baseCost' },
+    { label: '物流建议报价', field: 'suggestedQuotation' },
+    { label: '备注', field: 'note' },
+    { label: '文件', field: 'files' },
   ]);
   return builder;
 }

@@ -10,7 +10,12 @@
   import { getNeededColumnByOutWarehouseCar } from '@/api/dataLayer/modules/notify/NotifyRepository';
   import readXlsxFile from 'read-excel-file';
   import dayjs from 'dayjs';
-  import { OutWarehouseManager } from '@/api/dataLayer/modules/OutWarehouseCar/OutWarehouseModel';
+  import utc from 'dayjs/plugin/utc';
+  import { getCustomerList } from '@/api/newDataLayer/Customer/Customer';
+  import { addExternalVehicle } from '@/api/newDataLayer/CarManage/ExternalVehicle';
+  import { saveFiles } from '@/api/newDataLayer/Notify/Notify';
+
+  dayjs.extend(utc);
 
   const schemas: FormFields = [
     getFilesUploadFormField('files', false, () => {
@@ -22,7 +27,7 @@
 
   const emit = defineEmits(['saved', 'closed']);
 
-  async function readFile(file) {
+  async function readFile(file, filesUrl) {
     if (!file) {
       return [];
     }
@@ -31,25 +36,47 @@
         return [it.title, { prop: it.key }];
       })
     );
-    console.log(schema, 'schema');
+    const customerList = await getCustomerList();
+    let errorMessage = [];
     try {
       let { rows, errors } = await readXlsxFile(file, { schema });
       rows = rows.slice(1);
       rows.forEach((it) => {
-        it.status = '待下单';
-        it.date = dayjs(it.date).format('YYYY-MM-DD HH:mm:ss');
-        it.pickingDate = dayjs(it.pickingDate).format('YYYY-MM-DD HH:mm:ss');
-        it.sendingDate = dayjs(it.sendingDate).format('YYYY-MM-DD HH:mm:ss');
+        const currentCustomerId = customerList.find((x) => x.customerName === it.customer);
+        if (currentCustomerId) {
+          it.customerId = currentCustomerId.id;
+        } else {
+          errorMessage.push({ message: it.customer + ' 该客户不再系统内！' });
+        }
+        it.orderDate = it.orderDate
+          ? dayjs(it.orderDate).utcOffset(1).valueOf()
+          : dayjs().valueOf();
+        it.pickupDate = it.pickupDate
+          ? dayjs(it.pickupDate).utc().format('YYYY-MM-DD HH:mm:ss')
+          : '';
+        it.deliveryDate = it.deliveryDate
+          ? dayjs(it.deliveryDate).utc().format('YYYY-MM-DD HH:mm:ss')
+          : '';
+        it.files = filesUrl;
       });
-      await OutWarehouseManager.massiveAdd(rows);
+      if (errorMessage.length > 0) {
+        return false;
+      } else {
+        const quest = rows.map(async (it) => {
+          await addExternalVehicle(it);
+        });
+        await Promise.all(quest);
+      }
+      // await OutWarehouseManager.massiveAdd(rows);
     } catch (e: any) {
       console.log(e?.message);
+      errorMessage.push({ message: e?.message });
     }
-    return [];
   }
 
   async function handleSubmit(values: any) {
-    await readFile(values.files?.[0].file);
+    const filesUrl = await saveFiles(values.files);
+    await readFile(values.files?.[0].file, filesUrl);
     await safeScope(async () => {
       emit('saved');
     });

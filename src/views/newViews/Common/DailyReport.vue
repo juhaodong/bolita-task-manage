@@ -1,31 +1,51 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <div style="display: flex; align-items: center; justify-items: center">
-      <n-date-picker
-        v-model:value="dateRange"
-        :default-value="[dayjs().valueOf(), dayjs().valueOf()]"
-        class="ml-2"
-        clearable
-        type="daterange"
-      />
-      <div class="table-toolbar-right-icon" @click="reload">
-        <n-icon size="18">
-          <ReloadOutlined />
+    <div class="page-header">
+      <div class="page-title">
+        <n-icon size="20" class="mr-2">
+          <CalendarOutlined />
         </n-icon>
+        <span>日报表</span>
+      </div>
+      <div class="filter-section">
+        <n-date-picker
+          v-model:value="dateRange"
+          :default-value="[dayjs().valueOf(), dayjs().valueOf()]"
+          clearable
+          type="daterange"
+          size="medium"
+        />
+        <n-button class="ml-2" secondary type="primary" @click="reload">
+          <template #icon>
+            <n-icon>
+              <ReloadOutlined />
+            </n-icon>
+          </template>
+          刷新
+        </n-button>
       </div>
     </div>
-    <n-grid :cols="2" x-gap="12">
-      <n-gi>
-        <BasicTable ref="actionNotifyRef" :columns="notifyColumns" :request="loadNotifyDataTable" />
-      </n-gi>
-      <n-gi>
+
+    <div class="my-4"></div>
+
+    <n-tabs v-model:value="activeTab" type="card" tab-style="min-width: 80px;">
+      <n-tab-pane name="notify" tab="通知">
+        <BasicTable 
+          ref="actionNotifyRef" 
+          :columns="notifyColumns" 
+          :request="loadNotifyDataTable"
+          :row-key="(row) => row.id || row.containerNo" 
+        />
+      </n-tab-pane>
+      <n-tab-pane name="outbound" tab="出库">
         <BasicTable
           ref="actionOutboundRef"
           :columns="outboundColumns"
           :request="loadOutboundDataTable"
+          :row-key="(row) => row.id || row.REF"
         />
-      </n-gi>
-    </n-grid>
+      </n-tab-pane>
+    </n-tabs>
   </n-card>
 </template>
 
@@ -35,11 +55,12 @@
   import { valueOfToday } from '@/api/dataLayer/common/Date';
   import dayjs from 'dayjs';
   import { ref } from 'vue';
-  import { ReloadOutlined } from '@vicons/antd';
+  import { CalendarOutlined, ReloadOutlined } from '@vicons/antd';
   import { getOutboundForecastList } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import { getNotifyList } from '@/api/newDataLayer/Notify/Notify';
 
   let dateRange = $ref(valueOfToday);
+  let activeTab = $ref('notify'); // Default to notify tab
   const actionNotifyRef = ref();
   const actionOutboundRef = ref();
   const notifyColumns = [
@@ -150,4 +171,44 @@
   }
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.filter-section {
+  display: flex;
+  align-items: center;
+}
+
+.mr-2 {
+  margin-right: 8px;
+}
+
+.ml-2 {
+  margin-left: 8px;
+}
+
+.my-4 {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+:deep(.n-tabs-tab) {
+  padding: 8px 16px;
+}
+
+:deep(.n-data-table-th) {
+  font-weight: 500;
+}
+</style>

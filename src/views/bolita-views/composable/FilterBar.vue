@@ -138,23 +138,24 @@
   }
 
   const realSchemas: any[] = reactive([]);
-  watchEffect(async () => {
-    realSchemas.length = 0;
-    const res = [];
-    for (const it of props.formFields) {
-      res.push(await it);
-    }
-    realSchemas.push(...res);
-  });
+  // watchEffect(async () => {
+  //   console.log(props.formFields, 'props');
+  //   realSchemas.length = 0;
+  //   const res = [];
+  //   for (const it of props.formFields) {
+  //     res.push(await it);
+  //   }
+  //   realSchemas.push(...res);
+  // });
   const schemas: FormField[] = $computed(() => {
     return realSchemas.map(convertFormFieldToSchema).map((it) => {
       if (props?.defaultValueModel?.[it.field]) {
         it.defaultValue = props?.defaultValueModel?.[it.field];
       }
-      it.componentProps.placeholder = it.componentProps.placeholder
-        .replace('请输入', '')
-        .replace('请选择', '');
-      it.componentProps.size = 'small';
+      // it.componentProps.placeholder = it.componentProps.placeholder
+      //   .replace('请输入', '')
+      //   .replace('请选择', '');
+      // it.componentProps.size = 'small';
       return it;
     });
   });

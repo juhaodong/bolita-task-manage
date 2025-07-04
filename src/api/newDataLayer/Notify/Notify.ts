@@ -38,6 +38,15 @@ export async function getNotifyListByFilter(filter) {
   ).data.content;
 }
 
+export async function getNotifyListByFilterWithPagination(filter, pagination) {
+  return (
+    await hillo.jsonPost(typeName + '/list', {
+      ...pagination,
+      criteria: filter,
+    })
+  ).data;
+}
+
 export async function deleteNotify(id) {
   return await hillo.jsonPost(typeName + '/deleteById/' + id, {});
 }

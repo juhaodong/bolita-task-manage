@@ -226,6 +226,22 @@ export function timeColumn(
   };
 }
 
+export function timeAndDateColumn(
+  keyName = 'createTimestamp',
+  title = '创建时间',
+  timeFormat = standardDateFormat
+) {
+  return {
+    title: title,
+    key: keyName,
+    width: 110,
+    render(record) {
+      const display = record[keyName] ? dayjs(record[keyName]).format(timeFormat) : '-';
+      return h('div', display);
+    },
+  };
+}
+
 export function timeTableColumn(keyName, title, timeFormat = dateFormat) {
   return {
     title: title,

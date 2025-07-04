@@ -2,6 +2,7 @@ import { DataTableColumns } from 'naive-ui';
 import {
   selectedIdColumn,
   statusColumnEasy,
+  timeAndDateColumn,
   timeColumn,
   timeTableColumn,
 } from '@/views/bolita-views/composable/useableColumns';
@@ -12,30 +13,30 @@ import { generateOptionFromArray } from '@/store/utils/utils';
 import { reservationTimeList } from '@/views/newViews/ContainerForecast/columns';
 
 export const outCarColumns: DataTableColumns<CarpoolManagementModel> = [
-  timeColumn('realDate', '日期'),
+  timeColumn('orderDate', '日期'),
   {
     title: '渠道',
-    key: 'channel',
+    key: 'channelType',
   },
   {
     title: '约车类型',
-    key: 'carType',
+    key: 'vehicleType',
   },
   {
     title: '客户编号',
-    key: 'customerId',
+    key: 'customer.customerName',
   },
   {
     title: '订单号',
-    key: 'orderId',
+    key: 'orderNumber',
   },
   {
     title: '托数(XP/FP)',
-    key: 'trayNumber',
+    key: 'trayCount',
   },
   {
     title: '箱数Kartons',
-    key: 'boxNumber',
+    key: 'boxCount',
   },
   {
     title: '可堆叠',
@@ -43,51 +44,41 @@ export const outCarColumns: DataTableColumns<CarpoolManagementModel> = [
   },
   {
     title: '是否需要卸货设备',
-    key: 'needEquipment',
+    key: 'unloadingEquipmentRequired',
   },
   {
     title: '提货地址',
-    key: 'pickingAddress',
+    key: 'pickupAddress',
   },
   {
     title: '送货地址',
-    key: 'sendingAddress',
+    key: 'deliveryAddress',
   },
-  {
-    title: '取货日期+时点',
-    key: 'pickingDate',
-  },
-  {
-    title: '送货日期+时点',
-    key: 'sendingDate',
-  },
+  timeAndDateColumn('pickupDate', '取货日期+时点'),
+  timeAndDateColumn('deliveryDate', '送货日期+时点'),
   {
     title: '物流平台订单号',
-    key: 'platformOrderId',
+    key: 'logisticsOrderNumber',
   },
   {
     title: '运营对外报价',
-    key: 'offerPrice',
-  },
-  {
-    title: 'POD',
-    key: 'POD',
+    key: 'publicQuotation',
   },
   {
     title: 'cbm/尺寸/重量',
-    key: 'size',
+    key: 'dimensions',
   },
   {
     title: '需求',
-    key: 'demand',
+    key: 'requirements',
   },
   {
     title: '询价需求',
-    key: 'priceDemand',
+    key: 'inquiryRequirements',
   },
   {
     title: '是否有送仓文件',
-    key: 'warehouseDeliveryFile',
+    key: 'hasWarehouseDocuments',
   },
   {
     title: '物流公司',
@@ -95,16 +86,12 @@ export const outCarColumns: DataTableColumns<CarpoolManagementModel> = [
   },
   {
     title: '成本底价',
-    key: 'costPrice',
+    key: 'baseCost',
   },
   {
     title: '物流建议报价',
-    key: 'logisticsPrice',
+    key: 'suggestedQuotation',
   },
-  statusColumnEasy({
-    title: '状态',
-    key: 'status',
-  }),
   {
     title: '备注',
     key: 'note',

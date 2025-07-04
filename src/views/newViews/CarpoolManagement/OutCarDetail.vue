@@ -9,7 +9,13 @@
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { OutWarehouseManager } from '@/api/dataLayer/modules/OutWarehouseCar/OutWarehouseModel';
+  import {
+    channelTypeList,
+    updateExternalVehicle,
+    vehicleTypeList,
+  } from '@/api/newDataLayer/CarManage/ExternalVehicle';
+  import { NDatePicker } from 'naive-ui';
+  import dayjs from 'dayjs';
 
   interface Props {
     model?: any;
@@ -19,28 +25,51 @@
   const prop = defineProps<Props>();
   const schemas: FormFields = [
     {
+      label: '客户编号',
+      field: 'customerName',
+      disableCondition() {
+        return true;
+      },
+    },
+    {
+      label: '日期',
+      field: 'orderDate',
+      component: NDatePicker,
+      componentProps: {
+        type: 'date',
+        clearable: true,
+      },
+      disableCondition() {
+        return true;
+      },
+    },
+    {
       label: '渠道',
-      field: 'channel',
+      field: 'channelType',
+      component: 'NSelect',
+      componentProps: {
+        options: channelTypeList,
+      },
     },
     {
       label: '约车类型',
-      field: 'carType',
-    },
-    {
-      label: '客户编号',
-      field: 'customerId',
+      field: 'vehicleType',
+      component: 'NSelect',
+      componentProps: {
+        options: vehicleTypeList,
+      },
     },
     {
       label: '订单号',
-      field: 'orderId',
+      field: 'orderNumber',
     },
     {
       label: '托数(XP/FP)',
-      field: 'trayNumber',
+      field: 'trayCount',
     },
     {
       label: '箱数Kartons',
-      field: 'boxNumber',
+      field: 'boxCount',
     },
     {
       label: '可堆叠',
@@ -48,64 +77,84 @@
     },
     {
       label: '是否需要卸货设备',
-      field: 'needEquipment',
+      field: 'unloadingEquipmentRequired',
     },
     {
       label: '提货地址',
-      field: 'pickingAddress',
+      field: 'pickupAddress',
+      componentProps: {
+        type: 'textarea',
+      },
     },
     {
       label: '送货地址',
-      field: 'sendingAddress',
+      field: 'deliveryAddress',
+      componentProps: {
+        type: 'textarea',
+      },
     },
     {
       label: '取货日期+时点',
-      field: 'pickingDate',
+      field: 'pickupDate',
+      component: 'NDatePicker',
+      componentProps: {
+        type: 'datetime',
+        clearable: true,
+        timePickerProps: {
+          minutes: [0, 15, 30, 45],
+          seconds: [0],
+        },
+      },
     },
     {
       label: '送货日期+时点',
-      field: 'sendingDate',
+      field: 'deliveryDate',
+      component: 'NDatePicker',
+      componentProps: {
+        type: 'datetime',
+        clearable: true,
+        timePickerProps: {
+          minutes: [0, 15, 30, 45],
+          seconds: [0],
+        },
+      },
     },
     {
       label: '物流平台订单号',
-      field: 'platformOrderId',
+      field: 'logisticsOrderNumber',
     },
-    // {
-    //   label: '运营对外报价',
-    //   field: 'offerPrice',
-    // },
     {
-      label: 'POD',
-      field: 'POD',
+      label: '运营对外报价',
+      field: 'publicQuotation',
     },
     {
       label: 'cbm/尺寸/重量',
-      field: 'size',
+      field: 'dimensions',
     },
     {
       label: '需求',
-      field: 'demand',
+      field: 'requirements',
     },
     {
       label: '询价需求',
-      field: 'priceDemand',
+      field: 'inquiryRequirements',
     },
     {
       label: '是否有送仓文件',
-      field: 'warehouseDeliveryFile',
+      field: 'hasWarehouseDocuments',
     },
     {
       label: '物流公司',
       field: 'logisticsCompany',
     },
-    // {
-    //   label: '成本底价',
-    //   field: 'costPrice',
-    // },
-    // {
-    //   label: '物流建议报价',
-    //   field: 'logisticsPrice',
-    // },
+    {
+      label: '成本底价',
+      field: 'baseCost',
+    },
+    {
+      label: '物流建议报价',
+      field: 'suggestedQuotation',
+    },
     {
       label: '备注',
       field: 'note',
@@ -120,12 +169,11 @@
   async function handleSubmit(values: any) {
     console.log(prop.model, 'model');
     loading = true;
+    const currentObj = Object.assign({}, prop.model, values);
     await safeScope(async () => {
-      if (prop?.model?.id) {
-        await OutWarehouseManager.editInternal(values, prop.model.id);
-      } else {
-        await OutWarehouseManager.addInternal(values);
-      }
+      currentObj.pickupDate = dayjs(currentObj.pickupDate).format('YYYY-MM-DD HH:mm:ss');
+      currentObj.deliveryDate = dayjs(currentObj.pickupDate).format('YYYY-MM-DD HH:mm:ss');
+      await updateExternalVehicle(currentObj);
       emit('saved');
     });
     loading = false;

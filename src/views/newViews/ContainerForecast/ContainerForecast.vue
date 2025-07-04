@@ -54,8 +54,11 @@
         ref="actionRef"
         :actionColumn="actionColumn"
         :columns="currentColumns"
+        :pagination="paginationReactive"
         :request="loadDataTable"
         :row-key="(row) => row.id"
+        @update:page="handlePageChange"
+        @update:pageSize="handlePageSizeChange"
       />
       <n-modal
         v-model:show="showModal"
@@ -187,7 +190,7 @@
   import { valueOfToday } from '@/api/dataLayer/common/Date';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
   import FileSaver from 'file-saver';
-  import { addOrUpdateNotify, getNotifyListByFilter } from '@/api/newDataLayer/Notify/Notify';
+  import { addOrUpdateNotify, getNotifyListByFilterWithPagination } from '@/api/newDataLayer/Notify/Notify';
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
   import { addOrUpdateTask, getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
@@ -220,6 +223,24 @@
   let showConfirmUnloading = $ref(false);
   let showNeedCheckDialog = $ref(false);
   let filterItems = $ref<Array<{ option: string; value: string }>>([]);
+
+  const paginationReactive = reactive({
+    defaultPage: 1,
+    pageNumber: 0,
+    pageSize: 10,
+    defaultPageSize: 10,
+    showSizePicker: true,
+    pageSizes: [10, 20, 50, 100],
+    onChange: (page: number) => {
+      paginationReactive.pageNumber = page - 1;
+      // reloadTable() is called by handlePageChange, no need to call it here
+    },
+    onUpdatePageSize: (pageSize: number) => {
+      paginationReactive.pageSize = pageSize;
+      paginationReactive.pageNumber = 0;
+      // Let the BasicTable component handle the data fetching
+    },
+  });
 
   function addTable(type: NotifyType) {
     notifyType = type;
@@ -291,41 +312,61 @@
         }))
       : [];
 
-    // Get customer list and filter data
+    // Get customer list
     const customerId = await getUserCustomerList();
-    let data = await getNotifyListByFilter(currentFilter);
 
-    // Apply filters
-    let res = data.filter((it) => it.customer && customerId.includes(it.customer.id)) || [];
+    // Add customer filter
+    currentFilter.push({ field: 'customer.id', op: 'in', value: customerId });
+
+    // Filter canceled items if not showing all
+    if (!showAll) {
+      currentFilter.push({ field: 'inStatus', op: '!=', value: '已取消' });
+    }
+
+    // Apply date range filter if present
+    if (dateRange) {
+      currentFilter.push({ field: 'planArriveDateTime', op: '>=', value: dateRange[0] });
+      currentFilter.push({ field: 'planArriveDateTime', op: '<=', value: dateRange[1] });
+    }
+
+    // Get paginated data
+    const res = await getNotifyListByFilterWithPagination(currentFilter, paginationReactive);
+    let allList = res.content;
+    const totalCount = res.page.totalElements;
 
     // Format count display
-    res.forEach((item) => {
+    allList.forEach((item) => {
       if (item.totalCount) {
         item.arrivedCount = `${item.arrivedCount}(${item.totalCount})`;
       }
     });
 
-    // Filter canceled items if not showing all
-    if (!showAll) {
-      res = res.filter((item) => item.inStatus !== '已取消');
+    // Create fake list items for pagination display
+    let fakeListStart = [];
+    let fakeListEnd = [];
+
+    if (paginationReactive.pageNumber > 0) {
+      fakeListStart = Array(paginationReactive.pageNumber * paginationReactive.pageSize)
+        .fill(null)
+        .map((it, index) => {
+          return { key: index };
+        });
     }
 
-    // Apply date range filter if present
-    if (dateRange) {
-      const startDate = dayjs(dateRange[0]).startOf('day').valueOf() || valueOfToday[0];
-      const endDate = dayjs(dateRange[1]).endOf('day').valueOf() || valueOfToday[1];
-
-      res = res.filter((item) => {
-        const dateToCheck = item.realDate
-          ? parseInt(item.realDate)
-          : parseInt(item.planArriveDateTime);
-
-        return dateToCheck > startDate && dateToCheck < endDate;
-      });
+    if (paginationReactive.pageSize < totalCount) {
+      if (totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1) > 0) {
+        fakeListEnd = Array(
+          totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1)
+        )
+          .fill(null)
+          .map((it, index) => {
+            return { key: index };
+          });
+      }
     }
 
-    // Sort and return results
-    return res.sort(dateCompare('planArriveDateTime'));
+    // Sort and return results with fake items for pagination
+    return fakeListStart.concat(allList.sort(dateCompare('planArriveDateTime')).concat(fakeListEnd));
   };
 
   const actionRef = ref();
@@ -530,6 +571,17 @@
 
   function updateFilterWithItems(value) {
     filterObj = value;
+    reloadTable();
+  }
+
+  function handlePageChange(page: number) {
+    paginationReactive.pageNumber = page - 1;
+    reloadTable();
+  }
+
+  function handlePageSizeChange(pageSize: number) {
+    paginationReactive.pageSize = pageSize;
+    paginationReactive.pageNumber = 0;
     reloadTable();
   }
 

@@ -1,53 +1,37 @@
 <template>
   <n-card v-if="hasAuthPower('outStorageView')" :bordered="false" class="proCard">
-    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
-      <n-button
-        v-if="hasAuthPower('outStorageCarAdd')"
-        style="margin-left: 10px"
-        type="primary"
-        @click="ImportFilesDialog = true"
-        >库外订车</n-button
-      >
-      <n-button type="info" @click="downloadData"> 下载 </n-button>
-    </filter-bar>
-    <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
-      <n-card embedded size="small" style="max-width: 300px">
-        <div style="display: flex">
-          <n-select
-            v-model:value="optionOne"
-            :options="realOptions"
-            placeholder="过滤项1"
-            style="width: 130px"
-          />
-          <n-input
-            v-model:value="valueOne"
-            class="ml-2"
-            placeholder="过滤值1"
-            style="width: 130px"
-            type="text"
-          />
-        </div>
-      </n-card>
-      <n-card class="ml-2" embedded size="small" style="max-width: 300px">
-        <div style="display: flex">
-          <n-select
-            v-model:value="optionTwo"
-            :options="realOptions"
-            placeholder="过滤项2"
-            style="width: 130px"
-          />
-          <n-input
-            v-model:value="valueTwo"
-            class="ml-2"
-            placeholder="过滤值2"
-            style="width: 130px"
-            type="text"
-          />
-        </div>
-      </n-card>
-      <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
-    </div>
+    <filter-bar
+      v-model="filterItems"
+      v-model:dateRange="dateRange"
+      v-model:showAll="showAll"
+      :columns="outCarColumns"
+      @clear="updateFilter(null)"
+      @submit="updateFilter"
+      @filter-change="updateFilterWithItems"
+    />
     <div class="my-2"></div>
+    <n-button
+      v-if="hasAuthPower('outStorageCarAdd')"
+      class="action-button"
+      size="small"
+      type="primary"
+      @click="ImportFilesDialog = true"
+    >
+      <template #icon>
+        <n-icon>
+          <DocumentAdd20Regular />
+        </n-icon>
+      </template>
+      库外订车
+    </n-button>
+    <n-button class="action-button" size="small" type="info" @click="downloadData">
+      <template #icon>
+        <n-icon>
+          <ArrowDownload20Regular />
+        </n-icon>
+      </template>
+      下载
+    </n-button>
     <BasicTable
       ref="actionRef"
       v-model:checked-row-keys="checkedRows"
@@ -88,14 +72,11 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
+  import { computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { filters, outCarColumns } from './columns';
+  import { outCarColumns } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
-  import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
-  import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
-  import dayjs from 'dayjs';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import ImportOutWarehouseFile from '@/views/newViews/CarpoolManagement/ImportOutWarehouseFile.vue';
@@ -103,11 +84,24 @@
   import OutCarDetail from '@/views/newViews/CarpoolManagement/OutCarDetail.vue';
   import OutWarehouseCarOffer from '@/views/newViews/CarpoolManagement/OutWarehouseCarOffer.vue';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
-  import { valueOfToday } from '@/api/dataLayer/common/Date';
   import { generateOptionFromArray } from '@/store/utils/utils';
   import { columns } from '@/views/newViews/ContainerForecast/columns';
   import FileSaver from 'file-saver';
   import { getOutWarehouseDetailListById } from '@/api/dataLayer/modules/GetListById';
+  import { NIcon, NTooltip } from 'naive-ui';
+  import {
+    ArrowDownload20Regular,
+    Delete20Regular,
+    DocumentAdd20Regular,
+    DocumentEdit20Regular,
+    Image20Regular,
+  } from '@vicons/fluent';
+  import {
+    deleteExternalVehicleList,
+    getExternalVehicleList,
+    updateExternalVehicle,
+  } from '@/api/newDataLayer/CarManage/ExternalVehicle';
+  import dayjs from 'dayjs';
 
   const showModal = ref(false);
 
@@ -127,18 +121,23 @@
   let valueOne = $ref('');
   let valueTwo = $ref('');
   let dateRange = $ref(null);
+  let filterItems = $ref<Array<{ option: string; value: string }>>([]);
+  let showAll = $ref(false);
 
   const realOptions = computed(() => {
     return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
   });
   const loadDataTable = async () => {
-    let res = (await OutWarehouseManager.load()).sort(dateCompare('realDate'));
-    if (dateRange) {
-      let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-      let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-      res = res.filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate);
-    }
+    let res = await getExternalVehicleList();
+    console.log(res);
     return res;
+    // let res = (await OutWarehouseManager.load()).sort(dateCompare('realDate'));
+    // if (dateRange) {
+    //   let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
+    //   let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
+    //   res = res.filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate);
+    // }
+    // return res;
   };
 
   async function downloadData() {
@@ -189,10 +188,7 @@
     FileSaver.saveAs(blob, '库外订车' + '.csv');
   }
 
-  onMounted(async () => {
-    monthTab = OneYearMonthTab();
-    selectedMonth = monthTab[0];
-  });
+  onMounted(async () => {});
   const actionRef = ref();
 
   function updateFilter(value) {
@@ -218,6 +214,24 @@
     reloadTable();
   }
 
+  function updateFilterWithItems(value) {
+    filterObj = value;
+    reloadTable();
+  }
+
+  // Helper function to render icon with tooltip
+  const renderIconWithTooltip = (icon, tooltip) => {
+    return () =>
+      h(
+        NTooltip,
+        { trigger: 'hover', placement: 'top' },
+        {
+          trigger: () => h(NIcon, { size: 18, class: 'action-icon' }, { default: () => h(icon) }),
+          default: () => tooltip,
+        }
+      );
+  };
+
   function reloadTable() {
     actionRef.value.reload();
     editDetailModel = false;
@@ -226,79 +240,94 @@
     paymentDialogShow = false;
   }
 
-  async function startEdit(id) {
-    currentModel = await OutWarehouseManager.getById(id);
+  async function startEdit(record) {
+    // Transform deliveryDate and pickupDate using dayjs for proper display in NDatePicker
+    // NDatePicker with type="datetime" expects a timestamp (milliseconds)
+    if (record.deliveryDate) {
+      // Ensure the date is a valid timestamp
+      record.deliveryDate = dayjs(record.deliveryDate).isValid()
+        ? dayjs(record.deliveryDate).valueOf()
+        : null;
+    }
+    if (record.pickupDate) {
+      // Ensure the date is a valid timestamp
+      record.pickupDate = dayjs(record.pickupDate).isValid()
+        ? dayjs(record.pickupDate).valueOf()
+        : null;
+    }
+    currentModel = record;
     editDetailModel = true;
   }
 
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
-    width: 120,
+    width: 200,
     render(record: any) {
-      const fileAction = (label, key, icon?: Component, power) => {
-        return getFileActionButton(
-          label,
-          key,
-          OutWarehouseManager,
-          reloadTable,
-          record,
-          icon,
-          power
-        );
+      // Custom file action with icon
+      const iconFileAction = (label, key, icon, power) => {
+        return {
+          icon: renderIconWithTooltip(icon, label),
+          onClick: async () => {
+            try {
+              const upload = useUploadDialog();
+              const files = await upload.upload(record[key]);
+              if (files.checkPassed) {
+                record[key] = files.files;
+                await OutWarehouseManager.editInternal(record, record.id);
+                reloadTable();
+              }
+            } catch (error) {
+              console.error('上传失败:', error);
+            }
+          },
+          ifShow: () => {
+            return hasAuthPower(power);
+          },
+        };
       };
+
       return h(TableAction as any, {
-        style: 'button',
+        style: 'text',
         actions: [
           {
-            label: '修改',
+            icon: renderIconWithTooltip(DocumentEdit20Regular, '修改'),
             onClick() {
-              startEdit(record.id);
+              record.customerName = record.customer.customerName;
+              startEdit(record);
             },
             ifShow: () => {
               return hasAuthPower('outStorageEdit');
             },
           },
           {
-            label: '物流报价',
-            onClick() {
-              currentId = record.id;
-              showOfferPrice = true;
-            },
-            ifShow: () => {
-              return hasAuthPower('outStorageEdit');
-            },
-          },
-          {
-            label: '下单',
-            async onClick() {
-              record.status = '已下单';
-              await OutWarehouseManager.editInternal(record, record.id);
-              reloadTable();
-            },
-            ifShow: () => {
-              return hasAuthPower('outStorageConfirmOrder');
-            },
-          },
-          fileAction('POD', 'POD', '', 'outStoragePOD'),
-          {
-            label: '送仓文件',
+            icon: renderIconWithTooltip(Image20Regular, '文件'),
             highlight: () => {
-              return record?.['warehouseSendingFile']?.length > 0 ? 'success' : 'error';
-            },
-            ifShow: () => {
-              return record?.warehouseDeliveryFile === '是';
+              return record?.['files']?.length > 1 ? 'success' : 'error';
             },
             disabled: !hasAuthPower('outStorageSendFile'),
             async onClick() {
               const upload = useUploadDialog();
-              const files = await upload.upload(record['warehouseSendingFile']);
+              const files = await upload.upload(record['files']);
               if (files.checkPassed) {
-                const obj = {};
-                obj['warehouseDeliveryFile'] = files.files;
-                await OutWarehouseManager.editInternal(obj, record.id);
+                record.files = files.files;
+                await updateExternalVehicle(record);
               }
-              actionRef.value[0].reload();
+              actionRef.value.reload();
+            },
+          },
+          {
+            icon: renderIconWithTooltip(Delete20Regular, '删除'),
+            async onClick() {
+              try {
+                await deleteExternalVehicleList(record.id);
+                reloadTable();
+              } catch (error) {
+                console.error('删除失败:', error);
+              }
+            },
+            ifShow: () => {
+              return hasAuthPower('outStorageEdit');
             },
           },
         ],
@@ -307,4 +336,42 @@
   });
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+  .action-button {
+    margin-right: 8px;
+  }
+
+  .filter-container {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  .filter-card {
+    max-width: 300px;
+  }
+
+  .filter-row {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Styles for action icons */
+  :deep(.action-icon) {
+    margin: 0 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  :deep(.n-icon) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  :deep(.n-tooltip) {
+    max-width: 200px;
+    word-break: keep-all;
+  }
+</style>
