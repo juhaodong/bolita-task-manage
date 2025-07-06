@@ -6,14 +6,19 @@ import {
 } from '@/views/bolita-views/composable/useableColumns';
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
-import { generateOptionFromArray } from '@/store/utils/utils';
+import { generateOptionFromArray, generateOptionFromTimeArray } from '@/store/utils/utils';
 import { notifyStatusList } from '@/api/newDataLayer/Notify/Notify';
+import { timeArrays } from '@/api/newDataLayer/Common/Common';
 
 export const columns: DataTableColumns<any> = [
   timeColumn('planArriveDateTime', '预计入库日期'),
   {
     title: '预计时间',
     key: 'inHouseTime',
+    component: 'NSelect',
+    componentProps: {
+      options: generateOptionFromTimeArray(timeArrays),
+    },
   },
   selectedIdColumn('柜号', '/missions/missionDetail', 'containerNo'),
   // {

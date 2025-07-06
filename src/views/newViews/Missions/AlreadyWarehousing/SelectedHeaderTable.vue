@@ -14,17 +14,24 @@
       </n-tag>
     </n-card>
     <n-card :bordered="false" class="mt-4" embedded title="💴 正在使用字段">
-      <n-tag
-        v-for="(item, index) in currentHeaderList"
-        :key="index"
-        :type="item.tagType"
-        class="ml-2 mt-2"
-        round
-        size="large"
-        @click="deletedTag(item, index)"
+      <Draggable
+        v-model="currentHeaderList"
+        animation="300"
+        item-key="id"
+        @end="onDragEnd"
       >
-        {{ item.title }}
-      </n-tag>
+        <template #item="{ element }">
+          <n-tag
+            :type="element.tagType"
+            class="ml-2 mt-2"
+            round
+            size="large"
+            @click="deletedTag(element)"
+          >
+            {{ element.title }}
+          </n-tag>
+        </template>
+      </Draggable>
     </n-card>
     <n-space style="float: right">
       <n-button secondary type="warning" @click="save">保存</n-button>
@@ -41,6 +48,7 @@
     getTableHeaderGroupItemList,
   } from '@/api/newDataLayer/Header/HeaderGroup';
   import { useUserStore } from '@/store/modules/user';
+  import Draggable from 'vuedraggable';
 
   interface Props {
     allColumns?: any;
@@ -83,6 +91,11 @@
   }
   function deletedTag(item) {
     currentHeaderList = currentHeaderList.filter((it) => it.title !== item.title);
+  }
+
+  function onDragEnd() {
+    // The currentHeaderList is already updated by v-model
+    // No additional action needed here
   }
   let groupInfo = $ref({});
   async function reload() {

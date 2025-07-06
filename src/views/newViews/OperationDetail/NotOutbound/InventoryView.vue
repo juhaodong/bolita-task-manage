@@ -11,12 +11,7 @@
         @filter-change="updateFilterWithItems"
       />
       <div class="mt-2">
-        <n-button
-          class="action-button"
-          size="small"
-          type="primary"
-          @click="selectedHeader"
-        >
+        <n-button class="action-button" size="small" type="primary" @click="selectedHeader">
           <template #icon>
             <n-icon>
               <TableSettings20Regular />
@@ -24,12 +19,7 @@
           </template>
           选择表头显示
         </n-button>
-        <n-button
-          class="action-button"
-          size="small"
-          type="primary"
-          @click="finishedCancel"
-        >
+        <n-button class="action-button" size="small" type="primary" @click="finishedCancel">
           <template #icon>
             <n-icon>
               <Box20Filled />
@@ -37,12 +27,7 @@
           </template>
           操作完成
         </n-button>
-        <n-button
-          class="action-button"
-          size="small"
-          type="success"
-          @click="downloadData"
-        >
+        <n-button class="action-button" size="small" type="success" @click="downloadData">
           <template #icon>
             <n-icon>
               <ArrowDownload20Regular />
@@ -57,8 +42,11 @@
         v-model:checked-row-keys="checkedRows"
         :actionColumn="actionColumn"
         :columns="currentColumns"
+        :pagination="paginationReactive"
         :request="loadDataTable"
         :row-key="(row) => row.id"
+        @update:page="handlePageChange"
+        @update:pageSize="handlePageSizeChange"
       />
       <n-modal
         v-model:show="showModal"
@@ -129,22 +117,21 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
+  import { computed, h, onMounted, reactive, ref } from 'vue';
   import { NIcon, NTooltip } from 'naive-ui';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { columns, filters } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
+  import { columns } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
   import { $ref } from 'vue/macros';
-  import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
   import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
-  import { 
+  import {
     ArrowDownload20Regular,
     Box20Filled,
-    TableSettings20Regular,
+    Document20Regular,
     DocumentEdit20Regular,
     Image20Regular,
-    Document20Regular
+    TableSettings20Regular,
   } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import dayjs from 'dayjs';
@@ -157,13 +144,13 @@
   import { getUserCustomerList, hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import { generateOptionFromArray } from '@/store/utils/utils';
-  import { valueOfToday } from '@/api/dataLayer/common/Date';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
   import { inStorageObj } from '@/views/newViews/Missions/AlreadyWarehousing/selectionType';
   import FileSaver from 'file-saver';
   import {
     addOrUpdateTask,
     getTaskListByFilter,
+    getTaskListByFilterWithPagination,
     getTaskListByIds,
   } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
@@ -205,6 +192,24 @@
     belongsToId?: string;
   }
 
+  const paginationReactive = reactive({
+    defaultPage: 1,
+    pageNumber: 0,
+    pageSize: 10,
+    defaultPageSize: 10,
+    showSizePicker: true,
+    pageSizes: [10, 20, 50, 100],
+    onChange: (page: number) => {
+      paginationReactive.pageNumber = page - 1;
+      // reloadTable() is called by handlePageChange, no need to call it here
+    },
+    onUpdatePageSize: (pageSize: number) => {
+      paginationReactive.pageSize = pageSize;
+      paginationReactive.pageNumber = 0;
+      // Let the BasicTable component handle the data fetching
+    },
+  });
+
   async function startEdit(id) {
     currentModel = await NotifyDetailManager.getById(id);
     editDetailModel.value = true;
@@ -223,27 +228,64 @@
   });
 
   const loadDataTable = async () => {
-    let currentFilter = [
-      {
-        field: 'inStatus',
-        op: 'in',
-        value: ['入库待操作'],
-      },
-    ];
+    let currentFilter = [];
     if (filterObj) {
-      const res = Object.keys(filterObj);
-
-      for (const filterItem of res) {
-        currentFilter.push({
-          field: filterItem,
-          op: filterObj[filterItem] ? 'like' : '!=',
-          value: '%' + filterObj[filterItem] + '%' ?? '',
-        });
-      }
+      const filterOne = filterObj.filter((it) => it?.component?.name !== 'DatePicker');
+      const filterTwo = filterObj.filter((it) => it?.component?.name === 'DatePicker');
+      const filterWithOutDate = filterOne
+        ? Object.keys(filterOne).map((filterItem) => ({
+            field: filterOne[filterItem].key,
+            op: filterOne[filterItem].value ? 'like' : '!=',
+            value: `%${filterOne[filterItem].value || ''}%`,
+          }))
+        : [];
+      const filterWithDate = filterTwo
+        ? Object.keys(filterTwo).map((filterItem) => ({
+            field: filterTwo[filterItem].key,
+            op: filterTwo[filterItem].value ? 'like' : '!=',
+            value: `%${filterTwo[filterItem].value || ''}%`,
+          }))
+        : [];
+      currentFilter = filterWithOutDate.concat(filterWithDate);
     }
+    currentFilter.push({
+      field: 'inStatus',
+      op: 'in',
+      value: ['入库待操作'],
+    });
     const customerId = await getUserCustomerList();
     currentFilter.push({ field: 'customer.id', op: 'in', value: customerId });
-    allList = await getTaskListByFilter(currentFilter);
+
+    // Get paginated data
+    const res = await getTaskListByFilterWithPagination(currentFilter, paginationReactive);
+    allList = res.content;
+    const totalCount = res.page.totalElements;
+
+    // Create fake list items for pagination display
+    let fakeListStart = [];
+    let fakeListEnd = [];
+
+    if (paginationReactive.pageNumber > 0) {
+      fakeListStart = Array(paginationReactive.pageNumber * paginationReactive.pageSize)
+        .fill(null)
+        .map((it, index) => {
+          return { key: index };
+        });
+    }
+
+    if (paginationReactive.pageSize < totalCount) {
+      if (totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1) > 0) {
+        fakeListEnd = Array(
+          totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1)
+        )
+          .fill(null)
+          .map((it, index) => {
+            return { key: index };
+          });
+      }
+    }
+
+    // Process each item to calculate stay time
     allList.forEach((it) => {
       const storageTime = it.timelines.filter((x) => x.useType === 'storage');
       let stayTime = '';
@@ -263,14 +305,9 @@
         it.stayTime = '-';
       }
     });
-    if (dateRange) {
-      let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-      let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-      allList = allList.filter(
-        (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
-      );
-    }
-    return allList;
+
+    // Return combined list with fake items for pagination
+    return fakeListStart.concat(allList.concat(fakeListEnd));
   };
 
   async function downloadData() {
@@ -346,26 +383,10 @@
   }
 
   function updateFilter(value) {
-    if (value !== null) {
-      // Apply additional filters from the filter inputs
-      if (optionOne && valueOne) {
-        const keyOne = columns.find((it) => it.title === optionOne)?.key;
-        if (keyOne) {
-          value[keyOne] = valueOne;
-        }
-      }
+    filterObj = value;
 
-      if (optionTwo && valueTwo) {
-        const keyTwo = columns.find((it) => it.title === optionTwo)?.key;
-        if (keyTwo) {
-          value[keyTwo] = valueTwo;
-        }
-      }
-
-      filterObj = value;
-    } else {
+    if (value === null) {
       // Reset all filters
-      filterObj = null;
       optionOne = '';
       valueOne = '';
       optionTwo = '';
@@ -380,6 +401,17 @@
 
   function updateFilterWithItems(value) {
     filterObj = value;
+    reloadTable();
+  }
+
+  function handlePageChange(page: number) {
+    paginationReactive.pageNumber = page - 1;
+    reloadTable();
+  }
+
+  function handlePageSizeChange(pageSize: number) {
+    paginationReactive.pageSize = pageSize;
+    paginationReactive.pageNumber = 0;
     reloadTable();
   }
 
@@ -555,7 +587,12 @@
             },
           },
           iconFileAction('POD', 'POD', Document20Regular, 'missionPOD'),
-          iconFileAction('操作文件', 'operationFiles', DocumentEdit20Regular, 'missionOperationFile'),
+          iconFileAction(
+            '操作文件',
+            'operationFiles',
+            DocumentEdit20Regular,
+            'missionOperationFile'
+          ),
           iconFileAction('问题图片', 'problemFiles', Image20Regular, 'missionProblemPic'),
         ],
       });

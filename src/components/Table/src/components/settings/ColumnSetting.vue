@@ -2,7 +2,7 @@
   <n-tooltip trigger="hover">
     <template #trigger>
       <div class="cursor-pointer table-toolbar-right-icon">
-        <n-popover trigger="click" :width="230" class="toolbar-popover" placement="bottom-end">
+        <n-popover :width="230" class="toolbar-popover" placement="bottom-end" trigger="click">
           <template #trigger>
             <n-icon size="18">
               <SettingOutlined />
@@ -17,7 +17,7 @@
                 <n-checkbox v-model:checked="selection" @update:checked="onSelection"
                   >勾选列
                 </n-checkbox>
-                <n-button text type="info" size="small" class="mt-1" @click="resetColumns"
+                <n-button class="mt-1" size="small" text type="info" @click="resetColumns"
                   >重置
                 </n-button>
               </n-space>
@@ -27,58 +27,58 @@
             <n-checkbox-group v-model:value="checkList" @update:value="onChange">
               <Draggable
                 v-model="columnsList"
-                animation="300"
-                item-key="key"
-                filter=".no-draggable"
                 :move="onMove"
+                animation="300"
+                filter=".no-draggable"
+                item-key="key"
                 @end="draggableEnd"
               >
                 <template #item="{ element }">
                   <div
-                    class="table-toolbar-inner-checkbox"
                     :class="{
                       'table-toolbar-inner-checkbox-dark': getDarkTheme === true,
                       'no-draggable': element.draggable === false,
                     }"
+                    class="table-toolbar-inner-checkbox"
                   >
                     <span
-                      class="drag-icon"
                       :class="{ 'drag-icon-hidden': element.draggable === false }"
+                      class="drag-icon"
                     >
                       <n-icon size="18">
                         <DragOutlined />
                       </n-icon>
                     </span>
-                    <n-checkbox :value="element.key" :label="element.title" />
-                    <div class="fixed-item">
-                      <n-tooltip trigger="hover" placement="bottom">
-                        <template #trigger>
-                          <n-icon
-                            size="18"
-                            :color="element.fixed === 'left' ? '#2080f0' : undefined"
-                            class="cursor-pointer"
-                            @click="fixedColumn(element, 'left')"
-                          >
-                            <VerticalRightOutlined />
-                          </n-icon>
-                        </template>
-                        <span>固定到左侧</span>
-                      </n-tooltip>
-                      <n-divider vertical />
-                      <n-tooltip trigger="hover" placement="bottom">
-                        <template #trigger>
-                          <n-icon
-                            size="18"
-                            :color="element.fixed === 'right' ? '#2080f0' : undefined"
-                            class="cursor-pointer"
-                            @click="fixedColumn(element, 'right')"
-                          >
-                            <VerticalLeftOutlined />
-                          </n-icon>
-                        </template>
-                        <span>固定到右侧</span>
-                      </n-tooltip>
-                    </div>
+                    <n-checkbox :label="element.title" :value="element.key" />
+                    <!--                    <div class="fixed-item">-->
+                    <!--                      <n-tooltip trigger="hover" placement="bottom">-->
+                    <!--                        <template #trigger>-->
+                    <!--                          <n-icon-->
+                    <!--                            size="18"-->
+                    <!--                            :color="element.fixed === 'left' ? '#2080f0' : undefined"-->
+                    <!--                            class="cursor-pointer"-->
+                    <!--                            @click="fixedColumn(element, 'left')"-->
+                    <!--                          >-->
+                    <!--                            <VerticalRightOutlined />-->
+                    <!--                          </n-icon>-->
+                    <!--                        </template>-->
+                    <!--                        <span>固定到左侧</span>-->
+                    <!--                      </n-tooltip>-->
+                    <!--                      <n-divider vertical />-->
+                    <!--                      <n-tooltip trigger="hover" placement="bottom">-->
+                    <!--                        <template #trigger>-->
+                    <!--                          <n-icon-->
+                    <!--                            size="18"-->
+                    <!--                            :color="element.fixed === 'right' ? '#2080f0' : undefined"-->
+                    <!--                            class="cursor-pointer"-->
+                    <!--                            @click="fixedColumn(element, 'right')"-->
+                    <!--                          >-->
+                    <!--                            <VerticalLeftOutlined />-->
+                    <!--                          </n-icon>-->
+                    <!--                        </template>-->
+                    <!--                        <span>固定到右侧</span>-->
+                    <!--                      </n-tooltip>-->
+                    <!--                    </div>-->
                   </div>
                 </template>
               </Draggable>

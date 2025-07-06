@@ -20,52 +20,18 @@
           下载
         </n-button>
       </div>
-      <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
-        <n-card embedded size="small" style="max-width: 300px">
-          <div style="display: flex">
-            <n-select
-              v-model:value="optionOne"
-              :options="realOptions"
-              placeholder="过滤项1"
-              style="width: 130px"
-            />
-            <n-input
-              v-model:value="valueOne"
-              class="ml-2"
-              placeholder="过滤值1"
-              style="width: 130px"
-              type="text"
-            />
-          </div>
-        </n-card>
-        <n-card class="ml-2" embedded size="small" style="max-width: 300px">
-          <div style="display: flex">
-            <n-select
-              v-model:value="optionTwo"
-              :options="realOptions"
-              placeholder="过滤项2"
-              style="width: 130px"
-            />
-            <n-input
-              v-model:value="valueTwo"
-              class="ml-2"
-              placeholder="过滤值2"
-              style="width: 130px"
-              type="text"
-            />
-          </div>
-        </n-card>
-        <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
-        <!--      <n-checkbox v-model:checked="showAll" class="ml-2" label="全部" size="large" />-->
-      </div>
+      <!-- Filter controls are now handled by FilterBar component -->
       <div class="my-2"></div>
       <BasicTable
         ref="actionRef"
         v-model:checked-row-keys="checkedRows"
         :actionColumn="actionColumn"
         :columns="columns"
+        :pagination="paginationReactive"
         :request="loadDataTable"
         :row-key="(row) => row.id"
+        @update:page="handlePageChange"
+        @update:pageSize="handlePageSizeChange"
       />
       <n-modal
         v-model:show="editOutboundForecast"
@@ -129,9 +95,8 @@
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import { valueOfToday } from '@/api/dataLayer/common/Date';
-  import { generateOptionFromArray } from '@/store/utils/utils';
   import FileSaver from 'file-saver';
-  import { getOutboundForecastListByFilter } from '@/api/newDataLayer/CarManage/CarManage';
+  import { getOutboundForecastListByFilterWithPagination } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import OfferCustomerDialog from '@/views/newViews/CarpoolManagement/dialog/OfferCustomerDialog.vue';
   import BookingCarDialog from '@/views/newViews/CarpoolManagement/dialog/BookingCarDialog.vue';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
@@ -151,17 +116,32 @@
   let typeName = $ref('');
   let editId = $ref('');
   let allList = $ref([]);
-  let optionOne = $ref('');
-  let optionTwo = $ref('');
-  let valueOne = $ref('');
-  let valueTwo = $ref('');
   let showAll = $ref(false);
   let dateRange = $ref(null);
   let currentInfo = $ref({});
   let offerDialog = $ref(false);
   let carDialog = $ref(false);
   let filterItems = $ref<Array<{ option: string; value: string }>>([]);
+
+  const paginationReactive = reactive({
+    defaultPage: 1,
+    pageNumber: 0,
+    pageSize: 10,
+    defaultPageSize: 10,
+    showSizePicker: true,
+    pageSizes: [10, 20, 50, 100],
+    onChange: (page: number) => {
+      paginationReactive.pageNumber = page - 1;
+      // reloadTable() is called by handlePageChange, no need to call it here
+    },
+    onUpdatePageSize: (pageSize: number) => {
+      paginationReactive.pageSize = pageSize;
+      paginationReactive.pageNumber = 0;
+      // Let the BasicTable component handle the data fetching
+    },
+  });
   const loadDataTable = async () => {
+    // Build filter criteria
     let currentFilter = [
       {
         field: 'inStatus',
@@ -169,22 +149,49 @@
         value: '无需订车',
       },
     ];
+
     if (filterObj) {
-      const res = Object.keys(filterObj);
-      for (const filterItem of res) {
-        currentFilter.push({
-          field: filterItem,
-          op: filterObj[filterItem] ? 'like' : '!=',
-          value: '%' + filterObj[filterItem] + '%' ?? '',
-        });
+      if (Array.isArray(filterObj)) {
+        // Handle array format (from FilterBar)
+        const filterOne = filterObj.filter((it) => it?.component?.name !== 'DatePicker');
+        const filterTwo = filterObj.filter((it) => it?.component?.name === 'DatePicker');
+
+        const filterWithOutDate = filterOne
+          ? Object.keys(filterOne).map((filterItem) => ({
+              field: filterOne[filterItem].key,
+              op: filterOne[filterItem].value ? 'like' : '!=',
+              value: `%${filterOne[filterItem].value || ''}%`,
+            }))
+          : [];
+
+        const filterWithDate = filterTwo
+          ? Object.keys(filterTwo).map((filterItem) => ({
+              field: filterTwo[filterItem].key,
+              op: filterTwo[filterItem].value ? 'like' : '!=',
+              value: `%${filterTwo[filterItem].value || ''}%`,
+            }))
+          : [];
+
+        currentFilter = currentFilter.concat(filterWithOutDate, filterWithDate);
+      } else {
+        // Handle object format (from manual filters)
+        const res = Object.keys(filterObj);
+        for (const filterItem of res) {
+          currentFilter.push({
+            field: filterItem,
+            op: filterObj[filterItem] ? 'like' : '!=',
+            value: '%' + filterObj[filterItem] + '%' ?? '',
+          });
+        }
       }
     }
-    allList = (await getOutboundForecastListByFilter(currentFilter)).sort(
-      dateCompare('createTimestamp')
-    );
-    // if (!showAll) {
-    //   allList = allList.filter((a) => a.inStatus !== '已取消');
-    // }
+
+    // Get paginated data
+    const res = await getOutboundForecastListByFilterWithPagination(currentFilter, paginationReactive);
+    let allList = res.content;
+    const totalCount = res.page.totalElements;
+
+    // Apply date range filter if needed
     if (dateRange) {
       let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
       let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
@@ -192,60 +199,153 @@
         (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       );
     }
-    return allList;
+
+    // Create fake list items for pagination display
+    let fakeListStart = [];
+    let fakeListEnd = [];
+
+    if (paginationReactive.pageNumber > 0) {
+      fakeListStart = Array(paginationReactive.pageNumber * paginationReactive.pageSize)
+        .fill(null)
+        .map((it, index) => {
+          return { key: index };
+        });
+    }
+
+    if (paginationReactive.pageSize < totalCount) {
+      if (totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1) > 0) {
+        fakeListEnd = Array(
+          totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1)
+        )
+          .fill(null)
+          .map((it, index) => {
+            return { key: index };
+          });
+      }
+    }
+
+    // Return results with fake items for pagination
+    return fakeListStart.concat(allList.concat(fakeListEnd));
   };
   const actionRef = ref();
 
   async function downloadData() {
-    let selectedList = [];
-    selectedList = await loadDataTable();
-    let headerTitle = columns.filter((it) => it.title).map((it) => it.title);
-    let data = [];
-    data.unshift(headerTitle);
-    selectedList.forEach((it) => {
-      const res = [
-        it.id ?? '',
-        it.createTimestamp ? dayjs(parseFloat(it.createTimestamp)).format('YYYY-MM-DD') : '',
-        it.inStatus ?? '',
-        it.deliveryMethod ?? '',
-        it.waybillId ?? '',
-        it.trayNum ?? '',
-        it.totalNumber ?? '',
-        it.totalOutOffer ?? '',
-        it.costPrice ?? '',
-        it.suggestedPrice ?? '',
-        it.postcode ?? '',
-        it.FCAddress ?? '',
-        it.REF ?? '',
-        it.ISA ?? '',
-        it.logisticsCompany ?? '',
-        it.amzid ?? '',
-        it.trayNum ?? '',
-        it.reservationGetProductTime
-          ? dayjs(parseFloat(it.reservationGetProductTime)).format('YYYY-MM-DD')
-          : '',
-        it.reservationGetProductDetailTime ?? '',
-        it.note ?? '',
+    try {
+      // Build filter criteria without pagination for full data download
+      let currentFilter = [
+        {
+          field: 'inStatus',
+          op: '!=',
+          value: '无需订车',
+        },
       ];
-      data.push(res);
-    });
-    // 创建一个工作簿
-    const workbook = XLSX.utils.book_new();
-    // 将数据转换为工作表
-    const worksheet = XLSX.utils.aoa_to_sheet(data);
-    // 将工作表添加到工作簿
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
 
-    // 生成Excel文件
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+      if (filterObj) {
+        if (Array.isArray(filterObj)) {
+          // Handle array format (from FilterBar)
+          const filterOne = filterObj.filter((it) => it?.component?.name !== 'DatePicker');
+          const filterTwo = filterObj.filter((it) => it?.component?.name === 'DatePicker');
 
-    // 保存文件
-    FileSaver.saveAs(blob, '订车管理.xlsx');
+          const filterWithOutDate = filterOne
+            ? Object.keys(filterOne).map((filterItem) => ({
+                field: filterOne[filterItem].key,
+                op: filterOne[filterItem].value ? 'like' : '!=',
+                value: `%${filterOne[filterItem].value || ''}%`,
+              }))
+            : [];
+
+          const filterWithDate = filterTwo
+            ? Object.keys(filterTwo).map((filterItem) => ({
+                field: filterTwo[filterItem].key,
+                op: filterTwo[filterItem].value ? 'like' : '!=',
+                value: `%${filterTwo[filterItem].value || ''}%`,
+              }))
+            : [];
+
+          currentFilter = currentFilter.concat(filterWithOutDate, filterWithDate);
+        } else {
+          // Handle object format (from manual filters)
+          const res = Object.keys(filterObj);
+          for (const filterItem of res) {
+            currentFilter.push({
+              field: filterItem,
+              op: filterObj[filterItem] ? 'like' : '!=',
+              value: '%' + filterObj[filterItem] + '%' ?? '',
+            });
+          }
+        }
+      }
+
+      // Get all data for download (using large page size)
+      const downloadPagination = {
+        pageNumber: 0,
+        pageSize: 1000, // Large page size to get all data
+      };
+
+      const res = await getOutboundForecastListByFilterWithPagination(currentFilter, downloadPagination);
+      let selectedList = res.content;
+
+      // Apply date range filter if needed
+      if (dateRange) {
+        let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
+        let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
+        selectedList = selectedList.filter(
+          (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
+        );
+      }
+
+      // Create header row from column titles
+      const headerTitle = columns.filter((it) => it.title).map((it) => it.title);
+
+      // Create data array with header row
+      const data = [headerTitle];
+
+      // Add data rows
+      selectedList.forEach((it) => {
+        const res = [
+          it.id ?? '',
+          it.createTimestamp ? dayjs(parseFloat(it.createTimestamp)).format('YYYY-MM-DD') : '',
+          it.inStatus ?? '',
+          it.deliveryMethod ?? '',
+          it.waybillId ?? '',
+          it.trayNum ?? '',
+          it.totalNumber ?? '',
+          it.totalOutOffer ?? '',
+          it.costPrice ?? '',
+          it.suggestedPrice ?? '',
+          it.postcode ?? '',
+          it.FCAddress ?? '',
+          it.REF ?? '',
+          it.ISA ?? '',
+          it.logisticsCompany ?? '',
+          it.amzid ?? '',
+          it.trayNum ?? '',
+          it.reservationGetProductTime
+            ? dayjs(parseFloat(it.reservationGetProductTime)).format('YYYY-MM-DD')
+            : '',
+          it.reservationGetProductDetailTime ?? '',
+          it.note ?? '',
+        ];
+        data.push(res);
+      });
+
+      // Create workbook and worksheet
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+      // Generate Excel file
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+      // Save file
+      FileSaver.saveAs(blob, '订车管理.xlsx');
+    } catch (error) {
+      console.error('下载失败:', error);
+    }
   }
-  const realOptions = computed(() => {
-    return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
-  });
 
   function startShareCar(item) {
     // typeName = item;
@@ -259,23 +359,8 @@
   }
 
   function updateFilter(value) {
-    if (value !== null) {
-      if (optionOne && valueOne) {
-        const keyOne = columns.find((it) => it.title === optionOne).key;
-
-        value[keyOne] = valueOne;
-      }
-      if (optionTwo && valueTwo) {
-        const keyTwo = columns.find((it) => it.title === optionTwo).key;
-        value[keyTwo] = valueTwo;
-      }
-      filterObj = value;
-    } else {
-      filterObj = null;
-      optionOne = '';
-      valueOne = '';
-      optionTwo = '';
-      valueTwo = '';
+    filterObj = value;
+    if (value === null) {
       dateRange = null;
     }
     reloadTable();
@@ -283,6 +368,17 @@
 
   function updateFilterWithItems(value) {
     filterObj = value;
+    reloadTable();
+  }
+
+  function handlePageChange(page: number) {
+    paginationReactive.pageNumber = page - 1;
+    reloadTable();
+  }
+
+  function handlePageSizeChange(pageSize: number) {
+    paginationReactive.pageSize = pageSize;
+    paginationReactive.pageNumber = 0;
     reloadTable();
   }
 

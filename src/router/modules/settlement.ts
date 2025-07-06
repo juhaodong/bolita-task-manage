@@ -24,24 +24,24 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('@/views/newViews/SettlementManage/SettlementManage.vue'),
       },
-      {
-        path: 'reconciliation',
-        name: `reconciliation`,
-        meta: {
-          title: '对账管理',
-          activeMenu: 'reconciliation',
-        },
-        component: () => import('@/views/newViews/ReconciliationManage/ReconciliationManage.vue'),
-      },
-      {
-        path: 'tray',
-        name: `tray`,
-        meta: {
-          title: '托盘管理',
-          activeMenu: 'tray',
-        },
-        component: () => import('@/views/newViews/TrayManage/TrayManage.vue'),
-      },
+      // {
+      //   path: 'reconciliation',
+      //   name: `reconciliation`,
+      //   meta: {
+      //     title: '对账管理',
+      //     activeMenu: 'reconciliation',
+      //   },
+      //   component: () => import('@/views/newViews/ReconciliationManage/ReconciliationManage.vue'),
+      // },
+      // {
+      //   path: 'tray',
+      //   name: `tray`,
+      //   meta: {
+      //     title: '托盘管理',
+      //     activeMenu: 'tray',
+      //   },
+      //   component: () => import('@/views/newViews/TrayManage/TrayManage.vue'),
+      // },
     ],
   },
 ];

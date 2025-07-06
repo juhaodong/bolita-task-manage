@@ -105,14 +105,6 @@
       <div class="flex-grow"></div>
       <n-space :wrap="false">
         <n-button
-          v-if="getProps.showActionButtonGroup && getProps.showSubmitButton"
-          :loading="loadingSub"
-          size="small"
-          v-bind="getSubmitBtnOptions"
-          @click="handleSubmit"
-          >{{ getProps.submitButtonText }}
-        </n-button>
-        <n-button
           v-if="getProps.showActionButtonGroup && getProps.showResetButton"
           size="small"
           v-bind="getResetBtnOptions"
@@ -126,16 +118,7 @@
 
 <script lang="ts">
   import type { Ref } from 'vue';
-  import {
-    computed,
-    defineComponent,
-    onMounted,
-    onUnmounted,
-    reactive,
-    ref,
-    unref,
-    watch,
-  } from 'vue';
+  import { computed, defineComponent, onMounted, reactive, ref, unref, watch } from 'vue';
   import { createPlaceholderMessage } from './helper';
   import { useFormEvents } from './hooks/useFormEvents';
   import { useFormValues } from './hooks/useFormValues';
@@ -315,21 +298,21 @@
       });
       onMounted(() => {
         initDefault();
-        window.addEventListener('keydown', handleKeydown);
+        // window.addEventListener('keydown', handleKeydown);
         emit('register', formActionType);
       });
 
-      onUnmounted(() => {
-        window.removeEventListener('keydown', handleKeydown);
-      });
+      // onUnmounted(() => {
+      //   window.removeEventListener('keydown', handleKeydown);
+      // });
 
-      const handleKeydown = (event) => {
-        if (event.key === 'Enter') {
-          handleSubmit();
-        } else if (event.key === 'Escape') {
-          resetFields();
-        }
-      };
+      // const handleKeydown = (event) => {
+      //   if (event.key === 'Enter') {
+      //     handleSubmit();
+      //   } else if (event.key === 'Escape') {
+      //     resetFields();
+      //   }
+      // };
 
       return {
         formElRef,

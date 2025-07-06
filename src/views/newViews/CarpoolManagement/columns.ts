@@ -11,16 +11,25 @@ import { FormFields } from '@/api/dataLayer/common/GeneralModel';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { generateOptionFromArray } from '@/store/utils/utils';
 import { reservationTimeList } from '@/views/newViews/ContainerForecast/columns';
+import { channelTypeList, vehicleTypeList } from '@/api/newDataLayer/CarManage/ExternalVehicle';
 
 export const outCarColumns: DataTableColumns<CarpoolManagementModel> = [
   timeColumn('orderDate', '日期'),
   {
     title: '渠道',
     key: 'channelType',
+    component: 'NSelect',
+    componentProps: {
+      options: channelTypeList,
+    },
   },
   {
     title: '约车类型',
     key: 'vehicleType',
+    component: 'NSelect',
+    componentProps: {
+      options: vehicleTypeList,
+    },
   },
   {
     title: '客户编号',

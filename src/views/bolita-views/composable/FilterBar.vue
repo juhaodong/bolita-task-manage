@@ -1,14 +1,17 @@
 <script lang="ts" setup>
   import {
+    convertFormColumn,
     convertFormFieldToSchema,
     FormField,
   } from '@/views/bolita-views/composable/form-field-type';
   import { FormSchema, useForm } from '@/components/Form';
-  import { computed, reactive, ref, watchEffect } from 'vue';
+  import { computed, reactive, ref, unref, watchEffect } from 'vue';
   import { FormFields } from '@/api/dataLayer/common/GeneralModel';
   import { generateOptionFromArray } from '@/store/utils/utils';
   import { $ref } from 'vue/macros';
-  import { Delete20Regular, DocumentAdd20Regular } from '@vicons/fluent';
+  import { DocumentAdd20Regular } from '@vicons/fluent';
+  import { createPlaceholderMessage } from '@/components/Form/src/helper';
+  import dayjs from 'dayjs';
 
   const form = ref<any>(null);
 
@@ -45,7 +48,8 @@
   let showAddFilterDialog = $ref(false);
   let localDateRange = $ref(props.dateRange);
   let localShowAll = $ref(props.showAll);
-  let selectedFilterOptions = $ref<string[]>([]);
+  let selectedFilterOptions = $ref<any[]>([]);
+  let tempFilterValues = $ref<Record<string, string>>({});
 
   // Watch for changes in the modelValue prop
   watchEffect(() => {
@@ -88,74 +92,86 @@
   const availableColumns = computed(() => {
     if (!props.columns || props.columns.length === 0) return [];
     // Filter out columns that are already selected as filter items
-    return props.columns.filter(
-      (col) => col.key && col.title && !filterItems.some((item) => item.option === col.title)
-    );
+    return props.columns
+      .map(convertFormColumn)
+      .filter(
+        (col) => col.key && col.title && !filterItems.some((item) => item.option === col.title)
+      );
   });
 
   function addFilterItem() {
     showAddFilterDialog = true;
-    selectedFilterOptions = [];
+    // selectedFilterOptions = [];
+    tempFilterValues = {};
   }
 
-  function handleAddFilter(option: string) {
-    // Toggle selection of the option
-    const index = selectedFilterOptions.indexOf(option);
+  function handleAddFilter(column: any) {
+    // Toggle selection of the column
+    const index = selectedFilterOptions.findIndex((item) => item.title === column.title);
     if (index === -1) {
-      selectedFilterOptions.push(option);
+      selectedFilterOptions.push(column);
     } else {
+      selectedFilterOptions.splice(index, 1);
+      // Remove the temporary value if the column is deselected
+      delete tempFilterValues[column.title];
+    }
+  }
+
+  function removeSelectedOption(columnTitle: string) {
+    // Remove the option from selectedFilterOptions
+    const index = selectedFilterOptions.findIndex((item) => item.title === columnTitle);
+    if (index !== -1) {
+      // Remove the temporary value
+      delete tempFilterValues[selectedFilterOptions[index].title];
       selectedFilterOptions.splice(index, 1);
     }
   }
 
+  function dateRangeDisplay(dateRange: any) {
+    return (
+      dayjs(dateRange[0]).format('YYYY-MM-DD') + ' ~ ' + dayjs(dateRange[1]).format('YYYY-MM-DD')
+    );
+  }
+
   function confirmFilters() {
-    // Add all selected options as filter items
-    for (const option of selectedFilterOptions) {
-      filterItems.push({ option, value: '' });
+    filterItems = [];
+    for (const column of selectedFilterOptions) {
+      filterItems.push({
+        option: column.title,
+        key: column.key,
+        component: column.component,
+        value: formModel[column.key] || '',
+        display:
+          column?.component?.name === 'DatePicker'
+            ? dateRangeDisplay(formModel[column.key]) || ''
+            : formModel[column.key] || '',
+      });
     }
+    closeFilterDialog();
+    handleSubmit(filterItems);
+  }
+
+  function closeFilterDialog() {
     showAddFilterDialog = false;
+    tempFilterValues = {};
   }
 
   function removeFilterItem(index: number) {
     filterItems.splice(index, 1);
+    selectedFilterOptions.splice(index, 1);
     updateFilterWithItems();
   }
 
   function updateFilterWithItems() {
-    const value = {};
-
-    // Apply filters from filterItems
-    filterItems.forEach((item) => {
-      if (item.option && item.value) {
-        const key = props.columns.find((it) => it.title === item.option)?.key;
-        if (key) {
-          value[key] = item.value;
-        }
-      }
-    });
-
-    emit('filter-change', value);
+    handleSubmit(filterItems);
   }
 
   const realSchemas: any[] = reactive([]);
-  // watchEffect(async () => {
-  //   console.log(props.formFields, 'props');
-  //   realSchemas.length = 0;
-  //   const res = [];
-  //   for (const it of props.formFields) {
-  //     res.push(await it);
-  //   }
-  //   realSchemas.push(...res);
-  // });
   const schemas: FormField[] = $computed(() => {
     return realSchemas.map(convertFormFieldToSchema).map((it) => {
       if (props?.defaultValueModel?.[it.field]) {
         it.defaultValue = props?.defaultValueModel?.[it.field];
       }
-      // it.componentProps.placeholder = it.componentProps.placeholder
-      //   .replace('请输入', '')
-      //   .replace('请选择', '');
-      // it.componentProps.size = 'small';
       return it;
     });
   });
@@ -168,21 +184,10 @@
   });
 
   function handleSubmit(values: Recordable) {
-    // Apply filters from filterItems
-    filterItems.forEach((item) => {
-      if (item.option && item.value) {
-        const key = props.columns.find((it) => it.title === item.option)?.key;
-        if (key) {
-          values[key] = item.value;
-        }
-      }
-    });
-
     emit('submit', values);
   }
 
   function cancel() {
-    console.log(form.value.formModel);
     emit('cancel', form.value.formModel);
   }
 
@@ -193,6 +198,18 @@
     localShowAll = false;
     emit('clear');
   }
+
+  function getComponentProps(option) {
+    const compProps = option.componentProps ?? {};
+    const component = option.component;
+    return {
+      clearable: true,
+      placeholder: createPlaceholderMessage(unref(component)),
+      ...compProps,
+    };
+  }
+
+  const formModel = reactive<Recordable>({});
 </script>
 
 <template>
@@ -214,49 +231,14 @@
           添加过滤项
         </n-button>
 
-        <template v-for="(item, index) in filterItems" :key="index">
-          <n-card
-            :content-style="{ padding: '0 8px' }"
-            class="filter-card ml-2"
-            embedded
-            size="small"
-          >
-            <div class="filter-row">
-              <!--              <div class="filter-option-text">-->
-              <!--                {{ item.option }}-->
-              <!--              </div>-->
-              <n-input
-                v-model:value="item.value"
-                :placeholder="item.option"
-                class="filter-input"
-                size="tiny"
-                type="text"
-                @blur="updateFilterWithItems"
-              />
-              <n-button
-                class="remove-filter-button"
-                size="tiny"
-                type="error"
-                @click="removeFilterItem(index)"
-              >
-                <template #icon>
-                  <n-icon>
-                    <Delete20Regular />
-                  </n-icon>
-                </template>
-              </n-button>
-            </div>
-          </n-card>
-        </template>
-
-        <n-date-picker
-          v-model:value="localDateRange"
-          class="ml-2 date-picker-small"
-          clearable
-          size="small"
-          type="daterange"
-        />
-        <n-checkbox v-model:checked="localShowAll" class="ml-2" label="全部" size="large" />
+        <!-- Display filter items as tags -->
+        <div class="filter-tags-container">
+          <template v-for="(item, index) in filterItems" :key="index">
+            <n-tag class="filter-tag ml-2" closable type="info" @close="removeFilterItem(index)">
+              <span class="filter-tag-label">{{ item.option }}: {{ item.display }}</span>
+            </n-tag>
+          </template>
+        </div>
       </div>
       <slot></slot>
       <slot :submit="submit" name="extraSubmitButton"></slot>
@@ -268,22 +250,73 @@
       :show-icon="false"
       class="modal-medium"
       preset="card"
-      style="width: 600px"
+      style="width: 500px"
       title="添加过滤项"
     >
+      <!-- Filter input boxes for selected filters -->
+      <div v-if="selectedFilterOptions.length > 0" class="selected-filters-inputs">
+        <div v-for="option in selectedFilterOptions" :key="option.title" class="filter-input-item">
+          <span class="filter-input-label">{{ option.title }}:</span>
+          <!--判断插槽-->
+          <template v-if="option.slot">
+            <slot
+              :field="option.key"
+              :model="formModel"
+              :name="option.slot"
+              :value="formModel[option.key]"
+            ></slot>
+          </template>
+          <template v-else-if="option.component === 'NAutoComplete'">
+            <n-select
+              v-model:value="formModel[option.key]"
+              :get-show="() => true"
+              v-bind="getComponentProps(option)"
+            />
+          </template>
+          <template v-else-if="option.component === 'NSelect'">
+            <n-select
+              v-model:value="formModel[option.key]"
+              :get-show="() => true"
+              filterable
+              v-bind="getComponentProps(option)"
+            />
+          </template>
+          <!--动态渲染表单组件-->
+          <component
+            :is="option.component"
+            v-else
+            v-model:value="formModel[option.key]"
+            v-bind="getComponentProps(option)"
+          />
+        </div>
+      </div>
+
+      <!-- Available filter options section -->
+      <div class="section-header">可选择的过滤项</div>
       <div class="filter-options-container">
         <n-card
           v-for="column in availableColumns"
           :key="column.key"
           :class="[
             'filter-option-card',
-            { selected: selectedFilterOptions.includes(column.title) },
+            { selected: selectedFilterOptions.some((item) => item.title === column.title) },
           ]"
           embedded
           size="small"
-          @click="handleAddFilter(column.title)"
+          @click="handleAddFilter(column)"
         >
-          {{ column.title }}
+          <div class="filter-option-content">
+            {{ column.title }}
+            <n-button
+              v-if="selectedFilterOptions.some((item) => item.title === column.title)"
+              circle
+              class="cancel-selection-button"
+              quaternary
+              size="tiny"
+              type="error"
+              @click.stop="removeSelectedOption(column.title)"
+            />
+          </div>
         </n-card>
       </div>
       <div class="dialog-footer">
@@ -351,17 +384,50 @@
   .filter-options-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    max-height: 400px;
+    gap: 8px;
+    max-height: 300px;
     overflow-y: auto;
+    padding: 4px;
   }
 
   .filter-option-card {
-    width: calc(33.33% - 10px);
+    width: calc(25% - 8px);
     cursor: pointer;
     text-align: center;
-    padding: 10px;
+    padding: 4px 6px;
     transition: background-color 0.3s;
+    font-size: 12px;
+    line-height: 1.2;
+    max-height: 32px;
+    overflow: hidden;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .filter-option-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cancel-selection-button {
+    position: absolute;
+    right: -4px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 4px;
+    padding: 2px;
+    min-width: 16px;
+    height: 16px;
+    line-height: 1;
+    font-size: 10px;
   }
 
   .filter-option-card:hover {
@@ -391,5 +457,86 @@
 
   .date-picker-small {
     height: 32px; /* Match the height of small buttons */
+  }
+
+  .selected-filters-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+    padding: 6px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    min-height: 32px;
+  }
+
+  .selected-filter-tag {
+    margin-right: 3px;
+    margin-bottom: 3px;
+  }
+
+  .selected-filters-inputs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding: 8px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+  }
+
+  .filter-input-item {
+    display: flex;
+    align-items: center;
+    min-width: 180px;
+    margin-bottom: 6px;
+  }
+
+  .filter-input-label {
+    font-weight: 500;
+    margin-right: 6px;
+    min-width: 70px;
+    font-size: 12px;
+  }
+
+  .filter-input-field {
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .section-header {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid #e8e8e8;
+  }
+
+  .filter-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .filter-tag {
+    display: flex;
+    align-items: center;
+    padding: 1px 6px;
+    margin-bottom: 3px;
+  }
+
+  .filter-tag-label {
+    margin-right: 3px;
+    font-weight: 500;
+    font-size: 12px;
+  }
+
+  .filter-tag-input {
+    width: 80px;
+    height: 20px;
+    margin: 0 3px;
+    font-size: 12px;
   }
 </style>

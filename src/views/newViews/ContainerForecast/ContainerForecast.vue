@@ -115,6 +115,7 @@
         :show-icon="false"
         class="modal-medium"
         preset="card"
+        style="width: 90%; min-width: 800px; max-width: 800px"
         title="添加表头"
       >
         <selected-header-table
@@ -181,16 +182,17 @@
   import NotifyFeeDialog from '@/views/newViews/ContainerForecast/form/NotifyFeeDialog.vue';
   import WarehouseInfoDialog from '@/views/newViews/ContainerForecast/form/WarehouseInfoDialog.vue';
   import ContainerForecastIndex from '@/views/newViews/ContainerForecast/form/ContainerForecastIndex.vue';
-  import { dateCompare } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import UnloadingList from '@/views/newViews/ContainerForecast/form/UnloadingList.vue';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
   import { getUserCustomerList, hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
-  import { valueOfToday } from '@/api/dataLayer/common/Date';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
   import FileSaver from 'file-saver';
-  import { addOrUpdateNotify, getNotifyListByFilterWithPagination } from '@/api/newDataLayer/Notify/Notify';
+  import {
+    addOrUpdateNotify,
+    getNotifyListByFilterWithPagination,
+  } from '@/api/newDataLayer/Notify/Notify';
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
   import { addOrUpdateTask, getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
@@ -304,30 +306,32 @@
   }
   const loadDataTable = async () => {
     // Build filter criteria
-    const currentFilter = filterObj
-      ? Object.keys(filterObj).map((filterItem) => ({
-          field: filterItem,
-          op: filterObj[filterItem] ? 'like' : '!=',
-          value: `%${filterObj[filterItem] || ''}%`,
-        }))
-      : [];
+    let currentFilter = [];
+    if (filterObj) {
+      const filterOne = filterObj.filter((it) => it?.component?.name !== 'DatePicker');
+      const filterTwo = filterObj.filter((it) => it?.component?.name === 'DatePicker');
+      const filterWithOutDate = filterOne
+        ? Object.keys(filterOne).map((filterItem) => ({
+            field: filterOne[filterItem].key,
+            op: filterOne[filterItem].value ? 'like' : '!=',
+            value: `%${filterOne[filterItem].value || ''}%`,
+          }))
+        : [];
+      const filterWithDate = filterTwo
+        ? Object.keys(filterTwo).map((filterItem) => ({
+            field: filterTwo[filterItem].key,
+            op: filterTwo[filterItem].value ? 'like' : '!=',
+            value: `%${filterTwo[filterItem].value || ''}%`,
+          }))
+        : [];
+      currentFilter = filterWithOutDate.concat(filterWithDate);
+    }
 
     // Get customer list
     const customerId = await getUserCustomerList();
 
     // Add customer filter
     currentFilter.push({ field: 'customer.id', op: 'in', value: customerId });
-
-    // Filter canceled items if not showing all
-    if (!showAll) {
-      currentFilter.push({ field: 'inStatus', op: '!=', value: '已取消' });
-    }
-
-    // Apply date range filter if present
-    if (dateRange) {
-      currentFilter.push({ field: 'planArriveDateTime', op: '>=', value: dateRange[0] });
-      currentFilter.push({ field: 'planArriveDateTime', op: '<=', value: dateRange[1] });
-    }
 
     // Get paginated data
     const res = await getNotifyListByFilterWithPagination(currentFilter, paginationReactive);
@@ -366,41 +370,13 @@
     }
 
     // Sort and return results with fake items for pagination
-    return fakeListStart.concat(allList.sort(dateCompare('planArriveDateTime')).concat(fakeListEnd));
+    return fakeListStart.concat(allList.concat(fakeListEnd));
   };
 
   const actionRef = ref();
 
   function updateFilter(value) {
-    if (value !== null) {
-      // Apply additional filters from the filter inputs
-      if (optionOne && valueOne) {
-        const keyOne = columns.find((it) => it.title === optionOne)?.key;
-        if (keyOne) {
-          value[keyOne] = valueOne;
-        }
-      }
-
-      if (optionTwo && valueTwo) {
-        const keyTwo = columns.find((it) => it.title === optionTwo)?.key;
-        if (keyTwo) {
-          value[keyTwo] = valueTwo;
-        }
-      }
-
-      filterObj = value;
-    } else {
-      // Reset all filters
-      filterObj = null;
-      optionOne = '';
-      valueOne = '';
-      optionTwo = '';
-      valueTwo = '';
-      dateRange = null;
-      filterItems = [];
-    }
-
-    // Reload the table with the new filters
+    filterObj = value;
     reloadTable();
   }
 
@@ -623,11 +599,6 @@
     key: 'action',
     width: 200,
     render(record: any) {
-      // const fileAction = (label, key, icon?: Component, power) => {
-      //   return getFileActionButton(label, key, addOrUpdateNotify, reloadTable, record, icon, power);
-      // };
-
-      // Custom file action with icon
       const iconFileAction = (label, key, icon, power) => {
         return {
           icon: renderIconWithTooltip(icon, label),

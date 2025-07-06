@@ -3,32 +3,30 @@
     <filter-bar
       v-if="finished"
       v-model="filterItems"
-      v-model:dateRange="dateRange"
-      v-model:showAll="showAll"
-      :columns="columns"
+      :columns="typeMission === '卸柜结算' ? columnsIn : columnsOut"
       :default-value-model="filterObj"
       :form-fields="filters"
       @clear="updateFilter(null)"
       @submit="updateFilter"
       @filter-change="updateFilterWithItems"
     />
-    <div class="mt-2">
-      <n-button
-        v-if="hasAuthPower('settlementManageMerge')"
-        :disabled="checkedRows.length == 0"
-        class="action-button"
-        size="small"
-        type="primary"
-        @click="merge()"
-      >
-        <template #icon>
-          <n-icon>
-            <Box20Filled />
-          </n-icon>
-        </template>
-        合并对账
-      </n-button>
-    </div>
+    <!--    <div class="mt-2">-->
+    <!--      <n-button-->
+    <!--        v-if="hasAuthPower('settlementManageMerge')"-->
+    <!--        :disabled="checkedRows.length == 0"-->
+    <!--        class="action-button"-->
+    <!--        size="small"-->
+    <!--        type="primary"-->
+    <!--        @click="merge()"-->
+    <!--      >-->
+    <!--        <template #icon>-->
+    <!--          <n-icon>-->
+    <!--            <Box20Filled />-->
+    <!--          </n-icon>-->
+    <!--        </template>-->
+    <!--        合并对账-->
+    <!--      </n-button>-->
+    <!--    </div>-->
     <div class="my-2"></div>
     <n-tabs
       v-model:value="typeMission"
@@ -49,8 +47,11 @@
           v-model:checked-row-keys="checkedRows"
           :action-column="actionColumn"
           :columns="typeMission === '卸柜结算' ? columnsIn : columnsOut"
+          :pagination="paginationReactive"
           :request="loadDataTable"
           :row-key="(row) => row.id"
+          @update:page="handlePageChange"
+          @update:pageSize="handlePageSizeChange"
         />
       </n-tab-pane>
     </n-tabs>
@@ -99,24 +100,17 @@
     FinanceManager,
   } from '@/api/dataLayer/modules/cash/cash';
   import NewSettlement from '@/views/newViews/SettlementManage/NewSettlement.vue';
-  import {
-    Box20Filled,
-    Document20Regular,
-    DocumentEdit20Regular,
-    Payment20Regular,
-  } from '@vicons/fluent';
+  import { Document20Regular, DocumentEdit20Regular, Payment20Regular } from '@vicons/fluent';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
   import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import { getSettlementById, updateSettlement } from '@/api/dataLayer/common/SettlementType';
   import NewTotalFee from '@/views/newViews/SettlementManage/NewTotalFee.vue';
-  import dayjs from 'dayjs';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
-  import { valueOfToday } from '@/api/dataLayer/common/Date';
   import { columns } from '@/views/newViews/ContainerForecast/columns';
-  import { getNotifySettlement } from '@/api/newDataLayer/NotifySettlement/NotifySettlement';
-  import { getSettlementList } from '@/api/newDataLayer/TaskListSettlement/TaskListSettlement';
+  import { getNotifySettlementByFilterWithPagination } from '@/api/newDataLayer/NotifySettlement/NotifySettlement';
+  import { getSettlementListByFilterWithPagination } from '@/api/newDataLayer/TaskListSettlement/TaskListSettlement';
   import { getNotifyById } from '@/api/newDataLayer/Notify/Notify';
   import NotifyDetail from '@/views/newViews/SettlementManage/NotifyDetail.vue';
   import { NIcon, NTooltip } from 'naive-ui';
@@ -144,6 +138,26 @@
   let showNotifyDetail = $ref(false);
   let filterItems = $ref<Array<{ option: string; value: string }>>([]);
   let showAll = $ref(false);
+  let filterObj: any | null = $ref(null);
+
+  const paginationReactive = reactive({
+    defaultPage: 1,
+    pageNumber: 0,
+    pageSize: 10,
+    defaultPageSize: 10,
+    showSizePicker: true,
+    pageSizes: [10, 20, 50, 100],
+    onChange: (page: number) => {
+      paginationReactive.pageNumber = page - 1;
+      // reloadTable() is called by handlePageChange, no need to call it here
+    },
+    onUpdatePageSize: (pageSize: number) => {
+      paginationReactive.pageSize = pageSize;
+      paginationReactive.pageNumber = 0;
+      // Let the BasicTable component handle the data fetching
+    },
+  });
+
   onMounted(() => {
     monthTab = OneYearMonthTab();
     selectedMonth = monthTab[0];
@@ -165,54 +179,84 @@
   });
 
   const loadDataTable = async () => {
+    // Build filter criteria
+    let currentFilter = [];
+    if (filterObj) {
+      const filterOne = filterObj.filter((it) => it?.component?.name !== 'DatePicker');
+      const filterTwo = filterObj.filter((it) => it?.component?.name === 'DatePicker');
+      const filterWithOutDate = filterOne
+        ? Object.keys(filterOne).map((filterItem) => ({
+            field: filterOne[filterItem].key,
+            op: filterOne[filterItem].value ? 'like' : '!=',
+            value: `%${filterOne[filterItem].value || ''}%`,
+          }))
+        : [];
+      const filterWithDate = filterTwo
+        ? Object.keys(filterTwo).map((filterItem) => ({
+            field: filterTwo[filterItem].key,
+            op: filterTwo[filterItem].value ? 'like' : '!=',
+            value: `%${filterTwo[filterItem].value || ''}%`,
+          }))
+        : [];
+      currentFilter = filterWithOutDate.concat(filterWithDate);
+    }
+
+    let res;
     if (typeMission === '货柜结算') {
-      allList = await getSettlementList();
+      res = await getSettlementListByFilterWithPagination(currentFilter, paginationReactive);
     } else {
-      allList = await getNotifySettlement();
+      res = await getNotifySettlementByFilterWithPagination(currentFilter, paginationReactive);
     }
-    console.log(allList, 'list');
-    if (dateRange) {
-      let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-      let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-      allList = allList.filter(
-        (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
-      );
+
+    allList = res.content;
+    const totalCount = res.page.totalElements;
+
+    // Create fake list items for pagination display
+    let fakeListStart = [];
+    let fakeListEnd = [];
+
+    if (paginationReactive.pageNumber > 0) {
+      fakeListStart = Array(paginationReactive.pageNumber * paginationReactive.pageSize)
+        .fill(null)
+        .map((it, index) => {
+          return { key: index };
+        });
     }
-    return allList;
+
+    if (paginationReactive.pageSize < totalCount) {
+      if (totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1) > 0) {
+        fakeListEnd = Array(
+          totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1)
+        )
+          .fill(null)
+          .map((it, index) => {
+            return { key: index };
+          });
+      }
+    }
+
+    // Return results with fake items for pagination
+    return fakeListStart.concat(allList.concat(fakeListEnd));
   };
 
-  let filterObj: any | null = $ref(null);
-
   function updateFilter(value) {
-    if (value !== null) {
-      if (optionOne && valueOne) {
-        const keyOne = columns.find((it) => it.title === optionOne)?.key;
-        if (keyOne) {
-          value[keyOne] = valueOne;
-        }
-      }
-      if (optionTwo && valueTwo) {
-        const keyTwo = columns.find((it) => it.title === optionTwo)?.key;
-        if (keyTwo) {
-          value[keyTwo] = valueTwo;
-        }
-      }
-      filterObj = value;
-    } else {
-      filterObj = null;
-      optionOne = '';
-      valueOne = '';
-      optionTwo = '';
-      valueTwo = '';
-      dateRange = null;
-      filterItems = [];
-      showAll = false;
-    }
+    filterObj = value;
     reloadTable();
   }
 
   function updateFilterWithItems(value) {
     filterObj = value;
+    reloadTable();
+  }
+
+  function handlePageChange(page: number) {
+    paginationReactive.pageNumber = page - 1;
+    reloadTable();
+  }
+
+  function handlePageSizeChange(pageSize: number) {
+    paginationReactive.pageSize = pageSize;
+    paginationReactive.pageNumber = 0;
     reloadTable();
   }
 

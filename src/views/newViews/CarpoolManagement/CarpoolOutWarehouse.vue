@@ -5,6 +5,7 @@
       v-model:dateRange="dateRange"
       v-model:showAll="showAll"
       :columns="outCarColumns"
+      :pagination="paginationReactive"
       @clear="updateFilter(null)"
       @submit="updateFilter"
       @filter-change="updateFilterWithItems"
@@ -87,7 +88,7 @@
   import { generateOptionFromArray } from '@/store/utils/utils';
   import { columns } from '@/views/newViews/ContainerForecast/columns';
   import FileSaver from 'file-saver';
-  import { getOutWarehouseDetailListById } from '@/api/dataLayer/modules/GetListById';
+  import * as XLSX from 'xlsx';
   import { NIcon, NTooltip } from 'naive-ui';
   import {
     ArrowDownload20Regular,
@@ -98,7 +99,7 @@
   } from '@vicons/fluent';
   import {
     deleteExternalVehicleList,
-    getExternalVehicleList,
+    getExternalVehicleListByFilterWithPagination,
     updateExternalVehicle,
   } from '@/api/newDataLayer/CarManage/ExternalVehicle';
   import dayjs from 'dayjs';
@@ -127,10 +128,78 @@
   const realOptions = computed(() => {
     return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
   });
+
+  const paginationReactive = reactive({
+    defaultPage: 1,
+    pageNumber: 0,
+    pageSize: 10,
+    defaultPageSize: 10,
+    showSizePicker: true,
+    pageSizes: [10, 20, 50, 100],
+    onChange: (page: number) => {
+      paginationReactive.pageNumber = page - 1;
+    },
+    onUpdatePageSize: (pageSize: number) => {
+      paginationReactive.pageSize = pageSize;
+      paginationReactive.pageNumber = 0;
+    },
+  });
+
   const loadDataTable = async () => {
-    let res = await getExternalVehicleList();
-    console.log(res);
-    return res;
+    let currentFilter = [];
+    if (filterObj) {
+      const filterOne = filterObj.filter((it) => it?.component?.name !== 'DatePicker');
+      const filterTwo = filterObj.filter((it) => it?.component?.name === 'DatePicker');
+      const filterWithOutDate = filterOne
+        ? Object.keys(filterOne).map((filterItem) => ({
+            field: filterOne[filterItem].key,
+            op: filterOne[filterItem].value ? 'like' : '!=',
+            value: `%${filterOne[filterItem].value || ''}%`,
+          }))
+        : [];
+      const filterWithDate = filterTwo
+        ? Object.keys(filterTwo).map((filterItem) => ({
+            field: filterTwo[filterItem].key,
+            op: filterTwo[filterItem].value ? 'like' : '!=',
+            value: `%${filterTwo[filterItem].value || ''}%`,
+          }))
+        : [];
+      currentFilter = filterWithOutDate.concat(filterWithDate);
+    }
+
+    const res = await getExternalVehicleListByFilterWithPagination(
+      currentFilter,
+      paginationReactive
+    );
+
+    let allList = res.content;
+    const totalCount = res.page.totalElements;
+
+    let fakeListStart = [];
+    let fakeListEnd = [];
+
+    if (paginationReactive.pageNumber > 0) {
+      fakeListStart = Array(paginationReactive.pageNumber * paginationReactive.pageSize)
+        .fill(null)
+        .map((it, index) => {
+          return { key: index };
+        });
+    }
+
+    if (paginationReactive.pageSize < totalCount) {
+      if (totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1) > 0) {
+        fakeListEnd = Array(
+          totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1)
+        )
+          .fill(null)
+          .map((it, index) => {
+            return { key: index };
+          });
+      }
+    }
+    console.log(allList);
+    return fakeListStart.concat(allList.concat(fakeListEnd));
+
     // let res = (await OutWarehouseManager.load()).sort(dateCompare('realDate'));
     // if (dateRange) {
     //   let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
@@ -142,75 +211,61 @@
 
   async function downloadData() {
     let selectedList = [];
-    if (checkedRows.length > 0) {
-      selectedList = await getOutWarehouseDetailListById(checkedRows);
-    } else {
-      selectedList = await loadDataTable();
-    }
-    let headerTitle = outCarColumns
-      .filter((it) => it.title)
-      .map((it) => it.title)
-      .join();
-    let dataStrings = [];
-    dataStrings.unshift(headerTitle);
-    selectedList.forEach((it) => {
-      const res = [
-        it.realDate ?? '',
-        it.channel ?? '',
-        it.carType ?? '',
-        it.customerId ?? '',
-        it.orderId ?? '',
-        it.trayNumber ?? '',
-        it.boxNumber ?? '',
-        it.stackable ?? '',
-        it.needEquipment ?? '',
-        it.pickingAddress ?? '',
-        it.sendingAddress ?? '',
-        it.pickingDate ?? '',
-        it.sendingDate ?? '',
-        it.platformOrderId ?? '',
-        it.offerPrice ?? '',
-        it.POD ?? '',
-        it.size ?? '',
-        it.demand ?? '',
-        it.priceDemand ?? '',
-        it.warehouseDeliveryFile ?? '',
-        it.logisticsCompany ?? '',
-        it.costPrice ?? '',
-        it.logisticsPrice ?? '',
-        it.status ?? '',
-        it.note ?? '',
-      ];
-      dataStrings.push(res.join());
+    selectedList = await loadDataTable();
+    // Create a 2D array for Excel data
+    const data = [];
+    const headers = outCarColumns.filter((it) => it.title).map((it) => it.title);
+    data.push(headers);
+
+    // Add data rows
+    selectedList.forEach((item) => {
+      const row = [];
+      outCarColumns
+        .filter((col) => col.title)
+        .forEach((col) => {
+          // Handle nested properties like 'customer.customerName'
+          if (col.key && col.key.includes('.')) {
+            const keys = col.key.split('.');
+            let value = item;
+            for (const key of keys) {
+              value = value && value[key];
+            }
+            row.push(value || '');
+          } else if (col.key) {
+            // If the field is orderDate, format it using dayjs
+            if (col.key === 'orderDate' && item[col.key]) {
+              row.push(dayjs(item[col.key]).format('YYYY-MM-DD'));
+            } else {
+              row.push(item[col.key] || '');
+            }
+          } else {
+            row.push('');
+          }
+        });
+      data.push(row);
     });
-    dataStrings = dataStrings.join('\n');
-    const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
-    FileSaver.saveAs(blob, '库外订车' + '.csv');
+
+    // Create a workbook
+    const workbook = XLSX.utils.book_new();
+    // Convert data to worksheet
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    // Generate Excel file
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+    // Save file
+    FileSaver.saveAs(blob, '库外订车.xlsx');
   }
 
   onMounted(async () => {});
   const actionRef = ref();
 
   function updateFilter(value) {
-    if (value !== null) {
-      if (optionOne && valueOne) {
-        const keyOne = outCarColumns.find((it) => it.title === optionOne).key;
-
-        value[keyOne] = valueOne;
-      }
-      if (optionTwo && valueTwo) {
-        const keyTwo = outCarColumns.find((it) => it.title === optionTwo).key;
-        value[keyTwo] = valueTwo;
-      }
-      filterObj = value;
-    } else {
-      filterObj = null;
-      optionOne = '';
-      valueOne = '';
-      optionTwo = '';
-      valueTwo = '';
-      dateRange = null;
-    }
+    filterObj = value;
+    console.log(filterObj, 'filterObj');
     reloadTable();
   }
 

@@ -94,7 +94,6 @@ export async function asyncInventoryFormField(
     label: it.companyName,
     value: it.id,
   }));
-  console.log(userList);
   return {
     field: field,
     label: label,

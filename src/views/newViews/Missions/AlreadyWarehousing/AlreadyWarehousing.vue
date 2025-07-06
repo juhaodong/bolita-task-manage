@@ -212,6 +212,7 @@
     storageTimeWarnColumn,
     timeColumn,
     timeWarnColumn,
+    timeWarnList,
   } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
@@ -294,6 +295,14 @@
     {
       type: 'selection',
       disabled: (row) => row.inStatus !== InBoundDetailStatus.WaitCheck,
+    },
+    {
+      title: '时效',
+      key: 'usefulTimeRange',
+      component: 'NSelect',
+      componentProps: {
+        options: timeWarnList,
+      },
     },
     {
       title: '客户ID',
@@ -500,6 +509,7 @@
 
   const actionRef = ref();
   const props = defineProps<Prop>();
+
   interface Prop {
     belongsToId?: string;
   }
@@ -684,39 +694,48 @@
   const loadDataTable = async () => {
     let currentFilter = [];
     if (filterObj) {
-      const res = Object.keys(filterObj);
-      for (const filterItem of res) {
-        if (filterItem === 'usefulTimeRange') {
-          console.log(filterObj[filterItem]);
-          if (filterObj[filterItem] === '红色') {
-            currentFilter.push({
-              field: filterItem,
-              op: '>=',
-              value: 15,
-            });
-          } else if (filterObj[filterItem] === '黄色') {
-            currentFilter.push({
-              field: filterItem,
-              op: '>=',
-              value: 7,
-            });
-            currentFilter.push({
-              field: filterItem,
-              op: '<',
-              value: 15,
-            });
-          } else {
-            currentFilter.push({
-              field: filterItem,
-              op: '<',
-              value: 7,
-            });
-          }
+      const otherFilter = filterObj.filter((it) => it?.key !== 'usefulTimeRange');
+      const filterOne = otherFilter.filter((it) => it?.component?.name !== 'DatePicker');
+      const filterTwo = otherFilter.filter((it) => it?.component?.name === 'DatePicker');
+      const filterWithOutDate = filterOne
+        ? Object.keys(filterOne).map((filterItem) => ({
+            field: filterOne[filterItem].key,
+            op: filterOne[filterItem].value ? 'like' : '!=',
+            value: `%${filterOne[filterItem].value || ''}%`,
+          }))
+        : [];
+      const filterWithDate = filterTwo
+        ? Object.keys(filterTwo).map((filterItem) => ({
+            field: filterTwo[filterItem].key,
+            op: filterTwo[filterItem].value ? 'like' : '!=',
+            value: `%${filterTwo[filterItem].value || ''}%`,
+          }))
+        : [];
+      currentFilter = filterWithOutDate.concat(filterWithDate);
+      const usefulTimeFilter = filterObj.find((it) => it?.key === 'usefulTimeRange');
+      if (usefulTimeFilter) {
+        if (usefulTimeFilter.value === '红色') {
+          currentFilter.push({
+            field: 'usefulTimeRange',
+            op: '>=',
+            value: 15,
+          });
+        } else if (usefulTimeFilter.value === '黄色') {
+          currentFilter.push({
+            field: 'usefulTimeRange',
+            op: '>=',
+            value: 7,
+          });
+          currentFilter.push({
+            field: 'usefulTimeRange',
+            op: '<',
+            value: 15,
+          });
         } else {
           currentFilter.push({
-            field: filterItem,
-            op: filterObj[filterItem] ? 'like' : '!=',
-            value: '%' + filterObj[filterItem] + '%' ?? '',
+            field: 'usefulTimeRange',
+            op: '<',
+            value: 7,
           });
         }
       }
@@ -736,27 +755,6 @@
 
     const ownedCustomerIds = await getUserCustomerList();
     currentFilter.push({ field: 'customer.id', op: 'in', value: ownedCustomerIds });
-    // if (!showAll) {
-    //   const oldValue = currentFilter.find((it) => it.field === 'inStatus')?.value;
-    //   console.log(oldValue, 'old');
-    //   const currentValue = oldValue ? oldValue.push('已取消') : ['已取消'];
-    //   console.log(currentValue, 'value');
-    //   currentFilter = currentFilter.filter((it) => it.field !== 'inStatus');
-    //   currentFilter.push({
-    //     field: 'inStatus',
-    //     op: 'in',
-    //     value: currentValue,
-    //   });
-    // }
-    if (dateRange) {
-      currentFilter.push({ field: 'planArriveDateTime', op: '>=', value: dateRange[0] });
-      currentFilter.push({ field: 'planArriveDateTime', op: '<=', value: dateRange[1] });
-      // let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-      // let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-      // allList = allList.filter(
-      //   (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
-      // );
-    }
     const res = await getTaskListByFilterWithPagination(currentFilter, paginationReactive);
     allList = res.content;
     const totalCount = res.page.totalElements;
@@ -808,34 +806,8 @@
   };
 
   function updateFilter(value) {
-    if (value !== null) {
-      if (optionOne && valueOne) {
-        const keyOne = columns.find((it) => it.title === optionOne).key;
-        value[keyOne] = valueOne;
-      }
-      if (optionTwo && valueTwo) {
-        const keyTwo = columns.find((it) => it.title === optionTwo).key;
-        value[keyTwo] = valueTwo;
-      }
-      filterObj = value;
-      Object.keys(filterObj).forEach((key) => {
-        if (key === 'fcaddress') {
-          filterObj['FCAddress'] = filterObj[key];
-          delete filterObj[key];
-        }
-        if (key === 'ref') {
-          filterObj['REF'] = filterObj[key];
-          delete filterObj[key];
-        }
-      });
-    } else {
-      filterObj = null;
-      optionOne = '';
-      valueOne = '';
-      optionTwo = '';
-      valueTwo = '';
-      dateRange = null;
-    }
+    filterObj = value;
+    console.log(filterObj, 'filterObj');
     reloadTable();
   }
 
@@ -857,9 +829,8 @@
   async function reloadHeader() {
     currentWithOutSelection = [];
     currentHeader = [];
-    currentHeader = (await getTableHeaderGroupItemList('taskList'))
-      ? JSON.parse((await getTableHeaderGroupItemList('taskList'))?.headerItemJson)
-      : [];
+    const taskListHeader = await getTableHeaderGroupItemList('taskList');
+    currentHeader = taskListHeader ? JSON.parse(taskListHeader?.headerItemJson) : [];
     currentHeader.forEach((item) => {
       const res = columns.find((it) => it.key === item.itemKey);
       currentWithOutSelection.push(res);

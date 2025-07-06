@@ -11,12 +11,7 @@
         @filter-change="updateFilterWithItems"
       />
       <div class="mt-2">
-        <n-button
-          class="action-button"
-          size="small"
-          type="primary"
-          @click="selectedHeader"
-        >
+        <n-button class="action-button" size="small" type="primary" @click="selectedHeader">
           <template #icon>
             <n-icon>
               <TableSettings20Regular />
@@ -24,12 +19,7 @@
           </template>
           选择表头显示
         </n-button>
-        <n-button
-          class="action-button"
-          size="small"
-          type="success"
-          @click="downloadData"
-        >
+        <n-button class="action-button" size="small" type="success" @click="downloadData">
           <template #icon>
             <n-icon>
               <ArrowDownload20Regular />
@@ -73,22 +63,19 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
+  import { computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { columns, filters } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
+  import { columns } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
   import { $ref } from 'vue/macros';
-  import { getFileActionButton } from '@/views/bolita-views/composable/useableColumns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import {
     getDetailListById,
     NotifyDetailManager,
   } from '@/api/dataLayer/modules/notify/notify-detail';
-  import { 
+  import {
     ArrowDownload20Regular,
-    Box20Filled, 
+    CheckmarkCircle20Regular,
     TableSettings20Regular,
-    DocumentEdit20Regular,
-    CheckmarkCircle20Regular
   } from '@vicons/fluent';
   import { NIcon, NTooltip } from 'naive-ui';
   import dayjs from 'dayjs';
@@ -225,35 +212,38 @@
   const loadDataTable = async () => {
     let currentFilter = [];
     if (filterObj) {
-      const res = Object.keys(filterObj);
-      if (!res.includes('outboundId')) {
+      const filterByOutboundId = filterObj.find((it) => it.key === 'outboundId');
+      const otherFilter = filterObj.filter((it) => it.key !== 'outboundId');
+      const filterOne = otherFilter.filter((it) => it?.component?.name !== 'DatePicker');
+      const filterTwo = otherFilter.filter((it) => it?.component?.name === 'DatePicker');
+      const filterWithOutDate = filterOne
+        ? Object.keys(filterOne).map((filterItem) => ({
+            field: filterOne[filterItem].key,
+            op: filterOne[filterItem].value ? 'like' : '!=',
+            value: `%${filterOne[filterItem].value || ''}%`,
+          }))
+        : [];
+      const filterWithDate = filterTwo
+        ? Object.keys(filterTwo).map((filterItem) => ({
+            field: filterTwo[filterItem].key,
+            op: filterTwo[filterItem].value ? 'like' : '!=',
+            value: `%${filterTwo[filterItem].value || ''}%`,
+          }))
+        : [];
+      currentFilter = filterWithOutDate.concat(filterWithDate);
+      if (filterByOutboundId) {
+        currentFilter.push({
+          field: 'outboundId',
+          op: '==',
+          value: filterByOutboundId.value,
+        });
+      } else {
         currentFilter.push({
           field: 'outboundId',
           op: '!=',
           value: '',
         });
       }
-      for (const filterItem of res) {
-        if (filterItem === 'outboundId') {
-          currentFilter.push({
-            field: filterItem,
-            op: '==',
-            value: filterObj[filterItem],
-          });
-        } else {
-          currentFilter.push({
-            field: filterItem,
-            op: filterObj[filterItem] ? 'like' : '!=',
-            value: '%' + filterObj[filterItem] + '%' ?? '',
-          });
-        }
-      }
-    } else {
-      currentFilter.push({
-        field: 'outboundId',
-        op: '!=',
-        value: '',
-      });
     }
     const result = await getTaskListByFilterWithPagination(currentFilter, paginationReactive);
     allList = result.content;
@@ -276,50 +266,11 @@
           return { key: index };
         });
     }
-    if (dateRange) {
-      let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-      let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-      allList = allList.filter(
-        (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
-      );
-    }
     return fakeListStart.concat(allList.concat(fakeListEnd));
   };
 
   function updateFilter(value) {
-    if (value !== null) {
-      if (optionOne && valueOne) {
-        const keyOne = columns.find((it) => it.title === optionOne)?.key;
-        if (keyOne) {
-          value[keyOne] = valueOne;
-        }
-      }
-      if (optionTwo && valueTwo) {
-        const keyTwo = columns.find((it) => it.title === optionTwo)?.key;
-        if (keyTwo) {
-          value[keyTwo] = valueTwo;
-        }
-      }
-      filterObj = value;
-      Object.keys(filterObj).forEach((key) => {
-        if (key === 'fcaddress') {
-          filterObj['FCAddress'] = filterObj[key];
-          delete filterObj[key];
-        }
-        if (key === 'ref') {
-          filterObj['REF'] = filterObj[key];
-          delete filterObj[key];
-        }
-      });
-    } else {
-      filterObj = null;
-      optionOne = '';
-      valueOne = '';
-      optionTwo = '';
-      valueTwo = '';
-      dateRange = null;
-      filterItems = [];
-    }
+    filterObj = value;
     reloadTable();
   }
 

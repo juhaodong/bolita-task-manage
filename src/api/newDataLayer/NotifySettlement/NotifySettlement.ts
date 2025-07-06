@@ -6,6 +6,15 @@ export async function getNotifySettlement() {
   return (await hillo.jsonPost(typeName + '/list', {})).data.content;
 }
 
+export async function getNotifySettlementByFilterWithPagination(filter, pagination) {
+  return (
+    await hillo.jsonPost(typeName + '/list', {
+      ...pagination,
+      criteria: filter,
+    })
+  ).data;
+}
+
 export async function getNotifySettlementByNotifyId(id) {
   return (
     await hillo.jsonPost(typeName + '/list', {

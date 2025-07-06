@@ -44,6 +44,15 @@ export async function getOutboundForecastListByFilter(filter) {
   ).data.content;
 }
 
+export async function getOutboundForecastListByFilterWithPagination(filter, pagination) {
+  return (
+    await hillo.jsonPost(typeName + '/list', {
+      ...pagination,
+      criteria: filter,
+    })
+  ).data;
+}
+
 export async function deleteOutboundForecast(id) {
   return await hillo.jsonPost(typeName + '/deleteById/' + id, {});
 }
@@ -92,3 +101,5 @@ export const defaultOutboundList = {
   alreadyChanged: '',
   logisticsCompany: '',
 };
+
+export const waitOperationStatusList = ['已订车', '无需订车', '已装车', '已完成', '全部出库'];

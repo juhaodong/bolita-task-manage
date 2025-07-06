@@ -2,7 +2,7 @@ import { Component, h } from 'vue';
 import dayjs from 'dayjs';
 import { useUploadDialog } from '@/store/modules/uploadFileState';
 import { RouterLink } from 'vue-router';
-import { NInput, NText } from 'naive-ui';
+import { NDatePicker, NInput, NText } from 'naive-ui';
 import { safeParseInt } from '@/store/utils/utils';
 import { hasAuthPower } from '@/api/dataLayer/common/power';
 import { addOrUpdateWithRefOutboundForecast } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
@@ -68,6 +68,12 @@ export function timeWarnColumn(key = 'usefulTimeRange', title = '时效') {
     },
   };
 }
+
+export const timeWarnList = [
+  { label: '红色', value: '红色' },
+  { label: '黄色', value: '黄色' },
+  { label: '绿色', value: '绿色' },
+];
 
 export function storageTimeWarnColumn(key = 'stayTime', title = '留仓时间') {
   return {
@@ -218,6 +224,11 @@ export function timeColumn(
   return {
     title: title,
     key: keyName,
+    component: NDatePicker,
+    componentProps: {
+      type: 'daterange',
+      clearable: true,
+    },
     width: 110,
     render(record) {
       const display = record[keyName] ? dayjs(record[keyName]).format(timeFormat) : '-';

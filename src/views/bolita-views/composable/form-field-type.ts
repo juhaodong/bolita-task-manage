@@ -65,6 +65,37 @@ export function convertFormFieldToSchema(formField: FormField): FormSchema {
   };
 }
 
+export function convertFormColumn(column: column) {
+  const type = column?.component ?? 'NInput';
+  const verb = ['NInput', 'NInputNumber'].includes(type) ? '输入' : '选择';
+  const shouldUseNumber = ['NInputNumber', 'NDatePicker'].includes(type);
+  const required = column?.required ?? true;
+  const extraType = shouldUseNumber ? { type: 'number' } : {};
+  const rule: any = Object.assign(extraType, {
+    required: required,
+    message: '请' + verb + column.title,
+    trigger: ['blur'],
+  });
+  return {
+    component: type,
+    componentProps: Object.assign(
+      {
+        placeholder: '请' + verb + column.title,
+      },
+      column.componentProps
+    ),
+    labelMessage: column.labelMessage,
+    defaultValue: column.defaultValue,
+    key: column.key,
+    title: column.title,
+    displayCondition: column?.displayCondition,
+    rules: required ? [rule] : [],
+    disableCondition: column?.disableCondition,
+    onFormUpdate: column?.onFormUpdate,
+    group: column?.group,
+  };
+}
+
 export function convertFieldToColumn(field: FormField): BasicColumn {
   return {
     title: field.label,

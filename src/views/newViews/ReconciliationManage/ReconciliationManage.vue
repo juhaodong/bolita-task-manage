@@ -1,48 +1,14 @@
 <template>
   <n-card v-if="hasAuthPower('billManageView')" :bordered="false" class="proCard">
     <filter-bar
-      :default-value-model="filterObj"
-      :form-fields="filters"
+      v-model="filterItems"
+      v-model:dateRange="dateRange"
+      v-model:showAll="showAll"
+      :columns="columns"
       @clear="updateFilter(null)"
       @submit="updateFilter"
+      @filter-change="updateFilterWithItems"
     />
-    <div class="mt-2" style="display: flex; align-items: center; justify-items: center">
-      <n-card embedded size="small" style="max-width: 300px">
-        <div style="display: flex">
-          <n-select
-            v-model:value="optionOne"
-            :options="realOptions"
-            placeholder="过滤项1"
-            style="width: 130px"
-          />
-          <n-input
-            v-model:value="valueOne"
-            class="ml-2"
-            placeholder="过滤值1"
-            style="width: 130px"
-            type="text"
-          />
-        </div>
-      </n-card>
-      <n-card class="ml-2" embedded size="small" style="max-width: 300px">
-        <div style="display: flex">
-          <n-select
-            v-model:value="optionTwo"
-            :options="realOptions"
-            placeholder="过滤项2"
-            style="width: 130px"
-          />
-          <n-input
-            v-model:value="valueTwo"
-            class="ml-2"
-            placeholder="过滤值2"
-            style="width: 130px"
-            type="text"
-          />
-        </div>
-      </n-card>
-      <n-date-picker v-model:value="dateRange" class="ml-2" clearable type="daterange" />
-    </div>
     <div class="mt-2">
       <n-button
         v-if="hasAuthPower('billManageAdd')"
@@ -95,8 +61,11 @@
           v-model:checked-row-keys="checkedRows"
           :action-column="typeMission === '货柜对账' ? actionColumn : actionColumnContainer"
           :columns="typeMission === '货柜对账' ? columns : downProductsColumns"
+          :pagination="paginationReactive"
           :request="loadDataTable"
           :row-key="(row) => row.id"
+          @update:page="handlePageChange"
+          @update:pageSize="handlePageSizeChange"
         />
       </n-tab-pane>
     </n-tabs>
@@ -133,22 +102,15 @@
 </template>
 
 <script lang="ts" setup>
-  import { Component, computed, h, onMounted, reactive, ref } from 'vue';
+  import { computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { filters } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import { FinanceContainerManager, FinanceManager } from '@/api/dataLayer/modules/cash/cash';
   import NewReconciliation from '@/views/newViews/ReconciliationManage/NewReconciliation.vue';
+  import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
   import {
-    getFileActionButton,
-    statusColumnEasy,
-    timeColumn,
-  } from '@/views/bolita-views/composable/useableColumns';
-  import { 
     ArrowDownload20Regular,
-    Box20Filled,
-    Delete20Regular,
     Document20Regular,
     DocumentAdd20Regular,
     DocumentEdit20Regular,
@@ -158,7 +120,7 @@
   import { dateCompare, OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import { NButton, NIcon, NTooltip } from 'naive-ui';
-  import { generateOptionFromArray, handleRequest, toastSuccess } from '@/store/utils/utils';
+  import { generateOptionFromArray, toastSuccess } from '@/store/utils/utils';
   import ShowContainerDetailDialog from '@/views/newViews/ReconciliationManage/ShowContainerDetailDialog.vue';
   import ShowDownProductsDetailDialog from '@/views/newViews/ReconciliationManage/ShowDownProductsDetailDialog.vue';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
@@ -349,11 +311,28 @@
   let selectedMonth: any | null = $ref('');
   let currentModel: any | null = $ref(null);
   let allList: any | null = $ref([]);
-  let optionOne = $ref('');
-  let optionTwo = $ref('');
-  let valueOne = $ref('');
-  let valueTwo = $ref('');
   let dateRange = $ref(null);
+  let showAll = $ref(false);
+  let filterItems = $ref<Array<{ option: string; value: string }>>([]);
+
+  const paginationReactive = reactive({
+    defaultPage: 1,
+    pageNumber: 0,
+    pageSize: 10,
+    defaultPageSize: 10,
+    showSizePicker: true,
+    pageSizes: [10, 20, 50, 100],
+    pageCount: 0,
+    onChange: (page: number) => {
+      paginationReactive.pageNumber = page - 1;
+      // reloadTable() is called by handlePageChange, no need to call it here
+    },
+    onUpdatePageSize: (pageSize: number) => {
+      paginationReactive.pageSize = pageSize;
+      paginationReactive.pageNumber = 0;
+      // Let the BasicTable component handle the data fetching
+    },
+  });
 
   async function startEdit(id) {
     if (typeMission === '货柜对账') {
@@ -367,11 +346,14 @@
     return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
   });
   const loadDataTable = async () => {
+    // Load data based on mission type
     if (typeMission === '货柜对账') {
       allList = await FinanceManager.load(filterObj);
     } else {
       allList = await FinanceContainerManager.load(filterObj);
     }
+
+    // Apply date range filter if set
     if (dateRange) {
       let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
       let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
@@ -379,32 +361,76 @@
         (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
       );
     }
-    console.log(allList, 'list');
-    return allList.sort(dateCompare('createTimestamp'));
+
+    // Sort the data
+    allList = allList.sort(dateCompare('createTimestamp'));
+
+    // Get total count for pagination
+    const totalCount = allList.length;
+
+    // Apply pagination
+    const startIndex = paginationReactive.pageNumber * paginationReactive.pageSize;
+    const endIndex = startIndex + paginationReactive.pageSize;
+    const paginatedList = allList.slice(startIndex, endIndex);
+
+    // Create fake list items for pagination display
+    let fakeListStart = [];
+    let fakeListEnd = [];
+
+    if (paginationReactive.pageNumber > 0) {
+      fakeListStart = Array(paginationReactive.pageNumber * paginationReactive.pageSize)
+        .fill(null)
+        .map((it, index) => {
+          return { key: index };
+        });
+    }
+
+    if (paginationReactive.pageSize < totalCount) {
+      if (totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1) > 0) {
+        fakeListEnd = Array(
+          totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1)
+        )
+          .fill(null)
+          .map((it, index) => {
+            return { key: index };
+          });
+      }
+    }
+
+    // Update pagination total
+    paginationReactive.pageCount = Math.ceil(totalCount / paginationReactive.pageSize);
+
+    // Return paginated data with fake items for pagination
+    return fakeListStart.concat(paginatedList.concat(fakeListEnd));
   };
 
   let filterObj: any | null = $ref(null);
 
   function updateFilter(value) {
     if (value !== null) {
-      if (optionOne && valueOne) {
-        const keyOne = columns.find((it) => it.title === optionOne).key;
-
-        value[keyOne] = valueOne;
-      }
-      if (optionTwo && valueTwo) {
-        const keyTwo = columns.find((it) => it.title === optionTwo).key;
-        value[keyTwo] = valueTwo;
-      }
       filterObj = value;
     } else {
       filterObj = null;
-      optionOne = '';
-      valueOne = '';
-      optionTwo = '';
-      valueTwo = '';
+      filterItems = [];
       dateRange = null;
+      showAll = false;
     }
+    reloadTable();
+  }
+
+  function updateFilterWithItems(value) {
+    filterObj = value;
+    reloadTable();
+  }
+
+  function handlePageChange(page: number) {
+    paginationReactive.pageNumber = page - 1;
+    reloadTable();
+  }
+
+  function handlePageSizeChange(pageSize: number) {
+    paginationReactive.pageSize = pageSize;
+    paginationReactive.pageNumber = 0;
     reloadTable();
   }
   onMounted(async () => {

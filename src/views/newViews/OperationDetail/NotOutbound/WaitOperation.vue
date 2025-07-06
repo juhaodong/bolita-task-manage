@@ -33,8 +33,11 @@
       v-model:checked-row-keys="checkedRows"
       :actionColumn="actionColumn"
       :columns="currentColumns"
+      :pagination="paginationReactive"
       :request="loadDataTable"
       :row-key="(row) => row.id"
+      @update:page="handlePageChange"
+      @update:pageSize="handlePageSizeChange"
     />
     <n-modal
       v-model:show="showOutboundOrderDetail"
@@ -164,6 +167,8 @@
   import {
     addOrUpdateWithRefOutboundForecast,
     getOutboundForecastListByFilter,
+    getOutboundForecastListByFilterWithPagination,
+    waitOperationStatusList,
   } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
   import { addOrUpdateTask, getTaskListByOutboundId } from '@/api/newDataLayer/TaskList/TaskList';
@@ -203,6 +208,25 @@
   let dateRange = $ref(null);
   let showAll = $ref(false);
   let filterItems = $ref([]);
+
+  const paginationReactive = reactive({
+    defaultPage: 1,
+    pageNumber: 0,
+    pageSize: 10,
+    defaultPageSize: 10,
+    showSizePicker: true,
+    pageSizes: [10, 20, 50, 100],
+    onChange: (page: number) => {
+      paginationReactive.pageNumber = page - 1;
+      // reloadTable() is called by handlePageChange, no need to call it here
+    },
+    onUpdatePageSize: (pageSize: number) => {
+      paginationReactive.pageSize = pageSize;
+      paginationReactive.pageNumber = 0;
+      // Let the BasicTable component handle the data fetching
+    },
+  });
+
   const operationColumns = $ref([
     {
       title: 'ID',
@@ -304,20 +328,47 @@
     });
     showCurrentHeaderDataTable = false;
   }
+
   const loadDataTable = async () => {
+    // Build filter criteria
     let currentFilter = [];
     if (filterObj) {
-      const res = Object.keys(filterObj);
+      const filterOne = filterObj.filter((it) => it?.component?.name !== 'DatePicker');
+      const filterTwo = filterObj.filter((it) => it?.component?.name === 'DatePicker');
 
-      for (const filterItem of res) {
-        currentFilter.push({
-          field: filterItem,
-          op: filterObj[filterItem] ? 'like' : '!=',
-          value: '%' + filterObj[filterItem] + '%' ?? '',
-        });
-      }
+      const filterWithOutDate = filterOne
+        ? Object.keys(filterOne).map((filterItem) => ({
+            field: filterOne[filterItem].key,
+            op: filterOne[filterItem].value ? 'like' : '!=',
+            value: `%${filterOne[filterItem].value || ''}%`,
+          }))
+        : [];
+
+      const filterWithDate = filterTwo
+        ? Object.keys(filterTwo).map((filterItem) => ({
+            field: filterTwo[filterItem].key,
+            op: filterTwo[filterItem].value ? 'like' : '!=',
+            value: `%${filterTwo[filterItem].value || ''}%`,
+          }))
+        : [];
+
+      currentFilter = filterWithOutDate.concat(filterWithDate);
     }
-    let allList = await getOutboundForecastListByFilter(currentFilter);
+    currentFilter.push({
+      field: 'inStatus',
+      op: 'in',
+      value: waitOperationStatusList,
+    });
+
+    // Get paginated data
+    const res = await getOutboundForecastListByFilterWithPagination(
+      currentFilter,
+      paginationReactive
+    );
+    let allList = res.content;
+    const totalCount = res.page.totalElements;
+
+    // Filter by status
     currentList = allList.filter(
       (a) =>
         a.inStatus === CarStatus.Booked ||
@@ -326,71 +377,161 @@
         a.inStatus === '全部出库' ||
         a.inStatus === '已完成'
     );
-    if (dateRange) {
-      let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-      let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-      currentList = currentList.filter(
-        (it) => it.reservationGetProductTime > startDate && it.reservationGetProductTime < endDate
-      );
+
+    // Create fake list items for pagination display
+    let fakeListStart = [];
+    let fakeListEnd = [];
+
+    if (paginationReactive.pageNumber > 0) {
+      fakeListStart = Array(paginationReactive.pageNumber * paginationReactive.pageSize)
+        .fill(null)
+        .map((it, index) => {
+          return { key: index };
+        });
     }
-    console.log(
-      currentList.filter((it) => it.realOutDate),
-      '321'
-    );
-    return currentList.sort(dateCompare('createTimestamp'));
+
+    if (paginationReactive.pageSize < totalCount) {
+      if (totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1) > 0) {
+        fakeListEnd = Array(
+          totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1)
+        )
+          .fill(null)
+          .map((it, index) => {
+            return { key: index };
+          });
+      }
+    }
+
+    // Sort and return results with fake items for pagination
+    return fakeListStart.concat(currentList.concat(fakeListEnd));
   };
 
   async function downloadData() {
-    let selectedList = [];
-    selectedList = await loadDataTable();
-    let headerTitle = operationColumns
-      .filter((it) => it.title && it.title !== '详情')
-      .map((it) => it.title);
-    let data = [];
-    data.unshift(headerTitle);
-    selectedList.forEach((it) => {
-      const res = [
-        it.id ?? '',
-        it.realOutDate ?? '',
-        it.inventory.name ?? '',
-        it.customer.customerName ?? '',
-        it.pickUpDateTime ? dayjs(parseFloat(it.pickUpDateTime)).format('YYYY-MM-DD') : '',
-        it.reservationGetProductTime
-          ? dayjs(parseFloat(it.reservationGetProductTime)).format('YYYY-MM-DD')
-          : '',
-        it.inStatus ?? '',
-        it.ref ?? '',
-        it.isa ?? '',
-        it.amzid ?? '',
-        it.fcaddress ?? '',
-        it.deliveryMethod ?? '',
-        it.postcode ?? '',
-        it.outOperatePerson ?? '',
-      ];
-      data.push(res);
-    });
-    // 创建一个工作簿
-    const workbook = XLSX.utils.book_new();
-    // 将数据转换为工作表
-    const worksheet = XLSX.utils.aoa_to_sheet(data);
-    // 将工作表添加到工作簿
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+    try {
+      // Get all data without pagination for download
+      let currentFilter = [];
+      if (filterObj) {
+        if (Array.isArray(filterObj)) {
+          // Handle array format (from FilterBar component)
+          const filterOne = filterObj.filter((it) => it?.component?.name !== 'DatePicker');
+          const filterTwo = filterObj.filter((it) => it?.component?.name === 'DatePicker');
 
-    // 生成Excel文件
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+          const filterWithOutDate = filterOne
+            ? Object.keys(filterOne).map((filterItem) => ({
+                field: filterOne[filterItem].key,
+                op: filterOne[filterItem].value ? 'like' : '!=',
+                value: `%${filterOne[filterItem].value || ''}%`,
+              }))
+            : [];
 
-    // 保存文件
-    FileSaver.saveAs(blob, '出库看板.xlsx');
+          const filterWithDate = filterTwo
+            ? Object.keys(filterTwo).map((filterItem) => ({
+                field: filterTwo[filterItem].key,
+                op: filterTwo[filterItem].value ? 'like' : '!=',
+                value: `%${filterTwo[filterItem].value || ''}%`,
+              }))
+            : [];
+
+          currentFilter = filterWithOutDate.concat(filterWithDate);
+        } else {
+          // Handle object format (from direct filter)
+          const res = Object.keys(filterObj);
+          for (const filterItem of res) {
+            currentFilter.push({
+              field: filterItem,
+              op: filterObj[filterItem] ? 'like' : '!=',
+              value: '%' + filterObj[filterItem] + '%' ?? '',
+            });
+          }
+        }
+      }
+
+      // Get all data without pagination
+      let allList = await getOutboundForecastListByFilter(currentFilter);
+
+      // Filter by status
+      let selectedList = allList.filter(
+        (a) =>
+          a.inStatus === CarStatus.Booked ||
+          a.inStatus === '已装车' ||
+          a.inStatus === CarStatus.NoNeed ||
+          a.inStatus === '全部出库' ||
+          a.inStatus === '已完成'
+      );
+
+      // Filter by date range if provided
+      if (dateRange) {
+        let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
+        let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
+        selectedList = selectedList.filter(
+          (it) => it.reservationGetProductTime > startDate && it.reservationGetProductTime < endDate
+        );
+      }
+
+      // Sort data
+      selectedList = selectedList.sort(dateCompare('createTimestamp'));
+
+      // Create header row from column titles
+      let headerTitle = operationColumns
+        .filter((it) => it.title && it.title !== '详情')
+        .map((it) => it.title);
+
+      let data = [];
+      data.unshift(headerTitle);
+
+      // Add data rows
+      selectedList.forEach((it) => {
+        const res = [
+          it.id ?? '',
+          it.realOutDate ?? '',
+          it.inventory?.name ?? '',
+          it.customer?.customerName ?? '',
+          it.pickUpDateTime ? dayjs(parseFloat(it.pickUpDateTime)).format('YYYY-MM-DD') : '',
+          it.reservationGetProductTime
+            ? dayjs(parseFloat(it.reservationGetProductTime)).format('YYYY-MM-DD')
+            : '',
+          it.inStatus ?? '',
+          it.ref ?? '',
+          it.isa ?? '',
+          it.amzid ?? '',
+          it.fcaddress ?? '',
+          it.deliveryMethod ?? '',
+          it.postcode ?? '',
+          it.outOperatePerson ?? '',
+        ];
+        data.push(res);
+      });
+      // 创建一个工作簿
+      const workbook = XLSX.utils.book_new();
+      // 将数据转换为工作表
+      const worksheet = XLSX.utils.aoa_to_sheet(data);
+      // 将工作表添加到工作簿
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+      // 生成Excel文件
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+      // 保存文件
+      FileSaver.saveAs(blob, '出库看板.xlsx');
+
+      toastSuccess('下载成功');
+    } catch (error) {
+      console.error('下载失败:', error);
+    }
   }
+
   let currentModel = $ref(null);
+
   function startEditOF(id) {
     editId = id;
     editOutboundForecast = true;
   }
+
   function startShareCar() {
     showShareCarModel = true;
   }
+
   function saved() {
     reloadTable();
   }
@@ -398,6 +539,7 @@
   async function selectedHeader() {
     showCurrentHeaderDataTable = true;
   }
+
   function reloadTable() {
     showModal.value = false;
     showShareCarModel = false;
@@ -409,6 +551,17 @@
 
   function updateFilterWithItems(value) {
     filterObj = value;
+    reloadTable();
+  }
+
+  function handlePageChange(page: number) {
+    paginationReactive.pageNumber = page - 1;
+    reloadTable();
+  }
+
+  function handlePageSizeChange(pageSize: number) {
+    paginationReactive.pageSize = pageSize;
+    paginationReactive.pageNumber = 0;
     reloadTable();
   }
 
