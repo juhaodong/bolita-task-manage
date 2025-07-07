@@ -197,16 +197,7 @@
           });
       }
     }
-    console.log(allList);
     return fakeListStart.concat(allList.concat(fakeListEnd));
-
-    // let res = (await OutWarehouseManager.load()).sort(dateCompare('realDate'));
-    // if (dateRange) {
-    //   let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-    //   let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-    //   res = res.filter((it) => it.createTimestamp > startDate && it.createTimestamp < endDate);
-    // }
-    // return res;
   };
 
   async function downloadData() {

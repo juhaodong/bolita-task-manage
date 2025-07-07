@@ -561,60 +561,53 @@
   async function downloadData() {
     let selectedList = [];
     selectedList = await loadDataTable();
-    let headerTitle = columns.filter((it) => it.title).map((it) => it.title);
-    let data = [];
-    data.unshift(headerTitle);
-    selectedList.forEach((it) => {
-      const res = [
-        it.customer?.customerName ?? '', //客户
-        it.containerId ?? '', //柜号
-        it.ticketId ?? '', //票号
-        it.country ?? '', //国家
-        it.number ?? '', //预报件数
-        it.arrivedContainerNum ?? '', // 实际件数
-        it.weight ?? '', //总实重
-        it.volume ?? '', //总体积
-        it.size ?? '', //尺寸
-        it.inStatus ?? '', //状态
-        it.inventory?.name ?? '', //仓库
-        it.stayTime ?? '', //留仓时间
-        it.deliveryIdIn ?? '', //运单号
-        it.normalNote ?? '', //客户备注
-        it.FBADeliveryCode ?? '', //FBA单号
-        it.outboundMethod ?? '', //出库方式
-        it.deliveryMethod ?? '', //物流渠道
-        it.operationRequire ?? '', //操作要求
-        it.operationNote ?? '', //操作备注
-        it.finalStatus ?? '', //结算状态
-        it.PO ?? '', //PO
-        it.FCAddress ?? '', //FC/送货地址
-        it.postcode ?? '', //邮编
-        it.inBoundDetailStatus ?? '', //审核状态
-        it.changeOrderFiles ?? '', //换单文件
-        it.transportationNote ?? '', //送货备注
-        it.trayNum ?? '', //预报托数
-        it.trayDisplay ?? '', //托盘规格
-        it.arrivedTrayNum ?? '', //实际托数
-        it.planArriveDateTime ? dayjs(it.planArriveDateTime).format('YYYY-MM-DD') : '', //预期到仓日期
-        it.currentDate ? dayjs(it.currentDate[0]).format('YYYY-MM-DD') : '', //实际到仓日期
-        it.deliveryTime ? dayjs(it.deliveryTime).format('YYYY-MM-DD') : '', //发货时间
-        it.outBoundTime ? dayjs(it.outBoundTime).format('YYYY-MM-DD HH:ss:mm') : '', //预计取货时间
-        it.Ref ?? '', //REF
-        it.note ?? '', //仓库备注
-        it.warehouseLocation ?? '', //库位
-        it.sign ?? '', //分拣标识
-        it.package ?? '', //包装
-        it.industrialTrayNum ?? '', //托数
-        it.productName ?? '', //品名
-        it.UNNumber ?? '', //UN号
-        it.recipient ?? '', //收件人
-        it.phone ?? '', //电话
-        it.email ?? '', //邮箱
-        it.needReserve ?? '', //是否需要预约
-        it.industrialNote ?? '', //工业品备注
-      ];
-      data.push(res);
+    // Create a 2D array for Excel data
+    const data = [];
+    const headers = columns.filter((it) => it.title).map((it) => it.title);
+    data.push(headers);
+
+    // Add data rows
+    selectedList.forEach((item) => {
+      const row = [];
+      columns
+        .filter((col) => col.title)
+        .forEach((col) => {
+          // Handle nested properties like 'customer.customerName'
+          if (col.key && col.key.includes('.')) {
+            const keys = col.key.split('.');
+            let value = item;
+            for (const key of keys) {
+              value = value && value[key];
+            }
+            row.push(value || '');
+          } else if (col.key) {
+            // Handle date fields
+            if (col.key === 'planArriveDateTime' && item[col.key]) {
+              row.push(dayjs(item[col.key]).format('YYYY-MM-DD'));
+            } else if (col.key === 'arriveTime' && item[col.key]) {
+              row.push(dayjs(item[col.key]).format('YYYY-MM-DD'));
+            } else if (col.key === 'deliveryTime' && item[col.key]) {
+              row.push(dayjs(item[col.key]).format('YYYY-MM-DD'));
+            } else if (col.key === 'outBoundTime' && item[col.key]) {
+              row.push(dayjs(item[col.key]).format('YYYY-MM-DD HH:mm:ss'));
+            } else if (col.key === 'currentDate' && item[col.key]) {
+              row.push(dayjs(item[col.key][0]).format('YYYY-MM-DD'));
+            } else {
+              row.push(item[col.key] || '');
+            }
+          } else {
+            row.push('');
+          }
+        });
+
+      // Only add non-empty rows to the data array
+      // Check if the row has at least one non-empty value
+      const hasValue = row.some(value => value !== '' && value !== null && value !== undefined);
+      if (hasValue) {
+        data.push(row);
+      }
     });
+
     // 创建一个工作簿
     const workbook = XLSX.utils.book_new();
     // 将数据转换为工作表

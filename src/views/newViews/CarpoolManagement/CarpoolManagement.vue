@@ -88,7 +88,6 @@
   import { $ref } from 'vue/macros';
   import { CarpoolManager } from '@/api/dataLayer/modules/logistic/carpool';
   import { useUserStore } from '@/store/modules/user';
-  import { dateCompare } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import EditOF from '@/views/newViews/OperationDetail/NotOutbound/EditOF.vue';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
@@ -96,11 +95,13 @@
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import { valueOfToday } from '@/api/dataLayer/common/Date';
   import FileSaver from 'file-saver';
-  import { getOutboundForecastListByFilterWithPagination } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import {
+    addOrUpdateWithRefOutboundForecast,
+    getOutboundForecastListByFilterWithPagination,
+  } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import OfferCustomerDialog from '@/views/newViews/CarpoolManagement/dialog/OfferCustomerDialog.vue';
   import BookingCarDialog from '@/views/newViews/CarpoolManagement/dialog/BookingCarDialog.vue';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
-  import { addOrUpdateWithRefOutboundForecast } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import * as XLSX from 'xlsx';
 
   const showModal = ref(false);
@@ -142,52 +143,42 @@
   });
   const loadDataTable = async () => {
     // Build filter criteria
-    let currentFilter = [
-      {
-        field: 'inStatus',
-        op: '!=',
-        value: '无需订车',
-      },
-    ];
+    let currentFilter = [];
 
     if (filterObj) {
-      if (Array.isArray(filterObj)) {
-        // Handle array format (from FilterBar)
-        const filterOne = filterObj.filter((it) => it?.component?.name !== 'DatePicker');
-        const filterTwo = filterObj.filter((it) => it?.component?.name === 'DatePicker');
+      // Handle array format (from FilterBar)
+      const filterOne = filterObj.filter((it) => it?.component?.name !== 'DatePicker');
+      const filterTwo = filterObj.filter((it) => it?.component?.name === 'DatePicker');
 
-        const filterWithOutDate = filterOne
-          ? Object.keys(filterOne).map((filterItem) => ({
-              field: filterOne[filterItem].key,
-              op: filterOne[filterItem].value ? 'like' : '!=',
-              value: `%${filterOne[filterItem].value || ''}%`,
-            }))
-          : [];
+      const filterWithOutDate = filterOne
+        ? Object.keys(filterOne).map((filterItem) => ({
+            field: filterOne[filterItem].key,
+            op: filterOne[filterItem].value ? 'like' : '!=',
+            value: `%${filterOne[filterItem].value || ''}%`,
+          }))
+        : [];
 
-        const filterWithDate = filterTwo
-          ? Object.keys(filterTwo).map((filterItem) => ({
-              field: filterTwo[filterItem].key,
-              op: filterTwo[filterItem].value ? 'like' : '!=',
-              value: `%${filterTwo[filterItem].value || ''}%`,
-            }))
-          : [];
+      const filterWithDate = filterTwo
+        ? Object.keys(filterTwo).map((filterItem) => ({
+            field: filterTwo[filterItem].key,
+            op: filterTwo[filterItem].value ? 'like' : '!=',
+            value: `%${filterTwo[filterItem].value || ''}%`,
+          }))
+        : [];
 
-        currentFilter = currentFilter.concat(filterWithOutDate, filterWithDate);
-      } else {
-        // Handle object format (from manual filters)
-        const res = Object.keys(filterObj);
-        for (const filterItem of res) {
-          currentFilter.push({
-            field: filterItem,
-            op: filterObj[filterItem] ? 'like' : '!=',
-            value: '%' + filterObj[filterItem] + '%' ?? '',
-          });
-        }
-      }
+      currentFilter = currentFilter.concat(filterWithOutDate, filterWithDate);
     }
+    currentFilter.push({
+      field: 'inStatus',
+      op: '!=',
+      value: '无需订车',
+    });
 
     // Get paginated data
-    const res = await getOutboundForecastListByFilterWithPagination(currentFilter, paginationReactive);
+    const res = await getOutboundForecastListByFilterWithPagination(
+      currentFilter,
+      paginationReactive
+    );
     let allList = res.content;
     const totalCount = res.page.totalElements;
 
@@ -231,103 +222,50 @@
 
   async function downloadData() {
     try {
-      // Build filter criteria without pagination for full data download
-      let currentFilter = [
-        {
-          field: 'inStatus',
-          op: '!=',
-          value: '无需订车',
-        },
-      ];
-
-      if (filterObj) {
-        if (Array.isArray(filterObj)) {
-          // Handle array format (from FilterBar)
-          const filterOne = filterObj.filter((it) => it?.component?.name !== 'DatePicker');
-          const filterTwo = filterObj.filter((it) => it?.component?.name === 'DatePicker');
-
-          const filterWithOutDate = filterOne
-            ? Object.keys(filterOne).map((filterItem) => ({
-                field: filterOne[filterItem].key,
-                op: filterOne[filterItem].value ? 'like' : '!=',
-                value: `%${filterOne[filterItem].value || ''}%`,
-              }))
-            : [];
-
-          const filterWithDate = filterTwo
-            ? Object.keys(filterTwo).map((filterItem) => ({
-                field: filterTwo[filterItem].key,
-                op: filterTwo[filterItem].value ? 'like' : '!=',
-                value: `%${filterTwo[filterItem].value || ''}%`,
-              }))
-            : [];
-
-          currentFilter = currentFilter.concat(filterWithOutDate, filterWithDate);
-        } else {
-          // Handle object format (from manual filters)
-          const res = Object.keys(filterObj);
-          for (const filterItem of res) {
-            currentFilter.push({
-              field: filterItem,
-              op: filterObj[filterItem] ? 'like' : '!=',
-              value: '%' + filterObj[filterItem] + '%' ?? '',
-            });
-          }
-        }
-      }
-
-      // Get all data for download (using large page size)
-      const downloadPagination = {
-        pageNumber: 0,
-        pageSize: 1000, // Large page size to get all data
-      };
-
-      const res = await getOutboundForecastListByFilterWithPagination(currentFilter, downloadPagination);
-      let selectedList = res.content;
-
-      // Apply date range filter if needed
-      if (dateRange) {
-        let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-        let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-        selectedList = selectedList.filter(
-          (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
-        );
-      }
-
-      // Create header row from column titles
-      const headerTitle = columns.filter((it) => it.title).map((it) => it.title);
-
-      // Create data array with header row
-      const data = [headerTitle];
+      let selectedList = [];
+      selectedList = await loadDataTable();
+      // Create a 2D array for Excel data
+      const data = [];
+      const headers = columns.filter((it) => it.title).map((it) => it.title);
+      data.push(headers);
 
       // Add data rows
-      selectedList.forEach((it) => {
-        const res = [
-          it.id ?? '',
-          it.createTimestamp ? dayjs(parseFloat(it.createTimestamp)).format('YYYY-MM-DD') : '',
-          it.inStatus ?? '',
-          it.deliveryMethod ?? '',
-          it.waybillId ?? '',
-          it.trayNum ?? '',
-          it.totalNumber ?? '',
-          it.totalOutOffer ?? '',
-          it.costPrice ?? '',
-          it.suggestedPrice ?? '',
-          it.postcode ?? '',
-          it.FCAddress ?? '',
-          it.REF ?? '',
-          it.ISA ?? '',
-          it.logisticsCompany ?? '',
-          it.amzid ?? '',
-          it.trayNum ?? '',
-          it.reservationGetProductTime
-            ? dayjs(parseFloat(it.reservationGetProductTime)).format('YYYY-MM-DD')
-            : '',
-          it.reservationGetProductDetailTime ?? '',
-          it.note ?? '',
-        ];
-        data.push(res);
+      selectedList.forEach((item) => {
+        const row = [];
+        columns
+          .filter((col) => col.title)
+          .forEach((col) => {
+            // Handle nested properties like 'customer.customerName'
+            if (col.key && col.key.includes('.')) {
+              const keys = col.key.split('.');
+              let value = item;
+              for (const key of keys) {
+                value = value && value[key];
+              }
+              row.push(value || '');
+            } else if (col.key) {
+              // Handle date fields
+              if (col.key === 'createTimestamp' && item[col.key]) {
+                row.push(dayjs(item[col.key]).format('YYYY-MM-DD'));
+              } else if (col.key === 'reservationGetProductTime' && item[col.key]) {
+                row.push(dayjs(item[col.key]).format('YYYY-MM-DD'));
+              } else {
+                row.push(item[col.key] || '');
+              }
+            } else {
+              row.push('');
+            }
+          });
+
+        // Only add non-empty rows to the data array
+        // Check if the row has at least one non-empty value
+        const hasValue = row.some((value) => value !== '' && value !== null && value !== undefined);
+        if (hasValue) {
+          data.push(row);
+        }
       });
+
+      // Add data rows - filter out any rows with all empty values
 
       // Create workbook and worksheet
       const workbook = XLSX.utils.book_new();

@@ -435,28 +435,42 @@
       // Get filtered data
       const selectedList = await loadDataTable();
 
-      // Create header row from column titles
-      const headerTitle = columns.map((it) => it.title);
+      // Create a 2D array for Excel data
+      const data = [];
 
-      // Create data array with header row
-      const data = [headerTitle];
+      // Create header row from column titles (only include columns with titles)
+      const headers = columns.filter((it) => it.title).map((it) => it.title);
+      data.push(headers);
 
       // Add data rows
       selectedList.forEach((item) => {
-        const row = [
-          dayjs(item.planArriveDateTime).format('YYYY-MM-DD') || '',
-          item.inHouseTime || '',
-          item.containerNo || '',
-          item.customerName || '',
-          item.warehouseId || '',
-          item.arrivedCount || '',
-          item.inStatus || '',
-          item.unloadPerson || '',
-          item.salesName || '',
-          item.note || '',
-          item.containerFinalStatus || '',
-        ];
-        data.push(row);
+        const row = [];
+        columns
+          .filter((col) => col.title)
+          .forEach((col) => {
+            // Handle nested properties like 'customer.customerName'
+            if (col.key && col.key.includes('.')) {
+              const keys = col.key.split('.');
+              let value = item;
+              for (const key of keys) {
+                value = value && value[key];
+              }
+              row.push(value || '');
+            } else if (col.key) {
+              // Handle date fields
+              if (col.key === 'planArriveDateTime' && item[col.key]) {
+                row.push(dayjs(item[col.key]).format('YYYY-MM-DD'));
+              } else {
+                row.push(item[col.key] || '');
+              }
+            } else {
+              row.push('');
+            }
+          });
+        const hasValue = row.some((value) => value !== '' && value !== null && value !== undefined);
+        if (hasValue) {
+          data.push(row);
+        }
       });
 
       // Create workbook and worksheet

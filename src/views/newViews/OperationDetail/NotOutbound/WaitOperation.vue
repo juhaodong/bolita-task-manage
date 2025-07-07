@@ -147,7 +147,6 @@
   import { $ref } from 'vue/macros';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
-  import { dateCompare } from '@/api/dataLayer/common/MonthDatePick';
   import dayjs from 'dayjs';
   import OutboundOrder from '@/views/newViews/OutboundForecast/OutboundOrder.vue';
   import EditOF from '@/views/newViews/OperationDetail/NotOutbound/EditOF.vue';
@@ -157,16 +156,13 @@
   import { generateOptionFromArray, toastSuccess } from '@/store/utils/utils';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
   import DetailInfoDialog from '@/views/newViews/OperationDetail/NotOutbound/DetailInfoDialog.vue';
-  import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
   import LoadingCarDoc from '@/views/newViews/OperationDetail/NotOutbound/LoadingCarDoc.vue';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
-  import { valueOfToday } from '@/api/dataLayer/common/Date';
   import FileSaver from 'file-saver';
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
   import {
     addOrUpdateWithRefOutboundForecast,
-    getOutboundForecastListByFilter,
     getOutboundForecastListByFilterWithPagination,
     waitOperationStatusList,
   } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
@@ -368,16 +364,6 @@
     let allList = res.content;
     const totalCount = res.page.totalElements;
 
-    // Filter by status
-    currentList = allList.filter(
-      (a) =>
-        a.inStatus === CarStatus.Booked ||
-        a.inStatus === '已装车' ||
-        a.inStatus === CarStatus.NoNeed ||
-        a.inStatus === '全部出库' ||
-        a.inStatus === '已完成'
-    );
-
     // Create fake list items for pagination display
     let fakeListStart = [];
     let fakeListEnd = [];
@@ -403,73 +389,13 @@
     }
 
     // Sort and return results with fake items for pagination
-    return fakeListStart.concat(currentList.concat(fakeListEnd));
+    return fakeListStart.concat(allList.concat(fakeListEnd));
   };
 
   async function downloadData() {
     try {
-      // Get all data without pagination for download
-      let currentFilter = [];
-      if (filterObj) {
-        if (Array.isArray(filterObj)) {
-          // Handle array format (from FilterBar component)
-          const filterOne = filterObj.filter((it) => it?.component?.name !== 'DatePicker');
-          const filterTwo = filterObj.filter((it) => it?.component?.name === 'DatePicker');
-
-          const filterWithOutDate = filterOne
-            ? Object.keys(filterOne).map((filterItem) => ({
-                field: filterOne[filterItem].key,
-                op: filterOne[filterItem].value ? 'like' : '!=',
-                value: `%${filterOne[filterItem].value || ''}%`,
-              }))
-            : [];
-
-          const filterWithDate = filterTwo
-            ? Object.keys(filterTwo).map((filterItem) => ({
-                field: filterTwo[filterItem].key,
-                op: filterTwo[filterItem].value ? 'like' : '!=',
-                value: `%${filterTwo[filterItem].value || ''}%`,
-              }))
-            : [];
-
-          currentFilter = filterWithOutDate.concat(filterWithDate);
-        } else {
-          // Handle object format (from direct filter)
-          const res = Object.keys(filterObj);
-          for (const filterItem of res) {
-            currentFilter.push({
-              field: filterItem,
-              op: filterObj[filterItem] ? 'like' : '!=',
-              value: '%' + filterObj[filterItem] + '%' ?? '',
-            });
-          }
-        }
-      }
-
       // Get all data without pagination
-      let allList = await getOutboundForecastListByFilter(currentFilter);
-
-      // Filter by status
-      let selectedList = allList.filter(
-        (a) =>
-          a.inStatus === CarStatus.Booked ||
-          a.inStatus === '已装车' ||
-          a.inStatus === CarStatus.NoNeed ||
-          a.inStatus === '全部出库' ||
-          a.inStatus === '已完成'
-      );
-
-      // Filter by date range if provided
-      if (dateRange) {
-        let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-        let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-        selectedList = selectedList.filter(
-          (it) => it.reservationGetProductTime > startDate && it.reservationGetProductTime < endDate
-        );
-      }
-
-      // Sort data
-      selectedList = selectedList.sort(dateCompare('createTimestamp'));
+      const realDataList = await loadDataTable();
 
       // Create header row from column titles
       let headerTitle = operationColumns
@@ -477,30 +403,40 @@
         .map((it) => it.title);
 
       let data = [];
-      data.unshift(headerTitle);
+      data.push(headerTitle);
 
-      // Add data rows
-      selectedList.forEach((it) => {
-        const res = [
-          it.id ?? '',
-          it.realOutDate ?? '',
-          it.inventory?.name ?? '',
-          it.customer?.customerName ?? '',
-          it.pickUpDateTime ? dayjs(parseFloat(it.pickUpDateTime)).format('YYYY-MM-DD') : '',
-          it.reservationGetProductTime
-            ? dayjs(parseFloat(it.reservationGetProductTime)).format('YYYY-MM-DD')
-            : '',
-          it.inStatus ?? '',
-          it.ref ?? '',
-          it.isa ?? '',
-          it.amzid ?? '',
-          it.fcaddress ?? '',
-          it.deliveryMethod ?? '',
-          it.postcode ?? '',
-          it.outOperatePerson ?? '',
-        ];
-        data.push(res);
+      // Add data rows, filtering out empty rows
+      realDataList.forEach((item) => {
+        const row = [];
+        operationColumns
+          .filter((it) => it.title && it.title !== '详情')
+          .filter((col) => col.title)
+          .forEach((col) => {
+            // Handle nested properties like 'customer.customerName'
+            if (col.key && col.key.includes('.')) {
+              const keys = col.key.split('.');
+              let value = item;
+              for (const key of keys) {
+                value = value && value[key];
+              }
+              row.push(value || '');
+            } else if (col.key) {
+              // Handle date fields
+              if (col.key === 'planArriveDateTime' && item[col.key]) {
+                row.push(dayjs(item[col.key]).format('YYYY-MM-DD'));
+              } else {
+                row.push(item[col.key] || '');
+              }
+            } else {
+              row.push('');
+            }
+          });
+        const hasValue = row.some((value) => value !== '' && value !== null && value !== undefined);
+        if (hasValue) {
+          data.push(row);
+        }
       });
+
       // 创建一个工作簿
       const workbook = XLSX.utils.book_new();
       // 将数据转换为工作表
