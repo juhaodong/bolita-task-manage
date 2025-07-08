@@ -221,6 +221,7 @@
     Delete20Regular,
     Document20Regular,
     DocumentEdit20Regular,
+    DrawImage20Regular,
     Image20Regular,
     Payment20Regular,
     Tag20Regular,
@@ -1060,7 +1061,7 @@
               actionRef.value[0].reload();
             },
           },
-          iconFileAction('POD', 'POD', Document20Regular, 'missionPOD'),
+          iconFileAction('POD', 'POD', DrawImage20Regular, 'missionPOD'),
           iconFileAction('操作文件', 'operationFiles', Document20Regular, 'missionOperationFile'),
           iconFileAction('问题图片', 'problemFiles', Image20Regular, 'missionProblemPic'),
           {

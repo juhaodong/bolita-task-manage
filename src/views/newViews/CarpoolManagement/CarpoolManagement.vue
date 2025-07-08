@@ -81,9 +81,10 @@
 <script lang="ts" setup>
   import {
     ArrowDownload20Regular,
-    Box20Filled,
     Document20Regular,
+    DrawImage20Regular,
     Payment20Regular,
+    VehicleTruck20Regular,
   } from '@vicons/fluent';
   import { computed, h, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
@@ -404,14 +405,14 @@
             },
           },
           {
-            icon: renderIconWithTooltip(Box20Filled, '订车'),
+            icon: renderIconWithTooltip(VehicleTruck20Regular, '订车'),
             onClick() {
               currentInfo = record;
               carDialog = true;
             },
           },
           {
-            icon: renderIconWithTooltip(Document20Regular, 'POD'),
+            icon: renderIconWithTooltip(DrawImage20Regular, 'POD'),
             highlight: () => {
               return record?.['podfiles']?.length > 0 ? 'success' : 'error';
             },

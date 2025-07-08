@@ -135,6 +135,7 @@
     Image20Regular,
     Payment20Regular,
     TableSettings20Regular,
+    VehicleTruck20Regular,
   } from '@vicons/fluent';
   import { computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
@@ -572,7 +573,7 @@
             },
           },
           {
-            icon: renderIconWithTooltip(Box20Filled, '装车'),
+            icon: renderIconWithTooltip(VehicleTruck20Regular, '装车'),
             onClick() {
               currentInfo = record;
               currentId = record?.outboundDetailInfo;

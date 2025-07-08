@@ -61,7 +61,7 @@
 
 <script lang="ts" setup>
   import { h, onMounted, reactive, ref } from 'vue';
-  import { BasicTable, TableAction } from '@/components/Table';
+  import { BasicTable } from '@/components/Table';
   import {
     allDeliveryMethod,
     allInStatusList,
@@ -69,21 +69,12 @@
   } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
   import { $ref } from 'vue/macros';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import {
-    getDetailListById,
-    NotifyDetailManager,
-  } from '@/api/dataLayer/modules/notify/notify-detail';
-  import {
-    ArrowDownload20Regular,
-    CheckmarkCircle20Regular,
-    TableSettings20Regular,
-  } from '@vicons/fluent';
-  import { NButton, NIcon, NInput, NTooltip } from 'naive-ui';
+  import { ArrowDownload20Regular, TableSettings20Regular } from '@vicons/fluent';
+  import { NButton, NIcon, NInput } from 'naive-ui';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
-  import { updateOutboundForecast } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
-  import { generateOptionFromArray, safeSumBy, toastSuccess } from '@/store/utils/utils';
+  import { generateOptionFromArray } from '@/store/utils/utils';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import FileSaver from 'file-saver';
@@ -91,7 +82,6 @@
     addOrUpdateTask,
     getTaskListByFilterWithPagination,
   } from '@/api/newDataLayer/TaskList/TaskList';
-  import { getOutboundForecastById } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
   import * as XLSX from 'xlsx';
   import { InBoundDetailStatus } from '@/api/dataLayer/modules/notify/notify-api';
@@ -450,19 +440,20 @@
           }))
         : [];
       currentFilter = filterWithOutDate.concat(filterWithDate);
+      console.log(filterByOutboundId, 'filterByOutboundId');
       if (filterByOutboundId) {
         currentFilter.push({
           field: 'outboundId',
           op: '==',
           value: filterByOutboundId.value,
         });
-      } else {
-        currentFilter.push({
-          field: 'outboundId',
-          op: '!=',
-          value: '',
-        });
       }
+    } else {
+      currentFilter.push({
+        field: 'outboundId',
+        op: '!=',
+        value: '',
+      });
     }
     const result = await getTaskListByFilterWithPagination(currentFilter, paginationReactive);
     allList = result.content;
@@ -547,72 +538,75 @@
         value: res,
         display: res,
       });
+      updateFilter(filterItems);
+    } else {
+      await reloadTable();
     }
-    updateFilter(filterItems);
   });
 
   // Helper function to render icon with tooltip
-  const renderIconWithTooltip = (icon, tooltip) => {
-    return () =>
-      h(
-        NTooltip,
-        { trigger: 'hover', placement: 'top' },
-        {
-          trigger: () => h(NIcon, { size: 18, class: 'action-icon' }, { default: () => h(icon) }),
-          default: () => tooltip,
-        }
-      );
-  };
-
-  const actionColumn = reactive({
-    title: '可用动作',
-    key: 'action',
-    width: 120,
-    render(record: any) {
-      return h(TableAction as any, {
-        style: 'text',
-        actions: [
-          {
-            icon: renderIconWithTooltip(CheckmarkCircle20Regular, '审核'),
-            async onClick() {
-              let outboundInfo = await getOutboundForecastById(record.outboundId);
-              outboundInfo.outboundDetailInfo = outboundInfo.outboundDetailInfo.filter(
-                (it) => it !== record.id
-              );
-              if (!outboundInfo.waitPrice) {
-                outboundInfo.inStatus = '待订车';
-              }
-              if (outboundInfo.waitPrice && !outboundInfo.waitCar) {
-                outboundInfo.inStatus = '待订车';
-              }
-              if (outboundInfo.waitCar) {
-                outboundInfo.inStatus = '已订车';
-              }
-              if (outboundInfo.outboundDetailInfo.length === 0) {
-                outboundInfo.inStatus = '已取消';
-              }
-              record.outboundId = '';
-              await NotifyDetailManager.editInternal(record, record.id);
-              const currentList = await getDetailListById(outboundInfo.outboundDetailInfo);
-              outboundInfo.totalOutOffer = safeSumBy(currentList, 'outPrice') ?? 0;
-              outboundInfo.totalVolume = safeSumBy(currentList, 'volume') ?? 0;
-              outboundInfo.totalWeight = safeSumBy(currentList, 'weight') ?? 0;
-              outboundInfo.containerNum = safeSumBy(currentList, 'arrivedContainerNum') ?? 0;
-              await updateOutboundForecast(outboundInfo.id, outboundInfo);
-              toastSuccess('审核成功');
-              await reloadTable();
-            },
-            ifShow: () => {
-              return (
-                (record.inStatus === '存仓' || record.inStatus === '库内操作') &&
-                hasAuthPower('carDetailCheck')
-              );
-            },
-          },
-        ],
-      });
-    },
-  });
+  // const renderIconWithTooltip = (icon, tooltip) => {
+  //   return () =>
+  //     h(
+  //       NTooltip,
+  //       { trigger: 'hover', placement: 'top' },
+  //       {
+  //         trigger: () => h(NIcon, { size: 18, class: 'action-icon' }, { default: () => h(icon) }),
+  //         default: () => tooltip,
+  //       }
+  //     );
+  // };
+  //
+  // const actionColumn = reactive({
+  //   title: '可用动作',
+  //   key: 'action',
+  //   width: 120,
+  //   render(record: any) {
+  //     return h(TableAction as any, {
+  //       style: 'text',
+  //       actions: [
+  //         {
+  //           icon: renderIconWithTooltip(CheckmarkCircle20Regular, '审核'),
+  //           async onClick() {
+  //             console.log(record);
+  //             let outboundInfo = await getOutboundForecastById(record.outboundId);
+  //             outboundInfo.outboundDetailInfo = outboundInfo.outboundDetailInfo.filter(
+  //               (it) => it !== record.id
+  //             );
+  //             if (!outboundInfo.waitPrice) {
+  //               outboundInfo.inStatus = '待订车';
+  //             }
+  //             if (outboundInfo.waitPrice && !outboundInfo.waitCar) {
+  //               outboundInfo.inStatus = '待订车';
+  //             }
+  //             if (outboundInfo.waitCar) {
+  //               outboundInfo.inStatus = '已订车';
+  //             }
+  //             if (outboundInfo.outboundDetailInfo.length === 0) {
+  //               outboundInfo.inStatus = '已取消';
+  //             }
+  //             record.outboundId = '';
+  //             await NotifyDetailManager.editInternal(record, record.id);
+  //             const currentList = await getDetailListById(outboundInfo.outboundDetailInfo);
+  //             outboundInfo.totalOutOffer = safeSumBy(currentList, 'outPrice') ?? 0;
+  //             outboundInfo.totalVolume = safeSumBy(currentList, 'volume') ?? 0;
+  //             outboundInfo.totalWeight = safeSumBy(currentList, 'weight') ?? 0;
+  //             outboundInfo.containerNum = safeSumBy(currentList, 'arrivedContainerNum') ?? 0;
+  //             await updateOutboundForecast(outboundInfo.id, outboundInfo);
+  //             toastSuccess('审核成功');
+  //             await reloadTable();
+  //           },
+  //           ifShow: () => {
+  //             return (
+  //               (record.inStatus === '存仓' || record.inStatus === '库内操作') &&
+  //               hasAuthPower('carDetailCheck')
+  //             );
+  //           },
+  //         },
+  //       ],
+  //     });
+  //   },
+  // });
 </script>
 
 <style lang="less" scoped>
