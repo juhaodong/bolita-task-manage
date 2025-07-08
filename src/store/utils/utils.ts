@@ -3,11 +3,7 @@ import { sumBy } from 'lodash-es';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { CustomerManager } from '@/api/dataLayer/modules/user/user';
 import { useUserStore } from '@/store/modules/user';
-import {
-  getCustomerById,
-  getCustomerList,
-  getCustomerListByIds,
-} from '@/api/newDataLayer/Customer/Customer';
+import { getCustomerList, getCustomerListByIds } from '@/api/newDataLayer/Customer/Customer';
 import { getInventoryList } from '@/api/newDataLayer/Warehouse/Warehouse';
 import { getFBACodeList } from '@/api/newDataLayer/FBACode/FBACode';
 import { getUserById } from '@/api/newDataLayer/User/User';
@@ -44,44 +40,6 @@ export async function asyncFBACode(): Promise<FormField> {
       options: list,
     },
     required: false,
-  };
-}
-
-export async function asyncWarehouseList(defaultValue): Promise<FormField> {
-  const userStore = useUserStore();
-  let customerId = '';
-  customerId = userStore.info?.customerIds.split(',')[0] ?? '';
-  const currentCustomer = (await getCustomerById(customerId)) ?? '';
-  const warehouseList = await getInventoryList();
-  const list = warehouseList.map((it) => ({
-    label: it.name,
-    value: it.id,
-  }));
-  return {
-    field: 'inventoryId',
-    label: '仓库',
-    component: 'NSelect',
-    componentProps: {
-      options: list,
-    },
-    defaultValue: defaultValue !== '' ? defaultValue : currentCustomer?.inventory?.id ?? '',
-  };
-}
-
-export async function asyncFCAddress(): Promise<FormField> {
-  const FBACodeList = await getFBACodeList();
-  const list = FBACodeList.map((it) => ({
-    label: it.code,
-    value: it.id,
-  }));
-  return {
-    field: 'fcaddress',
-    label: 'FC/送货地址',
-    component: 'NSelect',
-    componentProps: {
-      options: list,
-      multiple: true,
-    },
   };
 }
 

@@ -8,7 +8,7 @@ import hillo from 'hillo';
 
 async function bootstrap() {
   const app = createApp(App);
-
+  await loadConfig();
   // 挂载状态管理
   setupStore(app);
 
@@ -38,7 +38,6 @@ async function bootstrap() {
   const meta = document.createElement('meta');
   meta.name = 'naive-ui-style';
   document.head.appendChild(meta);
-  await loadConfig();
 
   app.mount('#app', true);
 }

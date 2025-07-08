@@ -44,9 +44,9 @@
               <div class="flex-initial">
                 <n-checkbox v-model:checked="autoLogin">自动登录</n-checkbox>
               </div>
-              <div class="flex-initial order-last">
-                <a href="javascript:">忘记密码</a>
-              </div>
+              <!--              <div class="flex-initial order-last">-->
+              <!--                <a href="javascript:">忘记密码</a>-->
+              <!--              </div>-->
             </div>
           </n-form-item>
           <n-form-item>

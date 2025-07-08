@@ -5,6 +5,7 @@ import { ACCESS_TOKEN, CURRENT_USER } from '@/store/mutation-types';
 import { BaseUser, login, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
 import { storage } from '@/store/utils/Storage';
 import { generateOptionFromArray } from '@/store/utils/utils';
+import router from '@/router';
 
 export type UserInfoType = {
   username: string;
@@ -84,7 +85,10 @@ export const useUserStore = defineStore({
     // 获取用户信息
     async getInfo() {
       const result = this.getUserInfo;
-      console.log(result, 'result');
+      if (!result.id) {
+        await router.push('/login');
+        return;
+      }
       this.setAuthPower(result.powerTypeItems);
       this.setAvatar('');
       return result;
