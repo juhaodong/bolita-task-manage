@@ -136,6 +136,20 @@ export function statusColumnEasy(params: { title: string; key: string }) {
   return statusColumn(params.title, params.key);
 }
 
+export function statusColumnSelect(params: { title: string; key: string; list: Array<any> }) {
+  return {
+    title: params.title,
+    key: params.key,
+    component: 'NSelect',
+    componentProps: {
+      options: params.list,
+    },
+    render(record) {
+      return colorfulRender(record?.[params.key] ?? '');
+    },
+  };
+}
+
 const colorfulRender = (text) =>
   text
     ? h(
@@ -245,6 +259,11 @@ export function timeAndDateColumn(
   return {
     title: title,
     key: keyName,
+    component: NDatePicker,
+    componentProps: {
+      type: 'daterange',
+      clearable: true,
+    },
     width: 110,
     render(record) {
       const display = record[keyName] ? dayjs(record[keyName]).format(timeFormat) : '-';
@@ -257,6 +276,11 @@ export function timeTableColumn(keyName, title, timeFormat = dateFormat) {
   return {
     title: title,
     key: keyName,
+    component: NDatePicker,
+    componentProps: {
+      type: 'daterange',
+      clearable: true,
+    },
     width: 200,
     render(record) {
       const display = record[keyName] ? dayjs(parseInt(record[keyName])).format(timeFormat) : '-';

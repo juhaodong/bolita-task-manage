@@ -2,8 +2,6 @@
   <n-card v-if="hasAuthPower('outMissionView')" :bordered="false" class="proCard">
     <filter-bar
       v-model="filterItems"
-      v-model:dateRange="dateRange"
-      v-model:showAll="showAll"
       :columns="operationColumns"
       @clear="updateFilter(null)"
       @submit="updateFilter"
@@ -141,7 +139,7 @@
   import { computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import {
-    statusColumnEasy,
+    statusColumnSelect,
     timeTableColumn,
   } from '@/views/bolita-views/composable/useableColumns';
   import { $ref } from 'vue/macros';
@@ -171,6 +169,11 @@
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { useUserStore } from '@/store/modules/user';
   import * as XLSX from 'xlsx';
+  import {
+    allInStatusOperationList,
+    asyncCustomerByFilter,
+    asyncStorageByFilter,
+  } from '@/api/dataLayer/common/common';
 
   const showModal = ref(false);
   let showShareCarModel = $ref(false);
@@ -233,19 +236,14 @@
     //   title: '出库日期',
     //   key: 'realOutDate',
     // },
-    {
-      title: '仓库',
-      key: 'inventory.name',
-    },
-    {
-      title: 'Kunden',
-      key: 'customer.customerName',
-    },
+    asyncStorageByFilter(),
+    asyncCustomerByFilter(),
     timeTableColumn('pickUpDateTime', '预计取货时间'),
     timeTableColumn('reservationGetProductTime', '预约送货时间'),
-    statusColumnEasy({
+    statusColumnSelect({
       title: '状态',
       key: 'inStatus',
+      list: generateOptionFromArray(allInStatusOperationList),
     }),
     {
       title: '详情',
@@ -343,8 +341,8 @@
       const filterWithDate = filterTwo
         ? Object.keys(filterTwo).map((filterItem) => ({
             field: filterTwo[filterItem].key,
-            op: filterTwo[filterItem].value ? 'like' : '!=',
-            value: `%${filterTwo[filterItem].value || ''}%`,
+            op: 'between',
+            value: filterTwo[filterItem].value,
           }))
         : [];
 
@@ -502,27 +500,7 @@
   }
 
   function updateFilter(value) {
-    if (value !== null) {
-      if (optionOne && valueOne) {
-        const keyOne = operationColumns.find((it) => it.title === optionOne).key;
-
-        value[keyOne] = valueOne;
-      }
-      if (optionTwo && valueTwo) {
-        const keyTwo = operationColumns.find((it) => it.title === optionTwo).key;
-        value[keyTwo] = valueTwo;
-      }
-      filterObj = value;
-    } else {
-      filterObj = null;
-      optionOne = '';
-      valueOne = '';
-      optionTwo = '';
-      valueTwo = '';
-      dateRange = null;
-      filterItems = [];
-      showAll = false;
-    }
+    filterObj = value;
     reloadTable();
   }
 

@@ -79,7 +79,12 @@
 </template>
 
 <script lang="ts" setup>
-  import { ArrowDownload20Regular, Box20Filled } from '@vicons/fluent';
+  import {
+    ArrowDownload20Regular,
+    Box20Filled,
+    Document20Regular,
+    Payment20Regular,
+  } from '@vicons/fluent';
   import { computed, h, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { NIcon, NTooltip } from 'naive-ui';
@@ -161,8 +166,8 @@
       const filterWithDate = filterTwo
         ? Object.keys(filterTwo).map((filterItem) => ({
             field: filterTwo[filterItem].key,
-            op: filterTwo[filterItem].value ? 'like' : '!=',
-            value: `%${filterTwo[filterItem].value || ''}%`,
+            op: 'between',
+            value: filterTwo[filterItem].value,
           }))
         : [];
 
@@ -392,7 +397,7 @@
         style: 'text',
         actions: [
           {
-            icon: renderIconWithTooltip(Box20Filled, '对外报价'),
+            icon: renderIconWithTooltip(Payment20Regular, '对外报价'),
             onClick() {
               currentInfo = record;
               offerDialog = true;
@@ -406,7 +411,7 @@
             },
           },
           {
-            icon: renderIconWithTooltip(Box20Filled, 'POD'),
+            icon: renderIconWithTooltip(Document20Regular, 'POD'),
             highlight: () => {
               return record?.['podfiles']?.length > 0 ? 'success' : 'error';
             },
@@ -423,7 +428,7 @@
               return hasAuthPower('orderCarPOD');
             },
           },
-          iconFileAction('提单', 'pickupFiles', Box20Filled, 'orderCarOrder'),
+          iconFileAction('提单', 'pickupFiles', Document20Regular, 'orderCarOrder'),
         ],
       });
     },

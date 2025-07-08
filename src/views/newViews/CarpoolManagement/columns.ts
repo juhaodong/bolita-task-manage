@@ -1,6 +1,5 @@
-import { DataTableColumns } from 'naive-ui';
+import { DataTableColumns, NButton } from 'naive-ui';
 import {
-  selectedIdColumn,
   statusColumnEasy,
   timeAndDateColumn,
   timeColumn,
@@ -12,6 +11,8 @@ import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { generateOptionFromArray } from '@/store/utils/utils';
 import { reservationTimeList } from '@/views/newViews/ContainerForecast/columns';
 import { channelTypeList, vehicleTypeList } from '@/api/newDataLayer/CarManage/ExternalVehicle';
+import { h } from 'vue';
+import { RouterLink } from 'vue-router';
 
 export const outCarColumns: DataTableColumns<CarpoolManagementModel> = [
   timeColumn('orderDate', '日期'),
@@ -115,7 +116,33 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
   {
     type: 'selection',
   },
-  selectedIdColumn('物流ID', '/car/carBookingDetail', 'id'),
+  {
+    title: 'Ref',
+    key: 'ref',
+  },
+  {
+    title: '详情',
+    key: 'actions',
+    render(row) {
+      return h(
+        RouterLink,
+        {
+          to: '/car/carBookingDetail' + '?id=' + row['id'],
+        },
+        () =>
+          h(
+            NButton,
+            {
+              strong: true,
+              tertiary: true,
+              size: 'small',
+            },
+            { default: () => '查看' }
+          )
+      );
+    },
+  },
+  // selectedIdColumn('物流ID', '/car/carBookingDetail', 'id'),
   timeColumn('createTimestamp', '下单日期'),
   statusColumnEasy({
     title: '状态',
@@ -161,10 +188,7 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
   //   title: 'PO',
   //   key: 'PO',
   // },
-  {
-    title: 'Ref',
-    key: 'ref',
-  },
+
   {
     title: 'ISA',
     key: 'isa',

@@ -5,7 +5,7 @@
     FormField,
   } from '@/views/bolita-views/composable/form-field-type';
   import { FormSchema, useForm } from '@/components/Form';
-  import { computed, reactive, ref, unref, watchEffect } from 'vue';
+  import { computed, onMounted, reactive, ref, unref, watchEffect } from 'vue';
   import { FormFields } from '@/api/dataLayer/common/GeneralModel';
   import { generateOptionFromArray } from '@/store/utils/utils';
   import { $ref } from 'vue/macros';
@@ -50,8 +50,13 @@
   let localShowAll = $ref(props.showAll);
   let selectedFilterOptions = $ref<any[]>([]);
   let tempFilterValues = $ref<Record<string, string>>({});
+  let currentColumns = $ref<any[]>([]);
 
   // Watch for changes in the modelValue prop
+  onMounted(async () => {
+    // Handle the case where props.columns is undefined or empty
+  });
+
   watchEffect(() => {
     filterItems = props.modelValue || [];
   });
@@ -90,16 +95,40 @@
 
   // Computed property to filter out already selected options
   const availableColumns = computed(() => {
-    if (!props.columns || props.columns.length === 0) return [];
+    if (!currentColumns || currentColumns.length === 0) return [];
     // Filter out columns that are already selected as filter items
-    return props.columns
+    return currentColumns
       .map(convertFormColumn)
       .filter(
         (col) => col.key && col.title && !filterItems.some((item) => item.option === col.title)
       );
   });
 
-  function addFilterItem() {
+  async function addFilterItem() {
+    if (!props.columns || props.columns.length === 0) {
+      currentColumns = [];
+      return;
+    }
+
+    // Check if any items in props.columns are promises
+    const resolvedColumns = await Promise.all(
+      props.columns.map(async (column) => {
+        // If the column is a promise, wait for it to resolve
+        if (column instanceof Promise) {
+          try {
+            return await column;
+          } catch (error) {
+            console.error('Error resolving column promise:', error);
+            return null; // Return null for failed promises
+          }
+        }
+        // Otherwise, return the column as is
+        return column;
+      })
+    );
+
+    // Filter out any null values (failed promises)
+    currentColumns = resolvedColumns.filter((column) => column !== null);
     showAddFilterDialog = true;
     // selectedFilterOptions = [];
     tempFilterValues = {};
@@ -135,6 +164,7 @@
 
   function confirmFilters() {
     filterItems = [];
+    console.log(selectedFilterOptions, 'selectedFilterOptions');
     for (const column of selectedFilterOptions) {
       filterItems.push({
         option: column.title,

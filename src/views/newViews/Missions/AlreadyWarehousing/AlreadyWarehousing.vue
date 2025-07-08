@@ -3,8 +3,6 @@
     <div>
       <filter-bar
         v-model="filterItems"
-        v-model:dateRange="dateRange"
-        v-model:showAll="showAll"
         :columns="columns"
         @clear="updateFilter(null)"
         @submit="updateFilter"
@@ -14,7 +12,7 @@
         <n-button class="action-button" size="small" type="info" @click="selectedHeader">
           <template #icon>
             <n-icon>
-              <Box20Filled />
+              <DocumentEdit20Regular />
             </n-icon>
           </template>
           选择表头显示
@@ -42,7 +40,7 @@
         >
           <template #icon>
             <n-icon>
-              <Box20Filled />
+              <DocumentEdit20Regular />
             </n-icon>
           </template>
           审核
@@ -56,7 +54,7 @@
         >
           <template #icon>
             <n-icon>
-              <Box20Filled />
+              <Payment20Regular />
             </n-icon>
           </template>
           报价
@@ -64,7 +62,7 @@
         <n-button class="action-button" size="small" type="default" @click="downloadData">
           <template #icon>
             <n-icon>
-              <Box20Filled />
+              <ArrowDownload20Regular />
             </n-icon>
           </template>
           下载
@@ -72,7 +70,7 @@
         <n-button class="action-button" size="small" type="error" @click="merge">
           <template #icon>
             <n-icon>
-              <Box20Filled />
+              <DocumentEdit20Regular />
             </n-icon>
           </template>
           合并
@@ -102,7 +100,6 @@
               :pagination="paginationReactive"
               :request="loadDataTable"
               :row-key="(row) => row.id"
-              @update:page="handlePageChange"
             />
           </div>
           <no-power-page v-else />
@@ -205,10 +202,11 @@
 <script lang="ts" setup>
   import { computed, h, onMounted, reactive, ref, watch } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { columns } from './columns';
+  import { allDeliveryMethod, allInStatusList, allOutboundMethod } from './columns';
   import { $ref } from 'vue/macros';
   import {
     statusColumnEasy,
+    statusColumnSelect,
     storageTimeWarnColumn,
     timeColumn,
     timeWarnColumn,
@@ -217,6 +215,7 @@
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import {
+    ArrowDownload20Regular,
     Box20Filled,
     Clock20Regular,
     Delete20Regular,
@@ -224,6 +223,8 @@
     DocumentEdit20Regular,
     Image20Regular,
     Payment20Regular,
+    Tag20Regular,
+    Warning20Regular,
   } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import dayjs from 'dayjs';
@@ -257,10 +258,11 @@
   import SplitTaskDialog from '@/views/newViews/Missions/AlreadyWarehousing/SplitTaskDialog.vue';
   import { NButton, NIcon, NInput, NTooltip, useDialog } from 'naive-ui';
   import * as XLSX from 'xlsx';
+  import { asyncCustomerByFilter, asyncStorageByFilter } from '@/api/dataLayer/common/common';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
-
+  let filterItems: any | null = $ref(null);
   let filterObj: any | null = $ref(null);
   let addNewFeeDialog = $ref(false);
   let checkedRows = $ref([]);
@@ -304,10 +306,7 @@
         options: timeWarnList,
       },
     },
-    {
-      title: '客户ID',
-      key: 'customer.customerName',
-    },
+    asyncCustomerByFilter(),
     {
       title: '柜号',
       key: 'containerId',
@@ -340,14 +339,12 @@
       title: '尺寸',
       key: 'size',
     },
-    statusColumnEasy({
+    statusColumnSelect({
       title: '状态',
       key: 'inStatus',
+      list: generateOptionFromArray(allInStatusList),
     }),
-    {
-      title: '仓库',
-      key: 'inventory.name',
-    },
+    asyncStorageByFilter(),
     storageTimeWarnColumn('stayTime', '留仓时间'),
     {
       title: '运单号',
@@ -364,10 +361,18 @@
     {
       title: '出库方式',
       key: 'outboundMethod',
+      component: 'NSelect',
+      componentProps: {
+        options: generateOptionFromArray(allOutboundMethod),
+      },
     },
     {
       title: '物流渠道',
       key: 'deliveryMethod',
+      component: 'NSelect',
+      componentProps: {
+        options: generateOptionFromArray(allDeliveryMethod),
+      },
     },
     {
       title: '操作要求',
@@ -400,6 +405,13 @@
     {
       title: '换单文件',
       key: 'changeOrderFiles',
+      component: 'NSelect',
+      componentProps: {
+        options: [
+          { label: '是', value: '是' },
+          { label: '否', value: '否' },
+        ],
+      },
     },
     {
       title: '送货备注',
@@ -602,7 +614,7 @@
 
       // Only add non-empty rows to the data array
       // Check if the row has at least one non-empty value
-      const hasValue = row.some(value => value !== '' && value !== null && value !== undefined);
+      const hasValue = row.some((value) => value !== '' && value !== null && value !== undefined);
       if (hasValue) {
         data.push(row);
       }
@@ -700,8 +712,8 @@
       const filterWithDate = filterTwo
         ? Object.keys(filterTwo).map((filterItem) => ({
             field: filterTwo[filterItem].key,
-            op: filterTwo[filterItem].value ? 'like' : '!=',
-            value: `%${filterTwo[filterItem].value || ''}%`,
+            op: 'between',
+            value: filterTwo[filterItem].value,
           }))
         : [];
       currentFilter = filterWithOutDate.concat(filterWithDate);
@@ -879,7 +891,13 @@
     typeMission.value = '整柜任务看板';
     const res = getQueryString('containerNo');
     if (res) {
-      updateFilter({ containerId: res });
+      filterItems.push({
+        option: '柜号',
+        key: 'containerId',
+        value: res,
+        display: res,
+      });
+      updateFilter(filterItems);
     } else {
       await reloadTable();
     }
@@ -1011,7 +1029,7 @@
             },
           },
           {
-            icon: renderIconWithTooltip(Document20Regular, '托盘标签'),
+            icon: renderIconWithTooltip(Tag20Regular, '托盘标签'),
             highlight: () => {
               return record?.['trayFiles']?.length > 0 ? 'success' : 'error';
             },
@@ -1046,7 +1064,7 @@
           iconFileAction('操作文件', 'operationFiles', Document20Regular, 'missionOperationFile'),
           iconFileAction('问题图片', 'problemFiles', Image20Regular, 'missionProblemPic'),
           {
-            icon: renderIconWithTooltip(Box20Filled, '添加托盘'),
+            icon: renderIconWithTooltip(Tag20Regular, '添加托盘'),
             onClick() {
               recordData = record;
               startAddTray(record.id);
@@ -1080,7 +1098,7 @@
             },
           },
           {
-            icon: renderIconWithTooltip(Document20Regular, '信息已变更'),
+            icon: renderIconWithTooltip(Warning20Regular, '信息已变更'),
             highlight: () => {
               return 'error';
             },

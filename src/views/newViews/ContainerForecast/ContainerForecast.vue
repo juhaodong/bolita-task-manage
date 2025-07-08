@@ -79,6 +79,7 @@
         :show-icon="false"
         class="modal-medium"
         preset="dialog"
+        style="width: 800px"
         title="卸柜表"
       >
         <notify-unload-form :notify-id="currentNotifyId!" @save="reloadTable" />
@@ -320,8 +321,8 @@
       const filterWithDate = filterTwo
         ? Object.keys(filterTwo).map((filterItem) => ({
             field: filterTwo[filterItem].key,
-            op: filterTwo[filterItem].value ? 'like' : '!=',
-            value: `%${filterTwo[filterItem].value || ''}%`,
+            op: 'between',
+            value: filterTwo[filterItem].value,
           }))
         : [];
       currentFilter = filterWithOutDate.concat(filterWithDate);

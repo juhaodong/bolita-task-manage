@@ -2,6 +2,7 @@ import { DataTableColumns } from 'naive-ui';
 import {
   selectedIdColumn,
   statusColumnEasy,
+  statusColumnSelect,
   timeColumn,
 } from '@/views/bolita-views/composable/useableColumns';
 import { initModel } from '@/api/dataLayer/common/GeneralModel';
@@ -9,6 +10,11 @@ import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { generateOptionFromArray, generateOptionFromTimeArray } from '@/store/utils/utils';
 import { notifyStatusList } from '@/api/newDataLayer/Notify/Notify';
 import { timeArrays } from '@/api/newDataLayer/Common/Common';
+import {
+  allInStatusNotifyList,
+  asyncCustomerByFilter,
+  asyncStorageByFilter,
+} from '@/api/dataLayer/common/common';
 
 export const columns: DataTableColumns<any> = [
   timeColumn('planArriveDateTime', '预计入库日期'),
@@ -21,26 +27,16 @@ export const columns: DataTableColumns<any> = [
     },
   },
   selectedIdColumn('柜号', '/missions/missionDetail', 'containerNo'),
-  // {
-  //   title: '柜号',
-  //   key: 'containerNo',
-  // },
-  {
-    title: '客户ID',
-    key: 'customer.customerName',
-    resizable: true,
-  },
-  {
-    title: '仓库',
-    key: 'inventory.name',
-  },
+  asyncCustomerByFilter(),
+  asyncStorageByFilter(),
   {
     title: '数量',
     key: 'arrivedCount',
   },
-  statusColumnEasy({
+  statusColumnSelect({
     title: '状态',
     key: 'inStatus',
+    list: generateOptionFromArray(allInStatusNotifyList),
   }),
   {
     title: '操作人',

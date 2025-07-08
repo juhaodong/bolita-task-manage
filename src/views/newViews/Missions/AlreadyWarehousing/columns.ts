@@ -189,15 +189,21 @@ export const columns: DataTableColumns<any> = [
   },
 ];
 
-const allInStatusList = [
-  '待审核',
+export const allInStatusList = [
+  '等待审核',
+  '等待卸柜',
   '等待入库',
+  '等待提交',
   '入库待出库',
   '入库待操作',
   '已计划出库',
-  '已订车',
+  '已报价',
+  '已定车',
+  '无需订车',
   '已装车',
-  '全部出库',
+  '已完成',
+  '已取消',
+  '已拆分',
   '存仓',
 ];
 

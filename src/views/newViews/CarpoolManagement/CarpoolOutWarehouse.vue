@@ -160,8 +160,8 @@
       const filterWithDate = filterTwo
         ? Object.keys(filterTwo).map((filterItem) => ({
             field: filterTwo[filterItem].key,
-            op: filterTwo[filterItem].value ? 'like' : '!=',
-            value: `%${filterTwo[filterItem].value || ''}%`,
+            op: 'between',
+            value: filterTwo[filterItem].value,
           }))
         : [];
       currentFilter = filterWithOutDate.concat(filterWithDate);

@@ -3,8 +3,6 @@
     <div>
       <filter-bar
         v-model="filterItems"
-        v-model:dateRange="dateRange"
-        v-model:showAll="showAll"
         :columns="columns"
         @clear="updateFilter(null)"
         @submit="updateFilter"
@@ -37,7 +35,6 @@
         :pagination="paginationReactive"
         :request="loadDataTable"
         :row-key="(row) => row.id"
-        @update:page="handlePageChange"
       />
       <n-modal
         v-model:show="showCurrentHeaderDataTable"
@@ -63,9 +60,13 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, h, onMounted, reactive, ref } from 'vue';
+  import { h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { columns } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
+  import {
+    allDeliveryMethod,
+    allInStatusList,
+    allOutboundMethod,
+  } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
   import { $ref } from 'vue/macros';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import {
@@ -77,7 +78,7 @@
     CheckmarkCircle20Regular,
     TableSettings20Regular,
   } from '@vicons/fluent';
-  import { NIcon, NTooltip } from 'naive-ui';
+  import { NButton, NIcon, NInput, NTooltip } from 'naive-ui';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
@@ -86,10 +87,22 @@
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import FileSaver from 'file-saver';
-  import { getTaskListByFilterWithPagination } from '@/api/newDataLayer/TaskList/TaskList';
+  import {
+    addOrUpdateTask,
+    getTaskListByFilterWithPagination,
+  } from '@/api/newDataLayer/TaskList/TaskList';
   import { getOutboundForecastById } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
   import * as XLSX from 'xlsx';
+  import { InBoundDetailStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import {
+    statusColumnEasy,
+    statusColumnSelect,
+    storageTimeWarnColumn,
+    timeColumn,
+    timeWarnList,
+  } from '@/views/bolita-views/composable/useableColumns';
+  import { asyncCustomerByFilter, asyncStorageByFilter } from '@/api/dataLayer/common/common';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -97,21 +110,239 @@
   let filterObj: any | null = $ref(null);
   let checkedRows = $ref([]);
   let currentModel: any | null = $ref(null);
-  let monthTab: any | null = $ref(null);
-  let selectedMonth: any | null = $ref('');
   let allList: any | null = $ref([]);
   let currentHeader = $ref([]);
   let currentColumns = $ref([]);
   let showCurrentHeaderDataTable = $ref(false);
-  let optionOne = $ref('');
-  let optionTwo = $ref('');
-  let valueOne = $ref('');
-  let valueTwo = $ref('');
-  let dateRange = $ref(null);
-  let showAll = $ref(false);
   let filterItems = $ref<Array<{ option: string; value: string }>>([]);
+  const columns = [
+    {
+      type: 'selection',
+      disabled: (row) => row.inStatus !== InBoundDetailStatus.WaitCheck,
+    },
+    {
+      title: '时效',
+      key: 'usefulTimeRange',
+      component: 'NSelect',
+      componentProps: {
+        options: timeWarnList,
+      },
+    },
+    asyncCustomerByFilter(),
+    {
+      title: '柜号',
+      key: 'containerId',
+    },
+    {
+      title: '票号',
+      key: 'ticketId',
+    },
+    {
+      title: '国家',
+      key: 'country',
+    },
+    {
+      title: '预报件数',
+      key: 'number',
+    },
+    {
+      title: '实际件数',
+      key: 'arrivedContainerNum',
+    },
+    {
+      title: '总实重',
+      key: 'weight',
+    },
+    {
+      title: '总体积',
+      key: 'volume',
+    },
+    {
+      title: '尺寸',
+      key: 'size',
+    },
+    statusColumnSelect({
+      title: '状态',
+      key: 'inStatus',
+      list: generateOptionFromArray(allInStatusList),
+    }),
+    asyncStorageByFilter(),
+    storageTimeWarnColumn('stayTime', '留仓时间'),
+    {
+      title: '运单号',
+      key: 'deliveryIdIn',
+    },
+    {
+      title: '客户备注',
+      key: 'normalNote',
+    },
+    {
+      title: 'FBA单号',
+      key: 'FBADeliveryCode',
+    },
+    {
+      title: '出库方式',
+      key: 'outboundMethod',
+      component: 'NSelect',
+      componentProps: {
+        options: generateOptionFromArray(allOutboundMethod),
+      },
+    },
+    {
+      title: '物流渠道',
+      key: 'deliveryMethod',
+      component: 'NSelect',
+      componentProps: {
+        options: generateOptionFromArray(allDeliveryMethod),
+      },
+    },
+    {
+      title: '操作要求',
+      key: 'operationRequire',
+    },
+    {
+      title: '操作备注',
+      key: 'operationNote',
+    },
+    statusColumnEasy({
+      title: '结算状态',
+      key: 'finalStatus',
+    }),
+    {
+      title: 'PO',
+      key: 'PO',
+    },
+    {
+      title: 'FC/送货地址',
+      key: 'fcaddress',
+    },
+    {
+      title: '邮编',
+      key: 'postcode',
+    },
+    statusColumnEasy({
+      title: '审核状态',
+      key: 'inBoundDetailStatus',
+    }),
+    {
+      title: '换单文件',
+      key: 'changeOrderFiles',
+      component: 'NSelect',
+      componentProps: {
+        options: [
+          { label: '是', value: '是' },
+          { label: '否', value: '否' },
+        ],
+      },
+    },
+    {
+      title: '送货备注',
+      key: 'transportationNote',
+    },
+    {
+      title: '预报托数',
+      key: 'trayNum',
+    },
+    {
+      title: '托盘规格',
+      key: 'trayDisplay',
+    },
+    {
+      title: '实际托数',
+      key: 'arrivedTrayNum',
+    },
+    timeColumn('planArriveDateTime', '预期到仓日期'),
+    timeColumn('arriveTime', '实际到仓日期'),
+    timeColumn('deliveryTime', '发货时间'),
+    timeColumn('outBoundTime', '预计取货时间'),
+    {
+      title: 'Ref',
+      key: 'ref',
+    },
+    // {
+    //   title: '仓库备注',
+    //   key: 'note',
+    // },
+    {
+      title: '仓库备注',
+      key: 'note',
+      render(row) {
+        return h(
+          NButton,
+          {
+            text: true,
+            onClick: () => {
+              dialog.create({
+                title: '请输入仓库备注',
+                content: () =>
+                  h(NInput, {
+                    value: row.note,
+                    onUpdateValue: (value) => {
+                      row.note = value;
+                    },
+                    placeholder: '请输入备注',
+                  }),
+                positiveText: '确定',
+                negativeText: '取消',
+                onPositiveClick: async () => {
+                  await addOrUpdateTask(row);
+                },
+                onNegativeClick: () => {},
+              });
+            },
+          },
+          { default: () => (row.note ? row.note : '暂无备注') }
+        );
+      },
+    },
+    {
+      title: '库位',
+      key: 'warehouseLocation',
+    },
+    {
+      title: '分拣标识',
+      key: 'sign',
+    },
+    {
+      title: '包装',
+      key: 'package',
+    },
+    {
+      title: '托数',
+      key: 'industrialTrayNum',
+    },
+    {
+      title: '品名',
+      key: 'productName',
+    },
+    {
+      title: 'UN号',
+      key: 'UNNumber',
+    },
+    {
+      title: '收件人',
+      key: 'recipient',
+    },
+    {
+      title: '电话',
+      key: 'phone',
+    },
+    {
+      title: '邮箱',
+      key: 'email',
+    },
+    {
+      title: '是否需要预约',
+      key: 'needReserve',
+    },
+    {
+      title: '工业品备注',
+      key: 'industrialNote',
+    },
+  ];
 
   const actionRef = ref();
+
   async function selectedHeader() {
     showCurrentHeaderDataTable = true;
   }
@@ -119,7 +350,6 @@
   async function downloadData() {
     let selectedList = [];
     selectedList = await loadDataTable();
-    let headerTitle = columns.filter((it) => it.title).map((it) => it.title);
     const data = [];
     const headers = columns.filter((it) => it.title).map((it) => it.title);
     data.push(headers);
@@ -179,9 +409,6 @@
     // 保存文件
     FileSaver.saveAs(blob, '订车明细.xlsx');
   }
-  const realOptions = computed(() => {
-    return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
-  });
 
   const paginationReactive = reactive({
     defaultPage: 1,
@@ -218,8 +445,8 @@
       const filterWithDate = filterTwo
         ? Object.keys(filterTwo).map((filterItem) => ({
             field: filterTwo[filterItem].key,
-            op: filterTwo[filterItem].value ? 'like' : '!=',
-            value: `%${filterTwo[filterItem].value || ''}%`,
+            op: 'between',
+            value: filterTwo[filterItem].value,
           }))
         : [];
       currentFilter = filterWithOutDate.concat(filterWithDate);
@@ -273,9 +500,8 @@
 
   async function reloadHeader() {
     currentColumns = [];
-    currentHeader = (await getTableHeaderGroupItemList('taskList'))
-      ? JSON.parse((await getTableHeaderGroupItemList('taskList'))?.headerItemJson)
-      : [];
+    const taskListHeader = await getTableHeaderGroupItemList('taskList');
+    currentHeader = taskListHeader ? JSON.parse(taskListHeader?.headerItemJson) : [];
     currentHeader.forEach((item) => {
       const res = columns.find((it) => it.key === item.itemKey);
       currentColumns.push(res);
@@ -315,12 +541,14 @@
     await reloadHeader();
     const res = getQueryString('id');
     if (res) {
-      setTimeout(() => {
-        updateFilter({ outboundId: res });
-      }, 500);
-    } else {
-      await reloadTable();
+      filterItems.push({
+        option: '订车Id',
+        key: 'outboundId',
+        value: res,
+        display: res,
+      });
     }
+    updateFilter(filterItems);
   });
 
   // Helper function to render icon with tooltip

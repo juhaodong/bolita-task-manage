@@ -160,6 +160,7 @@ export async function asyncCustomer(): Promise<FormField> {
     label: it.customerName,
     value: it.id,
   }));
+  console.log(list, 'list');
   return {
     field: 'customer.id',
     label: '客户',
