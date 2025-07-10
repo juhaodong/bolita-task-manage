@@ -857,6 +857,7 @@
     } else {
       currentColumns = [...currentWithOutSelection];
     }
+    currentColumns = currentColumns.filter((it) => it);
     currentColumns.forEach((item) => {
       item.resizable = true;
     });
