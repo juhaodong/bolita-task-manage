@@ -53,6 +53,7 @@
 
   function stop() {
     loading = false;
+    loadingMessage = '';
   }
 
   let errorMessage = $ref([]);
@@ -136,9 +137,12 @@
     errorMessage = [];
   }
 
+  let loadingMessage = $ref('');
+
   async function saveNotify(value: any) {
     defaultValue = value;
     startLoading();
+    loadingMessage = '';
     if (value?.id) {
       await addOrUpdateNotify(value);
       const taskList = await getTaskListByNotifyId(value.id);
@@ -150,6 +154,7 @@
       }
       emit('saved');
     } else {
+      loadingMessage += '正在读取文件！' + `<br>`;
       const userStore = useUserStore();
       const currentCustomer = (await getCustomerById(value.customerId)) ?? '';
       value.containerNo = value.containerNo.trim();
@@ -181,6 +186,7 @@
         value.files = '';
       }
       if (errorMessage.length === 0) {
+        loadingMessage += '正在上传' + value.containerNo + '的货柜预报！' + `<br>`;
         const res = await addOrUpdateNotify(value);
         await addOrUpdateInventoryUseLog({
           notifyId: res.data.id,
@@ -200,12 +206,15 @@
           item.outContainerNum = '';
           item.outTrayNum = '';
           item.cmrfiles = '';
+          loadingMessage += '正在加载票号:' + item.ticketId + '的任务明细！' + `<br>`;
           quest.push(addOrUpdateTask(item));
         }
         const result = await Promise.all(quest);
+        loadingMessage += '正在上传货柜号:' + value.containerNo + '的任务明细！' + `<br>`;
         const ids = result.map((it) => it.data.id);
         let idQuest = [];
         const userInfo = useUserStore().info;
+        loadingMessage += '正在写入每一票的TimeLine' + `<br>`;
         for (const id of ids) {
           idQuest.push(
             addOrUpdateTaskTimeLine({
@@ -218,6 +227,7 @@
           );
         }
         await Promise.all(idQuest);
+        loadingMessage += '完成' + `<br>`;
         emit('saved');
       }
     }
@@ -226,7 +236,7 @@
 </script>
 
 <template>
-  <loading-frame :loading="loading">
+  <loading-frame :loading="loading" :title="loadingMessage">
     <template v-if="errorMessage.length === 0">
       <new-container-forecast
         :default-value="defaultValue"

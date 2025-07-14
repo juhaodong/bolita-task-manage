@@ -3,8 +3,6 @@
     <n-card v-if="hasAuthPower('forecastView')" :bordered="false" class="proCard">
       <filter-bar
         v-model="filterItems"
-        v-model:dateRange="dateRange"
-        v-model:showAll="showAll"
         :columns="columns"
         @clear="updateFilter(null)"
         @submit="updateFilter"
