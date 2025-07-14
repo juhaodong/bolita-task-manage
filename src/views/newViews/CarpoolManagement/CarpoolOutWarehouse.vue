@@ -2,8 +2,6 @@
   <n-card v-if="hasAuthPower('outStorageView')" :bordered="false" class="proCard">
     <filter-bar
       v-model="filterItems"
-      v-model:dateRange="dateRange"
-      v-model:showAll="showAll"
       :columns="outCarColumns"
       :pagination="paginationReactive"
       @clear="updateFilter(null)"
@@ -73,7 +71,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, h, onMounted, reactive, ref } from 'vue';
+  import { h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { outCarColumns } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
@@ -81,12 +79,9 @@
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import ImportOutWarehouseFile from '@/views/newViews/CarpoolManagement/ImportOutWarehouseFile.vue';
-  import { OutWarehouseManager } from '@/api/dataLayer/modules/OutWarehouseCar/OutWarehouseModel';
   import OutCarDetail from '@/views/newViews/CarpoolManagement/OutCarDetail.vue';
   import OutWarehouseCarOffer from '@/views/newViews/CarpoolManagement/OutWarehouseCarOffer.vue';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
-  import { generateOptionFromArray } from '@/store/utils/utils';
-  import { columns } from '@/views/newViews/ContainerForecast/columns';
   import FileSaver from 'file-saver';
   import * as XLSX from 'xlsx';
   import { NIcon, NTooltip } from 'naive-ui';
@@ -104,30 +99,14 @@
   } from '@/api/newDataLayer/CarManage/ExternalVehicle';
   import dayjs from 'dayjs';
 
-  const showModal = ref(false);
-
   let filterObj: any | null = $ref(null);
-  let data: any = $ref([]);
   let currentModel: any | null = $ref(null);
-  let paymentDialogShow: boolean = $ref(false);
-  let selectedMonth: any | null = $ref('');
   let checkedRows = $ref([]);
   let ImportFilesDialog = $ref(false);
   let editDetailModel = $ref(false);
-  let monthTab: any | null = $ref(null);
   let currentId = $ref('');
   let showOfferPrice = $ref(false);
-  let optionOne = $ref('');
-  let optionTwo = $ref('');
-  let valueOne = $ref('');
-  let valueTwo = $ref('');
-  let dateRange = $ref(null);
   let filterItems = $ref<Array<{ option: string; value: string }>>([]);
-  let showAll = $ref(false);
-
-  const realOptions = computed(() => {
-    return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
-  });
 
   const paginationReactive = reactive({
     defaultPage: 1,
@@ -283,7 +262,6 @@
     editDetailModel = false;
     showOfferPrice = false;
     ImportFilesDialog = false;
-    paymentDialogShow = false;
   }
 
   async function startEdit(record) {
@@ -310,29 +288,6 @@
     key: 'action',
     width: 200,
     render(record: any) {
-      // Custom file action with icon
-      const iconFileAction = (label, key, icon, power) => {
-        return {
-          icon: renderIconWithTooltip(icon, label),
-          onClick: async () => {
-            try {
-              const upload = useUploadDialog();
-              const files = await upload.upload(record[key]);
-              if (files.checkPassed) {
-                record[key] = files.files;
-                await OutWarehouseManager.editInternal(record, record.id);
-                reloadTable();
-              }
-            } catch (error) {
-              console.error('上传失败:', error);
-            }
-          },
-          ifShow: () => {
-            return hasAuthPower(power);
-          },
-        };
-      };
-
       return h(TableAction as any, {
         style: 'text',
         actions: [

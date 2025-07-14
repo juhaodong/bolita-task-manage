@@ -158,7 +158,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, h, onMounted, reactive, ref } from 'vue';
+  import { h, onMounted, reactive, ref } from 'vue';
   import { NIcon, NTooltip } from 'naive-ui';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columns } from './columns';
@@ -178,7 +178,7 @@
   import { CashStatus, InBoundStatus, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
   import { $ref } from 'vue/macros';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import { generateOptionFromArray, handleRequest, toastSuccess } from '@/store/utils/utils';
+  import { handleRequest, toastSuccess } from '@/store/utils/utils';
   import NotifyUnloadForm from '@/views/newViews/ContainerForecast/form/NotifyUnloadForm.vue';
   import NotifyFeeDialog from '@/views/newViews/ContainerForecast/form/NotifyFeeDialog.vue';
   import WarehouseInfoDialog from '@/views/newViews/ContainerForecast/form/WarehouseInfoDialog.vue';
@@ -214,10 +214,6 @@
   let showUnloadingList = $ref(false);
   let currentHeader = $ref([]);
   let currentColumns = $ref([]);
-  let optionOne = $ref('');
-  let optionTwo = $ref('');
-  let valueOne = $ref('');
-  let valueTwo = $ref('');
   let dateRange = $ref(null);
   let showConfirmDialog = $ref(false);
   let cancelRecord = $ref('');
@@ -253,10 +249,6 @@
 
   onMounted(async () => {
     await reloadHeader();
-  });
-
-  const realOptions = computed(() => {
-    return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
   });
 
   async function confirmUnloading() {
@@ -582,13 +574,6 @@
     showFeeDialog = false;
     showConfirmDialog = false;
     showConfirmUnloading = false;
-  }
-
-  async function downloadFiles() {
-    window.open(
-      'https://firebasestorage.googleapis.com/v0/b/bolita-task-manage.appspot.com/o/bolita%2F1704376613996-%E6%AD%A3%E6%96%B9%E5%BD%A2%E8%BF%AA%E8%BF%A6.png?alt=media&token=9ad0dc83-b898-4309-9d7f-c600fa4123de',
-      '_blank'
-    );
   }
 
   async function closeAddDialog() {

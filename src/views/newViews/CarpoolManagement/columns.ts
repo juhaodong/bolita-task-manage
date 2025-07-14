@@ -59,10 +59,12 @@ export const outCarColumns: DataTableColumns<CarpoolManagementModel> = [
   {
     title: '提货地址',
     key: 'pickupAddress',
+    width: 300,
   },
   {
     title: '送货地址',
     key: 'deliveryAddress',
+    width: 300,
   },
   timeAndDateColumn('pickupDate', '取货日期+时点'),
   timeAndDateColumn('deliveryDate', '送货日期+时点'),

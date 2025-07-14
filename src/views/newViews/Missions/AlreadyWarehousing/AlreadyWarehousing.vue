@@ -270,7 +270,6 @@
   let currentModel: any | null = $ref(null);
   let typeTab = $ref(['整柜任务看板', '审核看板', '存仓看板']);
   let typeMission = ref('');
-  let selectedMonth: any | null = $ref('');
   let currentData: any | null = $ref('');
   let recordData: any | null = $ref('');
   let allList: any | null = $ref([]);
@@ -282,12 +281,6 @@
   let showTimeLine = $ref(false);
   let currentWithOutSelection = $ref([]);
   let showOfferPrice = $ref(false);
-  let optionOne = $ref('');
-  let optionTwo = $ref('');
-  let valueOne = $ref('');
-  let valueTwo = $ref('');
-  let dateRange = $ref(null);
-  let showAll = $ref(false);
   let mergeDialog = $ref(false);
   let checkLoading = $ref(false);
   let showCheckDialog = $ref(false);
@@ -394,6 +387,7 @@
     {
       title: 'FC/送货地址',
       key: 'fcaddress',
+      width: 300,
     },
     {
       title: '邮编',
@@ -813,7 +807,6 @@
 
   function updateFilter(value) {
     filterObj = value;
-    console.log(filterObj, 'filterObj');
     reloadTable();
   }
 

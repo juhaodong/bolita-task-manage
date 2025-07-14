@@ -1,1 +1,0 @@
-const u="/assets/logo.0f029d4f.png",o="/assets/account-logo.0a6f895e.png",e=Object.freeze({title:"\u4EFB\u52A1\u7BA1\u7406\u5E73\u53F0",logo:u,loginImage:o,loginDesc:"\u4ED3\u5E93\u4EFB\u52A1\u7ED3\u7B97\u7BA1\u7406\u5E73\u53F0"});export{e as w};

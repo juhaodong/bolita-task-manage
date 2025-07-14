@@ -205,6 +205,7 @@
     {
       title: 'FC/送货地址',
       key: 'fcaddress',
+      width: 300,
     },
     {
       title: '邮编',
