@@ -2,7 +2,7 @@
   <n-card :bordered="false" class="proCard">
     <div class="page-header">
       <div class="page-title">
-        <n-icon size="20" class="mr-2">
+        <n-icon class="mr-2" size="20">
           <CalendarOutlined />
         </n-icon>
         <span>日报表</span>
@@ -12,8 +12,8 @@
           v-model:value="dateRange"
           :default-value="[dayjs().valueOf(), dayjs().valueOf()]"
           clearable
-          type="daterange"
           size="medium"
+          type="daterange"
         />
         <n-button class="ml-2" secondary type="primary" @click="reload">
           <template #icon>
@@ -28,13 +28,13 @@
 
     <div class="my-4"></div>
 
-    <n-tabs v-model:value="activeTab" type="card" tab-style="min-width: 80px;">
+    <n-tabs v-model:value="activeTab" tab-style="min-width: 80px;" type="card">
       <n-tab-pane name="notify" tab="通知">
-        <BasicTable 
-          ref="actionNotifyRef" 
-          :columns="notifyColumns" 
+        <BasicTable
+          ref="actionNotifyRef"
+          :columns="notifyColumns"
           :request="loadNotifyDataTable"
-          :row-key="(row) => row.id || row.containerNo" 
+          :row-key="(row) => row.id || row.containerNo"
         />
       </n-tab-pane>
       <n-tab-pane name="outbound" tab="出库">
@@ -56,8 +56,8 @@
   import dayjs from 'dayjs';
   import { ref } from 'vue';
   import { CalendarOutlined, ReloadOutlined } from '@vicons/antd';
-  import { getOutboundForecastList } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
-  import { getNotifyList } from '@/api/newDataLayer/Notify/Notify';
+  import { getOutboundForecastByBetweenDateRangeList } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import { getNotifyByBetweenDateRangeList } from '@/api/newDataLayer/Notify/Notify';
 
   let dateRange = $ref(valueOfToday);
   let activeTab = $ref('notify'); // Default to notify tab
@@ -128,11 +128,7 @@
   });
 
   const loadNotifyDataTable = async () => {
-    let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-    let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-    const res = (await getNotifyList()).filter(
-      (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
-    );
+    const res = await getNotifyByBetweenDateRangeList(dateRange);
     res.forEach((x) => {
       if (
         dayjs().valueOf() >
@@ -147,16 +143,11 @@
         x.problem = 'Schwer';
       }
     });
-    console.log(res, 'res');
     return res;
   };
 
   const loadOutboundDataTable = async () => {
-    let startDate = dayjs(dateRange[0]).startOf('day').valueOf() ?? valueOfToday[0];
-    let endDate = dayjs(dateRange[1]).endOf('day').valueOf() ?? valueOfToday[1];
-    const res = (await getOutboundForecastList()).filter(
-      (it) => it.createTimestamp > startDate && it.createTimestamp < endDate
-    );
+    const res = await getOutboundForecastByBetweenDateRangeList(dateRange);
     res.forEach((it) => {
       if (!it.REF) {
         it.REF = it.ref ? it.ref : it.id;
@@ -166,49 +157,52 @@
   };
 
   function reload() {
-    actionNotifyRef.value.reload();
-    actionOutboundRef.value.reload();
+    if (activeTab === 'notify') {
+      actionNotifyRef.value.reload();
+    } else {
+      actionOutboundRef.value.reload();
+    }
   }
 </script>
 
 <style lang="less" scoped>
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
 
-.page-title {
-  display: flex;
-  align-items: center;
-  font-size: 18px;
-  font-weight: 500;
-}
+  .page-title {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 500;
+  }
 
-.filter-section {
-  display: flex;
-  align-items: center;
-}
+  .filter-section {
+    display: flex;
+    align-items: center;
+  }
 
-.mr-2 {
-  margin-right: 8px;
-}
+  .mr-2 {
+    margin-right: 8px;
+  }
 
-.ml-2 {
-  margin-left: 8px;
-}
+  .ml-2 {
+    margin-left: 8px;
+  }
 
-.my-4 {
-  margin-top: 16px;
-  margin-bottom: 16px;
-}
+  .my-4 {
+    margin-top: 16px;
+    margin-bottom: 16px;
+  }
 
-:deep(.n-tabs-tab) {
-  padding: 8px 16px;
-}
+  :deep(.n-tabs-tab) {
+    padding: 8px 16px;
+  }
 
-:deep(.n-data-table-th) {
-  font-weight: 500;
-}
+  :deep(.n-data-table-th) {
+    font-weight: 500;
+  }
 </style>

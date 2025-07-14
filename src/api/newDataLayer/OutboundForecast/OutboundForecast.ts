@@ -6,6 +6,20 @@ export async function getOutboundForecastList() {
   return (await hillo.jsonPost(typeName + '/list', {})).data.content;
 }
 
+export async function getOutboundForecastByBetweenDateRangeList(dateRange) {
+  return (
+    await hillo.jsonPost(typeName + '/list', {
+      criteria: [
+        {
+          field: 'realOutDate',
+          op: 'between',
+          value: dateRange,
+        },
+      ],
+    })
+  ).data.content;
+}
+
 export async function getOutboundForecastById(id) {
   return (
     await hillo.jsonPost(typeName + '/list', {

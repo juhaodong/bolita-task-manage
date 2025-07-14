@@ -6,6 +6,20 @@ export async function getNotifyList() {
   return (await hillo.jsonPost(typeName + '/list', {})).data.content;
 }
 
+export async function getNotifyByBetweenDateRangeList(dateRange) {
+  return (
+    await hillo.jsonPost(typeName + '/list', {
+      criteria: [
+        {
+          field: 'planArriveDateTime',
+          op: 'between',
+          value: dateRange,
+        },
+      ],
+    })
+  ).data.content;
+}
+
 export async function getNotifyById(id) {
   return (
     await hillo.jsonPost(typeName + '/list', {
