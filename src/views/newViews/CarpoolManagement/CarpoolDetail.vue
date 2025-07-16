@@ -505,6 +505,7 @@
       }
     }
     currentColumns = currentColumns.length > 0 ? currentColumns : columns;
+    currentColumns = currentColumns.filter((it) => it);
     currentColumns.forEach((item) => {
       item.resizable = true;
     });

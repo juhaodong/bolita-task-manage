@@ -914,7 +914,7 @@
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
-    width: 200,
+    width: 100,
     render(record: any) {
       // Custom file action with icon
       const iconFileAction = (label, key, icon, power) => {

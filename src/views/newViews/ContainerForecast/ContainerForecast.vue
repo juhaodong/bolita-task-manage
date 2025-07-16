@@ -515,7 +515,7 @@
       if (currentColumns.length === 0) {
         currentColumns = [...columns];
       }
-
+      currentColumns = currentColumns.filter((it) => it);
       // Make all columns resizable
       currentColumns.forEach((item) => {
         item.resizable = true;
@@ -595,7 +595,7 @@
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
-    width: 200,
+    width: 100,
     render(record: any) {
       const iconFileAction = (label, key, icon, power) => {
         return {

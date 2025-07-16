@@ -89,7 +89,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, h, onMounted, reactive, ref } from 'vue';
+  import { h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { columnsIn, columnsOut, filters } from './columns';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
@@ -102,25 +102,19 @@
   import NewSettlement from '@/views/newViews/SettlementManage/NewSettlement.vue';
   import { Document20Regular, DocumentEdit20Regular, Payment20Regular } from '@vicons/fluent';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
+  import { safeSumBy } from '@/store/utils/utils';
   import { OneYearMonthTab } from '@/api/dataLayer/common/MonthDatePick';
   import { getSettlementById, updateSettlement } from '@/api/dataLayer/common/SettlementType';
   import NewTotalFee from '@/views/newViews/SettlementManage/NewTotalFee.vue';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
-  import { columns } from '@/views/newViews/ContainerForecast/columns';
   import { getNotifySettlementByFilterWithPagination } from '@/api/newDataLayer/NotifySettlement/NotifySettlement';
   import { getSettlementListByFilterWithPagination } from '@/api/newDataLayer/TaskListSettlement/TaskListSettlement';
   import { getNotifyById } from '@/api/newDataLayer/Notify/Notify';
   import NotifyDetail from '@/views/newViews/SettlementManage/NotifyDetail.vue';
   import { NIcon, NTooltip } from 'naive-ui';
 
-  interface Prop {
-    outId?: string;
-  }
-
   let finished = $ref(false);
-  const props = defineProps<Prop>();
   let addNewFeeDialog = $ref(false);
   let showFeeDialog = $ref(false);
   let selectedMonth: any | null = $ref('');
@@ -130,14 +124,8 @@
   let typeMission: any | null = $ref('');
   let currentData: any | null = $ref([]);
   let typeTab = $ref(['卸柜结算', '货柜结算']);
-  let optionOne = $ref('');
-  let optionTwo = $ref('');
-  let valueOne = $ref('');
-  let valueTwo = $ref('');
-  let dateRange = $ref(null);
   let showNotifyDetail = $ref(false);
   let filterItems = $ref<Array<{ option: string; value: string }>>([]);
-  let showAll = $ref(false);
   let filterObj: any | null = $ref(null);
 
   const paginationReactive = reactive({
@@ -174,9 +162,6 @@
     addNewFeeDialog = true;
   }
 
-  const realOptions = computed(() => {
-    return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
-  });
 
   const loadDataTable = async () => {
     // Build filter criteria
@@ -344,7 +329,7 @@
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
-    width: 200,
+    width: 100,
     render(record: any) {
       return h(TableAction as any, {
         style: 'text',

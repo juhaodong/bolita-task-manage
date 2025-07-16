@@ -319,6 +319,7 @@
       currentColumns.push(res);
     });
     currentColumns = currentColumns.length > 0 ? currentColumns : operationColumns;
+    currentColumns = currentColumns.filter((it) => it);
     currentColumns.forEach((item) => {
       item.resizable = true;
     });
@@ -519,7 +520,7 @@
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
-    width: 200,
+    width: 100,
     render(record) {
       // Custom file action with icon
       const iconFileAction = (label, key, icon, power) => {
