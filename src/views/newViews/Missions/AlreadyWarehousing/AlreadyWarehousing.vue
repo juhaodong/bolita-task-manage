@@ -226,6 +226,7 @@
     Payment20Regular,
     Tag20Regular,
     Warning20Regular,
+    SplitVertical20Regular,
   } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import dayjs from 'dayjs';
@@ -947,8 +948,15 @@
             onClick() {
               startEdit(record.id);
             },
+            highlight: () => {
+              if (record.alreadyChanged === 1) {
+                return 'error'
+              } else {
+                return 'success'
+              }
+            },
             ifShow: () => {
-              return hasAuthPower('missionEdit');
+              return hasAuthPower('missionEdit') && !['已装车','已出库'].includes(record.inStatus);
             },
           },
           {
@@ -961,7 +969,7 @@
             },
           },
           {
-            icon: renderIconWithTooltip(Delete20Regular, '拆分'),
+            icon: renderIconWithTooltip(SplitVertical20Regular, '拆分'),
             onClick() {
               currentInfo = record;
               splitTaskDialog = true;
@@ -1102,6 +1110,15 @@
               record.customerId = record.customer.id;
               record.inventoryId = record.inventory.id;
               await addOrUpdateTask(record);
+              const userInfo = useUserStore().info;
+              await addOrUpdateTaskTimeLine({
+                useType: 'normal',
+                bolitaTaskId: record.id,
+                operator: userInfo?.realName,
+                detailTime: dayjs().valueOf(),
+                note: '修改过的信息已经被确认！',
+              });
+              await reloadTable();
             },
             ifShow: () => {
               return record.alreadyChanged;

@@ -82,7 +82,7 @@
   async function handleSubmit(values: any) {
     loading = true;
     if (prop.typeName === 'car') {
-      values.inStatus = '已定车';
+      values.inStatus = '已订车';
       values.carStatus = CarStatus.Booked;
       values.inStatus = CarStatus.Booked;
       values.waitCar = '1';

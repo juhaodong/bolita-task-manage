@@ -44,3 +44,21 @@ export function getCurrentLogTime(date, time) {
   const res = dayjs(currentDate + ' ' + time).format('YYYY-MM-DD HH:mm:ss');
   return Date.parse(res);
 }
+
+export async function deleteInventoryLog(id) {
+  return await hillo.jsonPost(typeName + '/deleteById/' + id, {});
+}
+
+export async function getInventoryUseLogListByNotifyId(notifyId) {
+  return (
+    await hillo.jsonPost(typeName + '/list', {
+      criteria: [
+        {
+          field: 'notifyId',
+          op: '==',
+          value: notifyId,
+        },
+      ],
+    })
+  ).data.content;
+}

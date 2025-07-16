@@ -277,7 +277,7 @@
       if (values[valuesKey] !== prop.model[valuesKey]) {
         const res = allItemInfo.find((it) => it.field === valuesKey) ?? '';
         if (res) {
-          editLabel.push(res.label);
+          editLabel.push(res.label + '(' + waitEdit[valuesKey] + '->' + values[valuesKey] + ')');
         }
       }
     }
@@ -286,7 +286,7 @@
       bolitaTaskId: values.id,
       operator: userInfo?.realName,
       detailTime: dayjs().valueOf(),
-      note: '修改了' + editLabel.join(','),
+      note: '修改了 ' + editLabel.join(','),
     });
     await safeScope(async () => {
       await addOrUpdateTask(Object.assign(waitEdit, values));

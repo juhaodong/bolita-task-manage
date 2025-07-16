@@ -209,7 +209,7 @@ export function selectedIdColumn(title, targetPage, keyName) {
   return {
     title: title,
     key: keyName,
-    width: 200,
+    width: 100,
     render(record) {
       return h(
         RouterLink,

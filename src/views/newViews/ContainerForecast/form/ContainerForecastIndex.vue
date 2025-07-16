@@ -19,9 +19,9 @@
   import { getUserNameById } from '@/api/newDataLayer/User/User';
   import { getFBACodeList } from '@/api/newDataLayer/FBACode/FBACode';
   import {
-    addOrUpdateInventoryUseLog,
-    getCurrentLogTime,
-  } from '@/api/newDataLayer/Warehouse/UseLog';
+    addOrUpdateInventoryUseLog, deleteInventoryLog,
+    getCurrentLogTime, getInventoryUseLogListByNotifyId
+  } from "@/api/newDataLayer/Warehouse/UseLog";
   import {
     addOrUpdateTask,
     defaultTask,
@@ -29,6 +29,7 @@
   } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { safeSumBy } from '@/store/utils/utils';
+  import router from '@/router';
 
   interface Prop {
     currentModel?: any;
@@ -146,10 +147,20 @@
     if (value?.id) {
       await addOrUpdateNotify(value);
       const taskList = await getTaskListByNotifyId(value.id);
+      const log = (await getInventoryUseLogListByNotifyId(value.id))[0];
+      if (log) {
+        await addOrUpdateInventoryUseLog({
+          id: log.id,
+          notifyId: value.id,
+          inventoryId: value.inventoryId,
+          useAtTimestamp: getCurrentLogTime(value.planArriveDateTime, value.adminTimeSpan),
+        });
+      }
       for (const task of taskList) {
         task.customerId = value.customerId;
         task.inventoryId = value.inventoryId;
         task.inHouseTime = value.inHouseTime;
+        task.planArriveDateTime = value.planArriveDateTime;
         await addOrUpdateTask(task);
       }
       emit('saved');
@@ -228,7 +239,8 @@
         }
         await Promise.all(idQuest);
         loadingMessage += '完成' + `<br>`;
-        emit('saved');
+        await router.push('/missions/missionDetail?containerNo=' + value.containerNo);
+        // emit('saved');
       }
     }
     stop();

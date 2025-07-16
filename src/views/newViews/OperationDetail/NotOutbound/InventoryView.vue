@@ -97,16 +97,16 @@
         v-model:show="showTimeLine"
         :show-icon="false"
         preset="card"
-        style="width: 90%; min-width: 800px; max-width: 800px"
+        style="width: 800px"
         title="时间线"
       >
-        <time-line :ids="currentId" />
+        <time-line :info="currentInfo" />
       </n-modal>
       <n-modal
         v-model:show="showConfirmDialog"
         :show-icon="false"
         preset="card"
-        style="width: 90%; min-width: 400px; max-width: 400px"
+        style="width: 800px"
         title="请确认"
       >
         <confirm-dialog :title="'您确定要执行这个操作吗？'" @saved="confirmFinish" />
@@ -131,12 +131,12 @@
   import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import {
     ArrowDownload20Regular,
-    Box20Filled,
+    Box20Filled, Clock20Regular,
     Document20Regular,
     DocumentEdit20Regular,
     Image20Regular,
-    TableSettings20Regular,
-  } from '@vicons/fluent';
+    TableSettings20Regular
+  } from "@vicons/fluent";
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
@@ -176,9 +176,6 @@
   let addNewFeeDialog = $ref(false);
   let checkedRows = $ref([]);
   let currentModel: any | null = $ref(null);
-  let monthTab: any | null = $ref(null);
-  let typeMission: any | null = $ref('');
-  let selectedMonth: any | null = $ref('');
   let currentData: any | null = $ref('');
   let recordData: any | null = $ref('');
   let allList: any | null = $ref([]);
@@ -186,12 +183,8 @@
   let showCurrentHeaderDataTable = $ref(false);
   let currentHeader = $ref([]);
   let currentColumns = $ref([]);
-  let currentId = $ref('');
   let showTimeLine = $ref(false);
-  let optionOne = $ref('');
-  let optionTwo = $ref('');
-  let valueOne = $ref('');
-  let valueTwo = $ref('');
+  let currentInfo = $ref('');
   let dateRange = $ref(null);
   let showConfirmDialog = $ref(false);
   let cancelIds = $ref([]);
@@ -202,7 +195,7 @@
   const columns = [
     {
       type: 'selection',
-      disabled: (row) => row.inStatus !== InBoundDetailStatus.WaitCheck,
+      disabled: (row) => row.inStatus !== '入库待操作',
     },
     {
       title: '时效',
@@ -485,11 +478,16 @@
         : [];
       currentFilter = filterWithOutDate.concat(filterWithDate);
     }
+    // currentFilter.push({
+    //   field: 'inStatus',
+    //   op: 'in',
+    //   value: ['入库待操作'],
+    // });
     currentFilter.push({
-      field: 'inStatus',
-      op: 'in',
-      value: ['入库待操作'],
-    });
+      field: 'operateInStorage',
+      op: '==',
+      value: '是'
+    })
     const customerId = await getUserCustomerList();
     currentFilter.push({ field: 'customer.id', op: 'in', value: customerId });
 
@@ -693,9 +691,8 @@
     const userInfo = useUserStore().info;
     const currentList = await getTaskListByIds(cancelIds);
     for (const currentItem of currentList) {
-      currentItem.operateInStorage = '否';
       if (currentItem.outboundMethod !== '存仓') {
-        currentItem.inStatus = InBoundStatus.All;
+        currentItem.inStatus = '入库待出库';
       } else {
         currentItem.inStatus = '存仓';
       }
@@ -778,7 +775,7 @@
               showConfirmDialog = true;
             },
             ifShow: () => {
-              return record.operateInStorage === '是' && hasAuthPower('inStorageTurnToOut');
+              return record.inStatus === '入库待操作' && hasAuthPower('inStorageTurnToOut');
             },
           },
           {
@@ -820,6 +817,16 @@
             'missionOperationFile'
           ),
           iconFileAction('问题图片', 'problemFiles', Image20Regular, 'missionProblemPic'),
+          {
+            icon: renderIconWithTooltip(Clock20Regular, '时间线'),
+            onClick() {
+              currentInfo = record;
+              showTimeLine = true;
+            },
+            ifShow: () => {
+              return hasAuthPower('missionTimeline');
+            },
+          },
         ],
       });
     },

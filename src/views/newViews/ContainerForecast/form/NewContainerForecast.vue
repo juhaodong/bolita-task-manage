@@ -231,6 +231,7 @@
   async function submit() {
     if (prop.model?.id) {
       currentData.inHouseTime = currentData.inHouseTime + '/' + adminTimeSpan;
+      currentData.adminTimeSpan = adminTimeSpan;
     }
     await safeScope(async () => {
       emit('submit', currentData);

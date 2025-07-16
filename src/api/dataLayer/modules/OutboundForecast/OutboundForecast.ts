@@ -59,7 +59,7 @@ export async function updateTaskListAfterBookingCar(id) {
       detailTime: dayjs().valueOf(),
       note: '完成订车',
     });
-    res.inStatus = '已定车';
+    res.inStatus = '已订车';
     res.inventoryId = res.inventory.id;
     res.customerId = res.customer.id;
     await addOrUpdateTask(res);
@@ -84,7 +84,7 @@ export async function updateTaskListAfterBookingCarWithInfo(id, info) {
       dayjs(parseFloat(info.reservationGetProductTime)).format('YYYY-MM-DD') +
       ' ' +
       info.reservationGetProductDetailTime; // 预计取货时间
-    res.inStatus = '已定车';
+    res.inStatus = '已订车';
     res.inventoryId = res.inventory.id;
     res.customerId = res.customer.id;
     await addOrUpdateTask(res);

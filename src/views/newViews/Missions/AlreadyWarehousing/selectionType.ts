@@ -27,6 +27,6 @@ export const offerObj = {
 export const inStorageObj = {
   type: 'selection',
   disabled: (row) => {
-    return row.inStatus !== '库内操作';
+    return row.inStatus !== '入库待操作';
   },
 };

@@ -30,7 +30,7 @@
   async function nextStep() {
     if (step.value === 1) {
       newSplitList.value = [];
-      for (let i = 1; i.toString() <= splitNumber.value; i++) {
+      for (let i = 1; i <= parseFloat(splitNumber.value); i++) {
         newSplitList.value.push({
           value: i.toString(),
           currentNumber: '',
