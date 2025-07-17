@@ -91,6 +91,28 @@ export async function updateTaskListAfterBookingCarWithInfo(id, info) {
   }
 }
 
+export async function updateTaskListAfterCancelBookingCarWithInfo(id, info) {
+  console.log(info, 'info');
+  const taskListIds = (await getOutboundForecastById(id)).outboundDetailInfo.split(',');
+  const userInfo = useUserStore().info;
+  for (const taskId of taskListIds) {
+    const res = await getTaskListById(taskId);
+    await addOrUpdateTaskTimeLine({
+      useType: 'normal',
+      bolitaTaskId: taskId,
+      operator: userInfo?.realName,
+      detailTime: dayjs().valueOf(),
+      note: '取消订车',
+    });
+    res.ref = info.REF;
+    res.outBoundTime = ''; // 预计取货时间
+    res.inStatus = '已计划出库';
+    res.inventoryId = res.inventory.id;
+    res.customerId = res.customer.id;
+    await addOrUpdateTask(res);
+  }
+}
+
 export async function updateTaskListAfterOfferPriceCar(id, priceInfo) {
   const taskListIds = (await getOutboundForecastById(id)).outboundDetailInfo.split(',');
   const userInfo = useUserStore().info;

@@ -71,6 +71,16 @@
       >
         <booking-car-dialog :info="currentInfo" @saved="saved" />
       </n-modal>
+      <n-modal
+        v-model:show="showConfirmCancelDialog"
+        :show-icon="false"
+        class="modal-small"
+        preset="card"
+        style="width: 600px"
+        title="请确认"
+      >
+        <confirm-dialog :title="'确定取消订车吗?'" @saved="cancelOrderCar" />
+      </n-modal>
     </n-card>
     <no-power-page v-else />
   </div>
@@ -83,6 +93,7 @@
     DrawImage20Regular,
     Payment20Regular,
     VehicleTruck20Regular,
+    Warning20Regular,
   } from '@vicons/fluent';
   import { computed, h, onMounted, reactive, ref } from "vue";
   import { BasicTable, TableAction } from '@/components/Table';
@@ -107,6 +118,10 @@
   import BookingCarDialog from '@/views/newViews/CarpoolManagement/dialog/BookingCarDialog.vue';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
   import * as XLSX from 'xlsx';
+  import ConfirmDialog from "@/views/newViews/Common/ConfirmDialog.vue";
+  import {
+    updateTaskListAfterBookingCarWithInfo, updateTaskListAfterCancelBookingCarWithInfo
+  } from "@/api/dataLayer/modules/OutboundForecast/OutboundForecast";
 
   const showModal = ref(false);
 
@@ -228,6 +243,25 @@
     return fakeListStart.concat(allList.concat(fakeListEnd));
   };
   const actionRef = ref();
+  let showConfirmCancelDialog = $ref(false);
+
+  async function cancelOrderCar () {
+    currentInfo.AMZID = '';
+    currentInfo.ISA = '';
+    currentInfo.bookCarTimestamp = '';
+    currentInfo.carStatus = '';
+    currentInfo.note = '';
+    currentInfo.reservationGetProductDetailTime = '';
+    currentInfo.reservationGetProductTime = '';
+    currentInfo.waitCar = '0';
+    currentInfo.waybillId = '';
+    currentInfo.logisticsCompany = '';
+    currentInfo.inStatus = '待订车';
+    await updateTaskListAfterCancelBookingCarWithInfo(currentInfo.id, currentInfo);
+    await addOrUpdateWithRefOutboundForecast(currentInfo);
+    showConfirmCancelDialog = false
+    reloadTable();
+  }
 
   async function downloadData() {
     try {
@@ -337,6 +371,7 @@
     editOutboundForecast = false;
     offerDialog = false;
     carDialog = false;
+    showConfirmCancelDialog = false
   }
 
   function saved() {
@@ -432,12 +467,24 @@
               currentInfo = record;
               offerDialog = true;
             },
+            ifShow: () => {
+              return record.needOfferPrice === '1'
+            },
+            highlight: () => {
+              return record?.['waitPrice'] === '1' ? 'success' : 'error';
+            },
           },
           {
             icon: renderIconWithTooltip(VehicleTruck20Regular, '订车'),
             onClick() {
               currentInfo = record;
               carDialog = true;
+            },
+            ifShow: () => {
+              return record.needCar === '1'
+            },
+            highlight: () => {
+              return record?.['waitCar'] === '1' ? 'success' : 'error';
             },
           },
           {
@@ -459,6 +506,19 @@
             },
           },
           iconFileAction('提单', 'pickupFiles', Document20Regular, 'orderCarOrder'),
+          {
+            icon: renderIconWithTooltip(Warning20Regular, '取消订车'),
+            onClick() {
+              currentInfo = record;
+              showConfirmCancelDialog = true;
+            },
+            ifShow: () => {
+              return record.needCar === '1' && record?.['waitCar'] === '1'
+            },
+            highlight: () => {
+              return 'error'
+            },
+          },
         ],
       });
     },

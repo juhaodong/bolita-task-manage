@@ -12,7 +12,7 @@ export async function afterPlanDetailAdded(planDetails) {
   const quest = planDetails.map(async (detail) => {
     notifyIds.push(detail?.notifyId);
     detail.inStatus =
-      detail.carStatus === CarStatus.NoNeed ? CarStatus.NoNeed : OutPlanStatus.AlreadyPlan;
+      detail.carStatus === '无需订车' ? '无需订车' : '已计划出库';
     await addOrUpdateTask(detail);
     await addOrUpdateTaskTimeLine({
       useType: 'normal',

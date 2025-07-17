@@ -6,6 +6,7 @@
   import dayjs from 'dayjs';
   import { addOrUpdateWithRefOutboundForecast } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import { updateTaskListAfterBookingCarWithInfo } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import LoadingFrame from "@/views/bolita-views/composable/LoadingFrame.vue";
 
   interface Props {
     info?: any;
@@ -22,6 +23,7 @@
   let reservationGetProductDetailTime = $ref('');
   let AMZID = $ref('');
   let note = $ref('');
+  let loading = $ref(false);
   // const emit = defineEmits(['saved']);
   const prop = defineProps<Props>();
   onMounted(async () => {
@@ -69,7 +71,7 @@
       return;
     }
     let outboundForecastInfo = prop.info;
-    await updateTaskListAfterBookingCarWithInfo(outboundForecastInfo.id, outboundForecastInfo);
+    loading = true
     outboundForecastInfo.AMZID = AMZID;
     outboundForecastInfo.ISA = ISA;
     outboundForecastInfo.bookCarTimestamp = dayjs().valueOf();
@@ -77,16 +79,19 @@
     outboundForecastInfo.carStatus = '已订车';
     outboundForecastInfo.note = note;
     outboundForecastInfo.reservationGetProductDetailTime = reservationGetProductDetailTime;
-    outboundForecastInfo.reservationGetProductTime = reservationGetProductTime;
+    outboundForecastInfo.reservationGetProductTime = dayjs(reservationGetProductTime).valueOf();
     outboundForecastInfo.waitCar = '1';
     outboundForecastInfo.waybillId = waybillId;
     outboundForecastInfo.logisticsCompany = logisticsCompany;
+    await updateTaskListAfterBookingCarWithInfo(outboundForecastInfo.id, outboundForecastInfo);
     await addOrUpdateWithRefOutboundForecast(outboundForecastInfo);
+    loading = false
     emit('saved');
   }
 </script>
 
 <template>
+  <loading-frame :loading="loading">
   <div class="mt-8">
     <n-descriptions :columns="1" bordered label-placement="left">
       <n-descriptions-item :span="2" label="物流公司 (必填)">
@@ -125,6 +130,7 @@
     <n-button style="margin-top: 10px" type="info" @click="saveInfo">确认</n-button>
     <span v-if="requiredInfo" style="color: red">{{ errorMessage }}</span>
   </div>
+  </loading-frame>
 </template>
 
 <style lang="less" scoped></style>

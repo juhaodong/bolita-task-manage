@@ -7,6 +7,7 @@
   import { $ref } from 'vue/macros';
   import { getFBACodeList } from '@/api/newDataLayer/FBACode/FBACode';
   import dayjs from 'dayjs';
+  import LoadingFrame from "@/views/bolita-views/composable/LoadingFrame.vue";
 
   interface Props {
     info?: any;
@@ -17,7 +18,9 @@
   let REF = $ref('');
   let suggestedPrice = $ref('');
   let costPrice = $ref('');
+  let loading = $ref(false);
   onMounted(async () => {
+    loading = true;
     const res = await getTaskListByOutboundId(prop.info.id);
     const fbaCodeList = await getFBACodeList();
     const todayDisplay = dayjs().format('DDMMYY');
@@ -39,14 +42,16 @@
         price: safeSumBy(value, 'outPrice'),
       })
     );
+    loading = false;
   });
   const totalPrice = computed(() => {
     return safeSumBy(currentInfo.value, 'price');
   });
   async function savePrice() {
+    loading = true;
     for (const item of currentInfo.value) {
       for (const task of item.value) {
-        task.inStatus = '已报价';
+        // task.inStatus = '已报价';
         task.waitPrice = '1';
         task.outPrice = item.price / item.value.length;
         task.REF = REF.toString();
@@ -55,17 +60,19 @@
     }
     let outboundInfo = prop.info;
     outboundInfo.totalOutOffer = totalPrice.value;
-    outboundInfo.inStatus = '已报价';
+    // outboundInfo.inStatus = '已报价';
     outboundInfo.REF = REF.toString();
     outboundInfo.costPrice = costPrice;
     outboundInfo.suggestedPrice = suggestedPrice;
     outboundInfo.waitPrice = '1';
     await addOrUpdateOutboundForecast(outboundInfo);
+    loading = false;
     emit('saved');
   }
 </script>
 
 <template>
+  <loading-frame :loading="loading">
   <div class="mt-8">
     <n-descriptions :columns="1" bordered label-placement="left">
       <n-descriptions-item :span="2" label="REF">
@@ -91,6 +98,7 @@
     </n-descriptions>
     <n-button style="margin-top: 10px" type="info" @click="savePrice">确认</n-button>
   </div>
+  </loading-frame>
 </template>
 
 <style lang="less" scoped></style>
