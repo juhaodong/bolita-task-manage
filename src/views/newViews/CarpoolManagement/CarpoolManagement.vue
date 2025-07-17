@@ -84,7 +84,7 @@
     Payment20Regular,
     VehicleTruck20Regular,
   } from '@vicons/fluent';
-  import { computed, h, reactive, ref } from 'vue';
+  import { computed, h, onMounted, reactive, ref } from "vue";
   import { BasicTable, TableAction } from '@/components/Table';
   import { NIcon, NTooltip } from 'naive-ui';
   import { columns } from './columns';
@@ -177,7 +177,12 @@
       op: '!=',
       value: '无需订车',
     });
-
+    currentFilter.map((it) => {
+      if (it.field === 'id') {
+        it.op = '=='
+        it.value = parseFloat(it.value.replace(/^%|%$/g, ""))
+      }
+    })
     // Get paginated data
     const res = await getOutboundForecastListByFilterWithPagination(
       currentFilter,
@@ -363,6 +368,32 @@
     editId = id;
     editOutboundForecast = true;
   }
+
+  function getQueryString(name) {
+    return (
+      decodeURIComponent(
+        (new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.href) || [
+          '',
+          '',
+        ])[1].replace(/\+/g, '%20')
+      ) || null
+    );
+  }
+
+  onMounted(async () => {
+    const res = getQueryString('id');
+    if (res) {
+      filterItems.push({
+        option: 'id',
+        key: 'id',
+        value: res,
+        display: res,
+      });
+      updateFilter(filterItems);
+    } else {
+      await reloadTable();
+    }
+  });
 
   const actionColumn = reactive({
     title: '可用动作',

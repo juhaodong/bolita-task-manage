@@ -92,6 +92,7 @@
   import { BasicTable } from '@/components/Table';
   import { getUserCustomerList } from '@/api/dataLayer/common/power';
   import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import router from "@/router";
 
   interface Props {
     model?: any;
@@ -412,6 +413,7 @@
     await safeScope(() => {
       emit('saved');
     });
+    await router.push('/car/carBooking?id=' + outboundId);
     loading = false;
   }
 
