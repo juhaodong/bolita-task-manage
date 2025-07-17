@@ -121,6 +121,15 @@
     >
       <loading-car-doc :notify-id="currentNotifyId!" @save="reloadTable" />
     </n-modal>
+    <n-modal
+      v-model:show="offerDialog"
+      :show-icon="false"
+      preset="card"
+      style="width: 90%; min-width: 600px; max-width: 600px"
+      title="对外报价"
+    >
+      <offer-customer-dialog :info="currentInfo" @saved="saved" />
+    </n-modal>
   </n-card>
   <no-power-page v-else />
 </template>
@@ -175,6 +184,8 @@
     asyncCustomerByFilter,
     asyncStorageByFilter,
   } from '@/api/dataLayer/common/common';
+  import OfferCustomerDialog
+    from "@/views/newViews/CarpoolManagement/dialog/OfferCustomerDialog.vue";
 
   const showModal = ref(false);
   let showShareCarModel = $ref(false);
@@ -356,7 +367,12 @@
       op: 'in',
       value: waitOperationStatusList,
     });
-
+    currentFilter.map((it) => {
+      if (it.field === 'id') {
+        it.op = '=='
+        it.value = parseFloat(it.value.replace(/^%|%$/g, ""))
+      }
+    })
     // Get paginated data
     const res = await getOutboundForecastListByFilterWithPagination(
       currentFilter,
@@ -483,6 +499,7 @@
     editOutboundForecast = false;
     showLoadingCarListDialog = false;
     showFeeDialog = false;
+    offerDialog = false;
     actionRef.value.reload();
   }
 
@@ -512,10 +529,35 @@
     checkedRows = [];
   }
 
+  function getQueryString(name) {
+    return (
+      decodeURIComponent(
+        (new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.href) || [
+          '',
+          '',
+        ])[1].replace(/\+/g, '%20')
+      ) || null
+    );
+  }
+
   onMounted(async () => {
     await reloadHeader();
     typeMission = '出库任务看板';
+    const res = getQueryString('id');
+    if (res) {
+      filterItems.push({
+        option: 'id',
+        key: 'id',
+        value: res,
+        display: res,
+      });
+      updateFilter(filterItems);
+    } else {
+      await reloadTable();
+    }
   });
+
+  let offerDialog = $ref(false);
 
   const actionColumn = reactive({
     title: '可用动作',
@@ -549,13 +591,26 @@
       return h(TableAction as any, {
         style: 'text',
         actions: [
+          // {
+          //   icon: renderIconWithTooltip(DocumentEdit20Regular, '修改'),
+          //   onClick() {
+          //     startEditOF(record.id);
+          //   },
+          //   ifShow: () => {
+          //     return hasAuthPower('outMissionEdit');
+          //   },
+          // },
           {
-            icon: renderIconWithTooltip(DocumentEdit20Regular, '修改'),
+            icon: renderIconWithTooltip(Payment20Regular, '对外报价'),
             onClick() {
-              startEditOF(record.id);
+              currentInfo = record;
+              offerDialog = true;
             },
             ifShow: () => {
-              return hasAuthPower('outMissionEdit');
+              return record.needOfferPrice === '1'
+            },
+            highlight: () => {
+              return record?.['waitPrice'] === '1' ? 'success' : 'error';
             },
           },
           iconFileAction(

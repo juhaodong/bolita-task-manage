@@ -195,6 +195,16 @@
       >
         <split-task-dialog :info="currentInfo" @saved="reloadTable" />
       </n-modal>
+      <n-modal
+        v-model:show="showCancelDialog"
+        :show-icon="false"
+        class="modal-small"
+        preset="card"
+        style="width: 600px"
+        title="请确认"
+      >
+        <confirm-dialog :title="'确认取消任务？'" @saved="cancelTask" />
+      </n-modal>
     </div>
   </n-card>
 </template>
@@ -261,6 +271,11 @@
   import { NButton, NIcon, NInput, NTooltip, useDialog } from 'naive-ui';
   import * as XLSX from 'xlsx';
   import { asyncCustomerByFilter, asyncStorageByFilter } from '@/api/dataLayer/common/common';
+  import ConfirmDialog from "@/views/newViews/Common/ConfirmDialog.vue";
+  import {
+    addOrUpdateOutboundForecast, addOrUpdateWithRefOutboundForecast,
+    getOutboundForecastById
+  } from "@/api/newDataLayer/OutboundForecast/OutboundForecast";
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -537,6 +552,27 @@
       return hasAuthPower('missionStorageView');
     }
   });
+
+  let showCancelDialog = $ref(false);
+  async function cancelTask() {
+    console.log(currentInfo, 'currentInfo')
+    currentInfo.inStatus = '已取消'
+    await addOrUpdateTask(currentInfo);
+    const userInfo = useUserStore().info;
+    await addOrUpdateTaskTimeLine({
+      useType: 'normal',
+      bolitaTaskId: currentInfo.id,
+      operator: userInfo?.realName,
+      detailTime: dayjs().valueOf(),
+      note: '取消当前任务！',
+    });
+    if (currentInfo.outboundId) {
+      const outboundInfo = await getOutboundForecastById(currentInfo.outboundId)
+      outboundInfo.inStatus = '等待审核'
+      await addOrUpdateWithRefOutboundForecast(outboundInfo)
+    }
+    showCancelDialog = false
+  }
 
   async function startEdit(id) {
     currentModel = await getTaskListById(id);
@@ -1122,6 +1158,13 @@
             },
             ifShow: () => {
               return record.alreadyChanged;
+            },
+          },
+          {
+            icon: renderIconWithTooltip(Delete20Regular, '取消'),
+            async onClick() {
+              currentInfo = record;
+              showCancelDialog = true
             },
           },
         ],

@@ -386,7 +386,8 @@
       deliveryMethod: selectedDeliveryMethod,
       postcode: selectedPostcode ?? '',
       ...value,
-      inStatus: value.needCar === '1' ? CarStatus.UnAble : CarStatus.NoNeed,
+      inStatus: value.needCar === '1' ? '待订车' : '无需订车',
+      carStatus: value.needCar === '1' ? '待订车' : '无需订车',
       outboundDetailInfo: allNotifyDetail.map((it) => it.id).join(','),
       totalVolume: safeSumBy(allNotifyDetail, 'volume'),
       totalWeight: safeSumBy(allNotifyDetail, 'weight'),
@@ -413,7 +414,12 @@
     await safeScope(() => {
       emit('saved');
     });
-    await router.push('/car/carBooking?id=' + outboundId);
+    if (value.needCar === '1') {
+      await router.push('/car/carBooking?id=' + outboundId);
+    } else {
+      await router.push('/operationDetail/Operation?id=' + outboundId);
+    }
+
     loading = false;
   }
 

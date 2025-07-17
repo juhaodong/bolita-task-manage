@@ -49,7 +49,7 @@
         v-model:show="editDetailModel"
         :show-icon="false"
         preset="card"
-        style="width: 90%; min-width: 600px; max-width: 600px"
+        style="width: 600px"
         title="编辑详情"
       >
         <edit-mission-detail :model="currentModel" @saved="reloadTable" />
@@ -61,7 +61,7 @@
 
 <script lang="ts" setup>
   import { h, onMounted, reactive, ref } from 'vue';
-  import { BasicTable } from '@/components/Table';
+  import { BasicTable, TableAction } from '@/components/Table';
   import {
     allDeliveryMethod,
     allInStatusList,
@@ -69,19 +69,19 @@
   } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
   import { $ref } from 'vue/macros';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import { ArrowDownload20Regular, TableSettings20Regular } from '@vicons/fluent';
-  import { NButton, NIcon, NInput } from 'naive-ui';
+  import { ArrowDownload20Regular, TableSettings20Regular } from "@vicons/fluent";
+  import { NButton, NInput } from 'naive-ui';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
-  import { generateOptionFromArray } from '@/store/utils/utils';
+  import { generateOptionFromArray, safeSumBy } from "@/store/utils/utils";
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import FileSaver from 'file-saver';
   import {
     addOrUpdateTask,
-    getTaskListByFilterWithPagination,
-  } from '@/api/newDataLayer/TaskList/TaskList';
+    getTaskListByFilterWithPagination, getTaskListByIds
+  } from "@/api/newDataLayer/TaskList/TaskList";
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
   import * as XLSX from 'xlsx';
   import { InBoundDetailStatus } from '@/api/dataLayer/modules/notify/notify-api';
@@ -93,6 +93,12 @@
     timeWarnList,
   } from '@/views/bolita-views/composable/useableColumns';
   import { asyncCustomerByFilter, asyncStorageByFilter } from '@/api/dataLayer/common/common';
+  import { NIcon, NTooltip } from 'naive-ui';
+  import { Delete20Regular } from '@vicons/fluent';
+  import {
+    addOrUpdateWithRefOutboundForecast,
+    getOutboundForecastById
+  } from "@/api/newDataLayer/OutboundForecast/OutboundForecast";
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -547,68 +553,83 @@
   });
 
   // Helper function to render icon with tooltip
-  // const renderIconWithTooltip = (icon, tooltip) => {
-  //   return () =>
-  //     h(
-  //       NTooltip,
-  //       { trigger: 'hover', placement: 'top' },
-  //       {
-  //         trigger: () => h(NIcon, { size: 18, class: 'action-icon' }, { default: () => h(icon) }),
-  //         default: () => tooltip,
-  //       }
-  //     );
-  // };
-  //
-  // const actionColumn = reactive({
-  //   title: '可用动作',
-  //   key: 'action',
-  //   width: 120,
-  //   render(record: any) {
-  //     return h(TableAction as any, {
-  //       style: 'text',
-  //       actions: [
-  //         {
-  //           icon: renderIconWithTooltip(CheckmarkCircle20Regular, '审核'),
-  //           async onClick() {
-  //             console.log(record);
-  //             let outboundInfo = await getOutboundForecastById(record.outboundId);
-  //             outboundInfo.outboundDetailInfo = outboundInfo.outboundDetailInfo.filter(
-  //               (it) => it !== record.id
-  //             );
-  //             if (!outboundInfo.waitPrice) {
-  //               outboundInfo.inStatus = '待订车';
-  //             }
-  //             if (outboundInfo.waitPrice && !outboundInfo.waitCar) {
-  //               outboundInfo.inStatus = '待订车';
-  //             }
-  //             if (outboundInfo.waitCar) {
-  //               outboundInfo.inStatus = '已订车';
-  //             }
-  //             if (outboundInfo.outboundDetailInfo.length === 0) {
-  //               outboundInfo.inStatus = '已取消';
-  //             }
-  //             record.outboundId = '';
-  //             await NotifyDetailManager.editInternal(record, record.id);
-  //             const currentList = await getDetailListById(outboundInfo.outboundDetailInfo);
-  //             outboundInfo.totalOutOffer = safeSumBy(currentList, 'outPrice') ?? 0;
-  //             outboundInfo.totalVolume = safeSumBy(currentList, 'volume') ?? 0;
-  //             outboundInfo.totalWeight = safeSumBy(currentList, 'weight') ?? 0;
-  //             outboundInfo.containerNum = safeSumBy(currentList, 'arrivedContainerNum') ?? 0;
-  //             await updateOutboundForecast(outboundInfo.id, outboundInfo);
-  //             toastSuccess('审核成功');
-  //             await reloadTable();
-  //           },
-  //           ifShow: () => {
-  //             return (
-  //               (record.inStatus === '存仓' || record.inStatus === '库内操作') &&
-  //               hasAuthPower('carDetailCheck')
-  //             );
-  //           },
-  //         },
-  //       ],
-  //     });
-  //   },
-  // });
+  const renderIconWithTooltip = (icon, tooltip) => {
+    return () =>
+      h(
+        NTooltip,
+        { trigger: 'hover', placement: 'top' },
+        {
+          trigger: () => h(NIcon, { size: 18, class: 'action-icon' }, { default: () => h(icon) }),
+          default: () => tooltip,
+        }
+      );
+  };
+
+  const actionColumn = reactive({
+    title: '可用动作',
+    key: 'action',
+    width: 120,
+    render(record: any) {
+      return h(TableAction as any, {
+        style: 'text',
+        actions: [
+          {
+            icon: renderIconWithTooltip(Delete20Regular, '删除'),
+            async onClick() {
+              console.log(record);
+              const outboundInfo = await getOutboundForecastById(record.outboundId)
+              outboundInfo.inStatus = '待定车'
+              const allTaskId = outboundInfo.outboundDetailInfo.split(',')
+              const currentTaskIds = allTaskId.filter(it => it !== record.id)
+              outboundInfo.outboundDetailInfo = currentTaskIds.join(',')
+              record.outboundId = ''
+              const currentTaskList = await getTaskListByIds(currentTaskIds)
+              outboundInfo.totalVolume = safeSumBy(currentTaskList, 'volume') ?? 0;
+              outboundInfo.totalWeight = safeSumBy(currentTaskList, 'weight') ?? 0;
+              outboundInfo.containerNum = safeSumBy(currentTaskList, 'arrivedContainerNum') ?? 0;
+              await addOrUpdateTask(record);
+              await addOrUpdateWithRefOutboundForecast(outboundInfo)
+              await reloadTable();
+              // let outboundInfo = await getOutboundForecastById(record.outboundId);
+              // outboundInfo.outboundDetailInfo = outboundInfo.outboundDetailInfo.filter(
+              //   (it) => it !== record.id
+              // );
+              // if (!outboundInfo.waitPrice) {
+              //   outboundInfo.inStatus = '待订车';
+              // }
+              // if (outboundInfo.waitPrice && !outboundInfo.waitCar) {
+              //   outboundInfo.inStatus = '待订车';
+              // }
+              // if (outboundInfo.waitCar) {
+              //   outboundInfo.inStatus = '已订车';
+              // }
+              // if (outboundInfo.outboundDetailInfo.length === 0) {
+              //   outboundInfo.inStatus = '已取消';
+              // }
+              // record.outboundId = '';
+              // await NotifyDetailManager.editInternal(record, record.id);
+              // const currentList = await getDetailListById(outboundInfo.outboundDetailInfo);
+              // outboundInfo.totalOutOffer = safeSumBy(currentList, 'outPrice') ?? 0;
+              // outboundInfo.totalVolume = safeSumBy(currentList, 'volume') ?? 0;
+              // outboundInfo.totalWeight = safeSumBy(currentList, 'weight') ?? 0;
+              // outboundInfo.containerNum = safeSumBy(currentList, 'arrivedContainerNum') ?? 0;
+              // await updateOutboundForecast(outboundInfo.id, outboundInfo);
+              // toastSuccess('审核成功');
+
+            },
+            ifShow: () => {
+              return (
+                (record.inStatus === '存仓' ||
+                  record.inStatus === '库内操作' ||
+                  record.inStatus === '已取消') &&
+                hasAuthPower('carDetailCheck')
+              );
+            },
+          },
+        ],
+      });
+    },
+  });
 </script>
 
 <style lang="less" scoped>

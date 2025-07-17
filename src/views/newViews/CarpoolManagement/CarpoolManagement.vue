@@ -87,14 +87,14 @@
 </template>
 
 <script lang="ts" setup>
-  import {
-    ArrowDownload20Regular,
-    Document20Regular,
-    DrawImage20Regular,
-    Payment20Regular,
-    VehicleTruck20Regular,
-    Warning20Regular,
-  } from '@vicons/fluent';
+import {
+  ArrowDownload20Regular,
+  Document20Regular, DocumentEdit20Regular,
+  DrawImage20Regular,
+  Payment20Regular,
+  VehicleTruck20Regular,
+  Warning20Regular
+} from "@vicons/fluent";
   import { computed, h, onMounted, reactive, ref } from "vue";
   import { BasicTable, TableAction } from '@/components/Table';
   import { NIcon, NTooltip } from 'naive-ui';
@@ -122,6 +122,7 @@
   import {
     updateTaskListAfterBookingCarWithInfo, updateTaskListAfterCancelBookingCarWithInfo
   } from "@/api/dataLayer/modules/OutboundForecast/OutboundForecast";
+import router from "@/router";
 
   const showModal = ref(false);
 
@@ -187,11 +188,11 @@
 
       currentFilter = currentFilter.concat(filterWithOutDate, filterWithDate);
     }
-    currentFilter.push({
-      field: 'inStatus',
-      op: '!=',
-      value: '无需订车',
-    });
+    // currentFilter.push({
+    //   field: 'inStatus',
+    //   op: '!=',
+    //   value: '无需订车',
+    // });
     currentFilter.map((it) => {
       if (it.field === 'id') {
         it.op = '=='
@@ -513,7 +514,19 @@
               showConfirmCancelDialog = true;
             },
             ifShow: () => {
-              return record.needCar === '1' && record?.['waitCar'] === '1'
+              return record.needCar === '1' && record?.['waitCar'] === '1' && record?.['inStatus'] !== '已完成'
+            },
+            highlight: () => {
+              return 'error'
+            },
+          },
+          {
+            icon: renderIconWithTooltip(Warning20Regular, '审核'),
+            async onClick() {
+              await router.push('/car/carBookingDetail?id=' + record.id);
+            },
+            ifShow: () => {
+              return record.inStatus === '等待审核'
             },
             highlight: () => {
               return 'error'

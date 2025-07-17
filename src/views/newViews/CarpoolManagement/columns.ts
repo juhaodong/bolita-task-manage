@@ -114,10 +114,10 @@ export const outCarColumns: DataTableColumns<CarpoolManagementModel> = [
 });
 
 export const columns: DataTableColumns<CarpoolManagementModel> = [
-  // {
-  //   title: '物流ID',
-  //   key: 'id',
-  // },
+  {
+    title: '系统Id',
+    key: 'id',
+  },
   {
     type: 'selection',
   },
