@@ -24,16 +24,20 @@
       <!--刷新-->
     </div>
   </div>
-  <div class="s-table">
-    <div style="overflow-x: scroll">
-      <div style="width: fit-content">
-        <n-data-table ref="tableElRef" :striped="true" v-bind="getBindValues" virtual-scroll>
-          <template v-for="item in Object.keys($slots)" :key="item" #[item]="data">
-            <slot :name="item" v-bind="data"></slot>
-          </template>
-        </n-data-table>
-      </div>
-    </div>
+  <div>
+    <n-data-table
+      virtual-scroll
+      virtual-scroll-x
+      virtual-scroll-header
+      ref="tableElRef"
+      :striped="true"
+      :min-row-height="100"
+      v-bind="getBindValues"
+    >
+      <template v-for="item in Object.keys($slots)" :key="item" #[item]="data">
+        <slot :name="item" v-bind="data"></slot>
+      </template>
+    </n-data-table>
   </div>
   <n-space align="center" class="mt-2">
     <n-tag class="ml-2"> 共计 {{ getBindValues.data.length }} 条数据</n-tag>
@@ -48,8 +52,8 @@
       </template>
       <span>刷新</span>
     </n-tooltip>
-    <!--表格设置单独抽离成组件-->
-    <!--    <ColumnSetting />-->
+    <!--    表格设置单独抽离成组件-->
+    <!--        <ColumnSetting />-->
   </n-space>
 </template>
 
@@ -164,6 +168,9 @@
       const getBindValues = computed(() => {
         const tableData = unref(getDataSourceRef);
         const maxHeight = tableData.length ? `${unref(deviceHeight)}px` : 'auto';
+        const scrollXWidth = getPageColumns.value?.reduce((total, column) => {
+          return total + (column.width || 200); // 默认 200px
+        }, 0);
         return {
           ...unref(getProps),
           loading: unref(getLoading),
@@ -172,6 +179,7 @@
           data: tableData,
           size: unref(getTableSize),
           'max-height': maxHeight,
+          'scroll-x': scrollXWidth,
         };
       });
       const paginationReactive = reactive({

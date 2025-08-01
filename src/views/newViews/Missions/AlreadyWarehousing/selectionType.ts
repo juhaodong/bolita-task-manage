@@ -2,12 +2,14 @@ import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/noti
 
 export const checkedObj = {
   type: 'selection',
+  fixed: 'left',
   disabled: (row) =>
     row.inStatus !== InBoundDetailStatus.WaitCheck && row.inStatus !== InBoundStatus.WaitUnloading,
 };
 
 export const planObj = {
   type: 'selection',
+  fixed: 'left',
   disabled: (row) => {
     if (row.inStatus === InBoundStatus.WaitOperate || row.inStatus === InBoundStatus.All) {
       if (row.outboundMethod === '标准托盘' && row.trayItems.length === 0) {
@@ -21,6 +23,7 @@ export const planObj = {
 
 export const offerObj = {
   type: 'selection',
+  fixed: 'left',
   disabled: () => false,
 };
 

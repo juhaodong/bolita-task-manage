@@ -40,6 +40,7 @@ export const allInStatusNotifyList = [
   '等待入库',
   '部分操作',
   '入库待出库',
+  '全部出库',
   '已取消',
   '已结算',
 ];

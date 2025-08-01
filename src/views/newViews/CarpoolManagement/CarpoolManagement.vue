@@ -81,24 +81,33 @@
       >
         <confirm-dialog :title="'确定取消订车吗?'" @saved="cancelOrderCar" />
       </n-modal>
+      <n-modal
+        v-model:show="showDetailInfoDialog"
+        :show-icon="false"
+        preset="card"
+        style="width: 80%"
+        :title="'REF:' + (currentModel?.ref ? currentModel?.ref : '')"
+      >
+        <detail-info-dialog :ids="currentIds" />
+      </n-modal>
     </n-card>
     <no-power-page v-else />
   </div>
 </template>
 
 <script lang="ts" setup>
-import {
-  ArrowDownload20Regular,
-  Document20Regular, DocumentEdit20Regular,
-  DrawImage20Regular,
-  Payment20Regular,
-  VehicleTruck20Regular,
-  Warning20Regular
-} from "@vicons/fluent";
-  import { computed, h, onMounted, reactive, ref } from "vue";
+  import {
+    ArrowDownload20Regular,
+    Document20Regular,
+    DocumentEdit20Regular,
+    DrawImage20Regular,
+    Payment20Regular,
+    VehicleTruck20Regular,
+    Warning20Regular,
+  } from '@vicons/fluent';
+  import { computed, h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
-  import { NIcon, NTooltip } from 'naive-ui';
-  import { columns } from './columns';
+  import { DataTableColumns, NButton, NIcon, NTooltip } from 'naive-ui';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import { CarpoolManager } from '@/api/dataLayer/modules/logistic/carpool';
@@ -118,11 +127,23 @@ import {
   import BookingCarDialog from '@/views/newViews/CarpoolManagement/dialog/BookingCarDialog.vue';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
   import * as XLSX from 'xlsx';
-  import ConfirmDialog from "@/views/newViews/Common/ConfirmDialog.vue";
+  import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
   import {
-    updateTaskListAfterBookingCarWithInfo, updateTaskListAfterCancelBookingCarWithInfo
-  } from "@/api/dataLayer/modules/OutboundForecast/OutboundForecast";
-import router from "@/router";
+    updateTaskListAfterBookingCarWithInfo,
+    updateTaskListAfterCancelBookingCarWithInfo,
+  } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import router from '@/router';
+  import DetailInfoDialog from '@/views/newViews/OperationDetail/NotOutbound/DetailInfoDialog.vue';
+  import { RouterLink } from 'vue-router';
+  import {
+    statusColumnEasy,
+    timeColumn,
+    timeTableColumn,
+  } from '@/views/bolita-views/composable/useableColumns';
+  import {
+    getTaskListByNotifyId,
+    getTaskListByOutboundId,
+  } from '@/api/newDataLayer/TaskList/TaskList';
 
   const showModal = ref(false);
 
@@ -143,6 +164,111 @@ import router from "@/router";
   let offerDialog = $ref(false);
   let carDialog = $ref(false);
   let filterItems = $ref<Array<{ option: string; value: string }>>([]);
+  let showDetailInfoDialog = $ref(false);
+  let currentIds = $ref([]);
+  const columns: DataTableColumns<any> = [
+    {
+      title: '系统Id',
+      key: 'id',
+    },
+    {
+      type: 'selection',
+    },
+    {
+      title: 'Ref',
+      key: 'ref',
+    },
+    {
+      title: '详情',
+      key: 'actions',
+      render(row) {
+        return h(
+          NButton,
+          {
+            size: 'small',
+            onClick: async () => {
+              currentModel = row;
+              currentIds = (await getTaskListByOutboundId(row.id)).map((it) => it.id).join(',');
+              showDetailInfoDialog = true;
+            },
+          },
+          { default: () => '详情' }
+        );
+      },
+    },
+    // selectedIdColumn('物流ID', '/car/carBookingDetail', 'id'),
+    timeColumn('createTimestamp', '下单日期'),
+    statusColumnEasy({
+      title: '状态',
+      key: 'inStatus',
+    }),
+    {
+      title: '出库方式',
+      key: 'deliveryMethod',
+    },
+    {
+      title: '运单号',
+      key: 'waybillId',
+    },
+    {
+      title: '总托数',
+      key: 'trayNum',
+    },
+    {
+      title: '总件数',
+      key: 'totalNumber',
+    },
+    {
+      title: '对外报价',
+      key: 'totalOutOffer',
+    },
+    {
+      title: '物流底价',
+      key: 'costPrice',
+    },
+    {
+      title: '建议报价',
+      key: 'suggestedPrice',
+    },
+    {
+      title: '邮编',
+      key: 'postcode',
+    },
+    {
+      title: 'FC/送货地址',
+      key: 'fcaddress',
+    },
+    {
+      title: 'ISA',
+      key: 'isa',
+    },
+    {
+      title: '物流公司',
+      key: 'logisticsCompany',
+      width: 100,
+    },
+    {
+      title: 'AX4 Nr./AMZ/车队',
+      key: 'amzid',
+      width: 200,
+    },
+    {
+      title: '托盘',
+      key: 'trayNum',
+    },
+    timeTableColumn('reservationGetProductTime', '预约取货日期'),
+    {
+      title: '取货时间',
+      key: 'reservationGetProductDetailTime',
+    },
+    {
+      title: '备注',
+      key: 'note',
+    },
+  ].map((it) => {
+    it.resizable = true;
+    return it;
+  });
 
   const paginationReactive = reactive({
     defaultPage: 1,
@@ -195,10 +321,10 @@ import router from "@/router";
     // });
     currentFilter.map((it) => {
       if (it.field === 'id') {
-        it.op = '=='
-        it.value = parseFloat(it.value.replace(/^%|%$/g, ""))
+        it.op = '==';
+        it.value = parseFloat(it.value.replace(/^%|%$/g, ''));
       }
-    })
+    });
     // Get paginated data
     const res = await getOutboundForecastListByFilterWithPagination(
       currentFilter,
@@ -246,7 +372,7 @@ import router from "@/router";
   const actionRef = ref();
   let showConfirmCancelDialog = $ref(false);
 
-  async function cancelOrderCar () {
+  async function cancelOrderCar() {
     currentInfo.AMZID = '';
     currentInfo.ISA = '';
     currentInfo.bookCarTimestamp = '';
@@ -260,7 +386,7 @@ import router from "@/router";
     currentInfo.inStatus = '待订车';
     await updateTaskListAfterCancelBookingCarWithInfo(currentInfo.id, currentInfo);
     await addOrUpdateWithRefOutboundForecast(currentInfo);
-    showConfirmCancelDialog = false
+    showConfirmCancelDialog = false;
     reloadTable();
   }
 
@@ -372,7 +498,7 @@ import router from "@/router";
     editOutboundForecast = false;
     offerDialog = false;
     carDialog = false;
-    showConfirmCancelDialog = false
+    showConfirmCancelDialog = false;
   }
 
   function saved() {
@@ -469,7 +595,7 @@ import router from "@/router";
               offerDialog = true;
             },
             ifShow: () => {
-              return record.needOfferPrice === '1'
+              return record.needOfferPrice === '1';
             },
             highlight: () => {
               return record?.['waitPrice'] === '1' ? 'success' : 'error';
@@ -482,7 +608,7 @@ import router from "@/router";
               carDialog = true;
             },
             ifShow: () => {
-              return record.needCar === '1'
+              return record.needCar === '1';
             },
             highlight: () => {
               return record?.['waitCar'] === '1' ? 'success' : 'error';
@@ -514,10 +640,14 @@ import router from "@/router";
               showConfirmCancelDialog = true;
             },
             ifShow: () => {
-              return record.needCar === '1' && record?.['waitCar'] === '1' && record?.['inStatus'] !== '已完成'
+              return (
+                record.needCar === '1' &&
+                record?.['waitCar'] === '1' &&
+                record?.['inStatus'] !== '已完成'
+              );
             },
             highlight: () => {
-              return 'error'
+              return 'error';
             },
           },
           {
@@ -526,10 +656,10 @@ import router from "@/router";
               await router.push('/car/carBookingDetail?id=' + record.id);
             },
             ifShow: () => {
-              return record.inStatus === '等待审核'
+              return record.inStatus === '等待审核';
             },
             highlight: () => {
-              return 'error'
+              return 'error';
             },
           },
         ],

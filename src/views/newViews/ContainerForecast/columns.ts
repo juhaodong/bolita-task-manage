@@ -1,4 +1,4 @@
-import { DataTableColumns } from 'naive-ui';
+import { DataTableColumns, NButton } from 'naive-ui';
 import {
   selectedIdColumn,
   statusColumnEasy,
@@ -15,6 +15,8 @@ import {
   asyncCustomerByFilter,
   asyncStorageByFilter,
 } from '@/api/dataLayer/common/common';
+import { h } from 'vue';
+import { RouterLink } from 'vue-router';
 
 export const columns: DataTableColumns<any> = [
   timeColumn('planArriveDateTime', '预计入库日期'),
@@ -27,8 +29,14 @@ export const columns: DataTableColumns<any> = [
     },
   },
   selectedIdColumn('柜号', '/missions/missionDetail', 'containerNo'),
-  asyncCustomerByFilter(),
-  asyncStorageByFilter(),
+  {
+    title: '客户',
+    key: 'customer.customerName',
+  },
+  {
+    title: '仓库',
+    key: 'inventory.name',
+  },
   {
     title: '数量',
     key: 'arrivedCount',

@@ -11,13 +11,18 @@
       >
         <n-form-item label="客户" path="customerId">
           <n-select
+            :disabled="prop.model?.id"
             v-model:value="currentData.customerId"
             :options="customerList"
             placeholder="客户"
           />
         </n-form-item>
         <n-form-item label="货柜号" path="containerNo">
-          <n-input v-model:value="currentData.containerNo" placeholder="货柜号" />
+          <n-input
+            :disabled="prop.model?.id"
+            v-model:value="currentData.containerNo"
+            placeholder="货柜号"
+          />
         </n-form-item>
         <n-form-item label="仓库" path="inventoryId">
           <n-select
@@ -30,6 +35,7 @@
           <n-date-picker
             v-model:value="currentData.planArriveDateTime"
             placeholder="预计到仓日期"
+            :is-date-disabled="disablePreviousDate"
           />
         </n-form-item>
         <n-form-item
@@ -77,7 +83,7 @@
           </div>
         </n-form-item>
         <n-form-item label="预报备注">
-          <n-input v-model:value="currentData.note" placeholder="预报备注" />
+          <n-input type="textarea" v-model:value="currentData.note" placeholder="预报备注" />
         </n-form-item>
       </n-form>
       <n-button style="margin-left: 100px" @click="submit">提交</n-button>
@@ -164,6 +170,7 @@
   onMounted(async () => {
     loading = true;
     const userStore = useUserStore();
+    console.log(userStore.info);
     const currentUser = await getUserById(userStore.info.id);
     customerList = (await getCustomerListByIds(currentUser.customerIds.split(','))).map((it) => ({
       label: it.customerName,
@@ -176,6 +183,7 @@
     currentData.customerId = customerList[0]?.value;
     currentData.inventoryId = warehouseList[0]?.value;
     if (prop.model?.id) {
+      console.log(prop.model);
       currentData = Object.assign({}, prop.model);
       currentData.inventoryId = currentData.inventory.id;
       currentData.customerId = currentData.customer.id;
@@ -221,6 +229,10 @@
       return [];
     }
   });
+
+  function disablePreviousDate(timestamp) {
+    return timestamp < dayjs().subtract(1, 'day').valueOf();
+  }
 
   function downLoadFiles() {
     window.open(

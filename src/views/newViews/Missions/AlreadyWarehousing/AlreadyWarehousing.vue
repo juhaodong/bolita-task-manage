@@ -80,7 +80,6 @@
       <n-tabs
         v-model:value="typeMission"
         animated
-        class="card-tabs"
         pane-style="padding-left: 4px; padding-right: 4px; box-sizing: border-box;"
         pane-wrapper-style="margin: 0 -4px"
         size="large"
@@ -271,11 +270,12 @@
   import { NButton, NIcon, NInput, NTooltip, useDialog } from 'naive-ui';
   import * as XLSX from 'xlsx';
   import { asyncCustomerByFilter, asyncStorageByFilter } from '@/api/dataLayer/common/common';
-  import ConfirmDialog from "@/views/newViews/Common/ConfirmDialog.vue";
+  import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
   import {
-    addOrUpdateOutboundForecast, addOrUpdateWithRefOutboundForecast,
-    getOutboundForecastById
-  } from "@/api/newDataLayer/OutboundForecast/OutboundForecast";
+    addOrUpdateOutboundForecast,
+    addOrUpdateWithRefOutboundForecast,
+    getOutboundForecastById,
+  } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -308,21 +308,24 @@
       type: 'selection',
       disabled: (row) => row.inStatus !== InBoundDetailStatus.WaitCheck,
     },
+    asyncCustomerByFilter(),
     {
       title: '时效',
+      fixed: 'left',
       key: 'usefulTimeRange',
       component: 'NSelect',
       componentProps: {
         options: timeWarnList,
       },
     },
-    asyncCustomerByFilter(),
     {
       title: '柜号',
+      fixed: 'left',
       key: 'containerId',
     },
     {
       title: '票号',
+      fixed: 'left',
       key: 'ticketId',
     },
     {
@@ -403,7 +406,6 @@
     {
       title: 'FC/送货地址',
       key: 'fcaddress',
-      width: 300,
     },
     {
       title: '邮编',
@@ -528,7 +530,13 @@
       title: '工业品备注',
       key: 'industrialNote',
     },
-  ];
+  ].map((it) => {
+    it.width = 200;
+    it.ellipsis = {
+      tooltip: true,
+    };
+    return it;
+  });
 
   const actionRef = ref();
   const props = defineProps<Prop>();
@@ -555,8 +563,7 @@
 
   let showCancelDialog = $ref(false);
   async function cancelTask() {
-    console.log(currentInfo, 'currentInfo')
-    currentInfo.inStatus = '已取消'
+    currentInfo.inStatus = '已取消';
     await addOrUpdateTask(currentInfo);
     const userInfo = useUserStore().info;
     await addOrUpdateTaskTimeLine({
@@ -567,11 +574,11 @@
       note: '取消当前任务！',
     });
     if (currentInfo.outboundId) {
-      const outboundInfo = await getOutboundForecastById(currentInfo.outboundId)
-      outboundInfo.inStatus = '等待审核'
-      await addOrUpdateWithRefOutboundForecast(outboundInfo)
+      const outboundInfo = await getOutboundForecastById(currentInfo.outboundId);
+      outboundInfo.inStatus = '等待审核';
+      await addOrUpdateWithRefOutboundForecast(outboundInfo);
     }
-    showCancelDialog = false
+    showCancelDialog = false;
   }
 
   async function startEdit(id) {
@@ -855,11 +862,11 @@
   watch(
     typeMission,
     async (value, oldValue) => {
-      if (value !== oldValue) {
+      if (value !== oldValue && value && oldValue) {
         await reloadHeader();
       }
     },
-    { immediate: true, deep: true }
+    { deep: true }
   );
 
   async function reloadHeader() {
@@ -888,7 +895,14 @@
       currentColumns = [...currentWithOutSelection];
     }
     currentColumns = currentColumns.filter((it) => it);
+
+    // Sort columns with fixed property to the leftmost side
+    const fixedColumns = currentColumns.filter((col) => col.fixed === 'left');
+    const nonFixedColumns = currentColumns.filter((col) => col.fixed !== 'left');
+    currentColumns = [...fixedColumns, ...nonFixedColumns];
+
     currentColumns.forEach((item) => {
+      item.width = 200;
       item.resizable = true;
     });
     showCurrentHeaderDataTable = false;
@@ -919,8 +933,8 @@
   }
 
   onMounted(async () => {
-    await reloadHeader();
     typeMission.value = '整柜任务看板';
+    await reloadHeader();
     const res = getQueryString('containerNo');
     if (res) {
       filterItems.push({
@@ -951,7 +965,8 @@
   const actionColumn = reactive({
     title: '可用动作',
     key: 'action',
-    width: 100,
+    fixed: 'left',
+    width: 160,
     render(record: any) {
       // Custom file action with icon
       const iconFileAction = (label, key, icon, power) => {
@@ -986,13 +1001,13 @@
             },
             highlight: () => {
               if (record.alreadyChanged === 1) {
-                return 'error'
+                return 'error';
               } else {
-                return 'success'
+                return 'success';
               }
             },
             ifShow: () => {
-              return hasAuthPower('missionEdit') && !['已装车','已出库'].includes(record.inStatus);
+              return hasAuthPower('missionEdit') && !['已装车', '已出库'].includes(record.inStatus);
             },
           },
           {
@@ -1164,7 +1179,7 @@
             icon: renderIconWithTooltip(Delete20Regular, '取消'),
             async onClick() {
               currentInfo = record;
-              showCancelDialog = true
+              showCancelDialog = true;
             },
           },
         ],

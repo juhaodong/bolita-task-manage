@@ -26,8 +26,12 @@
         >
           <div>已经选择{{ checkedRowKeys.length }}条记录</div>
           <div>总数量: {{ totalNumber }}</div>
-          <div>总重量: {{ totalWeight }}</div>
-          <div>总体积: {{ totalVolume }}</div>
+          <div :style="{ color: parseFloat(totalWeight) > 20000 ? 'red' : '' }"
+            >总重量: {{ totalWeight }}</div
+          >
+          <div :style="{ color: parseFloat(totalVolume) > 70 ? 'red' : '' }"
+            >总体积: {{ totalVolume }}</div
+          >
           <n-button :disabled="checkedRowKeys.length == 0" type="primary" @click="confirmSelection"
             >确定
           </n-button>
@@ -92,7 +96,7 @@
   import { BasicTable } from '@/components/Table';
   import { getUserCustomerList } from '@/api/dataLayer/common/power';
   import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
-  import router from "@/router";
+  import router from '@/router';
 
   interface Props {
     model?: any;
@@ -187,31 +191,6 @@
   async function updateFilter(value) {
     filterObj = value;
     await actionRef.value.reload();
-    // let currentFilter = [];
-    // if (filterObj) {
-    //   const res = Object.keys(filterObj);
-    //   for (let filterItem of res) {
-    //     currentFilter.push({
-    //       field: filterItem === 'fcaddress' ? 'FCAddress' : filterItem,
-    //       op: filterObj[filterItem] ? 'like' : '!=',
-    //       value: '%' + filterObj[filterItem] + '%' ?? '',
-    //     });
-    //   }
-    // }
-    // if (prop.model.length > 0) {
-    //   allNotifyDetail = await getTaskListByIdsAndFilter(prop.model, currentFilter);
-    // } else {
-    //   currentFilter.push({
-    //     field: 'inStatus',
-    //     op: 'in',
-    //     value: [InBoundStatus.WaitOperate, InBoundStatus.All],
-    //   });
-    //   allNotifyDetail = (await getTaskListByFilter(currentFilter)).filter((x) => {
-    //     return x.outboundMethod !== '标准托盘' && x.outboundMethod !== '大件托盘'
-    //       ? true
-    //       : !!x.trayItems;
-    //   });
-    // }
   }
   let filterObj: any | null = $ref(null);
   let filterItems: any | null = $ref(null);
@@ -434,7 +413,7 @@
     { title: '仓库', key: 'inventory.name' },
     { title: '托数', key: 'arrivedTrayNum', width: 60 },
     { title: '箱数', key: 'arrivedContainerNum', width: 60 },
-    { title: '重量', key: 'weight', width: 80},
+    { title: '重量', key: 'weight', width: 80 },
     { title: '体积', key: 'volume', width: 80 },
     { title: 'FC/送货地址', key: 'FCAddress', width: 300 },
     { title: '邮编', key: 'postcode' },

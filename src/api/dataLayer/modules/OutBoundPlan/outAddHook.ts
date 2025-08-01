@@ -11,8 +11,7 @@ export async function afterPlanDetailAdded(planDetails) {
   const userInfo = useUserStore().info;
   const quest = planDetails.map(async (detail) => {
     notifyIds.push(detail?.notifyId);
-    detail.inStatus =
-      detail.carStatus === '无需订车' ? '无需订车' : '已计划出库';
+    detail.inStatus = detail.carStatus === '无需订车' ? '无需订车' : '已计划出库';
     await addOrUpdateTask(detail);
     await addOrUpdateTaskTimeLine({
       useType: 'normal',
@@ -31,6 +30,9 @@ export async function afterPlanDetailAdded(planDetails) {
     notifyDetail.customerId = notifyDetail.customer.id;
     if (res.length > 0) {
       notifyDetail.inStatus = OutStatus.Partial;
+      await addOrUpdateNotify(notifyDetail);
+    } else {
+      notifyDetail.inStatus = '全部出库';
       await addOrUpdateNotify(notifyDetail);
     }
   }

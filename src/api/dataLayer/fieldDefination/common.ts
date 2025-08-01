@@ -89,7 +89,7 @@ export async function asyncCustomerWarehouseFormField(multiple): Promise<FormFie
     value: it.id,
   }));
   return {
-    field: 'inventoryId',
+    field: 'inventory.id',
     label: '仓库',
     component: 'NSelect',
     componentProps: {
