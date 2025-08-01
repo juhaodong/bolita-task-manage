@@ -76,7 +76,7 @@
 <template>
   <div>
     <loading-frame :loading="loading">
-      <n-data-table :columns="columns" :data="currentItems" />
+      <n-data-table max-height="500px" :columns="columns" :data="currentItems" />
       <!--      <div v-for="item in currentItems" :key="item.id">-->
       <!--        <div class="mt-2 font-bold text-l">{{ item.ticketId }}</div>-->
       <!--        <n-descriptions :columns="2" bordered label-placement="left">-->
