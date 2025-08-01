@@ -57,6 +57,14 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('@/views/newViews/FBACode/FBACode.vue'),
       },
+      {
+        path: '价格查询',
+        name: `priceSearch`,
+        meta: {
+          title: 'priceSearch',
+        },
+        component: () => import('@/views/newViews/SettlementManage/PriceSearch.vue'),
+      },
     ],
   },
 ];

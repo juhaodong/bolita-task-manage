@@ -1,6 +1,7 @@
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { getCustomerList } from '@/api/newDataLayer/Customer/Customer';
 import { getInventoryList } from '@/api/newDataLayer/Warehouse/Warehouse';
+import hillo from 'hillo';
 
 export async function asyncCustomerByFilter(): Promise<FormField> {
   const customerList = await getCustomerList();
@@ -46,3 +47,32 @@ export const allInStatusNotifyList = [
 ];
 
 export const allInStatusOperationList = ['已完成', '已报价', '已订车', '待订车', '无需订车'];
+
+export async function checkPrice(currentWeight, country, zipCode) {
+  return (
+    await hillo.jsonPost('price-kg-look-up-table/list', {
+      criteria: [
+        {
+          field: 'fromWeightIncl',
+          op: '<=',
+          value: currentWeight,
+        },
+        {
+          field: 'toWeightExcl',
+          op: '>',
+          value: currentWeight,
+        },
+        {
+          field: 'country',
+          op: '==',
+          value: country,
+        },
+        {
+          field: 'leadingZipCode',
+          op: '==',
+          value: zipCode,
+        },
+      ],
+    })
+  ).data.content;
+}
