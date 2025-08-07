@@ -187,11 +187,10 @@
 
   const actionRef = ref();
 
-  async function clearFilter(value) {
-    checkedRowKeys.value = [];
+  async function clearFilter() {
     filterItems = null;
-    filterObj = value;
-    await reloadTable();
+    filterObj = null;
+    checkedRowKeys.value = [];
   }
 
   async function updateFilter(value) {
@@ -332,7 +331,7 @@
 
   async function backStep() {
     step = 0;
-    checkedRowKeys.value = [];
+    await clearFilter();
   }
 
   async function confirmSelection() {
@@ -349,20 +348,6 @@
     }
     step = 1;
   }
-
-  const defaultOutboundForecast = {
-    outboundDetailInfo: '',
-    FCAddress: '',
-    containerNum: 0,
-    deliveryMethod: '',
-    inStatus: '',
-    needCar: '',
-    needOfferPrice: '',
-    postcode: '',
-    totalVolume: '',
-    totalWeight: '',
-    trayNum: '',
-  };
 
   async function saveOutboundPlan(value) {
     loading = true;
@@ -468,11 +453,6 @@
     { title: 'FBA单号', key: 'FBADeliveryCode' },
     { title: '仓库', key: 'inventory.name' },
   ]);
-  const searchSchema: FormField[] = [
-    { label: '入库ID', field: 'notifyId' },
-    { label: '票号', field: 'ticketId' },
-    { label: '货柜号', field: 'containerNo' },
-  ];
 
   const addressFormFields: FormField[] = [
     {
