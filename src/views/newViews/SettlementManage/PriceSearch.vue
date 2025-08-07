@@ -31,42 +31,28 @@
   async function handleSubmit() {
     loading.value = true;
     message.value = '人工询价';
-    if (long.value <= 2.4 || width.value <= 1.2 || height.value <= 2.2 || weight.value <= 1500) {
-      if (country.value.toLowerCase() === 'de') {
-        if (numberAt.value > 8) {
-          message.value = '人工询价';
-          return;
-        } else {
-          if (outType.value === '木箱') {
-            const volumeWeight = long.value * width.value * height.value * 150;
-            currentWeight.value = Math.max(volumeWeight, weight.value);
-          } else {
-            const volumeWeight = long.value * width.value * height.value * 150;
-            currentWeight.value = Math.max(volumeWeight, weight.value, 150);
-          }
-        }
-      } else {
-        if (numberAt.value > 4) {
-          message.value = '人工询价';
-          return;
-        } else {
-          if (outType.value === '木箱') {
-            const volumeWeight = long.value * width.value * height.value * 330;
-            currentWeight.value = Math.max(volumeWeight, weight.value);
-          } else {
-            const volumeWeight = long.value * width.value * height.value * 330;
-            currentWeight.value = Math.max(volumeWeight, weight.value, 330);
-          }
-        }
-      }
-    } else {
-      message.value = '人工询价';
+    if (long.value > 2.4 || width.value > 1.2 || height.value > 2.2 || weight.value > 1500) {
+      loading.value = false;
       return;
+    }
+    const isGermany = country.value.toLowerCase() === 'de';
+    const maxItems = isGermany ? 8 : 4;
+
+    if (numberAt.value > maxItems) {
+      loading.value = false;
+      return;
+    }
+    const densityFactor = isGermany ? 150 : 330;
+    const volumeWeight = long.value * width.value * height.value * densityFactor;
+
+    if (outType.value === '木箱') {
+      currentWeight.value = Math.max(volumeWeight, weight.value);
+    } else {
+      currentWeight.value = Math.max(volumeWeight, weight.value, densityFactor);
     }
     const res = await checkPrice(currentWeight.value, country.value, zipCode.value);
     message.value = res.length > 0 ? res.map((it) => it.price).join(',') : '人工询价';
     loading.value = false;
-    // Add your submission logic here
   }
 </script>
 
