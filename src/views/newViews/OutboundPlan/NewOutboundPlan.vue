@@ -5,9 +5,10 @@
         <filter-bar
           v-model="filterItems"
           :columns="columns"
-          @clear="updateFilter(null)"
+          @clear="clearFilter(null)"
           @submit="updateFilter"
-          @filter-change="updateFilterWithItems"
+          @filter-change="updateFilter"
+          form-fields=""
         />
         <BasicTable
           ref="actionRef"
@@ -15,8 +16,8 @@
           :columns="columns"
           :pagination="paginationReactive"
           :request="loadDataTable"
+          @update:checked-row-keys="handleCheck"
           :row-key="(row) => row.id"
-          @update:page="handlePageChange"
         />
         <n-space
           v-if="checkedRowKeys.length > 0"
@@ -38,7 +39,7 @@
         </n-space>
       </template>
       <template v-else>
-        <n-button @click="step = 0">返回上一步</n-button>
+        <n-button @click="backStep">返回上一步</n-button>
         <n-data-table
           v-if="allNotifyDetail.length > 0"
           v-model:checked-row-keys="checkedRowKeys"
@@ -87,7 +88,10 @@
   import DetailInfo from '@/views/newViews/Missions/AlreadyWarehousing/DetailInfo.vue';
   import { $ref } from 'vue/macros';
   import { afterPlanDetailAdded } from '@/api/dataLayer/modules/OutBoundPlan/outAddHook';
-  import { getTaskListByFilterWithPagination } from '@/api/newDataLayer/TaskList/TaskList';
+  import {
+    getTaskListByFilterWithPagination,
+    getTaskListByIds,
+  } from '@/api/newDataLayer/TaskList/TaskList';
   import {
     addOrUpdateWithRefOutboundForecast,
     defaultOutboundList,
@@ -118,13 +122,13 @@
   let allNotifyDetail: any[] = $ref([]);
   let loading: boolean = $ref(false);
   let tableLoading = $ref(false);
+  let selectedTaskList = $ref([]);
 
-  watch(checkedRowKeys, async (val) => {
-    let realList = [];
+  watch(checkedRowKeys, async (val, oldValue) => {
     if (val.length > 0) {
-      selectedDeliveryMethod = allNotifyDetail.find((it) => it.id === val[0]).deliveryMethod;
-      selectedPostcode = allNotifyDetail.find((x) => x.id === val[0]).postcode;
-      selectedFCAddress = allNotifyDetail.find((x) => x.id === val[0]).FCAddress;
+      selectedDeliveryMethod = selectedTaskList.find((it) => it.id === val[0]).deliveryMethod;
+      selectedPostcode = selectedTaskList.find((x) => x.id === val[0]).postcode;
+      selectedFCAddress = selectedTaskList.find((x) => x.id === val[0]).FCAddress;
 
       // Update filterItems for display in FilterBar
       filterItems = filterItems.filter((it) => it.key !== 'deliveryMethod');
@@ -150,47 +154,49 @@
           display: selectedPostcode,
         },
       ]);
-      if (val.length === 1) {
+      if (val.length === 1 && oldValue.length < 2) {
         await updateFilter(filterItems);
       }
     } else {
       tableLoading = true;
-      if (autoOperation) {
-        await updateFilter(null);
-        filterItems = null;
-      }
+      filterItems = null;
       selectedPostcode = '';
       selectedDeliveryMethod = '';
       selectedFCAddress = '';
+      await updateFilter(null);
       tableLoading = false;
     }
-    for (const item of val) {
-      realList.push(allNotifyDetail.find((it) => it.id === item));
-    }
-    totalNumber.value = safeSumBy(realList, 'arrivedContainerNum').toFixed(3);
-    totalVolume.value = safeSumBy(realList, 'volume').toFixed(3);
-    totalWeight.value = safeSumBy(realList, 'weight').toFixed(3);
+    totalNumber.value = safeSumBy(selectedTaskList, 'arrivedContainerNum').toFixed(3);
+    totalVolume.value = safeSumBy(selectedTaskList, 'volume').toFixed(3);
+    totalWeight.value = safeSumBy(selectedTaskList, 'weight').toFixed(3);
   });
 
   let step = $ref(0);
-  let autoOperation = $ref(true);
 
-  async function submitSearch(filterObj) {
-    autoOperation = false;
-    await clearCheckRow();
-    await updateFilter(filterObj);
-    autoOperation = true;
-  }
-
-  async function clearCheckRow() {
-    checkedRowKeys.value = [];
+  async function handleCheck(rowKeys) {
+    checkedRowKeys.value = rowKeys;
+    const currentPageSelected = allNotifyDetail.filter((item) => rowKeys.includes(item.id));
+    // 合并到全局选中集合
+    selectedTaskList = [
+      ...selectedTaskList.filter(
+        (item) => !allNotifyDetail.some((pageItem) => pageItem.id === item.id)
+      ),
+      ...currentPageSelected,
+    ];
   }
 
   const actionRef = ref();
 
+  async function clearFilter(value) {
+    checkedRowKeys.value = [];
+    filterItems = null;
+    filterObj = value;
+    await reloadTable();
+  }
+
   async function updateFilter(value) {
     filterObj = value;
-    await actionRef.value.reload();
+    await reloadTable();
   }
   let filterObj: any | null = $ref(null);
   let filterItems: any | null = $ref(null);
@@ -212,11 +218,6 @@
       reloadTable();
     },
   });
-
-  function updateFilterWithItems(value) {
-    filterObj = value;
-    reloadTable();
-  }
 
   async function reloadTable() {
     await actionRef.value.reload();
@@ -329,8 +330,13 @@
     return allNotifyDetail;
   };
 
-  function confirmSelection() {
-    allNotifyDetail = allNotifyDetail.filter((it: any) => checkedRowKeys.value.includes(it.id));
+  async function backStep() {
+    step = 0;
+    checkedRowKeys.value = [];
+  }
+
+  async function confirmSelection() {
+    allNotifyDetail = await getTaskListByIds(checkedRowKeys.value);
     const notEnough = allNotifyDetail.find((it) => {
       return (
         safeParseInt(it.outBoundTrayNum) > safeParseInt(it.instorageTrayNum) ||
@@ -406,6 +412,15 @@
     {
       type: 'selection',
       key: 'selection',
+      disabled(row) {
+        if (selectedDeliveryMethod || selectedPostcode || selectedFCAddress) {
+          return (
+            row.deliveryMethod !== selectedDeliveryMethod ||
+            row.postcode !== selectedPostcode ||
+            row.FCAddress !== selectedFCAddress
+          );
+        }
+      },
     },
     { title: '客户', key: 'customer.customerName' },
     { title: '票号', key: 'ticketId' },
