@@ -14,47 +14,86 @@
           type="primary"
           @click="addTable(NotifyType.Container)"
         >
-          <template #icon>
-            <n-icon>
-              <Box20Filled />
-            </n-icon>
-          </template>
-          新建货柜预报
+          新建预报
         </n-button>
         <n-button class="action-button" size="small" type="info" @click="selectedHeader">
-          <template #icon>
-            <n-icon>
-              <TableSettings20Regular />
-            </n-icon>
-          </template>
-          选择表头显示
+          表头显示
         </n-button>
         <n-button class="action-button" size="small" type="success" @click="downloadData">
-          <template #icon>
-            <n-icon>
-              <ArrowDownload20Regular />
-            </n-icon>
-          </template>
           下载
         </n-button>
         <n-button class="action-button" size="small" type="warning" @click="downloadFbaCode">
-          <template #icon>
-            <n-icon>
-              <DocumentPdf20Regular />
-            </n-icon>
-          </template>
-          下载FBACode
+          下载FBA
+        </n-button>
+        <n-button
+          :disabled="selectedNotifyList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="startEdit"
+        >
+          修改
+        </n-button>
+        <n-button
+          :disabled="disableUnloading"
+          class="action-button"
+          size="small"
+          @click="checkContainerStatus"
+        >
+          卸柜
+        </n-button>
+        <n-button
+          :disabled="selectedNotifyList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="showUnloading"
+        >
+          生成卸柜单
+        </n-button>
+        <n-button
+          :disabled="selectedNotifyList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="showUnloadingPic"
+        >
+          卸柜照片
+        </n-button>
+        <n-button
+          :disabled="selectedNotifyList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="uploadUnloadingForm"
+        >
+          上传卸柜单
+        </n-button>
+        <n-button
+          :disabled="selectedNotifyList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="downloadFile"
+        >
+          预报文件
+        </n-button>
+        <n-button
+          :disabled="disableCancel"
+          class="action-button"
+          size="small"
+          @click="cancelButton"
+        >
+          取消
         </n-button>
       </div>
+
       <BasicTable
+        v-model:checked-row-keys="checkedRowKeys"
         ref="actionRef"
-        :actionColumn="actionColumn"
+        @update:checked-row-keys="handleCheck"
         :columns="currentColumns"
         :pagination="paginationReactive"
         :request="loadDataTable"
         :row-key="(row) => row.id"
         @update:page="handlePageChange"
         @update:pageSize="handlePageSizeChange"
+        @row-click="onRowClick"
       />
       <n-modal
         v-model:show="showModal"
@@ -157,9 +196,9 @@
         :show-icon="false"
         preset="card"
         style="width: 80%"
-        :title="currentModel?.containerNo"
+        :title="currentModel?.containerNo + '/' + currentModel?.inventory?.name"
       >
-        <detail-info-dialog :loading="dialogLoading" :ids="currentIds" />
+        <detail-group-task-dialog :notify-id="currentId" />
       </n-modal>
     </n-card>
     <no-power-page v-else />
@@ -167,24 +206,11 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, h, onMounted, reactive, ref } from 'vue';
-  import { DataTableColumns, NButton, NIcon, NTooltip } from 'naive-ui';
-  import { BasicTable, TableAction } from '@/components/Table';
+  import { h, onMounted, reactive, ref } from 'vue';
+  import { DataTableColumns, NButton } from 'naive-ui';
+  import { BasicTable } from '@/components/Table';
   import { columns } from './columns';
-  import {
-    ArrowDownload20Regular,
-    ArrowUpload20Regular,
-    Box20Filled,
-    Delete20Regular,
-    Document20Regular,
-    DocumentAdd20Regular,
-    DocumentEdit20Regular,
-    DocumentPdf20Regular,
-    Image20Regular,
-    Payment20Regular,
-    TableSettings20Regular,
-  } from '@vicons/fluent';
-  import { CashStatus, InBoundStatus, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
+  import { InBoundStatus, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
   import { $ref } from 'vue/macros';
   import {
     asyncCustomer,
@@ -206,6 +232,7 @@
   import FileSaver from 'file-saver';
   import {
     addOrUpdateNotify,
+    getNotifyListByFilter,
     getNotifyListByFilterWithPagination,
   } from '@/api/newDataLayer/Notify/Notify';
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
@@ -224,16 +251,14 @@
   } from '@/api/newDataLayer/Warehouse/UseLog';
   import SingleFilterBar from '@/views/bolita-views/composable/SingleFilterBar.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
-  import { allInStatusList } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
   import { allInStatusNotifyList } from '@/api/dataLayer/common/common';
   import {
-    selectedIdColumn,
     statusColumnEasy,
     statusColumnSelect,
     timeColumn,
   } from '@/views/bolita-views/composable/useableColumns';
   import { timeArrays } from '@/api/newDataLayer/Common/Common';
-  import DetailInfoDialog from '@/views/newViews/OperationDetail/NotOutbound/DetailInfoDialog.vue';
+  import DetailGroupTaskDialog from '@/views/newViews/ContainerForecast/form/DetailGroupTaskDialog.vue';
 
   let notifyType: NotifyType = $ref(NotifyType.Container);
   let currentModel: any | null = $ref(null);
@@ -255,10 +280,16 @@
   let showConfirmUnloading = $ref(false);
   let showNeedCheckDialog = $ref(false);
   let showDetailInfoDialog = $ref(false);
-  let currentIds = $ref([]);
+  let currentId = $ref([]);
   let dialogLoading = $ref(false);
+  let selectedRow = $ref(null);
+  let checkedRowKeys = $ref([]);
 
   const columns: DataTableColumns<any> = [
+    {
+      type: 'selection',
+      fixed: 'left',
+    },
     timeColumn('planArriveDateTime', '预计入库日期'),
     {
       title: '预计时间',
@@ -280,11 +311,9 @@
             text: true,
             type: 'primary',
             onClick: async () => {
-              dialogLoading = true;
+              currentId = row.id;
               showDetailInfoDialog = true;
               currentModel = row;
-              currentIds = (await getTaskListByNotifyId(row.id)).map((it) => it.id).join(',');
-              dialogLoading = false;
             },
           },
           { default: () => row?.containerNo }
@@ -427,13 +456,13 @@
     }
   }
 
-  const loadDataTable = async () => {
-    // Build filter criteria
-    let currentFilter = [];
+  let currentFilter = $ref([]);
+  let notifyList = $ref([]);
+
+  async function getCurrentFilter() {
     if (filterObj) {
       const filterOne = filterObj.filter((it) => it?.component !== 'NDatePicker');
       const filterTwo = filterObj.filter((it) => it?.component === 'NDatePicker');
-      console.log(filterOne, filterTwo, 'filterOne,filterTwo');
       const filterWithOutDate = filterOne
         ? filterOne.map((filterItem) => ({
             field: filterItem.key,
@@ -441,7 +470,6 @@
             value: `%${filterItem.value || ''}%`,
           }))
         : [];
-      console.log(filterWithOutDate, 'filterWithOutDate');
       const filterWithDate = filterTwo
         ? filterTwo.map((filterItem) => ({
             field: filterItem.key,
@@ -451,12 +479,16 @@
         : [];
       currentFilter = filterWithOutDate.concat(filterWithDate);
     }
-
     // Get customer list
     const customerId = await getUserCustomerList();
 
     // Add customer filter
     currentFilter.push({ field: 'customer.id', op: 'in', value: customerId });
+  }
+
+  const loadDataTable = async () => {
+    // Build filter criteria
+    await getCurrentFilter();
 
     // Get paginated data
     const res = await getNotifyListByFilterWithPagination(currentFilter, paginationReactive);
@@ -495,13 +527,13 @@
     }
 
     // Sort and return results with fake items for pagination
-    return fakeListStart.concat(allList.concat(fakeListEnd));
+    notifyList = fakeListStart.concat(allList.concat(fakeListEnd));
+    return notifyList;
   };
 
   const actionRef = ref();
 
   function updateFilter(value) {
-    console.log(value, 'value');
     filterObj = value;
     reloadTable();
   }
@@ -560,10 +592,17 @@
     );
   }
 
+  async function getAllNotifyByFilter() {
+    await getCurrentFilter();
+
+    // Get paginated data
+    return await getNotifyListByFilter(currentFilter);
+  }
+
   async function downloadData() {
     try {
       // Get filtered data
-      const selectedList = await loadDataTable();
+      const selectedList = await getAllNotifyByFilter();
 
       // Create a 2D array for Excel data
       const data = [];
@@ -668,22 +707,92 @@
     }
   }
 
-  async function startEdit(record) {
-    currentModel = record;
-    showModal.value = true;
+  let selectedNotifyList = $ref([]);
+
+  async function handleCheck(rowKeys) {
+    checkedRowKeys = rowKeys;
+    const currentPageSelected = notifyList.filter((item) => rowKeys.includes(item.id));
+    // 合并到全局选中集合
+    selectedNotifyList = [
+      ...selectedNotifyList.filter(
+        (item) => !notifyList.some((pageItem) => pageItem.id === item.id)
+      ),
+      ...currentPageSelected,
+    ];
   }
 
-  async function checkContainerStatus(record) {
-    if (record?.inStatus === InBoundStatus.Wait) {
-      currentRecord = record;
+  async function startEdit() {
+    if (selectedNotifyList.length === 1) {
+      currentModel = selectedNotifyList[0];
+      showModal.value = true;
+    }
+  }
+
+  function cancelButton() {
+    cancelRecord = selectedNotifyList[0];
+    showConfirmDialog = true;
+  }
+
+  const disableCancel = $computed(() => {
+    return (
+      selectedNotifyList.length !== 1 ||
+      (userPowerType === '客户' && selectedNotifyList[0].inStatus !== '等待审核')
+    );
+  });
+
+  function downloadFile() {
+    currentModel = selectedNotifyList[0];
+    const files = currentModel.files.split(',');
+    window.open(files[0]);
+  }
+
+  function showUnloading() {
+    currentNotifyId = selectedNotifyList[0].id;
+    showUnloadingList = true;
+  }
+
+  async function showUnloadingPic() {
+    currentModel = selectedNotifyList[0];
+    const upload = useUploadDialog();
+    const files = await upload.upload(currentModel['unloadingPic']);
+    if (files.checkPassed) {
+      currentModel.unloadingPic = files.files;
+      await addOrUpdateNotify(currentModel);
+    }
+    await actionRef.value.reload();
+  }
+
+  async function uploadUnloadingForm() {
+    currentModel = selectedNotifyList[0];
+    const upload = useUploadDialog();
+    const files = await upload.upload(currentModel['unloadingFile']);
+    if (files.checkPassed) {
+      currentModel.unloadingFile = files.files;
+      await addOrUpdateNotify(currentModel);
+    }
+    await actionRef.value.reload();
+  }
+
+  async function checkContainerStatus() {
+    if (selectedNotifyList[0]?.inStatus === InBoundStatus.Wait) {
+      currentRecord = selectedNotifyList[0];
       showConfirmUnloading = true;
-    } else if (record?.inStatus === InBoundStatus.WaitUnloading) {
-      currentNotifyId = record.id!;
+    } else if (selectedNotifyList[0]?.inStatus === InBoundStatus.WaitUnloading) {
+      currentNotifyId = selectedNotifyList[0].id!;
       showOperationTable = true;
-    } else if (record?.inStatus === InBoundStatus.WaitCheck) {
+    } else if (selectedNotifyList[0]?.inStatus === InBoundStatus.WaitCheck) {
       showNeedCheckDialog = true;
     }
   }
+
+  const disableUnloading = $computed(() => {
+    return (
+      selectedNotifyList.length !== 1 ||
+      ![InBoundStatus.Wait, InBoundStatus.WaitUnloading, InBoundStatus.WaitCheck].includes(
+        selectedNotifyList[0]?.inStatus
+      )
+    );
+  });
 
   async function selectedHeader() {
     showCurrentHeaderDataTable = true;
@@ -718,159 +827,35 @@
     showModal.value = false;
   }
 
+  function onRowClick(rowData) {
+    selectedRow = rowData;
+  }
+
   const userPowerType = $computed(() => {
     const userInfo = useUserStore().info;
     return userInfo?.userType;
-  });
-
-  // Helper function to render icon with tooltip
-  const renderIconWithTooltip = (icon, tooltip) => {
-    return () =>
-      h(
-        NTooltip,
-        { trigger: 'hover', placement: 'top' },
-        {
-          trigger: () => h(NIcon, { size: 18, class: 'action-icon' }, { default: () => h(icon) }),
-          default: () => tooltip,
-        }
-      );
-  };
-
-  const actionColumn = reactive({
-    title: '可用动作',
-    key: 'action',
-    width: 160,
-    render(record: any) {
-      const iconFileAction = (label, key, icon, power) => {
-        return {
-          icon: renderIconWithTooltip(icon, label),
-          onClick: async () => {
-            try {
-              const upload = useUploadDialog();
-              const files = await upload.upload(record[key]);
-              if (files.checkPassed) {
-                record[key] = files.files;
-                await addOrUpdateNotify(record);
-                toastSuccess('上传成功');
-                reloadTable();
-              }
-            } catch (error) {
-              console.error('上传失败:', error);
-            }
-          },
-          ifShow: () => {
-            return hasAuthPower(power);
-          },
-        };
-      };
-
-      return h(TableAction as any, {
-        style: 'text',
-        actions: [
-          {
-            icon: renderIconWithTooltip(DocumentEdit20Regular, '修改'),
-            onClick() {
-              console.log(userPowerType, 'userPowerType');
-              startEdit(record);
-            },
-            ifShow: () => {
-              return hasAuthPower('forecastEdit') || record.inStatus === '等待审核';
-            },
-          },
-          iconFileAction('上传卸柜单', 'unloadingFile', ArrowUpload20Regular, 'forecastUpload'),
-          {
-            icon: renderIconWithTooltip(DocumentAdd20Regular, '生成卸柜单'),
-            onClick() {
-              currentNotifyId = record.id!;
-              showUnloadingList = true;
-            },
-            ifShow: () => {
-              return hasAuthPower('forecastCreatFile') && !record?.unloadingFile;
-            },
-          },
-          {
-            icon: renderIconWithTooltip(Box20Filled, '卸柜'),
-            onClick() {
-              checkContainerStatus(record);
-            },
-            highlight: () => {
-              if (
-                record?.inStatus === InBoundStatus.WaitCheck ||
-                record?.inStatus === InBoundStatus.Wait
-              ) {
-                return 'error';
-              } else if (record?.inStatus === InBoundStatus.WaitUnloading) {
-                return 'info';
-              } else {
-                return 'success';
-              }
-            },
-            ifShow: () => {
-              return hasAuthPower('forecastDownload');
-            },
-          },
-          {
-            icon: renderIconWithTooltip(Image20Regular, '卸柜照片'),
-            highlight: () => {
-              return record?.['unloadingPic']?.length > 0 ? 'success' : 'error';
-            },
-            async onClick() {
-              const upload = useUploadDialog();
-              const files = await upload.upload(record['unloadingPic']);
-              if (files.checkPassed) {
-                record.unloadingPic = files.files;
-                await addOrUpdateNotify(record);
-              }
-              await actionRef.value.reload();
-            },
-            ifShow: () => {
-              return hasAuthPower('outMissionUploadFile');
-            },
-          },
-          {
-            icon: renderIconWithTooltip(Document20Regular, '预报文件'),
-            onClick() {
-              const files = record.files.split(',');
-              window.open(files[0]);
-            },
-          },
-          {
-            icon: renderIconWithTooltip(Delete20Regular, '取消'),
-            async onClick() {
-              if (userPowerType === '客户' && record.inStatus === '等待审核') {
-                return;
-              }
-              cancelRecord = record;
-              showConfirmDialog = true;
-            },
-            ifShow: () => {
-              return hasAuthPower('forecastCancel');
-            },
-          },
-          {
-            icon: renderIconWithTooltip(Payment20Regular, '结算'),
-            highlight: () => {
-              if (record?.editValue?.cashStatus == CashStatus.Done) {
-                return 'success';
-              }
-            },
-            ifShow: () => {
-              return hasAuthPower('forecastSettle');
-            },
-            onClick() {
-              currentNotifyId = record.id!;
-              showFeeDialog = true;
-            },
-          },
-        ],
-      });
-    },
   });
 </script>
 
 <style lang="less" scoped>
   .action-button {
     margin-right: 8px;
+  }
+
+  .action-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: #f5f7fa;
+    padding: 4px 12px;
+    border-radius: 4px;
+    margin-left: 8px;
+  }
+
+  .action-title {
+    font-weight: bold;
+    margin-right: 12px;
+    color: #606266;
+    font-size: 14px;
   }
 
   .filter-container {
@@ -911,12 +896,18 @@
     margin: 0 4px;
     cursor: pointer;
     transition: all 0.2s;
+    box-shadow: none !important;
   }
 
   :deep(.n-icon) {
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: none !important;
+  }
+
+  :deep(.action-wrapper .n-button) {
+    box-shadow: none !important;
   }
 
   :deep(.n-tooltip) {

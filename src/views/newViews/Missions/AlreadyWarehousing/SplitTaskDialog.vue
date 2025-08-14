@@ -11,7 +11,7 @@
   }
   const prop = defineProps<Props>();
   let newSplitList = ref([]);
-  let splitNumber = ref('');
+  let splitNumber = ref(2);
   let step = ref(1);
   let loading = ref(false);
   onMounted(async () => {
@@ -93,7 +93,11 @@
       >上一步</n-button
     >
     <n-button
-      :disabled="(!totalNumber && step === 2) || (step === 1 && !splitNumber)"
+      :disabled="
+        (!totalNumber && step === 2) ||
+        (step === 1 && !splitNumber) ||
+        !Number.isInteger(parseFloat(splitNumber))
+      "
       :loading="loading && step === 2"
       style="margin-top: 10px"
       type="info"

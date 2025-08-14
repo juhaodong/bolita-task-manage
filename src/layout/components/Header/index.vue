@@ -142,6 +142,7 @@
   import { useProjectSetting } from '@/hooks/setting/useProjectSetting';
   import { websiteConfig } from '@/store/config/website.config';
   import DailyReport from '@/views/newViews/Common/DailyReport.vue';
+  import { useTabsViewStore } from '@/store/modules/tabsView';
 
   export default defineComponent({
     name: 'PageHeader',
@@ -159,6 +160,7 @@
       const useLockscreen = useScreenLockStore();
       const message = useMessage();
       const dialog = useDialog();
+      const tabsViewStore = useTabsViewStore();
       const { navMode, navTheme, headerSetting, menuSetting, crumbsSetting } = useProjectSetting();
 
       const { realName, userType, userName } = userStore?.info || {};
@@ -242,9 +244,11 @@
           negativeText: '取消',
           onPositiveClick: () => {
             userStore.logout().then(() => {
+              // 清除标签页状态
+              tabsViewStore.closeAllTabs();
+              localStorage.removeItem(TABS_ROUTES);
               message.success('成功退出登录');
               // 移除标签页
-              localStorage.removeItem(TABS_ROUTES);
               router
                 .replace({
                   name: 'Login',

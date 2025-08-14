@@ -94,11 +94,13 @@
             <BasicTable
               ref="actionRef"
               v-model:checked-row-keys="checkedRows"
+              @update:checked-row-keys="handleCheck"
               :actionColumn="actionColumn"
               :columns="currentColumns"
               :pagination="paginationReactive"
               :request="loadDataTable"
               :row-key="(row) => row.id"
+              @row-click="onRowClick"
             />
           </div>
           <no-power-page v-else />
@@ -168,13 +170,13 @@
         <offer-price-dialog :ids="checkedRows" @saved="reloadTable" />
       </n-modal>
       <n-modal
-        v-model:show="mergeDialog"
+        v-model:show="showMergeDialog"
         :show-icon="false"
         preset="card"
         style="width: 90%; min-width: 1000px; max-width: 1000px"
         title="合并"
       >
-        <merge-dialog @save="reloadTable" />
+        <merge-dialog :info="selectedTaskList" @save="reloadTable" />
       </n-modal>
       <n-modal
         v-model:show="showCheckDialog"
@@ -203,6 +205,15 @@
         title="请确认"
       >
         <confirm-dialog :title="'确认取消任务？'" @saved="cancelTask" />
+      </n-modal>
+      <n-modal
+        v-model:show="showFeeDialog"
+        :show-icon="false"
+        class="modal-medium"
+        preset="dialog"
+        title="费用表"
+      >
+        <task-price-dialog :info="currentData" @save="reloadTable" />
       </n-modal>
     </div>
   </n-card>
@@ -233,9 +244,9 @@
     DrawImage20Regular,
     Image20Regular,
     Payment20Regular,
+    SplitVertical20Regular,
     Tag20Regular,
     Warning20Regular,
-    SplitVertical20Regular,
   } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import dayjs from 'dayjs';
@@ -256,9 +267,9 @@
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import { generateOptionFromArray } from '@/store/utils/utils';
   import FileSaver from 'file-saver';
-  import MergeDialog from '@/views/newViews/Missions/AlreadyWarehousing/MergeDialog.vue';
   import {
     addOrUpdateTask,
+    getTaskListByFilter,
     getTaskListByFilterWithPagination,
     getTaskListById,
   } from '@/api/newDataLayer/TaskList/TaskList';
@@ -272,10 +283,11 @@
   import { asyncCustomerByFilter, asyncStorageByFilter } from '@/api/dataLayer/common/common';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
   import {
-    addOrUpdateOutboundForecast,
     addOrUpdateWithRefOutboundForecast,
     getOutboundForecastById,
   } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import MergeDialog from '@/views/newViews/Missions/AlreadyWarehousing/MergeDialog.vue';
+  import TaskPriceDialog from '@/views/newViews/Missions/AlreadyWarehousing/TaskPriceDialog.vue';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -297,7 +309,7 @@
   let showTimeLine = $ref(false);
   let currentWithOutSelection = $ref([]);
   let showOfferPrice = $ref(false);
-  let mergeDialog = $ref(false);
+  let showMergeDialog = $ref(false);
   let checkLoading = $ref(false);
   let showCheckDialog = $ref(false);
   let log = $ref('');
@@ -545,6 +557,26 @@
     belongsToId?: string;
   }
 
+  let selectedRow = $ref('');
+  let selectedTaskList = $ref([]);
+  let allTaskList = $ref([]);
+
+  function onRowClick(rowData) {
+    selectedRow = rowData;
+  }
+
+  async function handleCheck(rowKeys) {
+    checkedRows = rowKeys;
+    const currentPageSelected = allTaskList.filter((item) => rowKeys.includes(item.id));
+    // 合并到全局选中集合
+    selectedTaskList = [
+      ...selectedTaskList.filter(
+        (item) => !allTaskList.some((pageItem) => pageItem.id === item.id)
+      ),
+      ...currentPageSelected,
+    ];
+  }
+
   const realOptions = computed(() => {
     return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
   });
@@ -601,7 +633,8 @@
   }
 
   function merge() {
-    mergeDialog = true;
+    console.log(selectedTaskList, 'selectedTaskList');
+    showMergeDialog = true;
   }
 
   function updateFilterWithItems(value) {
@@ -609,9 +642,16 @@
     reloadTable();
   }
 
+  async function getAllTaskListByFilter() {
+    await getCurrentFilter();
+
+    // Get paginated data
+    return await getTaskListByFilter(currentFilter);
+  }
+
   async function downloadData() {
     let selectedList = [];
-    selectedList = await loadDataTable();
+    selectedList = await getAllTaskListByFilter();
     // Create a 2D array for Excel data
     const data = [];
     const headers = columns.filter((it) => it.title).map((it) => it.title);
@@ -734,9 +774,9 @@
       reloadTable();
     },
   });
+  let currentFilter = $ref([]);
 
-  const loadDataTable = async () => {
-    let currentFilter = [];
+  async function getCurrentFilter() {
     if (filterObj) {
       const otherFilter = filterObj.filter((it) => it?.key !== 'usefulTimeRange');
       const filterOne = otherFilter.filter((it) => it?.component?.name !== 'DatePicker');
@@ -784,6 +824,11 @@
         }
       }
     }
+    currentFilter.push({
+      field: 'inStatus',
+      op: '!=',
+      value: '已拆分',
+    });
     if (typeMission.value === '整柜任务看板') {
     } else if (typeMission.value === '存仓看板') {
       currentFilter.push({ field: 'inStatus', op: 'in', value: ['存仓'] });
@@ -799,6 +844,10 @@
 
     const ownedCustomerIds = await getUserCustomerList();
     currentFilter.push({ field: 'customer.id', op: 'in', value: ownedCustomerIds });
+  }
+
+  const loadDataTable = async () => {
+    await getCurrentFilter();
     const res = await getTaskListByFilterWithPagination(currentFilter, paginationReactive);
     allList = res.content;
     const totalCount = res.page.totalElements;
@@ -846,7 +895,8 @@
         it.stayTime = '-';
       }
     });
-    return fakeListStart.concat(allList.concat(fakeListEnd));
+    allTaskList = fakeListStart.concat(allList.concat(fakeListEnd));
+    return allTaskList;
   };
 
   function updateFilter(value) {
@@ -857,6 +907,13 @@
   function checkCashStatus(id) {
     currentData = allList.find((it) => it.id === id);
     addNewFeeDialog = true;
+  }
+
+  let showFeeDialog = $ref(false);
+
+  function showPriceDialog(info) {
+    currentData = info;
+    showFeeDialog = true;
   }
 
   watch(
@@ -1011,13 +1068,13 @@
             },
           },
           {
-            icon: renderIconWithTooltip(Payment20Regular, '结算'),
+            icon: renderIconWithTooltip(Payment20Regular, '报价'),
             onClick() {
-              checkCashStatus(record.id);
+              showPriceDialog(record);
             },
-            ifShow: () => {
-              return hasAuthPower('missionSettle');
-            },
+            // ifShow: () => {
+            //   return hasAuthPower('missionSettle');
+            // },
           },
           {
             icon: renderIconWithTooltip(SplitVertical20Regular, '拆分'),

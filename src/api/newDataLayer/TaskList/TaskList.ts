@@ -1,5 +1,6 @@
 import hillo from 'hillo';
 import dayjs from 'dayjs';
+import { checkPrice } from '@/api/dataLayer/common/common';
 
 const typeName = 'bolitaTask';
 
@@ -47,6 +48,16 @@ export async function getTaskListByNotifyId(id) {
           field: 'notifyId',
           op: '==',
           value: id,
+        },
+        {
+          field: 'inStatus',
+          op: '!=',
+          value: '已拆分',
+        },
+        {
+          field: 'inStatus',
+          op: '!=',
+          value: '已取消',
         },
       ],
     })
@@ -181,3 +192,35 @@ export const defaultTask = {
   mergedId: '',
   waitCar: '',
 };
+
+export async function searchTaskPrice(
+  long,
+  width,
+  height,
+  weight,
+  country,
+  outboundMethod,
+  number,
+  zipCode
+) {
+  let currentWeight = 0;
+  if (long > 2.4 || width > 1.2 || height > 2.2 || weight > 1500) {
+    return '人工询价';
+  }
+  const isGermany = country.toLowerCase() === 'de';
+  const maxItems = isGermany ? 8 : 4;
+
+  if (number > maxItems) {
+    return '人工询价';
+  }
+  const densityFactor = isGermany ? 150 : 330;
+  const volumeWeight = long * width * height * densityFactor;
+
+  if (outboundMethod !== '大件托盘' && outboundMethod !== '标准托盘') {
+    currentWeight = Math.max(volumeWeight, weight);
+  } else {
+    currentWeight = Math.max(volumeWeight, weight, densityFactor);
+  }
+  const res = await checkPrice(currentWeight, country, zipCode);
+  return res.length > 0 ? res.map((it) => it.price).join(',') : '人工询价';
+}

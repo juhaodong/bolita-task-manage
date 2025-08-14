@@ -19,13 +19,15 @@
   import { getUserNameById } from '@/api/newDataLayer/User/User';
   import { getFBACodeList } from '@/api/newDataLayer/FBACode/FBACode';
   import {
-    addOrUpdateInventoryUseLog, deleteInventoryLog,
-    getCurrentLogTime, getInventoryUseLogListByNotifyId
-  } from "@/api/newDataLayer/Warehouse/UseLog";
+    addOrUpdateInventoryUseLog,
+    getCurrentLogTime,
+    getInventoryUseLogListByNotifyId,
+  } from '@/api/newDataLayer/Warehouse/UseLog';
   import {
     addOrUpdateTask,
     defaultTask,
     getTaskListByNotifyId,
+    searchTaskPrice,
   } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { safeSumBy } from '@/store/utils/utils';
@@ -40,9 +42,7 @@
   const emit = defineEmits(['saved']);
   let loading: boolean = $ref(false);
   let defaultValue = {
-    customerId: '',
     containerNo: '',
-    inventoryId: '',
     planArriveDateTime: dayjs().valueOf(),
     inHouseTime: '',
     note: '',
@@ -59,7 +59,7 @@
 
   let errorMessage = $ref([]);
 
-  async function readFile(file, notifyType) {
+  async function readFile(file, notifyType, containerNo = '') {
     if (!file) {
       return [];
     }
@@ -73,27 +73,17 @@
       let currentRows = [];
       let { rows, errors } = await readXlsxFile(file, { schema });
       rows = rows.slice(2);
-      rows.forEach((it, index) => {
+      for (const [index, it] of rows.entries()) {
         const keys = Object.keys(it);
         const res = difference(
           allKeysList.map((x) => x.field),
           keys
         );
         it.uploadFileTime = dayjs().format('YYYY-MM-DD');
+        if (it.containerId !== containerNo) {
+          errorMessage.push({ index: index + 4, detail: '货柜号与实际填写不一致' });
+        }
         if (it.outboundMethod !== '存仓') {
-          if (it.outboundMethod === '散货') {
-            if (it.deliveryMethod === 'FBA卡车派送') {
-              if (!it.FBADeliveryCode) {
-                errorMessage.push({ index: index + 4, detail: 'FBA单号' });
-              }
-              if (!it.PO) {
-                errorMessage.push({ index: index + 4, detail: 'PO' });
-              }
-            }
-            if (!allDeliveryList.includes(it.deliveryMethod) && !it.FCAddress) {
-              errorMessage.push({ index: index + 4, detail: 'FC/送货地址' });
-            }
-          }
           if (it.deliveryMethod === 'FBA卡车派送') {
             if (!it.FCAddress) {
               errorMessage.push({ index: index + 4, detail: 'FC/送货地址' });
@@ -107,23 +97,45 @@
               }
             }
           }
+          if (it.outboundMethod === '散货') {
+            if (it.deliveryMethod === 'FBA卡车派送') {
+              if (!it.FBADeliveryCode) {
+                errorMessage.push({ index: index + 4, detail: 'FBA单号' });
+              }
+              if (!it.PO) {
+                errorMessage.push({ index: index + 4, detail: 'PO' });
+              }
+            }
+            if (!allDeliveryList.includes(it.deliveryMethod) && !it.FCAddress) {
+              errorMessage.push({ index: index + 4, detail: 'FC/送货地址' });
+            }
+          }
         }
         if (it.changeOrderFiles === '是') {
-          it.inStatus = InBoundDetailStatus.WaitSubmit;
           it.operateInStorage = '是';
-        } else {
-          it.inStatus = InBoundDetailStatus.WaitCheck;
         }
+        const [long, width, height] = it.size.split('*');
+        it.suggestedPrice = await searchTaskPrice(
+          parseFloat(long),
+          parseFloat(width),
+          parseFloat(height),
+          parseFloat(it.weight),
+          it.country,
+          it.outboundMethod,
+          it.number,
+          it.postcode ? it.postcode.slice(0, 2) : ''
+        );
+        it.inStatus = InBoundDetailStatus.WaitCheck;
         currentRows.push(Object.assign({}, defaultTask, it));
         if (res.length > 0) {
           const realMessageDetail = [];
-          res.forEach((it) => {
-            const detailInfo = allKeysList.find((x) => x.field === it).label;
+          for (const item of res) {
+            const detailInfo = allKeysList.find((x) => x.field === item).label;
             realMessageDetail.push(detailInfo);
-          });
+          }
           errorMessage.push({ index: index + 4, detail: realMessageDetail });
         }
-      });
+      }
       if (currentRows.length > 0 && errors.length == 0) {
         return currentRows;
       }
@@ -141,7 +153,7 @@
   let loadingMessage = $ref('');
 
   async function saveNotify(value: any) {
-    defaultValue = value;
+    defaultValue = Object.assign(defaultValue, value);
     startLoading();
     loadingMessage = '';
     if (value?.id) {
@@ -182,7 +194,7 @@
       value.cashStatus = '';
       value.inStatus = InBoundStatus.WaitCheck;
       let taskList = [
-        ...(await readFile(value.files?.[0].file, value.notifyType)),
+        ...(await readFile(value.files?.[0].file, value.notifyType, value.containerNo)),
         ...(value?.trayTaskList ?? []),
       ];
       value.arrivedCount = safeSumBy(taskList, 'number').toString();

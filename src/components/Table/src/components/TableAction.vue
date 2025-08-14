@@ -50,25 +50,6 @@
           {{ action.label }}
         </n-tooltip>
       </template>
-      <n-dropdown
-        v-if="dropDownActions && getDropdownList.length"
-        trigger="hover"
-        :options="getDropdownList"
-        @select="select"
-      >
-        <slot name="more"></slot>
-        <n-button v-bind="getMoreProps" class="mx-2" v-if="!$slots.more" icon-placement="right">
-          <div class="flex items-center">
-            <span>更多</span>
-            <n-icon size="14" class="ml-1">
-              <DownOutlined />
-            </n-icon>
-          </div>
-          <!--          <template #icon>-->
-          <!--            -->
-          <!--          </template>-->
-        </n-button>
-      </n-dropdown>
     </n-space>
   </div>
 </template>

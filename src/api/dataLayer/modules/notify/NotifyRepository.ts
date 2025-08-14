@@ -23,16 +23,12 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'country',
     },
     {
-      label: '托数',
-      field: 'trayNum',
-    },
-    {
       label: '件数',
       field: 'number',
     },
     {
-      label: '尺寸',
-      field: 'size',
+      label: '托数',
+      field: 'trayNum',
     },
     {
       label: '总实重',
@@ -41,6 +37,14 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
     {
       label: '总体积',
       field: 'volume',
+    },
+    {
+      label: '尺寸',
+      field: 'size',
+    },
+    {
+      label: '包装',
+      field: 'packing',
     },
     {
       label: '客户备注',
@@ -57,8 +61,12 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'PO',
     },
     {
-      label: 'FC/送货地址',
+      label: 'FC',
       field: 'FCAddress',
+    },
+    {
+      label: '送货地址',
+      field: 'address',
     },
     {
       label: '邮编',
@@ -95,18 +103,6 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
   ]);
   builder.addAll([
     {
-      label: '分拣标识',
-      field: 'sign',
-    },
-    {
-      label: '包装',
-      field: 'packing',
-    },
-    {
-      label: '托数',
-      field: 'industrialTrayNum',
-    },
-    {
       label: '品名',
       field: 'productName',
     },
@@ -127,12 +123,8 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'email',
     },
     {
-      label: '是否需要预约',
-      field: 'needReserve',
-    },
-    {
-      label: '工业品备注',
-      field: 'industrialNote',
+      label: '尾板',
+      field: 'tailgate',
     },
   ]);
   return builder;
