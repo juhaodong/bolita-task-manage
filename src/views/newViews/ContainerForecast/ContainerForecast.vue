@@ -232,6 +232,7 @@
   import FileSaver from 'file-saver';
   import {
     addOrUpdateNotify,
+    deleteNotify,
     getNotifyListByFilter,
     getNotifyListByFilterWithPagination,
   } from '@/api/newDataLayer/Notify/Notify';
@@ -252,11 +253,7 @@
   import SingleFilterBar from '@/views/bolita-views/composable/SingleFilterBar.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { allInStatusNotifyList } from '@/api/dataLayer/common/common';
-  import {
-    statusColumnEasy,
-    statusColumnSelect,
-    timeColumn,
-  } from '@/views/bolita-views/composable/useableColumns';
+  import { statusColumnSelect, timeColumn } from '@/views/bolita-views/composable/useableColumns';
   import { timeArrays } from '@/api/newDataLayer/Common/Common';
   import DetailGroupTaskDialog from '@/views/newViews/ContainerForecast/form/DetailGroupTaskDialog.vue';
 
@@ -349,10 +346,6 @@
       title: '备注',
       key: 'note',
     },
-    statusColumnEasy({
-      title: '结算状态',
-      key: 'containerFinalStatus',
-    }),
   ];
 
   const filters: FormField[] = [
@@ -541,43 +534,48 @@
   async function confirmCancel() {
     try {
       // Get current user info
-      const userInfo = useUserStore().info;
-
-      // Update notify status
-      cancelRecord.inStatus = '已取消';
-      const res = await addOrUpdateNotify(cancelRecord);
-
-      // Get and update all related tasks
-      const list = await getTaskListByNotifyId(cancelRecord.id);
-
-      const logId = (await getInventoryUseLogListByNotifyId(cancelRecord.id))[0]?.id;
-      if (logId) {
-        await deleteInventoryLog(logId);
-      }
-      // Process each task
-      const taskUpdates = list.map(async (item) => {
-        // Update task status
-        item.inStatus = '已取消';
-        await addOrUpdateTask(item);
-
-        // Add timeline entry
-        await addOrUpdateTaskTimeLine({
-          useType: 'normal',
-          bolitaTaskId: item.id,
-          operator: userInfo?.realName,
-          detailTime: dayjs().valueOf(),
-          note: '取消',
-        });
-      });
-
-      // Wait for all task updates to complete
-      await Promise.all(taskUpdates);
-
-      // Handle response and reload table
-      await handleRequest(res, () => {
+      if (cancelRecord.inStatus === '等待审核') {
+        await deleteNotify(cancelRecord.id);
         toastSuccess('取消成功');
         reloadTable();
-      });
+      } else {
+        const userInfo = useUserStore().info;
+
+        // Update notify status
+        cancelRecord.inStatus = '已取消';
+        const res = await addOrUpdateNotify(cancelRecord);
+
+        // Get and update all related tasks
+        const list = await getTaskListByNotifyId(cancelRecord.id);
+
+        const logId = (await getInventoryUseLogListByNotifyId(cancelRecord.id))[0]?.id;
+        if (logId) {
+          await deleteInventoryLog(logId);
+        }
+        // Process each task
+        const taskUpdates = list.map(async (item) => {
+          // Update task status
+          item.inStatus = '已取消';
+          await addOrUpdateTask(item);
+
+          // Add timeline entry
+          await addOrUpdateTaskTimeLine({
+            useType: 'normal',
+            bolitaTaskId: item.id,
+            operator: userInfo?.realName,
+            detailTime: dayjs().valueOf(),
+            note: '取消',
+          });
+        });
+
+        // Wait for all task updates to complete
+        await Promise.all(taskUpdates);
+        // Handle response and reload table
+        await handleRequest(res, () => {
+          toastSuccess('取消成功');
+          reloadTable();
+        });
+      }
 
       // Close confirmation dialog
       showConfirmDialog = false;

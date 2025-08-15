@@ -17,13 +17,6 @@
             placeholder="客户"
           />
         </n-form-item>
-        <n-form-item label="货柜号" path="containerNo">
-          <n-input
-            :disabled="prop.model?.id"
-            v-model:value="currentData.containerNo"
-            placeholder="货柜号"
-          />
-        </n-form-item>
         <n-form-item label="仓库" path="inventoryId">
           <n-select
             v-model:value="currentData.inventoryId"
@@ -125,11 +118,6 @@
       trigger: ['blur', 'change'],
       message: '请输入',
     },
-    containerNo: {
-      required: true,
-      trigger: ['blur', 'input'],
-      message: '请输入',
-    },
     inventoryId: {
       required: true,
       trigger: ['blur', 'change'],
@@ -158,7 +146,6 @@
   let currentWarehouse = $ref({});
   let currentData = $ref({
     customerId: '',
-    containerNo: '',
     inventoryId: '',
     planArriveDateTime: null,
     files: [],
