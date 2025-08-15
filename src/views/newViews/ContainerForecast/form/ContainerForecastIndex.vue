@@ -9,15 +9,14 @@
   import NewContainerForecast from '@/views/newViews/ContainerForecast/form/NewContainerForecast.vue';
   import { useUserStore } from '@/store/modules/user';
   import readXlsxFile from 'read-excel-file';
-  import { difference } from 'lodash-es';
-  import { allDeliveryList, allKeysList } from '@/api/dataLayer/common/AllKeys';
+  import { difference, groupBy } from 'lodash-es';
+  import { allKeysList } from '@/api/dataLayer/common/AllKeys';
   import { $ref } from 'vue/macros';
   import ErrorMessageDialog from '@/views/newViews/ContainerForecast/form/ErrorMessageDialog.vue';
   import dayjs from 'dayjs';
-  import { addOrUpdateNotify, saveFiles } from '@/api/newDataLayer/Notify/Notify';
+  import { addOrUpdateNotify } from '@/api/newDataLayer/Notify/Notify';
   import { getCustomerById } from '@/api/newDataLayer/Customer/Customer';
   import { getUserNameById } from '@/api/newDataLayer/User/User';
-  import { getFBACodeList } from '@/api/newDataLayer/FBACode/FBACode';
   import {
     addOrUpdateInventoryUseLog,
     getCurrentLogTime,
@@ -27,11 +26,9 @@
     addOrUpdateTask,
     defaultTask,
     getTaskListByNotifyId,
-    searchTaskPrice,
   } from '@/api/newDataLayer/TaskList/TaskList';
-  import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { safeSumBy } from '@/store/utils/utils';
-  import router from '@/router';
+  import { getFBACodeList } from '@/api/newDataLayer/FBACode/FBACode';
 
   interface Prop {
     currentModel?: any;
@@ -59,7 +56,11 @@
 
   let errorMessage = $ref([]);
 
-  async function readFile(file, notifyType, containerNo = '') {
+  function isValidString(str) {
+    return /^[A-Za-z0-9]+$/.test(str);
+  }
+
+  async function readFile(file, notifyType) {
     if (!file) {
       return [];
     }
@@ -71,60 +72,90 @@
     const allFBACodeList = await getFBACodeList();
     try {
       let currentRows = [];
-      let { rows, errors } = await readXlsxFile(file, { schema });
+      let { rows, errors } = await readXlsxFile(file, { schema, row: { from: 1 } });
       rows = rows.slice(2);
+      const groupContainerId = Object.keys(groupBy(rows, 'containerId'));
+      if (groupContainerId.length > 1) {
+        errorMessage.push({ detail: '一个Excel文件中不可有多个柜号' });
+      } else {
+        defaultValue.containerNo = groupContainerId[0];
+      }
+      console.log(groupContainerId, 'groupContainerId');
       for (const [index, it] of rows.entries()) {
         const keys = Object.keys(it);
         const res = difference(
           allKeysList.map((x) => x.field),
           keys
         );
-        it.uploadFileTime = dayjs().format('YYYY-MM-DD');
-        if (it.containerId !== containerNo) {
-          errorMessage.push({ index: index + 4, detail: '货柜号与实际填写不一致' });
+        it.uploadFileTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
+        if (!isValidString(it.ticketId)) {
+          errorMessage.push({ index: index + 4, detail: '票号中不可有特殊符号' });
         }
-        if (it.outboundMethod !== '存仓') {
-          if (it.deliveryMethod === 'FBA卡车派送') {
-            if (!it.FCAddress) {
-              errorMessage.push({ index: index + 4, detail: 'FC/送货地址' });
-            }
-            if (!it.postcode) {
-              const currentFBACode = allFBACodeList.find((b) => b.code === it.FCAddress);
-              if (!currentFBACode) {
-                errorMessage.push({ index: index + 4, detail: 'FC/送货地址' });
-              } else {
-                it.postcode = currentFBACode.postcode;
-              }
-            }
+        //判断大件托盘
+        if (it.outboundMethod === '大件托盘') {
+          if (!it.productName) {
+            errorMessage.push({ index: index + 4, detail: '品名不可为空' });
           }
-          if (it.outboundMethod === '散货') {
-            if (it.deliveryMethod === 'FBA卡车派送') {
-              if (!it.FBADeliveryCode) {
-                errorMessage.push({ index: index + 4, detail: 'FBA单号' });
-              }
-              if (!it.PO) {
-                errorMessage.push({ index: index + 4, detail: 'PO' });
-              }
-            }
-            if (!allDeliveryList.includes(it.deliveryMethod) && !it.FCAddress) {
-              errorMessage.push({ index: index + 4, detail: 'FC/送货地址' });
-            }
+          if (!it.UNNumber) {
+            errorMessage.push({ index: index + 4, detail: 'UN号不可为空' });
+          }
+          if (!it.recipient) {
+            errorMessage.push({ index: index + 4, detail: '收件人不可为空' });
+          }
+          if (!it.phone) {
+            errorMessage.push({ index: index + 4, detail: '电话不可为空' });
+          }
+          if (!it.email) {
+            errorMessage.push({ index: index + 4, detail: '邮箱不可为空' });
+          }
+          if (!it.tailgate) {
+            errorMessage.push({ index: index + 4, detail: '尾板不可为空' });
+          }
+          it.packing = '大件托盘';
+        }
+
+        //判断FBA卡车派送
+        if (it.deliveryMethod === 'FBA卡车派送') {
+          if (!it.postcode) {
+            errorMessage.push({ index: index + 4, detail: '邮编不可为空' });
+          }
+          if (!it.address) {
+            errorMessage.push({ index: index + 4, detail: '送货地址不可为空' });
+          }
+          const allFBACode = allFBACodeList.map((x) => x.code);
+          if (!allFBACode.includes(it.FC)) {
+            errorMessage.push({ index: index + 4, detail: 'FC不在列表中' });
           }
         }
+
+        if (it.packing === '纸箱') {
+          if (!it.number) {
+            errorMessage.push({ index: index + 4, detail: '件数不可为空' });
+          }
+          it.trayNum = 0;
+        }
+
+        if (['木箱', '大件托盘', '标准托盘'].includes(it.packing)) {
+          if (!it.trayNum) {
+            errorMessage.push({ index: index + 4, detail: '托数不可为空' });
+          }
+          it.number = 0;
+        }
+
         if (it.changeOrderFiles === '是') {
           it.operateInStorage = '是';
         }
-        const [long, width, height] = it.size.split('*');
-        it.suggestedPrice = await searchTaskPrice(
-          parseFloat(long),
-          parseFloat(width),
-          parseFloat(height),
-          parseFloat(it.weight),
-          it.country,
-          it.outboundMethod,
-          it.number,
-          it.postcode ? it.postcode.slice(0, 2) : ''
-        );
+        // const [long, width, height] = it.size.split('*');
+        // it.suggestedPrice = await searchTaskPrice(
+        //   parseFloat(long),
+        //   parseFloat(width),
+        //   parseFloat(height),
+        //   parseFloat(it.weight),
+        //   it.country,
+        //   it.outboundMethod,
+        //   it.number,
+        //   it.postcode ? it.postcode.slice(0, 2) : ''
+        // );
         it.inStatus = InBoundDetailStatus.WaitCheck;
         currentRows.push(Object.assign({}, defaultTask, it));
         if (res.length > 0) {
@@ -180,7 +211,7 @@
       loadingMessage += '正在读取文件！' + `<br>`;
       const userStore = useUserStore();
       const currentCustomer = (await getCustomerById(value.customerId)) ?? '';
-      value.containerNo = value.containerNo.trim();
+      value.containerNo = defaultValue.containerNo.trim();
       value.notifyType = prop.type;
       value.unloadingFile = '';
       value.totalTime = '';
@@ -194,66 +225,66 @@
       value.cashStatus = '';
       value.inStatus = InBoundStatus.WaitCheck;
       let taskList = [
-        ...(await readFile(value.files?.[0].file, value.notifyType, value.containerNo)),
+        ...(await readFile(value.files?.[0].file, value.notifyType)),
         ...(value?.trayTaskList ?? []),
       ];
       value.arrivedCount = safeSumBy(taskList, 'number').toString();
 
-      if (value.files) {
-        try {
-          value.files = await saveFiles(value.files);
-        } catch (e) {
-          errorMessage.push({ detail: '文件上传错误' + e?.message });
-        }
-      } else {
-        value.files = '';
-      }
-      if (errorMessage.length === 0) {
-        loadingMessage += '正在上传' + value.containerNo + '的货柜预报！' + `<br>`;
-        const res = await addOrUpdateNotify(value);
-        await addOrUpdateInventoryUseLog({
-          notifyId: res.data.id,
-          inventoryId: value.inventoryId,
-          useAtTimestamp: getCurrentLogTime(value.planArriveDateTime, value.inHouseTime),
-        });
-        let quest = [];
-        for (const item of taskList) {
-          // item.customerName = value.customerName;
-          item.customerId = value.customerId;
-          item.inventoryId = value.inventoryId;
-          item.inHouseTime = value.inHouseTime;
-          item.notifyId = res.data.id;
-          item.files = value.files;
-          item.planArriveDateTime = value.planArriveDateTime;
-          item.outBoundTime = '';
-          item.outContainerNum = '';
-          item.outTrayNum = '';
-          item.cmrfiles = '';
-          loadingMessage += '正在加载票号:' + item.ticketId + '的任务明细！' + `<br>`;
-          quest.push(addOrUpdateTask(item));
-        }
-        const result = await Promise.all(quest);
-        loadingMessage += '正在上传货柜号:' + value.containerNo + '的任务明细！' + `<br>`;
-        const ids = result.map((it) => it.data.id);
-        let idQuest = [];
-        const userInfo = useUserStore().info;
-        loadingMessage += '正在写入每一票的TimeLine' + `<br>`;
-        for (const id of ids) {
-          idQuest.push(
-            addOrUpdateTaskTimeLine({
-              useType: 'normal',
-              bolitaTaskId: id,
-              operator: userInfo?.realName,
-              detailTime: dayjs().valueOf(),
-              note: '新建货柜预报',
-            })
-          );
-        }
-        await Promise.all(idQuest);
-        loadingMessage += '完成' + `<br>`;
-        await router.push('/missions/missionDetail?containerNo=' + value.containerNo);
-        // emit('saved');
-      }
+      // if (value.files) {
+      //   try {
+      //     value.files = await saveFiles(value.files);
+      //   } catch (e) {
+      //     errorMessage.push({ detail: '文件上传错误' + e?.message });
+      //   }
+      // } else {
+      //   value.files = '';
+      // }
+      // if (errorMessage.length === 0) {
+      //   loadingMessage += '正在上传' + value.containerNo + '的货柜预报！' + `<br>`;
+      //   const res = await addOrUpdateNotify(value);
+      //   await addOrUpdateInventoryUseLog({
+      //     notifyId: res.data.id,
+      //     inventoryId: value.inventoryId,
+      //     useAtTimestamp: getCurrentLogTime(value.planArriveDateTime, value.inHouseTime),
+      //   });
+      //   let quest = [];
+      //   for (const item of taskList) {
+      //     // item.customerName = value.customerName;
+      //     item.customerId = value.customerId;
+      //     item.inventoryId = value.inventoryId;
+      //     item.inHouseTime = value.inHouseTime;
+      //     item.notifyId = res.data.id;
+      //     item.files = value.files;
+      //     item.planArriveDateTime = value.planArriveDateTime;
+      //     item.outBoundTime = '';
+      //     item.outContainerNum = '';
+      //     item.outTrayNum = '';
+      //     item.cmrfiles = '';
+      //     loadingMessage += '正在加载票号:' + item.ticketId + '的任务明细！' + `<br>`;
+      //     quest.push(addOrUpdateTask(item));
+      //   }
+      //   const result = await Promise.all(quest);
+      //   loadingMessage += '正在上传货柜号:' + value.containerNo + '的任务明细！' + `<br>`;
+      //   const ids = result.map((it) => it.data.id);
+      //   let idQuest = [];
+      //   const userInfo = useUserStore().info;
+      //   loadingMessage += '正在写入每一票的TimeLine' + `<br>`;
+      //   for (const id of ids) {
+      //     idQuest.push(
+      //       addOrUpdateTaskTimeLine({
+      //         useType: 'normal',
+      //         bolitaTaskId: id,
+      //         operator: userInfo?.realName,
+      //         detailTime: dayjs().valueOf(),
+      //         note: '新建货柜预报',
+      //       })
+      //     );
+      //   }
+      //   await Promise.all(idQuest);
+      //   loadingMessage += '完成' + `<br>`;
+      //   await router.push('/missions/missionDetail?containerNo=' + value.containerNo);
+      //   // emit('saved');
+      // }
     }
     stop();
   }
