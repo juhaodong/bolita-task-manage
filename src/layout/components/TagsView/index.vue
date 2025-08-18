@@ -39,7 +39,12 @@
                 @click.stop="goPage(element)"
                 @contextmenu="handleContextMenu($event, element)"
               >
-                <span>{{ element.meta.title + (element.query?.id ?? '') }}</span>
+                <span>{{
+                  element.meta.title +
+                  Object.keys(element.query) +
+                  ':' +
+                  Object.values(element.query)
+                }}</span>
                 <n-icon size="14" @click.stop="closeTabItem(element)" v-if="!element.meta.affix">
                   <CloseOutlined />
                 </n-icon>
