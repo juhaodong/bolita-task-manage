@@ -253,7 +253,7 @@
       value.arrivedCount =
         safeSumBy(taskList, 'number').toString() +
         '件' +
-        safeSumBy(taskList, 'trayNumber').toString() +
+        safeSumBy(taskList, 'trayNum').toString() +
         '托';
 
       if (value.files) {
