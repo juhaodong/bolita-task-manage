@@ -23,7 +23,7 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: 'Ref',
-    key: 'REF',
+    key: 'ref',
   },
   {
     title: 'ISA',
@@ -51,7 +51,7 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: 'FC/送货地址',
-    key: 'FCAddress',
+    key: 'fcAddress',
   },
   statusColumnEasy({
     title: '状态',
@@ -98,6 +98,6 @@ export const filters: FormField[] = [
   },
   {
     label: 'Ref',
-    field: 'REF',
+    field: 'ref',
   },
 ];

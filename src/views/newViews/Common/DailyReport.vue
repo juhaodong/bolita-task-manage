@@ -42,7 +42,7 @@
           ref="actionOutboundRef"
           :columns="outboundColumns"
           :request="loadOutboundDataTable"
-          :row-key="(row) => row.id || row.REF"
+          :row-key="(row) => row.id || row.ref"
         />
       </n-tab-pane>
     </n-tabs>
@@ -103,8 +103,8 @@
 
   const outboundColumns = [
     {
-      title: 'REF',
-      key: 'REF',
+      title: 'ref',
+      key: 'ref',
     },
     {
       title: 'ISA',
@@ -149,8 +149,8 @@
   const loadOutboundDataTable = async () => {
     const res = await getOutboundForecastByBetweenDateRangeList(dateRange);
     res.forEach((it) => {
-      if (!it.REF) {
-        it.REF = it.ref ? it.ref : it.id;
+      if (!it.ref) {
+        it.ref = it.ref ? it.ref : it.id;
       }
     });
     return res;

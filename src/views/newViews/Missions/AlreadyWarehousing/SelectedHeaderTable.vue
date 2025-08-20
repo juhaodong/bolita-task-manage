@@ -14,12 +14,7 @@
       </n-tag>
     </n-card>
     <n-card :bordered="false" class="mt-4" embedded title="💴 正在使用字段">
-      <Draggable
-        v-model="currentHeaderList"
-        animation="300"
-        item-key="id"
-        @end="onDragEnd"
-      >
+      <Draggable v-model="currentHeaderList" animation="300" item-key="id" @end="onDragEnd">
         <template #item="{ element }">
           <n-tag
             :type="element.tagType"
@@ -42,7 +37,6 @@
   import { computed, onMounted } from 'vue';
   import { $ref } from 'vue/macros';
   import _, { differenceWith, sortBy } from 'lodash';
-  import { getTableHeaderItemList } from '@/api/newDataLayer/Header/Header';
   import {
     addOrUpdateTableHeaderGroupItem,
     getTableHeaderGroupItemList,
@@ -99,8 +93,8 @@
   }
   let groupInfo = $ref({});
   async function reload() {
-    allHeaderList = await getTableHeaderItemList();
     groupInfo = await getTableHeaderGroupItemList(prop.type);
+    allHeaderList = groupInfo.tableHeaderItems;
     currentHeaderList = JSON.parse(groupInfo.headerItemJson);
   }
   async function save() {

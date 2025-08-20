@@ -33,7 +33,7 @@
       const detailInfo = await getTaskListByIds(outboundInfo.outboundDetailInfo.split(','));
       console.log(outboundInfo, 'info');
       console.log(detailInfo, 'detailInfo');
-      currentTaskList = flatMap(groupBy(detailInfo, 'FCAddress'));
+      currentTaskList = flatMap(groupBy(detailInfo, 'fcAddress'));
       emit('refresh');
     }
   }
@@ -41,7 +41,7 @@
   async function downloadUnloadingFile() {
     let headerTitle = ['Ref,Name des Kunden,Gesamtmenge,Ankunftszeit'];
     let headerDate = [
-      outboundInfo?.REF,
+      outboundInfo?.ref,
       outboundInfo?.customerId,
       outboundInfo?.containerNum,
       outboundInfo?.createBookCarTimestamp,
@@ -52,7 +52,7 @@
     currentTaskList.forEach((it) => {
       const res = [
         it.ticketId,
-        it.FBADeliveryCode,
+        it.fbaDeliveryCode,
         it.number,
         '',
         '',
@@ -64,12 +64,12 @@
     });
     dataStrings = dataStrings.join('\n');
     const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
-    FileSaver.saveAs(blob, outboundInfo?.REF + '.csv');
+    FileSaver.saveAs(blob, outboundInfo?.ref + '.csv');
   }
 
   const columns: DataTableColumns<any> = $computed(() => [
     { title: 'Kenzeichen', key: 'ticketId' },
-    { title: 'FBA', key: 'FBADeliveryCode', width: 150 },
+    { title: 'FBA', key: 'fbaDeliveryCode', width: 150 },
     { title: 'Menge', key: 'number' },
     // { title: 'Gesamt', key: 'outBoundContainerNum' },
     { title: 'R/F', key: 'fakeDate' },
@@ -87,7 +87,7 @@
     <loading-frame :loading="loading">
       <n-descriptions v-if="outboundInfo" :columns="2" bordered label-placement="left">
         <n-descriptions-item label="Ref.">
-          {{ outboundInfo?.REF ?? outboundInfo?.id }}
+          {{ outboundInfo?.ref ?? outboundInfo?.id }}
         </n-descriptions-item>
         <n-descriptions-item label="Gesamtmenge:">
           {{ outboundInfo?.totalNumber }}</n-descriptions-item

@@ -93,15 +93,14 @@
   import { getInventoryUseLogListByInventoryId } from '@/api/newDataLayer/Warehouse/UseLog';
   import dayjs from 'dayjs';
   import { groupBy } from 'lodash';
-  import { getCustomerListByIds } from '@/api/newDataLayer/Customer/Customer';
   import { useUserStore } from '@/store/modules/user';
-  import { getUserById } from '@/api/newDataLayer/User/User';
   import { userType } from '@/api/dataLayer/common/power';
   import { generateOptionFromTimeArray } from '@/store/utils/utils';
   import { timeArrays } from '@/api/newDataLayer/Common/Common';
   import { currentBaseImageUrl } from '@/api/dataLayer/fieldDefination/common';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
+  import { getUserById } from '@/api/newDataLayer/User/User';
 
   interface Props {
     model?: any;
@@ -156,10 +155,9 @@
 
   onMounted(async () => {
     loading = true;
-    const userStore = useUserStore();
-    console.log(userStore.info);
-    const currentUser = await getUserById(userStore.info.id);
-    customerList = (await getCustomerListByIds(currentUser.customerIds.split(','))).map((it) => ({
+    const currentUser = await getUserById(useUserStore()?.info?.id);
+    console.log(currentUser, 'user');
+    customerList = currentUser.customers.map((it) => ({
       label: it.customerName,
       value: it.id,
     }));

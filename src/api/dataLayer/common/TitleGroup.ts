@@ -56,7 +56,7 @@ export const allTitleGroup = [
   },
   {
     title: 'FBA/快递单号',
-    itemKey: 'FBADeliveryCode',
+    itemKey: 'fbaDeliveryCode',
     tagType: 'warning',
   },
   {
@@ -85,13 +85,13 @@ export const allTitleGroup = [
     tagType: 'warning',
   },
   {
-    title: 'PO',
-    itemKey: 'PO',
+    title: 'po',
+    itemKey: 'po',
     tagType: 'warning',
   },
   {
     title: 'FC/送货地址',
-    itemKey: 'FCAddress',
+    itemKey: 'fcAddress',
     tagType: 'warning',
   },
   {
@@ -176,7 +176,7 @@ export const allTitleGroup = [
   },
   {
     title: 'UN号',
-    itemKey: 'UNNumber',
+    itemKey: 'unNumber',
     tagType: 'success',
   },
   {
@@ -241,7 +241,7 @@ export const operationTitleGroup = [
   },
   {
     title: 'Ref',
-    itemKey: 'REF',
+    itemKey: 'ref',
   },
   {
     title: 'ISA',
@@ -257,7 +257,7 @@ export const operationTitleGroup = [
   },
   {
     title: 'FC/送货地址',
-    itemKey: 'FCAddress',
+    itemKey: 'fcAddress',
   },
   {
     title: '物流方式',

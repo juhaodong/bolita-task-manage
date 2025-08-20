@@ -206,12 +206,38 @@
 </template>
 
 <script lang="ts" setup>
+  // Vue core imports
   import { h, onMounted, reactive, ref } from 'vue';
+  import { $ref } from 'vue/macros';
+
+  // Third-party libraries
+  import dayjs from 'dayjs';
+  import FileSaver from 'file-saver';
+  import * as XLSX from 'xlsx';
+
+  // UI components
   import { DataTableColumns, NButton } from 'naive-ui';
   import { BasicTable } from '@/components/Table';
+  import SingleFilterBar from '@/views/bolita-views/composable/SingleFilterBar.vue';
+
+  // Form components
+  import NotifyUnloadForm from '@/views/newViews/ContainerForecast/form/NotifyUnloadForm.vue';
+  import NotifyFeeDialog from '@/views/newViews/ContainerForecast/form/NotifyFeeDialog.vue';
+  import WarehouseInfoDialog from '@/views/newViews/ContainerForecast/form/WarehouseInfoDialog.vue';
+  import ContainerForecastIndex from '@/views/newViews/ContainerForecast/form/ContainerForecastIndex.vue';
+  import UnloadingList from '@/views/newViews/ContainerForecast/form/UnloadingList.vue';
+  import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
+  import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
+  import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
+  import DetailGroupTaskDialog from '@/views/newViews/ContainerForecast/form/DetailGroupTaskDialog.vue';
+
+  // Data and API
   import { columns } from './columns';
   import { InBoundStatus, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
-  import { $ref } from 'vue/macros';
+  import { FormField } from '@/views/bolita-views/composable/form-field-type';
+  import { allInStatusNotifyList } from '@/api/dataLayer/common/common';
+  import { statusColumnSelect, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+  import { createPaginationPlaceholders, timeArrays } from '@/api/newDataLayer/Common/Common';
   import {
     asyncCustomer,
     generateOptionFromArray,
@@ -219,17 +245,7 @@
     handleRequest,
     toastSuccess,
   } from '@/store/utils/utils';
-  import NotifyUnloadForm from '@/views/newViews/ContainerForecast/form/NotifyUnloadForm.vue';
-  import NotifyFeeDialog from '@/views/newViews/ContainerForecast/form/NotifyFeeDialog.vue';
-  import WarehouseInfoDialog from '@/views/newViews/ContainerForecast/form/WarehouseInfoDialog.vue';
-  import ContainerForecastIndex from '@/views/newViews/ContainerForecast/form/ContainerForecastIndex.vue';
-  import dayjs from 'dayjs';
-  import UnloadingList from '@/views/newViews/ContainerForecast/form/UnloadingList.vue';
-  import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
   import { getUserCustomerList, hasAuthPower } from '@/api/dataLayer/common/power';
-  import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
-  import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
-  import FileSaver from 'file-saver';
   import {
     addOrUpdateNotify,
     deleteNotify,
@@ -245,42 +261,42 @@
     currentBaseImageUrl,
   } from '@/api/dataLayer/fieldDefination/common';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
-  import * as XLSX from 'xlsx';
   import {
     deleteInventoryLog,
     getInventoryUseLogListByNotifyId,
   } from '@/api/newDataLayer/Warehouse/UseLog';
-  import SingleFilterBar from '@/views/bolita-views/composable/SingleFilterBar.vue';
-  import { FormField } from '@/views/bolita-views/composable/form-field-type';
-  import { allInStatusNotifyList } from '@/api/dataLayer/common/common';
-  import { statusColumnSelect, timeColumn } from '@/views/bolita-views/composable/useableColumns';
-  import { timeArrays } from '@/api/newDataLayer/Common/Common';
-  import DetailGroupTaskDialog from '@/views/newViews/ContainerForecast/form/DetailGroupTaskDialog.vue';
 
-  let notifyType: NotifyType = $ref(NotifyType.Container);
-  let currentModel: any | null = $ref(null);
-  let showCurrentHeaderDataTable = $ref(false);
+  // Table state
+  const actionRef = ref();
+  let currentColumns = $ref([]);
+  let currentHeader = $ref([]);
+  let checkedRowKeys = $ref([]);
+  let selectedNotifyList = $ref([]);
+  let notifyList = $ref([]);
+
+  // Modal visibility state
   const showModal = ref(false);
+  let showCurrentHeaderDataTable = $ref(false);
   let showOperationTable = $ref(false);
-  let currentNotifyId: string | null = $ref(null);
   let showWarehouseDialog = $ref(false);
   let showFeeDialog = $ref(false);
-  let filterObj: any | null = $ref(null);
   let showUnloadingList = $ref(false);
-  let currentHeader = $ref([]);
-  let currentColumns = $ref([]);
-  let dateRange = $ref(null);
   let showConfirmDialog = $ref(false);
-  let cancelRecord = $ref('');
-  let currentRecord = $ref({});
-  let showAll = $ref(false);
   let showConfirmUnloading = $ref(false);
   let showNeedCheckDialog = $ref(false);
   let showDetailInfoDialog = $ref(false);
+
+  // Form and data state
+  let notifyType: NotifyType = $ref(NotifyType.Container);
+  let currentModel: any | null = $ref(null);
+  let currentNotifyId: string | null = $ref(null);
   let currentId = $ref([]);
-  let dialogLoading = $ref(false);
-  let selectedRow = $ref(null);
-  let checkedRowKeys = $ref([]);
+  let cancelRecord = $ref('');
+  let currentRecord = $ref({});
+
+  // Filter state
+  let filterObj: any | null = $ref(null);
+  let currentFilter = $ref([]);
 
   const columns: DataTableColumns<any> = [
     {
@@ -392,16 +408,26 @@
     },
   });
 
+  /**
+   * Opens the dialog to add a new container forecast
+   * @param {NotifyType} type - The type of notification to create
+   */
   function addTable(type: NotifyType) {
     notifyType = type;
     currentModel = null;
     showModal.value = true;
   }
 
+  // Initialize component when mounted
   onMounted(async () => {
     await reloadHeader();
   });
 
+  /**
+   * Confirms container unloading process
+   * Updates the notification status and all related tasks
+   * Creates timeline entries for tracking
+   */
   async function confirmUnloading() {
     try {
       // Get current user info
@@ -428,7 +454,7 @@
           useType: 'normal',
           bolitaTaskId: item.id,
           operator: userInfo?.realName,
-          detailTime: dayjs().valueOf(),
+          detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
           note: '仓库接收,等待卸柜',
         });
       });
@@ -449,96 +475,83 @@
     }
   }
 
-  let currentFilter = $ref([]);
-  let notifyList = $ref([]);
-
+  /**
+   * Build the complete filter criteria from user inputs and system requirements
+   */
   async function getCurrentFilter() {
-    if (filterObj) {
-      const filterOne = filterObj.filter((it) => it?.component !== 'NDatePicker');
-      const filterTwo = filterObj.filter((it) => it?.component === 'NDatePicker');
-      const filterWithOutDate = filterOne
-        ? filterOne.map((filterItem) => ({
-            field: filterItem.key,
-            op: filterItem.value ? 'like' : '!=',
-            value: `%${filterItem.value || ''}%`,
-          }))
-        : [];
-      const filterWithDate = filterTwo
-        ? filterTwo.map((filterItem) => ({
-            field: filterItem.key,
-            op: 'between',
-            value: filterItem.value,
-          }))
-        : [];
-      currentFilter = filterWithOutDate.concat(filterWithDate);
-    }
-    // Get customer list
-    const customerId = await getUserCustomerList();
+    // Reset current filter
+    currentFilter = [];
 
-    // Add customer filter
-    currentFilter.push({ field: 'customer.id', op: 'in', value: customerId });
+    if (filterObj) {
+      currentFilter = filterObj;
+      const customerId = await getUserCustomerList();
+      console.log(customerId, 'ids');
+      if (!filterObj['customer.id']) {
+        currentFilter['customerIds'] = customerId;
+      } else {
+        currentFilter['customerIds'] = [filterObj['customer.id']];
+      }
+      if (filterObj['inventory.id']) {
+        currentFilter['inventoryIds'] = [filterObj['inventory.id']];
+      }
+      if (filterObj['planArriveDateTime']) {
+        currentFilter['minPlanArriveDateTime'] =
+          dayjs(filterObj['planArriveDateTime'][0]).format('YYYY-MM-DD') + 'T00:00:00';
+        currentFilter['maxPlanArriveDateTime'] =
+          dayjs(filterObj['planArriveDateTime'][1]).format('YYYY-MM-DD') + 'T23:59:59';
+      }
+    }
+    console.log(currentFilter, 'currentFilter');
   }
 
+  /**
+   * Loads data for the table with pagination support
+   * @returns Array of data items for display
+   */
   const loadDataTable = async () => {
     // Build filter criteria
     await getCurrentFilter();
 
     // Get paginated data
     const res = await getNotifyListByFilterWithPagination(currentFilter, paginationReactive);
-    let allList = res.content;
-    const totalCount = res.page.totalElements;
+    const allList = res.rows;
+    const totalCount = res.totalRowCount;
 
-    // Format count display
-    allList.forEach((item) => {
-      if (item.totalCount) {
-        item.arrivedCount = `${item.arrivedCount}(${item.totalCount})`;
-      }
-    });
+    // Process data if needed
 
-    // Create fake list items for pagination display
-    let fakeListStart = [];
-    let fakeListEnd = [];
+    // Create pagination placeholders
+    const { fakeListStart, fakeListEnd } = createPaginationPlaceholders(
+      paginationReactive.pageNumber,
+      paginationReactive.pageSize,
+      totalCount
+    );
 
-    if (paginationReactive.pageNumber > 0) {
-      fakeListStart = Array(paginationReactive.pageNumber * paginationReactive.pageSize)
-        .fill(null)
-        .map((it, index) => {
-          return { key: index };
-        });
-    }
-
-    if (paginationReactive.pageSize < totalCount) {
-      if (totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1) > 0) {
-        fakeListEnd = Array(
-          totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1)
-        )
-          .fill(null)
-          .map((it, index) => {
-            return { key: index };
-          });
-      }
-    }
-
-    // Sort and return results with fake items for pagination
-    notifyList = fakeListStart.concat(allList.concat(fakeListEnd));
+    // Combine real data with placeholders
+    notifyList = [...fakeListStart, ...allList, ...fakeListEnd];
     return notifyList;
   };
 
-  const actionRef = ref();
-
   function updateFilter(value) {
     filterObj = value;
+    console.log(filterObj, 'filterObj');
     reloadTable();
   }
 
+  /**
+   * Confirms cancellation of a container forecast
+   * Handles different cancellation flows based on current status
+   * Updates all related tasks and inventory logs
+   */
   async function confirmCancel() {
     try {
-      // Get current user info
+      // For items in review status, simply delete the notification
       if (cancelRecord.inStatus === '等待审核') {
         await deleteNotify(cancelRecord.id);
         toastSuccess('取消成功');
         reloadTable();
-      } else {
+      }
+      // For other statuses, mark as cancelled and update related records
+      else {
         const userInfo = useUserStore().info;
 
         // Update notify status
@@ -548,10 +561,12 @@
         // Get and update all related tasks
         const list = await getTaskListByNotifyId(cancelRecord.id);
 
+        // Clean up inventory logs
         const logId = (await getInventoryUseLogListByNotifyId(cancelRecord.id))[0]?.id;
         if (logId) {
           await deleteInventoryLog(logId);
         }
+
         // Process each task
         const taskUpdates = list.map(async (item) => {
           // Update task status
@@ -563,13 +578,14 @@
             useType: 'normal',
             bolitaTaskId: item.id,
             operator: userInfo?.realName,
-            detailTime: dayjs().valueOf(),
+            detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
             note: '取消',
           });
         });
 
         // Wait for all task updates to complete
         await Promise.all(taskUpdates);
+
         // Handle response and reload table
         await handleRequest(res, () => {
           toastSuccess('取消成功');
@@ -597,52 +613,89 @@
     return await getNotifyListByFilter(currentFilter);
   }
 
+  /**
+   * Extracts a value from an object using a dot-notation path
+   * @param {Object} obj - The source object
+   * @param {string} path - Dot-notation path (e.g., 'customer.name')
+   * @returns {*} The extracted value or empty string if not found
+   */
+  function getNestedValue(obj, path) {
+    if (!path) return '';
+
+    const keys = path.split('.');
+    let value = obj;
+
+    for (const key of keys) {
+      value = value && value[key];
+      if (value === undefined || value === null) return '';
+    }
+
+    return value;
+  }
+
+  /**
+   * Prepares data for Excel export
+   * @param {Array} dataList - List of data objects
+   * @param {Array} columnDefs - Column definitions
+   * @returns {Array} 2D array ready for Excel export
+   */
+  function prepareExcelData(dataList, columnDefs) {
+    // Create a 2D array for Excel data
+    const data = [];
+
+    // Create header row from column titles (only include columns with titles)
+    const columnsWithTitles = columnDefs.filter((col) => col.title);
+    const headers = columnsWithTitles.map((col) => col.title);
+    data.push(headers);
+
+    // Add data rows
+    dataList.forEach((item) => {
+      const row = [];
+
+      columnsWithTitles.forEach((col) => {
+        if (!col.key) {
+          row.push('');
+          return;
+        }
+
+        // Handle nested properties like 'customer.customerName'
+        if (col.key.includes('.')) {
+          row.push(getNestedValue(item, col.key));
+        }
+        // Handle date fields
+        else if (col.key === 'planArriveDateTime' && item[col.key]) {
+          row.push(dayjs(item[col.key]).format('YYYY-MM-DD'));
+        }
+        // Handle regular fields
+        else {
+          row.push(item[col.key] || '');
+        }
+      });
+
+      // Only add rows that have at least one non-empty value
+      const hasValue = row.some((value) => value !== '' && value !== null && value !== undefined);
+      if (hasValue) {
+        data.push(row);
+      }
+    });
+
+    return data;
+  }
+
+  /**
+   * Downloads table data as Excel file
+   */
   async function downloadData() {
     try {
       // Get filtered data
       const selectedList = await getAllNotifyByFilter();
 
-      // Create a 2D array for Excel data
-      const data = [];
-
-      // Create header row from column titles (only include columns with titles)
-      const headers = columns.filter((it) => it.title).map((it) => it.title);
-      data.push(headers);
-
-      // Add data rows
-      selectedList.forEach((item) => {
-        const row = [];
-        columns
-          .filter((col) => col.title)
-          .forEach((col) => {
-            // Handle nested properties like 'customer.customerName'
-            if (col.key && col.key.includes('.')) {
-              const keys = col.key.split('.');
-              let value = item;
-              for (const key of keys) {
-                value = value && value[key];
-              }
-              row.push(value || '');
-            } else if (col.key) {
-              // Handle date fields
-              if (col.key === 'planArriveDateTime' && item[col.key]) {
-                row.push(dayjs(item[col.key]).format('YYYY-MM-DD'));
-              } else {
-                row.push(item[col.key] || '');
-              }
-            } else {
-              row.push('');
-            }
-          });
-        const hasValue = row.some((value) => value !== '' && value !== null && value !== undefined);
-        if (hasValue) {
-          data.push(row);
-        }
-      });
+      // Prepare data for Excel
+      const excelData = prepareExcelData(selectedList, columns);
 
       // Create workbook and worksheet
       const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.aoa_to_sheet(data);
+      const worksheet = XLSX.utils.aoa_to_sheet(excelData);
 
       // Add worksheet to workbook
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
@@ -660,18 +713,22 @@
     }
   }
 
+  /**
+   * Loads and configures table headers based on saved configuration
+   * Handles fallback to default columns if configuration is missing or invalid
+   */
   async function reloadHeader() {
     try {
       // Reset columns
       currentColumns = [];
 
-      // Get header configuration
+      // Get header configuration from backend
       const headerConfig = await getTableHeaderGroupItemList('containerForecast');
 
       // Parse header items or use empty array if not found
       currentHeader = headerConfig ? JSON.parse(headerConfig.headerItemJson || '[]') : [];
 
-      // Map header items to columns
+      // Map header items to columns if configuration exists
       if (currentHeader.length > 0) {
         currentHeader.forEach((item) => {
           const matchedColumn = columns.find((col) => col.key === item.itemKey);
@@ -681,40 +738,55 @@
         });
       }
 
-      // Add selection column if exists
+      // Add selection column if exists (always show at the beginning)
       const selectionType = columns.find((col) => col.type === 'selection');
       if (selectionType) {
         currentColumns.unshift(selectionType);
       }
 
-      // Use default columns if no custom columns defined
+      // Use default columns if no custom columns defined or if configuration is invalid
       if (currentColumns.length === 0) {
         currentColumns = [...columns];
       }
+
+      // Remove any undefined columns
       currentColumns = currentColumns.filter((it) => it);
-      // Make all columns resizable
+
+      // Make all columns resizable for better user experience
       currentColumns.forEach((item) => {
         item.resizable = true;
       });
 
-      // Close header selection dialog
+      // Close header selection dialog if open
       showCurrentHeaderDataTable = false;
     } catch (error) {
       console.error('加载表头失败:', error);
-      currentColumns = [...columns]; // Fallback to default columns
+      // Fallback to default columns in case of error
+      currentColumns = [...columns];
     }
   }
 
-  let selectedNotifyList = $ref([]);
+  // selectedNotifyList is already declared in the grouped variables section
 
+  /**
+   * Handles row selection in the table
+   * Maintains selection state across pagination
+   * @param {Array} rowKeys - Array of selected row keys
+   */
   async function handleCheck(rowKeys) {
+    // Update the checked keys in the table
     checkedRowKeys = rowKeys;
+
+    // Get the selected items from the current page
     const currentPageSelected = notifyList.filter((item) => rowKeys.includes(item.id));
-    // 合并到全局选中集合
+
+    // Merge with global selection, removing any items from current page that are no longer selected
     selectedNotifyList = [
+      // Keep previously selected items that are not on the current page
       ...selectedNotifyList.filter(
         (item) => !notifyList.some((pageItem) => pageItem.id === item.id)
       ),
+      // Add newly selected items from current page
       ...currentPageSelected,
     ];
   }
@@ -749,26 +821,38 @@
     showUnloadingList = true;
   }
 
-  async function showUnloadingPic() {
+  /**
+   * Handles file upload for a specific field in the current model
+   * @param {string} fieldName - The field name to update with uploaded files
+   * @returns {Promise<void>}
+   */
+  async function handleFileUpload(fieldName) {
+    if (selectedNotifyList.length !== 1) return;
+
     currentModel = selectedNotifyList[0];
     const upload = useUploadDialog();
-    const files = await upload.upload(currentModel['unloadingPic']);
+    const files = await upload.upload(currentModel[fieldName]);
+
     if (files.checkPassed) {
-      currentModel.unloadingPic = files.files;
+      currentModel[fieldName] = files.files;
       await addOrUpdateNotify(currentModel);
     }
+
     await actionRef.value.reload();
   }
 
+  /**
+   * Shows dialog to upload unloading pictures
+   */
+  async function showUnloadingPic() {
+    await handleFileUpload('unloadingPic');
+  }
+
+  /**
+   * Shows dialog to upload unloading form
+   */
   async function uploadUnloadingForm() {
-    currentModel = selectedNotifyList[0];
-    const upload = useUploadDialog();
-    const files = await upload.upload(currentModel['unloadingFile']);
-    if (files.checkPassed) {
-      currentModel.unloadingFile = files.files;
-      await addOrUpdateNotify(currentModel);
-    }
-    await actionRef.value.reload();
+    await handleFileUpload('unloadingFile');
   }
 
   async function checkContainerStatus() {
@@ -796,10 +880,7 @@
     showCurrentHeaderDataTable = true;
   }
 
-  function updateFilterWithItems(value) {
-    filterObj = value;
-    reloadTable();
-  }
+  // This function was redundant with updateFilter and has been removed
 
   function handlePageChange(page: number) {
     paginationReactive.pageNumber = page - 1;
@@ -812,21 +893,26 @@
     reloadTable();
   }
 
+  /**
+   * Reloads the table data and resets dialog states
+   * Called after operations that modify data to refresh the view
+   */
   function reloadTable() {
+    // Reload table data
     actionRef.value.reload();
+
+    // Reset all operation dialogs
     showOperationTable = false;
     showFeeDialog = false;
     showConfirmDialog = false;
     showConfirmUnloading = false;
+    checkedRowKeys = [];
+    selectedNotifyList = [];
   }
 
   async function closeAddDialog() {
     reloadTable();
     showModal.value = false;
-  }
-
-  function onRowClick(rowData) {
-    selectedRow = rowData;
   }
 
   const userPowerType = $computed(() => {

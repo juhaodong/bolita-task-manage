@@ -66,8 +66,8 @@ export const columns: DataTableColumns = [
     key: 'ISA',
   },
   {
-    title: 'REF.',
-    key: 'REF',
+    title: 'ref.',
+    key: 'ref',
   },
   {
     title: '运单号',
@@ -142,8 +142,8 @@ export const filters: FormField[] = [
     label: 'ISA',
   },
   {
-    field: 'REF',
-    label: 'REF.',
+    field: 'ref',
+    label: 'ref.',
   },
   {
     field: 'fbaCode',

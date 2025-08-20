@@ -147,7 +147,7 @@
           },
           fileAction('附件', 'files', Folder32Filled, true),
           fileAction('CMR', 'CMR', undefined, true),
-          fileAction('POD', 'PODFiles'),
+          fileAction('pod', 'PODFiles'),
           fileAction('提单', 'pickupFiles'),
           {
             label: '编辑信息',

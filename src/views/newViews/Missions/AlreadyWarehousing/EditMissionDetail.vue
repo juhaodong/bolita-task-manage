@@ -14,7 +14,6 @@
     allDeliveryMethod,
     allOutboundMethod,
   } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
-  import dayjs from 'dayjs';
   import { useUserStore } from '@/store/modules/user';
   import {
     addOrUpdateOutboundForecast,
@@ -92,7 +91,7 @@
     },
     {
       label: 'FBA单号',
-      field: 'FBADeliveryCode',
+      field: 'fbaDeliveryCode',
       required: false,
     },
     {
@@ -112,13 +111,13 @@
       },
     },
     {
-      label: 'PO',
-      field: 'PO',
+      label: 'po',
+      field: 'po',
       required: false,
     },
     {
       label: 'FC/送货地址',
-      field: 'FCAddress',
+      field: 'fcAddress',
       required: false,
     },
     {
@@ -180,7 +179,7 @@
     },
     {
       label: 'UN号',
-      field: 'UNNumber',
+      field: 'unNumber',
       required: false,
     },
     {
@@ -244,7 +243,7 @@
         useType: 'storage',
         bolitaTaskId: values.id,
         operator: userInfo?.realName,
-        detailTime: dayjs().valueOf(),
+        detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
         note: '转为存仓',
       });
       if (prop.model?.outboundId) {
@@ -257,7 +256,7 @@
         useType: 'storage',
         bolitaTaskId: values.id,
         operator: userInfo?.realName,
-        detailTime: dayjs().valueOf(),
+        detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
         note: '存仓转出',
       });
       values.inStatus = '入库待出库';
@@ -285,7 +284,7 @@
       useType: 'normal',
       bolitaTaskId: values.id,
       operator: userInfo?.realName,
-      detailTime: dayjs().valueOf(),
+      detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
       note: '修改了 ' + editLabel.join(','),
     });
     await safeScope(async () => {

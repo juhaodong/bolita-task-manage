@@ -1,14 +1,14 @@
 import hillo from 'hillo';
 
-const typeName = 'fbacode';
+const typeName = 'fbaCode';
 
 export async function getFBACodeList() {
-  return (await hillo.jsonPost(typeName + '/list', {})).data.content;
+  return (await hillo.jsonPost(typeName + '/getAll', {})).data;
 }
 
 export async function getFBACodeListByFilter(filter, pagination) {
   return (
-    await hillo.jsonPost(typeName + '/list', {
+    await hillo.jsonPost(typeName + '/search', {
       ...pagination,
       criteria: filter,
     })

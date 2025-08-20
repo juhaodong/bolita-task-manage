@@ -3,21 +3,15 @@ import hillo from 'hillo';
 const typeName = 'inventory';
 
 export async function getInventoryList() {
-  return (await hillo.jsonPost(typeName + '/list', {})).data.content;
+  return (await hillo.jsonPost(typeName + '/getAll', {})).data;
 }
 
 export async function getInventoryById(id) {
   return (
-    await hillo.jsonPost(typeName + '/list', {
-      criteria: [
-        {
-          field: 'id',
-          op: '==',
-          value: id,
-        },
-      ],
+    await hillo.jsonPost(typeName + '/search', {
+      id: id,
     })
-  ).data.content[0];
+  ).data.rows[0];
 }
 
 export async function getInventoryByName(name) {

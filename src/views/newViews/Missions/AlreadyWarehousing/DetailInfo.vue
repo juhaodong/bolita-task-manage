@@ -35,10 +35,10 @@
           {{ currentDate?.deliveryMethod }}
         </n-descriptions-item>
         <n-descriptions-item label="FC/送货地址">
-          {{ currentDate?.FCAddress }}
+          {{ currentDate?.fcAddress }}
         </n-descriptions-item>
         <n-descriptions-item label="FBA/快递单号">
-          {{ currentDate?.FBADeliveryCode }}
+          {{ currentDate?.fbaDeliveryCode }}
         </n-descriptions-item>
         <n-descriptions-item label="基础备注"> {{ currentDate?.normalNote }} </n-descriptions-item>
         <n-descriptions-item label="送货备注">

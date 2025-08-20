@@ -86,7 +86,7 @@
         :show-icon="false"
         preset="card"
         style="width: 80%"
-        :title="'REF:' + (currentModel?.ref ? currentModel?.ref : '')"
+        :title="'ref:' + (currentModel?.ref ? currentModel?.ref : '')"
       >
         <detail-info-dialog :ids="currentIds" />
       </n-modal>
@@ -99,7 +99,6 @@
   import {
     ArrowDownload20Regular,
     Document20Regular,
-    DocumentEdit20Regular,
     DrawImage20Regular,
     Payment20Regular,
     VehicleTruck20Regular,
@@ -128,22 +127,15 @@
   import { useUploadDialog } from '@/store/modules/uploadFileState';
   import * as XLSX from 'xlsx';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
-  import {
-    updateTaskListAfterBookingCarWithInfo,
-    updateTaskListAfterCancelBookingCarWithInfo,
-  } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import { updateTaskListAfterCancelBookingCarWithInfo } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import router from '@/router';
   import DetailInfoDialog from '@/views/newViews/OperationDetail/NotOutbound/DetailInfoDialog.vue';
-  import { RouterLink } from 'vue-router';
   import {
     statusColumnEasy,
     timeColumn,
     timeTableColumn,
   } from '@/views/bolita-views/composable/useableColumns';
-  import {
-    getTaskListByNotifyId,
-    getTaskListByOutboundId,
-  } from '@/api/newDataLayer/TaskList/TaskList';
+  import { getTaskListByOutboundId } from '@/api/newDataLayer/TaskList/TaskList';
 
   const showModal = ref(false);
 
@@ -236,7 +228,7 @@
     },
     {
       title: 'FC/送货地址',
-      key: 'fcaddress',
+      key: 'fcAddress',
     },
     {
       title: 'ISA',
@@ -615,7 +607,7 @@
             },
           },
           {
-            icon: renderIconWithTooltip(DrawImage20Regular, 'POD'),
+            icon: renderIconWithTooltip(DrawImage20Regular, 'pod'),
             highlight: () => {
               return record?.['podfiles']?.length > 0 ? 'success' : 'error';
             },

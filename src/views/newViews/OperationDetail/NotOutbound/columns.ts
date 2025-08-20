@@ -36,7 +36,7 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: 'FC/送货地址',
-    key: 'FCAddress',
+    key: 'fcAddress',
   },
   {
     title: '物流方式',
@@ -149,8 +149,8 @@ export const schemas: FormField[] = [
     },
   },
   {
-    field: 'REF',
-    label: 'REF.',
+    field: 'ref',
+    label: 'ref.',
   },
   {
     field: 'ISA',

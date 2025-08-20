@@ -50,29 +50,14 @@
   const emit = defineEmits(['submit', 'cancel', 'clear']);
 
   function handleSubmit(values: Recordable) {
-    console.log(values, 'values');
-    const filterItems = [];
-    const filterKeys = Object.keys(values);
-    console.log(schemas, 'schemas');
-    for (const it of schemas) {
-      if (filterKeys.includes(it.field)) {
-        filterItems.push({
-          key: it.field,
-          component: it.component,
-          value: values[it.field] || '',
-        });
-      }
-    }
-    emit('submit', filterItems);
+    emit('submit', values);
   }
 
   function cancel() {
-    console.log(form.value.formModel);
     emit('cancel', form.value.formModel);
   }
 
   function handleReset(value: Recordable) {
-    console.log(value);
     emit('clear');
   }
 </script>

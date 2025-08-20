@@ -54,15 +54,15 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
   builder.addAll([
     {
       label: 'FBA单号',
-      field: 'FBADeliveryCode',
+      field: 'fbaDeliveryCode',
     },
     {
-      label: 'PO',
-      field: 'PO',
+      label: 'po',
+      field: 'po',
     },
     {
       label: 'FC',
-      field: 'FCAddress',
+      field: 'fcAddress',
     },
     {
       label: '送货地址',
@@ -108,7 +108,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
     },
     {
       label: 'UN号',
-      field: 'UNNumber',
+      field: 'unNumber',
     },
     {
       label: '收件人',

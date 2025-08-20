@@ -108,8 +108,8 @@ export const columns: DataTableColumns<NotifyDetailInfoModel> = [
     key: 'FBANo',
   },
   {
-    title: 'PO',
-    key: 'PO',
+    title: 'po',
+    key: 'po',
   },
   {
     title: '收货地址',
@@ -158,7 +158,7 @@ export type NotifyDetailInfoModel = {
   targetCountry: string;
   fbaCode: string;
   deliveryDetail: string;
-  PO: string;
+  po: string;
 
   shippingAddress: string;
   logisticsMethods: string;

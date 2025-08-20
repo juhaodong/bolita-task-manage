@@ -50,7 +50,7 @@
           it.Anmerkung = 'Loose';
         }
         if (it.deliveryMethod === 'FBA卡车派送') {
-          it.Adresse = it.FCAddress;
+          it.Adresse = it.fcAddress;
         } else if (
           it.deliveryMethod === 'DHL' ||
           it.deliveryMethod === 'DPD' ||
@@ -92,7 +92,7 @@
     currentTaskList.forEach((it) => {
       const res = [
         it.ticketId,
-        it.FBADeliveryCode,
+        it.fbaDeliveryCode,
         it.number,
         it.unloadingTotalNumber,
         '',
@@ -110,7 +110,7 @@
 
   const columns: DataTableColumns<any> = $computed(() => [
     { title: 'Kenzeichen', key: 'ticketId' },
-    { title: 'FBA', key: 'FBADeliveryCode', width: 150 },
+    { title: 'FBA', key: 'fbaDeliveryCode', width: 150 },
     { title: 'Menge', key: 'number' },
     {
       title: 'Gesamt',

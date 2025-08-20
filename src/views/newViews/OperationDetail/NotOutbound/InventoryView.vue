@@ -128,15 +128,16 @@
   import { $ref } from 'vue/macros';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
-  import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
+  import { InBoundDetailStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import {
     ArrowDownload20Regular,
-    Box20Filled, Clock20Regular,
+    Box20Filled,
+    Clock20Regular,
     Document20Regular,
     DocumentEdit20Regular,
     Image20Regular,
-    TableSettings20Regular
-  } from "@vicons/fluent";
+    TableSettings20Regular,
+  } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
@@ -255,7 +256,7 @@
     },
     {
       title: 'FBA单号',
-      key: 'FBADeliveryCode',
+      key: 'fbaDeliveryCode',
     },
     {
       title: '出库方式',
@@ -286,12 +287,12 @@
       key: 'finalStatus',
     }),
     {
-      title: 'PO',
-      key: 'PO',
+      title: 'po',
+      key: 'po',
     },
     {
       title: 'FC/送货地址',
-      key: 'fcaddress',
+      key: 'fcAddress',
       width: 300,
     },
     {
@@ -395,7 +396,7 @@
     },
     {
       title: 'UN号',
-      key: 'UNNumber',
+      key: 'unNumber',
     },
     {
       title: '收件人',
@@ -486,8 +487,8 @@
     currentFilter.push({
       field: 'operateInStorage',
       op: '==',
-      value: '是'
-    })
+      value: '是',
+    });
     const customerId = await getUserCustomerList();
     currentFilter.push({ field: 'customer.id', op: 'in', value: customerId });
 
@@ -702,7 +703,7 @@
         useType: 'normal',
         bolitaTaskId: currentItem.id,
         operator: userInfo?.realName,
-        detailTime: dayjs().valueOf(),
+        detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
         note: '完成库内操作',
       });
       await addOrUpdateTask(currentItem);
@@ -799,7 +800,7 @@
                   useType: 'normal',
                   bolitaTaskId: record.id,
                   operator: userInfo?.realName,
-                  detailTime: dayjs().valueOf(),
+                  detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
                   note: '提交了换单文件',
                 });
                 record.customerId = record.customer.id;
@@ -809,7 +810,7 @@
               actionRef.value.reload();
             },
           },
-          iconFileAction('POD', 'POD', Document20Regular, 'missionPOD'),
+          iconFileAction('pod', 'pod', Document20Regular, 'missionPOD'),
           iconFileAction(
             '操作文件',
             'operationFiles',

@@ -1,6 +1,7 @@
 import hillo from 'hillo';
 import dayjs from 'dayjs';
 import { checkPrice } from '@/api/dataLayer/common/common';
+import { getQuery } from '@/api/newDataLayer/Common/Common';
 
 const typeName = 'bolitaTask';
 
@@ -10,17 +11,16 @@ export async function getTaskList() {
 
 export async function getTaskListByFilter(filter) {
   return (
-    await hillo.jsonPost(typeName + '/list', {
+    await hillo.jsonPost(typeName + '/searchOne', {
       criteria: filter,
     })
-  ).data.content;
+  ).data.rows;
 }
 
 export async function getTaskListByFilterWithPagination(filter, pagination) {
   return (
-    await hillo.jsonPost(typeName + '/list', {
-      ...pagination,
-      criteria: filter,
+    await hillo.jsonPost(typeName + '/searchForFull' + getQuery(pagination), {
+      ...filter,
     })
   ).data;
 }
@@ -121,9 +121,9 @@ export async function deleteTask(id) {
 }
 
 export const defaultTask = {
-  FBADeliveryCode: '',
-  FCAddress: '',
-  PO: '',
+  fbaDeliveryCode: '',
+  fcAddress: '',
+  po: '',
   arriveTime: '',
   arrivedContainerNum: 0,
   arrivedCount: 0,
@@ -168,13 +168,13 @@ export const defaultTask = {
   packing: '',
   industrialTrayNum: '',
   productName: '',
-  UNNumber: '',
+  unNumber: '',
   recipient: '',
   phone: '',
   email: '',
   needReserve: '',
   industrialNote: '',
-  POD: '',
+  pod: '',
   operationFiles: '',
   problemFiles: '',
   trayFiles: '',
@@ -187,7 +187,7 @@ export const defaultTask = {
   waitPrice: '',
   suggestedPrice: '',
   costPrice: '',
-  REF: '',
+  ref: '',
   bookingCarTime: '',
   mergedId: '',
   waitCar: '',

@@ -143,7 +143,7 @@
     <loading-frame :loading="loading">
       <n-descriptions v-if="currentOutBoundInfo" :columns="2" bordered label-placement="left">
         <n-descriptions-item label="Ref.">
-          {{ currentOutBoundInfo.REF ? currentOutBoundInfo.REF : currentOutBoundInfo.id }}
+          {{ currentOutBoundInfo.ref ? currentOutBoundInfo.ref : currentOutBoundInfo.id }}
         </n-descriptions-item>
         <n-descriptions-item label="预报总数"> {{ totalArrived }}</n-descriptions-item>
         <!--        <n-descriptions-item label="预约日期时间">-->

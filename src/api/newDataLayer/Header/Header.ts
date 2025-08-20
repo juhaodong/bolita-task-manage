@@ -3,7 +3,7 @@ import hillo from 'hillo';
 const typeName = 'tableHeaderItem';
 
 export async function getTableHeaderItemList() {
-  return (await hillo.jsonPost(typeName + '/list', {})).data.content;
+  return (await hillo.jsonPost(typeName + '/search', {})).data.rows;
 }
 
 export async function addOrUpdateTableHeaderItem(item) {

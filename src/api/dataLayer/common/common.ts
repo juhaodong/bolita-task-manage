@@ -44,6 +44,7 @@ export const allInStatusNotifyList = [
   '全部出库',
   '已取消',
   '已结算',
+  '已拆分',
 ];
 
 export const allInStatusOperationList = ['已完成', '已报价', '已订车', '待订车', '无需订车'];

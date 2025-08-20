@@ -51,7 +51,7 @@
   import { DataTableColumns, NButton } from 'naive-ui';
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { asyncFCAddressByFilter, safeSumBy } from '@/store/utils/utils';
+  import { asyncfcAddressByFilter, safeSumBy } from '@/store/utils/utils';
   import DetailInfo from '@/views/newViews/Missions/AlreadyWarehousing/DetailInfo.vue';
   import { $ref } from 'vue/macros';
   import {
@@ -74,7 +74,7 @@
   const outboundMethod = ref<any[]>([]);
   let selectedContainer = $ref('');
   let selectedCountry = $ref('');
-  let selectedFCAddress = $ref('');
+  let selectedfcAddress = $ref('');
   onMounted(async () => {});
   let loading: boolean = $ref(false);
 
@@ -97,8 +97,8 @@
     mergeItem.volume = totalVolume.value;
     mergeItem.weight = totalWeight.value;
     mergeItem.ticketId = currentList.map((it) => it.ticketId).join('#');
-    mergeItem.FBADeliveryCode = currentList.map((it) => it.FBADeliveryCode).join('#');
-    mergeItem.PO = currentList.map((it) => it.PO).join('#');
+    mergeItem.fbaDeliveryCode = currentList.map((it) => it.fbaDeliveryCode).join('#');
+    mergeItem.po = currentList.map((it) => it.po).join('#');
     mergeItem.mergedId = currentList.map((it) => it.id).join(',');
     const currentObj = Object.assign(defaultTask, mergeItem);
     currentObj.customerId = currentObj.customer.id;
@@ -114,7 +114,7 @@
       //   useType: 'normal',
       //   bolitaTaskId: item.id,
       //   operator: userInfo?.realName,
-      //   detailTime: dayjs().valueOf(),
+      //   detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
       //   note: '被合并',
       // });
       await addOrUpdateTask(item);
@@ -140,9 +140,9 @@
     { title: '箱数', key: 'arrivedContainerNum' },
     { title: '重量', key: 'weight' },
     { title: '体积', key: 'volume' },
-    { title: 'FC/送货地址', key: 'FCAddress' },
+    { title: 'FC/送货地址', key: 'fcAddress' },
     { title: '国家', key: 'country' },
-    { title: 'FBA单号', key: 'FBADeliveryCode' },
+    { title: 'FBA单号', key: 'fbaDeliveryCode' },
     {
       title: '详情',
       key: 'actions',
@@ -173,7 +173,7 @@
       label: '票号',
       field: 'ticketId',
     },
-    asyncFCAddressByFilter(),
+    asyncfcAddressByFilter(),
   ];
 </script>
 

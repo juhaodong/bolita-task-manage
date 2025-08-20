@@ -3,7 +3,6 @@
   import { safeSumBy } from '@/store/utils/utils';
   import { addOrUpdateTask } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
-  import dayjs from 'dayjs';
   import { useUserStore } from '@/store/modules/user';
 
   interface Props {
@@ -56,7 +55,7 @@
         useType: 'normal',
         bolitaTaskId: prop.info.id,
         operator: userInfo?.realName,
-        detailTime: dayjs().valueOf(),
+        detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
         note: '被拆分',
       });
       loading.value = false;

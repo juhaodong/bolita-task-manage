@@ -48,7 +48,7 @@ export async function updatePickupInfo(
     reservationOutboundDate?: string;
     deliveryCompany?: string;
     ISA?: string;
-    REF?: string;
+    ref?: string;
     PODFiles?: string[];
     pickupFiles?: string[];
   },

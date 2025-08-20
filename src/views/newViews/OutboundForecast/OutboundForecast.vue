@@ -174,7 +174,7 @@
     AMZID = res.AMZID;
     pickDate = dayjs(res.reservationGetProductTime).format('YYYY-MM-DD');
     FBACode = res.FBACode;
-    RefCode = res.REF;
+    RefCode = res.ref;
     showOutboundOrderDetail = true;
   }
 
@@ -184,7 +184,7 @@
     AMZID = res.AMZID;
     pickDate = dayjs(res.reservationGetProductTime).format('YYYY-MM-DD');
     pickTime = res.reservationGetProductDetailTime;
-    RefCode = res.REF;
+    RefCode = res.ref;
     pickTime = res.reservationGetProductDetailTime;
     ISACode = res.ISA;
     operator = res.changeOperator ?? '';
@@ -228,7 +228,7 @@
         style: 'button',
         actions: [
           fileAction('提单文件', 'files'),
-          fileAction('POD', 'POD'),
+          fileAction('pod', 'pod'),
           fileAction('装车照片', 'CMRFilesOut'),
           {
             label: '出库单',

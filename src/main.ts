@@ -5,6 +5,7 @@ import App from './App.vue';
 import router, { setupRouter } from './router';
 import { setupStore } from '@/store';
 import hillo from 'hillo';
+import { storage } from '@/store/utils/Storage';
 
 async function bootstrap() {
   const app = createApp(App);
@@ -43,7 +44,25 @@ async function bootstrap() {
 }
 
 export async function loadConfig() {
-  hillo.initial('https://bolita-test.aaden.io/');
+  // hillo.initial('https://bolita-test.aaden.io/');
+  // hillo.initial('http://localhost:8080/');
+  const config = {
+    isDebug: false,
+    productionUrl: 'http://localhost:8080/',
+    debugUrl: 'http://localhost:8080/',
+    header: {
+      post: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+    },
+    LoadingUtils: {},
+  };
+  const tokenName = storage.get('TOKEN_NAME');
+  if (tokenName) {
+    config.header.post[tokenName] = storage.get('TOKEN_VALUE');
+  }
+
+  hillo.use(config);
 }
 
 void bootstrap();

@@ -29,15 +29,15 @@ export const allKeysList = [
   },
   {
     label: 'FBA单号',
-    field: 'FBADeliveryCode',
+    field: 'fbaDeliveryCode',
   },
   // {
-  //   label: 'PO',
-  //   field: 'PO',
+  //   label: 'po',
+  //   field: 'po',
   // },
   {
     label: 'FC',
-    field: 'FCAddress',
+    field: 'fcAddress',
   },
   {
     label: '出库方式',

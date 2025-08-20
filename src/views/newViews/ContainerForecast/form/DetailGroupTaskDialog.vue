@@ -14,8 +14,8 @@
       key: 'customer.customerName',
     },
     {
-      title: 'REF',
-      key: 'REF',
+      title: 'ref',
+      key: 'ref',
     },
     {
       title: '票号',
@@ -31,11 +31,11 @@
     }),
     {
       title: 'FC/Address',
-      key: 'FCAddress',
+      key: 'fcAddress',
     },
     {
       title: 'FBA单号',
-      key: 'FBADeliveryCode',
+      key: 'fbaDeliveryCode',
     },
     {
       title: '出库方式',
@@ -73,7 +73,7 @@
 
   const currentDisplay = computed(() => {
     const groupInfo = groupBy(currentItems, (item) => {
-      return ['FCAddress', 'deliveryMethod', 'outboundMethod'].map((it) => item[it]).join('-');
+      return ['fcAddress', 'deliveryMethod', 'outboundMethod'].map((it) => item[it]).join('-');
     });
     const res = Object.entries(groupInfo).map(([key, value]) => {
       console.log(key, value, 'key');
@@ -84,11 +84,11 @@
       return {
         customer: value[0].customer,
         ticketId: value.map((it) => it.ticketId).join(','),
-        REF: value.map((it) => it.REF).join(','),
+        ref: value.map((it) => it.ref).join(','),
         country: value[0].country,
         inStatus: value[0].inStatus,
-        FCAddress: value[0].FCAddress,
-        FBADeliveryCode: value[0].FBADeliveryCode,
+        fcAddress: value[0].fcAddress,
+        fbaDeliveryCode: value[0].fbaDeliveryCode,
         outboundMethod: value[0].outboundMethod,
         deliveryMethod: value[0].deliveryMethod,
         numberDisplay: outNumber + '/' + safeSumBy(value, 'number'),

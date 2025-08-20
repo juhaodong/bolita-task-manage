@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { store } from '@/store';
-import { ACCESS_TOKEN, CURRENT_USER } from '@/store/mutation-types';
+import { ACCESS_TOKEN, CURRENT_USER, TOKEN_NAME, TOKEN_VALUE } from '@/store/mutation-types';
 
 import { BaseUser, login, PermissionEnums } from '@/api/dataLayer/modules/system/user/baseUser';
 import { storage } from '@/store/utils/Storage';
@@ -21,6 +21,8 @@ export interface IUserState {
   info?: BaseUser;
   powerList: any[];
   authPower: any[];
+  tokenName: string;
+  tokenValue: string;
 }
 
 export const useUserStore = defineStore({
@@ -34,6 +36,8 @@ export const useUserStore = defineStore({
     powerList: [],
     info: storage.get(CURRENT_USER, {}),
     authPower: [],
+    tokenName: storage.get(TOKEN_NAME, ''),
+    tokenValue: storage.get(TOKEN_VALUE, ''),
   }),
   getters: {
     getPowerList(): [any][] {
@@ -59,6 +63,12 @@ export const useUserStore = defineStore({
     },
   },
   actions: {
+    setTokenName(tokenName: string) {
+      this.tokenName = tokenName;
+    },
+    setTokenValue(tokenValue: string) {
+      this.tokenValue = tokenValue;
+    },
     setToken(token: string) {
       this.token = token;
     },
@@ -100,6 +110,9 @@ export const useUserStore = defineStore({
       this.setUserInfo();
       storage.remove(ACCESS_TOKEN);
       storage.remove(CURRENT_USER);
+      storage.remove(TOKEN_NAME);
+      storage.remove(TOKEN_VALUE);
+      return true;
     },
   },
 });

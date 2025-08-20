@@ -18,10 +18,10 @@
           <n-input v-model:value="totalVolume" />
         </n-descriptions-item>
         <n-descriptions-item :span="2" label="Ref">
-          <n-input v-model:value="REF" />
+          <n-input v-model:value="ref" />
         </n-descriptions-item>
-        <n-descriptions-item :span="2" label="PO">
-          <n-input v-model:value="PO" />
+        <n-descriptions-item :span="2" label="po">
+          <n-input v-model:value="po" />
         </n-descriptions-item>
         <n-descriptions-item :span="2" label="FBACode">
           <n-input v-model:value="deliveryCode" />
@@ -130,8 +130,8 @@
   let containerNum = $ref('');
   let totalWeight = $ref('');
   let totalVolume = $ref('');
-  let REF = $ref('');
-  let PO = $ref('');
+  let ref = $ref('');
+  let po = $ref('');
   let deliveryCode = $ref('');
   let ISA = $ref('');
   let note = $ref('');
@@ -171,8 +171,8 @@
     containerNum = prop.data.containerNum ?? '';
     totalWeight = prop.data.totalWeight ?? '';
     totalVolume = prop.data.totalVolume ?? '';
-    REF = prop.data.REF ?? '';
-    PO = prop.data.PO ?? '';
+    ref = prop.data.ref ?? '';
+    po = prop.data.po ?? '';
     deliveryCode = prop.data.deliveryCode ?? '';
     ISA = prop.data.ISA ?? '';
     note = prop.data.note ?? '';
@@ -202,8 +202,8 @@
       containerNum: containerNum,
       totalWeight: totalWeight,
       totalVolume: totalVolume,
-      REF: REF,
-      PO: PO,
+      ref: ref,
+      po: po,
       deliveryCode: deliveryCode,
       ISA: ISA,
       note: note,

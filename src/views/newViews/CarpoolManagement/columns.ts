@@ -187,11 +187,11 @@ export const columns: DataTableColumns<CarpoolManagementModel> = [
   },
   {
     title: 'FC/送货地址',
-    key: 'fcaddress',
+    key: 'fcAddress',
   },
   // {
-  //   title: 'PO',
-  //   key: 'PO',
+  //   title: 'po',
+  //   key: 'po',
   // },
 
   {

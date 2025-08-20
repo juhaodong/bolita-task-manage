@@ -73,7 +73,7 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: 'FBA单号',
-    key: 'FBADeliveryCode',
+    key: 'fbaDeliveryCode',
   },
   {
     title: '出库方式',
@@ -96,12 +96,12 @@ export const columns: DataTableColumns<any> = [
     key: 'finalStatus',
   }),
   {
-    title: 'PO',
-    key: 'PO',
+    title: 'po',
+    key: 'po',
   },
   {
     title: 'FC/送货地址',
-    key: 'fcaddress',
+    key: 'fcAddress',
   },
   {
     title: '邮编',
@@ -165,7 +165,7 @@ export const columns: DataTableColumns<any> = [
   },
   {
     title: 'UN号',
-    key: 'UNNumber',
+    key: 'unNumber',
   },
   {
     title: '收件人',

@@ -56,7 +56,7 @@ export async function updateTaskListAfterBookingCar(id) {
       useType: 'normal',
       bolitaTaskId: taskId,
       operator: userInfo?.realName,
-      detailTime: dayjs().valueOf(),
+      detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
       note: '完成订车',
     });
     res.inStatus = '已订车';
@@ -76,10 +76,10 @@ export async function updateTaskListAfterBookingCarWithInfo(id, info) {
       useType: 'normal',
       bolitaTaskId: taskId,
       operator: userInfo?.realName,
-      detailTime: dayjs().valueOf(),
+      detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
       note: '完成订车',
     });
-    res.ref = info.REF;
+    res.ref = info.ref;
     res.outBoundTime =
       dayjs(parseFloat(info.reservationGetProductTime)).format('YYYY-MM-DD') +
       ' ' +
@@ -101,10 +101,10 @@ export async function updateTaskListAfterCancelBookingCarWithInfo(id, info) {
       useType: 'normal',
       bolitaTaskId: taskId,
       operator: userInfo?.realName,
-      detailTime: dayjs().valueOf(),
+      detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
       note: '取消订车',
     });
-    res.ref = info.REF;
+    res.ref = info.ref;
     res.outBoundTime = ''; // 预计取货时间
     res.inStatus = '已计划出库';
     res.inventoryId = res.inventory.id;
@@ -122,14 +122,14 @@ export async function updateTaskListAfterOfferPriceCar(id, priceInfo) {
       useType: 'normal',
       bolitaTaskId: taskId,
       operator: userInfo?.realName,
-      detailTime: dayjs().valueOf(),
+      detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
       note: '完成报价',
     });
     res.inStatus = '已报价';
     res.inventoryId = res.inventory.id;
     res.customerId = res.customer.id;
     res.bookingCarTime = dayjs().format('YYYY-MM-DD');
-    res.REF = priceInfo.REF;
+    res.ref = priceInfo.ref;
     res.costPrice = priceInfo.costPrice;
     res.inStatus = priceInfo.inStatus;
     res.suggestedPrice = priceInfo.suggestedPrice;

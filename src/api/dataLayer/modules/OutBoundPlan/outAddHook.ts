@@ -17,7 +17,7 @@ export async function afterPlanDetailAdded(planDetails) {
       useType: 'normal',
       bolitaTaskId: detail.id,
       operator: userInfo?.realName,
-      detailTime: dayjs().valueOf(),
+      detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
       note: '提交了出库计划',
     });
   });

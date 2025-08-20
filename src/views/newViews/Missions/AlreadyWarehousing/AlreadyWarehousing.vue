@@ -1,12 +1,10 @@
 <template>
   <n-card :bordered="false" class="proCard">
     <div>
-      <filter-bar
-        v-model="filterItems"
-        :columns="columns"
+      <single-filter-bar
+        :form-fields="filters"
         @clear="updateFilter(null)"
         @submit="updateFilter"
-        @filter-change="updateFilterWithItems"
       />
       <div class="mt-2">
         <n-button class="action-button" size="small" type="info" @click="selectedHeader">
@@ -232,7 +230,6 @@
     timeWarnColumn,
     timeWarnList,
   } from '@/views/bolita-views/composable/useableColumns';
-  import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import {
     ArrowDownload20Regular,
@@ -265,7 +262,7 @@
   import OfferPriceDialog from '@/views/newViews/Missions/AlreadyWarehousing/OfferPriceDialog.vue';
   import { getUserCustomerList, hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
-  import { generateOptionFromArray } from '@/store/utils/utils';
+  import { asyncCustomer, generateOptionFromArray } from '@/store/utils/utils';
   import FileSaver from 'file-saver';
   import {
     addOrUpdateTask,
@@ -280,7 +277,11 @@
   import SplitTaskDialog from '@/views/newViews/Missions/AlreadyWarehousing/SplitTaskDialog.vue';
   import { NButton, NIcon, NInput, NTooltip, useDialog } from 'naive-ui';
   import * as XLSX from 'xlsx';
-  import { asyncCustomerByFilter, asyncStorageByFilter } from '@/api/dataLayer/common/common';
+  import {
+    allInStatusNotifyList,
+    asyncCustomerByFilter,
+    asyncStorageByFilter,
+  } from '@/api/dataLayer/common/common';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
   import {
     addOrUpdateWithRefOutboundForecast,
@@ -288,6 +289,9 @@
   } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import MergeDialog from '@/views/newViews/Missions/AlreadyWarehousing/MergeDialog.vue';
   import TaskPriceDialog from '@/views/newViews/Missions/AlreadyWarehousing/TaskPriceDialog.vue';
+  import SingleFilterBar from '@/views/bolita-views/composable/SingleFilterBar.vue';
+  import { FormField } from '@/views/bolita-views/composable/form-field-type';
+  import { createPaginationPlaceholders } from '@/api/newDataLayer/Common/Common';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -315,6 +319,34 @@
   let log = $ref('');
   let splitTaskDialog = $ref(false);
   const dialog = useDialog();
+  const filters: FormField[] = [
+    asyncCustomer(),
+    {
+      label: '柜号',
+      field: 'containerNo',
+    },
+    {
+      label: '票号',
+      field: 'ticketId',
+    },
+    {
+      label: 'ref',
+      field: 'ref',
+    },
+    {
+      label: '状态',
+      field: 'inStatus',
+      component: 'NSelect',
+      componentProps: {
+        options: generateOptionFromArray(allInStatusNotifyList),
+      },
+    },
+    {
+      label: '显示拆分',
+      field: 'showAll',
+      component: 'NCheckbox',
+    },
+  ];
   const columns = [
     {
       type: 'selection',
@@ -381,7 +413,7 @@
     },
     {
       title: 'FBA单号',
-      key: 'FBADeliveryCode',
+      key: 'fbaDeliveryCode',
     },
     {
       title: '出库方式',
@@ -412,12 +444,12 @@
       key: 'finalStatus',
     }),
     {
-      title: 'PO',
-      key: 'PO',
+      title: 'po',
+      key: 'po',
     },
     {
       title: 'FC/送货地址',
-      key: 'fcaddress',
+      key: 'fcAddress',
     },
     {
       title: '邮编',
@@ -520,7 +552,7 @@
     },
     {
       title: 'UN号',
-      key: 'UNNumber',
+      key: 'unNumber',
     },
     {
       title: '收件人',
@@ -602,7 +634,7 @@
       useType: 'normal',
       bolitaTaskId: currentInfo.id,
       operator: userInfo?.realName,
-      detailTime: dayjs().valueOf(),
+      detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
       note: '取消当前任务！',
     });
     if (currentInfo.outboundId) {
@@ -729,7 +761,7 @@
           useType: 'normal',
           bolitaTaskId: res.id,
           operator: userInfo?.realName,
-          detailTime: dayjs().valueOf(),
+          detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
           note: '进行了审核',
         });
         res.customerId = res.customer.id;
@@ -777,100 +809,40 @@
   let currentFilter = $ref([]);
 
   async function getCurrentFilter() {
+    currentFilter = [];
     if (filterObj) {
-      const otherFilter = filterObj.filter((it) => it?.key !== 'usefulTimeRange');
-      const filterOne = otherFilter.filter((it) => it?.component?.name !== 'DatePicker');
-      const filterTwo = otherFilter.filter((it) => it?.component?.name === 'DatePicker');
-      const filterWithOutDate = filterOne
-        ? Object.keys(filterOne).map((filterItem) => ({
-            field: filterOne[filterItem].key,
-            op: filterOne[filterItem].value ? 'like' : '!=',
-            value: `%${filterOne[filterItem].value || ''}%`,
-          }))
-        : [];
-      const filterWithDate = filterTwo
-        ? Object.keys(filterTwo).map((filterItem) => ({
-            field: filterTwo[filterItem].key,
-            op: 'between',
-            value: filterTwo[filterItem].value,
-          }))
-        : [];
-      currentFilter = filterWithOutDate.concat(filterWithDate);
-      const usefulTimeFilter = filterObj.find((it) => it?.key === 'usefulTimeRange');
-      if (usefulTimeFilter) {
-        if (usefulTimeFilter.value === '红色') {
-          currentFilter.push({
-            field: 'usefulTimeRange',
-            op: '>=',
-            value: 15,
-          });
-        } else if (usefulTimeFilter.value === '黄色') {
-          currentFilter.push({
-            field: 'usefulTimeRange',
-            op: '>=',
-            value: 7,
-          });
-          currentFilter.push({
-            field: 'usefulTimeRange',
-            op: '<',
-            value: 15,
-          });
-        } else {
-          currentFilter.push({
-            field: 'usefulTimeRange',
-            op: '<',
-            value: 7,
-          });
-        }
+      currentFilter = filterObj;
+      const customerId = await getUserCustomerList();
+      if (!filterObj['customer.id']) {
+        currentFilter['customerIds'] = customerId;
+      } else {
+        currentFilter['customerIds'] = [filterObj['customer.id']];
       }
-    }
-    currentFilter.push({
-      field: 'inStatus',
-      op: '!=',
-      value: '已拆分',
-    });
-    if (typeMission.value === '整柜任务看板') {
-    } else if (typeMission.value === '存仓看板') {
-      currentFilter.push({ field: 'inStatus', op: 'in', value: ['存仓'] });
-    } else if (typeMission.value === '审核看板') {
-      currentFilter.push({
-        field: 'inStatus',
-        op: 'in',
-        value: ['等待提交', '等待审核'],
-      });
-    } else if (typeMission.value === '报价看板') {
-      currentFilter.push({ field: 'needOfferPrice', op: '==', value: '1' });
+    } else {
+      currentFilter['inStatusNe'] = '已拆分';
     }
 
-    const ownedCustomerIds = await getUserCustomerList();
-    currentFilter.push({ field: 'customer.id', op: 'in', value: ownedCustomerIds });
+    if (typeMission.value === '整柜任务看板') {
+    } else if (typeMission.value === '存仓看板') {
+      currentFilter['inStatusIn'] = ['存仓'];
+    } else if (typeMission.value === '审核看板') {
+      currentFilter['inStatusIn'] = ['等待提交', '等待审核'];
+    } else if (typeMission.value === '报价看板') {
+      currentFilter['needOfferPrice'] = '1';
+    }
   }
 
   const loadDataTable = async () => {
     await getCurrentFilter();
     const res = await getTaskListByFilterWithPagination(currentFilter, paginationReactive);
-    allList = res.content;
-    const totalCount = res.page.totalElements;
-    let fakeListStart = [];
-    let fakeListEnd = [];
-    if (paginationReactive.pageNumber > 0) {
-      fakeListStart = Array(paginationReactive.pageNumber * paginationReactive.pageSize)
-        .fill(null)
-        .map((it, index) => {
-          return { key: index };
-        });
-    }
-    if (paginationReactive.pageSize < totalCount) {
-      if (totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1) > 0) {
-        fakeListEnd = Array(
-          totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1)
-        )
-          .fill(null)
-          .map((it, index) => {
-            return { key: index };
-          });
-      }
-    }
+    allList = res.rows;
+    const totalCount = res.totalRowCount;
+    // Create pagination placeholders
+    const { fakeListStart, fakeListEnd } = createPaginationPlaceholders(
+      paginationReactive.pageNumber,
+      paginationReactive.pageSize,
+      totalCount
+    );
     allList.forEach((it) => {
       if (it.trayItems.length > 0) {
         it.trayDisplay = it.trayItems.map(
@@ -895,7 +867,7 @@
         it.stayTime = '-';
       }
     });
-    allTaskList = fakeListStart.concat(allList.concat(fakeListEnd));
+    allTaskList = [...fakeListStart, ...allList, ...fakeListEnd];
     return allTaskList;
   };
 
@@ -994,12 +966,7 @@
     await reloadHeader();
     const res = getQueryString('containerNo');
     if (res) {
-      filterItems.push({
-        option: '柜号',
-        key: 'containerId',
-        value: res,
-        display: res,
-      });
+      // filterItems['containerId'] = res;
       updateFilter(filterItems);
     } else {
       await reloadTable();
@@ -1129,7 +1096,7 @@
                   useType: 'normal',
                   bolitaTaskId: record.id,
                   operator: userInfo?.realName,
-                  detailTime: dayjs().valueOf(),
+                  detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
                   note: '提交了换单文件',
                 });
                 record.customerId = record.customer.id;
@@ -1161,7 +1128,7 @@
                   useType: 'normal',
                   bolitaTaskId: record.id,
                   operator: userInfo?.realName,
-                  detailTime: dayjs().valueOf(),
+                  detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
                   note: '提交了托盘标签',
                 });
                 record.customerId = record.customer.id;
@@ -1171,7 +1138,7 @@
               actionRef.value[0].reload();
             },
           },
-          iconFileAction('POD', 'POD', DrawImage20Regular, 'missionPOD'),
+          iconFileAction('pod', 'pod', DrawImage20Regular, 'missionPOD'),
           iconFileAction('操作文件', 'operationFiles', Document20Regular, 'missionOperationFile'),
           iconFileAction('问题图片', 'problemFiles', Image20Regular, 'missionProblemPic'),
           {
@@ -1223,7 +1190,7 @@
                 useType: 'normal',
                 bolitaTaskId: record.id,
                 operator: userInfo?.realName,
-                detailTime: dayjs().valueOf(),
+                detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
                 note: '修改过的信息已经被确认！',
               });
               await reloadTable();

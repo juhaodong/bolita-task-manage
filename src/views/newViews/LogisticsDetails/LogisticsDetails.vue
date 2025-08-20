@@ -262,7 +262,7 @@
           },
           fileAction('附件', 'files', undefined, true),
           fileAction('提单', 'pickupFiles', undefined, true),
-          fileAction('POD', 'PODFiles'),
+          fileAction('pod', 'PODFiles'),
           fileAction('客户账单', 'billsForCustomer', undefined, customerBills.value),
           {
             label: '确认结算',

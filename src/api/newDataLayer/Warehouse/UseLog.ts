@@ -8,29 +8,15 @@ export async function getInventoryUseLogList() {
 }
 
 export async function getInventoryUseLogListByInventoryId(id, date) {
-  const startDate = dayjs(date).startOf('day').valueOf();
-  const endDate = dayjs(date).endOf('day').valueOf();
+  const startDate = dayjs(date).startOf('day').format('YYYY-MM-DD') + 'T00:00:00';
+  const endDate = dayjs(date).endOf('day').format('YYYY-MM-DD') + 'T23:59:59';
   return (
-    await hillo.jsonPost(typeName + '/list', {
-      criteria: [
-        {
-          field: 'inventoryId',
-          op: '==',
-          value: id,
-        },
-        {
-          field: 'useAtTimestamp',
-          op: '>=',
-          value: startDate,
-        },
-        {
-          field: 'useAtTimestamp',
-          op: '<=',
-          value: endDate,
-        },
-      ],
+    await hillo.jsonPost(typeName + '/search', {
+      minUseAtTimestamp: startDate,
+      maxUseAtTimestamp: endDate,
+      inventoryId: id,
     })
-  ).data.content;
+  ).data.rows;
 }
 
 export async function addOrUpdateInventoryUseLog(item) {
@@ -51,7 +37,7 @@ export async function deleteInventoryLog(id) {
 
 export async function getInventoryUseLogListByNotifyId(notifyId) {
   return (
-    await hillo.jsonPost(typeName + '/list', {
+    await hillo.jsonPost(typeName + '/search', {
       criteria: [
         {
           field: 'notifyId',
@@ -60,5 +46,5 @@ export async function getInventoryUseLogListByNotifyId(notifyId) {
         },
       ],
     })
-  ).data.content;
+  ).data;
 }

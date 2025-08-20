@@ -88,7 +88,7 @@ export function getTargetAddressSelectionGroup(dm = deliveryMethod): FormField[]
       },
     },
     {
-      label: 'PO',
+      label: 'po',
       field: 'po',
       required: false,
       displayCondition(model) {

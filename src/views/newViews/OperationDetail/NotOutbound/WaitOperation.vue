@@ -140,7 +140,6 @@
     ArrowUpload20Regular,
     Box20Filled,
     DocumentAdd20Regular,
-    DocumentEdit20Regular,
     Image20Regular,
     Payment20Regular,
     TableSettings20Regular,
@@ -184,8 +183,7 @@
     asyncCustomerByFilter,
     asyncStorageByFilter,
   } from '@/api/dataLayer/common/common';
-  import OfferCustomerDialog
-    from "@/views/newViews/CarpoolManagement/dialog/OfferCustomerDialog.vue";
+  import OfferCustomerDialog from '@/views/newViews/CarpoolManagement/dialog/OfferCustomerDialog.vue';
 
   const showModal = ref(false);
   let showShareCarModel = $ref(false);
@@ -290,7 +288,7 @@
     },
     {
       title: 'FC/送货地址',
-      key: 'fcaddress',
+      key: 'fcAddress',
       width: 300,
     },
     {
@@ -369,10 +367,10 @@
     });
     currentFilter.map((it) => {
       if (it.field === 'id') {
-        it.op = '=='
-        it.value = parseFloat(it.value.replace(/^%|%$/g, ""))
+        it.op = '==';
+        it.value = parseFloat(it.value.replace(/^%|%$/g, ''));
       }
-    })
+    });
     // Get paginated data
     const res = await getOutboundForecastListByFilterWithPagination(
       currentFilter,
@@ -607,7 +605,7 @@
               offerDialog = true;
             },
             ifShow: () => {
-              return record.needOfferPrice === '1'
+              return record.needOfferPrice === '1';
             },
             highlight: () => {
               return record?.['waitPrice'] === '1' ? 'success' : 'error';
@@ -664,7 +662,7 @@
                     useType: 'normal',
                     bolitaTaskId: item.id,
                     operator: userInfo?.realName,
-                    detailTime: dayjs().valueOf(),
+                    detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
                     note: '已装车，已完成',
                   });
                 }

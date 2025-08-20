@@ -149,7 +149,7 @@
           useType: 'storage',
           bolitaTaskId: listElement.id,
           operator: userInfo?.realName,
-          detailTime: dayjs().valueOf(),
+          detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
           note: '开始存仓',
         });
       }
@@ -157,7 +157,7 @@
         useType: 'normal',
         bolitaTaskId: listElement.id,
         operator: userInfo?.realName,
-        detailTime: dayjs().valueOf(),
+        detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
         note: '卸柜并入库',
       });
       request.push(addOrUpdateTask(listElement));

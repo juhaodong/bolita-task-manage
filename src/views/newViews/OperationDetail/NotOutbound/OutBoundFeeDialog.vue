@@ -92,7 +92,7 @@
   <div class="mt-8">
     <n-descriptions :columns="3" bordered label-placement="left">
       <n-descriptions-item :span="2" label="Ref.">
-        {{ currentOutBoundInfo.REF }}
+        {{ currentOutBoundInfo.ref }}
       </n-descriptions-item>
       <n-descriptions-item :span="2" label="装柜费">
         <n-input v-model:value="extraInfo.outPrice" />

@@ -16,16 +16,9 @@
               </template>
               <!--NCheckbox-->
               <template v-else-if="schema.component === 'NCheckbox'">
-                <n-checkbox-group v-model:value="formModel[schema.field]">
-                  <n-space>
-                    <n-checkbox
-                      v-for="item in schema.componentProps.options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    />
-                  </n-space>
-                </n-checkbox-group>
+                <n-checkbox v-model:checked="formModel[schema.field]">
+                  {{ schema.label }}
+                </n-checkbox>
               </template>
               <!--NRadioGroup-->
               <template v-else-if="schema.component === 'NRadioGroup'">
@@ -258,7 +251,6 @@
 
       const groupedSchema = computed(() => {
         return Object.entries(groupBy(getSchema.value, 'group')).map((it) => {
-          console.log(it, 'it');
           const [index, t] = it;
           return {
             group: index === 'undefined' ? '基本信息' : index,

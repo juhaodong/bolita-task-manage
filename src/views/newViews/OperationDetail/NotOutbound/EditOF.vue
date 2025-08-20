@@ -7,7 +7,7 @@
           :options="generateOptionFromArray(allDeliveryMethod)"
         />
       </n-descriptions-item>
-      <n-descriptions-item :span="2" label="REF">
+      <n-descriptions-item :span="2" label="ref">
         <n-input v-model:value="newRef" />
       </n-descriptions-item>
       <n-descriptions-item :span="2" label="ISA">
@@ -89,7 +89,7 @@
     options = generateOptionFromArray(await getFBACodeList());
     currentInfo = (await getOutboundForecast()).find((it) => it.id === prop.id);
     newDeliveryDetail = currentInfo.deliveryMethod;
-    newRef = currentInfo?.REF;
+    newRef = currentInfo?.ref;
     newISA = currentInfo?.ISA;
     newAMZ = currentInfo?.AMZID;
     newWaybillId = currentInfo?.waybillId;
@@ -114,7 +114,7 @@
       await NotifyDetailManager.editInternal(item, item.id);
     }
     const res = {
-      REF: newRef,
+      ref: newRef,
       ISA: newISA,
       AMZID: newAMZ,
       waybillId: newWaybillId,

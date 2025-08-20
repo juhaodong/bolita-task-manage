@@ -69,19 +69,20 @@
   } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
   import { $ref } from 'vue/macros';
   import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import { ArrowDownload20Regular, TableSettings20Regular } from "@vicons/fluent";
-  import { NButton, NInput } from 'naive-ui';
+  import { ArrowDownload20Regular, Delete20Regular, TableSettings20Regular } from '@vicons/fluent';
+  import { NButton, NIcon, NInput, NTooltip } from 'naive-ui';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
-  import { generateOptionFromArray, safeSumBy } from "@/store/utils/utils";
+  import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import FileSaver from 'file-saver';
   import {
     addOrUpdateTask,
-    getTaskListByFilterWithPagination, getTaskListByIds
-  } from "@/api/newDataLayer/TaskList/TaskList";
+    getTaskListByFilterWithPagination,
+    getTaskListByIds,
+  } from '@/api/newDataLayer/TaskList/TaskList';
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
   import * as XLSX from 'xlsx';
   import { InBoundDetailStatus } from '@/api/dataLayer/modules/notify/notify-api';
@@ -93,12 +94,10 @@
     timeWarnList,
   } from '@/views/bolita-views/composable/useableColumns';
   import { asyncCustomerByFilter, asyncStorageByFilter } from '@/api/dataLayer/common/common';
-  import { NIcon, NTooltip } from 'naive-ui';
-  import { Delete20Regular } from '@vicons/fluent';
   import {
     addOrUpdateWithRefOutboundForecast,
-    getOutboundForecastById
-  } from "@/api/newDataLayer/OutboundForecast/OutboundForecast";
+    getOutboundForecastById,
+  } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -174,7 +173,7 @@
     },
     {
       title: 'FBA单号',
-      key: 'FBADeliveryCode',
+      key: 'fbaDeliveryCode',
     },
     {
       title: '出库方式',
@@ -205,12 +204,12 @@
       key: 'finalStatus',
     }),
     {
-      title: 'PO',
-      key: 'PO',
+      title: 'po',
+      key: 'po',
     },
     {
       title: 'FC/送货地址',
-      key: 'fcaddress',
+      key: 'fcAddress',
       width: 300,
     },
     {
@@ -314,7 +313,7 @@
     },
     {
       title: 'UN号',
-      key: 'UNNumber',
+      key: 'unNumber',
     },
     {
       title: '收件人',
@@ -577,18 +576,18 @@
             icon: renderIconWithTooltip(Delete20Regular, '删除'),
             async onClick() {
               console.log(record);
-              const outboundInfo = await getOutboundForecastById(record.outboundId)
-              outboundInfo.inStatus = '待定车'
-              const allTaskId = outboundInfo.outboundDetailInfo.split(',')
-              const currentTaskIds = allTaskId.filter(it => it !== record.id)
-              outboundInfo.outboundDetailInfo = currentTaskIds.join(',')
-              record.outboundId = ''
-              const currentTaskList = await getTaskListByIds(currentTaskIds)
+              const outboundInfo = await getOutboundForecastById(record.outboundId);
+              outboundInfo.inStatus = '待定车';
+              const allTaskId = outboundInfo.outboundDetailInfo.split(',');
+              const currentTaskIds = allTaskId.filter((it) => it !== record.id);
+              outboundInfo.outboundDetailInfo = currentTaskIds.join(',');
+              record.outboundId = '';
+              const currentTaskList = await getTaskListByIds(currentTaskIds);
               outboundInfo.totalVolume = safeSumBy(currentTaskList, 'volume') ?? 0;
               outboundInfo.totalWeight = safeSumBy(currentTaskList, 'weight') ?? 0;
               outboundInfo.containerNum = safeSumBy(currentTaskList, 'arrivedContainerNum') ?? 0;
               await addOrUpdateTask(record);
-              await addOrUpdateWithRefOutboundForecast(outboundInfo)
+              await addOrUpdateWithRefOutboundForecast(outboundInfo);
               await reloadTable();
               // let outboundInfo = await getOutboundForecastById(record.outboundId);
               // outboundInfo.outboundDetailInfo = outboundInfo.outboundDetailInfo.filter(
@@ -615,7 +614,6 @@
               // outboundInfo.containerNum = safeSumBy(currentList, 'arrivedContainerNum') ?? 0;
               // await updateOutboundForecast(outboundInfo.id, outboundInfo);
               // toastSuccess('审核成功');
-
             },
             ifShow: () => {
               return (

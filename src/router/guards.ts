@@ -25,28 +25,6 @@ export function createRouterGuards(router: Router) {
       next();
       return;
     }
-    // const token = storage.get(ACCESS_TOKEN);
-    // console.log(token);
-    // if (!token) {
-    //   // You can access without permissions. You need to set the routing meta.ignoreAuth to true
-    //   if (to.meta.ignoreAuth) {
-    //     next();
-    //     return;
-    //   }
-    //   // redirect login page
-    //   const redirectData: { path: string; replace: boolean; query?: Recordable<string> } = {
-    //     path: LOGIN_PATH,
-    //     replace: true,
-    //   };
-    //   if (to.path) {
-    //     redirectData.query = {
-    //       ...redirectData.query,
-    //       redirect: to.path,
-    //     };
-    //   }
-    //   next(redirectData);
-    //   return;
-    // }
 
     if (asyncRouteStore.getIsDynamicRouteAdded) {
       next();
@@ -54,6 +32,7 @@ export function createRouterGuards(router: Router) {
     }
 
     const userInfo = await userStore.getInfo();
+    console.log(userInfo, 'userInfo');
 
     const routes = await asyncRouteStore.generateRoutes(userInfo);
     console.log(routes, 'routes');

@@ -55,8 +55,8 @@
 
   const offerSchemas: FormField[] = [
     {
-      field: 'REF',
-      label: 'REF.',
+      field: 'ref',
+      label: 'ref.',
       defaultValue: defaultRef,
     },
     {
@@ -106,14 +106,14 @@
           outboundForecastInfo.reservationGetProductTime = values.reservationGetProductTime;
           outboundForecastInfo.waitCar = '1';
           outboundForecastInfo.waybillId = values.waybillId;
-          if (!outboundForecastInfo.REF) {
-            outboundForecastInfo.REF = outboundForecastInfo.ref
+          if (!outboundForecastInfo.ref) {
+            outboundForecastInfo.ref = outboundForecastInfo.ref
               ? outboundForecastInfo.ref
               : outboundForecastInfo.id;
           }
           await updateTaskListAfterBookingCar(id);
         } else {
-          outboundForecastInfo.REF = values.REF.toString();
+          outboundForecastInfo.ref = values.ref.toString();
           outboundForecastInfo.costPrice = values.costPrice;
           outboundForecastInfo.inStatus = values.inStatus;
           outboundForecastInfo.suggestedPrice = values.suggestedPrice;

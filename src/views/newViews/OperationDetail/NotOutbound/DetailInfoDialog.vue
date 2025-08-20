@@ -42,7 +42,7 @@
     },
     {
       title: 'FBA单号',
-      key: 'FBADeliveryCode',
+      key: 'fbaDeliveryCode',
     },
     {
       title: '出库方式',

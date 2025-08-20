@@ -28,3 +28,33 @@ export const renderIconWithTooltip = (icon, tooltip) => {
       }
     );
 };
+
+export function createPaginationPlaceholders(pageNumber, pageSize, totalCount) {
+  let fakeListStart = [];
+  let fakeListEnd = [];
+
+  // Create placeholders for previous pages
+  if (pageNumber > 0) {
+    fakeListStart = Array(pageNumber * pageSize)
+      .fill(null)
+      .map((_, index) => ({ key: index }));
+  }
+
+  // Create placeholders for remaining pages
+  if (pageSize < totalCount) {
+    const remainingItems = totalCount - pageSize * (pageNumber + 1);
+    if (remainingItems > 0) {
+      fakeListEnd = Array(remainingItems)
+        .fill(null)
+        .map((_, index) => ({ key: index }));
+    }
+  }
+
+  return { fakeListStart, fakeListEnd };
+}
+
+export function getQuery(pagination) {
+  const pageNumber = pagination.pageNumber;
+  const pageSize = pagination.pageSize;
+  return '?pageNumber=' + pageNumber + '&pageSize=' + pageSize;
+}

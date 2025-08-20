@@ -72,7 +72,7 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import {
     asyncCustomer,
-    asyncFCAddressByFilter,
+    asyncfcAddressByFilter,
     asyncStorage,
     generateOptionFromArray,
     safeParseInt,
@@ -118,7 +118,7 @@
   const totalWeight = ref(null);
   let selectedPostcode = $ref('');
   let selectedDeliveryMethod = $ref('');
-  let selectedFCAddress = $ref('');
+  let selectedfcAddress = $ref('');
   let allNotifyDetail: any[] = $ref([]);
   let loading: boolean = $ref(false);
   let tableLoading = $ref(false);
@@ -128,11 +128,11 @@
     if (val.length > 0) {
       selectedDeliveryMethod = selectedTaskList.find((it) => it.id === val[0]).deliveryMethod;
       selectedPostcode = selectedTaskList.find((x) => x.id === val[0]).postcode;
-      selectedFCAddress = selectedTaskList.find((x) => x.id === val[0]).FCAddress;
+      selectedfcAddress = selectedTaskList.find((x) => x.id === val[0]).fcAddress;
 
       // Update filterItems for display in FilterBar
       filterItems = filterItems.filter((it) => it.key !== 'deliveryMethod');
-      filterItems = filterItems.filter((it) => it.key !== 'FCAddress');
+      filterItems = filterItems.filter((it) => it.key !== 'fcAddress');
       filterItems = filterItems.filter((it) => it.key !== 'postcode');
       filterItems = filterItems.concat([
         {
@@ -143,9 +143,9 @@
         },
         {
           option: 'FC/送货地址',
-          key: 'FCAddress',
-          value: selectedFCAddress,
-          display: selectedFCAddress,
+          key: 'fcAddress',
+          value: selectedfcAddress,
+          display: selectedfcAddress,
         },
         {
           option: '邮编',
@@ -162,7 +162,7 @@
       filterItems = null;
       selectedPostcode = '';
       selectedDeliveryMethod = '';
-      selectedFCAddress = '';
+      selectedfcAddress = '';
       await updateFilter(null);
       tableLoading = false;
     }
@@ -352,7 +352,7 @@
   async function saveOutboundPlan(value) {
     loading = true;
     const res = {
-      FCAddress: selectedFCAddress ?? '',
+      fcAddress: selectedfcAddress ?? '',
       deliveryMethod: selectedDeliveryMethod,
       postcode: selectedPostcode ?? '',
       ...value,
@@ -398,11 +398,11 @@
       type: 'selection',
       key: 'selection',
       disabled(row) {
-        if (selectedDeliveryMethod || selectedPostcode || selectedFCAddress) {
+        if (selectedDeliveryMethod || selectedPostcode || selectedfcAddress) {
           return (
             row.deliveryMethod !== selectedDeliveryMethod ||
             row.postcode !== selectedPostcode ||
-            row.FCAddress !== selectedFCAddress
+            row.fcAddress !== selectedfcAddress
           );
         }
       },
@@ -415,11 +415,11 @@
     { title: '箱数', key: 'arrivedContainerNum', width: 60 },
     { title: '重量', key: 'weight', width: 80 },
     { title: '体积', key: 'volume', width: 80 },
-    { title: 'FC/送货地址', key: 'FCAddress', width: 300 },
+    { title: 'FC/送货地址', key: 'fcAddress', width: 300 },
     { title: '邮编', key: 'postcode' },
     { title: '出库方式', key: 'outboundMethod' },
     { title: '物流方式', key: 'deliveryMethod' },
-    { title: 'FBA单号', key: 'FBADeliveryCode' },
+    { title: 'FBA单号', key: 'fbaDeliveryCode' },
     {
       title: '详情',
       key: 'actions',
@@ -450,7 +450,7 @@
     { title: '邮编', key: 'postcode' },
     { title: '预计出库方式', key: 'outboundMethod' },
     { title: '物流方式', key: 'deliveryMethod' },
-    { title: 'FBA单号', key: 'FBADeliveryCode' },
+    { title: 'FBA单号', key: 'fbaDeliveryCode' },
     { title: '仓库', key: 'inventory.name' },
   ]);
 
@@ -508,7 +508,7 @@
       label: '票号',
       field: 'ticketId',
     },
-    asyncFCAddressByFilter(),
+    asyncfcAddressByFilter(),
     asyncStorage(),
     {
       label: '物流方式',

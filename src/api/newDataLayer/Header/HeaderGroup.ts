@@ -6,21 +6,11 @@ const typeName = 'tableHeader';
 export async function getTableHeaderGroupItemList(name) {
   const userId = useUserStore().info.id;
   return (
-    await hillo.jsonPost(typeName + '/list', {
-      criteria: [
-        {
-          field: 'name',
-          op: '==',
-          value: name,
-        },
-        {
-          field: 'userId',
-          op: '==',
-          value: userId,
-        },
-      ],
+    await hillo.jsonPost(typeName + '/searchOne', {
+      name: name,
+      userId: userId,
     })
-  ).data.content[0];
+  ).data;
 }
 
 export async function addOrUpdateTableHeaderGroupItem(item) {

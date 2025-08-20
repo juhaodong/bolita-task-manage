@@ -543,7 +543,7 @@ export const fbaCode: FBAAddress[] = [
   {
     code: 'LIL1-3',
     state: '(PC)',
-    address: 'Strada Dogana Po, 2UCastel San Giovanni',
+    address: 'Strada Dogana po, 2UCastel San Giovanni',
     postCode: '59553',
     countryCode: 'FR',
   },
@@ -908,7 +908,7 @@ export const fbaCode: FBAAddress[] = [
   {
     code: 'MXP5',
     state: 'Castel San Giovanni (PC)',
-    address: 'Strada Dogana Po, 2U',
+    address: 'Strada Dogana po, 2U',
     postCode: '29015',
     countryCode: 'IT',
   },
@@ -950,7 +950,7 @@ export const fbaCode: FBAAddress[] = [
   {
     code: 'MXP5-1',
     state: 'Castel San Giovanni (PC)',
-    address: 'Strada Dogana Po, 2U',
+    address: 'Strada Dogana po, 2U',
     postCode: '29015',
     countryCode: 'IT',
   },

@@ -73,7 +73,7 @@ export async function deleteOutboundForecast(id) {
 
 export const defaultOutboundList = {
   outboundDetailInfo: '',
-  FCAddress: '',
+  fcAddress: '',
   containerNum: 0,
   deliveryMethod: '',
   inStatus: '',
@@ -83,7 +83,7 @@ export const defaultOutboundList = {
   totalVolume: '',
   totalWeight: '',
   trayNum: '',
-  REF: '',
+  ref: '',
   ISA: '',
   AMZID: '',
   waybillId: '',

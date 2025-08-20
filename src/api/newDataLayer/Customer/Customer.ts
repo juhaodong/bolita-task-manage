@@ -3,26 +3,20 @@ import hillo from 'hillo';
 const typeName = 'customer';
 
 export async function getCustomerList() {
-  return (await hillo.jsonPost(typeName + '/list', {})).data.content;
+  return (await hillo.jsonPost(typeName + '/search', {})).data.rows;
 }
 
 export async function getCustomerById(id) {
   return (
-    await hillo.jsonPost(typeName + '/list', {
-      criteria: [
-        {
-          field: 'id',
-          op: '==',
-          value: id,
-        },
-      ],
+    await hillo.jsonPost(typeName + '/searchOne', {
+      id,
     })
-  ).data.content[0];
+  ).data.rows;
 }
 
 export async function getCustomerListByIds(ids) {
   return (
-    await hillo.jsonPost(typeName + '/list', {
+    await hillo.jsonPost(typeName + '/search', {
       criteria: [
         {
           field: 'id',

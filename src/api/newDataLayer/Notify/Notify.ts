@@ -1,37 +1,27 @@
 import hillo from 'hillo';
+import { getQuery } from '@/api/newDataLayer/Common/Common';
 
 const typeName = 'notify';
 
 export async function getNotifyList() {
-  return (await hillo.jsonPost(typeName + '/list', {})).data.content;
+  return (await hillo.jsonPost(typeName + '/search', {})).data.rows;
 }
 
 export async function getNotifyByBetweenDateRangeList(dateRange) {
   return (
-    await hillo.jsonPost(typeName + '/list', {
-      criteria: [
-        {
-          field: 'planArriveDateTime',
-          op: 'between',
-          value: dateRange,
-        },
-      ],
+    await hillo.jsonPost(typeName + '/search', {
+      minPlanArriveDateTime: dateRange[0],
+      maxPlanArriveDateTime: dateRange[1],
     })
   ).data.content;
 }
 
 export async function getNotifyById(id) {
   return (
-    await hillo.jsonPost(typeName + '/list', {
-      criteria: [
-        {
-          field: 'id',
-          op: '==',
-          value: id,
-        },
-      ],
+    await hillo.jsonPost(typeName + '/searchOne', {
+      id,
     })
-  ).data.content[0];
+  ).data;
 }
 
 export async function addOrUpdateNotify(item) {
@@ -46,17 +36,16 @@ export async function addOrUpdateNotify(item) {
 
 export async function getNotifyListByFilter(filter) {
   return (
-    await hillo.jsonPost(typeName + '/list', {
-      criteria: filter,
+    await hillo.jsonPost(typeName + '/search', {
+      ...filter,
     })
-  ).data.content;
+  ).data.rows;
 }
 
 export async function getNotifyListByFilterWithPagination(filter, pagination) {
   return (
-    await hillo.jsonPost(typeName + '/list', {
-      ...pagination,
-      criteria: filter,
+    await hillo.jsonPost(typeName + '/search' + getQuery(pagination), {
+      ...filter,
     })
   ).data;
 }

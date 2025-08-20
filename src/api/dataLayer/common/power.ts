@@ -30,5 +30,6 @@ export async function getUserTypePowerList(type) {
 
 export async function getUserCustomerList() {
   const currentUser = await getUserById(useUserStore()?.info?.id);
-  return currentUser.customerIds.split(',');
+  console.log(currentUser, 'user');
+  return currentUser.customers.map((it) => it.id);
 }

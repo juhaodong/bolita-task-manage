@@ -71,11 +71,13 @@
         return [it.title, { prop: it.key }];
       })
     );
+    console.log(schema, 'schema');
     const allFBACodeList = await getFBACodeList();
     try {
       let currentRows = [];
       let { rows, errors } = await readXlsxFile(file, { schema, row: { from: 1 } });
       rows = rows.slice(2);
+      console.log(rows, 'rows');
       const groupContainerId = Object.keys(groupBy(rows, 'containerId'));
       if (groupContainerId.length > 1) {
         errorMessage.push({ detail: '一个Excel文件中不可有多个柜号' });
@@ -99,7 +101,7 @@
           if (!it.productName) {
             errorMessage.push({ index: index + 4, detail: '品名不可为空' });
           }
-          if (!it.UNNumber) {
+          if (!it.unNumber) {
             errorMessage.push({ index: index + 4, detail: 'UN号不可为空' });
           }
           if (!it.recipient) {
@@ -120,7 +122,7 @@
         //判断FBA卡车派送
         if (it.deliveryMethod === 'FBA卡车派送') {
           const allFBACode = allFBACodeList.map((x) => x.code);
-          if (!allFBACode.includes(it.FCAddress)) {
+          if (!allFBACode.includes(it.fcAddress)) {
             errorMessage.push({ index: index + 4, detail: 'FC不在FBACode列表中' });
           }
         } else {
@@ -187,7 +189,7 @@
             let counter = 1;
             for (const row of currentRows) {
               if (row.ticketId === ticketId) {
-                row.ticketId = `${row.ticketId}#${counter}`;
+                row.ticketId = `${row.ticketId}-${counter}`;
                 counter++;
               }
             }
@@ -247,6 +249,7 @@
       value.salesName =
         (await getUserNameById(currentCustomer.belongSalesId)) ?? userStore.info?.userName;
       value.cashStatus = '';
+      value.planArriveDateTime = dayjs(value.planArriveDateTime).format('YYYY-MM-DD') + 'T00:00:00';
       value.inStatus = InBoundStatus.WaitCheck;
       let taskList = [...(await readFile(value.files?.[0].file, value.notifyType))];
       value.containerNo = defaultValue.containerNo.trim();
@@ -301,7 +304,7 @@
               useType: 'normal',
               bolitaTaskId: id,
               operator: userInfo?.realName,
-              detailTime: dayjs().valueOf(),
+              detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
               note: '新建货柜预报',
             })
           );

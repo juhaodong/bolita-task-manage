@@ -3,35 +3,23 @@ import hillo from 'hillo';
 const typeName = 'user';
 
 export async function getUserList() {
-  return (await hillo.jsonPost(typeName + '/list', {})).data.content;
+  return (await hillo.jsonPost(typeName + '/search', {})).data.content;
 }
 
 export async function getUserById(id) {
   return (
-    await hillo.jsonPost(typeName + '/list', {
-      criteria: [
-        {
-          field: 'id',
-          op: '==',
-          value: id,
-        },
-      ],
+    await hillo.jsonPost(typeName + '/searchOne', {
+      id,
     })
-  ).data.content[0];
+  ).data;
 }
 
 export async function getUserByLoginName(name) {
   return (
-    await hillo.jsonPost(typeName + '/list', {
-      criteria: [
-        {
-          field: 'loginName',
-          op: '==',
-          value: name,
-        },
-      ],
+    await hillo.jsonPost(typeName + '/searchOne', {
+      loginName: name,
     })
-  ).data.content[0];
+  ).data;
 }
 
 export async function addOrUpdateUser(item) {

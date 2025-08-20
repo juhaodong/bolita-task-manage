@@ -43,14 +43,14 @@ export async function asyncFBACode(): Promise<FormField> {
   };
 }
 
-export async function asyncFCAddressByFilter(): Promise<FormField> {
+export async function asyncfcAddressByFilter(): Promise<FormField> {
   const FBACodeList = await getFBACodeList();
   const list = FBACodeList.map((it) => ({
     label: it.code,
     value: it.code,
   }));
   return {
-    field: 'FCAddress',
+    field: 'fcAddress',
     label: 'FC/送货地址',
     component: 'NSelect',
     componentProps: {

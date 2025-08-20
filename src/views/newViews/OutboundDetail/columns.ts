@@ -70,8 +70,8 @@ export const columns: DataTableColumns<OutboundDetailModel> = [
     key: 'waybillId',
   },
   {
-    title: 'REF.',
-    key: 'REF',
+    title: 'ref.',
+    key: 'ref',
   },
   {
     title: 'ISA',
@@ -86,8 +86,8 @@ export const columns: DataTableColumns<OutboundDetailModel> = [
     key: 'fbaCode',
   },
   {
-    title: 'PO',
-    key: 'PO',
+    title: 'po',
+    key: 'po',
   },
   {
     title: '收货地址',
@@ -122,11 +122,11 @@ export type OutboundDetailModel = {
   reservationOutboundDate: string;
   outStatus: string;
   waybillId: number;
-  REF: string;
+  ref: string;
   ISA: string;
   targetCountry: string;
   fbaCode: string;
-  PO: string;
+  po: string;
   shippingAddress: string;
   logisticsMethods: string;
   storeAddress: string;

@@ -1,11 +1,13 @@
 import { collection, query, where } from 'firebase/firestore';
 import { db, executeQuery } from '@/store/plugins/firebase';
 import { Result, resultError, resultSuccess } from '@/store/request/_util';
-import { ACCESS_TOKEN, CURRENT_USER } from '@/store/mutation-types';
+import { ACCESS_TOKEN, CURRENT_USER, TOKEN_NAME, TOKEN_VALUE } from '@/store/mutation-types';
 import { storage } from '@/store/utils/Storage';
 import { CustomerManager, salesMan, userPath } from '@/api/dataLayer/modules/user/user';
-import { getUserByLoginName } from '@/api/newDataLayer/User/User';
+import { loginNew } from '@/api/newDataLayer/User/Login';
+import hillo from 'hillo';
 import { useUserStore } from '@/store/modules/user';
+import { getUserByLoginName } from '@/api/newDataLayer/User/User';
 
 export enum PermissionEnums {
   Manager = '管理员',
@@ -31,11 +33,31 @@ export type BaseUser = {
 };
 
 export async function login(params: { username: string; password: string }) {
-  const exist = await getUserByLoginName(params.username);
-  if (exist.password === params.password) {
-    useUserStore().setUserInfo(exist);
+  const exist = await loginNew(params.username, params.password);
+  const config = {
+    isDebug: false,
+    productionUrl: 'http://localhost:8080/',
+    debugUrl: 'http://localhost:8080/',
+    header: {
+      post: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+    },
+    LoadingUtils: {},
+  };
+  config.header.post[exist.tokenName] = exist.tokenValue;
+  console.log(config, 'config');
+  if (exist) {
+    hillo.use(config);
+    useUserStore().setTokenName(exist.tokenName);
+    useUserStore().setTokenValue(exist.tokenValue);
+    const userInfo = await getUserByLoginName(params.username);
+    console.log(userInfo, 'info');
+    useUserStore().setUserInfo(userInfo);
     const ex = 30 * 24 * 60 * 60;
-    storage.set(CURRENT_USER, exist, ex);
+    storage.set(TOKEN_NAME, exist.tokenName);
+    storage.set(TOKEN_VALUE, exist.tokenValue);
+    storage.set(CURRENT_USER, userInfo, ex);
     return resultSuccess('登录成功');
   } else {
     return resultError('用户不存在');
