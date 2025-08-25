@@ -243,7 +243,7 @@ export function timeColumn(
       type: 'daterange',
       clearable: true,
     },
-    width: 110,
+    width: 120,
     render(record) {
       const display = record[keyName] ? dayjs(record[keyName]).format(timeFormat) : '-';
       return h('div', display);

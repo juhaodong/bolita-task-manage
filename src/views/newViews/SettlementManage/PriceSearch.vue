@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { ref } from 'vue';
-  import { NCard, NForm, NFormItem, NInput, NGrid, NButton, NSpace } from 'naive-ui';
+  import { NButton, NCard, NInput } from 'naive-ui';
   import { checkPrice } from '@/api/dataLayer/common/common';
 
   // Define reactive variables for form inputs
@@ -11,6 +11,7 @@
   const height = ref('');
   const width = ref('');
   const long = ref('');
+  const size = ref('');
   const numberAt = ref('');
   const message = ref('人工询价');
   const currentWeight = ref('');
@@ -30,8 +31,9 @@
   // Function to handle form submission
   async function handleSubmit() {
     loading.value = true;
+    const [long, width, height] = size.value.split('*');
     message.value = '人工询价';
-    if (long.value > 2.4 || width.value > 1.2 || height.value > 2.2 || weight.value > 1500) {
+    if (long > 2.4 || width > 1.2 || height > 2.2 || weight.value > 1500) {
       loading.value = false;
       return;
     }
@@ -43,14 +45,14 @@
       return;
     }
     const densityFactor = isGermany ? 150 : 330;
-    const volumeWeight = long.value * width.value * height.value * densityFactor;
+    const volumeWeight = long * width * height * densityFactor;
 
     if (outType.value === '木箱') {
       currentWeight.value = Math.max(volumeWeight, weight.value);
     } else {
       currentWeight.value = Math.max(volumeWeight, weight.value, densityFactor);
     }
-    const res = await checkPrice(currentWeight.value, country.value, zipCode.value);
+    const res = await checkPrice(currentWeight.value, country.value, zipCode.value.slice(0, 2));
     message.value = res.length > 0 ? res.map((it) => it.price).join(',') : '人工询价';
     loading.value = false;
   }
@@ -74,14 +76,8 @@
       <n-descriptions-item label="重量">
         <n-input-number v-model:value="weight" />
       </n-descriptions-item>
-      <n-descriptions-item label="长">
-        <n-input-number v-model:value="long" />
-      </n-descriptions-item>
-      <n-descriptions-item label="宽">
-        <n-input-number v-model:value="width" />
-      </n-descriptions-item>
-      <n-descriptions-item label="高">
-        <n-input-number v-model:value="height" />
+      <n-descriptions-item label="尺寸">
+        <n-input v-model:value="size" />
       </n-descriptions-item>
       <n-descriptions-item label="价格">
         <n-input v-model:value="message" />

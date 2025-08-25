@@ -16,9 +16,9 @@
         >
           新建预报
         </n-button>
-        <n-button class="action-button" size="small" type="info" @click="selectedHeader">
-          表头显示
-        </n-button>
+        <!--        <n-button class="action-button" size="small" type="info" @click="selectedHeader">-->
+        <!--          表头显示-->
+        <!--        </n-button>-->
         <n-button class="action-button" size="small" type="success" @click="downloadData">
           下载
         </n-button>
@@ -87,7 +87,7 @@
         v-model:checked-row-keys="checkedRowKeys"
         ref="actionRef"
         @update:checked-row-keys="handleCheck"
-        :columns="currentColumns"
+        :columns="columns"
         :pagination="paginationReactive"
         :request="loadDataTable"
         :row-key="(row) => row.id"
@@ -302,19 +302,12 @@
     {
       type: 'selection',
       fixed: 'left',
-    },
-    timeColumn('planArriveDateTime', '预计入库日期'),
-    {
-      title: '预计时间',
-      key: 'inHouseTime',
-      component: 'NSelect',
-      componentProps: {
-        options: generateOptionFromTimeArray(timeArrays),
-      },
+      width: 50,
     },
     {
       title: '柜号',
       key: 'containerNo',
+      fixed: 'left',
       width: 160,
       render(row) {
         return h(
@@ -335,8 +328,20 @@
     },
     {
       title: '客户',
+      fixed: 'left',
       key: 'customer.customerName',
     },
+    timeColumn('planArriveDateTime', '预计入库日期'),
+    {
+      title: '预计时间',
+      key: 'inHouseTime',
+      component: 'NSelect',
+      width: 160,
+      componentProps: {
+        options: generateOptionFromTimeArray(timeArrays),
+      },
+    },
+
     {
       title: '仓库',
       key: 'inventory.name',
@@ -344,6 +349,7 @@
     {
       title: '数量',
       key: 'arrivedCount',
+      width: 160,
     },
     statusColumnSelect({
       title: '状态',
@@ -351,16 +357,22 @@
       list: generateOptionFromArray(allInStatusNotifyList),
     }),
     {
-      title: '操作人',
+      title: '卸柜人',
       key: 'unloadPerson',
     },
     {
-      title: '用户名',
+      title: '创建人',
       key: 'salesName',
+    },
+    {
+      title: '最后修改',
+      key: 'lastModifierName',
+      width: 100,
     },
     {
       title: '备注',
       key: 'note',
+      width: 160,
     },
   ];
 
@@ -485,7 +497,6 @@
     if (filterObj) {
       currentFilter = filterObj;
       const customerId = await getUserCustomerList();
-      console.log(customerId, 'ids');
       if (!filterObj['customer.id']) {
         currentFilter['customerIds'] = customerId;
       } else {

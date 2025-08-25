@@ -53,7 +53,7 @@
       <span>刷新</span>
     </n-tooltip>
     <!--    表格设置单独抽离成组件-->
-    <!--        <ColumnSetting />-->
+    <ColumnSetting />
   </n-space>
 </template>
 

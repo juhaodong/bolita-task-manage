@@ -51,29 +51,11 @@ export const allInStatusOperationList = ['已完成', '已报价', '已订车', 
 
 export async function checkPrice(currentWeight, country, zipCode) {
   return (
-    await hillo.jsonPost('price-kg-look-up-table/list', {
-      criteria: [
-        {
-          field: 'fromWeightIncl',
-          op: '<=',
-          value: currentWeight,
-        },
-        {
-          field: 'toWeightExcl',
-          op: '>',
-          value: currentWeight,
-        },
-        {
-          field: 'country',
-          op: '==',
-          value: country,
-        },
-        {
-          field: 'leadingZipCode',
-          op: '==',
-          value: zipCode,
-        },
-      ],
+    await hillo.jsonPost('price-kg-look-up-table/search', {
+      maxFromWeightIncl: currentWeight,
+      minToWeightExcl: currentWeight,
+      country,
+      leadingZipCode: zipCode,
     })
-  ).data.content;
+  ).data.rows;
 }

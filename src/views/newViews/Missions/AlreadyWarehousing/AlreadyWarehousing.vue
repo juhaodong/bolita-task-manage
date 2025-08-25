@@ -8,12 +8,7 @@
       />
       <div class="mt-2">
         <n-button class="action-button" size="small" type="info" @click="selectedHeader">
-          <template #icon>
-            <n-icon>
-              <DocumentEdit20Regular />
-            </n-icon>
-          </template>
-          选择表头显示
+          表头显示
         </n-button>
         <n-button
           v-if="typeMission === '整柜任务看板' && hasAuthPower('missionOutboundAdd')"
@@ -22,11 +17,6 @@
           type="success"
           @click="addTable"
         >
-          <template #icon>
-            <n-icon>
-              <Box20Filled />
-            </n-icon>
-          </template>
           新建出库计划
         </n-button>
         <n-button
@@ -36,11 +26,6 @@
           type="primary"
           @click="checkDetailInfo"
         >
-          <template #icon>
-            <n-icon>
-              <DocumentEdit20Regular />
-            </n-icon>
-          </template>
           审核
         </n-button>
         <n-button
@@ -50,28 +35,59 @@
           type="warning"
           @click="showOfferPrice = true"
         >
-          <template #icon>
-            <n-icon>
-              <Payment20Regular />
-            </n-icon>
-          </template>
           报价
         </n-button>
         <n-button class="action-button" size="small" type="default" @click="downloadData">
-          <template #icon>
-            <n-icon>
-              <ArrowDownload20Regular />
-            </n-icon>
-          </template>
           下载
         </n-button>
-        <n-button class="action-button" size="small" type="error" @click="merge">
-          <template #icon>
-            <n-icon>
-              <DocumentEdit20Regular />
-            </n-icon>
-          </template>
-          合并
+        <n-button class="action-button" size="small" type="error" @click="merge"> 合并 </n-button>
+        <n-button
+          :disabled="selectedTaskList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="startEdit"
+        >
+          修改
+        </n-button>
+        <n-button
+          :disabled="selectedTaskList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="startEdit"
+        >
+          附件
+        </n-button>
+        <n-button
+          :disabled="selectedTaskList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="startEdit"
+        >
+          时间线
+        </n-button>
+        <n-button
+          :disabled="selectedTaskList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="startEdit"
+        >
+          拆分
+        </n-button>
+        <n-button
+          :disabled="selectedTaskList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="startEdit"
+        >
+          托盘
+        </n-button>
+        <n-button
+          :disabled="selectedTaskList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="startEdit"
+        >
+          取消
         </n-button>
       </div>
 
@@ -94,7 +110,7 @@
               v-model:checked-row-keys="checkedRows"
               @update:checked-row-keys="handleCheck"
               :actionColumn="actionColumn"
-              :columns="currentColumns"
+              :columns="columns"
               :pagination="paginationReactive"
               :request="loadDataTable"
               :row-key="(row) => row.id"
@@ -225,15 +241,11 @@
   import {
     statusColumnEasy,
     statusColumnSelect,
-    storageTimeWarnColumn,
     timeColumn,
     timeWarnColumn,
-    timeWarnList,
   } from '@/views/bolita-views/composable/useableColumns';
   import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import {
-    ArrowDownload20Regular,
-    Box20Filled,
     Clock20Regular,
     Delete20Regular,
     Document20Regular,
@@ -277,11 +289,7 @@
   import SplitTaskDialog from '@/views/newViews/Missions/AlreadyWarehousing/SplitTaskDialog.vue';
   import { NButton, NIcon, NInput, NTooltip, useDialog } from 'naive-ui';
   import * as XLSX from 'xlsx';
-  import {
-    allInStatusNotifyList,
-    asyncCustomerByFilter,
-    asyncStorageByFilter,
-  } from '@/api/dataLayer/common/common';
+  import { allInStatusNotifyList } from '@/api/dataLayer/common/common';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
   import {
     addOrUpdateWithRefOutboundForecast,
@@ -350,40 +358,46 @@
   const columns = [
     {
       type: 'selection',
-      disabled: (row) => row.inStatus !== InBoundDetailStatus.WaitCheck,
-    },
-    asyncCustomerByFilter(),
-    {
-      title: '时效',
       fixed: 'left',
-      key: 'usefulTimeRange',
-      component: 'NSelect',
-      componentProps: {
-        options: timeWarnList,
-      },
+    },
+    {
+      title: '客户',
+      fixed: 'left',
+      key: 'customer.customerName',
+      width: 100,
     },
     {
       title: '柜号',
       fixed: 'left',
       key: 'containerId',
+      width: 160,
     },
     {
       title: '票号',
       fixed: 'left',
       key: 'ticketId',
+      width: 120,
     },
     {
-      title: '国家',
-      key: 'country',
+      title: 'Ref',
+      key: 'ref',
+      width: 120,
     },
     {
-      title: '预报件数',
-      key: 'number',
+      title: '价格',
+      key: 'suggestedPrice',
+      width: 120,
     },
     {
-      title: '实际件数',
-      key: 'arrivedContainerNum',
+      title: '滞留时间',
+      key: 'storageTime',
+      width: 100,
     },
+    statusColumnSelect({
+      title: '状态',
+      key: 'inStatus',
+      list: generateOptionFromArray(allInStatusList),
+    }),
     {
       title: '总实重',
       key: 'weight',
@@ -396,20 +410,32 @@
       title: '尺寸',
       key: 'size',
     },
-    statusColumnSelect({
-      title: '状态',
-      key: 'inStatus',
-      list: generateOptionFromArray(allInStatusList),
-    }),
-    asyncStorageByFilter(),
-    storageTimeWarnColumn('stayTime', '留仓时间'),
     {
-      title: '运单号',
-      key: 'deliveryIdIn',
+      title: '包装',
+      key: 'packing',
+    },
+    {
+      title: '国家',
+      key: 'country',
+    },
+    {
+      title: '预报件数',
+      key: 'number',
+      width: 96,
     },
     {
       title: '客户备注',
       key: 'normalNote',
+      width: 96,
+    },
+    {
+      title: '实际件数',
+      key: 'arrivedContainerNum',
+      width: 96,
+    },
+    {
+      title: '运单号',
+      key: 'deliveryIdIn',
     },
     {
       title: 'FBA单号',
@@ -490,10 +516,6 @@
     timeColumn('arriveTime', '实际到仓日期'),
     timeColumn('deliveryTime', '发货时间'),
     timeColumn('outBoundTime', '预计取货时间'),
-    {
-      title: 'Ref',
-      key: 'ref',
-    },
     // {
     //   title: '仓库备注',
     //   key: 'note',
@@ -538,10 +560,7 @@
       title: '分拣标识',
       key: 'sign',
     },
-    {
-      title: '包装',
-      key: 'package',
-    },
+
     {
       title: '托数',
       key: 'industrialTrayNum',
@@ -575,7 +594,6 @@
       key: 'industrialNote',
     },
   ].map((it) => {
-    it.width = 200;
     it.ellipsis = {
       tooltip: true,
     };
@@ -819,7 +837,7 @@
         currentFilter['customerIds'] = [filterObj['customer.id']];
       }
     } else {
-      currentFilter['inStatusNe'] = '已拆分';
+      currentFilter['inStatusNotIn'] = ['已拆分', '已取消'];
     }
 
     if (typeMission.value === '整柜任务看板') {

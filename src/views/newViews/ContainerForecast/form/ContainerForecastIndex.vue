@@ -15,8 +15,6 @@
   import ErrorMessageDialog from '@/views/newViews/ContainerForecast/form/ErrorMessageDialog.vue';
   import dayjs from 'dayjs';
   import { addOrUpdateNotify, saveFiles } from '@/api/newDataLayer/Notify/Notify';
-  import { getCustomerById } from '@/api/newDataLayer/Customer/Customer';
-  import { getUserNameById } from '@/api/newDataLayer/User/User';
   import {
     addOrUpdateInventoryUseLog,
     getCurrentLogTime,
@@ -215,6 +213,7 @@
     startLoading();
     loadingMessage = '';
     if (value?.id) {
+      value.planArriveDateTime = dayjs(value.planArriveDateTime).format('YYYY-MM-DDT00:00:00');
       await addOrUpdateNotify(value);
       const taskList = await getTaskListByNotifyId(value.id);
       const log = (await getInventoryUseLogListByNotifyId(value.id))[0];
@@ -237,7 +236,6 @@
     } else {
       loadingMessage += '正在读取文件！' + `<br>`;
       const userStore = useUserStore();
-      const currentCustomer = (await getCustomerById(value.customerId)) ?? '';
       value.notifyType = prop.type;
       value.unloadingFile = '';
       value.totalTime = '';
@@ -246,8 +244,7 @@
       value.realDate = '';
       value.totalCount = '';
       value.operationalRemarks = '';
-      value.salesName =
-        (await getUserNameById(currentCustomer.belongSalesId)) ?? userStore.info?.userName;
+      value.salesName = userStore.info?.userName;
       value.cashStatus = '';
       value.planArriveDateTime = dayjs(value.planArriveDateTime).format('YYYY-MM-DD') + 'T00:00:00';
       value.inStatus = InBoundStatus.WaitCheck;

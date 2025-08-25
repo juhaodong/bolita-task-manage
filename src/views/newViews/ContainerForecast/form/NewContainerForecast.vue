@@ -172,6 +172,7 @@
       currentData = Object.assign({}, prop.model);
       currentData.inventoryId = currentData.inventory.id;
       currentData.customerId = currentData.customer.id;
+      currentData.planArriveDateTime = dayjs(currentData.planArriveDateTime).valueOf();
     } else {
       currentData = Object.assign(currentData, prop.defaultValue);
     }

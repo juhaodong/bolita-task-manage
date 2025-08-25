@@ -1,17 +1,15 @@
 <script lang="ts" setup>
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { computed, onMounted } from 'vue';
+  import { onMounted } from 'vue';
   import { $ref } from 'vue/macros';
-  import { getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
+  import { getTaskGroupByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
   import { DataTableColumns } from 'naive-ui';
   import { statusColumnEasy } from '@/views/bolita-views/composable/useableColumns';
-  import { groupBy } from 'lodash';
-  import { safeSumBy } from '@/store/utils/utils';
 
   const columns: DataTableColumns<any> = [
     {
-      title: '客户ID',
-      key: 'customer.customerName',
+      title: '客户',
+      key: 'customerName',
     },
     {
       title: 'ref',
@@ -19,7 +17,7 @@
     },
     {
       title: '票号',
-      key: 'ticketId',
+      key: 'ticketIds',
     },
     {
       title: '国家',
@@ -35,7 +33,7 @@
     },
     {
       title: 'FBA单号',
-      key: 'fbaDeliveryCode',
+      key: 'fbaDeliveryCodes',
     },
     {
       title: '出库方式',
@@ -46,7 +44,7 @@
       key: 'deliveryMethod',
     },
     {
-      title: '出库件数/总件数',
+      title: '出库数/总数',
       key: 'numberDisplay',
     },
   ].map((it) => {
@@ -66,37 +64,30 @@
   async function reload() {
     loading = true;
     if (props.notifyId) {
-      currentItems = await getTaskListByNotifyId(props.notifyId);
+      currentItems = (await getTaskGroupByNotifyId(props.notifyId)).map((it) => {
+        it.ref = it.groupKey.ref;
+        it.country = it.groupKey.country;
+        it.customerName = it.groupKey.customerName;
+        it.deliveryMethod = it.groupKey.deliveryMethod;
+        it.fcAddress = it.groupKey.fcAddress;
+        it.inStatus = it.groupKey.inStatus;
+        it.outboundMethod = it.groupKey.outboundMethod;
+        it.numberDisplay =
+          it.totalOutContainerNum +
+          '件' +
+          it.totalOutTrayNum +
+          '托' +
+          '/' +
+          it.totalArrivedContainerNum +
+          '件' +
+          it.totalArrivedTrayNum +
+          '托';
+        return it;
+      });
+      console.log(currentItems, 'currentItems');
     }
     loading = false;
   }
-
-  const currentDisplay = computed(() => {
-    const groupInfo = groupBy(currentItems, (item) => {
-      return ['fcAddress', 'deliveryMethod', 'outboundMethod'].map((it) => item[it]).join('-');
-    });
-    const res = Object.entries(groupInfo).map(([key, value]) => {
-      console.log(key, value, 'key');
-      const outNumber = safeSumBy(
-        value.filter((it) => it.inStatus === '全部出库'),
-        'number'
-      );
-      return {
-        customer: value[0].customer,
-        ticketId: value.map((it) => it.ticketId).join(','),
-        ref: value.map((it) => it.ref).join(','),
-        country: value[0].country,
-        inStatus: value[0].inStatus,
-        fcAddress: value[0].fcAddress,
-        fbaDeliveryCode: value[0].fbaDeliveryCode,
-        outboundMethod: value[0].outboundMethod,
-        deliveryMethod: value[0].deliveryMethod,
-        numberDisplay: outNumber + '/' + safeSumBy(value, 'number'),
-      };
-    });
-    console.log(res, 'res');
-    return res;
-  });
   onMounted(async () => {
     await reload();
   });
@@ -105,7 +96,7 @@
 <template>
   <div>
     <loading-frame :loading="loading">
-      <n-data-table max-height="500px" :columns="columns" :data="currentDisplay" />
+      <n-data-table max-height="500px" :columns="columns" :data="currentItems" />
     </loading-frame>
   </div>
 </template>

@@ -42,26 +42,11 @@ export async function getTaskListByIdsAndFilter(ids, filter) {
 
 export async function getTaskListByNotifyId(id) {
   return (
-    await hillo.jsonPost(typeName + '/list', {
-      criteria: [
-        {
-          field: 'notifyId',
-          op: '==',
-          value: id,
-        },
-        {
-          field: 'inStatus',
-          op: '!=',
-          value: '已拆分',
-        },
-        {
-          field: 'inStatus',
-          op: '!=',
-          value: '已取消',
-        },
-      ],
+    await hillo.jsonPost(typeName + '/search', {
+      inStatusNotIn: ['已取消', '已拆分'],
+      notifyId: id,
     })
-  ).data.content;
+  ).data.rows;
 }
 
 export async function getTaskListByOutboundId(id) {
@@ -104,6 +89,16 @@ export async function getTaskListByIds(ids) {
       ],
     })
   ).data.content;
+}
+
+export async function getTaskGroupByNotifyId(id) {
+  console.log(id, 'id');
+  return (
+    await hillo.jsonPost(typeName + '/getGroupedTask', {
+      inStatusNotIn: ['已取消', '已拆分'],
+      notifyId: id,
+    })
+  ).data;
 }
 
 export async function addOrUpdateTask(item) {

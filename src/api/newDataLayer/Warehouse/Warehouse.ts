@@ -8,10 +8,10 @@ export async function getInventoryList() {
 
 export async function getInventoryById(id) {
   return (
-    await hillo.jsonPost(typeName + '/search', {
+    await hillo.jsonPost(typeName + '/searchOne', {
       id: id,
     })
-  ).data.rows[0];
+  ).data;
 }
 
 export async function getInventoryByName(name) {
