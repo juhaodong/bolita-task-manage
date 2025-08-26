@@ -24,6 +24,7 @@
     addOrUpdateTask,
     defaultTask,
     getTaskListByNotifyId,
+    searchTaskPrice,
   } from '@/api/newDataLayer/TaskList/TaskList';
   import { safeSumBy } from '@/store/utils/utils';
   import { getFBACodeList } from '@/api/newDataLayer/FBACode/FBACode';
@@ -149,17 +150,14 @@
         if (it.changeOrderFiles === '是') {
           it.operateInStorage = '是';
         }
-        // const [long, width, height] = it.size.split('*');
-        // it.suggestedPrice = await searchTaskPrice(
-        //   parseFloat(long),
-        //   parseFloat(width),
-        //   parseFloat(height),
-        //   parseFloat(it.weight),
-        //   it.country,
-        //   it.outboundMethod,
-        //   it.number,
-        //   it.postcode ? it.postcode.slice(0, 2) : ''
-        // );
+        it.suggestedPrice = await searchTaskPrice(
+          it.size,
+          parseFloat(it.weight),
+          it.country,
+          it.outboundMethod,
+          it.number,
+          it.postcode ? it.postcode.slice(0, 2) : ''
+        );
         it.inStatus = InBoundDetailStatus.WaitCheck;
         currentRows.push(Object.assign({}, defaultTask, it));
         if (res.length > 0) {

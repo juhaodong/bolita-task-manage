@@ -31,6 +31,12 @@
   // Function to handle form submission
   async function handleSubmit() {
     loading.value = true;
+    const sizeFormat = /^\d+\*\d+\*\d+$/.test(size.value);
+    if (!sizeFormat) {
+      message.value = '尺寸格式不对，请人工询价';
+      loading.value = false;
+      return;
+    }
     const [long, width, height] = size.value.split('*');
     message.value = '人工询价';
     if (long > 2.4 || width > 1.2 || height > 2.2 || weight.value > 1500) {

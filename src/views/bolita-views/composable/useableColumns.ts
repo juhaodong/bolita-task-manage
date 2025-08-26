@@ -283,7 +283,7 @@ export function timeTableColumn(keyName, title, timeFormat = dateFormat) {
     },
     width: 200,
     render(record) {
-      const display = record[keyName] ? dayjs(parseInt(record[keyName])).format(timeFormat) : '-';
+      const display = record[keyName] ? dayjs(record[keyName]).format(timeFormat) : '-';
       return h('div', display);
     },
   };

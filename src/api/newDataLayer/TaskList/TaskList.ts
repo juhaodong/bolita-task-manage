@@ -19,9 +19,15 @@ export async function getTaskListByFilter(filter) {
 
 export async function getTaskListByFilterWithPagination(filter, pagination) {
   return (
-    await hillo.jsonPost(typeName + '/searchForFull' + getQuery(pagination), {
-      ...filter,
-    })
+    await hillo.jsonPost(
+      typeName +
+        '/searchForFull' +
+        getQuery(pagination) +
+        '&orderCodes=createTimestamp desc,notifyId',
+      {
+        ...filter,
+      }
+    )
   ).data;
 }
 
@@ -65,16 +71,10 @@ export async function getTaskListByOutboundId(id) {
 
 export async function getTaskListById(id) {
   return (
-    await hillo.jsonPost(typeName + '/list', {
-      criteria: [
-        {
-          field: 'id',
-          op: '==',
-          value: id,
-        },
-      ],
+    await hillo.jsonPost(typeName + '/searchOne', {
+      id,
     })
-  ).data.content[0];
+  ).data;
 }
 
 export async function getTaskListByIds(ids) {
@@ -143,7 +143,7 @@ export const defaultTask = {
   operationRequire: '',
   outboundMethod: '',
   outPrice: '',
-  planArriveDateTime: dayjs().valueOf(),
+  planArriveDateTime: dayjs().format('YYYY-MM-DDT00:00:00'),
   salesName: '',
   size: '',
   stayTime: '',
@@ -188,16 +188,12 @@ export const defaultTask = {
   waitCar: '',
 };
 
-export async function searchTaskPrice(
-  long,
-  width,
-  height,
-  weight,
-  country,
-  outboundMethod,
-  number,
-  zipCode
-) {
+export async function searchTaskPrice(size, weight, country, outboundMethod, number, zipCode) {
+  const sizeFormat = /^\d+\*\d+\*\d+$/.test(size.value);
+  if (!sizeFormat) {
+    return '人工询价';
+  }
+  const [long, width, height] = size.split('*');
   let currentWeight = 0;
   if (long > 2.4 || width > 1.2 || height > 2.2 || weight > 1500) {
     return '人工询价';

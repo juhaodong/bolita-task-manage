@@ -1,164 +1,327 @@
 <template>
   <n-form ref="formElRef" :model="formModel" v-bind="getBindValue">
-    <n-grid v-bind="getGrid" x-gap="8">
-      <template v-for="g in groupedSchema" :key="g.group">
-        <n-gi v-if="showGroupHeader" :span="24">
-          <n-h4>{{ g.group }}</n-h4>
-        </n-gi>
-        <n-gi v-for="schema in g.schema" :key="schema.field" v-bind="schema.giProps">
-          <n-form-item :label="schema.label" :path="schema.field">
-            <!--标签名右侧温馨提示-->
-            <template v-if="schema.labelMessage" #label>
-              {{ schema.label }}
-              <n-tooltip :style="schema.labelMessageStyle" trigger="hover">
-                <template #trigger>
-                  <n-icon class="cursor-pointer text-gray-400" size="18">
-                    <QuestionCircleOutlined />
-                  </n-icon>
+    <template v-if="groupedSchema.length > 1">
+      <n-tabs v-model:value="activeTab" tab-style="min-width: 80px;" type="card">
+        <n-tab-pane v-for="g in groupedSchema" :key="g.group" :name="g.group" :tab="g.group">
+          <n-grid v-bind="getGrid" x-gap="8">
+            <n-gi v-for="schema in g.schema" :key="schema.field" v-bind="schema.giProps">
+              <n-form-item :label="schema.label" :path="schema.field">
+                <!--标签名右侧温馨提示-->
+                <template v-if="schema.labelMessage" #label>
+                  {{ schema.label }}
+                  <n-tooltip :style="schema.labelMessageStyle" trigger="hover">
+                    <template #trigger>
+                      <n-icon class="cursor-pointer text-gray-400" size="18">
+                        <QuestionCircleOutlined />
+                      </n-icon>
+                    </template>
+                    {{ schema.labelMessage }}
+                  </n-tooltip>
                 </template>
-                {{ schema.labelMessage }}
-              </n-tooltip>
-            </template>
 
-            <!--判断插槽-->
-            <template v-if="schema.slot">
-              <slot
-                :field="schema.field"
-                :model="formModel"
-                :name="schema.slot"
-                :value="formModel[schema.field]"
-              ></slot>
-            </template>
+                <!--判断插槽-->
+                <template v-if="schema.slot">
+                  <slot
+                    :field="schema.field"
+                    :model="formModel"
+                    :name="schema.slot"
+                    :value="formModel[schema.field]"
+                  ></slot>
+                </template>
 
-            <!--NCheckbox-->
-            <template v-else-if="schema.component === 'NCheckbox'">
-              <n-checkbox-group v-model:value="formModel[schema.field]">
-                <n-space>
-                  <n-checkbox
-                    v-for="item in schema.componentProps.options"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
+                <!--NCheckbox-->
+                <template v-else-if="schema.component === 'NCheckbox'">
+                  <n-checkbox-group v-model:value="formModel[schema.field]">
+                    <n-space>
+                      <n-checkbox
+                        v-for="item in schema.componentProps.options"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                      />
+                    </n-space>
+                  </n-checkbox-group>
+                </template>
+
+                <!--NRadioGroup-->
+                <template v-else-if="schema.component === 'NRadioGroup'">
+                  <n-radio-group v-model:value="formModel[schema.field]">
+                    <n-space>
+                      <n-radio
+                        v-for="item in schema.componentProps.options"
+                        :key="item.value"
+                        :value="item.value"
+                      >
+                        {{ item.label }}
+                      </n-radio>
+                    </n-space>
+                  </n-radio-group>
+                </template>
+
+                <template v-else-if="schema.component === 'NUpload'">
+                  <n-space>
+                    <n-upload
+                      v-model:file-list="formModel[schema.field]"
+                      v-bind="getComponentProps(schema)"
+                    >
+                      <n-button> 上传文件</n-button>
+                    </n-upload>
+                    <n-button
+                      v-if="getComponentProps(schema).uploadTemplate"
+                      dashed
+                      type="info"
+                      @click="getComponentProps(schema).uploadTemplate"
+                      >下载上传模板
+                    </n-button>
+                  </n-space>
+                </template>
+                <template v-else-if="schema.component === 'NAutoComplete'">
+                  <n-select
+                    v-model:value="formModel[schema.field]"
+                    :class="{ isFull: schema.isFull != false && getProps.isFull }"
+                    :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
+                    :get-show="() => true"
+                    v-bind="getComponentProps(schema)"
                   />
-                </n-space>
-              </n-checkbox-group>
-            </template>
-
-            <!--NRadioGroup-->
-            <template v-else-if="schema.component === 'NRadioGroup'">
-              <n-radio-group v-model:value="formModel[schema.field]">
-                <n-space>
-                  <n-radio
-                    v-for="item in schema.componentProps.options"
-                    :key="item.value"
-                    :value="item.value"
-                  >
-                    {{ item.label }}
-                  </n-radio>
-                </n-space>
-              </n-radio-group>
-            </template>
-
-            <template v-else-if="schema.component === 'NUpload'">
-              <n-space>
-                <n-upload
-                  v-model:file-list="formModel[schema.field]"
+                </template>
+                <template v-else-if="schema.component === 'NSelect'">
+                  <n-select
+                    v-model:value="formModel[schema.field]"
+                    :class="{ isFull: schema.isFull != false && getProps.isFull }"
+                    :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
+                    :get-show="() => true"
+                    filterable
+                    v-bind="getComponentProps(schema)"
+                  />
+                </template>
+                <!--动态渲染表单组件-->
+                <component
+                  :is="schema.component"
+                  v-else
+                  v-model:value="formModel[schema.field]"
+                  :class="{ isFull: schema.isFull != false && getProps.isFull }"
+                  :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
                   v-bind="getComponentProps(schema)"
-                >
-                  <n-button> 上传文件</n-button>
-                </n-upload>
-                <n-button
-                  v-if="getComponentProps(schema).uploadTemplate"
-                  dashed
-                  type="info"
-                  @click="getComponentProps(schema).uploadTemplate"
-                  >下载上传模板
-                </n-button>
-              </n-space>
-            </template>
-            <template v-else-if="schema.component === 'NAutoComplete'">
-              <n-select
-                v-model:value="formModel[schema.field]"
-                :class="{ isFull: schema.isFull != false && getProps.isFull }"
-                :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
-                :get-show="() => true"
-                v-bind="getComponentProps(schema)"
-              />
-            </template>
-            <template v-else-if="schema.component === 'NSelect'">
-              <n-select
-                v-model:value="formModel[schema.field]"
-                :class="{ isFull: schema.isFull != false && getProps.isFull }"
-                :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
-                :get-show="() => true"
-                filterable
-                v-bind="getComponentProps(schema)"
-              />
-            </template>
-            <!--动态渲染表单组件-->
-            <component
-              :is="schema.component"
-              v-else
-              v-model:value="formModel[schema.field]"
-              :class="{ isFull: schema.isFull != false && getProps.isFull }"
-              :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
-              v-bind="getComponentProps(schema)"
-            />
-            <!--组件后面的内容-->
-            <template v-if="schema.suffix">
-              <slot
-                :field="schema.field"
-                :model="formModel"
-                :name="schema.suffix"
-                :value="formModel[schema.field]"
-              ></slot>
-            </template>
-          </n-form-item>
-        </n-gi>
-      </template>
-
+                />
+                <!--组件后面的内容-->
+                <template v-if="schema.suffix">
+                  <slot
+                    :field="schema.field"
+                    :model="formModel"
+                    :name="schema.suffix"
+                    :value="formModel[schema.field]"
+                  ></slot>
+                </template>
+              </n-form-item>
+            </n-gi>
+          </n-grid>
+        </n-tab-pane>
+      </n-tabs>
       <!--提交 重置 展开 收起 按钮-->
-      <n-gi #="{ overflow }" :span="isInline ? '' : 24" :suffix="isInline ? true : false">
-        <slot name="extra"></slot>
-        <n-space
-          :justify="isInline ? 'end' : 'start'"
-          :style="{ 'margin-left': `${isInline ? 12 : getProps.labelWidth}px` }"
-          align="center"
-        >
-          <n-button
-            v-if="getProps.showActionButtonGroup && getProps.showSubmitButton"
-            :loading="loadingSub"
-            v-bind="getSubmitBtnOptions"
-            @click="handleSubmit"
-            >{{ getProps.submitButtonText }}
-          </n-button>
-          <n-button
-            v-if="getProps.showActionButtonGroup && getProps.showResetButton"
-            v-bind="getResetBtnOptions"
-            @click="resetFields"
-            >{{ getProps.resetButtonText }}
-          </n-button>
-          <slot></slot>
-          <n-button
-            v-if="isInline && getProps.showAdvancedButton"
-            icon-placement="right"
-            text
-            type="primary"
-            @click="unfoldToggle"
+      <n-grid v-bind="getGrid" x-gap="8">
+        <n-gi #="{ overflow }" :span="isInline ? '' : 24" :suffix="isInline ? true : false">
+          <slot name="extra"></slot>
+          <n-space
+            :justify="isInline ? 'end' : 'start'"
+            :style="{ 'margin-left': `${isInline ? 12 : getProps.labelWidth}px` }"
+            align="center"
           >
-            <template #icon>
-              <n-icon v-if="overflow" class="unfold-icon" size="14">
-                <DownOutlined />
-              </n-icon>
-              <n-icon v-else class="unfold-icon" size="14">
-                <UpOutlined />
-              </n-icon>
-            </template>
-            {{ overflow ? '展开' : '收起' }}
-          </n-button>
-        </n-space>
-      </n-gi>
-    </n-grid>
+            <n-button
+              v-if="getProps.showActionButtonGroup && getProps.showSubmitButton"
+              :loading="loadingSub"
+              v-bind="getSubmitBtnOptions"
+              @click="handleSubmit"
+              >{{ getProps.submitButtonText }}
+            </n-button>
+            <n-button
+              v-if="getProps.showActionButtonGroup && getProps.showResetButton"
+              v-bind="getResetBtnOptions"
+              @click="resetFields"
+              >{{ getProps.resetButtonText }}
+            </n-button>
+            <slot></slot>
+            <n-button
+              v-if="isInline && getProps.showAdvancedButton"
+              icon-placement="right"
+              text
+              type="primary"
+              @click="unfoldToggle"
+            >
+              <template #icon>
+                <n-icon v-if="overflow" class="unfold-icon" size="14">
+                  <DownOutlined />
+                </n-icon>
+                <n-icon v-else class="unfold-icon" size="14">
+                  <UpOutlined />
+                </n-icon>
+              </template>
+              {{ overflow ? '展开' : '收起' }}
+            </n-button>
+          </n-space>
+        </n-gi>
+      </n-grid>
+    </template>
+    <template v-else>
+      <n-grid v-bind="getGrid" x-gap="8">
+        <template v-for="g in groupedSchema" :key="g.group">
+          <n-gi v-if="showGroupHeader" :span="24">
+            <n-h4>{{ g.group }}</n-h4>
+          </n-gi>
+          <n-gi v-for="schema in g.schema" :key="schema.field" v-bind="schema.giProps">
+            <n-form-item :label="schema.label" :path="schema.field">
+              <!--标签名右侧温馨提示-->
+              <template v-if="schema.labelMessage" #label>
+                {{ schema.label }}
+                <n-tooltip :style="schema.labelMessageStyle" trigger="hover">
+                  <template #trigger>
+                    <n-icon class="cursor-pointer text-gray-400" size="18">
+                      <QuestionCircleOutlined />
+                    </n-icon>
+                  </template>
+                  {{ schema.labelMessage }}
+                </n-tooltip>
+              </template>
+
+              <!--判断插槽-->
+              <template v-if="schema.slot">
+                <slot
+                  :field="schema.field"
+                  :model="formModel"
+                  :name="schema.slot"
+                  :value="formModel[schema.field]"
+                ></slot>
+              </template>
+
+              <!--NCheckbox-->
+              <template v-else-if="schema.component === 'NCheckbox'">
+                <n-checkbox-group v-model:value="formModel[schema.field]">
+                  <n-space>
+                    <n-checkbox
+                      v-for="item in schema.componentProps.options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    />
+                  </n-space>
+                </n-checkbox-group>
+              </template>
+
+              <!--NRadioGroup-->
+              <template v-else-if="schema.component === 'NRadioGroup'">
+                <n-radio-group v-model:value="formModel[schema.field]">
+                  <n-space>
+                    <n-radio
+                      v-for="item in schema.componentProps.options"
+                      :key="item.value"
+                      :value="item.value"
+                    >
+                      {{ item.label }}
+                    </n-radio>
+                  </n-space>
+                </n-radio-group>
+              </template>
+
+              <template v-else-if="schema.component === 'NUpload'">
+                <n-space>
+                  <n-upload
+                    v-model:file-list="formModel[schema.field]"
+                    v-bind="getComponentProps(schema)"
+                  >
+                    <n-button> 上传文件</n-button>
+                  </n-upload>
+                  <n-button
+                    v-if="getComponentProps(schema).uploadTemplate"
+                    dashed
+                    type="info"
+                    @click="getComponentProps(schema).uploadTemplate"
+                    >下载上传模板
+                  </n-button>
+                </n-space>
+              </template>
+              <template v-else-if="schema.component === 'NAutoComplete'">
+                <n-select
+                  v-model:value="formModel[schema.field]"
+                  :class="{ isFull: schema.isFull != false && getProps.isFull }"
+                  :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
+                  :get-show="() => true"
+                  v-bind="getComponentProps(schema)"
+                />
+              </template>
+              <template v-else-if="schema.component === 'NSelect'">
+                <n-select
+                  v-model:value="formModel[schema.field]"
+                  :class="{ isFull: schema.isFull != false && getProps.isFull }"
+                  :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
+                  :get-show="() => true"
+                  filterable
+                  v-bind="getComponentProps(schema)"
+                />
+              </template>
+              <!--动态渲染表单组件-->
+              <component
+                :is="schema.component"
+                v-else
+                v-model:value="formModel[schema.field]"
+                :class="{ isFull: schema.isFull != false && getProps.isFull }"
+                :disabled="schema?.disableCondition && schema?.disableCondition(formModel)"
+                v-bind="getComponentProps(schema)"
+              />
+              <!--组件后面的内容-->
+              <template v-if="schema.suffix">
+                <slot
+                  :field="schema.field"
+                  :model="formModel"
+                  :name="schema.suffix"
+                  :value="formModel[schema.field]"
+                ></slot>
+              </template>
+            </n-form-item>
+          </n-gi>
+        </template>
+
+        <!--提交 重置 展开 收起 按钮-->
+        <n-gi #="{ overflow }" :span="isInline ? '' : 24" :suffix="isInline ? true : false">
+          <slot name="extra"></slot>
+          <n-space
+            :justify="isInline ? 'end' : 'start'"
+            :style="{ 'margin-left': `${isInline ? 12 : getProps.labelWidth}px` }"
+            align="center"
+          >
+            <n-button
+              v-if="getProps.showActionButtonGroup && getProps.showSubmitButton"
+              :loading="loadingSub"
+              v-bind="getSubmitBtnOptions"
+              @click="handleSubmit"
+              >{{ getProps.submitButtonText }}
+            </n-button>
+            <n-button
+              v-if="getProps.showActionButtonGroup && getProps.showResetButton"
+              v-bind="getResetBtnOptions"
+              @click="resetFields"
+              >{{ getProps.resetButtonText }}
+            </n-button>
+            <slot></slot>
+            <n-button
+              v-if="isInline && getProps.showAdvancedButton"
+              icon-placement="right"
+              text
+              type="primary"
+              @click="unfoldToggle"
+            >
+              <template #icon>
+                <n-icon v-if="overflow" class="unfold-icon" size="14">
+                  <DownOutlined />
+                </n-icon>
+                <n-icon v-else class="unfold-icon" size="14">
+                  <UpOutlined />
+                </n-icon>
+              </template>
+              {{ overflow ? '展开' : '收起' }}
+            </n-button>
+          </n-space>
+        </n-gi>
+      </n-grid>
+    </template>
   </n-form>
 </template>
 
@@ -195,6 +358,7 @@
       const gridCollapsed = ref(true);
       const loadingSub = ref(false);
       const isUpdateDefaultRef = ref(false);
+      const activeTab = ref('基本信息');
 
       const getSubmitBtnOptions = computed(() => {
         return Object.assign(
@@ -277,13 +441,17 @@
       });
 
       const groupedSchema = computed(() => {
-        return Object.entries(groupBy(getSchema.value, 'group')).map((it) => {
+        const res = Object.entries(groupBy(getSchema.value, 'group')).map((it) => {
+          console.log(it, 'it');
           const [index, t] = it;
           return {
             group: index === 'undefined' ? '基本信息' : index,
             schema: t,
           };
         });
+        // Initialize activeTab with the first group's name
+        console.log(res, 'res');
+        return res;
       });
 
       const { handleFormValues, initDefault } = useFormValues({
@@ -369,6 +537,7 @@
         getComponentProps,
         unfoldToggle,
         groupedSchema,
+        activeTab,
       };
     },
   });

@@ -7,9 +7,9 @@
         @submit="updateFilter"
       />
       <div class="mt-2">
-        <n-button class="action-button" size="small" type="info" @click="selectedHeader">
-          表头显示
-        </n-button>
+        <!--        <n-button class="action-button" size="small" type="info" @click="selectedHeader">-->
+        <!--          表头显示-->
+        <!--        </n-button>-->
         <n-button
           v-if="typeMission === '整柜任务看板' && hasAuthPower('missionOutboundAdd')"
           class="action-button"
@@ -53,7 +53,7 @@
           :disabled="selectedTaskList.length !== 1"
           class="action-button"
           size="small"
-          @click="startEdit"
+          @click="showFiles"
         >
           附件
         </n-button>
@@ -61,7 +61,7 @@
           :disabled="selectedTaskList.length !== 1"
           class="action-button"
           size="small"
-          @click="startEdit"
+          @click="showTimeLine"
         >
           时间线
         </n-button>
@@ -69,7 +69,7 @@
           :disabled="selectedTaskList.length !== 1"
           class="action-button"
           size="small"
-          @click="startEdit"
+          @click="splitTask"
         >
           拆分
         </n-button>
@@ -77,7 +77,7 @@
           :disabled="selectedTaskList.length !== 1"
           class="action-button"
           size="small"
-          @click="startEdit"
+          @click="showTaskTray"
         >
           托盘
         </n-button>
@@ -85,7 +85,7 @@
           :disabled="selectedTaskList.length !== 1"
           class="action-button"
           size="small"
-          @click="startEdit"
+          @click="showCancel"
         >
           取消
         </n-button>
@@ -109,7 +109,6 @@
               ref="actionRef"
               v-model:checked-row-keys="checkedRows"
               @update:checked-row-keys="handleCheck"
-              :actionColumn="actionColumn"
               :columns="columns"
               :pagination="paginationReactive"
               :request="loadDataTable"
@@ -154,7 +153,7 @@
         style="width: 90%; min-width: 800px; max-width: 800px"
         title="添加托盘"
       >
-        <new-tray-dialog :current-data="recordData" @saved="reloadTable" />
+        <new-tray-dialog :current-data="currentModel" @saved="reloadTable" />
       </n-modal>
       <n-modal
         v-model:show="showCurrentHeaderDataTable"
@@ -166,7 +165,7 @@
         <selected-header-table :all-columns="columns" :type="'taskList'" @saved="reloadHeader" />
       </n-modal>
       <n-modal
-        v-model:show="showTimeLine"
+        v-model:show="timeLineDialog"
         :show-icon="false"
         preset="card"
         style="width: 90%; min-width: 800px; max-width: 800px"
@@ -202,13 +201,13 @@
         <loading-frame :loading="checkLoading" :title="log" />
       </n-modal>
       <n-modal
-        v-model:show="splitTaskDialog"
+        v-model:show="showSplitTaskDialog"
         :show-icon="false"
         preset="card"
         style="width: 90%; min-width: 600px; max-width: 600px"
         title="拆分"
       >
-        <split-task-dialog :info="currentInfo" @saved="reloadTable" />
+        <split-task-dialog :info="currentModel" @saved="reloadTable" />
       </n-modal>
       <n-modal
         v-model:show="showCancelDialog"
@@ -229,6 +228,16 @@
       >
         <task-price-dialog :info="currentData" @save="reloadTable" />
       </n-modal>
+      <n-modal
+        v-model:show="showFilesDialog"
+        :show-icon="false"
+        class="modal-medium"
+        preset="dialog"
+        title="查看附件"
+        style="width: 800px"
+      >
+        <task-files :info="currentInfo" @save="reloadTable" />
+      </n-modal>
     </div>
   </n-card>
 </template>
@@ -239,7 +248,6 @@
   import { allDeliveryMethod, allInStatusList, allOutboundMethod } from './columns';
   import { $ref } from 'vue/macros';
   import {
-    statusColumnEasy,
     statusColumnSelect,
     timeColumn,
     timeWarnColumn,
@@ -280,14 +288,13 @@
     addOrUpdateTask,
     getTaskListByFilter,
     getTaskListByFilterWithPagination,
-    getTaskListById,
   } from '@/api/newDataLayer/TaskList/TaskList';
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import SplitTaskDialog from '@/views/newViews/Missions/AlreadyWarehousing/SplitTaskDialog.vue';
-  import { NButton, NIcon, NInput, NTooltip, useDialog } from 'naive-ui';
+  import { NButton, NIcon, NTooltip, useDialog } from 'naive-ui';
   import * as XLSX from 'xlsx';
   import { allInStatusNotifyList } from '@/api/dataLayer/common/common';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
@@ -300,6 +307,7 @@
   import SingleFilterBar from '@/views/bolita-views/composable/SingleFilterBar.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { createPaginationPlaceholders } from '@/api/newDataLayer/Common/Common';
+  import TaskFiles from '@/views/newViews/Missions/AlreadyWarehousing/TaskFiles.vue';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -318,14 +326,15 @@
   let currentHeader = $ref([]);
   let currentColumns = $ref([]);
   let currentInfo = $ref('');
-  let showTimeLine = $ref(false);
+  let timeLineDialog = $ref(false);
   let currentWithOutSelection = $ref([]);
   let showOfferPrice = $ref(false);
   let showMergeDialog = $ref(false);
   let checkLoading = $ref(false);
   let showCheckDialog = $ref(false);
   let log = $ref('');
-  let splitTaskDialog = $ref(false);
+  let showSplitTaskDialog = $ref(false);
+  let showFilesDialog = $ref(false);
   const dialog = useDialog();
   const filters: FormField[] = [
     asyncCustomer(),
@@ -359,6 +368,7 @@
     {
       type: 'selection',
       fixed: 'left',
+      width: 50,
     },
     {
       title: '客户',
@@ -415,31 +425,29 @@
       key: 'packing',
     },
     {
-      title: '国家',
-      key: 'country',
-    },
-    {
-      title: '预报件数',
-      key: 'number',
-      width: 96,
-    },
-    {
       title: '客户备注',
       key: 'normalNote',
       width: 96,
     },
     {
-      title: '实际件数',
-      key: 'arrivedContainerNum',
-      width: 96,
-    },
-    {
-      title: '运单号',
-      key: 'deliveryIdIn',
-    },
-    {
       title: 'FBA单号',
       key: 'fbaDeliveryCode',
+    },
+    {
+      title: '国家',
+      key: 'country',
+    },
+    {
+      title: '邮编',
+      key: 'postcode',
+    },
+    {
+      title: 'FC',
+      key: 'fcAddress',
+    },
+    {
+      title: '送货地址',
+      key: 'address',
     },
     {
       title: '出库方式',
@@ -458,33 +466,10 @@
       },
     },
     {
-      title: '操作要求',
-      key: 'operationRequire',
+      title: '库内操作',
+      key: 'operateInStorage',
+      width: 96,
     },
-    {
-      title: '操作备注',
-      key: 'operationNote',
-    },
-    statusColumnEasy({
-      title: '结算状态',
-      key: 'finalStatus',
-    }),
-    {
-      title: 'po',
-      key: 'po',
-    },
-    {
-      title: 'FC/送货地址',
-      key: 'fcAddress',
-    },
-    {
-      title: '邮编',
-      key: 'postcode',
-    },
-    statusColumnEasy({
-      title: '审核状态',
-      key: 'inBoundDetailStatus',
-    }),
     {
       title: '换单文件',
       key: 'changeOrderFiles',
@@ -497,102 +482,164 @@
       },
     },
     {
-      title: '送货备注',
-      key: 'transportationNote',
-    },
-    {
-      title: '预报托数',
-      key: 'trayNum',
-    },
-    {
-      title: '托盘规格',
-      key: 'trayDisplay',
-    },
-    {
-      title: '实际托数',
-      key: 'arrivedTrayNum',
-    },
-    timeColumn('planArriveDateTime', '预期到仓日期'),
-    timeColumn('arriveTime', '实际到仓日期'),
-    timeColumn('deliveryTime', '发货时间'),
-    timeColumn('outBoundTime', '预计取货时间'),
-    // {
-    //   title: '仓库备注',
-    //   key: 'note',
-    // },
-    {
-      title: '仓库备注',
-      key: 'note',
-      render(row) {
-        return h(
-          NButton,
-          {
-            text: true,
-            onClick: () => {
-              dialog.create({
-                title: '请输入仓库备注',
-                content: () =>
-                  h(NInput, {
-                    value: row.note,
-                    onUpdateValue: (value) => {
-                      row.note = value;
-                    },
-                    placeholder: '请输入备注',
-                  }),
-                positiveText: '确定',
-                negativeText: '取消',
-                onPositiveClick: async () => {
-                  await addOrUpdateTask(row);
-                },
-                onNegativeClick: () => {},
-              });
-            },
-          },
-          { default: () => (row.note ? row.note : '暂无备注') }
-        );
+      title: '尾板',
+      key: 'tailgate',
+      component: 'NSelect',
+      componentProps: {
+        options: [
+          { label: '是', value: '是' },
+          { label: '否', value: '否' },
+        ],
       },
     },
     {
-      title: '库位',
-      key: 'warehouseLocation',
+      title: '仓库',
+      key: 'inventory.name',
+      width: 100,
     },
     {
-      title: '分拣标识',
-      key: 'sign',
+      title: '预报/实际件数',
+      key: 'number',
+      width: 96,
     },
 
     {
-      title: '托数',
-      key: 'industrialTrayNum',
+      title: '预报/实际托数',
+      key: 'arrivedContainerNum',
+      width: 96,
+    },
+    timeColumn('planArriveDateTime', '预期到仓日期'),
+    timeColumn('arriveTime', '实际到仓日期'),
+    timeColumn('deliveryTime', '预计发货时间'),
+    timeColumn('outBoundTime', '实际发货时间'),
+    {
+      title: '出库件数',
+      key: 'deliveryIdIn',
     },
     {
-      title: '品名',
-      key: 'productName',
+      title: '出库托数',
+      key: 'deliveryIdIn',
     },
     {
-      title: 'UN号',
-      key: 'unNumber',
+      title: 'po',
+      key: 'po',
     },
     {
-      title: '收件人',
-      key: 'recipient',
+      title: 'ISA',
+      key: 'isa',
     },
     {
-      title: '电话',
-      key: 'phone',
+      title: 'Versand Nr',
+      key: 'isa',
     },
-    {
-      title: '邮箱',
-      key: 'email',
-    },
-    {
-      title: '是否需要预约',
-      key: 'needReserve',
-    },
-    {
-      title: '工业品备注',
-      key: 'industrialNote',
-    },
+
+    // {
+    //   title: '操作要求',
+    //   key: 'operationRequire',
+    // },
+    // {
+    //   title: '操作备注',
+    //   key: 'operationNote',
+    // },
+    // statusColumnEasy({
+    //   title: '结算状态',
+    //   key: 'finalStatus',
+    // }),
+    //
+    // statusColumnEasy({
+    //   title: '审核状态',
+    //   key: 'inBoundDetailStatus',
+    // }),
+    // {
+    //   title: '送货备注',
+    //   key: 'transportationNote',
+    // },
+    // {
+    //   title: '预报托数',
+    //   key: 'trayNum',
+    // },
+    // {
+    //   title: '托盘规格',
+    //   key: 'trayDisplay',
+    // },
+    // {
+    //   title: '实际托数',
+    //   key: 'arrivedTrayNum',
+    // },
+
+    // {
+    //   title: '仓库备注',
+    //   key: 'note',
+    //   render(row) {
+    //     return h(
+    //       NButton,
+    //       {
+    //         text: true,
+    //         onClick: () => {
+    //           dialog.create({
+    //             title: '请输入仓库备注',
+    //             content: () =>
+    //               h(NInput, {
+    //                 value: row.note,
+    //                 onUpdateValue: (value) => {
+    //                   row.note = value;
+    //                 },
+    //                 placeholder: '请输入备注',
+    //               }),
+    //             positiveText: '确定',
+    //             negativeText: '取消',
+    //             onPositiveClick: async () => {
+    //               await addOrUpdateTask(row);
+    //             },
+    //             onNegativeClick: () => {},
+    //           });
+    //         },
+    //       },
+    //       { default: () => (row.note ? row.note : '暂无备注') }
+    //     );
+    //   },
+    // },
+    // {
+    //   title: '库位',
+    //   key: 'warehouseLocation',
+    // },
+    // {
+    //   title: '分拣标识',
+    //   key: 'sign',
+    // },
+    //
+    // {
+    //   title: '托数',
+    //   key: 'industrialTrayNum',
+    // },
+    // {
+    //   title: '品名',
+    //   key: 'productName',
+    // },
+    // {
+    //   title: 'UN号',
+    //   key: 'unNumber',
+    // },
+    // {
+    //   title: '收件人',
+    //   key: 'recipient',
+    // },
+    // {
+    //   title: '电话',
+    //   key: 'phone',
+    // },
+    // {
+    //   title: '邮箱',
+    //   key: 'email',
+    // },
+    // {
+    //   title: '是否需要预约',
+    //   key: 'needReserve',
+    // },
+    // {
+    //   title: '工业品备注',
+    //   key: 'industrialNote',
+    // },
   ].map((it) => {
     it.ellipsis = {
       tooltip: true,
@@ -606,13 +653,17 @@
   interface Prop {
     belongsToId?: string;
   }
-
-  let selectedRow = $ref('');
   let selectedTaskList = $ref([]);
   let allTaskList = $ref([]);
 
-  function onRowClick(rowData) {
-    selectedRow = rowData;
+  function showTimeLine() {
+    currentInfo = selectedTaskList[0];
+    timeLineDialog = true;
+  }
+
+  function showFiles() {
+    currentInfo = selectedTaskList[0];
+    showFilesDialog = true;
   }
 
   async function handleCheck(rowKeys) {
@@ -663,19 +714,29 @@
     showCancelDialog = false;
   }
 
-  async function startEdit(id) {
-    currentModel = await getTaskListById(id);
-    currentModel.customerId = currentModel.customer.id;
-    currentModel.inventoryId = currentModel.inventory.id;
+  async function startEdit() {
+    currentModel = selectedTaskList[0];
+    currentModel.customerName = currentModel.customer.customerName;
     editDetailModel.value = true;
+  }
+
+  function splitTask() {
+    currentModel = selectedTaskList[0];
+    showSplitTaskDialog = true;
+  }
+
+  function showTaskTray() {
+    currentModel = selectedTaskList[0];
+    addNewTrayDialog = true;
+  }
+
+  function showCancel() {
+    currentInfo = selectedTaskList[0];
+    showCancelDialog = true;
   }
 
   async function selectedHeader() {
     showCurrentHeaderDataTable = true;
-  }
-
-  async function startAddTray(id) {
-    addNewTrayDialog = true;
   }
 
   function addTable() {
@@ -836,6 +897,13 @@
       } else {
         currentFilter['customerIds'] = [filterObj['customer.id']];
       }
+      if (filterObj['inStatus']) {
+        currentFilter['inStatusIn'] = [filterObj['inStatus']];
+      } else {
+        if (filterObj['showAll']) {
+          currentFilter['inStatusIn'] = ['已拆分'];
+        }
+      }
     } else {
       currentFilter['inStatusNotIn'] = ['已拆分', '已取消'];
     }
@@ -964,7 +1032,9 @@
     showOfferPrice = false;
     checkLoading = false;
     showCheckDialog = false;
-    splitTaskDialog = false;
+    showSplitTaskDialog = false;
+    checkedRows = [];
+    selectedTaskList = [];
     await actionRef.value[0].reload();
   }
 
@@ -1087,7 +1157,7 @@
             icon: renderIconWithTooltip(Clock20Regular, '时间线'),
             onClick() {
               currentInfo = record;
-              showTimeLine = true;
+              timeLineDialog = true;
             },
             ifShow: () => {
               return hasAuthPower('missionTimeline');

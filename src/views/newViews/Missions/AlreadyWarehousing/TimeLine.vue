@@ -22,7 +22,8 @@
   const props = defineProps<Props>();
   async function reload() {
     loading = true;
-    currentItems = props.info.timelines.filter((it) => it.useType === 'normal')
+    currentItems = props.info.timelines
+      .filter((it) => it.useType === 'normal')
       .sort((a, b) => {
         return new Date(b.detailTime).getTime() - new Date(a.detailTime).getTime();
       });

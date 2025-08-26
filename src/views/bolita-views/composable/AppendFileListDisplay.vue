@@ -8,6 +8,13 @@
   const showImagePreview = ref(false);
   const previewImageUrl = ref('');
 
+  interface Props {
+    filesUrl?: any;
+    disableClick?: boolean;
+    showButton?: boolean;
+  }
+  const props = defineProps<Props>();
+
   function deleteFile(files) {
     emit('deleteFile', files);
   }
@@ -24,8 +31,6 @@
     }
     return res;
   });
-
-  const props = defineProps({ filesUrl: Array, disableClick: null });
 </script>
 
 <template>
@@ -67,7 +72,11 @@
               <n-icon> <link-outlined /> </n-icon>
             </template>
           </n-button>
-          <n-button :disabled="disableClick" icon-placement="right" @click="deleteFile(f)"
+          <n-button
+            v-if="showButton"
+            :disabled="disableClick"
+            icon-placement="right"
+            @click="deleteFile(f)"
             >删除
             <template #icon>
               <n-icon> <delete-outlined /> </n-icon>
@@ -120,7 +129,7 @@
 
   .card-actions {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     margin-top: 8px;
   }
 </style>

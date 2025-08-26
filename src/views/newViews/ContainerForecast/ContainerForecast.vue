@@ -232,7 +232,6 @@
   import DetailGroupTaskDialog from '@/views/newViews/ContainerForecast/form/DetailGroupTaskDialog.vue';
 
   // Data and API
-  import { columns } from './columns';
   import { InBoundStatus, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { allInStatusNotifyList } from '@/api/dataLayer/common/common';
@@ -302,6 +301,7 @@
     {
       type: 'selection',
       fixed: 'left',
+      key: 'selection',
       width: 50,
     },
     {

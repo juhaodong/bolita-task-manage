@@ -1,15 +1,15 @@
 <template>
   <n-card class="proCard">
     <loading-frame :loading="loading">
-      <normal-form :default-value-model="model" :form-fields="schemas" @submit="handleSubmit" />
+      <normal-form :default-value-model="model" :form-fields="allSchemas" @submit="handleSubmit" />
     </loading-frame>
   </n-card>
 </template>
 <script lang="ts" setup>
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { asyncUserCustomer, generateOptionFromArray } from '@/store/utils/utils';
+  import { safeScope } from '@/api/dataLayer/common/GeneralModel';
+  import { generateOptionFromArray } from '@/store/utils/utils';
   import {
     allDeliveryMethod,
     allOutboundMethod,
@@ -22,6 +22,7 @@
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { keys } from 'lodash';
   import { addOrUpdateTask } from '@/api/newDataLayer/TaskList/TaskList';
+  import dayjs from 'dayjs';
 
   interface Props {
     model?: any;
@@ -29,7 +30,7 @@
 
   let loading: boolean = $ref(false);
   const prop = defineProps<Props>();
-  const schemas: FormFields = [
+  const normalSchemas = [
     {
       label: 'id',
       field: 'id',
@@ -41,58 +42,103 @@
         return prop.model?.id;
       },
     },
-    asyncUserCustomer(prop.model.customerId),
+    {
+      label: '客户',
+      field: 'customerName',
+      required: false,
+      disableCondition: () => {
+        return prop.model?.id;
+      },
+      displayCondition: () => {
+        return prop.model?.id;
+      },
+    },
     {
       label: '柜号',
       field: 'containerId',
+      disableCondition: () => {
+        return prop.model?.id;
+      },
+      displayCondition: () => {
+        return prop.model?.id;
+      },
     },
     {
       label: '票号',
       field: 'ticketId',
+      disableCondition: () => {
+        return prop.model?.id;
+      },
+      displayCondition: () => {
+        return prop.model?.id;
+      },
     },
     {
       label: '国家',
       field: 'country',
     },
     {
+      label: '预计件数',
+      field: 'number',
+    },
+    {
       label: '预计托数',
       field: 'trayNum',
-      required: false,
     },
     {
       label: '实际到达托数',
       field: 'arrivedTrayNum',
-      required: false,
     },
-    {
-      label: '预计件数',
-      field: 'number',
-      required: false,
-    },
+
     {
       label: '实际到达件数',
       field: 'arrivedContainerNum',
-      required: false,
     },
     {
       label: '总实重',
       field: 'weight',
-      required: false,
     },
     {
       label: '总体积',
       field: 'volume',
-      required: false,
     },
     {
-      label: '运单号',
-      field: 'deliveryIdIn',
-      required: false,
+      label: '尺寸',
+      field: 'size',
     },
+    {
+      label: '包装',
+      field: 'packing',
+    },
+    {
+      label: '客户备注',
+      field: 'normalNote',
+    },
+  ].map((it) => {
+    it.group = '基本信息';
+    it.required = false;
+    return it;
+  });
+  const inventorySchemas = [
     {
       label: 'FBA单号',
       field: 'fbaDeliveryCode',
-      required: false,
+    },
+    {
+      label: 'po',
+      field: 'po',
+    },
+    {
+      label: 'FC',
+      field: 'fcAddress',
+    },
+    {
+      label: '送货地址',
+      field: 'address',
+    },
+    {
+      label: '邮编',
+      field: 'postcode',
     },
     {
       label: '出库方式',
@@ -110,16 +156,7 @@
         options: generateOptionFromArray(allDeliveryMethod),
       },
     },
-    {
-      label: 'po',
-      field: 'po',
-      required: false,
-    },
-    {
-      label: 'FC/送货地址',
-      field: 'fcAddress',
-      required: false,
-    },
+
     {
       label: '换单文件',
       field: 'changeOrderFiles',
@@ -142,97 +179,47 @@
         ],
       },
     },
-    {
-      label: '仓库备注',
-      field: 'note',
-      required: false,
-    },
-    {
-      label: '库位',
-      field: 'warehouseLocation',
-      required: false,
-    },
-    {
-      label: '送货备注',
-      field: 'transportationNote',
-      required: false,
-    },
-    {
-      label: '操作备注',
-      field: 'operationNote',
-      required: false,
-    },
-    {
-      label: '分拣标识',
-      field: 'sign',
-      required: false,
-    },
-    {
-      label: '工业品托数',
-      field: 'industrialTrayNum',
-      required: false,
-    },
+  ].map((it) => {
+    it.group = '仓库信息';
+    it.required = false;
+    return it;
+  });
+  const otherSchemas = [
     {
       label: '品名',
       field: 'productName',
-      required: false,
     },
     {
       label: 'UN号',
       field: 'unNumber',
-      required: false,
     },
     {
       label: '收件人',
       field: 'recipient',
-      required: false,
     },
     {
       label: '电话',
       field: 'phone',
-      required: false,
     },
     {
       label: '邮箱',
       field: 'email',
-      required: false,
     },
     {
-      label: '地址1',
-      field: 'address1',
-      required: false,
+      label: '尾板',
+      field: 'tailgate',
     },
-    {
-      label: '地址2',
-      field: 'address2',
-      required: false,
-    },
-    {
-      label: '工业品国家',
-      field: 'industrialCountry',
-      required: false,
-    },
-    {
-      label: '工业品城市',
-      field: 'industrialCity',
-      required: false,
-    },
-    {
-      label: '是否需要预约',
-      field: 'needReserve',
-      required: false,
-    },
-    {
-      label: '工业品备注',
-      field: 'industrialNote',
-      required: false,
-    },
-  ];
+  ].map((it) => {
+    it.group = '大件信息';
+    it.required = false;
+    return it;
+  });
+
+  const allSchemas = [...normalSchemas, ...inventorySchemas, ...otherSchemas];
 
   const emit = defineEmits(['saved']);
 
   async function handleSubmit(values: any) {
-    console.log(prop.model, 'model');
     const waitEdit = prop.model;
     loading = true;
     values.alreadyChanged = 1;
@@ -271,7 +258,7 @@
     }
     const valuesKeys = keys(values);
     let editLabel = [];
-    let allItemInfo = schemas.filter((x) => x.field);
+    let allItemInfo = allSchemas.filter((x) => x.field);
     for (const valuesKey of valuesKeys) {
       if (values[valuesKey] !== prop.model[valuesKey]) {
         const res = allItemInfo.find((it) => it.field === valuesKey) ?? '';

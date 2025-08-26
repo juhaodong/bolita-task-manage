@@ -1,9 +1,10 @@
 <script lang="ts" setup>
   import { computed, onMounted, ref } from 'vue';
   import { safeSumBy } from '@/store/utils/utils';
-  import { addOrUpdateTask } from '@/api/newDataLayer/TaskList/TaskList';
+  import { addOrUpdateTask, searchTaskPrice } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { useUserStore } from '@/store/modules/user';
+  import dayjs from 'dayjs';
 
   interface Props {
     info?: any;
@@ -23,6 +24,9 @@
       prop.info.arrivedContainerNum.toString()
     );
   });
+  const totalWeight = computed(() => {
+    return safeSumBy(newSplitList.value, 'weight').toString() === prop.info.weight.toString();
+  });
   function backStep() {
     step.value = step.value - 1;
   }
@@ -33,6 +37,8 @@
         newSplitList.value.push({
           value: i.toString(),
           currentNumber: '',
+          size: '',
+          weight: '',
         });
       }
       step.value = step.value + 1;
@@ -42,8 +48,18 @@
         let defaultTask = Object.assign({}, prop.info);
         delete defaultTask.id;
         delete defaultTask.timelines;
+        defaultTask.weight = item.weight;
+        defaultTask.size = item.size;
         defaultTask.arrivedContainerNum = item.currentNumber;
         defaultTask.ticketId = defaultTask.ticketId + '#' + item.value;
+        defaultTask.suggestionPrice = await searchTaskPrice(
+          item.size,
+          item.weight,
+          defaultTask.country,
+          defaultTask.outboundMethod,
+          item.currentNumber,
+          defaultTask.postcode
+        );
         await addOrUpdateTask(defaultTask);
       }
       let originalTask = Object.assign({}, prop.info);
@@ -69,6 +85,7 @@
     <div style="display: flex; justify-content: space-between">
       <div>原票号:{{ prop.info.ticketId }}</div>
       <div>总数量: {{ prop.info.arrivedContainerNum }}</div>
+      <div>总重量: {{ prop.info.weight }}</div>
     </div>
     <n-descriptions :columns="1" bordered label-placement="left">
       <n-descriptions-item v-if="step === 1" :span="2" label="拆分数量">
@@ -80,7 +97,9 @@
           :key="index"
           :label="'#' + item.value"
         >
-          <n-input-number v-model:value="item.currentNumber" />
+          <n-input-number placeholder="请输入数量" v-model:value="item.currentNumber" />
+          <n-input-number placeholder="请输入重量" v-model:value="item.weight" />
+          <n-input placeholder="请输入尺寸" v-model:value="item.size" />
         </n-descriptions-item>
       </template>
     </n-descriptions>
@@ -93,7 +112,7 @@
     >
     <n-button
       :disabled="
-        (!totalNumber && step === 2) ||
+        ((!totalNumber || !totalWeight) && step === 2) ||
         (step === 1 && !splitNumber) ||
         !Number.isInteger(parseFloat(splitNumber))
       "
