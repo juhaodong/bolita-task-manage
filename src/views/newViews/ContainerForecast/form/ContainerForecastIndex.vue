@@ -29,7 +29,6 @@
   import { safeSumBy } from '@/store/utils/utils';
   import { getFBACodeList } from '@/api/newDataLayer/FBACode/FBACode';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
-  import router from '@/router';
 
   interface Prop {
     currentModel?: any;
@@ -306,8 +305,7 @@
         }
         await Promise.all(idQuest);
         loadingMessage += '完成' + `<br>`;
-        await router.push('/missions/missionDetail?containerNo=' + value.containerNo);
-        // emit('saved');
+        emit('saved');
       }
     }
     stop();

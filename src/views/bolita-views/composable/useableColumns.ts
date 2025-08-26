@@ -20,7 +20,6 @@ export function timeDisplay(time) {
 
 export function timeDisplayYMD(time) {
   if (time) {
-    time = parseFloat(time);
     return dayjs(time).format('YYYY-MM-DD');
   } else {
     return '';

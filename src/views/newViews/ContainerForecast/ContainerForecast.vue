@@ -447,7 +447,7 @@
 
       // Update notify status and arrival time
       currentRecord.inStatus = '等待卸柜';
-      currentRecord.arrivedInventoryTime = dayjs().valueOf();
+      currentRecord.arrivedInventoryTime = dayjs().format('YYYY-MM-DDTHH:mm:ss');
 
       // Save notify changes
       const res = await addOrUpdateNotify(currentRecord);

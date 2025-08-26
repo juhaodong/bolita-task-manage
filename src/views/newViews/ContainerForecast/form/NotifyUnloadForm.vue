@@ -142,8 +142,6 @@
           ? '入库待操作'
           : newInStatus;
       listElement.arriveTime = dayjs(realDate).format('YYYY-MM-DD') + ' ' + startTime;
-      listElement.customerId = listElement.customer.id;
-      listElement.inventoryId = listElement.inventory.id;
       if (listElement.inStatus === '存仓') {
         await addOrUpdateTaskTimeLine({
           useType: 'storage',

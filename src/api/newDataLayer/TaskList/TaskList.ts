@@ -17,6 +17,14 @@ export async function getTaskListByFilter(filter) {
   ).data.rows;
 }
 
+export async function getTaskListBySourceId(id) {
+  return (
+    await hillo.jsonPost(typeName + '/search', {
+      sourceId: id,
+    })
+  ).data.rows;
+}
+
 export async function getTaskListByFilterWithPagination(filter, pagination) {
   return (
     await hillo.jsonPost(
@@ -111,8 +119,10 @@ export async function addOrUpdateTask(item) {
   });
 }
 
-export async function deleteTask(id) {
-  return await hillo.jsonPost(typeName + '/deleteById/' + id, {});
+export async function deleteTask(ids) {
+  return await hillo.jsonPost(typeName + '/deleteBySpec', {
+    idIn: ids,
+  });
 }
 
 export const defaultTask = {

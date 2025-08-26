@@ -1,180 +1,79 @@
 <template>
-  <n-card class="proCard">
-    <loading-frame :loading="loading">
-      <template v-if="step == 0">
-        <n-data-table
-          :columns="columns"
-          :data="info"
-          :row-key="(row) => row.id"
-          class="mt-4"
-          max-height="450"
-          virtual-scroll
-        />
-        <n-space v-if="info.length > 0" align="center" class="mt-4" justify="space-between">
-          <div>已经选择{{ info.length }}条记录</div>
-          <div>总数量: {{ totalNumber }}</div>
-          <div>总重量: {{ totalWeight }}</div>
-          <div>总体积: {{ totalVolume }}</div>
-          <n-button :disabled="info.length == 0" type="primary" @click="confirmSelection"
-            >确定
-          </n-button>
-        </n-space>
-      </template>
-      <template v-else>
-        <n-button @click="step = 0">返回上一步</n-button>
-        <n-data-table
-          v-if="allNotifyDetail.length > 0"
-          v-model:checked-row-keys="checkedRowKeys"
-          :columns="displayColumns"
-          :data="allNotifyDetail"
-          class="mt-4"
-          max-height="450"
-          virtual-scroll
-        />
-        <normal-form :form-fields="addressFormFields" class="mt-8" @submit="saveOutboundPlan" />
-      </template>
-    </loading-frame>
-    <n-modal
-      v-model:show="showDetailInfo"
-      :show-icon="false"
-      preset="dialog"
-      style="width: 90%; min-width: 600px; max-width: 1000px"
-      title="详情"
-    >
-      <detail-info :current-date="currentDate" @save="reloadTable" />
-    </n-modal>
-  </n-card>
+  <loading-frame :loading="loading">
+    <span>原始明细</span>
+    <n-data-table
+      :columns="columns"
+      :data="[sourceTask]"
+      :row-key="(row) => row.id"
+      max-height="450"
+      virtual-scroll
+    />
+    <span class="mt-4">拆分明细</span>
+    <n-data-table
+      :columns="columns"
+      :data="allTaskList"
+      :row-key="(row) => row.id"
+      max-height="450"
+      virtual-scroll
+    />
+    <n-button @click="confirmMerge" style="margin-top: 20px" type="primary">确定</n-button>
+  </loading-frame>
 </template>
 <script lang="ts" setup>
-  import { FormField } from '@/views/bolita-views/composable/form-field-type';
-  import { computed, h, onMounted, ref } from 'vue';
-  import { DataTableColumns, NButton } from 'naive-ui';
-  import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
+  import { onMounted, ref } from 'vue';
+  import { DataTableColumns } from 'naive-ui';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { asyncfcAddressByFilter, safeSumBy } from '@/store/utils/utils';
-  import DetailInfo from '@/views/newViews/Missions/AlreadyWarehousing/DetailInfo.vue';
   import { $ref } from 'vue/macros';
   import {
     addOrUpdateTask,
-    defaultTask,
-    getTaskListByIds,
+    deleteTask,
+    getTaskListById,
+    getTaskListBySourceId,
   } from '@/api/newDataLayer/TaskList/TaskList';
 
   interface Props {
-    info?: any[];
-    model?: any;
-    initialKey?: any[];
+    info?: {};
   }
 
   const prop = defineProps<Props>();
   const emit = defineEmits(['saved']);
-  const checkedRowKeys = ref<any[]>([]);
-  let showDetailInfo = $ref(false);
-  let currentDate = ref([]);
-  const outboundMethod = ref<any[]>([]);
-  let selectedContainer = $ref('');
-  let selectedCountry = $ref('');
-  let selectedfcAddress = $ref('');
-  onMounted(async () => {});
+  onMounted(async () => {
+    await init();
+  });
   let loading: boolean = $ref(false);
 
-  const totalNumber = computed(() => {
-    return safeSumBy(prop.info, 'arrivedContainerNum').toFixed(2);
-  });
-  const totalVolume = computed(() => {
-    return safeSumBy(prop.info, 'volume').toFixed(2);
-  });
-  const totalWeight = computed(() => {
-    return safeSumBy(prop.info, 'weight').toFixed(2);
-  });
+  const allTaskList = ref([]);
+  const sourceTask = ref({});
 
-  let step = $ref(0);
-
-  async function confirmSelection() {
-    const currentList = await getTaskListByIds(checkedRowKeys.value);
-    const mergeItem = Object.assign({}, currentList[0]);
-    mergeItem.number = totalNumber.value;
-    mergeItem.volume = totalVolume.value;
-    mergeItem.weight = totalWeight.value;
-    mergeItem.ticketId = currentList.map((it) => it.ticketId).join('#');
-    mergeItem.fbaDeliveryCode = currentList.map((it) => it.fbaDeliveryCode).join('#');
-    mergeItem.po = currentList.map((it) => it.po).join('#');
-    mergeItem.mergedId = currentList.map((it) => it.id).join(',');
-    const currentObj = Object.assign(defaultTask, mergeItem);
-    currentObj.customerId = currentObj.customer.id;
-    currentObj.inventoryId = currentObj.inventory.id;
-    delete currentObj.id;
-    await addOrUpdateTask(currentObj);
-    // const userInfo = useUserStore().info;
-    for (const item of currentList) {
-      item.inStatus = '已合并';
-      item.customerId = item.customer.id;
-      item.inventoryId = item.inventory.id;
-      // await addOrUpdateTaskTimeLine({
-      //   useType: 'normal',
-      //   bolitaTaskId: item.id,
-      //   operator: userInfo?.realName,
-      //   detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
-      //   note: '被合并',
-      // });
-      await addOrUpdateTask(item);
-    }
+  async function confirmMerge() {
+    // const source
+    loading = true;
+    sourceTask.value.inStatus = '入库待出库';
+    await addOrUpdateTask(sourceTask.value);
+    const deleteIds = allTaskList.value.map((it) => it.id);
+    await deleteTask(deleteIds);
     emit('saved');
+    loading = false;
   }
 
   async function init() {
-    // addressFormFields.unshift(await asyncCustomerFormField());
     loading = true;
-    await updateFilter(null);
+    allTaskList.value = await getTaskListBySourceId(prop.info[0].sourceId);
+    sourceTask.value = await getTaskListById(prop.info[0].sourceId);
     loading = false;
   }
 
   const columns: DataTableColumns<any> = $computed(() => [
-    {
-      type: 'selection',
-      key: 'selection',
-    },
     { title: '票号', key: 'ticketId' },
     { title: '柜号', key: 'containerId' },
     { title: '托数', key: 'arrivedTrayNum' },
     { title: '箱数', key: 'arrivedContainerNum' },
     { title: '重量', key: 'weight' },
     { title: '体积', key: 'volume' },
-    { title: 'FC/送货地址', key: 'fcAddress' },
+    { title: 'FC', key: 'fcAddress' },
     { title: '国家', key: 'country' },
     { title: 'FBA单号', key: 'fbaDeliveryCode' },
-    {
-      title: '详情',
-      key: 'actions',
-      render(row) {
-        return h(
-          NButton,
-          {
-            strong: true,
-            tertiary: true,
-            size: 'small',
-            onClick: () => {
-              currentDate.value = row;
-              showDetailInfo = true;
-            },
-          },
-          { default: () => '查看' }
-        );
-      },
-    },
   ]);
-
-  const filters: FormField[] = [
-    {
-      label: '柜号',
-      field: 'containerId',
-    },
-    {
-      label: '票号',
-      field: 'ticketId',
-    },
-    asyncfcAddressByFilter(),
-  ];
 </script>
 
 <style lang="less" scoped></style>

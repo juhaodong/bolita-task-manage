@@ -1,7 +1,11 @@
 <script lang="ts" setup>
   import { computed, onMounted, ref } from 'vue';
   import { safeSumBy } from '@/store/utils/utils';
-  import { addOrUpdateTask, searchTaskPrice } from '@/api/newDataLayer/TaskList/TaskList';
+  import {
+    addOrUpdateTask,
+    deleteTask,
+    searchTaskPrice,
+  } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { useUserStore } from '@/store/modules/user';
   import dayjs from 'dayjs';
@@ -46,6 +50,9 @@
       loading.value = true;
       for (const item of newSplitList.value) {
         let defaultTask = Object.assign({}, prop.info);
+        if (!defaultTask.sourceId) {
+          defaultTask.sourceId = defaultTask.id;
+        }
         delete defaultTask.id;
         delete defaultTask.timelines;
         defaultTask.weight = item.weight;
@@ -63,10 +70,13 @@
         await addOrUpdateTask(defaultTask);
       }
       let originalTask = Object.assign({}, prop.info);
-      originalTask.inStatus = '已拆分';
-      console.log(originalTask, 'task');
+      if (originalTask.sourceId) {
+        await deleteTask([originalTask.id]);
+      } else {
+        originalTask.inStatus = '已拆分';
+        await addOrUpdateTask(originalTask);
+      }
       const userInfo = useUserStore().info;
-      await addOrUpdateTask(originalTask);
       await addOrUpdateTaskTimeLine({
         useType: 'normal',
         bolitaTaskId: prop.info.id,

@@ -44,9 +44,12 @@ export async function getNotifyListByFilter(filter) {
 
 export async function getNotifyListByFilterWithPagination(filter, pagination) {
   return (
-    await hillo.jsonPost(typeName + '/search' + getQuery(pagination), {
-      ...filter,
-    })
+    await hillo.jsonPost(
+      typeName + '/search' + getQuery(pagination) + '&orderCodes=createTimestamp desc',
+      {
+        ...filter,
+      }
+    )
   ).data;
 }
 

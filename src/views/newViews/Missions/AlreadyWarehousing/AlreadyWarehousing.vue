@@ -189,7 +189,7 @@
         style="width: 90%; min-width: 1000px; max-width: 1000px"
         title="合并"
       >
-        <merge-dialog :info="selectedTaskList" @save="reloadTable" />
+        <merge-dialog :info="selectedTaskList" @saved="reloadTable" />
       </n-modal>
       <n-modal
         v-model:show="showCheckDialog"
@@ -1035,6 +1035,7 @@
     showSplitTaskDialog = false;
     checkedRows = [];
     selectedTaskList = [];
+    showMergeDialog = false;
     await actionRef.value[0].reload();
   }
 
