@@ -7,39 +7,24 @@
         @submit="updateFilter"
       />
       <div class="mt-2">
-        <n-button
-          v-if="hasAuthPower('forecastAdd')"
-          class="action-button"
-          size="small"
-          type="primary"
-          @click="addTable(NotifyType.Container)"
-        >
-          新建预报
-        </n-button>
-        <!--        <n-button class="action-button" size="small" type="info" @click="selectedHeader">-->
-        <!--          表头显示-->
-        <!--        </n-button>-->
         <n-button class="action-button" size="small" type="success" @click="downloadData">
           下载
         </n-button>
-        <n-button class="action-button" size="small" type="warning" @click="downloadFbaCode">
-          下载FBA
+        <n-button
+          :disabled="disableUnloading"
+          class="action-button"
+          size="small"
+          @click="checkContainerStatus"
+        >
+          卸柜
         </n-button>
         <n-button
           :disabled="selectedNotifyList.length !== 1"
           class="action-button"
           size="small"
-          @click="startEdit"
+          @click="showUnloadingPic"
         >
-          修改
-        </n-button>
-        <n-button
-          :disabled="selectedNotifyList.length !== 1"
-          class="action-button"
-          size="small"
-          @click="showUnloading"
-        >
-          生成卸柜单
+          卸柜照片
         </n-button>
         <n-button
           :disabled="selectedNotifyList.length !== 1"
@@ -47,23 +32,7 @@
           size="small"
           @click="uploadUnloadingForm"
         >
-          上传卸柜单
-        </n-button>
-        <n-button
-          :disabled="selectedNotifyList.length !== 1"
-          class="action-button"
-          size="small"
-          @click="downloadFile"
-        >
-          预报文件
-        </n-button>
-        <n-button
-          :disabled="disableCancel"
-          class="action-button"
-          size="small"
-          @click="cancelButton"
-        >
-          取消
+          下载卸柜单
         </n-button>
       </div>
 
@@ -79,20 +48,6 @@
         @update:pageSize="handlePageSizeChange"
         @row-click="onRowClick"
       />
-      <n-modal
-        v-model:show="showModal"
-        :show-icon="false"
-        :style="{ maxWidth: notifyType === NotifyType.TrayOrBox ? '1600px' : '800px' }"
-        class="modal-large"
-        preset="card"
-        :title="currentModel ? '编辑货柜预报' : '新建货柜预报'"
-      >
-        <container-forecast-index
-          :current-model="currentModel"
-          :type="notifyType"
-          @saved="closeAddDialog"
-        />
-      </n-modal>
       <n-modal
         v-model:show="showOperationTable"
         :show-icon="false"
@@ -182,7 +137,7 @@
         style="width: 80%"
         :title="currentModel?.containerNo + '/' + currentModel?.inventory?.name"
       >
-        <detail-group-task-dialog :notify-id="currentId" />
+        <detail-info-dialog :notify-id="currentId" />
       </n-modal>
     </n-card>
     <no-power-page v-else />
@@ -208,12 +163,10 @@
   import NotifyUnloadForm from '@/views/newViews/ContainerForecast/form/NotifyUnloadForm.vue';
   import NotifyFeeDialog from '@/views/newViews/ContainerForecast/form/NotifyFeeDialog.vue';
   import WarehouseInfoDialog from '@/views/newViews/ContainerForecast/form/WarehouseInfoDialog.vue';
-  import ContainerForecastIndex from '@/views/newViews/ContainerForecast/form/ContainerForecastIndex.vue';
   import UnloadingList from '@/views/newViews/ContainerForecast/form/UnloadingList.vue';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
-  import DetailGroupTaskDialog from '@/views/newViews/ContainerForecast/form/DetailGroupTaskDialog.vue';
 
   // Data and API
   import { InBoundStatus, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
@@ -239,15 +192,13 @@
   import { addOrUpdateTask, getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { useUserStore } from '@/store/modules/user';
-  import {
-    asyncCustomerWarehouseFormField,
-    currentBaseImageUrl,
-  } from '@/api/dataLayer/fieldDefination/common';
+  import { currentBaseImageUrl } from '@/api/dataLayer/fieldDefination/common';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
   import {
     deleteInventoryLog,
     getInventoryUseLogListByNotifyId,
   } from '@/api/newDataLayer/Warehouse/UseLog';
+  import DetailInfoDialog from '@/views/newViews/OperationDetail/NotOutbound/DetailInfoDialog.vue';
 
   // Table state
   const actionRef = ref();
@@ -301,9 +252,9 @@
             text: true,
             type: 'primary',
             onClick: async () => {
+              currentModel = row;
               currentId = row.id;
               showDetailInfoDialog = true;
-              currentModel = row;
             },
           },
           { default: () => row?.containerNo }
@@ -315,24 +266,24 @@
       fixed: 'left',
       key: 'customer.customerName',
     },
+    {
+      title: '仓库',
+      key: 'inventory.name',
+    },
     timeColumn('planArriveDateTime', '预计入库日期'),
     {
       title: '预计时间',
       key: 'inHouseTime',
       component: 'NSelect',
-      width: 160,
+      width: 100,
       componentProps: {
         options: generateOptionFromTimeArray(timeArrays),
       },
     },
     {
-      title: '仓库',
-      key: 'inventory.name',
-    },
-    {
       title: '数量',
       key: 'totalCountDisplay',
-      width: 160,
+      width: 140,
     },
     statusColumnSelect({
       title: '状态',
@@ -340,24 +291,24 @@
       list: generateOptionFromArray(allInStatusNotifyList),
     }),
     {
-      title: '卸柜人',
-      key: 'unloadPerson',
-    },
-    {
       title: '创建人',
       key: 'salesName',
     },
     {
-      title: '最后修改',
-      key: 'lastModifierName',
-      width: 100,
+      title: '卸柜人',
+      key: 'unloadPerson',
     },
     {
       title: '备注',
       key: 'note',
-      width: 160,
+      width: 100,
     },
-  ];
+  ].map((it) => {
+    it.ellipsis = {
+      tooltip: true,
+    };
+    return it;
+  });
 
   const filters: FormField[] = [
     asyncCustomer(),
@@ -373,11 +324,10 @@
         options: generateOptionFromArray(allInStatusNotifyList),
       },
     },
-    asyncCustomerWarehouseFormField(),
     {
       field: 'planArriveDateTime',
       component: 'NDatePicker',
-      label: '入库日期',
+      label: '预期到仓日期',
       componentProps: {
         type: 'daterange',
         clearable: true,
@@ -828,7 +778,7 @@
 
     currentModel = selectedNotifyList[0];
     const upload = useUploadDialog();
-    const files = await upload.upload(currentModel[fieldName]);
+    const files = await upload.upload(currentModel[fieldName], '卸柜单');
 
     if (files.checkPassed) {
       currentModel[fieldName] = files.files;

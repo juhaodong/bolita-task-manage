@@ -16,6 +16,14 @@ const routes: Array<RouteRecordRaw> = [
     },
     children: [
       {
+        path: 'InventoryDashboard',
+        name: `InventoryDashboard`,
+        meta: {
+          title: '入库任务看板',
+        },
+        component: () => import('@/views/newViews/OperationDetail/InventoryDashboard.vue'),
+      },
+      {
         path: 'Operation',
         name: `Operation`,
         meta: {

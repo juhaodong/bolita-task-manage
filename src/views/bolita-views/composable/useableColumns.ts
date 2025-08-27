@@ -125,6 +125,7 @@ export function statusColumn(title = '状态', key = 'status') {
   return {
     title: title,
     key: key,
+    width: 80,
     render(record) {
       return colorfulRender(record?.[key] ?? '');
     },

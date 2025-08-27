@@ -141,7 +141,7 @@
           : listElement.operateInStorage === '是'
           ? '入库待操作'
           : newInStatus;
-      listElement.arriveTime = dayjs(realDate).format('YYYY-MM-DD') + ' ' + startTime;
+      listElement.arriveTime = dayjs(realDate).format('YYYY-MM-DD') + 'T' + startTime;
       if (listElement.inStatus === '存仓') {
         await addOrUpdateTaskTimeLine({
           useType: 'storage',
@@ -163,10 +163,9 @@
     log += '正在处理数据';
     await Promise.all(request);
     (notifyInfo.arrivedCount =
-      totalArrivedTrayCount.value + '托' + totalArrivedContainerCount.value + '箱'),
+      totalArrivedContainerCount.value + '件' + totalArrivedTrayCount.value + '托'),
       (notifyInfo.inStatus = newInStatus),
       (notifyInfo.unloadPerson = unloadPerson),
-      (notifyInfo.totalCount = totalTrayCount.value + '托' + totalContainerCount.value + '箱'),
       (notifyInfo.realDate = realDate),
       (notifyInfo.unloadStartTime = startTime),
       (notifyInfo.unloadEndTime = endTime),
@@ -201,7 +200,7 @@
         <n-descriptions-item label="实际入库日期">
           {{ timeDisplayYMD(notifyInfo?.arrivedInventoryTime) ?? '' }}
         </n-descriptions-item>
-        <n-descriptions-item label="预报总数"> {{ notifyInfo?.arrivedCount }}</n-descriptions-item>
+        <n-descriptions-item label="预报总数"> {{ notifyInfo?.totalCount }}</n-descriptions-item>
         <n-descriptions-item label="实际卸柜日期">
           <n-date-picker v-model:value="realDate" type="date" />
         </n-descriptions-item>

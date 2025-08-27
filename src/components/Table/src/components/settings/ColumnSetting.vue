@@ -168,7 +168,6 @@
 
       //切换
       function onChange(checkList) {
-        console.log(checkList, 'checkList');
         if (state.selection) {
           checkList.unshift('selection');
         }
@@ -346,7 +345,7 @@
   .toolbar-popover {
     .n-popover__content {
       padding: 0;
-      max-height: 500px;
+      max-height: 400px;
       overflow-y: auto;
     }
   }

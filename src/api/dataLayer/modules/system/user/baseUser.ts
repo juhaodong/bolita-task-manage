@@ -36,8 +36,10 @@ export async function login(params: { username: string; password: string }) {
   const exist = await loginNew(params.username, params.password);
   const config = {
     isDebug: false,
-    productionUrl: 'http://localhost:8080/',
-    debugUrl: 'http://localhost:8080/',
+    // productionUrl: 'http://localhost:80/',
+    // debugUrl: 'http://localhost:80/',
+    productionUrl: 'https://bolita-test.aaden.io/',
+    debugUrl: 'https://bolita-test.aaden.io/',
     header: {
       post: {
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',

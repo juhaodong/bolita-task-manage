@@ -10,38 +10,46 @@
     {
       title: '客户',
       key: 'customerName',
+      width: 80,
     },
     {
       title: 'ref',
       key: 'ref',
+      width: 100,
     },
     {
       title: '票号',
       key: 'ticketIds',
+      width: 150,
     },
     {
       title: '国家',
       key: 'country',
+      width: 50,
     },
     statusColumnEasy({
       title: '状态',
       key: 'inStatus',
     }),
     {
-      title: 'FC/Address',
+      title: 'FC',
       key: 'fcAddress',
+      width: 80,
     },
     {
       title: 'FBA单号',
       key: 'fbaDeliveryCodes',
+      width: 160,
     },
     {
       title: '出库方式',
       key: 'outboundMethod',
+      width: 100,
     },
     {
       title: '物流渠道',
       key: 'deliveryMethod',
+      width: 100,
     },
     {
       title: '出库数/总数',

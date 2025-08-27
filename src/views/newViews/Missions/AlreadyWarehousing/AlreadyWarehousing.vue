@@ -113,7 +113,6 @@
               :pagination="paginationReactive"
               :request="loadDataTable"
               :row-key="(row) => row.id"
-              @row-click="onRowClick"
             />
           </div>
           <no-power-page v-else />
@@ -243,42 +242,20 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, h, onMounted, reactive, ref, watch } from 'vue';
-  import { BasicTable, TableAction } from '@/components/Table';
+  import { computed, onMounted, reactive, ref } from 'vue';
+  import { BasicTable } from '@/components/Table';
   import { allDeliveryMethod, allInStatusList, allOutboundMethod } from './columns';
   import { $ref } from 'vue/macros';
-  import {
-    statusColumnSelect,
-    timeColumn,
-    timeWarnColumn,
-  } from '@/views/bolita-views/composable/useableColumns';
+  import { statusColumnSelect, timeColumn } from '@/views/bolita-views/composable/useableColumns';
   import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
-  import {
-    Clock20Regular,
-    Delete20Regular,
-    Document20Regular,
-    DocumentEdit20Regular,
-    DrawImage20Regular,
-    Image20Regular,
-    Payment20Regular,
-    SplitVertical20Regular,
-    Tag20Regular,
-    Warning20Regular,
-  } from '@vicons/fluent';
   import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
   import NewTotalFee from '@/views/newViews/SettlementManage/NewTotalFee.vue';
-  import { useUploadDialog } from '@/store/modules/uploadFileState';
   import NewTrayDialog from '@/views/newViews/Missions/AlreadyWarehousing/NewTrayDialog.vue';
   import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
   import TimeLine from '@/views/newViews/Missions/AlreadyWarehousing/TimeLine.vue';
   import { useUserStore } from '@/store/modules/user';
-  import {
-    checkedObj,
-    offerObj,
-    planObj,
-  } from '@/views/newViews/Missions/AlreadyWarehousing/selectionType';
   import OfferPriceDialog from '@/views/newViews/Missions/AlreadyWarehousing/OfferPriceDialog.vue';
   import { getUserCustomerList, hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
@@ -289,12 +266,11 @@
     getTaskListByFilter,
     getTaskListByFilterWithPagination,
   } from '@/api/newDataLayer/TaskList/TaskList';
-  import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import SplitTaskDialog from '@/views/newViews/Missions/AlreadyWarehousing/SplitTaskDialog.vue';
-  import { NButton, NIcon, NTooltip, useDialog } from 'naive-ui';
+  import { NButton, useDialog } from 'naive-ui';
   import * as XLSX from 'xlsx';
   import { allInStatusNotifyList } from '@/api/dataLayer/common/common';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
@@ -432,10 +408,12 @@
     {
       title: 'FBA单号',
       key: 'fbaDeliveryCode',
+      width: 100,
     },
     {
       title: '国家',
       key: 'country',
+      width: 60,
     },
     {
       title: '邮编',
@@ -448,6 +426,7 @@
     {
       title: '送货地址',
       key: 'address',
+      width: 100,
     },
     {
       title: '出库方式',
@@ -456,6 +435,7 @@
       componentProps: {
         options: generateOptionFromArray(allOutboundMethod),
       },
+      width: 100,
     },
     {
       title: '物流渠道',
@@ -464,6 +444,7 @@
       componentProps: {
         options: generateOptionFromArray(allDeliveryMethod),
       },
+      width: 100,
     },
     {
       title: '库内操作',
@@ -471,7 +452,7 @@
       width: 96,
     },
     {
-      title: '换单文件',
+      title: '换单',
       key: 'changeOrderFiles',
       component: 'NSelect',
       componentProps: {
@@ -499,14 +480,13 @@
     },
     {
       title: '预报/实际件数',
-      key: 'number',
-      width: 96,
+      key: 'numberDisplay',
+      width: 120,
     },
-
     {
       title: '预报/实际托数',
-      key: 'arrivedContainerNum',
-      width: 96,
+      key: 'trayDisplay',
+      width: 120,
     },
     timeColumn('planArriveDateTime', '预期到仓日期'),
     timeColumn('arriveTime', '实际到仓日期'),
@@ -514,11 +494,13 @@
     timeColumn('outBoundTime', '实际发货时间'),
     {
       title: '出库件数',
-      key: 'deliveryIdIn',
+      key: 'outContainerNum',
+      width: 100,
     },
     {
       title: '出库托数',
-      key: 'deliveryIdIn',
+      key: 'outTrayNum',
+      width: 100,
     },
     {
       title: 'po',
@@ -532,114 +514,6 @@
       title: 'Versand Nr',
       key: 'isa',
     },
-
-    // {
-    //   title: '操作要求',
-    //   key: 'operationRequire',
-    // },
-    // {
-    //   title: '操作备注',
-    //   key: 'operationNote',
-    // },
-    // statusColumnEasy({
-    //   title: '结算状态',
-    //   key: 'finalStatus',
-    // }),
-    //
-    // statusColumnEasy({
-    //   title: '审核状态',
-    //   key: 'inBoundDetailStatus',
-    // }),
-    // {
-    //   title: '送货备注',
-    //   key: 'transportationNote',
-    // },
-    // {
-    //   title: '预报托数',
-    //   key: 'trayNum',
-    // },
-    // {
-    //   title: '托盘规格',
-    //   key: 'trayDisplay',
-    // },
-    // {
-    //   title: '实际托数',
-    //   key: 'arrivedTrayNum',
-    // },
-
-    // {
-    //   title: '仓库备注',
-    //   key: 'note',
-    //   render(row) {
-    //     return h(
-    //       NButton,
-    //       {
-    //         text: true,
-    //         onClick: () => {
-    //           dialog.create({
-    //             title: '请输入仓库备注',
-    //             content: () =>
-    //               h(NInput, {
-    //                 value: row.note,
-    //                 onUpdateValue: (value) => {
-    //                   row.note = value;
-    //                 },
-    //                 placeholder: '请输入备注',
-    //               }),
-    //             positiveText: '确定',
-    //             negativeText: '取消',
-    //             onPositiveClick: async () => {
-    //               await addOrUpdateTask(row);
-    //             },
-    //             onNegativeClick: () => {},
-    //           });
-    //         },
-    //       },
-    //       { default: () => (row.note ? row.note : '暂无备注') }
-    //     );
-    //   },
-    // },
-    // {
-    //   title: '库位',
-    //   key: 'warehouseLocation',
-    // },
-    // {
-    //   title: '分拣标识',
-    //   key: 'sign',
-    // },
-    //
-    // {
-    //   title: '托数',
-    //   key: 'industrialTrayNum',
-    // },
-    // {
-    //   title: '品名',
-    //   key: 'productName',
-    // },
-    // {
-    //   title: 'UN号',
-    //   key: 'unNumber',
-    // },
-    // {
-    //   title: '收件人',
-    //   key: 'recipient',
-    // },
-    // {
-    //   title: '电话',
-    //   key: 'phone',
-    // },
-    // {
-    //   title: '邮箱',
-    //   key: 'email',
-    // },
-    // {
-    //   title: '是否需要预约',
-    //   key: 'needReserve',
-    // },
-    // {
-    //   title: '工业品备注',
-    //   key: 'industrialNote',
-    // },
   ].map((it) => {
     it.ellipsis = {
       tooltip: true,
@@ -921,7 +795,11 @@
   const loadDataTable = async () => {
     await getCurrentFilter();
     const res = await getTaskListByFilterWithPagination(currentFilter, paginationReactive);
-    allList = res.rows;
+    allList = res.rows.map((it) => {
+      it.numberDisplay = it.number + '/' + it.arrivedContainerNum;
+      it.trayDisplay = it.trayNum + '/' + it.arrivedTrayNum;
+      return it;
+    });
     const totalCount = res.totalRowCount;
     // Create pagination placeholders
     const { fakeListStart, fakeListEnd } = createPaginationPlaceholders(
@@ -935,22 +813,11 @@
           (a) => a.trayType + '(' + a.size + ')' + '*' + a.amount + ' / '
         );
       }
-      const storageTime = it.timelines.filter((x) => x.useType === 'storage');
-      let stayTime = '';
-      if (storageTime) {
-        for (let i = 0; i < storageTime.length - 1; i += 2) {
-          stayTime =
-            stayTime +
-            dayjs(storageTime[i].detailTime).diff(dayjs(storageTime[i + 1].detailTime), 'day');
-        }
-        const timeListLength = storageTime.length;
-        if (timeListLength % 2 !== 0) {
-          stayTime =
-            stayTime + dayjs().diff(dayjs(storageTime[timeListLength - 1].detailTime), 'day');
-        }
-        it.stayTime = stayTime;
+      // todo 滞留时间
+      if (it.outboundForecast?.outDate || !it.arriveTime) {
+        it.storageTime = '/';
       } else {
-        it.stayTime = '-';
+        it.storageTime = dayjs().diff(dayjs(it.arriveTime), 'hour') ?? '/';
       }
     });
     allTaskList = [...fakeListStart, ...allList, ...fakeListEnd];
@@ -962,66 +829,66 @@
     reloadTable();
   }
 
-  function checkCashStatus(id) {
-    currentData = allList.find((it) => it.id === id);
-    addNewFeeDialog = true;
-  }
+  // function checkCashStatus(id) {
+  //   currentData = allList.find((it) => it.id === id);
+  //   addNewFeeDialog = true;
+  // }
 
   let showFeeDialog = $ref(false);
 
-  function showPriceDialog(info) {
-    currentData = info;
-    showFeeDialog = true;
-  }
+  // function showPriceDialog(info) {
+  //   currentData = info;
+  //   showFeeDialog = true;
+  // }
 
-  watch(
-    typeMission,
-    async (value, oldValue) => {
-      if (value !== oldValue && value && oldValue) {
-        await reloadHeader();
-      }
-    },
-    { deep: true }
-  );
+  // watch(
+  //   typeMission,
+  //   async (value, oldValue) => {
+  //     if (value !== oldValue && value && oldValue) {
+  //       // await reloadHeader();
+  //     }
+  //   },
+  //   { deep: true }
+  // );
 
-  async function reloadHeader() {
-    currentWithOutSelection = [];
-    currentHeader = [];
-    const taskListHeader = await getTableHeaderGroupItemList('taskList');
-    currentHeader = taskListHeader ? JSON.parse(taskListHeader?.headerItemJson) : [];
-    currentHeader.forEach((item) => {
-      const res = columns.find((it) => it.key === item.itemKey);
-      currentWithOutSelection.push(res);
-    });
-    currentWithOutSelection =
-      currentWithOutSelection.length > 0 ? currentWithOutSelection : columns;
-
-    const userInfo = useUserStore().info;
-    if (typeMission.value === '整柜任务看板') {
-      currentColumns = [planObj, ...currentWithOutSelection];
-      if (userInfo.userType !== '客户') {
-        currentColumns.unshift(timeWarnColumn());
-      }
-    } else if (typeMission.value === '审核看板') {
-      currentColumns = [checkedObj, ...currentWithOutSelection];
-    } else if (typeMission.value === '报价看板') {
-      currentColumns = [offerObj, ...currentWithOutSelection];
-    } else {
-      currentColumns = [...currentWithOutSelection];
-    }
-    currentColumns = currentColumns.filter((it) => it);
-
-    // Sort columns with fixed property to the leftmost side
-    const fixedColumns = currentColumns.filter((col) => col.fixed === 'left');
-    const nonFixedColumns = currentColumns.filter((col) => col.fixed !== 'left');
-    currentColumns = [...fixedColumns, ...nonFixedColumns];
-
-    currentColumns.forEach((item) => {
-      item.width = 200;
-      item.resizable = true;
-    });
-    showCurrentHeaderDataTable = false;
-  }
+  // async function reloadHeader() {
+  //   currentWithOutSelection = [];
+  //   currentHeader = [];
+  //   const taskListHeader = await getTableHeaderGroupItemList('taskList');
+  //   currentHeader = taskListHeader ? JSON.parse(taskListHeader?.headerItemJson) : [];
+  //   currentHeader.forEach((item) => {
+  //     const res = columns.find((it) => it.key === item.itemKey);
+  //     currentWithOutSelection.push(res);
+  //   });
+  //   currentWithOutSelection =
+  //     currentWithOutSelection.length > 0 ? currentWithOutSelection : columns;
+  //
+  //   const userInfo = useUserStore().info;
+  //   if (typeMission.value === '整柜任务看板') {
+  //     currentColumns = [planObj, ...currentWithOutSelection];
+  //     if (userInfo.userType !== '客户') {
+  //       currentColumns.unshift(timeWarnColumn());
+  //     }
+  //   } else if (typeMission.value === '审核看板') {
+  //     currentColumns = [checkedObj, ...currentWithOutSelection];
+  //   } else if (typeMission.value === '报价看板') {
+  //     currentColumns = [offerObj, ...currentWithOutSelection];
+  //   } else {
+  //     currentColumns = [...currentWithOutSelection];
+  //   }
+  //   currentColumns = currentColumns.filter((it) => it);
+  //
+  //   // Sort columns with fixed property to the leftmost side
+  //   const fixedColumns = currentColumns.filter((col) => col.fixed === 'left');
+  //   const nonFixedColumns = currentColumns.filter((col) => col.fixed !== 'left');
+  //   currentColumns = [...fixedColumns, ...nonFixedColumns];
+  //
+  //   currentColumns.forEach((item) => {
+  //     item.width = 200;
+  //     item.resizable = true;
+  //   });
+  //   showCurrentHeaderDataTable = false;
+  // }
 
   async function reloadTable() {
     showModal.value = false;
@@ -1052,252 +919,12 @@
 
   onMounted(async () => {
     typeMission.value = '整柜任务看板';
-    await reloadHeader();
     const res = getQueryString('containerNo');
     if (res) {
-      // filterItems['containerId'] = res;
       updateFilter(filterItems);
     } else {
       await reloadTable();
     }
-  });
-
-  // Helper function to render icon with tooltip
-  const renderIconWithTooltip = (icon, tooltip) => {
-    return () =>
-      h(
-        NTooltip,
-        { trigger: 'hover', placement: 'top' },
-        {
-          trigger: () => h(NIcon, { size: 18, class: 'action-icon' }, { default: () => h(icon) }),
-          default: () => tooltip,
-        }
-      );
-  };
-
-  const actionColumn = reactive({
-    title: '可用动作',
-    key: 'action',
-    fixed: 'left',
-    width: 160,
-    render(record: any) {
-      // Custom file action with icon
-      const iconFileAction = (label, key, icon, power) => {
-        return {
-          icon: renderIconWithTooltip(icon, label),
-          onClick: async () => {
-            try {
-              const upload = useUploadDialog();
-              const files = await upload.upload(record[key]);
-              if (files.checkPassed) {
-                record[key] = files.files;
-                await addOrUpdateTask(record);
-                reloadTable();
-              }
-            } catch (error) {
-              console.error('上传失败:', error);
-            }
-          },
-          ifShow: () => {
-            return hasAuthPower(power);
-          },
-        };
-      };
-
-      return h(TableAction as any, {
-        style: 'text',
-        actions: [
-          {
-            icon: renderIconWithTooltip(DocumentEdit20Regular, '修改'),
-            onClick() {
-              startEdit(record.id);
-            },
-            highlight: () => {
-              if (record.alreadyChanged === 1) {
-                return 'error';
-              } else {
-                return 'success';
-              }
-            },
-            ifShow: () => {
-              return hasAuthPower('missionEdit') && !['已装车', '已出库'].includes(record.inStatus);
-            },
-          },
-          {
-            icon: renderIconWithTooltip(Payment20Regular, '报价'),
-            onClick() {
-              showPriceDialog(record);
-            },
-            // ifShow: () => {
-            //   return hasAuthPower('missionSettle');
-            // },
-          },
-          {
-            icon: renderIconWithTooltip(SplitVertical20Regular, '拆分'),
-            onClick() {
-              currentInfo = record;
-              splitTaskDialog = true;
-            },
-            ifShow: () => {
-              return hasAuthPower('missionEdit');
-            },
-          },
-          // {
-          //   icon: renderIconWithTooltip(Document20Regular, '请报价'),
-          //   onClick() {
-          //     checkCashStatus(record.id);
-          //   },
-          //   highlight: () => {
-          //     return 'info';
-          //   },
-          //   ifShow: () => {
-          //     return record?.['needOfferPrice'] === '1' && hasAuthPower('missionPriceOffer');
-          //   },
-          // },
-          {
-            icon: renderIconWithTooltip(Clock20Regular, '时间线'),
-            onClick() {
-              currentInfo = record;
-              timeLineDialog = true;
-            },
-            ifShow: () => {
-              return hasAuthPower('missionTimeline');
-            },
-          },
-          {
-            icon: renderIconWithTooltip(Document20Regular, '换单文件'),
-            highlight: () => {
-              return record?.['changeOrder']?.length > 0 ? 'success' : 'error';
-            },
-            ifShow: () => {
-              return record?.changeOrderFiles === '是' && hasAuthPower('missionChangeFile');
-            },
-            async onClick() {
-              const upload = useUploadDialog();
-              const files = await upload.upload(record['changeOrder']);
-              const userInfo = useUserStore().info;
-              if (files.checkPassed) {
-                record['changeOrder'] = files.files;
-                if (!record.arriveTime) {
-                  record['inStatus'] = InBoundDetailStatus.WaitCheck;
-                }
-                await addOrUpdateTaskTimeLine({
-                  useType: 'normal',
-                  bolitaTaskId: record.id,
-                  operator: userInfo?.realName,
-                  detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
-                  note: '提交了换单文件',
-                });
-                record.customerId = record.customer.id;
-                record.inventoryId = record.inventory.id;
-                await addOrUpdateTask(record);
-              }
-              actionRef.value[0].reload();
-            },
-          },
-          {
-            icon: renderIconWithTooltip(Tag20Regular, '托盘标签'),
-            highlight: () => {
-              return record?.['trayFiles']?.length > 0 ? 'success' : 'error';
-            },
-            ifShow: () => {
-              return (
-                record?.deliveryMethod === 'FBA卡车派送' &&
-                record?.outboundMethod === '标准托盘' &&
-                hasAuthPower('missionTrayTag')
-              );
-            },
-            async onClick() {
-              const upload = useUploadDialog();
-              const files = await upload.upload(record['trayFiles']);
-              const userInfo = useUserStore().info;
-              if (files.checkPassed) {
-                record['trayFiles'] = files.files;
-                await addOrUpdateTaskTimeLine({
-                  useType: 'normal',
-                  bolitaTaskId: record.id,
-                  operator: userInfo?.realName,
-                  detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
-                  note: '提交了托盘标签',
-                });
-                record.customerId = record.customer.id;
-                record.inventoryId = record.inventory.id;
-                await addOrUpdateTask(record);
-              }
-              actionRef.value[0].reload();
-            },
-          },
-          iconFileAction('pod', 'pod', DrawImage20Regular, 'missionPOD'),
-          iconFileAction('操作文件', 'operationFiles', Document20Regular, 'missionOperationFile'),
-          iconFileAction('问题图片', 'problemFiles', Image20Regular, 'missionProblemPic'),
-          {
-            icon: renderIconWithTooltip(Tag20Regular, '添加托盘'),
-            onClick() {
-              recordData = record;
-              startAddTray(record.id);
-            },
-            highlight: () => {
-              return record.trayItems.length > 0 ? 'success' : 'error';
-            },
-            ifShow: () => {
-              return (
-                (record.outboundMethod === '大件托盘' || record.outboundMethod === '标准托盘') &&
-                hasAuthPower('missionAddTray')
-              );
-            },
-          },
-          {
-            icon: renderIconWithTooltip(Image20Regular, '装车照片'),
-            highlight: () => {
-              return record?.['cmrfiles']?.length > 0 ? 'success' : 'error';
-            },
-            async onClick() {
-              const upload = useUploadDialog();
-              const files = await upload.upload(record['cmrfiles']);
-              if (files.checkPassed) {
-                record.cmrfiles = files.files;
-                await addOrUpdateTask(record);
-              }
-              await actionRef.value[0].reload();
-            },
-            ifShow: () => {
-              return hasAuthPower('outMissionUploadFile');
-            },
-          },
-          {
-            icon: renderIconWithTooltip(Warning20Regular, '信息已变更'),
-            highlight: () => {
-              return 'error';
-            },
-            async onClick() {
-              record.alreadyChanged = 0;
-              record.customerId = record.customer.id;
-              record.inventoryId = record.inventory.id;
-              await addOrUpdateTask(record);
-              const userInfo = useUserStore().info;
-              await addOrUpdateTaskTimeLine({
-                useType: 'normal',
-                bolitaTaskId: record.id,
-                operator: userInfo?.realName,
-                detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
-                note: '修改过的信息已经被确认！',
-              });
-              await reloadTable();
-            },
-            ifShow: () => {
-              return record.alreadyChanged;
-            },
-          },
-          {
-            icon: renderIconWithTooltip(Delete20Regular, '取消'),
-            async onClick() {
-              currentInfo = record;
-              showCancelDialog = true;
-            },
-          },
-        ],
-      });
-    },
   });
 </script>
 

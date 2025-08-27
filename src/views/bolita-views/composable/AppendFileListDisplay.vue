@@ -13,7 +13,9 @@
     disableClick?: boolean;
     showButton?: boolean;
   }
-  const props = defineProps<Props>();
+  const props = withDefaults(defineProps<Props>(), {
+    showButton: true,
+  });
 
   function deleteFile(files) {
     emit('deleteFile', files);

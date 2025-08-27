@@ -28,10 +28,7 @@ export async function getTaskListBySourceId(id) {
 export async function getTaskListByFilterWithPagination(filter, pagination) {
   return (
     await hillo.jsonPost(
-      typeName +
-        '/searchForFull' +
-        getQuery(pagination) +
-        '&orderCodes=createTimestamp desc,notifyId',
+      typeName + '/searchForFull' + getQuery(pagination) + '&orderCodes=createTimestamp desc',
       {
         ...filter,
       }
@@ -56,7 +53,7 @@ export async function getTaskListByIdsAndFilter(ids, filter) {
 
 export async function getTaskListByNotifyId(id) {
   return (
-    await hillo.jsonPost(typeName + '/search', {
+    await hillo.jsonPost(typeName + '/searchForFull', {
       inStatusNotIn: ['已取消', '已拆分'],
       notifyId: id,
     })

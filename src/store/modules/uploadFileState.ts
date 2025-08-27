@@ -34,10 +34,10 @@ export const useUploadDialog = defineStore('uploadFileDialog', {
     },
     async upload(
       currentFileUrls: string[],
-      title = '请选择要上传的文件',
+      title = '请选择文件',
       editable = true
     ): Promise<UploadResult> {
-      this.title = title ?? '请选择要上传的文件';
+      this.title = title ?? '请选择文件';
       this.editable = editable;
       this.currentFileUrls = currentFileUrls;
       this.show = true;

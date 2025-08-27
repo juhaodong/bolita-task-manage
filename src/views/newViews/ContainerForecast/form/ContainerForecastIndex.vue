@@ -239,7 +239,7 @@
       value.unloadEndTime = '';
       value.unloadStartTime = '';
       value.realDate = '';
-      value.totalCount = '';
+
       value.operationalRemarks = '';
       value.salesName = userStore.info?.userName;
       value.cashStatus = '';
@@ -247,12 +247,12 @@
       value.inStatus = InBoundStatus.WaitCheck;
       let taskList = [...(await readFile(value.files?.[0].file, value.notifyType))];
       value.containerNo = defaultValue.containerNo.trim();
-      value.arrivedCount =
+      value.arrivedCount = '';
+      value.totalCount =
         safeSumBy(taskList, 'number').toString() +
         '件' +
         safeSumBy(taskList, 'trayNum').toString() +
         '托';
-
       if (value.files) {
         try {
           value.files = await saveFiles(value.files);
