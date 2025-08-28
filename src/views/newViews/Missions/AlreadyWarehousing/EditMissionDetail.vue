@@ -76,23 +76,27 @@
     {
       label: '国家',
       field: 'country',
+      defaultValue: '',
     },
     {
       label: '预计件数',
       field: 'number',
+      defaultValue: 0,
     },
     {
       label: '预计托数',
       field: 'trayNum',
+      defaultValue: 0,
     },
     {
       label: '实际到达托数',
       field: 'arrivedTrayNum',
+      defaultValue: 0,
     },
-
     {
       label: '实际到达件数',
       field: 'arrivedContainerNum',
+      defaultValue: 0,
     },
     {
       label: '总实重',
@@ -113,6 +117,7 @@
     {
       label: '客户备注',
       field: 'normalNote',
+      defaultValue: '',
     },
   ].map((it) => {
     it.group = '基本信息';
@@ -127,18 +132,22 @@
     {
       label: 'po',
       field: 'po',
+      defaultValue: '',
     },
     {
       label: 'FC',
       field: 'fcAddress',
+      defaultValue: '',
     },
     {
       label: '送货地址',
       field: 'address',
+      defaultValue: '',
     },
     {
       label: '邮编',
       field: 'postcode',
+      defaultValue: '',
     },
     {
       label: '出库方式',
@@ -188,26 +197,32 @@
     {
       label: '品名',
       field: 'productName',
+      defaultValue: '',
     },
     {
       label: 'UN号',
       field: 'unNumber',
+      defaultValue: '',
     },
     {
       label: '收件人',
       field: 'recipient',
+      defaultValue: '',
     },
     {
       label: '电话',
       field: 'phone',
+      defaultValue: '',
     },
     {
       label: '邮箱',
       field: 'email',
+      defaultValue: '',
     },
     {
       label: '尾板',
       field: 'tailgate',
+      defaultValue: '',
     },
   ].map((it) => {
     it.group = '大件信息';

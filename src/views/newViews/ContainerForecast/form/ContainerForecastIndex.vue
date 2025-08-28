@@ -69,13 +69,11 @@
         return [it.title, { prop: it.key }];
       })
     );
-    console.log(schema, 'schema');
     const allFBACodeList = await getFBACodeList();
     try {
       let currentRows = [];
       let { rows, errors } = await readXlsxFile(file, { schema, row: { from: 1 } });
       rows = rows.slice(2);
-      console.log(rows, 'rows');
       const groupContainerId = Object.keys(groupBy(rows, 'containerId'));
       if (groupContainerId.length > 1) {
         errorMessage.push({ detail: '一个Excel文件中不可有多个柜号' });

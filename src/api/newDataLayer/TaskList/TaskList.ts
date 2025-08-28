@@ -193,6 +193,7 @@ export const defaultTask = {
   bookingCarTime: '',
   mergedId: '',
   waitCar: '',
+  tailgate: '',
 };
 
 export async function searchTaskPrice(size, weight, country, outboundMethod, number, zipCode) {
