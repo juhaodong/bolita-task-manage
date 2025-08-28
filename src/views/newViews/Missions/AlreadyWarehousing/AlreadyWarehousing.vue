@@ -316,7 +316,7 @@
     asyncCustomer(),
     {
       label: '柜号',
-      field: 'containerNo',
+      field: 'containerId',
     },
     {
       label: '票号',
@@ -777,6 +777,12 @@
         if (filterObj['showAll']) {
           currentFilter['inStatusIn'] = ['已拆分'];
         }
+      }
+      if (currentFilter['containerId']) {
+        currentFilter['containerIdLike'] = currentFilter['containerId'];
+      }
+      if (currentFilter['ticketId']) {
+        currentFilter['ticketIdLike'] = currentFilter['ticketIdId'];
       }
     } else {
       currentFilter['inStatusNotIn'] = ['已拆分', '已取消'];

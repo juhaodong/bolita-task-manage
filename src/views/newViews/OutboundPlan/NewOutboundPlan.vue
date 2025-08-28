@@ -2,13 +2,10 @@
   <n-card class="proCard">
     <loading-frame :loading="loading">
       <template v-if="step === 0">
-        <filter-bar
-          v-model="filterItems"
-          :columns="columns"
-          @clear="clearFilter(null)"
+        <single-filter-bar
+          :form-fields="filters"
+          @clear="updateFilter(null)"
           @submit="updateFilter"
-          @filter-change="updateFilter"
-          form-fields=""
         />
         <BasicTable
           ref="actionRef"
@@ -26,7 +23,7 @@
           justify="space-between"
         >
           <div>已经选择{{ checkedRowKeys.length }}条记录</div>
-          <div>总数量: {{ totalNumber }}</div>
+          <div>总数量: {{ totalNumber }}件 {{ totalTray }}托</div>
           <div :style="{ color: parseFloat(totalWeight) > 20000 ? 'red' : '' }"
             >总重量: {{ totalWeight }}</div
           >
@@ -64,7 +61,6 @@
   </n-card>
 </template>
 <script lang="ts" setup>
-  import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { h, reactive, ref, watch } from 'vue';
   import { DataTableColumns, NButton } from 'naive-ui';
@@ -72,8 +68,6 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import {
     asyncCustomer,
-    asyncfcAddressByFilter,
-    asyncStorage,
     generateOptionFromArray,
     safeParseInt,
     safeSumBy,
@@ -81,10 +75,6 @@
   } from '@/store/utils/utils';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
-  import {
-    deliveryMethodList,
-    outboundMethodList,
-  } from '@/api/dataLayer/modules/deliveryMethod/detail';
   import DetailInfo from '@/views/newViews/Missions/AlreadyWarehousing/DetailInfo.vue';
   import { $ref } from 'vue/macros';
   import { afterPlanDetailAdded } from '@/api/dataLayer/modules/OutBoundPlan/outAddHook';
@@ -99,8 +89,13 @@
   import dayjs from 'dayjs';
   import { BasicTable } from '@/components/Table';
   import { getUserCustomerList } from '@/api/dataLayer/common/power';
-  import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import router from '@/router';
+  import { createPaginationPlaceholders } from '@/api/newDataLayer/Common/Common';
+  import SingleFilterBar from '@/views/bolita-views/composable/SingleFilterBar.vue';
+  import {
+    deliveryMethodList,
+    outboundMethodList,
+  } from '@/api/dataLayer/modules/deliveryMethod/detail';
 
   interface Props {
     model?: any;
@@ -116,6 +111,7 @@
   const totalNumber = ref(null);
   const totalVolume = ref(null);
   const totalWeight = ref(null);
+  const totalTray = ref(null);
   let selectedPostcode = $ref('');
   let selectedDeliveryMethod = $ref('');
   let selectedfcAddress = $ref('');
@@ -123,43 +119,53 @@
   let loading: boolean = $ref(false);
   let tableLoading = $ref(false);
   let selectedTaskList = $ref([]);
+  const filters: FormField[] = [
+    asyncCustomer(),
+    {
+      label: '柜号',
+      field: 'containerId',
+    },
+    {
+      label: '票号',
+      field: 'ticketId',
+    },
+    {
+      label: '物流方式',
+      field: 'deliveryMethod',
+      component: 'NSelect',
+      componentProps: {
+        options: generateOptionFromArray(deliveryMethodList),
+      },
+    },
+    {
+      label: '出库方式',
+      field: 'outboundMethod',
+      component: 'NSelect',
+      componentProps: {
+        options: generateOptionFromArray(outboundMethodList),
+      },
+    },
+    {
+      label: '邮编',
+      field: 'postcode',
+    },
+  ];
 
   watch(checkedRowKeys, async (val, oldValue) => {
     if (val.length > 0) {
       selectedDeliveryMethod = selectedTaskList.find((it) => it.id === val[0]).deliveryMethod;
       selectedPostcode = selectedTaskList.find((x) => x.id === val[0]).postcode;
       selectedfcAddress = selectedTaskList.find((x) => x.id === val[0]).fcAddress;
-
-      // Update filterItems for display in FilterBar
-      filterItems = filterItems.filter((it) => it.key !== 'deliveryMethod');
-      filterItems = filterItems.filter((it) => it.key !== 'fcAddress');
-      filterItems = filterItems.filter((it) => it.key !== 'postcode');
-      filterItems = filterItems.concat([
-        {
-          option: '物流方式',
-          key: 'deliveryMethod',
-          value: selectedDeliveryMethod,
-          display: selectedDeliveryMethod,
-        },
-        {
-          option: 'FC/送货地址',
-          key: 'fcAddress',
-          value: selectedfcAddress,
-          display: selectedfcAddress,
-        },
-        {
-          option: '邮编',
-          key: 'postcode',
-          value: selectedPostcode,
-          display: selectedPostcode,
-        },
-      ]);
+      filterObj['deliveryMethod'] = selectedDeliveryMethod;
+      filterObj['fcAddress'] = selectedfcAddress;
+      filterObj['postcode'] = selectedPostcode;
+      console.log(filterObj, 'items');
       if (val.length === 1 && oldValue.length < 2) {
-        await updateFilter(filterItems);
+        await updateFilter(filterObj);
       }
     } else {
       tableLoading = true;
-      filterItems = null;
+      filterObj = null;
       selectedPostcode = '';
       selectedDeliveryMethod = '';
       selectedfcAddress = '';
@@ -188,7 +194,6 @@
   const actionRef = ref();
 
   async function clearFilter() {
-    filterItems = null;
     filterObj = null;
     checkedRowKeys.value = [];
   }
@@ -197,8 +202,7 @@
     filterObj = value;
     await reloadTable();
   }
-  let filterObj: any | null = $ref(null);
-  let filterItems: any | null = $ref(null);
+  let filterObj = $ref({});
 
   const paginationReactive = reactive({
     defaultPage: 1,
@@ -222,109 +226,44 @@
     await actionRef.value.reload();
   }
 
-  const loadDataTable = async () => {
-    let currentFilter = [];
+  let currentFilter = $ref([]);
+
+  async function getCurrentFilter() {
+    currentFilter = [];
     if (filterObj) {
-      const otherFilter = filterObj.filter((it) => it?.key !== 'usefulTimeRange');
-      const filterOne = otherFilter.filter((it) => it?.component?.name !== 'DatePicker');
-      const filterTwo = otherFilter.filter((it) => it?.component?.name === 'DatePicker');
-      const filterWithOutDate = filterOne
-        ? Object.keys(filterOne).map((filterItem) => ({
-            field: filterOne[filterItem].key,
-            op: filterOne[filterItem].value ? 'like' : '!=',
-            value: `%${filterOne[filterItem].value || ''}%`,
-          }))
-        : [];
-      const filterWithDate = filterTwo
-        ? Object.keys(filterTwo).map((filterItem) => ({
-            field: filterTwo[filterItem].key,
-            op: 'between',
-            value: filterTwo[filterItem].value,
-          }))
-        : [];
-      currentFilter = filterWithOutDate.concat(filterWithDate);
-      const usefulTimeFilter = filterObj.find((it) => it?.key === 'usefulTimeRange');
-      if (usefulTimeFilter) {
-        if (usefulTimeFilter.value === '红色') {
-          currentFilter.push({
-            field: 'usefulTimeRange',
-            op: '>=',
-            value: 15,
-          });
-        } else if (usefulTimeFilter.value === '黄色') {
-          currentFilter.push({
-            field: 'usefulTimeRange',
-            op: '>=',
-            value: 7,
-          });
-          currentFilter.push({
-            field: 'usefulTimeRange',
-            op: '<',
-            value: 15,
-          });
-        } else {
-          currentFilter.push({
-            field: 'usefulTimeRange',
-            op: '<',
-            value: 7,
-          });
-        }
-      }
-    }
-    const ownedCustomerIds = await getUserCustomerList();
-    currentFilter.push({ field: 'customer.id', op: 'in', value: ownedCustomerIds });
-    currentFilter.push({
-      field: 'inStatus',
-      op: 'in',
-      value: [InBoundStatus.WaitOperate, InBoundStatus.All],
-    });
-    const res = await getTaskListByFilterWithPagination(currentFilter, paginationReactive);
-    const allList = res.content;
-    const totalCount = res.page.totalElements;
-    let fakeListStart = [];
-    let fakeListEnd = [];
-    if (paginationReactive.pageNumber > 0) {
-      fakeListStart = Array(paginationReactive.pageNumber * paginationReactive.pageSize)
-        .fill(null)
-        .map((it, index) => {
-          return { key: index };
-        });
-    }
-    if (paginationReactive.pageSize < totalCount) {
-      if (totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1) > 0) {
-        fakeListEnd = Array(
-          totalCount - paginationReactive.pageSize * (paginationReactive.pageNumber + 1)
-        )
-          .fill(null)
-          .map((it, index) => {
-            return { key: index };
-          });
-      }
-    }
-    allList.forEach((it) => {
-      if (it.trayItems.length > 0) {
-        it.trayDisplay = it.trayItems.map(
-          (a) => a.trayType + '(' + a.size + ')' + '*' + a.amount + ' / '
-        );
-      }
-      const storageTime = it.timelines.filter((x) => x.useType === 'storage');
-      let stayTime = '';
-      if (storageTime) {
-        for (let i = 0; i < storageTime.length - 1; i += 2) {
-          stayTime =
-            stayTime +
-            dayjs(storageTime[i].detailTime).diff(dayjs(storageTime[i + 1].detailTime), 'day');
-        }
-        const timeListLength = storageTime.length;
-        if (timeListLength % 2 !== 0) {
-          stayTime =
-            stayTime + dayjs().diff(dayjs(storageTime[timeListLength - 1].detailTime), 'day');
-        }
-        it.stayTime = stayTime;
+      currentFilter = filterObj;
+      const customerId = await getUserCustomerList();
+      if (!filterObj['customer.id']) {
+        currentFilter['customerIds'] = customerId;
       } else {
-        it.stayTime = '-';
+        currentFilter['customerIds'] = [filterObj['customer.id']];
       }
+      if (currentFilter['containerId']) {
+        currentFilter['containerIdLike'] = currentFilter['containerId'];
+      }
+      if (currentFilter['ticketId']) {
+        currentFilter['ticketIdLike'] = currentFilter['ticketIdId'];
+      }
+    }
+    currentFilter['inStatusIn'] = ['入库待出库'];
+  }
+
+  let allList: any[] = $ref([]);
+
+  const loadDataTable = async () => {
+    await getCurrentFilter();
+    const res = await getTaskListByFilterWithPagination(currentFilter, paginationReactive);
+    allList = res.rows.map((it) => {
+      it.numberDisplay = it.number + '/' + it.arrivedContainerNum;
+      it.trayDisplay = it.trayNum + '/' + it.arrivedTrayNum;
+      return it;
     });
+    const totalCount = res.totalRowCount;
+    const { fakeListStart, fakeListEnd } = createPaginationPlaceholders(
+      paginationReactive.pageNumber,
+      paginationReactive.pageSize,
+      totalCount
+    );
     allNotifyDetail = fakeListStart.concat(allList.concat(fakeListEnd));
     return allNotifyDetail;
   };
@@ -393,53 +332,52 @@
     loading = false;
   }
 
-  const columns: DataTableColumns<any> = $computed(() => [
-    {
-      type: 'selection',
-      key: 'selection',
-      disabled(row) {
-        if (selectedDeliveryMethod || selectedPostcode || selectedfcAddress) {
-          return (
-            row.deliveryMethod !== selectedDeliveryMethod ||
-            row.postcode !== selectedPostcode ||
-            row.fcAddress !== selectedfcAddress
-          );
-        }
+  const columns: DataTableColumns<any> = $computed(() =>
+    [
+      {
+        type: 'selection',
+        key: 'selection',
       },
-    },
-    { title: '客户', key: 'customer.customerName' },
-    { title: '票号', key: 'ticketId' },
-    { title: '柜号', key: 'containerId' },
-    { title: '仓库', key: 'inventory.name' },
-    { title: '托数', key: 'arrivedTrayNum', width: 60 },
-    { title: '箱数', key: 'arrivedContainerNum', width: 60 },
-    { title: '重量', key: 'weight', width: 80 },
-    { title: '体积', key: 'volume', width: 80 },
-    { title: 'FC/送货地址', key: 'fcAddress', width: 300 },
-    { title: '邮编', key: 'postcode' },
-    { title: '出库方式', key: 'outboundMethod' },
-    { title: '物流方式', key: 'deliveryMethod' },
-    { title: 'FBA单号', key: 'fbaDeliveryCode' },
-    {
-      title: '详情',
-      key: 'actions',
-      render(row) {
-        return h(
-          NButton,
-          {
-            strong: true,
-            tertiary: true,
-            size: 'small',
-            onClick: () => {
-              currentDate.value = row;
-              showDetailInfo = true;
+      { title: '客户', key: 'customer.customerName' },
+      { title: '票号', key: 'ticketId' },
+      { title: '柜号', key: 'containerId' },
+      { title: '仓库', key: 'inventory.name' },
+      { title: '托数', key: 'arrivedTrayNum', width: 60 },
+      { title: '箱数', key: 'arrivedContainerNum', width: 60 },
+      { title: '重量', key: 'weight', width: 80 },
+      { title: '体积', key: 'volume', width: 80 },
+      { title: 'FC', key: 'fcAddress', width: 80 },
+      { title: '地址', key: 'address', width: 120 },
+      { title: '邮编', key: 'postcode' },
+      { title: '出库方式', key: 'outboundMethod', width: 100 },
+      { title: '物流方式', key: 'deliveryMethod', width: 120 },
+      { title: 'FBA单号', key: 'fbaDeliveryCode', width: 120 },
+      {
+        title: '详情',
+        key: 'actions',
+        render(row) {
+          return h(
+            NButton,
+            {
+              strong: true,
+              tertiary: true,
+              size: 'small',
+              onClick: () => {
+                currentDate.value = row;
+                showDetailInfo = true;
+              },
             },
-          },
-          { default: () => '查看' }
-        );
+            { default: () => '查看' }
+          );
+        },
       },
-    },
-  ]);
+    ].map((it) => {
+      it.ellipsis = {
+        tooltip: true,
+      };
+      return it;
+    })
+  );
   const displayColumns: DataTableColumns<any> = $computed(() => [
     { title: '票号', key: 'ticketId' },
     { title: '柜号', key: 'containerId' },
@@ -476,60 +414,6 @@
           { value: '0', label: '否' },
         ],
       },
-    },
-    // {
-    //   field: 'pickUpDateTime',
-    //   component: 'NDatePicker',
-    //   label: '提货日期',
-    //   componentProps: {
-    //     type: 'date',
-    //     clearable: true,
-    //   },
-    //   displayCondition(model) {
-    //     return model.needCar === '0';
-    //   },
-    // },
-    // {
-    //   field: 'pickUpPerson',
-    //   label: '提货方',
-    //   displayCondition(model) {
-    //     return model.needCar === '0';
-    //   },
-    // },
-  ];
-
-  const filters: FormField[] = [
-    asyncCustomer(),
-    {
-      label: '柜号',
-      field: 'containerId',
-    },
-    {
-      label: '票号',
-      field: 'ticketId',
-    },
-    asyncfcAddressByFilter(),
-    asyncStorage(),
-    {
-      label: '物流方式',
-      field: 'deliveryMethod',
-      component: 'NSelect',
-      componentProps: {
-        options: generateOptionFromArray(deliveryMethodList),
-        multiple: true,
-      },
-    },
-    {
-      label: '出库方式',
-      field: 'outboundMethod',
-      component: 'NSelect',
-      componentProps: {
-        options: generateOptionFromArray(outboundMethodList),
-      },
-    },
-    {
-      label: '邮编',
-      field: 'postcode',
     },
   ];
 </script>
