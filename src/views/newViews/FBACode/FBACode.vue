@@ -1,14 +1,30 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter">
+    <single-filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter" />
+    <div class="mt-2">
       <n-button size="small" type="primary" @click="showAdd">新建FBACode</n-button>
-      <n-button size="small" type="primary" @click="downloadFBACode">下载FBACode</n-button>
-      <n-button size="small" type="primary" @click="ImportCode = true">导入FBACode</n-button>
-    </filter-bar>
+      <n-button size="small" class="ml-4" @click="downloadFBACode">下载FBACode</n-button>
+      <n-button
+        :disabled="checkedRows.length !== 1"
+        class="action-button"
+        size="small"
+        @click="startEdit"
+      >
+        修改
+      </n-button>
+      <n-button
+        :disabled="checkedRows.length !== 1"
+        class="action-button"
+        size="small"
+        @click="startRemove"
+      >
+        删除
+      </n-button>
+    </div>
+
     <BasicTable
       ref="actionRef"
       v-model:checked-row-keys="checkedRows"
-      :action-column="actionColumn"
       :columns="columns"
       :pagination="paginationReactive"
       :request="loadDataTable"
@@ -36,21 +52,16 @@
 </template>
 
 <script lang="ts" setup>
-  import { h, reactive, ref } from 'vue';
-  import { BasicTable, TableAction } from '@/components/Table';
+  import { reactive, ref } from 'vue';
+  import { BasicTable } from '@/components/Table';
   import { columns, filters } from './columns';
-  import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
-  import Delete16Filled from '@vicons/fluent/es/Delete16Filled';
   import NewFBACode from '@/views/newViews/FBACode/NewFBACode.vue';
   import { $ref } from 'vue/macros';
   import FileSaver from 'file-saver';
   import ImportFBACodeFile from '@/views/newViews/FBACode/ImportFBACodeFile.vue';
-  import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
-  import {
-    deleteFBACode,
-    getFbaCodeById,
-    getFBACodeListByFilter,
-  } from '@/api/newDataLayer/FBACode/FBACode';
+  import { deleteFBACode, getFBACodeListByFilter } from '@/api/newDataLayer/FBACode/FBACode';
+  import SingleFilterBar from '@/views/bolita-views/composable/SingleFilterBar.vue';
+  import { NButton } from 'naive-ui';
 
   const actionRef = ref();
   let currentModel: any | null = $ref(null);
@@ -82,38 +93,19 @@
     },
   });
 
+  let currentFilter = $ref([]);
+
+  async function getCurrentFilter() {
+    currentFilter = [];
+    currentFilter = filterObj;
+  }
+
+  let allList = $ref([]);
+
   const loadDataTable = async () => {
-    let currentFilter = [];
-    if (filterObj) {
-      const res = Object.keys(filterObj);
-      for (const filterItem of res) {
-        currentFilter.push({
-          field: filterItem,
-          op: filterObj[filterItem] ? '==' : '!=',
-          value: filterObj[filterItem] ?? '',
-        });
-      }
-    }
-    const res = await getFBACodeListByFilter(currentFilter, paginationReactive);
-    FBACodeList = res.content;
-    const totalCount = res.page.totalElements;
-    let fakeListStart = [];
-    let fakeListEnd = [];
-    if (paginationReactive.pageNumber > 0) {
-      fakeListStart = Array(paginationReactive.pageNumber * paginationReactive.pageSize)
-        .fill(null)
-        .map((it, index) => {
-          return { key: index };
-        });
-    }
-    if (paginationReactive.pageSize < totalCount) {
-      fakeListEnd = Array(totalCount - paginationReactive.pageSize * paginationReactive.pageNumber)
-        .fill(null)
-        .map((it, index) => {
-          return { key: index };
-        });
-    }
-    return fakeListStart.concat(FBACodeList.concat(fakeListEnd));
+    await getCurrentFilter();
+    allList = await getFBACodeListByFilter(currentFilter);
+    return allList;
   };
 
   let filterObj: any | null = $ref(null);
@@ -124,8 +116,8 @@
     ImportCode = false;
   }
 
-  async function startEdit(id) {
-    currentModel = await getFbaCodeById(id);
+  async function startEdit() {
+    currentModel = allList.find((it) => it.id === checkedRows[0]);
     showModal.value = true;
   }
 
@@ -145,37 +137,10 @@
     reloadTable();
   }
 
-  async function startRemove(id) {
-    currentModel = await deleteFBACode(id);
+  async function startRemove() {
+    await deleteFBACode(checkedRows[0]);
     reloadTable();
   }
-
-  const actionColumn = reactive({
-    title: '可用动作',
-    key: 'action',
-    width: 60,
-    render(record: any) {
-      return h(TableAction as any, {
-        style: 'button',
-        actions: [
-          {
-            label: '修改',
-            icon: DocumentEdit16Filled,
-            onClick() {
-              startEdit(record.id);
-            },
-          },
-          {
-            label: '删除',
-            icon: Delete16Filled,
-            onClick() {
-              startRemove(record.id);
-            },
-          },
-        ],
-      });
-    },
-  });
 </script>
 
 <style lang="less" scoped></style>

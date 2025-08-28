@@ -40,13 +40,28 @@ export function useFormValues({ defaultFormModel, getSchema, formModel }: UseFor
   function initDefault() {
     const schemas = unref(getSchema);
     const obj: Recordable = {};
-    schemas.forEach((item) => {
-      const { defaultValue } = item;
-      if (!isNullOrUnDef(defaultValue)) {
-        obj[item.field] = defaultValue;
-        formModel[item.field] = defaultValue;
+
+    // Clear all existing values in formModel that are not in the current schema
+    Object.keys(formModel).forEach((key) => {
+      const schemaItem = schemas.find((item) => item.field === key);
+      if (!schemaItem) {
+        formModel[key] = null;
       }
     });
+
+    // Set values based on current schema
+    schemas.forEach((item) => {
+      const { defaultValue, field } = item;
+      if (!isNullOrUnDef(defaultValue)) {
+        obj[field] = defaultValue;
+        formModel[field] = defaultValue;
+      } else {
+        // Clear the value in formModel if defaultValue is null or undefined
+        formModel[field] = null;
+      }
+    });
+
+    console.log(obj, 'obj');
     defaultFormModel.value = obj;
   }
 

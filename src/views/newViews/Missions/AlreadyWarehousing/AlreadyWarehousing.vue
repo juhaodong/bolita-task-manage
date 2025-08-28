@@ -40,7 +40,14 @@
         <n-button class="action-button" size="small" type="default" @click="downloadData">
           下载
         </n-button>
-        <n-button class="action-button" size="small" type="error" @click="merge"> 合并 </n-button>
+        <n-button
+          :disabled="selectedTaskList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="merge"
+        >
+          合并
+        </n-button>
         <n-button
           :disabled="selectedTaskList.length !== 1"
           class="action-button"
@@ -270,7 +277,7 @@
   import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import SplitTaskDialog from '@/views/newViews/Missions/AlreadyWarehousing/SplitTaskDialog.vue';
-  import { NButton, useDialog } from 'naive-ui';
+  import { NButton, useDialog, useMessage } from 'naive-ui';
   import * as XLSX from 'xlsx';
   import { allInStatusNotifyList } from '@/api/dataLayer/common/common';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
@@ -617,9 +624,15 @@
     showModal.value = true;
   }
 
+  const message = useMessage();
+
   function merge() {
     console.log(selectedTaskList, 'selectedTaskList');
-    showMergeDialog = true;
+    if (selectedTaskList[0].sourceId) {
+      showMergeDialog = true;
+    } else {
+      message.error('当前明细无法合并！');
+    }
   }
 
   function updateFilterWithItems(value) {
@@ -782,7 +795,7 @@
         currentFilter['containerIdLike'] = currentFilter['containerId'];
       }
       if (currentFilter['ticketId']) {
-        currentFilter['ticketIdLike'] = currentFilter['ticketIdId'];
+        currentFilter['ticketIdLike'] = currentFilter['ticketId'];
       }
     } else {
       currentFilter['inStatusNotIn'] = ['已拆分', '已取消'];
@@ -835,66 +848,7 @@
     reloadTable();
   }
 
-  // function checkCashStatus(id) {
-  //   currentData = allList.find((it) => it.id === id);
-  //   addNewFeeDialog = true;
-  // }
-
   let showFeeDialog = $ref(false);
-
-  // function showPriceDialog(info) {
-  //   currentData = info;
-  //   showFeeDialog = true;
-  // }
-
-  // watch(
-  //   typeMission,
-  //   async (value, oldValue) => {
-  //     if (value !== oldValue && value && oldValue) {
-  //       // await reloadHeader();
-  //     }
-  //   },
-  //   { deep: true }
-  // );
-
-  // async function reloadHeader() {
-  //   currentWithOutSelection = [];
-  //   currentHeader = [];
-  //   const taskListHeader = await getTableHeaderGroupItemList('taskList');
-  //   currentHeader = taskListHeader ? JSON.parse(taskListHeader?.headerItemJson) : [];
-  //   currentHeader.forEach((item) => {
-  //     const res = columns.find((it) => it.key === item.itemKey);
-  //     currentWithOutSelection.push(res);
-  //   });
-  //   currentWithOutSelection =
-  //     currentWithOutSelection.length > 0 ? currentWithOutSelection : columns;
-  //
-  //   const userInfo = useUserStore().info;
-  //   if (typeMission.value === '整柜任务看板') {
-  //     currentColumns = [planObj, ...currentWithOutSelection];
-  //     if (userInfo.userType !== '客户') {
-  //       currentColumns.unshift(timeWarnColumn());
-  //     }
-  //   } else if (typeMission.value === '审核看板') {
-  //     currentColumns = [checkedObj, ...currentWithOutSelection];
-  //   } else if (typeMission.value === '报价看板') {
-  //     currentColumns = [offerObj, ...currentWithOutSelection];
-  //   } else {
-  //     currentColumns = [...currentWithOutSelection];
-  //   }
-  //   currentColumns = currentColumns.filter((it) => it);
-  //
-  //   // Sort columns with fixed property to the leftmost side
-  //   const fixedColumns = currentColumns.filter((col) => col.fixed === 'left');
-  //   const nonFixedColumns = currentColumns.filter((col) => col.fixed !== 'left');
-  //   currentColumns = [...fixedColumns, ...nonFixedColumns];
-  //
-  //   currentColumns.forEach((item) => {
-  //     item.width = 200;
-  //     item.resizable = true;
-  //   });
-  //   showCurrentHeaderDataTable = false;
-  // }
 
   async function reloadTable() {
     showModal.value = false;

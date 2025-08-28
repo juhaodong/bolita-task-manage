@@ -86,7 +86,7 @@
       values.carStatus = CarStatus.Booked;
       values.inStatus = CarStatus.Booked;
       values.waitCar = '1';
-      values.bookCarTimestamp = dayjs().valueOf();
+      values.bookCarTimestamp = dayjs().format('YYYY-MM-DDTHH:mm:ss');
     } else {
       values.inStatus = '已报价';
       values.waitPrice = '1';

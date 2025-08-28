@@ -6,7 +6,7 @@
   import dayjs from 'dayjs';
   import { addOrUpdateWithRefOutboundForecast } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import { updateTaskListAfterBookingCarWithInfo } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
-  import LoadingFrame from "@/views/bolita-views/composable/LoadingFrame.vue";
+  import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
 
   interface Props {
     info?: any;
@@ -71,10 +71,10 @@
       return;
     }
     let outboundForecastInfo = prop.info;
-    loading = true
+    loading = true;
     outboundForecastInfo.AMZID = AMZID;
     outboundForecastInfo.ISA = ISA;
-    outboundForecastInfo.bookCarTimestamp = dayjs().valueOf();
+    outboundForecastInfo.bookCarTimestamp = dayjs().format('YYYY-MM-DDTHH:mm:ss');
     outboundForecastInfo.inStatus = '已订车';
     outboundForecastInfo.carStatus = '已订车';
     outboundForecastInfo.note = note;
@@ -85,51 +85,51 @@
     outboundForecastInfo.logisticsCompany = logisticsCompany;
     await updateTaskListAfterBookingCarWithInfo(outboundForecastInfo.id, outboundForecastInfo);
     await addOrUpdateWithRefOutboundForecast(outboundForecastInfo);
-    loading = false
+    loading = false;
     emit('saved');
   }
 </script>
 
 <template>
   <loading-frame :loading="loading">
-  <div class="mt-8">
-    <n-descriptions :columns="1" bordered label-placement="left">
-      <n-descriptions-item :span="2" label="物流公司 (必填)">
-        <n-select
-          v-model:value="logisticsCompany"
-          :options="logisticsCompanyList"
-          :status="requiredInfo ? 'error' : ''"
-        />
-      </n-descriptions-item>
-      <n-descriptions-item :label="currentNeedInfo.label + ' (必填)'" :span="2">
-        <n-input v-model:value="AMZID" :status="requiredInfo ? 'error' : ''" />
-      </n-descriptions-item>
-      <n-descriptions-item :label="isaRequired ? 'ISA (必填)' : 'ISA'" :span="2">
-        <n-input v-model:value="ISA" />
-      </n-descriptions-item>
-      <n-descriptions-item :span="2" label="运单号">
-        <n-input v-model:value="waybillId" />
-      </n-descriptions-item>
-      <n-descriptions-item :span="2" label="预计取货日期 (必填)">
-        <n-date-picker
-          v-model:value="reservationGetProductTime"
-          :status="requiredInfo ? 'error' : ''"
-        />
-      </n-descriptions-item>
-      <n-descriptions-item :span="2" label="预计取货时间 (必填)">
-        <n-select
-          v-model:value="reservationGetProductDetailTime"
-          :options="generateOptionFromArray(reservationTimeList)"
-          :status="requiredInfo ? 'error' : ''"
-        />
-      </n-descriptions-item>
-      <n-descriptions-item :span="2" label="备注">
-        <n-input v-model:value="note" />
-      </n-descriptions-item>
-    </n-descriptions>
-    <n-button style="margin-top: 10px" type="info" @click="saveInfo">确认</n-button>
-    <span v-if="requiredInfo" style="color: red">{{ errorMessage }}</span>
-  </div>
+    <div class="mt-8">
+      <n-descriptions :columns="1" bordered label-placement="left">
+        <n-descriptions-item :span="2" label="物流公司 (必填)">
+          <n-select
+            v-model:value="logisticsCompany"
+            :options="logisticsCompanyList"
+            :status="requiredInfo ? 'error' : ''"
+          />
+        </n-descriptions-item>
+        <n-descriptions-item :label="currentNeedInfo.label + ' (必填)'" :span="2">
+          <n-input v-model:value="AMZID" :status="requiredInfo ? 'error' : ''" />
+        </n-descriptions-item>
+        <n-descriptions-item :label="isaRequired ? 'ISA (必填)' : 'ISA'" :span="2">
+          <n-input v-model:value="ISA" />
+        </n-descriptions-item>
+        <n-descriptions-item :span="2" label="运单号">
+          <n-input v-model:value="waybillId" />
+        </n-descriptions-item>
+        <n-descriptions-item :span="2" label="预计取货日期 (必填)">
+          <n-date-picker
+            v-model:value="reservationGetProductTime"
+            :status="requiredInfo ? 'error' : ''"
+          />
+        </n-descriptions-item>
+        <n-descriptions-item :span="2" label="预计取货时间 (必填)">
+          <n-select
+            v-model:value="reservationGetProductDetailTime"
+            :options="generateOptionFromArray(reservationTimeList)"
+            :status="requiredInfo ? 'error' : ''"
+          />
+        </n-descriptions-item>
+        <n-descriptions-item :span="2" label="备注">
+          <n-input v-model:value="note" />
+        </n-descriptions-item>
+      </n-descriptions>
+      <n-button style="margin-top: 10px" type="info" @click="saveInfo">确认</n-button>
+      <span v-if="requiredInfo" style="color: red">{{ errorMessage }}</span>
+    </div>
   </loading-frame>
 </template>
 

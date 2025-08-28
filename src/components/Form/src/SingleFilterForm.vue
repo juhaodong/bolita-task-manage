@@ -237,6 +237,7 @@
           const { defaultValue } = schema;
           // handle date type
           // dateItemType.includes(component as string)
+          console.log(schema, 'schema');
           if (defaultValue) {
             schema.defaultValue = defaultValue;
           }
@@ -298,24 +299,29 @@
       watch(
         () => getSchema.value,
         (schema) => {
-          if (unref(isUpdateDefaultRef)) {
-            return;
-          }
-          if (schema?.length) {
+          // if (unref(isUpdateDefaultRef)) {
+          //   console.log('000');
+          //   return;
+          if (schema?.length > 0) {
             initDefault();
             isUpdateDefaultRef.value = true;
           }
-        }
+        },
+        { deep: true, immediate: true }
       );
 
-      watch(formModel, (value) => {
-        const notify = getSchema.value.filter((it) => it?.onFormUpdate);
-        notify.forEach((it) => {
-          if (it) {
-            it?.onFormUpdate(value);
-          }
-        });
-      });
+      watch(
+        formModel,
+        (value) => {
+          const notify = getSchema.value.filter((it) => it?.onFormUpdate);
+          notify.forEach((it) => {
+            if (it) {
+              it?.onFormUpdate(value);
+            }
+          });
+        },
+        { deep: true }
+      );
       onMounted(() => {
         initDefault();
         window.addEventListener('keydown', handleKeydown);

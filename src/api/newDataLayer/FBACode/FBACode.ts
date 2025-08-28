@@ -6,14 +6,22 @@ export async function getFBACodeList() {
   return (await hillo.jsonPost(typeName + '/getAll', {})).data;
 }
 
-export async function getFBACodeListByFilter(filter, pagination) {
+export async function getFBACodeListByFilter(filter) {
   return (
-    await hillo.jsonPost(typeName + '/search', {
-      ...pagination,
-      criteria: filter,
+    await hillo.jsonPost(typeName + '/getAll', {
+      ...filter,
     })
   ).data;
 }
+
+// export async function getFBACodeListByFilter(filter, pagination) {
+//   return (
+//     await hillo.jsonPost(typeName + '/search', {
+//       ...pagination,
+//       criteria: filter,
+//     })
+//   ).data;
+// }
 
 export async function getFbaCodeById(id) {
   return (

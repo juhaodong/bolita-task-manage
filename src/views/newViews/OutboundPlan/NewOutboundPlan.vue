@@ -4,7 +4,8 @@
       <template v-if="step === 0">
         <single-filter-bar
           :form-fields="filters"
-          @clear="updateFilter(null)"
+          :default-value-model="filterObj"
+          @clear="resetFilter()"
           @submit="updateFilter"
         />
         <BasicTable
@@ -78,10 +79,7 @@
   import DetailInfo from '@/views/newViews/Missions/AlreadyWarehousing/DetailInfo.vue';
   import { $ref } from 'vue/macros';
   import { afterPlanDetailAdded } from '@/api/dataLayer/modules/OutBoundPlan/outAddHook';
-  import {
-    getTaskListByFilterWithPagination,
-    getTaskListByIds,
-  } from '@/api/newDataLayer/TaskList/TaskList';
+  import { getTaskListByFilterWithPagination } from '@/api/newDataLayer/TaskList/TaskList';
   import {
     addOrUpdateWithRefOutboundForecast,
     defaultOutboundList,
@@ -89,13 +87,9 @@
   import dayjs from 'dayjs';
   import { BasicTable } from '@/components/Table';
   import { getUserCustomerList } from '@/api/dataLayer/common/power';
-  import router from '@/router';
   import { createPaginationPlaceholders } from '@/api/newDataLayer/Common/Common';
   import SingleFilterBar from '@/views/bolita-views/composable/SingleFilterBar.vue';
-  import {
-    deliveryMethodList,
-    outboundMethodList,
-  } from '@/api/dataLayer/modules/deliveryMethod/detail';
+  import { deliveryMethodList } from '@/api/dataLayer/modules/deliveryMethod/detail';
 
   interface Props {
     model?: any;
@@ -137,17 +131,21 @@
         options: generateOptionFromArray(deliveryMethodList),
       },
     },
-    {
-      label: '出库方式',
-      field: 'outboundMethod',
-      component: 'NSelect',
-      componentProps: {
-        options: generateOptionFromArray(outboundMethodList),
-      },
-    },
+    // {
+    //   label: '出库方式',
+    //   field: 'outboundMethod',
+    //   component: 'NSelect',
+    //   componentProps: {
+    //     options: generateOptionFromArray(outboundMethodList),
+    //   },
+    // },
     {
       label: '邮编',
       field: 'postcode',
+    },
+    {
+      label: 'FC',
+      field: 'fcAddress',
     },
   ];
 
@@ -159,20 +157,24 @@
       filterObj['deliveryMethod'] = selectedDeliveryMethod;
       filterObj['fcAddress'] = selectedfcAddress;
       filterObj['postcode'] = selectedPostcode;
-      console.log(filterObj, 'items');
       if (val.length === 1 && oldValue.length < 2) {
         await updateFilter(filterObj);
       }
     } else {
       tableLoading = true;
-      filterObj = null;
+      // Instead of completely replacing filterObj, we'll clear its properties
+      // This preserves the reference while removing all values
+      for (const key in filterObj) {
+        delete filterObj[key];
+      }
       selectedPostcode = '';
       selectedDeliveryMethod = '';
       selectedfcAddress = '';
-      await updateFilter(null);
+      await updateFilter({});
       tableLoading = false;
     }
-    totalNumber.value = safeSumBy(selectedTaskList, 'arrivedContainerNum').toFixed(3);
+    totalNumber.value = safeSumBy(selectedTaskList, 'arrivedContainerNum');
+    totalTray.value = safeSumBy(selectedTaskList, 'arrivedTrayNum');
     totalVolume.value = safeSumBy(selectedTaskList, 'volume').toFixed(3);
     totalWeight.value = safeSumBy(selectedTaskList, 'weight').toFixed(3);
   });
@@ -194,8 +196,24 @@
   const actionRef = ref();
 
   async function clearFilter() {
-    filterObj = null;
+    // Instead of completely replacing filterObj, we'll clear its properties
+    // This preserves the reference while removing all values
     checkedRowKeys.value = [];
+    selectedTaskList = [];
+    for (const key in filterObj) {
+      delete filterObj[key];
+    }
+  }
+
+  async function resetFilter() {
+    // Instead of completely replacing filterObj, we'll clear its properties
+    // This preserves the reference while removing all values
+
+    checkedRowKeys.value = [];
+    selectedTaskList = [];
+    for (const key in filterObj) {
+      delete filterObj[key];
+    }
   }
 
   async function updateFilter(value) {
@@ -230,7 +248,7 @@
 
   async function getCurrentFilter() {
     currentFilter = [];
-    if (filterObj) {
+    if (Object.keys(filterObj).length > 0) {
       currentFilter = filterObj;
       const customerId = await getUserCustomerList();
       if (!filterObj['customer.id']) {
@@ -274,8 +292,8 @@
   }
 
   async function confirmSelection() {
-    allNotifyDetail = await getTaskListByIds(checkedRowKeys.value);
-    const notEnough = allNotifyDetail.find((it) => {
+    // allNotifyDetail = await getTaskListByIds(checkedRowKeys.value);
+    const notEnough = selectedTaskList.find((it) => {
       return (
         safeParseInt(it.outBoundTrayNum) > safeParseInt(it.instorageTrayNum) ||
         safeParseInt(it.outBoundContainerNum) > safeParseInt(it.instorageContainerNum)
@@ -297,16 +315,17 @@
       ...value,
       inStatus: value.needCar === '1' ? '待订车' : '无需订车',
       carStatus: value.needCar === '1' ? '待订车' : '无需订车',
-      outboundDetailInfo: allNotifyDetail.map((it) => it.id).join(','),
-      totalVolume: safeSumBy(allNotifyDetail, 'volume'),
-      totalWeight: safeSumBy(allNotifyDetail, 'weight'),
-      totalNumber: safeSumBy(allNotifyDetail, 'number'),
-      customerId: allNotifyDetail[0].customer.id,
-      inventoryId: allNotifyDetail[0].inventory.id,
+      outboundDetailInfo: selectedTaskList.map((it) => it.id).join(','),
+      totalVolume: safeSumBy(selectedTaskList, 'volume'),
+      totalWeight: safeSumBy(selectedTaskList, 'weight'),
+      totalNumber: safeSumBy(selectedTaskList, 'number'),
+      customerId: selectedTaskList[0].customer.id,
+      inventoryId: selectedTaskList[0].inventory.id,
+      bolitaTaskIds: selectedTaskList.map((it) => it.id),
     };
     const currentInfo = Object.assign(defaultOutboundList, res);
     const outboundId = (await addOrUpdateWithRefOutboundForecast(currentInfo)).data.id;
-    allNotifyDetail.forEach((it) => {
+    selectedTaskList.forEach((it) => {
       it.customerId = it.customer.id;
       it.inventoryId = it.inventory.id;
       it.needCar = value.needCar;
@@ -316,19 +335,15 @@
         it.carStatus = CarStatus.NoNeed;
       }
       it.outboundId = outboundId;
-      it.needOfferPrice = value.needOfferPrice;
+
+      // 需要报价 todo
+      it.needOfferPrice = '';
       it.usefulTimeRange = dayjs().diff(dayjs(it.arriveTime), 'day') ?? '-';
     });
-    await afterPlanDetailAdded(allNotifyDetail);
+    await afterPlanDetailAdded(selectedTaskList);
     await safeScope(() => {
       emit('saved');
     });
-    if (value.needCar === '1') {
-      await router.push('/car/carBooking?id=' + outboundId);
-    } else {
-      await router.push('/operationDetail/Operation?id=' + outboundId);
-    }
-
     loading = false;
   }
 
@@ -397,17 +412,6 @@
       field: 'needCar',
       component: 'NSelect',
       label: '是否需要订车',
-      componentProps: {
-        options: [
-          { value: '1', label: '是' },
-          { value: '0', label: '否' },
-        ],
-      },
-    },
-    {
-      field: 'needOfferPrice',
-      component: 'NSelect',
-      label: '是否需要报价',
       componentProps: {
         options: [
           { value: '1', label: '是' },

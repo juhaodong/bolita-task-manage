@@ -11,10 +11,12 @@ export const columns: DataTableColumns<FBACode> = [
   {
     title: '州',
     key: 'state',
+    width: 80,
   },
   {
     title: '地址',
     key: 'address',
+    width: 300,
   },
   {
     title: '城市',
@@ -24,7 +26,12 @@ export const columns: DataTableColumns<FBACode> = [
     title: '邮编',
     key: 'postcode',
   },
-];
+].map((it) => {
+  it.ellipsis = {
+    tooltip: true,
+  };
+  return it;
+});
 
 export type FBACode = {
   code: number;
