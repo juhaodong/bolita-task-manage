@@ -237,7 +237,6 @@
           const { defaultValue } = schema;
           // handle date type
           // dateItemType.includes(component as string)
-          console.log(schema, 'schema');
           if (defaultValue) {
             schema.defaultValue = defaultValue;
           }
@@ -299,9 +298,6 @@
       watch(
         () => getSchema.value,
         (schema) => {
-          // if (unref(isUpdateDefaultRef)) {
-          //   console.log('000');
-          //   return;
           if (schema?.length > 0) {
             initDefault();
             isUpdateDefaultRef.value = true;

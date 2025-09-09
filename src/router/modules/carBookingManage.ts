@@ -23,14 +23,14 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('@/views/newViews/CarpoolManagement/CarpoolManagement.vue'),
       },
-      {
-        path: 'carBookingDetail',
-        name: `carBookingDetail`,
-        meta: {
-          title: '定车明细',
-        },
-        component: () => import('@/views/newViews/CarpoolManagement/CarpoolDetail.vue'),
-      },
+      // {
+      //   path: 'carBookingDetail',
+      //   name: `carBookingDetail`,
+      //   meta: {
+      //     title: '定车明细',
+      //   },
+      //   component: () => import('@/views/newViews/CarpoolManagement/CarpoolDetail.vue'),
+      // },
       {
         path: 'carBookingOut',
         name: `carBookingOut`,
