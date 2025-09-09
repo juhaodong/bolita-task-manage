@@ -1,5 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router';
-import { isNavigationFailure, Router } from 'vue-router';
+import { Router } from 'vue-router';
 import { useUser } from '@/store/modules/user';
 import { useAsyncRoute } from '@/store/modules/asyncRoute';
 import { PageEnum } from '@/store/enums/pageEnum';
@@ -32,10 +32,8 @@ export function createRouterGuards(router: Router) {
     }
 
     const userInfo = await userStore.getInfo();
-    console.log(userInfo, 'userInfo');
 
     const routes = await asyncRouteStore.generateRoutes(userInfo);
-    console.log(routes, 'routes');
 
     // 动态添加可访问路由表
     routes.forEach((item) => {
@@ -58,9 +56,6 @@ export function createRouterGuards(router: Router) {
 
   router.afterEach((to, _, failure) => {
     document.title = (to?.meta?.title as string) || document.title;
-    if (isNavigationFailure(failure)) {
-      //console.log('failed navigation', failure)
-    }
     const asyncRouteStore = useAsyncRoute();
     // 在这里设置需要缓存的组件名称
     const keepAliveComponents = asyncRouteStore.keepAliveComponents;

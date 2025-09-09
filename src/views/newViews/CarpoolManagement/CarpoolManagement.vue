@@ -277,7 +277,6 @@
     if (filterObj) {
       currentFilter = filterObj;
     }
-    console.log(currentFilter, 'currentFilter');
   }
 
   let outboundForecastList = $ref([]);

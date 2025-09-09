@@ -494,7 +494,6 @@
           dayjs(filterObj['planArriveDateTime'][1]).format('YYYY-MM-DD') + 'T23:59:59';
       }
     }
-    console.log(currentFilter, 'currentFilter');
   }
 
   /**

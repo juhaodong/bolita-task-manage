@@ -87,10 +87,8 @@ export const useAsyncRouteStore = defineStore({
       this.keepAliveComponents = compNames;
     },
     async generateRoutes(data) {
-      console.log(data, 'data');
       let accessedRouters;
       const permissionsList = [data.userType] ?? [];
-      console.log(permissionsList, 'list');
       const routeFilter = (route) => {
         const { meta } = route;
         const { permissions } = meta || {};

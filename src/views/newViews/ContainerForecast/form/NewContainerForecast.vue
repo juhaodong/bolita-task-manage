@@ -156,7 +156,6 @@
   onMounted(async () => {
     loading = true;
     const currentUser = await getUserById(useUserStore()?.info?.id);
-    console.log(currentUser, 'user');
     customerList = currentUser.customers.map((it) => ({
       label: it.customerName,
       value: it.id,

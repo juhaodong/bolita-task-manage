@@ -60,8 +60,6 @@ export function useFormValues({ defaultFormModel, getSchema, formModel }: UseFor
         formModel[field] = null;
       }
     });
-
-    console.log(obj, 'obj');
     defaultFormModel.value = obj;
   }
 

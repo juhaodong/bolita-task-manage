@@ -164,7 +164,6 @@
       const { navMode, navTheme, headerSetting, menuSetting, crumbsSetting } = useProjectSetting();
 
       const { realName, userType, userName } = userStore?.info || {};
-      console.log(userStore.info, '321');
 
       const drawerSetting = ref();
 

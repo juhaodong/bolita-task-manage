@@ -8,7 +8,6 @@ export async function getInventoryUseLogList() {
 }
 
 export async function getInventoryUseLogListByInventoryId(id, date) {
-  console.log(date, 'date');
   const startDate = dayjs(date).startOf('day').format('YYYY-MM-DD') + 'T00:00:00';
   const endDate = dayjs(date).endOf('day').format('YYYY-MM-DD') + 'T23:59:59';
 
