@@ -1,23 +1,25 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <filter-bar
-      v-if="finished"
-      :default-value-model="filterObj"
-      :form-fields="filters"
-      @clear="updateFilter(null)"
-      @submit="updateFilter"
+    <single-filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter" />
+    <n-button class="action-button" size="small" @click="showAdd"> 新增 </n-button>
+    <n-button
+      :disabled="selectedUserList.length !== 1"
+      class="action-button"
+      size="small"
+      @click="startEdit"
     >
-      <n-button size="small" type="primary" @click="showAdd">新建用户</n-button>
-      <n-button size="small" type="primary" @click="powerManage">权限管理</n-button>
-    </filter-bar>
+      编辑
+    </n-button>
+    <n-button class="action-button" size="small" @click="powerManage"> 权限管理 </n-button>
     <div class="my-2"></div>
     <BasicTable
+      v-model:checked-row-keys="checkedRowKeys"
       ref="actionRef"
-      v-model:checked-row-keys="checkedRows"
-      :action-column="actionColumn"
+      @update:checked-row-keys="handleCheck"
       :columns="columns"
       :request="loadDataTable"
       :row-key="(row) => row.id"
+      @row-click="onRowClick"
     />
 
     <n-modal
@@ -54,7 +56,6 @@
   import { h, onMounted, reactive, ref } from 'vue';
   import { BasicTable, TableAction } from '@/components/Table';
   import { filters } from './columns';
-  import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
   import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import NewUser from '@/views/newViews/UserManage/NewUser.vue';
@@ -64,6 +65,7 @@
   import Delete16Filled from '@vicons/fluent/es/Delete16Filled';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
   import { deleteUser, getUserById, getUserList } from '@/api/newDataLayer/User/User';
+  import SingleFilterBar from '@/views/bolita-views/composable/SingleFilterBar.vue';
 
   interface Prop {
     belongsToId?: string;
@@ -132,17 +134,21 @@
     finished = true;
   });
   const showModal = ref(false);
-  let checkedRows = $ref([]);
   let currentModel: any | null = $ref(null);
+  let selectedUserList = $ref([]);
+  let checkedRowKeys = $ref([]);
 
-  async function startEdit(id) {
-    currentModel = await getUserById(id);
-    currentModel.customerIds = currentModel.customerIds.split(',');
+  async function startEdit() {
+    currentModel = await getUserById(selectedUserList[0].id);
+    currentModel.customerIds = currentModel.customers.map((x) => x.id);
     showModal.value = true;
   }
 
+  let allUserList = $ref([]);
+
   const loadDataTable = async () => {
-    return await getUserList();
+    allUserList = await getUserList();
+    return allUserList;
   };
 
   let filterObj: any | null = $ref(null);
@@ -150,6 +156,11 @@
   function updateFilter(value) {
     filterObj = value;
     reloadTable();
+  }
+
+  async function handleCheck(rowKeys) {
+    checkedRowKeys = rowKeys;
+    selectedUserList = allUserList.filter((item) => rowKeys.includes(item.id));
   }
 
   function showAdd() {
@@ -208,4 +219,8 @@
   });
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+  .action-button {
+    margin-right: 8px;
+  }
+</style>

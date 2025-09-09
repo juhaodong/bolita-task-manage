@@ -3,7 +3,7 @@ import hillo from 'hillo';
 const typeName = 'user';
 
 export async function getUserList() {
-  return (await hillo.jsonPost(typeName + '/search', {})).data.content;
+  return (await hillo.jsonPost(typeName + '/getAll', {})).data;
 }
 
 export async function getUserById(id) {

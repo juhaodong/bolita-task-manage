@@ -3,7 +3,7 @@ import hillo from 'hillo';
 const typeName = 'customer';
 
 export async function getCustomerList() {
-  return (await hillo.jsonPost(typeName + '/search', {})).data.rows;
+  return (await hillo.jsonPost(typeName + '/getAll', {})).data;
 }
 
 export async function getCustomerById(id) {

@@ -1,13 +1,9 @@
 <template>
   <n-card :bordered="false" class="proCard">
-    <filter-bar
-      :default-value-model="filterObj"
-      :form-fields="filters"
-      @clear="updateFilter(null)"
-      @submit="updateFilter"
-    >
-      <n-button size="small" type="primary" @click="showAdd">新建仓库</n-button>
-    </filter-bar>
+    <single-filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter" />
+    <n-button class="action-button" size="small" @click="newAdd"> 新增 </n-button>
+    <n-button class="action-button" size="small" @click="editInventory"> 修改 </n-button>
+    <n-button class="action-button" size="small" @click="editInventoryUser"> 用户 </n-button>
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
@@ -39,16 +35,16 @@
 </template>
 
 <script lang="ts" setup>
-  import { h, reactive, ref } from 'vue';
-  import { BasicTable, TableAction } from '@/components/Table';
+  import { ref } from 'vue';
+  import { BasicTable } from '@/components/Table';
   import { columns, filters } from './columns';
-  import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import { $ref } from 'vue/macros';
-  import DocumentEdit16Filled from '@vicons/fluent/es/DocumentEdit16Filled';
   import NewInventory from '@/views/newViews/WarehouseManage/WarehouseForm.vue';
   import { useEditOrganizationUserDialog } from '@/views/newViews/WarehouseManage/WarehouseUserDialog';
   import UserManage from '@/views/newViews/UserManage/UserManage.vue';
   import { getInventoryById, getInventoryList } from '@/api/newDataLayer/Warehouse/Warehouse';
+  import SingleFilterBar from '@/views/bolita-views/composable/SingleFilterBar.vue';
+  import { NButton } from 'naive-ui';
 
   let finished = $ref(false);
 
@@ -87,31 +83,10 @@
   }
 
   const wuDialog = useEditOrganizationUserDialog();
-  const actionColumn = reactive({
-    title: '可用动作',
-    key: 'action',
-    width: 60,
-    render(record: any) {
-      return h(TableAction as any, {
-        style: 'button',
-        actions: [
-          {
-            label: '修改',
-            icon: DocumentEdit16Filled,
-            onClick() {
-              startEdit(record.id);
-            },
-          },
-          {
-            label: '用户',
-            onClick() {
-              wuDialog.startEdit(record.id);
-            },
-          },
-        ],
-      });
-    },
-  });
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+  .action-button {
+    margin-right: 8px;
+  }
+</style>

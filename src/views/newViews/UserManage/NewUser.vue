@@ -15,7 +15,6 @@
   import { getPowerTypeByName } from '@/api/newDataLayer/Power/Power';
   import { $ref } from 'vue/macros';
   import { addOrUpdateUser } from '@/api/newDataLayer/User/User';
-  import { flatChildrenById } from '@/api/newDataLayer/Power/PowerItems';
   import { getCustomerList } from '@/api/newDataLayer/Customer/Customer';
 
   interface Props {
@@ -87,13 +86,13 @@
       values.token = values.token ?? '';
       values.department = values.department ?? '';
       values.customerName = values?.customerName ?? '';
-      values.customerIds = values?.customerIds ? values?.customerIds.join(',') : '';
+      values.customerIds = values?.customerIds ? values?.customerIds : '';
       values.realName = values.realName ?? '';
       if (values.customerIds === 'all') {
-        values.customerIds = (await getCustomerList()).map((it) => it.id).join(',');
+        values.customerIds = (await getCustomerList()).map((it) => it.id);
       }
       const allPowerList = (await getPowerTypeByName(res.label)) ?? [];
-      values.powerTypeItemIds = flatChildrenById(allPowerList);
+      values.powerTypeItemIds = allPowerList.map((it) => it.id);
       await addOrUpdateUser(values);
       emit('saved');
     });

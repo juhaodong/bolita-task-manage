@@ -9,16 +9,10 @@ export async function getPowerTypeList() {
 
 export async function getPowerTypeByName(name) {
   return (
-    await hillo.jsonPost(typeName + '/list', {
-      criteria: [
-        {
-          field: 'name',
-          op: '==',
-          value: name,
-        },
-      ],
+    await hillo.jsonPost(typeName + '/searchOne', {
+      name,
     })
-  ).data.content[0].powerTypeItems;
+  ).data.powerTypeItems;
 }
 
 export async function getPowerTypeByKey(key) {
