@@ -34,7 +34,7 @@
     waybillId = prop.info.waybillId ?? '';
     suggestedPrice = prop.info.suggestedPrice ?? '';
     reservationGetProductTime = prop.info.reservationGetProductTime
-      ? parseFloat(prop.info.reservationGetProductTime)
+      ? dayjs(prop.info.reservationGetProductTime).valueOf()
       : new Date();
     reservationGetProductDetailTime = prop.info.reservationGetProductDetailTime ?? '';
     amzId = prop.info.amzId ?? '';
