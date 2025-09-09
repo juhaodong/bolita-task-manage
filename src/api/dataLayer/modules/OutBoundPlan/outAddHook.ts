@@ -1,7 +1,6 @@
-import { InBoundStatus, OutPlanStatus, OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
+import { InBoundStatus, OutStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import dayjs from 'dayjs';
 import { useUserStore } from '@/store/modules/user';
-import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
 import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
 import { addOrUpdateTask, getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
 import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
@@ -11,7 +10,7 @@ export async function afterPlanDetailAdded(planDetails) {
   const userInfo = useUserStore().info;
   const quest = planDetails.map(async (detail) => {
     notifyIds.push(detail?.notifyId);
-    detail.inStatus = detail.carStatus === '无需订车' ? '无需订车' : '已计划出库';
+    detail.inStatus = detail.carStatus === '无需定车' ? '无需定车' : '已计划出库';
     await addOrUpdateTask(detail);
     await addOrUpdateTaskTimeLine({
       useType: 'normal',

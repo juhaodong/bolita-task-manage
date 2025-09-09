@@ -92,6 +92,14 @@
           :disabled="selectedTaskList.length !== 1"
           class="action-button"
           size="small"
+          @click="updateSuggestedPrice"
+        >
+          询价
+        </n-button>
+        <n-button
+          :disabled="selectedTaskList.length !== 1"
+          class="action-button"
+          size="small"
           @click="showCancel"
         >
           取消
@@ -132,7 +140,7 @@
         style="width: 90%; min-width: 600px; max-width: 1200px"
         title="出库计划"
       >
-        <new-outbound-plan :model="checkedRows" @saved="reloadTable" />
+        <out-plan-by-task :model="selectedTaskList" @saved="reloadTable" />
       </n-modal>
       <n-modal
         v-model:show="editDetailModel"
@@ -255,7 +263,6 @@
   import { $ref } from 'vue/macros';
   import { statusColumnSelect, timeColumn } from '@/views/bolita-views/composable/useableColumns';
   import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
-  import NewOutboundPlan from '@/views/newViews/OutboundPlan/NewOutboundPlan.vue';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
   import NewTotalFee from '@/views/newViews/SettlementManage/NewTotalFee.vue';
@@ -272,6 +279,8 @@
     addOrUpdateTask,
     getTaskListByFilter,
     getTaskListByFilterWithPagination,
+    searchTaskPrice,
+    updateTask,
   } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
@@ -291,6 +300,7 @@
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { createPaginationPlaceholders } from '@/api/newDataLayer/Common/Common';
   import TaskFiles from '@/views/newViews/Missions/AlreadyWarehousing/TaskFiles.vue';
+  import OutPlanByTask from '@/views/newViews/CarpoolManagement/OutPlanByTask.vue';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -606,6 +616,25 @@
     showSplitTaskDialog = true;
   }
 
+  async function updateSuggestedPrice() {
+    let currentTask = selectedTaskList[0];
+    const taskSize = selectedTaskList[0].size;
+    const taskWeight = selectedTaskList[0].weight;
+    const taskCountry = selectedTaskList[0].country;
+    const taskOutboundMethod = selectedTaskList[0].outboundMethod;
+    const taskNumber = selectedTaskList[0].arrivedContainerNum;
+    const taskPostcode = selectedTaskList[0].postcode;
+    currentTask.suggestedPrice = await searchTaskPrice(
+      taskSize,
+      taskWeight,
+      taskCountry,
+      taskOutboundMethod,
+      taskNumber,
+      taskPostcode
+    );
+    await updateTask(currentTask);
+  }
+
   function showTaskTray() {
     currentModel = selectedTaskList[0];
     addNewTrayDialog = true;
@@ -627,7 +656,6 @@
   const message = useMessage();
 
   function merge() {
-    console.log(selectedTaskList, 'selectedTaskList');
     if (selectedTaskList[0].sourceId) {
       showMergeDialog = true;
     } else {

@@ -107,11 +107,11 @@ export const powerList = [
     ],
   },
   {
-    label: '订车管理',
+    label: '定车管理',
     key: 'car',
     children: [
       {
-        label: '订车管理',
+        label: '定车管理',
         key: 'orderCar',
         children: [
           { label: '提单', key: 'orderCarOrder' },
@@ -119,12 +119,12 @@ export const powerList = [
           { label: 'pod', key: 'orderCarPOD' },
           { label: '修改', key: 'orderCarEdit' },
           { label: '报价', key: 'orderCarOffer' },
-          { label: '订车', key: 'orderCarBookingCar' },
+          { label: '定车', key: 'orderCarBookingCar' },
           { label: '浏览', key: 'orderCarView' },
         ],
       },
       {
-        label: '订车明细',
+        label: '定车明细',
         key: 'carDetail',
         children: [
           { label: '审核', key: 'carDetailCheck' },
@@ -132,10 +132,10 @@ export const powerList = [
         ],
       },
       {
-        label: '库外订车',
+        label: '库外定车',
         key: 'outStorageCar',
         children: [
-          { label: '新建库外订车', key: 'outStorageCarAdd' },
+          { label: '新建库外定车', key: 'outStorageCarAdd' },
           { label: '修改', key: 'outStorageEdit' },
           { label: '浏览', key: 'outStorageView' },
           { label: '物流报价', key: 'outStorageLogisticsOffer' },

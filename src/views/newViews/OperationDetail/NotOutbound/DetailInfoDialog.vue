@@ -1,14 +1,18 @@
 <script lang="ts" setup>
   import { $ref } from 'vue/macros';
   import { getTaskListByIds, getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
-  import { statusColumnEasy, timeColumn } from '@/views/bolita-views/composable/useableColumns';
-  import { onMounted } from 'vue';
+  import { statusColumnEasy } from '@/views/bolita-views/composable/useableColumns';
+  import { h, onMounted } from 'vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { DataTableColumns } from 'naive-ui';
+  import { DataTableColumns, NButton } from 'naive-ui';
+  import ExceptionDialog from './dialog/ExceptionDialog.vue';
 
   onMounted(async () => {
     await reload();
   });
+
+  let showExceptionDialog = $ref(false);
+  let currentRow = $ref(null);
 
   const allColumns: DataTableColumns<any> = [
     {
@@ -19,7 +23,7 @@
     },
     {
       title: 'Ref',
-      key: 'ref',
+      key: 'outboundForecast.ref',
       width: 120,
     },
     {
@@ -28,34 +32,14 @@
       width: 60,
     },
     {
-      title: '预报/实际件数',
-      key: 'numberDisplay',
-      width: 120,
-    },
-    {
-      title: '预报/实际托数',
-      key: 'trayDisplay',
-      width: 120,
-    },
-    {
       title: 'FC',
       key: 'fcAddress',
       width: 80,
     },
     {
-      title: '送货地址',
-      key: 'address',
-      width: 100,
-    },
-    {
       title: 'FBA单号',
       key: 'fbaDeliveryCode',
       width: 140,
-    },
-    {
-      title: '出库方式',
-      key: 'outboundMethod',
-      width: 100,
     },
     {
       title: '物流渠道',
@@ -77,31 +61,29 @@
       key: 'size',
       width: 80,
     },
-    {
-      title: '操作要求',
-      key: 'operationRequire',
-      width: 100,
-    },
-    {
-      title: '操作备注',
-      key: 'operationNote',
-      width: 100,
-    },
     statusColumnEasy({
       title: '状态',
       key: 'inStatus',
     }),
-    timeColumn('arriveTime', '实际到仓日期'),
-    timeColumn('arriveTime', '预计取货日期'),
-    timeColumn('outBoundTime', '实际发货时间'),
     {
-      title: '滞留时间',
-      key: 'storageTime',
-      width: 100,
-    },
-    {
-      title: '库位',
-      key: 'storageTime',
+      title: '异常',
+      key: 'actions',
+      width: 80,
+      render(row) {
+        return h(
+          NButton,
+          {
+            strong: true,
+            tertiary: true,
+            size: 'small',
+            onClick: () => {
+              currentRow = row;
+              showExceptionDialog = true;
+            },
+          },
+          { default: () => '异常' }
+        );
+      },
     },
   ].map((it) => {
     it.ellipsis = {
@@ -117,10 +99,11 @@
   let loading = $ref(false);
   const props = defineProps<Props>();
   let currentList = $ref([]);
+
   async function reload() {
     loading = true;
     if (props.ids) {
-      currentList = await getTaskListByIds(props.ids.split(','));
+      currentList = await getTaskListByIds(props.ids);
     }
     if (props.notifyId) {
       currentList = (await getTaskListByNotifyId(props.notifyId)).map((it) => {
@@ -131,11 +114,34 @@
     }
     loading = false;
   }
+
+  async function handleExceptionSaved(updatedData) {
+    showExceptionDialog = false;
+    // Update the local list with the updated data
+    currentList = currentList.map(item => {
+      if (item.id === updatedData.id) {
+        return updatedData;
+      }
+      return item;
+    });
+  }
+
+  function handleExceptionCancel() {
+    showExceptionDialog = false;
+  }
 </script>
 
 <template>
   <loading-frame :loading="loading">
     <n-data-table :max-height="400" :columns="allColumns" :data="currentList" />
+
+    <n-modal v-model:show="showExceptionDialog" preset="dialog" title="异常信息">
+      <exception-dialog
+        :row="currentRow"
+        @saved="handleExceptionSaved"
+        @cancel="handleExceptionCancel"
+      />
+    </n-modal>
   </loading-frame>
 </template>
 

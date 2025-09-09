@@ -41,10 +41,6 @@ export async function addOrUpdateOutboundForecast(item) {
 }
 
 export async function addOrUpdateWithRefOutboundForecast(item) {
-  if (item.customer || item.inventory) {
-    item.customerId = item.customer.id;
-    item.inventoryId = item.inventory.id;
-  }
   return await hillo.jsonPost(typeName + '/addOrUpdateWithRef', {
     ...item,
   });
@@ -116,4 +112,4 @@ export const defaultOutboundList = {
   logisticsCompany: '',
 };
 
-export const waitOperationStatusList = ['已订车', '无需订车', '已装车', '已完成', '全部出库'];
+export const waitOperationStatusList = ['已定车', '无需定车', '已装车', '已完成', '全部出库'];

@@ -47,7 +47,7 @@ export const columns: DataTableColumns<any> = [
     key: 'postcode',
   },
   statusColumnEasy({
-    title: '订车状态',
+    title: '定车状态',
     key: 'carStatus',
   }),
   {
@@ -167,7 +167,7 @@ export const schemas: FormField[] = [
   asyncFBACode(),
   {
     field: 'orderCarPrice',
-    label: '订车价格',
+    label: '定车价格',
   },
   getDatePickerFormField('reservationGetProductTime', '预约取货日期'),
   {

@@ -21,7 +21,7 @@
           <DocumentAdd20Regular />
         </n-icon>
       </template>
-      库外订车
+      库外定车
     </n-button>
     <n-button class="action-button" size="small" type="info" @click="downloadData">
       <template #icon>
@@ -44,7 +44,7 @@
       :show-icon="false"
       preset="card"
       style="width: 90%; min-width: 600px; max-width: 600px"
-      title="库外订车"
+      title="库外定车"
     >
       <import-out-warehouse-file @saved="reloadTable" />
     </n-modal>
@@ -227,7 +227,7 @@
     const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
 
     // Save file
-    FileSaver.saveAs(blob, '库外订车.xlsx');
+    FileSaver.saveAs(blob, '库外定车.xlsx');
   }
 
   onMounted(async () => {});

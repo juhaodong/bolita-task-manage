@@ -21,7 +21,7 @@
         type="warning"
         @click="startShareCar()"
       >
-        订车
+        定车
       </n-button>
       <n-button
         v-if="cancelBookBtn"
@@ -29,7 +29,7 @@
         type="error"
         @click="cancelCar()"
       >
-        取消订车
+        取消定车
       </n-button>
     </filter-bar>
     <div class="my-2"></div>
@@ -46,7 +46,7 @@
       :show-icon="false"
       preset="card"
       style="width: 90%; min-width: 600px; max-width: 600px"
-      title="新建订车"
+      title="新建定车"
     >
       <new-logistic-detail @saved="reloadTable" />
     </n-modal>
@@ -55,7 +55,7 @@
       :show-icon="false"
       preset="card"
       style="width: 90%; min-width: 600px; max-width: 600px"
-      title="新建订车"
+      title="新建定车"
     >
       <new-carpool-management :merged-out-ids="checkedRows" @saved="saveShareCar" />
     </n-modal>

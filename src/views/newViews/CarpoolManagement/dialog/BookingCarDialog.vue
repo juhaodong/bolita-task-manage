@@ -17,11 +17,12 @@
     { label: '第三方', value: '第三方' },
   ]);
   let logisticsCompany = $ref('');
-  let ISA = $ref('');
+  let isa = $ref('');
   let waybillId = $ref('');
+  let suggestedPrice = $ref('');
   let reservationGetProductTime = $ref(null);
   let reservationGetProductDetailTime = $ref('');
-  let AMZID = $ref('');
+  let amzId = $ref('');
   let note = $ref('');
   let loading = $ref(false);
   // const emit = defineEmits(['saved']);
@@ -29,13 +30,14 @@
   onMounted(async () => {
     console.log(prop.info, 'info');
     logisticsCompany = prop.info.logisticsCompany ?? 'DHL Freight';
-    ISA = prop.info.ISA ?? '';
+    isa = prop.info.isa ?? '';
     waybillId = prop.info.waybillId ?? '';
+    suggestedPrice = prop.info.suggestedPrice ?? '';
     reservationGetProductTime = prop.info.reservationGetProductTime
       ? parseFloat(prop.info.reservationGetProductTime)
       : new Date();
     reservationGetProductDetailTime = prop.info.reservationGetProductDetailTime ?? '';
-    AMZID = prop.info.AMZID ?? '';
+    amzId = prop.info.amzId ?? '';
     note = prop.info.note ?? '';
   });
   const emit = defineEmits(['saved']);
@@ -55,7 +57,7 @@
   let errorMessage = $ref('');
   async function saveInfo() {
     requiredInfo = false;
-    if (isaRequired.value && !ISA) {
+    if (isaRequired.value && !isa) {
       requiredInfo = true;
       errorMessage = '请完整填完必填项！';
       return;
@@ -64,7 +66,7 @@
       !logisticsCompany ||
       !reservationGetProductTime ||
       !reservationGetProductDetailTime ||
-      !AMZID
+      !amzId
     ) {
       requiredInfo = true;
       errorMessage = '请完整填完必填项！';
@@ -72,16 +74,18 @@
     }
     let outboundForecastInfo = prop.info;
     loading = true;
-    outboundForecastInfo.AMZID = AMZID;
-    outboundForecastInfo.ISA = ISA;
+    outboundForecastInfo.amzId = amzId;
+    outboundForecastInfo.isa = isa;
     outboundForecastInfo.bookCarTimestamp = dayjs().format('YYYY-MM-DDTHH:mm:ss');
-    outboundForecastInfo.inStatus = '已订车';
-    outboundForecastInfo.carStatus = '已订车';
+    outboundForecastInfo.inStatus = '已定车';
+    outboundForecastInfo.carStatus = '已定车';
     outboundForecastInfo.note = note;
     outboundForecastInfo.reservationGetProductDetailTime = reservationGetProductDetailTime;
-    outboundForecastInfo.reservationGetProductTime = dayjs(reservationGetProductTime).valueOf();
+    outboundForecastInfo.reservationGetProductTime =
+      dayjs(reservationGetProductTime).format('YYYY-MM-DDTHH:mm:ss');
     outboundForecastInfo.waitCar = '1';
     outboundForecastInfo.waybillId = waybillId;
+    outboundForecastInfo.suggestedPrice = suggestedPrice;
     outboundForecastInfo.logisticsCompany = logisticsCompany;
     await updateTaskListAfterBookingCarWithInfo(outboundForecastInfo.id, outboundForecastInfo);
     await addOrUpdateWithRefOutboundForecast(outboundForecastInfo);
@@ -102,13 +106,16 @@
           />
         </n-descriptions-item>
         <n-descriptions-item :label="currentNeedInfo.label + ' (必填)'" :span="2">
-          <n-input v-model:value="AMZID" :status="requiredInfo ? 'error' : ''" />
+          <n-input v-model:value="amzId" :status="requiredInfo ? 'error' : ''" />
         </n-descriptions-item>
-        <n-descriptions-item :label="isaRequired ? 'ISA (必填)' : 'ISA'" :span="2">
-          <n-input v-model:value="ISA" />
+        <n-descriptions-item :label="isaRequired ? 'isa (必填)' : 'isa'" :span="2">
+          <n-input v-model:value="isa" />
         </n-descriptions-item>
         <n-descriptions-item :span="2" label="运单号">
           <n-input v-model:value="waybillId" />
+        </n-descriptions-item>
+        <n-descriptions-item :span="2" label="整车报价">
+          <n-input v-model:value="suggestedPrice" />
         </n-descriptions-item>
         <n-descriptions-item :span="2" label="预计取货日期 (必填)">
           <n-date-picker
@@ -124,7 +131,7 @@
           />
         </n-descriptions-item>
         <n-descriptions-item :span="2" label="备注">
-          <n-input v-model:value="note" />
+          <n-input type="textarea" v-model:value="note" />
         </n-descriptions-item>
       </n-descriptions>
       <n-button style="margin-top: 10px" type="info" @click="saveInfo">确认</n-button>

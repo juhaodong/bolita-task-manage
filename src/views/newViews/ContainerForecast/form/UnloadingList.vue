@@ -61,6 +61,11 @@
         } else {
           it.Adresse = '-';
         }
+        if (it.Anmerkung === 'PL' || it.Anmerkung === 'AMZ PL' || it.Anmerkung === 'PRI PL') {
+          it.palType = 'KI / FP / XP';
+        } else {
+          it.size = '';
+        }
       });
       let groupByInfo = groupBy(res, 'Adresse');
       let containIndex = 0;
@@ -129,7 +134,8 @@
     },
     { title: 'R/F', key: 'fakeDate' },
     { title: 'Pal Menge', key: 'fakeDate' },
-    { title: 'Pal Type', key: 'fakeDate' },
+    { title: 'Pal Type', key: 'palType' },
+    { title: 'Size', key: 'size' },
     { title: 'Adresse', key: 'Adresse', width: 200 },
     { title: 'Anmerkung', key: 'Anmerkung' },
   ]);

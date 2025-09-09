@@ -313,8 +313,8 @@
       deliveryMethod: selectedDeliveryMethod,
       postcode: selectedPostcode ?? '',
       ...value,
-      inStatus: value.needCar === '1' ? '待订车' : '无需订车',
-      carStatus: value.needCar === '1' ? '待订车' : '无需订车',
+      inStatus: value.needCar === '1' ? '待定车' : '无需定车',
+      carStatus: value.needCar === '1' ? '待定车' : '无需定车',
       outboundDetailInfo: selectedTaskList.map((it) => it.id).join(','),
       totalVolume: safeSumBy(selectedTaskList, 'volume'),
       totalWeight: safeSumBy(selectedTaskList, 'weight'),
@@ -411,7 +411,7 @@
     {
       field: 'needCar',
       component: 'NSelect',
-      label: '是否需要订车',
+      label: '是否需要定车',
       componentProps: {
         options: [
           { value: '1', label: '是' },

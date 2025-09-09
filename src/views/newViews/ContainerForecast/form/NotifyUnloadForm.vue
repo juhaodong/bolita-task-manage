@@ -35,7 +35,6 @@
     return userInfo?.powerList;
   });
   const showBtn = computed(() => {
-    console.log(AccountPowerList.value);
     return hasPermission([NotifyListPower.Operate]);
   });
 
@@ -221,11 +220,12 @@
         <n-table :single-line="false" class="mt-4">
           <thead>
             <tr>
-              <th>票号</th>
+              <th style="width: 100px">票号</th>
               <th>预报 托</th>
               <th>预报 箱</th>
               <th style="width: 100px">入库 托</th>
               <th style="width: 100px">入库 箱</th>
+              <th style="width: 100px">尺寸</th>
               <th>库位</th>
               <th>仓库备注</th>
             </tr>
@@ -252,6 +252,9 @@
                   placeholder=""
                   @focus="item.arrivedContainerNumEdit = ''"
                 />
+              </td>
+              <td>
+                <n-input v-model:value="item.size" :disabled="!canEdit" placeholder="" />
               </td>
               <td>
                 <n-input

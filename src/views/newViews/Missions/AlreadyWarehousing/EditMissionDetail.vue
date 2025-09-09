@@ -21,7 +21,7 @@
   } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { keys } from 'lodash';
-  import { addOrUpdateTask } from '@/api/newDataLayer/TaskList/TaskList';
+  import { updateTask } from '@/api/newDataLayer/TaskList/TaskList';
   import dayjs from 'dayjs';
 
   interface Props {
@@ -290,7 +290,7 @@
       note: '修改了 ' + editLabel.join(','),
     });
     await safeScope(async () => {
-      await addOrUpdateTask(Object.assign(waitEdit, values));
+      await updateTask(Object.assign(waitEdit, values));
       emit('saved', values);
     });
     loading = false;

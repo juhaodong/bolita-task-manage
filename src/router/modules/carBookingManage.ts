@@ -9,7 +9,7 @@ const routes: Array<RouteRecordRaw> = [
     name: 'car',
     component: Layout,
     meta: {
-      title: '订车管理',
+      title: '定车管理',
       sort: 4,
       isRoot: true,
       icon: renderIcon(DeliveryTruck),
@@ -19,7 +19,7 @@ const routes: Array<RouteRecordRaw> = [
         path: 'carBooking',
         name: `carBooking`,
         meta: {
-          title: '订车管理',
+          title: '定车管理',
         },
         component: () => import('@/views/newViews/CarpoolManagement/CarpoolManagement.vue'),
       },
@@ -27,7 +27,7 @@ const routes: Array<RouteRecordRaw> = [
         path: 'carBookingDetail',
         name: `carBookingDetail`,
         meta: {
-          title: '订车明细',
+          title: '定车明细',
         },
         component: () => import('@/views/newViews/CarpoolManagement/CarpoolDetail.vue'),
       },
@@ -35,7 +35,7 @@ const routes: Array<RouteRecordRaw> = [
         path: 'carBookingOut',
         name: `carBookingOut`,
         meta: {
-          title: '库外订车',
+          title: '库外定车',
         },
         component: () => import('@/views/newViews/CarpoolManagement/CarpoolOutWarehouse.vue'),
       },

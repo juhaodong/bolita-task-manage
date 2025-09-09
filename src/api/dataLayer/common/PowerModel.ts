@@ -33,20 +33,20 @@ export enum LogisticsDetailPower {
   AllowCheckForm = '物流详情允许查看运输公司,账单号,价格',
   CostOperate = '物流详情费用动作',
   CustomerBills = '物流详情客户账单',
-  BookCar = '物流详情订车',
-  CancelBookCar = '物流详情取消订车',
+  BookCar = '物流详情定车',
+  CancelBookCar = '物流详情取消定车',
   SubmitQuotation = '物流详情提交报价',
   ConfirmQuotation = '物流详情确认报价',
 }
 
 export enum CarpoolManagementPower {
-  Edit = '订车管理修改',
-  SubmitOrder = '订车管理提单',
-  pod = '订车管理POD',
-  Bill = '订车管理账单',
-  Cost = '订车管理费用',
-  SubmitPay = '订车管理提交付款',
-  ConfirmPay = '订车管理确认付款',
+  Edit = '定车管理修改',
+  SubmitOrder = '定车管理提单',
+  pod = '定车管理POD',
+  Bill = '定车管理账单',
+  Cost = '定车管理费用',
+  SubmitPay = '定车管理提交付款',
+  ConfirmPay = '定车管理确认付款',
 }
 
 export enum SettlementPower {

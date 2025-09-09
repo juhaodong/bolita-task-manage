@@ -36,6 +36,14 @@ export async function getTaskListByFilterWithPagination(filter, pagination) {
   ).data;
 }
 
+export async function getTaskListByFilterAndSort(filter, sort) {
+  return (
+    await hillo.jsonPost(typeName + '/searchForFull' + '?&orderCodes=' + sort, {
+      criteria: filter,
+    })
+  ).data.rows;
+}
+
 export async function getTaskListByIdsAndFilter(ids, filter) {
   return (
     await hillo.jsonPost(typeName + '/list', {
@@ -81,19 +89,12 @@ export async function getTaskListById(id) {
     })
   ).data;
 }
-
 export async function getTaskListByIds(ids) {
   return (
-    await hillo.jsonPost(typeName + '/list', {
-      criteria: [
-        {
-          field: 'id',
-          op: 'in',
-          value: ids,
-        },
-      ],
+    await hillo.jsonPost(typeName + '/searchForFull', {
+      idIn: ids,
     })
-  ).data.content;
+  ).data.rows;
 }
 
 export async function getTaskGroupByNotifyId(id) {
@@ -112,6 +113,26 @@ export async function addOrUpdateTask(item) {
     item.inventoryId = item.inventory.id;
   }
   return await hillo.jsonPost(typeName + '/addOrUpdateWithRef', {
+    ...item,
+  });
+}
+
+export async function updateTask(item) {
+  if (item.customer || item.inventory) {
+    item.customerId = item.customer.id;
+    item.inventoryId = item.inventory.id;
+  }
+  return await hillo.jsonPost(typeName + '/updateWithRef', {
+    ...item,
+  });
+}
+
+export async function addTask(item) {
+  if (item.customer || item.inventory) {
+    item.customerId = item.customer.id;
+    item.inventoryId = item.inventory.id;
+  }
+  return await hillo.jsonPost(typeName + '/addWithRef', {
     ...item,
   });
 }
@@ -223,3 +244,5 @@ export async function searchTaskPrice(size, weight, country, outboundMethod, num
   const res = await checkPrice(currentWeight, country, zipCode);
   return res.length > 0 ? res.map((it) => it.price).join(',') : '人工询价';
 }
+
+export const errorStatus = ['待入库', '存仓', '入库待出库'];

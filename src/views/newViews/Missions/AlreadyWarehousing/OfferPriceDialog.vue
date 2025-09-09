@@ -34,7 +34,7 @@
     loading = true;
     await safeScope(async () => {
       for (const item of currentTaskList) {
-        item.inStatus = '待订车';
+        item.inStatus = '待定车';
         item.needOfferPrice = '2';
         item.customerId = item.customer.id;
         item.inventoryId = item.inventory.id;

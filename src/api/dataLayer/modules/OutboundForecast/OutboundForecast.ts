@@ -57,9 +57,9 @@ export async function updateTaskListAfterBookingCar(id) {
       bolitaTaskId: taskId,
       operator: userInfo?.realName,
       detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
-      note: '完成订车',
+      note: '完成定车',
     });
-    res.inStatus = '已订车';
+    res.inStatus = '已定车';
     res.inventoryId = res.inventory.id;
     res.customerId = res.customer.id;
     await addOrUpdateTask(res);
@@ -68,7 +68,7 @@ export async function updateTaskListAfterBookingCar(id) {
 
 export async function updateTaskListAfterBookingCarWithInfo(id, info) {
   console.log(info, 'info');
-  const taskListIds = (await getOutboundForecastById(id)).outboundDetailInfo.split(',');
+  const taskListIds = info.bolitaTaskIds;
   const userInfo = useUserStore().info;
   for (const taskId of taskListIds) {
     const res = await getTaskListById(taskId);
@@ -77,14 +77,13 @@ export async function updateTaskListAfterBookingCarWithInfo(id, info) {
       bolitaTaskId: taskId,
       operator: userInfo?.realName,
       detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
-      note: '完成订车',
+      note: '完成定车',
     });
-    res.ref = info.ref;
     res.outBoundTime =
       dayjs(parseFloat(info.reservationGetProductTime)).format('YYYY-MM-DD') +
       ' ' +
       info.reservationGetProductDetailTime; // 预计取货时间
-    res.inStatus = '已订车';
+    res.inStatus = '已定车';
     res.inventoryId = res.inventory.id;
     res.customerId = res.customer.id;
     await addOrUpdateTask(res);
@@ -102,7 +101,7 @@ export async function updateTaskListAfterCancelBookingCarWithInfo(id, info) {
       bolitaTaskId: taskId,
       operator: userInfo?.realName,
       detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
-      note: '取消订车',
+      note: '取消定车',
     });
     res.ref = info.ref;
     res.outBoundTime = ''; // 预计取货时间

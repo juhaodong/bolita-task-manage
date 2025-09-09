@@ -207,7 +207,7 @@ export function getFileNameAndTypeForFirebaseLink(firebaseLink: string) {
     const extension = name.split('.').pop()?.toLowerCase();
     if (extension) {
       // Check if it's an image file
-      if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(extension)) {
+      if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'jfif'].includes(extension)) {
         type = 'image';
       } else if (['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'].includes(extension)) {
         type = extension;

@@ -40,7 +40,7 @@ export const columns: DataTableColumns<OutboundPlanModel> = [
   ...sizeColumns(),
   timeColumn(),
   statusColumnEasy({
-    title: '订车状态',
+    title: '定车状态',
     key: 'carStatus',
   }),
   timeColumn('reservationOutboundDate', '预约出库日期'),
@@ -100,9 +100,9 @@ export type OutboundPlanModel = {
 };
 
 export enum CarStatus {
-  NoNeed = '无需订车',
-  UnAble = '待订车',
-  Booked = '已订车',
+  NoNeed = '无需定车',
+  UnAble = '待定车',
+  Booked = '已定车',
   Interception = '已截停',
 }
 

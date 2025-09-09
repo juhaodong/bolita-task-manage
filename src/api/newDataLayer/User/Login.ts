@@ -4,7 +4,7 @@ const loginPath = 'login';
 
 export async function loginNew(loginName, password) {
   return (
-    await hillo.jsonPost(loginPath + '/doLogin', {
+    await hillo.jsonPost('https://bolita-test.aaden.io/' + loginPath + '/doLogin', {
       loginName,
       password,
     })

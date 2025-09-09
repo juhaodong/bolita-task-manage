@@ -1,0 +1,135 @@
+<template>
+  <n-card class="proCard">
+    <loading-frame :loading="loading">
+      <n-data-table
+        :columns="displayColumns"
+        :data="model"
+        class="my-4"
+        max-height="450"
+        virtual-scroll
+      />
+      <span>是否需要定车</span>
+      <n-select
+        v-model:value="needCar"
+        :options="[
+          { value: '1', label: '是' },
+          { value: '0', label: '否' },
+        ]"
+        placeholder="是否需要定车"
+      />
+      <n-space v-if="model.length > 0" align="center" class="mt-4" justify="space-between">
+        <div>总数量: {{ totalNumber }}件 {{ totalTray }}托</div>
+        <div :style="{ color: parseFloat(totalWeight) > 20000 ? 'red' : '' }"
+          >总重量: {{ totalWeight }}</div
+        >
+        <div :style="{ color: parseFloat(totalVolume) > 70 ? 'red' : '' }"
+          >总体积: {{ totalVolume }}</div
+        >
+        <div :style="{ color: parseFloat(totalVolume) > 70 ? 'red' : '' }"
+          >总价格: {{ suggestedPrice }}</div
+        >
+      </n-space>
+      <n-button :loading="btnLoading" type="primary" @click="handleSubmit"> 保存 </n-button>
+    </loading-frame>
+  </n-card>
+</template>
+<script lang="ts" setup>
+  import { computed, ref } from 'vue';
+  import { DataTableColumns } from 'naive-ui';
+  import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
+  import { safeSumBy } from '@/store/utils/utils';
+  import { $ref } from 'vue/macros';
+  import {
+    addOrUpdateWithRefOutboundForecast,
+    defaultOutboundList,
+  } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+
+  interface Props {
+    model?: any;
+    initialKey?: any[];
+  }
+
+  const prop = defineProps<Props>();
+  const emit = defineEmits(['saved']);
+  const checkedRowKeys = ref<any[]>([]);
+  let showDetailInfo = $ref(false);
+  let currentDate = ref([]);
+  const outboundMethod = ref<any[]>([]);
+  let selectedPostcode = $ref('');
+  let selectedDeliveryMethod = $ref('');
+  let selectedfcAddress = $ref('');
+  let allNotifyDetail: any[] = $ref([]);
+  let loading: boolean = $ref(false);
+  let tableLoading = $ref(false);
+  let selectedTaskList = $ref([]);
+
+  const totalNumber = computed(() => {
+    return safeSumBy(prop.model, 'arrivedContainerNum');
+  });
+
+  const totalTray = computed(() => {
+    return safeSumBy(prop.model, 'arrivedTrayNum');
+  });
+
+  const totalVolume = computed(() => {
+    return safeSumBy(prop.model, 'volume');
+  });
+
+  const totalWeight = computed(() => {
+    return safeSumBy(prop.model, 'weight');
+  });
+
+  const suggestedPrice = computed(() => {
+    const allPriceList = prop.model.map((it) => it.suggestedPrice);
+    if (allPriceList.includes('人工询价')) {
+      return '人工询价';
+    } else {
+      return safeSumBy(prop.model, 'suggestedPrice');
+    }
+  });
+
+  let needCar = $ref('1');
+  let btnLoading = $ref(false);
+
+  async function handleSubmit() {
+    btnLoading = true;
+    const taskIds = prop.model.map((it) => it.id);
+    const res = {
+      fcAddress: prop.model[0].fcAddress ?? '',
+      deliveryMethod: prop.model[0].deliveryMethod,
+      postcode: prop.model[0].postcode ?? '',
+      needCar: needCar,
+      inStatus: needCar === '1' ? '待定车' : '无需定车',
+      carStatus: needCar === '1' ? '待定车' : '无需定车',
+      outboundDetailInfo: taskIds.join(','),
+      totalVolume: safeSumBy(prop.model, 'volume'),
+      totalWeight: safeSumBy(prop.model, 'weight'),
+      totalNumber: safeSumBy(prop.model, 'arrivedContainerNum'),
+      trayNum: safeSumBy(prop.model, 'arrivedTrayNum'),
+      suggestedPrice: safeSumBy(prop.model, 'suggestedPrice'),
+      bolitaTaskIds: taskIds,
+    };
+    const currentInfo = Object.assign(defaultOutboundList, res);
+    const outboundId = (await addOrUpdateWithRefOutboundForecast(currentInfo)).data.id;
+    console.log(outboundId, 'outboundId');
+    console.log(currentInfo, 'currentInfo');
+    btnLoading = false;
+  }
+
+  const displayColumns: DataTableColumns<any> = $computed(() => [
+    { title: '票号', key: 'ticketId' },
+    { title: '柜号', key: 'containerId' },
+    { title: '托数', key: 'arrivedTrayNum', width: 50 },
+    { title: '箱数', key: 'arrivedContainerNum', width: 50 },
+    { title: '重量', key: 'weight', width: 50 },
+    { title: '体积', key: 'volume', width: 50 },
+    { title: '邮编', key: 'postcode', width: 80 },
+    { title: '预计出库方式', key: 'outboundMethod' },
+    { title: '物流方式', key: 'deliveryMethod', width: 100 },
+    { title: 'FBA单号', key: 'fbaDeliveryCode' },
+    { title: '仓库', key: 'inventory.name', width: 100 },
+    { title: '价格', key: 'suggestedPrice', width: 100 },
+  ]);
+</script>
+
+<style lang="less" scoped></style>

@@ -1,4 +1,5 @@
 import hillo from 'hillo';
+import { getQuery } from '@/api/newDataLayer/Common/Common';
 
 const typeName = 'outboundForecast';
 
@@ -12,6 +13,14 @@ export async function getOutboundForecastListByFilter(filter) {
       criteria: filter,
     })
   ).data.content;
+}
+
+export async function getOutboundForecastListByFilterWithPagination(filter, pagination) {
+  return (
+    await hillo.jsonPost(typeName + '/searchForFull' + getQuery(pagination) + '&orderCodes=', {
+      ...filter,
+    })
+  ).data;
 }
 
 export async function getOutboundForecastListById(id) {

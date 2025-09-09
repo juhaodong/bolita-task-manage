@@ -1,30 +1,18 @@
 <template>
   <n-card v-if="hasAuthPower('outMissionView')" :bordered="false" class="proCard">
-    <filter-bar
-      v-model="filterItems"
-      :columns="operationColumns"
-      @clear="updateFilter(null)"
-      @submit="updateFilter"
-      @filter-change="updateFilterWithItems"
-    />
-    <div class="mt-2">
-      <n-button class="action-button" size="small" type="info" @click="selectedHeader">
-        <template #icon>
-          <n-icon>
-            <TableSettings20Regular />
-          </n-icon>
-        </template>
-        选择表头显示
-      </n-button>
-      <n-button class="action-button" size="small" type="success" @click="downloadData">
-        <template #icon>
-          <n-icon>
-            <ArrowDownload20Regular />
-          </n-icon>
-        </template>
-        下载
-      </n-button>
-    </div>
+    <single-filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter" />
+    <n-button class="action-button" size="small" type="success" @click="downloadData">
+      下载
+    </n-button>
+    <n-button class="action-button" size="small" type="success" @click="downloadData">
+      生成装车单
+    </n-button>
+    <n-button class="action-button" size="small" type="success" @click="downloadData">
+      上传装车单
+    </n-button>
+    <n-button class="action-button" size="small" type="success" @click="downloadData">
+      装车图片
+    </n-button>
     <div class="my-2"></div>
     <BasicTable
       ref="actionRef"
@@ -59,7 +47,7 @@
       :show-icon="false"
       preset="card"
       style="width: 90%; min-width: 600px; max-width: 600px"
-      title="新建订车"
+      title="新建定车"
     >
       <new-carpool-management :merged-out-ids="checkedRows" @saved="saveShareCar" />
     </n-modal>
@@ -136,13 +124,11 @@
 
 <script lang="ts" setup>
   import {
-    ArrowDownload20Regular,
     ArrowUpload20Regular,
     Box20Filled,
     DocumentAdd20Regular,
     Image20Regular,
     Payment20Regular,
-    TableSettings20Regular,
     VehicleTruck20Regular,
   } from '@vicons/fluent';
   import { computed, h, onMounted, reactive, ref } from 'vue';
@@ -152,7 +138,6 @@
     timeTableColumn,
   } from '@/views/bolita-views/composable/useableColumns';
   import { $ref } from 'vue/macros';
-  import FilterBar from '@/views/bolita-views/composable/FilterBar.vue';
   import NewCarpoolManagement from '@/views/newViews/CarpoolManagement/dialog/NewCarpoolManagement.vue';
   import dayjs from 'dayjs';
   import OutboundOrder from '@/views/newViews/OutboundForecast/OutboundOrder.vue';
@@ -184,6 +169,7 @@
     asyncStorageByFilter,
   } from '@/api/dataLayer/common/common';
   import OfferCustomerDialog from '@/views/newViews/CarpoolManagement/dialog/OfferCustomerDialog.vue';
+  import SingleFilterBar from '@/views/bolita-views/composable/SingleFilterBar.vue';
 
   const showModal = ref(false);
   let showShareCarModel = $ref(false);
@@ -300,7 +286,7 @@
       key: 'postcode',
     },
     // statusColumnEasy({
-    //   title: '订车状态',
+    //   title: '定车状态',
     //   key: 'carStatus',
     // }),
     {

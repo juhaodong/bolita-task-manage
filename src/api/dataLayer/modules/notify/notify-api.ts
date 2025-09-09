@@ -71,7 +71,7 @@ export enum OutStatus {
 export enum OutPlanStatus {
   AlreadyPlan = '已计划出库',
   AlreadyOut = '已出库',
-  AlreadyBookingCar = '已订车',
+  AlreadyBookingCar = '已定车',
   AlreadyOffer = '已报价',
 }
 

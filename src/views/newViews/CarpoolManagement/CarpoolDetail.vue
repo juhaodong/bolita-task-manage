@@ -403,7 +403,7 @@
     const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
 
     // 保存文件
-    FileSaver.saveAs(blob, '订车明细.xlsx');
+    FileSaver.saveAs(blob, '定车明细.xlsx');
   }
 
   const paginationReactive = reactive({
@@ -540,7 +540,7 @@
     const res = getQueryString('id');
     if (res) {
       filterItems.push({
-        option: '订车Id',
+        option: '定车Id',
         key: 'outboundId',
         value: res,
         display: res,
@@ -594,13 +594,13 @@
               //   (it) => it !== record.id
               // );
               // if (!outboundInfo.waitPrice) {
-              //   outboundInfo.inStatus = '待订车';
+              //   outboundInfo.inStatus = '待定车';
               // }
               // if (outboundInfo.waitPrice && !outboundInfo.waitCar) {
-              //   outboundInfo.inStatus = '待订车';
+              //   outboundInfo.inStatus = '待定车';
               // }
               // if (outboundInfo.waitCar) {
-              //   outboundInfo.inStatus = '已订车';
+              //   outboundInfo.inStatus = '已定车';
               // }
               // if (outboundInfo.outboundDetailInfo.length === 0) {
               //   outboundInfo.inStatus = '已取消';

@@ -32,7 +32,7 @@ const routes: Array<RouteRecordRaw> = [
         path: 'carpoolManage',
         name: `${name}carpoolManage`,
         meta: {
-          title: '订车管理',
+          title: '定车管理',
           permissions: [
             PermissionEnums.Logistic,
             PermissionEnums.Manager,

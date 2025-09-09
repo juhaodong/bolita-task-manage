@@ -77,7 +77,6 @@
         :row-key="(row) => row.id"
         @update:page="handlePageChange"
         @update:pageSize="handlePageSizeChange"
-        @row-click="onRowClick"
       />
       <n-modal
         v-model:show="showModal"

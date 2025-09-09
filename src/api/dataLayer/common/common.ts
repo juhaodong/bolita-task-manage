@@ -47,7 +47,7 @@ export const allInStatusNotifyList = [
   '已拆分',
 ];
 
-export const allInStatusOperationList = ['已完成', '已报价', '已订车', '待订车', '无需订车'];
+export const allInStatusOperationList = ['已完成', '已定车', '待定车', '无需定车'];
 
 export async function checkPrice(currentWeight, country, zipCode) {
   return (
