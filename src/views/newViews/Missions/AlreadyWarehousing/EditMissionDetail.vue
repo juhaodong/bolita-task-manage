@@ -23,6 +23,7 @@
   import { keys } from 'lodash';
   import { updateTask } from '@/api/newDataLayer/TaskList/TaskList';
   import dayjs from 'dayjs';
+  import { allInStatusNotifyList } from '@/api/dataLayer/common/common';
 
   interface Props {
     model?: any;
@@ -230,7 +231,22 @@
     return it;
   });
 
-  const allSchemas = [...normalSchemas, ...inventorySchemas, ...otherSchemas];
+  const systemSchemas = [
+    {
+      label: '状态',
+      field: 'inStatus',
+      component: 'NSelect',
+      componentProps: {
+        options: generateOptionFromArray(allInStatusNotifyList),
+      },
+    },
+  ].map((it) => {
+    it.group = '系统信息';
+    it.required = false;
+    return it;
+  });
+
+  const allSchemas = [...normalSchemas, ...inventorySchemas, ...otherSchemas, ...systemSchemas];
 
   const emit = defineEmits(['saved']);
 

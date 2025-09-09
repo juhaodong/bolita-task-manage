@@ -7,9 +7,38 @@
         @submit="updateFilter"
       />
       <div class="mt-2">
-        <n-button class="action-button" size="small" type="info" @click="orderCar"> 定车 </n-button>
-        <n-button class="action-button" size="small" @click="downloadData"> 下载 </n-button>
-        <n-button class="action-button" size="small" @click="showDetailInfo"> 详情 </n-button>
+        <n-button
+          :disabled="selectedOutboundForecastList.length !== 1"
+          class="action-button"
+          size="small"
+          type="info"
+          @click="orderCar"
+        >
+          定车
+        </n-button>
+        <n-button
+          :disabled="selectedOutboundForecastList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="downloadData"
+        >
+          下载
+        </n-button>
+        <n-button
+          :disabled="selectedOutboundForecastList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="showDetailInfo"
+        >
+          详情
+        </n-button>
+        <n-button
+          :disabled="selectedOutboundForecastList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="editCmr"
+          >CMR
+        </n-button>
       </div>
       <!-- Filter controls are now handled by FilterBar component -->
       <div class="my-2"></div>
@@ -78,7 +107,10 @@
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import FileSaver from 'file-saver';
-  import { addOrUpdateWithRefOutboundForecast } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import {
+    addOrUpdateOutboundForecast,
+    addOrUpdateWithRefOutboundForecast,
+  } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import BookingCarDialog from '@/views/newViews/CarpoolManagement/dialog/BookingCarDialog.vue';
   import * as XLSX from 'xlsx';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
@@ -94,6 +126,7 @@
   import { allInStatusOperationList } from '@/api/dataLayer/common/common';
   import { createPaginationPlaceholders } from '@/api/newDataLayer/Common/Common';
   import { getOutboundForecastListByFilterWithPagination } from '@/api/newDataLayer/CarManage/CarManage';
+  import { useUploadDialog } from '@/store/modules/uploadFileState';
 
   const showModal = ref(false);
 
@@ -381,15 +414,23 @@
     }
   }
 
-  function startShareCar(item) {
-    // typeName = item;
-    // showShareCarModel = true;
-    carDialog = true;
+  async function editCmr() {
+    await handleFileUpload('cmrFiles');
   }
 
-  async function saveShareCar() {
-    reloadTable();
-    checkedRowKeys = [];
+  async function handleFileUpload(fieldName) {
+    if (selectedOutboundForecastList.length !== 1) return;
+
+    currentModel = selectedOutboundForecastList[0];
+    const upload = useUploadDialog();
+    const files = await upload.upload(currentModel[fieldName]);
+
+    if (files.checkPassed) {
+      currentModel[fieldName] = files.files;
+      await addOrUpdateOutboundForecast(currentModel);
+    }
+
+    await actionRef.value.reload();
   }
 
   function showDetailInfo() {

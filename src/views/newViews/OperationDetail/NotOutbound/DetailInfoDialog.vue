@@ -118,12 +118,7 @@
   async function handleExceptionSaved(updatedData) {
     showExceptionDialog = false;
     // Update the local list with the updated data
-    currentList = currentList.map(item => {
-      if (item.id === updatedData.id) {
-        return updatedData;
-      }
-      return item;
-    });
+    currentList = currentList.filter((it) => it.id !== updatedData.id);
   }
 
   function handleExceptionCancel() {

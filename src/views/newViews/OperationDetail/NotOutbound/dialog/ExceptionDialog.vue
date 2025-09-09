@@ -42,6 +42,7 @@
       ...props.row,
     };
     updatedData.inStatus = status;
+    updatedData.outboundForecastId = null;
 
     try {
       const userInfo = useUserStore().info;
