@@ -90,12 +90,12 @@
       defaultValue: 0,
     },
     {
-      label: '实际到达托数',
+      label: '到达托数',
       field: 'arrivedTrayNum',
       defaultValue: 0,
     },
     {
-      label: '实际到达件数',
+      label: '到达件数',
       field: 'arrivedContainerNum',
       defaultValue: 0,
     },

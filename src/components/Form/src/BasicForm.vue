@@ -5,7 +5,11 @@
         <n-tab-pane v-for="g in groupedSchema" :key="g.group" :name="g.group" :tab="g.group">
           <n-grid v-bind="getGrid" x-gap="8">
             <n-gi v-for="schema in g.schema" :key="schema.field" v-bind="schema.giProps">
-              <n-form-item :label="schema.label" :path="schema.field">
+              <n-form-item
+                :label="schema.label"
+                :path="schema.field"
+                :class="{ 'modified-field': isFieldModified(schema.field) }"
+              >
                 <!--标签名右侧温馨提示-->
                 <template v-if="schema.labelMessage" #label>
                   {{ schema.label }}
@@ -168,7 +172,11 @@
             <n-h4>{{ g.group }}</n-h4>
           </n-gi>
           <n-gi v-for="schema in g.schema" :key="schema.field" v-bind="schema.giProps">
-            <n-form-item :label="schema.label" :path="schema.field">
+            <n-form-item
+              :label="schema.label"
+              :path="schema.field"
+              :class="{ 'modified-field': isFieldModified(schema.field) }"
+            >
               <!--标签名右侧温馨提示-->
               <template v-if="schema.labelMessage" #label>
                 {{ schema.label }}
@@ -442,7 +450,6 @@
 
       const groupedSchema = computed(() => {
         const res = Object.entries(groupBy(getSchema.value, 'group')).map((it) => {
-          console.log(it, 'it');
           const [index, t] = it;
           return {
             group: index === 'undefined' ? '基本信息' : index,
@@ -450,7 +457,6 @@
           };
         });
         // Initialize activeTab with the first group's name
-        console.log(res, 'res');
         return res;
       });
 
@@ -521,6 +527,18 @@
         emit('register', formActionType);
       });
 
+      function isFieldModified(field: string): boolean {
+        // Compare current value with default value
+        const currentValue = formModel[field];
+        const defaultValue = defaultFormModel.value[field];
+
+        // Handle different types of values
+        if (typeof currentValue === 'object' && currentValue !== null) {
+          return JSON.stringify(currentValue) !== JSON.stringify(defaultValue);
+        }
+        return currentValue !== defaultValue;
+      }
+
       return {
         formElRef,
         formModel,
@@ -538,6 +556,7 @@
         unfoldToggle,
         groupedSchema,
         activeTab,
+        isFieldModified,
       };
     },
   });
@@ -554,5 +573,11 @@
     align-items: center;
     height: 100%;
     margin-left: -3px;
+  }
+
+  :deep(.modified-field .n-form-item-label) {
+    border: 1px solid #f56c6c;
+    border-radius: 4px;
+    padding: 0 5px;
   }
 </style>
