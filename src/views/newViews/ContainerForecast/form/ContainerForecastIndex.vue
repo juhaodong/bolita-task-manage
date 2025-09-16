@@ -22,6 +22,7 @@
   } from '@/api/newDataLayer/Warehouse/UseLog';
   import {
     addOrUpdateTask,
+    addTask,
     defaultTask,
     getTaskListByNotifyId,
     searchTaskPrice,
@@ -282,7 +283,7 @@
           item.outTrayNum = '';
           item.cmrfiles = '';
           loadingMessage += '正在加载票号:' + item.ticketId + '的任务明细！' + `<br>`;
-          quest.push(addOrUpdateTask(item));
+          quest.push(addTask(item));
         }
         const result = await Promise.all(quest);
         loadingMessage += '正在上传货柜号:' + value.containerNo + '的任务明细！' + `<br>`;

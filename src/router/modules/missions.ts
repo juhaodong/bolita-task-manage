@@ -16,14 +16,24 @@ const routes: Array<RouteRecordRaw> = [
     },
     children: [
       {
-        path: 'missionDetail',
-        name: `missionDetail`,
+        path: 'missionDisplay',
+        name: `missionDisplay`,
         meta: {
-          title: '任务明细',
-          activeMenu: 'missionDetail',
+          title: '明细显示',
+          activeMenu: 'missionDisplay',
         },
         component: () =>
           import('@/views/newViews/Missions/AlreadyWarehousing/AlreadyWarehousing.vue'),
+      },
+      {
+        path: 'missionOperation',
+        name: `missionOperation`,
+        meta: {
+          title: '明细操作',
+          activeMenu: 'missionOperation',
+        },
+        component: () =>
+          import('@/views/newViews/Missions/AlreadyWarehousing/MissionOperationPage.vue'),
       },
       // {
       //   path: 'notWarehousing',

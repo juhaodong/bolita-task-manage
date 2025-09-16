@@ -7,6 +7,33 @@
         @submit="updateFilter"
       />
       <div class="mt-2">
+        <n-button
+          v-if="typeMission === '整柜任务看板' && hasAuthPower('missionOutboundAdd')"
+          class="action-button"
+          size="small"
+          type="success"
+          @click="addTable"
+        >
+          新建出库计划
+        </n-button>
+        <n-button
+          v-if="typeMission === '审核看板' && hasAuthPower('missionCheck')"
+          class="action-button"
+          size="small"
+          type="primary"
+          @click="checkDetailInfo"
+        >
+          审核
+        </n-button>
+        <n-button
+          v-if="typeMission === '报价看板' && hasAuthPower('missionPriceOffer')"
+          class="action-button"
+          size="small"
+          type="warning"
+          @click="showOfferPrice = true"
+        >
+          报价
+        </n-button>
         <n-button class="action-button" size="small" type="default" @click="downloadData">
           下载
         </n-button>
@@ -14,45 +41,63 @@
           :disabled="selectedTaskList.length !== 1"
           class="action-button"
           size="small"
-          @click="startEdit"
+          @click="merge"
         >
-          修改
+          合并
         </n-button>
         <n-button
           :disabled="selectedTaskList.length !== 1"
           class="action-button"
           size="small"
-          @click="showFiles"
+          @click="splitTask"
         >
-          附件
+          拆分
         </n-button>
         <n-button
           :disabled="selectedTaskList.length !== 1"
           class="action-button"
           size="small"
-          @click="showTimeLine"
+          @click="showTaskTray"
         >
-          时间线
+          托盘
         </n-button>
         <n-button
           :disabled="selectedTaskList.length !== 1"
           class="action-button"
           size="small"
-          @click="showCancel"
+          @click="updateSuggestedPrice"
         >
-          取消
+          询价
         </n-button>
       </div>
-      <BasicTable
-        ref="actionRef"
-        v-model:checked-row-keys="checkedRows"
-        @update:checked-row-keys="handleCheck"
-        :columns="columns"
-        :pagination="paginationReactive"
-        :request="loadDataTable"
-        :row-key="(row) => row.id"
-      />
 
+      <n-tabs
+        v-model:value="typeMission"
+        animated
+        pane-style="padding-left: 4px; padding-right: 4px; box-sizing: border-box;"
+        pane-wrapper-style="margin: 0 -4px"
+        size="large"
+      >
+        <n-tab-pane
+          v-for="currentType in typeTab"
+          :key="currentType"
+          :name="currentType"
+          :tab="currentType"
+        >
+          <div v-if="hasPagePower">
+            <BasicTable
+              ref="actionRef"
+              v-model:checked-row-keys="checkedRows"
+              @update:checked-row-keys="handleCheck"
+              :columns="columns"
+              :pagination="paginationReactive"
+              :request="loadDataTable"
+              :row-key="(row) => row.id"
+            />
+          </div>
+          <no-power-page v-else />
+        </n-tab-pane>
+      </n-tabs>
       <n-modal
         v-model:show="showModal"
         :show-icon="false"
@@ -177,7 +222,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { onMounted, reactive, ref } from 'vue';
+  import { computed, onMounted, reactive, ref } from 'vue';
   import { BasicTable } from '@/components/Table';
   import { allDeliveryMethod, allInStatusList, allOutboundMethod } from './columns';
   import { $ref } from 'vue/macros';
@@ -191,7 +236,8 @@
   import TimeLine from '@/views/newViews/Missions/AlreadyWarehousing/TimeLine.vue';
   import { useUserStore } from '@/store/modules/user';
   import OfferPriceDialog from '@/views/newViews/Missions/AlreadyWarehousing/OfferPriceDialog.vue';
-  import { getUserCustomerList } from '@/api/dataLayer/common/power';
+  import { getUserCustomerList, hasAuthPower } from '@/api/dataLayer/common/power';
+  import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import { asyncCustomer, generateOptionFromArray } from '@/store/utils/utils';
   import FileSaver from 'file-saver';
   import {
@@ -488,6 +534,22 @@
     ];
   }
 
+  const realOptions = computed(() => {
+    return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
+  });
+
+  const hasPagePower = computed(() => {
+    if (typeMission.value === '整柜任务看板') {
+      return hasAuthPower('missionAllView');
+    } else if (typeMission.value === '审核看板') {
+      return hasAuthPower('missionCheckView');
+    } else if (typeMission.value === '报价看板') {
+      return hasAuthPower('missionOfferView');
+    } else if (typeMission.value === '存仓看板') {
+      return hasAuthPower('missionStorageView');
+    }
+  });
+
   let showCancelDialog = $ref(false);
   async function cancelTask() {
     currentInfo.inStatus = '已取消';
@@ -731,6 +793,15 @@
     } else {
       currentFilter['inStatusNotIn'] = ['已拆分', '已取消'];
     }
+
+    if (typeMission.value === '整柜任务看板') {
+    } else if (typeMission.value === '存仓看板') {
+      currentFilter['inStatusIn'] = ['存仓'];
+    } else if (typeMission.value === '审核看板') {
+      currentFilter['inStatusIn'] = ['等待提交', '等待审核'];
+    } else if (typeMission.value === '报价看板') {
+      currentFilter['needOfferPrice'] = '1';
+    }
   }
 
   const loadDataTable = async () => {
@@ -785,11 +856,28 @@
     checkedRows = [];
     selectedTaskList = [];
     showMergeDialog = false;
-    await actionRef.value.reload();
+    await actionRef.value[0].reload();
+  }
+
+  function getQueryString(name) {
+    return (
+      decodeURIComponent(
+        (new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.href) || [
+          '',
+          '',
+        ])[1].replace(/\+/g, '%20')
+      ) || null
+    );
   }
 
   onMounted(async () => {
-    await reloadTable();
+    typeMission.value = '整柜任务看板';
+    const res = getQueryString('containerNo');
+    if (res) {
+      updateFilter(filterItems);
+    } else {
+      await reloadTable();
+    }
   });
 </script>
 

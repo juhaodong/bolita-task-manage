@@ -17,6 +17,48 @@
         ]"
         placeholder="是否需要定车"
       />
+      <template v-if="needCar === '1'">
+        <div class="mt-2">
+          <n-descriptions :columns="4" bordered label-placement="left">
+            <n-descriptions-item :span="2" label="物流公司 (必填)">
+              <n-select
+                v-model:value="logisticsCompany"
+                :options="logisticsCompanyList"
+                :status="requiredInfo ? 'error' : ''"
+              />
+            </n-descriptions-item>
+            <n-descriptions-item :label="isaRequired ? 'isa (必填)' : 'isa'" :span="2">
+              <n-input v-model:value="isa" />
+            </n-descriptions-item>
+            <n-descriptions-item :span="2" label="运单号">
+              <n-input v-model:value="waybillId" />
+            </n-descriptions-item>
+            <n-descriptions-item :span="2" label="PO">
+              <n-input v-model:value="po" />
+            </n-descriptions-item>
+            <n-descriptions-item :span="2" label="整车报价">
+              <n-input v-model:value="suggestedPrice" />
+            </n-descriptions-item>
+            <n-descriptions-item :span="2" label="预计取货日期 (必填)">
+              <n-date-picker
+                v-model:value="reservationGetProductTime"
+                :status="requiredInfo ? 'error' : ''"
+              />
+            </n-descriptions-item>
+            <n-descriptions-item :span="2" label="预计取货时间 (必填)">
+              <n-select
+                v-model:value="reservationGetProductDetailTime"
+                :options="generateOptionFromArray(reservationTimeList)"
+                :status="requiredInfo ? 'error' : ''"
+              />
+            </n-descriptions-item>
+            <n-descriptions-item :span="2" label="备注">
+              <n-input type="textarea" v-model:value="note" />
+            </n-descriptions-item>
+          </n-descriptions>
+          <span v-if="requiredInfo" style="color: red">{{ errorMessage }}</span>
+        </div>
+      </template>
       <n-space v-if="model.length > 0" align="center" class="mt-4" justify="space-between">
         <div>总数量: {{ totalNumber }}件 {{ totalTray }}托</div>
         <div :style="{ color: parseFloat(totalWeight) > 20000 ? 'red' : '' }"
@@ -37,12 +79,15 @@
   import { computed, ref } from 'vue';
   import { DataTableColumns } from 'naive-ui';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { safeSumBy } from '@/store/utils/utils';
+  import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
   import { $ref } from 'vue/macros';
   import {
     addOrUpdateWithRefOutboundForecast,
     defaultOutboundList,
+    getOutboundRef,
   } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import { reservationTimeList } from '@/views/newViews/ContainerForecast/columns';
+  import { allDeliveryList } from '@/api/dataLayer/common/AllKeys';
 
   interface Props {
     model?: any;
@@ -62,6 +107,18 @@
   let loading: boolean = $ref(false);
   let tableLoading = $ref(false);
   let selectedTaskList = $ref([]);
+  const logisticsCompanyList = $ref([
+    { label: 'DHL Freight', value: 'DHL Freight' },
+    { label: 'AF', value: 'AF' },
+    { label: '第三方', value: '第三方' },
+  ]);
+  let logisticsCompany = $ref('');
+  let isa = $ref('');
+  let waybillId = $ref('');
+  let reservationGetProductTime = $ref(null);
+  let reservationGetProductDetailTime = $ref('');
+  let amzId = $ref('');
+  let note = $ref('');
 
   const totalNumber = computed(() => {
     return safeSumBy(prop.model, 'arrivedContainerNum');
@@ -88,7 +145,17 @@
     }
   });
 
-  let needCar = $ref('1');
+  const currentNeedInfo = computed(() => {
+    if (logisticsCompany === 'DHL Freight') {
+      return { label: 'AX4 Nr.', value: '' };
+    } else if (logisticsCompany === 'AF') {
+      return { label: 'AMZ-Sendungs ID', value: '' };
+    } else {
+      return { label: '车队', value: '' };
+    }
+  });
+
+  let needCar = $ref('0');
   let btnLoading = $ref(false);
 
   async function handleSubmit() {
@@ -110,7 +177,22 @@
       bolitaTaskIds: taskIds,
     };
     const currentInfo = Object.assign(defaultOutboundList, res);
+
     const outboundId = (await addOrUpdateWithRefOutboundForecast(currentInfo)).data.id;
+    if (needCar === '1') {
+      if (prop.model[0].outboundMethod === '散货') {
+        if (allDeliveryList.includes(prop.model[0].deliveryMethod)) {
+          await getOutboundRef('Channel', '', prop.model[0].deliveryMethod, outboundId);
+        } else {
+          await getOutboundRef('Other', prop.model[0].postcode, '', outboundId);
+        }
+      } else {
+        await getOutboundRef('Tray', prop.model[0].postcode, '', outboundId);
+      }
+    } else {
+      await getOutboundRef('WithoutCar', '', '', outboundId);
+    }
+
     console.log(outboundId, 'outboundId');
     console.log(currentInfo, 'currentInfo');
     btnLoading = false;

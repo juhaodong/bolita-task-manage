@@ -1,4 +1,5 @@
 import hillo from 'hillo';
+import dayjs from 'dayjs';
 
 const typeName = 'outboundForecast';
 
@@ -66,6 +67,19 @@ export async function getOutboundForecastListByFilterWithPagination(filter, pagi
 export async function deleteOutboundForecast(id) {
   return await hillo.jsonPost(typeName + '/deleteById/' + id, {});
 }
+
+export async function getOutboundRef(type, postcode, channel, id) {
+  return await hillo.jsonPost(typeName + '/setRef', {
+    id: id,
+    forDate: dayjs().format('YYYY-MM-DD'),
+    refType: type,
+    postcode,
+    targetPostcode: postcode,
+    channel: channel,
+  });
+}
+
+export const refTypeList = ['Other', 'Tray', 'Channel', 'WithoutCar'];
 
 export const defaultOutboundList = {
   outboundDetailInfo: '',
