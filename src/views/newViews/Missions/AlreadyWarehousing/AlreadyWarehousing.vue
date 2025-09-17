@@ -182,7 +182,6 @@
   import { allDeliveryMethod, allInStatusList, allOutboundMethod } from './columns';
   import { $ref } from 'vue/macros';
   import { statusColumnSelect, timeColumn } from '@/views/bolita-views/composable/useableColumns';
-  import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
   import NewTotalFee from '@/views/newViews/SettlementManage/NewTotalFee.vue';
@@ -198,11 +197,8 @@
     addOrUpdateTask,
     getTaskListByFilter,
     getTaskListByFilterWithPagination,
-    searchTaskPrice,
-    updateTask,
   } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
-  import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import SplitTaskDialog from '@/views/newViews/Missions/AlreadyWarehousing/SplitTaskDialog.vue';
   import { NButton, useDialog, useMessage } from 'naive-ui';
@@ -223,23 +219,16 @@
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
-  let filterItems: any | null = $ref(null);
   let filterObj: any | null = $ref(null);
   let addNewFeeDialog = $ref(false);
   let checkedRows = $ref([]);
   let currentModel: any | null = $ref(null);
-  let typeTab = $ref(['整柜任务看板', '审核看板', '存仓看板']);
-  let typeMission = ref('');
   let currentData: any | null = $ref('');
-  let recordData: any | null = $ref('');
   let allList: any | null = $ref([]);
   let addNewTrayDialog = $ref(false);
   let showCurrentHeaderDataTable = $ref(false);
-  let currentHeader = $ref([]);
-  let currentColumns = $ref([]);
   let currentInfo = $ref('');
   let timeLineDialog = $ref(false);
-  let currentWithOutSelection = $ref([]);
   let showOfferPrice = $ref(false);
   let showMergeDialog = $ref(false);
   let checkLoading = $ref(false);
@@ -302,7 +291,7 @@
     },
     {
       title: 'Ref',
-      key: 'ref',
+      key: 'outboundForecast.ref',
       width: 120,
     },
     {
@@ -514,62 +503,12 @@
     editDetailModel.value = true;
   }
 
-  function splitTask() {
-    currentModel = selectedTaskList[0];
-    showSplitTaskDialog = true;
-  }
-
-  async function updateSuggestedPrice() {
-    let currentTask = selectedTaskList[0];
-    const taskSize = selectedTaskList[0].size;
-    const taskWeight = selectedTaskList[0].weight;
-    const taskCountry = selectedTaskList[0].country;
-    const taskOutboundMethod = selectedTaskList[0].outboundMethod;
-    const taskNumber = selectedTaskList[0].arrivedContainerNum;
-    const taskPostcode = selectedTaskList[0].postcode;
-    currentTask.suggestedPrice = await searchTaskPrice(
-      taskSize,
-      taskWeight,
-      taskCountry,
-      taskOutboundMethod,
-      taskNumber,
-      taskPostcode
-    );
-    await updateTask(currentTask);
-  }
-
-  function showTaskTray() {
-    currentModel = selectedTaskList[0];
-    addNewTrayDialog = true;
-  }
-
   function showCancel() {
     currentInfo = selectedTaskList[0];
     showCancelDialog = true;
   }
 
-  async function selectedHeader() {
-    showCurrentHeaderDataTable = true;
-  }
-
-  function addTable() {
-    showModal.value = true;
-  }
-
   const message = useMessage();
-
-  function merge() {
-    if (selectedTaskList[0].sourceId) {
-      showMergeDialog = true;
-    } else {
-      message.error('当前明细无法合并！');
-    }
-  }
-
-  function updateFilterWithItems(value) {
-    filterObj = value;
-    reloadTable();
-  }
 
   async function getAllTaskListByFilter() {
     await getCurrentFilter();
@@ -643,49 +582,6 @@
     FileSaver.saveAs(blob, '任务明细.xlsx');
   }
 
-  async function checkDetailInfo() {
-    checkLoading = true;
-    showCheckDialog = true;
-    let i = 0;
-    for (const rows of checkedRows) {
-      i = i + 1;
-      log = '正在审核' + '第' + i + '票货物,共' + checkedRows.length + '票' + `<br>`;
-      const res = allList.find((it) => it.id === rows);
-      if (res) {
-        res.inStatus = InBoundStatus.Wait;
-        const userInfo = useUserStore().info;
-        await addOrUpdateTaskTimeLine({
-          useType: 'normal',
-          bolitaTaskId: res.id,
-          operator: userInfo?.realName,
-          detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
-          note: '进行了审核',
-        });
-        res.customerId = res.customer.id;
-        res.inventoryId = res.inventory.id;
-        await addOrUpdateTask(res);
-        const containerForecastInfo = await getNotifyById(res.notifyId);
-        if (containerForecastInfo.inStatus === InBoundStatus.WaitCheck) {
-          const allDetailList = allList
-            .filter((x) => x.notifyId === res.notifyId)
-            .filter(
-              (b) =>
-                b.inStatus === InBoundDetailStatus.WaitSubmit ||
-                b.inStatus === InBoundDetailStatus.WaitCheck
-            );
-          if (allDetailList.length === 0) {
-            containerForecastInfo.inStatus = InBoundStatus.Wait;
-            containerForecastInfo.customerId = containerForecastInfo.customer.id;
-            containerForecastInfo.inventoryId = containerForecastInfo.inventory.id;
-            await addOrUpdateNotify(containerForecastInfo);
-          }
-        }
-      }
-    }
-    checkedRows = [];
-    await reloadTable();
-  }
-
   const paginationReactive = reactive({
     defaultPage: 1,
     pageNumber: 0,
@@ -715,18 +611,29 @@
       } else {
         currentFilter['customerIds'] = [filterObj['customer.id']];
       }
+      delete currentFilter['customer.id'];
       if (filterObj['inStatus']) {
         currentFilter['inStatusIn'] = [filterObj['inStatus']];
+        delete currentFilter.inStatus;
       } else {
         if (filterObj['showAll']) {
           currentFilter['inStatusIn'] = ['已拆分'];
         }
+        currentFilter['inStatusNotIn'] = ['已拆分', '已取消'];
+        delete currentFilter.inStatus;
       }
       if (currentFilter['containerId']) {
         currentFilter['containerIdLike'] = currentFilter['containerId'];
+        delete currentFilter.containerId;
       }
       if (currentFilter['ticketId']) {
-        currentFilter['ticketIdLike'] = currentFilter['ticketId'];
+        const ticketIds = currentFilter['ticketId'].split(',');
+        if (ticketIds.length > 1) {
+          currentFilter['ticketIdIn'] = ticketIds;
+        } else {
+          currentFilter['ticketIdLike'] = currentFilter['ticketId'];
+        }
+        delete currentFilter.ticketId;
       }
     } else {
       currentFilter['inStatusNotIn'] = ['已拆分', '已取消'];
@@ -767,6 +674,10 @@
 
   function updateFilter(value) {
     filterObj = value;
+    reloadTable();
+  }
+
+  function reloadHeader() {
     reloadTable();
   }
 

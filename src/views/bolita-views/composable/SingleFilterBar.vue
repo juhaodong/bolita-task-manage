@@ -50,7 +50,14 @@
   const emit = defineEmits(['submit', 'cancel', 'clear']);
 
   function handleSubmit(values: Recordable) {
-    emit('submit', values);
+    // Remove keys with null values
+    const filteredValues = { ...values };
+    for (const key in filteredValues) {
+      if (filteredValues[key] === null) {
+        delete filteredValues[key];
+      }
+    }
+    emit('submit', filteredValues);
   }
 
   function cancel() {

@@ -76,7 +76,7 @@
   </n-card>
 </template>
 <script lang="ts" setup>
-  import { computed, ref } from 'vue';
+  import { computed } from 'vue';
   import { DataTableColumns } from 'naive-ui';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
@@ -95,30 +95,32 @@
   }
 
   const prop = defineProps<Props>();
-  const emit = defineEmits(['saved']);
-  const checkedRowKeys = ref<any[]>([]);
-  let showDetailInfo = $ref(false);
-  let currentDate = ref([]);
-  const outboundMethod = ref<any[]>([]);
-  let selectedPostcode = $ref('');
-  let selectedDeliveryMethod = $ref('');
-  let selectedfcAddress = $ref('');
-  let allNotifyDetail: any[] = $ref([]);
   let loading: boolean = $ref(false);
-  let tableLoading = $ref(false);
-  let selectedTaskList = $ref([]);
   const logisticsCompanyList = $ref([
+    { label: 'DHL Packet', value: 'DHL Packet' },
+    { label: 'DPD', value: 'DPD' },
+    { label: 'UPS', value: 'UPS' },
     { label: 'DHL Freight', value: 'DHL Freight' },
-    { label: 'AF', value: 'AF' },
-    { label: '第三方', value: '第三方' },
+    { label: 'GEL', value: 'GEL' },
+    { label: 'Fedex', value: 'Fedex' },
+    { label: 'Slam', value: 'Slam' },
+    { label: 'Amzon Freight', value: 'Amzon Freight' },
+    { label: 'Palirox', value: 'Palirox' },
+    { label: 'Conwest', value: 'Conwest' },
+    { label: 'Bolita', value: 'Bolita' },
+    { label: 'FinsterWalder', value: 'FinsterWalder' },
+    { label: 'Courierfeld', value: 'Courierfeld' },
   ]);
   let logisticsCompany = $ref('');
   let isa = $ref('');
   let waybillId = $ref('');
   let reservationGetProductTime = $ref(null);
   let reservationGetProductDetailTime = $ref('');
-  let amzId = $ref('');
   let note = $ref('');
+  let po = $ref('');
+  let requiredInfo = $ref(false);
+  let isaRequired = $ref(false);
+  let errorMessage = $ref('请填写必填项');
 
   const totalNumber = computed(() => {
     return safeSumBy(prop.model, 'arrivedContainerNum');
@@ -142,16 +144,6 @@
       return '人工询价';
     } else {
       return safeSumBy(prop.model, 'suggestedPrice');
-    }
-  });
-
-  const currentNeedInfo = computed(() => {
-    if (logisticsCompany === 'DHL Freight') {
-      return { label: 'AX4 Nr.', value: '' };
-    } else if (logisticsCompany === 'AF') {
-      return { label: 'AMZ-Sendungs ID', value: '' };
-    } else {
-      return { label: '车队', value: '' };
     }
   });
 
@@ -192,9 +184,6 @@
     } else {
       await getOutboundRef('WithoutCar', '', '', outboundId);
     }
-
-    console.log(outboundId, 'outboundId');
-    console.log(currentInfo, 'currentInfo');
     btnLoading = false;
   }
 

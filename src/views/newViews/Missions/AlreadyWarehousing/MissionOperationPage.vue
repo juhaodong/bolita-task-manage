@@ -10,6 +10,7 @@
         <n-button
           v-if="typeMission === '整柜任务看板' && hasAuthPower('missionOutboundAdd')"
           class="action-button"
+          :disabled="orderCarRule"
           size="small"
           type="success"
           @click="addTable"
@@ -251,7 +252,7 @@
   import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import SplitTaskDialog from '@/views/newViews/Missions/AlreadyWarehousing/SplitTaskDialog.vue';
-  import { NButton, useDialog, useMessage } from 'naive-ui';
+  import { NButton, useMessage } from 'naive-ui';
   import * as XLSX from 'xlsx';
   import { allInStatusNotifyList } from '@/api/dataLayer/common/common';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
@@ -269,7 +270,6 @@
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
-  let filterItems: any | null = $ref(null);
   let filterObj: any | null = $ref(null);
   let addNewFeeDialog = $ref(false);
   let checkedRows = $ref([]);
@@ -277,15 +277,11 @@
   let typeTab = $ref(['整柜任务看板', '审核看板', '存仓看板']);
   let typeMission = ref('');
   let currentData: any | null = $ref('');
-  let recordData: any | null = $ref('');
   let allList: any | null = $ref([]);
   let addNewTrayDialog = $ref(false);
   let showCurrentHeaderDataTable = $ref(false);
-  let currentHeader = $ref([]);
-  let currentColumns = $ref([]);
   let currentInfo = $ref('');
   let timeLineDialog = $ref(false);
-  let currentWithOutSelection = $ref([]);
   let showOfferPrice = $ref(false);
   let showMergeDialog = $ref(false);
   let checkLoading = $ref(false);
@@ -293,7 +289,6 @@
   let log = $ref('');
   let showSplitTaskDialog = $ref(false);
   let showFilesDialog = $ref(false);
-  const dialog = useDialog();
   const filters: FormField[] = [
     asyncCustomer(),
     {
@@ -348,7 +343,7 @@
     },
     {
       title: 'Ref',
-      key: 'ref',
+      key: 'outboundForecast.ref',
       width: 120,
     },
     {
@@ -532,10 +527,21 @@
       ),
       ...currentPageSelected,
     ];
+    console.log(selectedTaskList, 'list');
   }
 
-  const realOptions = computed(() => {
-    return generateOptionFromArray(columns.filter((it) => it.key).map((it) => it.title));
+  const orderCarRule = computed(() => {
+    if (selectedTaskList.length === 0) {
+      return true;
+    }
+
+    const validStatuses = ['入库待出库', '入库待操作', '等待入库'];
+
+    // Check if all items in selectedTaskList have an inStatus in validStatuses
+    const allValid = selectedTaskList.every((task) => validStatuses.includes(task.inStatus));
+
+    // Return false if all are valid, true otherwise
+    return !allValid;
   });
 
   const hasPagePower = computed(() => {
@@ -626,11 +632,6 @@
     } else {
       message.error('当前明细无法合并！');
     }
-  }
-
-  function updateFilterWithItems(value) {
-    filterObj = value;
-    reloadTable();
   }
 
   async function getAllTaskListByFilter() {
@@ -777,23 +778,33 @@
       } else {
         currentFilter['customerIds'] = [filterObj['customer.id']];
       }
+      delete currentFilter['customer.id'];
       if (filterObj['inStatus']) {
         currentFilter['inStatusIn'] = [filterObj['inStatus']];
+        delete currentFilter.inStatus;
       } else {
         if (filterObj['showAll']) {
           currentFilter['inStatusIn'] = ['已拆分'];
         }
+        currentFilter['inStatusNotIn'] = ['已拆分', '已取消'];
+        delete currentFilter.inStatus;
       }
       if (currentFilter['containerId']) {
         currentFilter['containerIdLike'] = currentFilter['containerId'];
+        delete currentFilter.containerId;
       }
       if (currentFilter['ticketId']) {
-        currentFilter['ticketIdLike'] = currentFilter['ticketId'];
+        const ticketIds = currentFilter['ticketId'].split(',');
+        if (ticketIds.length > 1) {
+          currentFilter['ticketIdIn'] = ticketIds;
+        } else {
+          currentFilter['ticketIdLike'] = currentFilter['ticketId'];
+        }
+        delete currentFilter.ticketId;
       }
     } else {
       currentFilter['inStatusNotIn'] = ['已拆分', '已取消'];
     }
-
     if (typeMission.value === '整柜任务看板') {
     } else if (typeMission.value === '存仓看板') {
       currentFilter['inStatusIn'] = ['存仓'];
@@ -841,6 +852,11 @@
     reloadTable();
   }
 
+  function reloadHeader() {
+    showCurrentHeaderDataTable = false;
+    reloadTable();
+  }
+
   let showFeeDialog = $ref(false);
 
   async function reloadTable() {
@@ -856,7 +872,12 @@
     checkedRows = [];
     selectedTaskList = [];
     showMergeDialog = false;
-    await actionRef.value[0].reload();
+    showFeeDialog = false;
+    showFilesDialog = false;
+    timeLineDialog = false;
+    if (actionRef.value && actionRef.value[0]) {
+      await actionRef.value[0].reload();
+    }
   }
 
   function getQueryString(name) {
@@ -874,7 +895,7 @@
     typeMission.value = '整柜任务看板';
     const res = getQueryString('containerNo');
     if (res) {
-      updateFilter(filterItems);
+      updateFilter(null);
     } else {
       await reloadTable();
     }
