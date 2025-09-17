@@ -8,6 +8,9 @@
         max-height="450"
         virtual-scroll
       />
+      <n-alert v-if="hasDifferentDeliveryMethods" type="warning" class="mb-2">
+        物流方式不同无法订车！
+      </n-alert>
       <span>是否需要定车</span>
       <n-select
         v-model:value="needCar"
@@ -71,12 +74,19 @@
           >总价格: {{ suggestedPrice }}</div
         >
       </n-space>
-      <n-button :loading="btnLoading" type="primary" @click="handleSubmit"> 保存 </n-button>
+      <n-button
+        :disabled="hasDifferentDeliveryMethods"
+        :loading="btnLoading"
+        type="primary"
+        @click="handleSubmit"
+      >
+        保存
+      </n-button>
     </loading-frame>
   </n-card>
 </template>
 <script lang="ts" setup>
-  import { computed } from 'vue';
+  import { computed, watch } from 'vue';
   import { DataTableColumns } from 'naive-ui';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
@@ -88,6 +98,8 @@
   } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import { reservationTimeList } from '@/views/newViews/ContainerForecast/columns';
   import { allDeliveryList } from '@/api/dataLayer/common/AllKeys';
+  import dayjs from 'dayjs';
+  import { updateTaskListAfterBookingCarWithInfo } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
 
   interface Props {
     model?: any;
@@ -147,10 +159,27 @@
     }
   });
 
+  const hasDifferentDeliveryMethods = computed(() => {
+    if (!prop.model || prop.model.length <= 1) return false;
+    const firstDeliveryMethod = prop.model[0].deliveryMethod;
+    return prop.model.some((item) => item.deliveryMethod !== firstDeliveryMethod);
+  });
+
   let needCar = $ref('0');
   let btnLoading = $ref(false);
 
+  // Reset needCar to '0' if deliveryMethods become different
+  watch(hasDifferentDeliveryMethods, (newVal) => {
+    if (newVal && needCar === '1') {
+      needCar = '0';
+    }
+  });
+  const emit = defineEmits(['saved']);
+
   async function handleSubmit() {
+    if (hasDifferentDeliveryMethods.value && needCar === '1') {
+      return;
+    }
     btnLoading = true;
     const taskIds = prop.model.map((it) => it.id);
     const res = {
@@ -158,8 +187,8 @@
       deliveryMethod: prop.model[0].deliveryMethod,
       postcode: prop.model[0].postcode ?? '',
       needCar: needCar,
-      inStatus: needCar === '1' ? '待定车' : '无需定车',
-      carStatus: needCar === '1' ? '待定车' : '无需定车',
+      inStatus: needCar === '1' ? '已定车' : '无需定车',
+      carStatus: needCar === '1' ? '已定车' : '无需定车',
       outboundDetailInfo: taskIds.join(','),
       totalVolume: safeSumBy(prop.model, 'volume'),
       totalWeight: safeSumBy(prop.model, 'weight'),
@@ -167,10 +196,18 @@
       trayNum: safeSumBy(prop.model, 'arrivedTrayNum'),
       suggestedPrice: safeSumBy(prop.model, 'suggestedPrice'),
       bolitaTaskIds: taskIds,
+      isa: isa,
+      waybillId: waybillId,
+      reservationGetProductTime: dayjs(reservationGetProductTime).format('YYYY-MM-DDTHH:mm:ss'),
+      reservationGetProductDetailTime: reservationGetProductDetailTime,
+      po: po,
+      note: note,
+      logisticsCompany: logisticsCompany,
     };
     const currentInfo = Object.assign(defaultOutboundList, res);
 
     const outboundId = (await addOrUpdateWithRefOutboundForecast(currentInfo)).data.id;
+    await updateTaskListAfterBookingCarWithInfo(outboundId, currentInfo);
     if (needCar === '1') {
       if (prop.model[0].outboundMethod === '散货') {
         if (allDeliveryList.includes(prop.model[0].deliveryMethod)) {
@@ -185,6 +222,7 @@
       await getOutboundRef('WithoutCar', '', '', outboundId);
     }
     btnLoading = false;
+    emit('saved');
   }
 
   const displayColumns: DataTableColumns<any> = $computed(() => [

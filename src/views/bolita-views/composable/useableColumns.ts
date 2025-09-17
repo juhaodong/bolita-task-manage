@@ -150,6 +150,30 @@ export function statusColumnSelect(params: { title: string; key: string; list: A
   };
 }
 
+export function statusColumnSelectByTask(params: { title: string; key: string; list: Array<any> }) {
+  return {
+    title: params.title,
+    key: params.key,
+    component: 'NSelect',
+    componentProps: {
+      options: params.list,
+    },
+    render(record) {
+      // Handle nested properties like 'outboundForecast.inStatus'
+      if (params.key.includes('.')) {
+        const keys = params.key.split('.');
+        let value = record;
+        for (const key of keys) {
+          value = value?.[key];
+          if (value === undefined) break;
+        }
+        return colorfulRender(value ?? '');
+      }
+      return colorfulRender(record?.[params.key] ?? '');
+    },
+  };
+}
+
 const colorfulRender = (text) =>
   text
     ? h(
@@ -245,7 +269,20 @@ export function timeColumn(
     },
     width: 120,
     render(record) {
-      const display = record[keyName] ? dayjs(record[keyName]).format(timeFormat) : '-';
+      // Handle nested properties like 'outboundForecast.reservationGetProductTime'
+      let value;
+      if (keyName.includes('.')) {
+        const keys = keyName.split('.');
+        value = record;
+        for (const key of keys) {
+          value = value?.[key];
+          if (value === undefined) break;
+        }
+      } else {
+        value = record[keyName];
+      }
+
+      const display = value ? dayjs(value).format(timeFormat) : '-';
       return h('div', display);
     },
   };
@@ -266,7 +303,20 @@ export function timeAndDateColumn(
     },
     width: 110,
     render(record) {
-      const display = record[keyName] ? dayjs(record[keyName]).format(timeFormat) : '-';
+      // Handle nested properties like 'outboundForecast.reservationGetProductTime'
+      let value;
+      if (keyName.includes('.')) {
+        const keys = keyName.split('.');
+        value = record;
+        for (const key of keys) {
+          value = value?.[key];
+          if (value === undefined) break;
+        }
+      } else {
+        value = record[keyName];
+      }
+
+      const display = value ? dayjs(value).format(timeFormat) : '-';
       return h('div', display);
     },
   };
@@ -283,7 +333,20 @@ export function timeTableColumn(keyName, title, timeFormat = dateFormat) {
     },
     width: 200,
     render(record) {
-      const display = record[keyName] ? dayjs(record[keyName]).format(timeFormat) : '-';
+      // Handle nested properties like 'outboundForecast.reservationGetProductTime'
+      let value;
+      if (keyName.includes('.')) {
+        const keys = keyName.split('.');
+        value = record;
+        for (const key of keys) {
+          value = value?.[key];
+          if (value === undefined) break;
+        }
+      } else {
+        value = record[keyName];
+      }
+
+      const display = value ? dayjs(value).format(timeFormat) : '-';
       return h('div', display);
     },
   };

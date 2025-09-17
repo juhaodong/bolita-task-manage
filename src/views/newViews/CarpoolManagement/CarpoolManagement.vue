@@ -14,7 +14,7 @@
           type="info"
           @click="orderCar"
         >
-          定车
+          修改
         </n-button>
         <n-button
           :disabled="selectedOutboundForecastList.length !== 1"
@@ -38,6 +38,13 @@
           size="small"
           @click="editCmr"
           >CMR
+        </n-button>
+        <n-button
+          :disabled="selectedOutboundForecastList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="editLieferschein"
+          >Lieferschein
         </n-button>
       </div>
       <!-- Filter controls are now handled by FilterBar component -->
@@ -172,9 +179,8 @@
       key: 'ref',
     },
     {
-      title: 'AX4 Nr./AMZ/车队',
-      key: 'amzId',
-      width: 160,
+      title: '运单号',
+      key: 'waybillId',
     },
     {
       title: 'ISA',
@@ -196,10 +202,6 @@
       title: '出库方式',
       key: 'deliveryMethod',
       width: 100,
-    },
-    {
-      title: '运单号',
-      key: 'waybillId',
     },
     {
       title: '总托数',
@@ -417,6 +419,10 @@
     await handleFileUpload('cmrFiles');
   }
 
+  async function editLieferschein() {
+    await handleFileUpload('lieferscheinFiles');
+  }
+
   async function handleFileUpload(fieldName) {
     if (selectedOutboundForecastList.length !== 1) return;
 
@@ -426,6 +432,9 @@
 
     if (files.checkPassed) {
       currentModel[fieldName] = files.files;
+      if (fieldName === 'lieferscheinFiles') {
+        currentModel.inStatus = '已定车';
+      }
       await addOrUpdateOutboundForecast(currentModel);
     }
 

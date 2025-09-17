@@ -60,7 +60,7 @@
         style="width: 90%; min-width: 800px; max-width: 800px"
         title="添加托盘"
       >
-        <new-tray-dialog :current-data="currentModel" @saved="reloadTable" />
+        <edit-tray-dialog @saved="reloadTable" :row="currentModel" />
       </n-modal>
     </div>
   </n-card>
@@ -72,7 +72,6 @@
   import { $ref } from 'vue/macros';
   import { statusColumnSelect, timeColumn } from '@/views/bolita-views/composable/useableColumns';
   import dayjs from 'dayjs';
-  import NewTrayDialog from '@/views/newViews/Missions/AlreadyWarehousing/NewTrayDialog.vue';
   import { getUserCustomerList } from '@/api/dataLayer/common/power';
   import { asyncCustomer, generateOptionFromArray } from '@/store/utils/utils';
   import FileSaver from 'file-saver';
@@ -92,6 +91,7 @@
     allOutboundMethod,
   } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
+  import EditTrayDialog from '@/views/newViews/OperationDetail/NotOutbound/dialog/EditTrayDialog.vue';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -316,6 +316,7 @@
 
   function showTaskTray() {
     currentModel = selectedTaskList[0];
+    console.log(currentModel, 'model');
     addNewTrayDialog = true;
   }
 

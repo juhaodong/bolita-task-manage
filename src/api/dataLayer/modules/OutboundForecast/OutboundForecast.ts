@@ -67,11 +67,9 @@ export async function updateTaskListAfterBookingCar(id) {
 }
 
 export async function updateTaskListAfterBookingCarWithInfo(id, info) {
-  console.log(info, 'info');
   const taskListIds = info.bolitaTaskIds;
   const userInfo = useUserStore().info;
   for (const taskId of taskListIds) {
-    const res = await getTaskListById(taskId);
     await addOrUpdateTaskTimeLine({
       useType: 'normal',
       bolitaTaskId: taskId,
@@ -79,14 +77,20 @@ export async function updateTaskListAfterBookingCarWithInfo(id, info) {
       detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
       note: '完成定车',
     });
-    res.outBoundTime =
-      dayjs(parseFloat(info.reservationGetProductTime)).format('YYYY-MM-DD') +
-      ' ' +
-      info.reservationGetProductDetailTime; // 预计取货时间
-    res.inStatus = '已定车';
-    res.inventoryId = res.inventory.id;
-    res.customerId = res.customer.id;
-    await addOrUpdateTask(res);
+  }
+}
+
+export async function updateTaskListAfterEditBookingCarWithInfo(id, info) {
+  const taskListIds = info.bolitaTaskIds;
+  const userInfo = useUserStore().info;
+  for (const taskId of taskListIds) {
+    await addOrUpdateTaskTimeLine({
+      useType: 'normal',
+      bolitaTaskId: taskId,
+      operator: userInfo?.realName,
+      detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
+      note: '修改订车信息',
+    });
   }
 }
 

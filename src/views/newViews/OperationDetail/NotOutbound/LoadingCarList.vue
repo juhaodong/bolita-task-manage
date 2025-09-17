@@ -14,7 +14,7 @@
   import { usePermission } from '@/hooks/web/usePermission';
   import { useUserStore } from '@/store/modules/user';
   import { $ref } from 'vue/macros';
-  import { addOrUpdateTask, getTaskListByIds } from '@/api/newDataLayer/TaskList/TaskList';
+  import { getTaskListByIds, updateTask } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateWithRefOutboundForecast } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
 
   interface Props {
@@ -34,7 +34,7 @@
   let startTime: any = $ref(null);
   let endTime: any = $ref(null);
 
-  const emit = defineEmits(['close', 'refresh', 'save']);
+  const emit = defineEmits(['close', 'refresh', 'saved']);
   watchEffect(async () => {
     await reload();
   });
@@ -55,9 +55,13 @@
 
   async function reload() {
     currentOutBoundInfo = props.outboundInfo;
+    console.log(props.outboundInfo, 'info');
     currentTaskList = await getTaskListByIds(currentOutBoundInfo.outboundDetailInfo.split(','));
+    console.log(currentTaskList, 'taskList');
     outOperatePerson = currentOutBoundInfo?.outOperatePerson ?? '';
-    currentDate = currentOutBoundInfo.outDate ?? new Date();
+    currentDate = currentOutBoundInfo.outDate
+      ? dayjs(currentOutBoundInfo.outDate).valueOf()
+      : new Date();
     startTime = currentOutBoundInfo.outStartTime;
     endTime = currentOutBoundInfo.outEndTime;
     loadAll();
@@ -75,9 +79,8 @@
 
   function loadAll() {
     currentTaskList.forEach((it, index) => {
-      currentTaskList[index].outTrayNumEdit = it.outTrayNum == 0 ? '' : it.outTrayNum;
-      currentTaskList[index].outContainerNumEdit =
-        it.outContainerNum == 0 ? '' : it.outContainerNum;
+      currentTaskList[index].outTrayNumEdit = it.outTrayNum == 0 ? 0 : it.outTrayNum;
+      currentTaskList[index].outContainerNumEdit = it.outContainerNum == 0 ? 0 : it.outContainerNum;
     });
   }
 
@@ -110,14 +113,13 @@
       listElement.outTrayNum = listElement?.outTrayNumEdit ?? 0;
       listElement.outContainerNum = listElement?.outContainerNumEdit ?? 0;
       listElement.inStatus = newInStatus;
-      listElement.OutBoundTime = dayjs().valueOf();
-      const res = await addOrUpdateTask(listElement);
+      const res = await updateTask(listElement);
       if (res.code != ResultEnum.SUCCESS) {
         toastError(res.message);
         break;
       }
     }
-    currentOutBoundInfo.outDate = currentDate;
+    currentOutBoundInfo.outDate = dayjs(currentDate).format('YYYY-MM-DDTHH:mm:ss');
     currentOutBoundInfo.outStartTime = startTime;
     currentOutBoundInfo.outEndTime = endTime;
     currentOutBoundInfo.outTotalTime = totalTime;
@@ -133,7 +135,7 @@
     //   outTotalTime: totalTime ?? '',
     // });
     toastSuccess('success');
-    emit('save');
+    emit('saved');
     loading = false;
   }
 </script>

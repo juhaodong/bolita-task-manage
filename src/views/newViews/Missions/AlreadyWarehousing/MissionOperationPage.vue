@@ -58,14 +58,6 @@
           :disabled="selectedTaskList.length !== 1"
           class="action-button"
           size="small"
-          @click="showTaskTray"
-        >
-          托盘
-        </n-button>
-        <n-button
-          :disabled="selectedTaskList.length !== 1"
-          class="action-button"
-          size="small"
           @click="updateSuggestedPrice"
         >
           询价
@@ -225,9 +217,18 @@
 <script lang="ts" setup>
   import { computed, onMounted, reactive, ref } from 'vue';
   import { BasicTable } from '@/components/Table';
-  import { allDeliveryMethod, allInStatusList, allOutboundMethod } from './columns';
+  import {
+    allCarStatusList,
+    allDeliveryMethod,
+    allInStatusList,
+    allOutboundMethod,
+  } from './columns';
   import { $ref } from 'vue/macros';
-  import { statusColumnSelect, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+  import {
+    statusColumnSelect,
+    statusColumnSelectByTask,
+    timeColumn,
+  } from '@/views/bolita-views/composable/useableColumns';
   import { InBoundDetailStatus, InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
@@ -361,6 +362,11 @@
       key: 'inStatus',
       list: generateOptionFromArray(allInStatusList),
     }),
+    statusColumnSelectByTask({
+      title: '订车',
+      key: 'outboundForecast.inStatus',
+      list: generateOptionFromArray(allCarStatusList),
+    }),
     {
       title: '总实重',
       key: 'weight',
@@ -467,7 +473,12 @@
     },
     timeColumn('planArriveDateTime', '预期到仓日期'),
     timeColumn('arriveTime', '实际到仓日期'),
-    timeColumn('deliveryTime', '预计发货时间'),
+    timeColumn('outboundForecast.reservationGetProductTime', '预计发货日期'),
+    {
+      title: '预计发货时间',
+      key: 'outboundForecast.reservationGetProductDetailTime',
+      width: 100,
+    },
     timeColumn('outBoundTime', '实际发货时间'),
     {
       title: '出库件数',
@@ -527,7 +538,6 @@
       ),
       ...currentPageSelected,
     ];
-    console.log(selectedTaskList, 'list');
   }
 
   const orderCarRule = computed(() => {
@@ -758,12 +768,12 @@
     pageSizes: [10, 20, 50, 100],
     onChange: (page: number) => {
       paginationReactive.pageNumber = page - 1;
-      reloadTable();
+      reloadTable(false);
     },
     onUpdatePageSize: (pageSize: number) => {
       paginationReactive.pageSize = pageSize;
       paginationReactive.pageNumber = 0;
-      reloadTable();
+      reloadTable(false);
     },
   });
   let currentFilter = $ref([]);
@@ -859,7 +869,7 @@
 
   let showFeeDialog = $ref(false);
 
-  async function reloadTable() {
+  async function reloadTable(clearSelection = true) {
     showModal.value = false;
     editDetailModel.value = false;
     addNewFeeDialog = false;
@@ -869,8 +879,10 @@
     checkLoading = false;
     showCheckDialog = false;
     showSplitTaskDialog = false;
-    checkedRows = [];
-    selectedTaskList = [];
+    if (clearSelection) {
+      checkedRows = [];
+      selectedTaskList = [];
+    }
     showMergeDialog = false;
     showFeeDialog = false;
     showFilesDialog = false;

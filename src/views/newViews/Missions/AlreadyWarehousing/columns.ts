@@ -208,6 +208,8 @@ export const allInStatusList = [
   '全部出库',
 ];
 
+export const allCarStatusList = ['已定车', '无需定车', '已装车', '已取消'];
+
 export const allOutboundMethod = ['散货', '存仓', '大件托盘', '标准托盘'];
 
 export const allDeliveryMethod = ['FBA卡车派送', 'DHL', 'DPD', 'UPS', 'GLS', '其他'];

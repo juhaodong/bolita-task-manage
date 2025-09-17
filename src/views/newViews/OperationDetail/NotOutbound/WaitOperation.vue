@@ -14,7 +14,7 @@
           size="small"
           @click="showLoadingList"
         >
-          生成装车单
+          装车信息
         </n-button>
         <n-button
           :disabled="selectedOutboundForecastList.length !== 1"
@@ -61,6 +61,15 @@
       >
         <booking-car-dialog :info="currentInfo" @saved="saved" />
       </n-modal>
+      <n-modal
+        v-model:show="loadingCarDialog"
+        :show-icon="false"
+        preset="card"
+        style="width: 90%; min-width: 600px; max-width: 600px"
+        title="装车单"
+      >
+        <loading-car-list :outbound-info="currentInfo" @saved="saved" />
+      </n-modal>
     </n-card>
     <no-power-page v-else />
   </div>
@@ -91,6 +100,7 @@
   import { createPaginationPlaceholders } from '@/api/newDataLayer/Common/Common';
   import { getOutboundForecastListByFilterWithPagination } from '@/api/newDataLayer/CarManage/CarManage';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
+  import LoadingCarList from '@/views/newViews/OperationDetail/NotOutbound/LoadingCarList.vue';
 
   const showModal = ref(false);
 
@@ -136,13 +146,12 @@
       key: 'ref',
     },
     {
-      title: 'AX4 Nr./AMZ/车队',
-      key: 'amzId',
-      width: 160,
-    },
-    {
       title: 'ISA',
       key: 'isa',
+    },
+    {
+      title: '运单号',
+      key: 'waybillId',
     },
     statusColumnEasy({
       title: '状态',
@@ -176,6 +185,10 @@
     {
       title: '邮编',
       key: 'postcode',
+    },
+    {
+      title: '操作人',
+      key: 'outOperatePerson',
     },
     timeTableColumn('reservationGetProductTime', '取货日期'),
     {
@@ -345,6 +358,13 @@
   function updateFilterWithItems(value) {
     filterObj = value;
     reloadTable();
+  }
+
+  let loadingCarDialog = $ref(false);
+
+  function showLoadingList() {
+    currentInfo = selectedOutboundForecastList[0];
+    loadingCarDialog = true;
   }
 
   async function handleFileUpload(fieldName) {

@@ -5,16 +5,26 @@
   import { reservationTimeList } from '@/views/newViews/ContainerForecast/columns';
   import dayjs from 'dayjs';
   import { addOrUpdateWithRefOutboundForecast } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
-  import { updateTaskListAfterBookingCarWithInfo } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import { updateTaskListAfterEditBookingCarWithInfo } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
 
   interface Props {
     info?: any;
   }
   const logisticsCompanyList = $ref([
+    { label: 'DHL Packet', value: 'DHL Packet' },
+    { label: 'DPD', value: 'DPD' },
+    { label: 'UPS', value: 'UPS' },
     { label: 'DHL Freight', value: 'DHL Freight' },
-    { label: 'AF', value: 'AF' },
-    { label: '第三方', value: '第三方' },
+    { label: 'GEL', value: 'GEL' },
+    { label: 'Fedex', value: 'Fedex' },
+    { label: 'Slam', value: 'Slam' },
+    { label: 'Amzon Freight', value: 'Amzon Freight' },
+    { label: 'Palirox', value: 'Palirox' },
+    { label: 'Conwest', value: 'Conwest' },
+    { label: 'Bolita', value: 'Bolita' },
+    { label: 'FinsterWalder', value: 'FinsterWalder' },
+    { label: 'Courierfeld', value: 'Courierfeld' },
   ]);
   let logisticsCompany = $ref('');
   let isa = $ref('');
@@ -22,7 +32,6 @@
   let suggestedPrice = $ref('');
   let reservationGetProductTime = $ref(null);
   let reservationGetProductDetailTime = $ref('');
-  let amzId = $ref('');
   let note = $ref('');
   let loading = $ref(false);
   // const emit = defineEmits(['saved']);
@@ -37,19 +46,9 @@
       ? dayjs(prop.info.reservationGetProductTime).valueOf()
       : new Date();
     reservationGetProductDetailTime = prop.info.reservationGetProductDetailTime ?? '';
-    amzId = prop.info.amzId ?? '';
     note = prop.info.note ?? '';
   });
   const emit = defineEmits(['saved']);
-  const currentNeedInfo = computed(() => {
-    if (logisticsCompany === 'DHL Freight') {
-      return { label: 'AX4 Nr.', value: '' };
-    } else if (logisticsCompany === 'AF') {
-      return { label: 'AMZ-Sendungs ID', value: '' };
-    } else {
-      return { label: '车队', value: '' };
-    }
-  });
   const isaRequired = computed(() => {
     return logisticsCompany === 'AF';
   });
@@ -62,23 +61,14 @@
       errorMessage = '请完整填完必填项！';
       return;
     }
-    if (
-      !logisticsCompany ||
-      !reservationGetProductTime ||
-      !reservationGetProductDetailTime ||
-      !amzId
-    ) {
+    if (!logisticsCompany || !reservationGetProductTime || !reservationGetProductDetailTime) {
       requiredInfo = true;
       errorMessage = '请完整填完必填项！';
       return;
     }
     let outboundForecastInfo = prop.info;
     loading = true;
-    outboundForecastInfo.amzId = amzId;
     outboundForecastInfo.isa = isa;
-    outboundForecastInfo.bookCarTimestamp = dayjs().format('YYYY-MM-DDTHH:mm:ss');
-    outboundForecastInfo.inStatus = '已定车';
-    outboundForecastInfo.carStatus = '已定车';
     outboundForecastInfo.note = note;
     outboundForecastInfo.reservationGetProductDetailTime = reservationGetProductDetailTime;
     outboundForecastInfo.reservationGetProductTime =
@@ -87,7 +77,7 @@
     outboundForecastInfo.waybillId = waybillId;
     outboundForecastInfo.suggestedPrice = suggestedPrice;
     outboundForecastInfo.logisticsCompany = logisticsCompany;
-    await updateTaskListAfterBookingCarWithInfo(outboundForecastInfo.id, outboundForecastInfo);
+    await updateTaskListAfterEditBookingCarWithInfo(outboundForecastInfo.id, outboundForecastInfo);
     await addOrUpdateWithRefOutboundForecast(outboundForecastInfo);
     loading = false;
     emit('saved');
@@ -104,9 +94,6 @@
             :options="logisticsCompanyList"
             :status="requiredInfo ? 'error' : ''"
           />
-        </n-descriptions-item>
-        <n-descriptions-item :label="currentNeedInfo.label + ' (必填)'" :span="2">
-          <n-input v-model:value="amzId" :status="requiredInfo ? 'error' : ''" />
         </n-descriptions-item>
         <n-descriptions-item :label="isaRequired ? 'isa (必填)' : 'isa'" :span="2">
           <n-input v-model:value="isa" />
