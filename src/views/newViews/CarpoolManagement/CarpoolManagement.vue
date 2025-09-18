@@ -432,9 +432,6 @@
 
     if (files.checkPassed) {
       currentModel[fieldName] = files.files;
-      if (fieldName === 'lieferscheinFiles') {
-        currentModel.inStatus = '已定车';
-      }
       await addOrUpdateOutboundForecast(currentModel);
     }
 

@@ -316,7 +316,6 @@
 
   function showTaskTray() {
     currentModel = selectedTaskList[0];
-    console.log(currentModel, 'model');
     addNewTrayDialog = true;
   }
 

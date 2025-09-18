@@ -53,20 +53,11 @@
         @update:pageSize="handlePageSizeChange"
       />
       <n-modal
-        v-model:show="carDialog"
-        :show-icon="false"
-        preset="card"
-        style="width: 90%; min-width: 600px; max-width: 600px"
-        title="定车信息"
-      >
-        <booking-car-dialog :info="currentInfo" @saved="saved" />
-      </n-modal>
-      <n-modal
         v-model:show="loadingCarDialog"
         :show-icon="false"
         preset="card"
         style="width: 90%; min-width: 600px; max-width: 600px"
-        title="装车单"
+        title="装车信息"
       >
         <loading-car-list :outbound-info="currentInfo" @saved="saved" />
       </n-modal>
@@ -87,7 +78,6 @@
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import FileSaver from 'file-saver';
   import { addOrUpdateOutboundForecast } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
-  import BookingCarDialog from '@/views/newViews/CarpoolManagement/dialog/BookingCarDialog.vue';
   import * as XLSX from 'xlsx';
   import {
     statusColumnEasy,
@@ -101,6 +91,12 @@
   import { getOutboundForecastListByFilterWithPagination } from '@/api/newDataLayer/CarManage/CarManage';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
   import LoadingCarList from '@/views/newViews/OperationDetail/NotOutbound/LoadingCarList.vue';
+  import {
+    getTaskListByIds,
+    getTaskListByNotifyId,
+    updateTask,
+  } from '@/api/newDataLayer/TaskList/TaskList';
+  import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
 
   const showModal = ref(false);
 
@@ -376,6 +372,21 @@
 
     if (files.checkPassed) {
       currentModel[fieldName] = files.files;
+      if (fieldName === 'unloadingFile') {
+        currentModel.inStatus = '已完成';
+        const taskList = await getTaskListByIds(currentModel.bolitaTaskIds);
+        for (const currentTask of taskList) {
+          currentTask.inStatus = '已完成';
+          await updateTask(currentTask);
+          const allTask = await getTaskListByNotifyId(currentTask.notifyId);
+          const alreadyDoneTask = allTask.filter((it) => it.inStatus === '已完成');
+          if (alreadyDoneTask.length === allTask.length) {
+            const notify = await getNotifyById(currentTask.notifyId);
+            notify.inStatus = '全部出库';
+            await addOrUpdateNotify(notify);
+          }
+        }
+      }
       await addOrUpdateOutboundForecast(currentModel);
     }
 

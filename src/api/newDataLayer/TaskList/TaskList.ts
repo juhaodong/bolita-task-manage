@@ -98,7 +98,6 @@ export async function getTaskListByIds(ids) {
 }
 
 export async function getTaskGroupByNotifyId(id) {
-  console.log(id, 'id');
   return (
     await hillo.jsonPost(typeName + '/getGroupedTask', {
       inStatusNotIn: ['已取消', '已拆分'],
