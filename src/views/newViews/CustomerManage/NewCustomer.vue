@@ -46,16 +46,6 @@
     },
     asyncCustomerWarehouseFormField(false),
     asyncSalesManFormField(),
-    // {
-    //   label: '使用系统',
-    //   field: 'useSystem',
-    //   required: false,
-    // },
-    // {
-    //   label: '快速账号绑定',
-    //   field: 'quickBindAccount',
-    //   required: false,
-    // },
     customerStatusSelection,
   ];
 
@@ -63,14 +53,10 @@
 
   async function handleSubmit(values: any) {
     loading = true;
-    // values.belongSalesId =
-    //   (await UserManager.load()).find((it) => it.realName === values.belongSalesMan)?.id ?? '';
-    // if (!values.belongSalesId) {
-    //   values.belongSalesMan = '';
-    // }
-    console.log(values, 'values');
     values.belongSalesMan = '';
     values.businessParty = values.businessParty ?? '';
+    values.inventoryId = values['inventory.id'] ?? '';
+    console.log(values, 'values');
     await safeScope(async () => {
       await addOrUpdateCustomer(values);
       emit('saved', values);

@@ -13,6 +13,7 @@ const routes: Array<RouteRecordRaw> = [
       sort: 4,
       isRoot: true,
       icon: renderIcon(DeliveryTruck),
+      permissions: ['管理员', '仓库', '物流部'],
     },
     children: [
       {

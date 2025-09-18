@@ -36,7 +36,7 @@ export async function getOutboundForecastById(id) {
 }
 
 export async function addOrUpdateOutboundForecast(item) {
-  return await hillo.jsonPost(typeName + '/addOrUpdate', {
+  return await hillo.jsonPost(typeName + '/addOrUpdateWithRef', {
     ...item,
   });
 }

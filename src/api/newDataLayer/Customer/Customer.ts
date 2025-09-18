@@ -11,7 +11,7 @@ export async function getCustomerById(id) {
     await hillo.jsonPost(typeName + '/searchOne', {
       id,
     })
-  ).data.rows;
+  ).data;
 }
 
 export async function getCustomerListByIds(ids) {

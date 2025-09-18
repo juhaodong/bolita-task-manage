@@ -8,7 +8,6 @@
       />
       <div class="mt-2">
         <n-button
-          v-if="hasAuthPower('forecastAdd')"
           class="action-button"
           size="small"
           type="primary"
@@ -16,9 +15,6 @@
         >
           新建预报
         </n-button>
-        <!--        <n-button class="action-button" size="small" type="info" @click="selectedHeader">-->
-        <!--          表头显示-->
-        <!--        </n-button>-->
         <n-button class="action-button" size="small" type="success" @click="downloadData">
           下载
         </n-button>
@@ -34,6 +30,7 @@
           修改
         </n-button>
         <n-button
+          v-if="!userTypeIsCustomer()"
           :disabled="selectedNotifyList.length !== 1"
           class="action-button"
           size="small"
@@ -42,6 +39,7 @@
           生成卸柜单
         </n-button>
         <n-button
+          v-if="!userTypeIsCustomer()"
           :disabled="selectedNotifyList.length !== 1"
           class="action-button"
           size="small"
@@ -227,7 +225,11 @@
     handleRequest,
     toastSuccess,
   } from '@/store/utils/utils';
-  import { getUserCustomerList, hasAuthPower } from '@/api/dataLayer/common/power';
+  import {
+    getUserCustomerList,
+    hasAuthPower,
+    userTypeIsCustomer,
+  } from '@/api/dataLayer/common/power';
   import {
     addOrUpdateNotify,
     deleteNotify,

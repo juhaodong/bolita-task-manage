@@ -224,7 +224,7 @@
     if (filterObj) {
       currentFilter = filterObj;
     }
-    currentFilter['inStatusIn'] = ['已定车', '无需定车'];
+    // currentFilter['inStatusIn'] = ['已定车', '无需定车'];
   }
 
   let outboundForecastList = $ref([]);

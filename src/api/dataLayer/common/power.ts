@@ -5,6 +5,7 @@ import { resultOfId } from '@/api/dataLayer/modules/OutboundForecast/OutboundFor
 import { getUserById } from '@/api/newDataLayer/User/User';
 
 export function hasAuthPower(power) {
+  console.log(power, 'power');
   const res = useUserStore()?.info?.powerTypeItems.map((it) => it.itemKey) ?? [];
   return res.includes(power);
 }
@@ -15,6 +16,29 @@ export function userType() {
     useUserStore()?.info?.userType === '运营部前端' ||
     useUserStore()?.info?.userType === '运营部后端'
   );
+}
+
+export function userTypeIsCustomer() {
+  return useUserStore()?.info?.userType === '客户';
+}
+
+export function userTypeIsAdmin() {
+  return useUserStore()?.info?.userType === '管理员';
+}
+
+export function userTypeIsYunYing() {
+  return (
+    useUserStore()?.info?.userType === '运营部前端' ||
+    useUserStore()?.info?.userType === '运营部后端'
+  );
+}
+
+export function userTypeIsInventory() {
+  return useUserStore()?.info?.userType === '仓库';
+}
+
+export function userTypeIsLogistics() {
+  return useUserStore()?.info?.userType === '物流部';
 }
 
 export const PowerTypeList = 'PowerTypeList';
@@ -30,6 +54,5 @@ export async function getUserTypePowerList(type) {
 
 export async function getUserCustomerList() {
   const currentUser = await getUserById(useUserStore()?.info?.id);
-  console.log(currentUser, 'user');
   return currentUser.customers.map((it) => it.id);
 }

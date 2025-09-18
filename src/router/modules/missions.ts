@@ -31,6 +31,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           title: '明细操作',
           activeMenu: 'missionOperation',
+          permissions: ['管理员', '运营部前端', '运营部后端', '仓库', '物流部'],
         },
         component: () =>
           import('@/views/newViews/Missions/AlreadyWarehousing/MissionOperationPage.vue'),
