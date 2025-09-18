@@ -803,9 +803,6 @@
 
   async function checkContainerStatus() {
     if (selectedNotifyList[0]?.inStatus === InBoundStatus.Wait) {
-      currentRecord = selectedNotifyList[0];
-      showConfirmUnloading = true;
-    } else if (selectedNotifyList[0]?.inStatus === InBoundStatus.WaitUnloading) {
       currentNotifyId = selectedNotifyList[0].id!;
       showOperationTable = true;
     } else if (selectedNotifyList[0]?.inStatus === InBoundStatus.WaitCheck) {

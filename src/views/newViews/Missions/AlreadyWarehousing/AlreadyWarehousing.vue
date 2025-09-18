@@ -179,9 +179,18 @@
 <script lang="ts" setup>
   import { onMounted, reactive, ref } from 'vue';
   import { BasicTable } from '@/components/Table';
-  import { allDeliveryMethod, allInStatusList, allOutboundMethod } from './columns';
+  import {
+    allCarStatusList,
+    allDeliveryMethod,
+    allInStatusList,
+    allOutboundMethod,
+  } from './columns';
   import { $ref } from 'vue/macros';
-  import { statusColumnSelect, timeColumn } from '@/views/bolita-views/composable/useableColumns';
+  import {
+    statusColumnSelect,
+    statusColumnSelectByTask,
+    timeColumn,
+  } from '@/views/bolita-views/composable/useableColumns';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
   import NewTotalFee from '@/views/newViews/SettlementManage/NewTotalFee.vue';
@@ -309,6 +318,11 @@
       key: 'inStatus',
       list: generateOptionFromArray(allInStatusList),
     }),
+    statusColumnSelectByTask({
+      title: '订车',
+      key: 'outboundForecast.inStatus',
+      list: generateOptionFromArray(allCarStatusList),
+    }),
     {
       title: '总实重',
       key: 'weight',
@@ -415,7 +429,11 @@
     },
     timeColumn('planArriveDateTime', '预期到仓日期'),
     timeColumn('arriveTime', '实际到仓日期'),
-    timeColumn('outboundForecast.realOutDate', '实际发货时间'),
+    {
+      title: '实际发货时间',
+      key: 'outboundForecast.outDate',
+      width: 100,
+    },
     {
       title: '出库件数',
       key: 'outContainerNum',

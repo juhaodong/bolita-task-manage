@@ -372,7 +372,7 @@
 
     if (files.checkPassed) {
       currentModel[fieldName] = files.files;
-      if (fieldName === 'unloadingFile') {
+      if (fieldName === 'pickupFiles') {
         currentModel.inStatus = '已完成';
         const taskList = await getTaskListByIds(currentModel.bolitaTaskIds);
         for (const currentTask of taskList) {
@@ -425,6 +425,7 @@
     offerDialog = false;
     carDialog = false;
     showConfirmCancelDialog = false;
+    loadingCarDialog = false;
     selectedOutboundForecastList = [];
     checkedRowKeys = [];
   }

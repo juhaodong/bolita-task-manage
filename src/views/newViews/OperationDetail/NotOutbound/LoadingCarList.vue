@@ -147,7 +147,7 @@
         <n-descriptions-item label="Ref.">
           {{ currentOutBoundInfo.ref ? currentOutBoundInfo.ref : currentOutBoundInfo.id }}
         </n-descriptions-item>
-        <n-descriptions-item label="预报总数"> {{ totalArrived }}</n-descriptions-item>
+        <n-descriptions-item label="库内总数"> {{ totalArrived }}</n-descriptions-item>
         <!--        <n-descriptions-item label="预约日期时间">-->
         <!--          {{ timeDisplay(currentOutBoundInfo?.pickUpDateTime) }}-->
         <!--        </n-descriptions-item>-->

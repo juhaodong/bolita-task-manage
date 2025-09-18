@@ -198,7 +198,8 @@
       bolitaTaskIds: taskIds,
       isa: isa,
       waybillId: waybillId,
-      reservationGetProductTime: dayjs(reservationGetProductTime).format('YYYY-MM-DDTHH:mm:ss'),
+      reservationGetProductTime:
+        dayjs(reservationGetProductTime).format('YYYY-MM-DDTHH:mm:ss') ?? '',
       reservationGetProductDetailTime: reservationGetProductDetailTime,
       po: po,
       note: note,

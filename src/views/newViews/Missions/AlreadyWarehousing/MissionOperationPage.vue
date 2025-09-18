@@ -168,9 +168,9 @@
         :show-icon="false"
         preset="card"
         style="width: 90%; min-width: 600px; max-width: 600px"
-        title="请确认"
+        title="审核中"
       >
-        <loading-frame :loading="checkLoading" :title="log" />
+        <loading-frame :loading="checkLoading" />
       </n-modal>
       <n-modal
         v-model:show="showSplitTaskDialog"
@@ -737,7 +737,7 @@
         });
         res.customerId = res.customer.id;
         res.inventoryId = res.inventory.id;
-        await addOrUpdateTask(res);
+        await updateTask(res);
         const containerForecastInfo = await getNotifyById(res.notifyId);
         if (containerForecastInfo.inStatus === InBoundStatus.WaitCheck) {
           const allDetailList = allList

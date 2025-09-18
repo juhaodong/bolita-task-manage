@@ -42,6 +42,14 @@
         >
           问题图片
         </n-button>
+        <n-button
+          :disabled="selectedTaskList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="confirmEdit"
+        >
+          完成操作
+        </n-button>
       </div>
 
       <BasicTable
@@ -92,6 +100,8 @@
   } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
   import EditTrayDialog from '@/views/newViews/OperationDetail/NotOutbound/dialog/EditTrayDialog.vue';
+  import { useUserStore } from '@/store/modules/user';
+  import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -333,6 +343,21 @@
       await updateTask(currentModel);
     }
 
+    await actionRef.value.reload();
+  }
+
+  async function confirmEdit() {
+    const currentTask = Object.assign({}, selectedTaskList[0]);
+    currentTask.operateInStorage = '否';
+    const userInfo = useUserStore().info;
+    await addOrUpdateTaskTimeLine({
+      useType: 'normal',
+      bolitaTaskId: currentTask.id,
+      operator: userInfo?.realName,
+      detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
+      note: '完成库内操作',
+    });
+    await updateTask(currentTask);
     await actionRef.value.reload();
   }
 

@@ -79,6 +79,9 @@
         containIndex = containIndex + 1;
       }
       currentTaskList = flatMap(groupByInfo);
+      currentTaskList.forEach((it) => {
+        it.displayNumber = it.number !== 0 ? it.number : it.trayNum;
+      });
       emit('refresh');
     }
   }
@@ -116,7 +119,7 @@
   const columns: DataTableColumns<any> = $computed(() => [
     { title: 'Kenzeichen', key: 'ticketId' },
     { title: 'FBA', key: 'fbaDeliveryCode', width: 150 },
-    { title: 'Menge', key: 'number' },
+    { title: 'Menge', key: 'displayNumber' },
     {
       title: 'Gesamt',
       key: 'unloadingTotalNumber',
@@ -151,7 +154,7 @@
           {{ notifyInfo?.containerNo }}
         </n-descriptions-item>
         <n-descriptions-item label="Gesamtmenge:">
-          {{ notifyInfo?.arrivedCount }}</n-descriptions-item
+          {{ notifyInfo?.totalCount }}</n-descriptions-item
         >
         <n-descriptions-item label="Name des Kunden:">
           {{ notifyInfo?.customer.customerName }}</n-descriptions-item

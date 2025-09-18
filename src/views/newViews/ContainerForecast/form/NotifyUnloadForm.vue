@@ -196,9 +196,6 @@
         <n-descriptions-item label="预约日期时间">
           {{ timeDisplayYMD(notifyInfo?.planArriveDateTime) }}/{{ notifyInfo?.inHouseTime }}
         </n-descriptions-item>
-        <n-descriptions-item label="实际入库日期">
-          {{ timeDisplayYMD(notifyInfo?.arrivedInventoryTime) ?? '' }}
-        </n-descriptions-item>
         <n-descriptions-item label="预报总数"> {{ notifyInfo?.totalCount }}</n-descriptions-item>
         <n-descriptions-item label="实际卸柜日期">
           <n-date-picker v-model:value="realDate" type="date" />

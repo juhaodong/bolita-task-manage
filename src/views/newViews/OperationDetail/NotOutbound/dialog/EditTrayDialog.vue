@@ -3,9 +3,6 @@
   import { onMounted } from 'vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { updateTask } from '@/api/newDataLayer/TaskList/TaskList';
-  import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
-  import dayjs from 'dayjs';
-  import { useUserStore } from '@/store/modules/user';
 
   interface Props {
     row?: any;
@@ -16,26 +13,20 @@
   let normalNumber = $ref(0);
   let loading = $ref(false);
   let trayNumber = $ref(0);
+  let size = $ref('');
 
   onMounted(() => {
     normalNumber = props.row.arrivedContainerNum ? props.row.arrivedContainerNum : 0;
     trayNumber = props.row.trayNum ? props.row.trayNum : 0;
+    size = props.row.size ? props.row.size : '';
   });
 
   async function saveInfo() {
     let currentTask = Object.assign({}, props.row);
+    currentTask.size = size;
     currentTask.outContainerNum = normalNumber;
     currentTask.outTrayNum = trayNumber;
-    currentTask.operateInStorage = '否';
     await updateTask(currentTask);
-    const userInfo = useUserStore().info;
-    await addOrUpdateTaskTimeLine({
-      useType: 'normal',
-      bolitaTaskId: currentTask.id,
-      operator: userInfo?.realName,
-      detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
-      note: '完成库内操作',
-    });
     emit('saved');
   }
   function cancel() {

@@ -21,15 +21,14 @@ export async function getInventoryUseLogListByInventoryId(id, date) {
 }
 
 export async function addOrUpdateInventoryUseLog(item) {
-  return await hillo.jsonPost(typeName + '/addOrUpdate', {
+  return await hillo.jsonPost(typeName + '/addOrUpdateWithRef', {
     ...item,
   });
 }
 
 export function getCurrentLogTime(date, time) {
   const currentDate = dayjs(date).format('YYYY-MM-DD');
-  const res = dayjs(currentDate + ' ' + time).format('YYYY-MM-DD HH:mm:ss');
-  return Date.parse(res);
+  return dayjs(currentDate + ' ' + time).format('YYYY-MM-DDTHH:mm:ss');
 }
 
 export async function deleteInventoryLog(id) {
