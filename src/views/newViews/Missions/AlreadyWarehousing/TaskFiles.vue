@@ -6,6 +6,7 @@
   import { saveFiles } from '@/api/newDataLayer/Notify/Notify';
   import { addOrUpdateTask, getTaskListById } from '@/api/newDataLayer/TaskList/TaskList';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
+  import { userTypeIsCustomer } from '@/api/dataLayer/common/power';
 
   interface Props {
     info: any;
@@ -68,7 +69,7 @@
           if (fileValue && fileValue.trim() !== '') {
             // If the value already contains commas, split it and add each part
             if (fileValue.includes(',')) {
-              const parts = fileValue.split(',').filter(part => part.trim() !== '');
+              const parts = fileValue.split(',').filter((part) => part.trim() !== '');
               allFilesArray = [...allFilesArray, ...parts];
             } else {
               allFilesArray.push(fileValue);
@@ -76,7 +77,6 @@
           }
         }
       });
-      console.log(allFilesArray.join(','), 'allFiles');
       return allFilesArray.join(',');
     } else {
       // For specific file types, return files for that key
@@ -117,6 +117,12 @@
     await reload();
   }
 
+  const emit = defineEmits(['cancel']);
+
+  function cancel() {
+    emit('cancel');
+  }
+
   async function deleteFile(file) {
     // If 'all' is selected, we need to find which property contains the file
     if (currentTypeKey.value === 'all') {
@@ -132,7 +138,9 @@
               fileValue = currentInfo.value[keys[0]][keys[1]];
               if (fileValue.includes(file)) {
                 const allFiles = fileValue.split(',');
-                currentInfo.value[keys[0]][keys[1]] = allFiles.filter((it) => it !== file).join(',');
+                currentInfo.value[keys[0]][keys[1]] = allFiles
+                  .filter((it) => it !== file)
+                  .join(',');
                 found = true;
               }
             }
@@ -204,7 +212,7 @@
           @delete-file="deleteFile"
         />
       </div>
-      <div v-if="selectedFileType !== 'all'">
+      <div v-if="selectedFileType !== 'all' && !userTypeIsCustomer()">
         <n-divider class="my-8" />
         <normal-form
           :form-fields="field"

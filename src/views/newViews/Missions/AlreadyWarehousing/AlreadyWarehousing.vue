@@ -170,7 +170,7 @@
         title="查看附件"
         style="width: 800px"
       >
-        <task-files :info="currentInfo" @save="reloadTable" />
+        <task-files @cancel="showFilesDialog = false" :info="currentInfo" @save="reloadTable" />
       </n-modal>
     </div>
   </n-card>

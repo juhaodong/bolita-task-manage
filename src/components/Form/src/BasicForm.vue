@@ -576,8 +576,12 @@
   }
 
   :deep(.modified-field .n-form-item-label) {
-    border: 1px solid #f56c6c;
-    border-radius: 4px;
-    padding: 0 5px;
+    border-bottom: none;
+  }
+
+  :deep(.modified-field .n-form-item-label span) {
+    display: inline-block;
+    border-bottom: 1px solid #f56c6c;
+    padding-bottom: 1px;
   }
 </style>
