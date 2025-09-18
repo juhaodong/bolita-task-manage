@@ -398,7 +398,7 @@
   }
 
   async function LoadingListPic() {
-    await handleFileUpload('unloadingFile');
+    await handleFileUpload('pickupFiles');
   }
 
   async function editPod() {

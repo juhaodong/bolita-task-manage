@@ -12,16 +12,16 @@
   }
   const fileTypes = [
     { label: 'All', key: 'all' },
-    { label: '卸柜单', key: 'xieguidan' },
-    { label: '卸车图片', key: 'xieguipic' },
+    { label: '卸柜单', key: 'notify.unloadingFile' },
+    { label: '卸车图片', key: 'notify.unloadingPic' },
     { label: '换单文件', key: 'changeOrder' },
     { label: '操作图片', key: 'operationFiles' },
     { label: '问题图片', key: 'problemFiles' },
-    { label: '装车单', key: 'zhuangchedan' },
-    { label: '装车图片', key: 'zhuangchepic' },
-    { label: 'CMR', key: 'cmr' },
-    { label: 'Lieferschein', key: 'lieferschein' },
-    { label: 'POD', key: 'pod' },
+    { label: '装车图片', key: 'outboundForecast.pickupFiles' },
+    { label: '装车单', key: 'outboundForecast.loadingCarDoc' },
+    { label: 'CMR', key: 'outboundForecast.cmrFiles' },
+    { label: 'lieferschein', key: 'outboundForecast.lieferscheinFiles' },
+    { label: 'POD', key: 'outboundForecast.podFiles' },
   ];
 
   const loading = ref(false);
@@ -45,35 +45,129 @@
   // Get files based on the selected file type
   const filteredFiles = computed(() => {
     if (!currentInfo.value) return [];
-
     if (currentTypeKey.value === 'all') {
       // For 'All' option, collect files from all keys
-      let allFiles = '';
+      let allFilesArray = [];
+      // console.log(currentInfo.value['outboundForecast']['lieferscheinFiles'], 'currentInfo.value');
       fileTypes.forEach((type) => {
         if (type.key !== 'all') {
-          allFiles += currentInfo.value[type.key] ?? '';
+          let fileValue = '';
+          if (type.key.includes('.')) {
+            const keys = type.key.split('.');
+            // Check if the nested property exists
+            if (currentInfo.value[keys[0]] && currentInfo.value[keys[0]][keys[1]]) {
+              fileValue = currentInfo.value[keys[0]][keys[1]];
+            }
+          } else {
+            // Check if the property exists
+            if (currentInfo.value[type.key]) {
+              fileValue = currentInfo.value[type.key];
+            }
+          }
+          // Only add non-empty values
+          if (fileValue && fileValue.trim() !== '') {
+            // If the value already contains commas, split it and add each part
+            if (fileValue.includes(',')) {
+              const parts = fileValue.split(',').filter(part => part.trim() !== '');
+              allFilesArray = [...allFilesArray, ...parts];
+            } else {
+              allFilesArray.push(fileValue);
+            }
+          }
         }
       });
-      return allFiles;
+      console.log(allFilesArray.join(','), 'allFiles');
+      return allFilesArray.join(',');
     } else {
       // For specific file types, return files for that key
-      return currentInfo.value[currentTypeKey.value] || '';
+      if (currentTypeKey.value.includes('.')) {
+        const keys = currentTypeKey.value.split('.');
+        return currentInfo.value[keys[0]] && currentInfo.value[keys[0]][keys[1]]
+          ? currentInfo.value[keys[0]][keys[1]]
+          : '';
+      } else {
+        return currentInfo.value[currentTypeKey.value] || '';
+      }
     }
   });
 
   async function submit(value: any) {
-    let currentFilesUrl = currentInfo.value[currentTypeKey.value];
+    let currentFilesUrl = '';
     let newFiles = '';
-    newFiles = await saveFiles(value.files);
-    currentFilesUrl = currentFilesUrl + ',' + newFiles;
-    currentInfo.value[currentTypeKey.value] = currentFilesUrl;
+
+    // Handle nested properties
+    if (currentTypeKey.value.includes('.')) {
+      const keys = currentTypeKey.value.split('.');
+      // Ensure the parent object exists
+      if (!currentInfo.value[keys[0]]) {
+        currentInfo.value[keys[0]] = {};
+      }
+      currentFilesUrl = currentInfo.value[keys[0]][keys[1]] || '';
+      newFiles = await saveFiles(value.files);
+      currentFilesUrl = currentFilesUrl ? currentFilesUrl + ',' + newFiles : newFiles;
+      currentInfo.value[keys[0]][keys[1]] = currentFilesUrl;
+    } else {
+      currentFilesUrl = currentInfo.value[currentTypeKey.value] || '';
+      newFiles = await saveFiles(value.files);
+      currentFilesUrl = currentFilesUrl ? currentFilesUrl + ',' + newFiles : newFiles;
+      currentInfo.value[currentTypeKey.value] = currentFilesUrl;
+    }
+
     await addOrUpdateTask(currentInfo.value);
     await reload();
   }
 
   async function deleteFile(file) {
-    const allFiles = currentInfo.value[currentTypeKey.value].split(',');
-    currentInfo.value[currentTypeKey.value] = allFiles.filter((it) => it !== file).join(',');
+    // If 'all' is selected, we need to find which property contains the file
+    if (currentTypeKey.value === 'all') {
+      // Check each file type to find where the file is located
+      for (const type of fileTypes) {
+        if (type.key !== 'all') {
+          let fileValue = '';
+          let found = false;
+
+          if (type.key.includes('.')) {
+            const keys = type.key.split('.');
+            if (currentInfo.value[keys[0]] && currentInfo.value[keys[0]][keys[1]]) {
+              fileValue = currentInfo.value[keys[0]][keys[1]];
+              if (fileValue.includes(file)) {
+                const allFiles = fileValue.split(',');
+                currentInfo.value[keys[0]][keys[1]] = allFiles.filter((it) => it !== file).join(',');
+                found = true;
+              }
+            }
+          } else {
+            if (currentInfo.value[type.key]) {
+              fileValue = currentInfo.value[type.key];
+              if (fileValue.includes(file)) {
+                const allFiles = fileValue.split(',');
+                currentInfo.value[type.key] = allFiles.filter((it) => it !== file).join(',');
+                found = true;
+              }
+            }
+          }
+
+          if (found) break; // Stop searching once we've found and updated the file
+        }
+      }
+    } else {
+      // Handle specific file type (nested or not)
+      let allFiles = [];
+
+      if (currentTypeKey.value.includes('.')) {
+        const keys = currentTypeKey.value.split('.');
+        if (currentInfo.value[keys[0]] && currentInfo.value[keys[0]][keys[1]]) {
+          allFiles = currentInfo.value[keys[0]][keys[1]].split(',');
+          currentInfo.value[keys[0]][keys[1]] = allFiles.filter((it) => it !== file).join(',');
+        }
+      } else {
+        if (currentInfo.value[currentTypeKey.value]) {
+          allFiles = currentInfo.value[currentTypeKey.value].split(',');
+          currentInfo.value[currentTypeKey.value] = allFiles.filter((it) => it !== file).join(',');
+        }
+      }
+    }
+
     await addOrUpdateTask(currentInfo.value);
     await reload();
   }
