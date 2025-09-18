@@ -415,8 +415,7 @@
     },
     timeColumn('planArriveDateTime', '预期到仓日期'),
     timeColumn('arriveTime', '实际到仓日期'),
-    timeColumn('deliveryTime', '预计发货时间'),
-    timeColumn('outBoundTime', '实际发货时间'),
+    timeColumn('outboundForecast.realOutDate', '实际发货时间'),
     {
       title: '出库件数',
       key: 'outContainerNum',
@@ -429,15 +428,11 @@
     },
     {
       title: 'po',
-      key: 'po',
+      key: 'outboundForecast.po',
     },
     {
-      title: 'ISA',
-      key: 'isa',
-    },
-    {
-      title: 'Versand Nr',
-      key: 'isa',
+      title: '运单号',
+      key: 'outboundForecast.waybillId',
     },
   ].map((it) => {
     it.ellipsis = {

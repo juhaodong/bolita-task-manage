@@ -479,6 +479,11 @@
       key: 'outboundForecast.reservationGetProductDetailTime',
       width: 100,
     },
+    {
+      title: '实际发货时间',
+      key: 'outboundForecast.realOutDate',
+      width: 100,
+    },
     timeColumn('outBoundTime', '实际发货时间'),
     {
       title: '出库件数',
@@ -492,15 +497,11 @@
     },
     {
       title: 'po',
-      key: 'po',
+      key: 'outboundForecast.po',
     },
     {
-      title: 'ISA',
-      key: 'isa',
-    },
-    {
-      title: 'Versand Nr',
-      key: 'isa',
+      title: '运单号',
+      key: 'outboundForecast.waybillId',
     },
   ].map((it) => {
     it.ellipsis = {
