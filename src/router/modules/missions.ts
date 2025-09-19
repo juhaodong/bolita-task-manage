@@ -13,7 +13,6 @@ const routes: Array<RouteRecordRaw> = [
       sort: 2,
       isRoot: true,
       icon: renderIcon(BellOutlined),
-      permissions: ['管理员', '运营部前端', '运营部后端'],
     },
     children: [
       {
@@ -32,6 +31,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           title: '明细操作',
           activeMenu: 'missionOperation',
+          permissions: ['管理员', '运营部前端', '运营部后端'],
         },
         component: () =>
           import('@/views/newViews/Missions/AlreadyWarehousing/MissionOperationPage.vue'),

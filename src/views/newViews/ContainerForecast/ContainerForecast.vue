@@ -477,10 +477,9 @@
   async function getCurrentFilter() {
     // Reset current filter
     currentFilter = [];
-
+    const customerId = await getUserCustomerList();
     if (filterObj) {
       currentFilter = filterObj;
-      const customerId = await getUserCustomerList();
       if (!filterObj['customer.id']) {
         currentFilter['customerIds'] = customerId;
       } else {
@@ -495,6 +494,8 @@
         currentFilter['maxPlanArriveDateTime'] =
           dayjs(filterObj['planArriveDateTime'][1]).format('YYYY-MM-DD') + 'T23:59:59';
       }
+    } else {
+      currentFilter['customerIds'] = customerId;
     }
   }
 

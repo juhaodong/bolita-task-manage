@@ -616,9 +616,10 @@
 
   async function getCurrentFilter() {
     currentFilter = [];
+    const customerId = await getUserCustomerList();
     if (filterObj) {
       currentFilter = filterObj;
-      const customerId = await getUserCustomerList();
+
       if (!filterObj['customer.id']) {
         currentFilter['customerIds'] = customerId;
       } else {
@@ -650,6 +651,7 @@
       }
     } else {
       currentFilter['inStatusNotIn'] = ['已拆分', '已取消'];
+      currentFilter['customerIds'] = customerId;
     }
   }
 
