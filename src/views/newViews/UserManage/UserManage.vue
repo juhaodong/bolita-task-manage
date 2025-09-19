@@ -10,7 +10,7 @@
     >
       编辑
     </n-button>
-    <n-button class="action-button" size="small" @click="powerManage"> 权限管理 </n-button>
+    <!--    <n-button class="action-button" size="small" @click="powerManage"> 权限管理 </n-button>-->
     <div class="my-2"></div>
     <BasicTable
       v-model:checked-row-keys="checkedRowKeys"
@@ -99,26 +99,26 @@
       title: '密码',
       key: 'password',
     },
-    {
-      title: '查看权限',
-      key: 'actions',
-      render(row) {
-        return h(
-          NButton,
-          {
-            strong: true,
-            tertiary: true,
-            size: 'small',
-            onClick: () => {
-              console.log(row, 'row');
-              authInfo = row;
-              showPowerModal = true;
-            },
-          },
-          { default: () => '查看' }
-        );
-      },
-    },
+    // {
+    //   title: '查看权限',
+    //   key: 'actions',
+    //   render(row) {
+    //     return h(
+    //       NButton,
+    //       {
+    //         strong: true,
+    //         tertiary: true,
+    //         size: 'small',
+    //         onClick: () => {
+    //           console.log(row, 'row');
+    //           authInfo = row;
+    //           showPowerModal = true;
+    //         },
+    //       },
+    //       { default: () => '查看' }
+    //     );
+    //   },
+    // },
     timeColumn(),
   ];
   let authInfo = $ref([]);

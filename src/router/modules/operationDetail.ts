@@ -21,6 +21,7 @@ const routes: Array<RouteRecordRaw> = [
         name: `InventoryDashboard`,
         meta: {
           title: '入库任务看板',
+          permissions: ['管理员', '运营部前端', '运营部后端', '仓库'],
         },
         component: () => import('@/views/newViews/OperationDetail/InventoryDashboard.vue'),
       },
@@ -29,6 +30,7 @@ const routes: Array<RouteRecordRaw> = [
         name: `Operation`,
         meta: {
           title: '出库任务看板',
+          permissions: ['管理员', '仓库', '物流部'],
         },
         component: () => import('@/views/newViews/OperationDetail/NotOutbound/WaitOperation.vue'),
       },
@@ -37,6 +39,7 @@ const routes: Array<RouteRecordRaw> = [
         name: `InventoryView`,
         meta: {
           title: '库内操作看板',
+          permissions: ['管理员', '运营部后端', '仓库'],
         },
         component: () => import('@/views/newViews/OperationDetail/NotOutbound/InventoryView.vue'),
       },
