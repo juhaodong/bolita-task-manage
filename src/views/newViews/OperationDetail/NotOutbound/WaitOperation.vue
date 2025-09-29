@@ -384,6 +384,10 @@
             const notify = await getNotifyById(currentTask.notifyId);
             notify.inStatus = '全部出库';
             await addOrUpdateNotify(notify);
+          } else {
+            const notify = await getNotifyById(currentTask.notifyId);
+            notify.inStatus = '部分出库';
+            await addOrUpdateNotify(notify);
           }
         }
       }

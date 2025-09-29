@@ -25,10 +25,10 @@
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { $ref } from 'vue/macros';
   import {
-    addOrUpdateTask,
     deleteTask,
     getTaskListById,
     getTaskListBySourceId,
+    updateTask,
   } from '@/api/newDataLayer/TaskList/TaskList';
 
   interface Props {
@@ -49,7 +49,7 @@
     // const source
     loading = true;
     sourceTask.value.inStatus = '入库待出库';
-    await addOrUpdateTask(sourceTask.value);
+    await updateTask(sourceTask.value);
     const deleteIds = allTaskList.value.map((it) => it.id);
     await deleteTask(deleteIds);
     emit('saved');

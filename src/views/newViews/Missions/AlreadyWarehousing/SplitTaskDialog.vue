@@ -3,6 +3,7 @@
   import { safeSumBy } from '@/store/utils/utils';
   import {
     addOrUpdateTask,
+    addTask,
     deleteTask,
     searchTaskPrice,
   } from '@/api/newDataLayer/TaskList/TaskList';
@@ -56,8 +57,12 @@
         delete defaultTask.id;
         delete defaultTask.timelines;
         defaultTask.weight = item.weight;
-        defaultTask.size = item.size;
+        defaultTask.size = item.size ? item.size : prop.info.size;
         defaultTask.arrivedContainerNum = item.currentNumber;
+        defaultTask.volume = (
+          (parseFloat(defaultTask.volume) * parseFloat(item.currentNumber)) /
+          parseFloat(prop.info.arrivedContainerNum)
+        ).toFixed(2);
         defaultTask.ticketId = defaultTask.ticketId + '#' + item.value;
         defaultTask.suggestionPrice = await searchTaskPrice(
           item.size,
@@ -67,7 +72,7 @@
           item.currentNumber,
           defaultTask.postcode
         );
-        await addOrUpdateTask(defaultTask);
+        await addTask(defaultTask);
       }
       let originalTask = Object.assign({}, prop.info);
       if (originalTask.sourceId) {
@@ -94,7 +99,11 @@
   <div class="mt-2">
     <div style="display: flex; justify-content: space-between">
       <div>原票号:{{ prop.info.ticketId }}</div>
-      <div>总数量: {{ prop.info.arrivedContainerNum }}</div>
+      <div>
+        总数量:
+        <span v-if="prop.info.arrivedContainerNum">{{ prop.info.arrivedContainerNum }}件</span>
+        <span v-if="prop.info.arrivedTrayNum">{{ prop.info.arrivedTrayNum }}托</span>
+      </div>
       <div>总重量: {{ prop.info.weight }}</div>
     </div>
     <n-descriptions :columns="1" bordered label-placement="left">

@@ -23,7 +23,7 @@
   import { keys } from 'lodash';
   import { updateTask } from '@/api/newDataLayer/TaskList/TaskList';
   import dayjs from 'dayjs';
-  import { allInStatusNotifyList } from '@/api/dataLayer/common/common';
+  import { allInStatusTaskList } from '@/api/dataLayer/common/common';
 
   interface Props {
     model?: any;
@@ -237,7 +237,7 @@
       field: 'inStatus',
       component: 'NSelect',
       componentProps: {
-        options: generateOptionFromArray(allInStatusNotifyList),
+        options: generateOptionFromArray(allInStatusTaskList),
       },
     },
   ].map((it) => {

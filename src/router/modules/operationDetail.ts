@@ -9,7 +9,7 @@ const routes: Array<RouteRecordRaw> = [
     name: 'operationDetail',
     component: Layout,
     meta: {
-      title: '仓库明细',
+      title: '仓库信息',
       sort: 3,
       isRoot: true,
       icon: renderIcon(Box),
@@ -25,14 +25,24 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('@/views/newViews/OperationDetail/InventoryDashboard.vue'),
       },
+      // {
+      //   path: 'Operation',
+      //   name: `Operation`,
+      //   meta: {
+      //     title: '出库任务看板',
+      //     permissions: ['管理员', '仓库', '物流部'],
+      //   },
+      //   component: () => import('@/views/newViews/OperationDetail/NotOutbound/WaitOperation.vue'),
+      // },
       {
-        path: 'Operation',
-        name: `Operation`,
+        path: 'OutMission',
+        name: `OutMission`,
         meta: {
           title: '出库任务看板',
           permissions: ['管理员', '仓库', '物流部'],
         },
-        component: () => import('@/views/newViews/OperationDetail/NotOutbound/WaitOperation.vue'),
+        component: () =>
+          import('@/views/newViews/Missions/AlreadyWarehousing/MissionWithCarPage.vue'),
       },
       {
         path: 'InventoryView',

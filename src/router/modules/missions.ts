@@ -36,14 +36,17 @@ const routes: Array<RouteRecordRaw> = [
         component: () =>
           import('@/views/newViews/Missions/AlreadyWarehousing/MissionOperationPage.vue'),
       },
-      // {
-      //   path: 'notWarehousing',
-      //   name: `notWarehousing`,
-      //   meta: {
-      //     title: '未入库',
-      //   },
-      //   component: () => import('@/views/newViews/Missions/NotWarehousing/NotWarehousing.vue'),
-      // },
+      {
+        path: 'missionCheckPrice',
+        name: `missionCheckPrice`,
+        meta: {
+          title: '询价看板',
+          activeMenu: 'missionCheckPrice',
+          permissions: ['管理员', '运营部前端', '运营部后端', '物流部', '仓库'],
+        },
+        component: () =>
+          import('@/views/newViews/Missions/AlreadyWarehousing/MissionCheckPrice.vue'),
+      },
     ],
   },
 ];

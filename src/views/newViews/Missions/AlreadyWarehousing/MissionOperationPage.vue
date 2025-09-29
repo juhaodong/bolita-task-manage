@@ -26,15 +26,6 @@
         >
           审核
         </n-button>
-        <n-button
-          v-if="typeMission === '报价看板' && hasAuthPower('missionPriceOffer')"
-          class="action-button"
-          size="small"
-          type="warning"
-          @click="showOfferPrice = true"
-        >
-          报价
-        </n-button>
         <n-button class="action-button" size="small" type="default" @click="downloadData">
           下载
         </n-button>
@@ -47,7 +38,7 @@
           合并
         </n-button>
         <n-button
-          :disabled="selectedTaskList.length !== 1"
+          :disabled="selectedTaskList.length !== 1 || !selectedTaskList[0].arrivedContainerNum"
           class="action-button"
           size="small"
           @click="splitTask"
@@ -255,7 +246,7 @@
   import SplitTaskDialog from '@/views/newViews/Missions/AlreadyWarehousing/SplitTaskDialog.vue';
   import { NButton, useMessage } from 'naive-ui';
   import * as XLSX from 'xlsx';
-  import { allInStatusNotifyList } from '@/api/dataLayer/common/common';
+  import { allInStatusTaskList } from '@/api/dataLayer/common/common';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
   import {
     addOrUpdateWithRefOutboundForecast,
@@ -309,7 +300,7 @@
       field: 'inStatus',
       component: 'NSelect',
       componentProps: {
-        options: generateOptionFromArray(allInStatusNotifyList),
+        options: generateOptionFromArray(allInStatusTaskList),
       },
     },
     {

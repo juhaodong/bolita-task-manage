@@ -121,6 +121,9 @@ export async function updateTask(item) {
     item.customerId = item.customer.id;
     item.inventoryId = item.inventory.id;
   }
+  if (item.notify) {
+    item.notifyId = item.notify.id;
+  }
   return await hillo.jsonPost(typeName + '/updateWithRef', {
     ...item,
   });

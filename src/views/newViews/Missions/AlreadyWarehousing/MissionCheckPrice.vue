@@ -18,30 +18,6 @@
         >
           修改
         </n-button>
-        <n-button
-          :disabled="selectedTaskList.length !== 1"
-          class="action-button"
-          size="small"
-          @click="showFiles"
-        >
-          附件
-        </n-button>
-        <n-button
-          :disabled="selectedTaskList.length !== 1"
-          class="action-button"
-          size="small"
-          @click="showTimeLine"
-        >
-          时间线
-        </n-button>
-        <n-button
-          :disabled="selectedTaskList.length !== 1"
-          class="action-button"
-          size="small"
-          @click="showCancel"
-        >
-          取消
-        </n-button>
       </div>
       <BasicTable
         ref="actionRef"
@@ -616,6 +592,7 @@
 
   async function getCurrentFilter() {
     currentFilter = [];
+    currentFilter['suggestedPrice'] = '人工询价';
     const customerId = await getUserCustomerList();
     if (filterObj) {
       currentFilter = filterObj;

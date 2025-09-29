@@ -215,7 +215,7 @@
   // Data and API
   import { InBoundStatus, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
-  import { allInStatusNotifyList } from '@/api/dataLayer/common/common';
+  import { allInStatusTaskList } from '@/api/dataLayer/common/common';
   import { statusColumnSelect, timeColumn } from '@/views/bolita-views/composable/useableColumns';
   import { createPaginationPlaceholders, timeArrays } from '@/api/newDataLayer/Common/Common';
   import {
@@ -338,7 +338,7 @@
     statusColumnSelect({
       title: '状态',
       key: 'inStatus',
-      list: generateOptionFromArray(allInStatusNotifyList),
+      list: generateOptionFromArray(allInStatusTaskList),
     }),
     {
       title: '卸柜人',
@@ -371,7 +371,7 @@
       field: 'inStatus',
       component: 'NSelect',
       componentProps: {
-        options: generateOptionFromArray(allInStatusNotifyList),
+        options: generateOptionFromArray(allInStatusTaskList),
       },
     },
     asyncCustomerWarehouseFormField(),
@@ -543,7 +543,7 @@
   async function confirmCancel() {
     try {
       // For items in review status, simply delete the notification
-      if (cancelRecord.inStatus === '等待审核') {
+      if (cancelRecord.inStatus === '等待审核' || cancelRecord.inStatus === '等待提交') {
         await deleteNotify(cancelRecord.id);
         toastSuccess('取消成功');
         reloadTable();
