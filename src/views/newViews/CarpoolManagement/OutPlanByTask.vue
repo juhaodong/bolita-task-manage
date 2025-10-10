@@ -203,8 +203,8 @@
       isa: isa,
       waybillId: waybillId,
       reservationGetProductTime:
-        dayjs(reservationGetProductTime).format('YYYY-MM-DDTHH:mm:ss') ?? '',
-      reservationGetProductDetailTime: reservationGetProductDetailTime,
+        needCar === '1' ? dayjs(reservationGetProductTime).format('YYYY-MM-DDTHH:mm:ss') : '',
+      reservationGetProductDetailTime: needCar === '1' ? reservationGetProductDetailTime : '',
       po: po,
       note: note,
       logisticsCompany: logisticsCompany,
