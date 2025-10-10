@@ -212,7 +212,6 @@
   import SplitTaskDialog from '@/views/newViews/Missions/AlreadyWarehousing/SplitTaskDialog.vue';
   import { NButton, useDialog, useMessage } from 'naive-ui';
   import * as XLSX from 'xlsx';
-  import { allInStatusTaskList } from '@/api/dataLayer/common/common';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
   import {
     addOrUpdateWithRefOutboundForecast,
@@ -259,19 +258,6 @@
     {
       label: 'ref',
       field: 'ref',
-    },
-    {
-      label: '状态',
-      field: 'inStatus',
-      component: 'NSelect',
-      componentProps: {
-        options: generateOptionFromArray(allInStatusTaskList),
-      },
-    },
-    {
-      label: '显示拆分',
-      field: 'showAll',
-      component: 'NCheckbox',
     },
   ];
   const columns = [
@@ -617,25 +603,16 @@
   async function getCurrentFilter() {
     currentFilter = [];
     const customerId = await getUserCustomerList();
+    currentFilter['inStatusIn'] = ['已定车', '无需定车', '全部出库', '入库待出库'];
+    currentFilter['outBoundForecastNotNull'] = true;
     if (filterObj) {
       currentFilter = filterObj;
-
       if (!filterObj['customer.id']) {
         currentFilter['customerIds'] = customerId;
       } else {
         currentFilter['customerIds'] = [filterObj['customer.id']];
       }
       delete currentFilter['customer.id'];
-      if (filterObj['inStatus']) {
-        currentFilter['inStatusIn'] = [filterObj['inStatus']];
-        delete currentFilter.inStatus;
-      } else {
-        if (filterObj['showAll']) {
-          currentFilter['inStatusIn'] = ['已拆分'];
-        }
-        currentFilter['inStatusNotIn'] = ['已拆分', '已取消'];
-        delete currentFilter.inStatus;
-      }
       if (currentFilter['containerId']) {
         currentFilter['containerIdLike'] = currentFilter['containerId'];
         delete currentFilter.containerId;
@@ -650,7 +627,6 @@
         delete currentFilter.ticketId;
       }
     } else {
-      currentFilter['inStatusNotIn'] = ['已拆分', '已取消'];
       currentFilter['customerIds'] = customerId;
     }
   }

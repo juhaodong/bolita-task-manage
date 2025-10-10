@@ -7,6 +7,14 @@
         @submit="updateFilter"
       />
       <div class="mt-2">
+        <n-button
+          :disabled="selectedTaskList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="startOutPlan"
+        >
+          出库计划
+        </n-button>
         <n-button class="action-button" size="small" type="default" @click="downloadData">
           下载
         </n-button>
@@ -36,7 +44,7 @@
         style="width: 90%; min-width: 600px; max-width: 1200px"
         title="出库计划"
       >
-        <out-plan-by-task :model="selectedTaskList" @saved="reloadTable" />
+        <out-task-with-check-price :model="selectedTaskList" @saved="reloadTable" />
       </n-modal>
       <n-modal
         v-model:show="editDetailModel"
@@ -46,107 +54,6 @@
         title="编辑详情"
       >
         <edit-mission-detail :model="currentModel" @saved="reloadTable" />
-      </n-modal>
-      <n-modal
-        v-model:show="addNewFeeDialog"
-        :show-icon="false"
-        preset="card"
-        style="width: 90%; min-width: 800px; max-width: 800px"
-        title="新建费用"
-      >
-        <new-total-fee :current-data="currentData" @saved="reloadTable" />
-      </n-modal>
-      <n-modal
-        v-model:show="addNewTrayDialog"
-        :show-icon="false"
-        preset="card"
-        style="width: 90%; min-width: 800px; max-width: 800px"
-        title="添加托盘"
-      >
-        <new-tray-dialog :current-data="currentModel" @saved="reloadTable" />
-      </n-modal>
-      <n-modal
-        v-model:show="showCurrentHeaderDataTable"
-        :show-icon="false"
-        preset="card"
-        style="width: 90%; min-width: 800px; max-width: 800px"
-        title="添加表头"
-      >
-        <selected-header-table :all-columns="columns" :type="'taskList'" @saved="reloadHeader" />
-      </n-modal>
-      <n-modal
-        v-model:show="timeLineDialog"
-        :show-icon="false"
-        preset="card"
-        style="width: 90%; min-width: 800px; max-width: 800px"
-        title="时间线"
-      >
-        <time-line :info="currentInfo" />
-      </n-modal>
-      <n-modal
-        v-model:show="showOfferPrice"
-        :show-icon="false"
-        preset="card"
-        style="width: 90%; min-width: 800px; max-width: 800px"
-        title="报价表"
-      >
-        <offer-price-dialog :ids="checkedRows" @saved="reloadTable" />
-      </n-modal>
-      <n-modal
-        v-model:show="showMergeDialog"
-        :show-icon="false"
-        preset="card"
-        style="width: 90%; min-width: 1000px; max-width: 1000px"
-        title="合并"
-      >
-        <merge-dialog :info="selectedTaskList" @saved="reloadTable" />
-      </n-modal>
-      <n-modal
-        v-model:show="showCheckDialog"
-        :show-icon="false"
-        preset="card"
-        style="width: 90%; min-width: 600px; max-width: 600px"
-        title="请确认"
-      >
-        <loading-frame :loading="checkLoading" :title="log" />
-      </n-modal>
-      <n-modal
-        v-model:show="showSplitTaskDialog"
-        :show-icon="false"
-        preset="card"
-        style="width: 90%; min-width: 600px; max-width: 600px"
-        title="拆分"
-      >
-        <split-task-dialog :info="currentModel" @saved="reloadTable" />
-      </n-modal>
-      <n-modal
-        v-model:show="showCancelDialog"
-        :show-icon="false"
-        class="modal-small"
-        preset="card"
-        style="width: 600px"
-        title="请确认"
-      >
-        <confirm-dialog :title="'确认取消任务？'" @saved="cancelTask" />
-      </n-modal>
-      <n-modal
-        v-model:show="showFeeDialog"
-        :show-icon="false"
-        class="modal-medium"
-        preset="dialog"
-        title="费用表"
-      >
-        <task-price-dialog :info="currentData" @save="reloadTable" />
-      </n-modal>
-      <n-modal
-        v-model:show="showFilesDialog"
-        :show-icon="false"
-        class="modal-medium"
-        preset="dialog"
-        title="查看附件"
-        style="width: 800px"
-      >
-        <task-files @cancel="showFilesDialog = false" :info="currentInfo" @save="reloadTable" />
       </n-modal>
     </div>
   </n-card>
@@ -169,12 +76,7 @@
   } from '@/views/bolita-views/composable/useableColumns';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
-  import NewTotalFee from '@/views/newViews/SettlementManage/NewTotalFee.vue';
-  import NewTrayDialog from '@/views/newViews/Missions/AlreadyWarehousing/NewTrayDialog.vue';
-  import SelectedHeaderTable from '@/views/newViews/Missions/AlreadyWarehousing/SelectedHeaderTable.vue';
-  import TimeLine from '@/views/newViews/Missions/AlreadyWarehousing/TimeLine.vue';
   import { useUserStore } from '@/store/modules/user';
-  import OfferPriceDialog from '@/views/newViews/Missions/AlreadyWarehousing/OfferPriceDialog.vue';
   import { getUserCustomerList } from '@/api/dataLayer/common/power';
   import { asyncCustomer, generateOptionFromArray } from '@/store/utils/utils';
   import FileSaver from 'file-saver';
@@ -184,23 +86,16 @@
     getTaskListByFilterWithPagination,
   } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
-  import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import SplitTaskDialog from '@/views/newViews/Missions/AlreadyWarehousing/SplitTaskDialog.vue';
   import { NButton, useDialog, useMessage } from 'naive-ui';
   import * as XLSX from 'xlsx';
-  import { allInStatusTaskList } from '@/api/dataLayer/common/common';
-  import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
   import {
     addOrUpdateWithRefOutboundForecast,
     getOutboundForecastById,
   } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
-  import MergeDialog from '@/views/newViews/Missions/AlreadyWarehousing/MergeDialog.vue';
-  import TaskPriceDialog from '@/views/newViews/Missions/AlreadyWarehousing/TaskPriceDialog.vue';
   import SingleFilterBar from '@/views/bolita-views/composable/SingleFilterBar.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { createPaginationPlaceholders } from '@/api/newDataLayer/Common/Common';
-  import TaskFiles from '@/views/newViews/Missions/AlreadyWarehousing/TaskFiles.vue';
-  import OutPlanByTask from '@/views/newViews/CarpoolManagement/OutPlanByTask.vue';
+  import OutTaskWithCheckPrice from '@/views/newViews/Missions/AlreadyWarehousing/OutTaskWithCheckPrice.vue';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -234,20 +129,7 @@
     },
     {
       label: 'ref',
-      field: 'ref',
-    },
-    {
-      label: '状态',
-      field: 'inStatus',
-      component: 'NSelect',
-      componentProps: {
-        options: generateOptionFromArray(allInStatusTaskList),
-      },
-    },
-    {
-      label: '显示拆分',
-      field: 'showAll',
-      component: 'NCheckbox',
+      field: 'outboundForecast.ref',
     },
   ];
   const columns = [
@@ -444,14 +326,8 @@
   let selectedTaskList = $ref([]);
   let allTaskList = $ref([]);
 
-  function showTimeLine() {
-    currentInfo = selectedTaskList[0];
-    timeLineDialog = true;
-  }
-
-  function showFiles() {
-    currentInfo = selectedTaskList[0];
-    showFilesDialog = true;
+  function startOutPlan() {
+    showModal.value = true;
   }
 
   async function handleCheck(rowKeys) {
@@ -593,6 +469,7 @@
   async function getCurrentFilter() {
     currentFilter = [];
     currentFilter['suggestedPrice'] = '人工询价';
+    currentFilter['outBoundForecastNull'] = true;
     const customerId = await getUserCustomerList();
     if (filterObj) {
       currentFilter = filterObj;
@@ -603,16 +480,6 @@
         currentFilter['customerIds'] = [filterObj['customer.id']];
       }
       delete currentFilter['customer.id'];
-      if (filterObj['inStatus']) {
-        currentFilter['inStatusIn'] = [filterObj['inStatus']];
-        delete currentFilter.inStatus;
-      } else {
-        if (filterObj['showAll']) {
-          currentFilter['inStatusIn'] = ['已拆分'];
-        }
-        currentFilter['inStatusNotIn'] = ['已拆分', '已取消'];
-        delete currentFilter.inStatus;
-      }
       if (currentFilter['containerId']) {
         currentFilter['containerIdLike'] = currentFilter['containerId'];
         delete currentFilter.containerId;
@@ -627,7 +494,6 @@
         delete currentFilter.ticketId;
       }
     } else {
-      currentFilter['inStatusNotIn'] = ['已拆分', '已取消'];
       currentFilter['customerIds'] = customerId;
     }
   }

@@ -212,7 +212,6 @@
   import SplitTaskDialog from '@/views/newViews/Missions/AlreadyWarehousing/SplitTaskDialog.vue';
   import { NButton, useDialog, useMessage } from 'naive-ui';
   import * as XLSX from 'xlsx';
-  import { allInStatusTaskList } from '@/api/dataLayer/common/common';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
   import {
     addOrUpdateWithRefOutboundForecast,
@@ -265,7 +264,7 @@
       field: 'inStatus',
       component: 'NSelect',
       componentProps: {
-        options: generateOptionFromArray(allInStatusTaskList),
+        options: generateOptionFromArray(allInStatusList),
       },
     },
     {

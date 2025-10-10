@@ -12,6 +12,7 @@
   import { generateOptionFromArray } from '@/store/utils/utils';
   import {
     allDeliveryMethod,
+    allInStatusList,
     allOutboundMethod,
   } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
   import { useUserStore } from '@/store/modules/user';
@@ -23,7 +24,6 @@
   import { keys } from 'lodash';
   import { updateTask } from '@/api/newDataLayer/TaskList/TaskList';
   import dayjs from 'dayjs';
-  import { allInStatusTaskList } from '@/api/dataLayer/common/common';
 
   interface Props {
     model?: any;
@@ -237,7 +237,7 @@
       field: 'inStatus',
       component: 'NSelect',
       componentProps: {
-        options: generateOptionFromArray(allInStatusTaskList),
+        options: generateOptionFromArray(allInStatusList),
       },
     },
   ].map((it) => {

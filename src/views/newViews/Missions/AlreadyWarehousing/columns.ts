@@ -196,7 +196,7 @@ export const allInStatusList = [
   // '等待提交',
   '入库待出库',
   '入库待操作',
-  '已计划出库',
+  // '已计划出库',
   // '已报价',
   '已定车',
   '无需定车',
@@ -207,6 +207,8 @@ export const allInStatusList = [
   '存仓',
   '全部出库',
 ];
+
+// export const outMissionInStatus = ['已定车', '无需定车', '已装车', '已取消', '全部出库'];
 
 export const allCarStatusList = ['已定车', '无需定车', '已装车', '已取消'];
 

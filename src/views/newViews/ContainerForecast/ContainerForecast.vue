@@ -215,7 +215,7 @@
   // Data and API
   import { InBoundStatus, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
-  import { allInStatusTaskList } from '@/api/dataLayer/common/common';
+  import { allNotifyInStatus } from '@/api/dataLayer/common/common';
   import { statusColumnSelect, timeColumn } from '@/views/bolita-views/composable/useableColumns';
   import { createPaginationPlaceholders, timeArrays } from '@/api/newDataLayer/Common/Common';
   import {
@@ -338,7 +338,7 @@
     statusColumnSelect({
       title: '状态',
       key: 'inStatus',
-      list: generateOptionFromArray(allInStatusTaskList),
+      list: generateOptionFromArray(allNotifyInStatus),
     }),
     {
       title: '卸柜人',
@@ -371,7 +371,7 @@
       field: 'inStatus',
       component: 'NSelect',
       componentProps: {
-        options: generateOptionFromArray(allInStatusTaskList),
+        options: generateOptionFromArray(allNotifyInStatus),
       },
     },
     asyncCustomerWarehouseFormField(),

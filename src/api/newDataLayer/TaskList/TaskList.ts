@@ -247,4 +247,4 @@ export async function searchTaskPrice(size, weight, country, outboundMethod, num
   return res.length > 0 ? res.map((it) => it.price).join(',') : '人工询价';
 }
 
-export const errorStatus = ['待入库', '存仓', '入库待出库'];
+export const errorStatus = ['存仓', '入库待出库'];

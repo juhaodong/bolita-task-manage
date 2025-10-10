@@ -9,7 +9,7 @@
         virtual-scroll
       />
       <n-alert v-if="hasDifferentDeliveryMethods" type="warning" class="mb-2">
-        物流方式不同！
+        物流方式不同无法订车！
       </n-alert>
       <span>是否需要定车</span>
       <n-select
@@ -86,8 +86,8 @@
   </n-card>
 </template>
 <script lang="ts" setup>
-  import { computed, h, onMounted, watch } from 'vue';
-  import { DataTableColumns, NButton } from 'naive-ui';
+  import { computed, onMounted, watch } from 'vue';
+  import { DataTableColumns } from 'naive-ui';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
   import { $ref } from 'vue/macros';
@@ -168,10 +168,6 @@
   });
   const emit = defineEmits(['saved']);
 
-  function removeTask(row) {
-    console.log(row, 'row');
-  }
-
   async function handleSubmit() {
     if (hasDifferentDeliveryMethods.value && needCar === '1') {
       return;
@@ -235,22 +231,6 @@
     { title: 'FBA单号', key: 'fbaDeliveryCode' },
     { title: '仓库', key: 'inventory.name', width: 100 },
     { title: '价格', key: 'suggestedPrice', width: 100 },
-    {
-      title: '异常',
-      key: 'actions',
-      render(row) {
-        return h(
-          NButton,
-          {
-            strong: true,
-            tertiary: true,
-            size: 'small',
-            onClick: () => removeTask(row),
-          },
-          { default: () => 'Play' }
-        );
-      },
-    },
   ]);
 
   onMounted(() => {

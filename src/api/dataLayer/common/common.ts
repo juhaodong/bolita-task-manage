@@ -35,7 +35,7 @@ export async function asyncStorageByFilter(): Promise<FormField> {
   };
 }
 
-export const allInStatusTaskList = [
+export const allNotifyInStatus = [
   '等待审核',
   '等待卸柜',
   '等待入库',
@@ -44,7 +44,6 @@ export const allInStatusTaskList = [
   '全部出库',
   '已取消',
   '已结算',
-  '已拆分',
 ];
 
 export const allOutMissionStatus = ['入库待出库', '全部出库'];

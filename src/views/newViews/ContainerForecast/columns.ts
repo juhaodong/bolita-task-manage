@@ -10,7 +10,7 @@ import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { generateOptionFromArray, generateOptionFromTimeArray } from '@/store/utils/utils';
 import { notifyStatusList } from '@/api/newDataLayer/Notify/Notify';
 import { timeArrays } from '@/api/newDataLayer/Common/Common';
-import { allInStatusTaskList } from '@/api/dataLayer/common/common';
+import { allNotifyInStatus } from '@/api/dataLayer/common/common';
 
 export const columns: DataTableColumns<any> = [
   timeColumn('planArriveDateTime', '预计入库日期'),
@@ -38,7 +38,7 @@ export const columns: DataTableColumns<any> = [
   statusColumnSelect({
     title: '状态',
     key: 'inStatus',
-    list: generateOptionFromArray(allInStatusTaskList),
+    list: generateOptionFromArray(allNotifyInStatus),
   }),
   {
     title: '操作人',

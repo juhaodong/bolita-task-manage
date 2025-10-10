@@ -67,12 +67,10 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, h, reactive, ref } from 'vue';
+  import { reactive, ref } from 'vue';
   import { BasicTable } from '@/components/Table';
-  import { DataTableColumns, NButton, NIcon, NTooltip } from 'naive-ui';
+  import { DataTableColumns, NButton } from 'naive-ui';
   import { $ref } from 'vue/macros';
-  import { CarpoolManager } from '@/api/dataLayer/modules/logistic/carpool';
-  import { useUserStore } from '@/store/modules/user';
   import dayjs from 'dayjs';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
@@ -351,11 +349,6 @@
     reloadTable();
   }
 
-  function updateFilterWithItems(value) {
-    filterObj = value;
-    reloadTable();
-  }
-
   let loadingCarDialog = $ref(false);
 
   function showLoadingList() {
@@ -436,32 +429,6 @@
 
   function saved() {
     reloadTable();
-  }
-
-  async function startEdit(id) {
-    currentModel = await CarpoolManager.getById(id);
-    showModal.value = true;
-  }
-
-  // Helper function to render icon with tooltip
-  const renderIconWithTooltip = (icon, tooltip) => {
-    return () =>
-      h(
-        NTooltip,
-        { trigger: 'hover', placement: 'top' },
-        {
-          trigger: () => h(NIcon, { size: 18, class: 'action-icon' }, { default: () => h(icon) }),
-          default: () => tooltip,
-        }
-      );
-  };
-
-  const AccountPowerList = computed(() => {
-    return useUserStore()?.info?.powerList;
-  });
-  function startEditOF(id) {
-    editId = id;
-    editOutboundForecast = true;
   }
 </script>
 

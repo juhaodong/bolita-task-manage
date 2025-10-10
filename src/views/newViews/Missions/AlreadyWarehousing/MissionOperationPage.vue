@@ -246,7 +246,6 @@
   import SplitTaskDialog from '@/views/newViews/Missions/AlreadyWarehousing/SplitTaskDialog.vue';
   import { NButton, useMessage } from 'naive-ui';
   import * as XLSX from 'xlsx';
-  import { allInStatusTaskList } from '@/api/dataLayer/common/common';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
   import {
     addOrUpdateWithRefOutboundForecast,
@@ -300,7 +299,7 @@
       field: 'inStatus',
       component: 'NSelect',
       componentProps: {
-        options: generateOptionFromArray(allInStatusTaskList),
+        options: generateOptionFromArray(allInStatusList),
       },
     },
     {
@@ -538,12 +537,11 @@
     }
 
     const validStatuses = ['入库待出库', '入库待操作', '等待入库'];
-
     // Check if all items in selectedTaskList have an inStatus in validStatuses
     const allValid = selectedTaskList.every((task) => validStatuses.includes(task.inStatus));
-
+    const allRef = selectedTaskList.every((it) => !it.outboundForecast);
     // Return false if all are valid, true otherwise
-    return !allValid;
+    return !allValid || !allRef;
   });
 
   const hasPagePower = computed(() => {

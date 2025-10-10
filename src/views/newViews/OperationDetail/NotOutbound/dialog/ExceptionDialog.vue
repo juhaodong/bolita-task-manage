@@ -24,7 +24,6 @@
   onMounted(() => {
     if (props.row) {
       status = props.row.inStatus || '异常';
-      reason = props.row.exceptionReason || '';
     }
   });
 

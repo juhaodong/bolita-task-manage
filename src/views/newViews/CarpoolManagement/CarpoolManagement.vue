@@ -36,6 +36,14 @@
           :disabled="selectedOutboundForecastList.length !== 1"
           class="action-button"
           size="small"
+          @click="addNewTask"
+        >
+          添加明细
+        </n-button>
+        <n-button
+          :disabled="selectedOutboundForecastList.length !== 1"
+          class="action-button"
+          size="small"
           @click="editCmr"
           >CMR
         </n-button>
@@ -93,9 +101,18 @@
         :show-icon="false"
         preset="card"
         style="width: 80%"
-        :title="'ref:' + (currentModel?.ref ? currentModel?.ref : '')"
+        :title="'Ref:' + (currentModel?.ref ? currentModel?.ref : '')"
       >
         <detail-info-dialog :ids="currentIds" />
+      </n-modal>
+      <n-modal
+        v-model:show="showAddNewMissionDialog"
+        :show-icon="false"
+        preset="card"
+        style="width: 80%"
+        :title="'Ref:' + (currentModel?.ref ? currentModel?.ref : '')"
+      >
+        <add-new-mission :info="currentModel" @saved="saved" />
       </n-modal>
     </n-card>
     <no-power-page v-else />
@@ -134,6 +151,7 @@
   import { createPaginationPlaceholders } from '@/api/newDataLayer/Common/Common';
   import { getOutboundForecastListByFilterWithPagination } from '@/api/newDataLayer/CarManage/CarManage';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
+  import AddNewMission from '@/views/newViews/OperationDetail/NotOutbound/dialog/AddNewMission.vue';
 
   const showModal = ref(false);
 
@@ -154,6 +172,7 @@
   let carDialog = $ref(false);
   let filterItems = $ref<Array<{ option: string; value: string }>>([]);
   let showDetailInfoDialog = $ref(false);
+  let showAddNewMissionDialog = $ref(false);
   let currentIds = $ref([]);
   const filters: FormField[] = [
     {
@@ -440,7 +459,13 @@
 
   function showDetailInfo() {
     currentIds = selectedOutboundForecastList[0].bolitaTaskIds;
+    currentModel = selectedOutboundForecastList[0];
     showDetailInfoDialog = true;
+  }
+
+  function addNewTask() {
+    currentModel = selectedOutboundForecastList[0];
+    showAddNewMissionDialog = true;
   }
 
   function orderCar() {
@@ -482,6 +507,8 @@
     carDialog = false;
     showConfirmCancelDialog = false;
     selectedOutboundForecastList = [];
+    showDetailInfoDialog = false;
+    showAddNewMissionDialog = false;
     checkedRowKeys = [];
   }
 
