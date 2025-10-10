@@ -3,13 +3,13 @@
     <loading-frame :loading="loading">
       <n-data-table
         :columns="displayColumns"
-        :data="model"
+        :data="allList"
         class="my-4"
         max-height="450"
         virtual-scroll
       />
       <n-alert v-if="hasDifferentDeliveryMethods" type="warning" class="mb-2">
-        物流方式不同无法订车！
+        物流方式不同！
       </n-alert>
       <span>是否需要定车</span>
       <n-select
@@ -41,6 +41,9 @@
             </n-descriptions-item>
             <n-descriptions-item :span="2" label="整车报价">
               <n-input v-model:value="suggestedPrice" />
+            </n-descriptions-item>
+            <n-descriptions-item :span="2" label="底价">
+              <n-input v-model:value="costPrice" />
             </n-descriptions-item>
             <n-descriptions-item :span="2" label="预计取货日期 (必填)">
               <n-date-picker
@@ -87,7 +90,7 @@
 </template>
 <script lang="ts" setup>
   import { computed, onMounted, watch } from 'vue';
-  import { DataTableColumns } from 'naive-ui';
+  import { DataTableColumns, NButton } from 'naive-ui';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
   import { $ref } from 'vue/macros';
@@ -99,13 +102,13 @@
   import { reservationTimeList } from '@/views/newViews/ContainerForecast/columns';
   import { allDeliveryList } from '@/api/dataLayer/common/AllKeys';
   import dayjs from 'dayjs';
-  import { updateTaskListAfterBookingCarWithInfo } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
+  import { updateTaskListAfterEditBookingCarWithInfoAndPrice } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
 
   interface Props {
     model?: any;
     initialKey?: any[];
   }
-
+  let allList = $ref([]);
   const prop = defineProps<Props>();
   let loading: boolean = $ref(false);
   const logisticsCompanyList = $ref([
@@ -134,27 +137,31 @@
   let isaRequired = $ref(false);
   let errorMessage = $ref('请填写必填项');
   let suggestedPrice = $ref('0');
+  let costPrice = $ref('');
 
   const totalNumber = computed(() => {
-    return safeSumBy(prop.model, 'arrivedContainerNum');
+    return safeSumBy(allList, 'arrivedContainerNum');
   });
 
   const totalTray = computed(() => {
-    return safeSumBy(prop.model, 'arrivedTrayNum');
+    return safeSumBy(allList, 'arrivedTrayNum');
   });
 
   const totalVolume = computed(() => {
-    return safeSumBy(prop.model, 'volume');
+    return safeSumBy(allList, 'volume');
   });
 
   const totalWeight = computed(() => {
-    return safeSumBy(prop.model, 'weight');
+    return safeSumBy(allList, 'weight');
   });
 
   const hasDifferentDeliveryMethods = computed(() => {
-    if (!prop.model || prop.model.length <= 1) return false;
-    const firstDeliveryMethod = prop.model[0].deliveryMethod;
-    return prop.model.some((item) => item.deliveryMethod !== firstDeliveryMethod);
+    if (allList.length <= 1) {
+      return false;
+    } else {
+      const firstDeliveryMethod = allList[0].deliveryMethod;
+      return allList.some((item) => item.deliveryMethod !== firstDeliveryMethod);
+    }
   });
 
   let needCar = $ref('0');
@@ -167,26 +174,25 @@
     }
   });
   const emit = defineEmits(['saved']);
-
   async function handleSubmit() {
     if (hasDifferentDeliveryMethods.value && needCar === '1') {
       return;
     }
     btnLoading = true;
-    const taskIds = prop.model.map((it) => it.id);
+    const taskIds = allList.map((it) => it.id);
     const res = {
-      fcAddress: prop.model[0].fcAddress ?? '',
-      deliveryMethod: prop.model[0].deliveryMethod,
-      postcode: prop.model[0].postcode ?? '',
+      fcAddress: allList[0].fcAddress ?? '',
+      deliveryMethod: allList[0].deliveryMethod,
+      postcode: allList[0].postcode ?? '',
       needCar: needCar,
       inStatus: needCar === '1' ? '已定车' : '无需定车',
       carStatus: needCar === '1' ? '已定车' : '无需定车',
       outboundDetailInfo: taskIds.join(','),
-      totalVolume: safeSumBy(prop.model, 'volume'),
-      totalWeight: safeSumBy(prop.model, 'weight'),
-      totalNumber: safeSumBy(prop.model, 'arrivedContainerNum'),
-      trayNum: safeSumBy(prop.model, 'arrivedTrayNum'),
-      suggestedPrice: safeSumBy(prop.model, 'suggestedPrice'),
+      totalVolume: safeSumBy(allList, 'volume'),
+      totalWeight: safeSumBy(allList, 'weight'),
+      totalNumber: safeSumBy(allList, 'arrivedContainerNum'),
+      trayNum: safeSumBy(allList, 'arrivedTrayNum'),
+      suggestedPrice: suggestedPrice,
       bolitaTaskIds: taskIds,
       isa: isa,
       waybillId: waybillId,
@@ -196,20 +202,21 @@
       po: po,
       note: note,
       logisticsCompany: logisticsCompany,
+      costPrice: costPrice,
     };
     const currentInfo = Object.assign(defaultOutboundList, res);
 
     const outboundId = (await addOrUpdateWithRefOutboundForecast(currentInfo)).data.id;
-    await updateTaskListAfterBookingCarWithInfo(outboundId, currentInfo);
+    await updateTaskListAfterEditBookingCarWithInfoAndPrice(outboundId, currentInfo);
     if (needCar === '1') {
-      if (prop.model[0].outboundMethod === '散货') {
-        if (allDeliveryList.includes(prop.model[0].deliveryMethod)) {
-          await getOutboundRef('Channel', '', prop.model[0].deliveryMethod, outboundId);
+      if (allList[0].outboundMethod === '散货') {
+        if (allDeliveryList.includes(allList[0].deliveryMethod)) {
+          await getOutboundRef('Channel', '', allList[0].deliveryMethod, outboundId);
         } else {
-          await getOutboundRef('Other', prop.model[0].postcode, '', outboundId);
+          await getOutboundRef('Other', allList[0].postcode, '', outboundId);
         }
       } else {
-        await getOutboundRef('Tray', prop.model[0].postcode, '', outboundId);
+        await getOutboundRef('Tray', allList[0].postcode, '', outboundId);
       }
     } else {
       await getOutboundRef('WithoutCar', '', '', outboundId);
@@ -234,11 +241,12 @@
   ]);
 
   onMounted(() => {
-    const allPriceList = prop.model.map((it) => it.suggestedPrice);
+    allList = prop.model;
+    const allPriceList = allList.map((it) => it.suggestedPrice);
     if (allPriceList.includes('人工询价')) {
       suggestedPrice = '人工询价';
     } else {
-      suggestedPrice = safeSumBy(prop.model, 'suggestedPrice');
+      suggestedPrice = safeSumBy(allList, 'suggestedPrice');
     }
   });
 </script>

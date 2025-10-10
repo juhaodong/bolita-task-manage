@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import { NotifyDetailManager } from '@/api/dataLayer/modules/notify/notify-detail';
 import { OutPlanStatus } from '@/api/dataLayer/modules/notify/notify-api';
 import { useUserStore } from '@/store/modules/user';
-import { addOrUpdateTask, getTaskListById } from '@/api/newDataLayer/TaskList/TaskList';
+import { addOrUpdateTask, getTaskListById, updateTask } from '@/api/newDataLayer/TaskList/TaskList';
 import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
 import { getOutboundForecastById } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
 
@@ -84,6 +84,25 @@ export async function updateTaskListAfterEditBookingCarWithInfo(id, info) {
   const taskListIds = info.bolitaTaskIds;
   const userInfo = useUserStore().info;
   for (const taskId of taskListIds) {
+    await addOrUpdateTaskTimeLine({
+      useType: 'normal',
+      bolitaTaskId: taskId,
+      operator: userInfo?.realName,
+      detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
+      note: '修改订车信息',
+    });
+  }
+}
+
+export async function updateTaskListAfterEditBookingCarWithInfoAndPrice(id, info) {
+  const taskListIds = info.bolitaTaskIds;
+  const userInfo = useUserStore().info;
+  for (const taskId of taskListIds) {
+    const res = await getTaskListById(taskId);
+    res.suggestedPrice = '整车:' + info.suggestedPrice;
+    res.inventoryId = res.inventory.id;
+    res.customerId = res.customer.id;
+    await updateTask(res);
     await addOrUpdateTaskTimeLine({
       useType: 'normal',
       bolitaTaskId: taskId,

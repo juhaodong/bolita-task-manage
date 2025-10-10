@@ -34,6 +34,7 @@
   let reservationGetProductDetailTime = $ref('');
   let note = $ref('');
   let loading = $ref(false);
+  let costPrice = $ref('');
   // const emit = defineEmits(['saved']);
   const prop = defineProps<Props>();
   onMounted(async () => {
@@ -42,6 +43,7 @@
     isa = prop.info.isa ?? '';
     waybillId = prop.info.waybillId ?? '';
     suggestedPrice = prop.info.suggestedPrice ?? '';
+    costPrice = prop.info.costPrice ?? '';
     reservationGetProductTime = prop.info.reservationGetProductTime
       ? dayjs(prop.info.reservationGetProductTime).valueOf()
       : new Date();
@@ -77,6 +79,7 @@
     outboundForecastInfo.waybillId = waybillId;
     outboundForecastInfo.suggestedPrice = suggestedPrice;
     outboundForecastInfo.logisticsCompany = logisticsCompany;
+    outboundForecastInfo.costPrice = costPrice;
     await updateTaskListAfterEditBookingCarWithInfo(outboundForecastInfo.id, outboundForecastInfo);
     await addOrUpdateWithRefOutboundForecast(outboundForecastInfo);
     loading = false;
@@ -103,6 +106,9 @@
         </n-descriptions-item>
         <n-descriptions-item :span="2" label="整车报价">
           <n-input v-model:value="suggestedPrice" />
+        </n-descriptions-item>
+        <n-descriptions-item :span="2" label="底价">
+          <n-input v-model:value="costPrice" />
         </n-descriptions-item>
         <n-descriptions-item :span="2" label="预计取货日期 (必填)">
           <n-date-picker

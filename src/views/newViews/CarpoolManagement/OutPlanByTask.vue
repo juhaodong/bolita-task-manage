@@ -3,7 +3,7 @@
     <loading-frame :loading="loading">
       <n-data-table
         :columns="displayColumns"
-        :data="model"
+        :data="allList"
         class="my-4"
         max-height="450"
         virtual-scroll
@@ -41,6 +41,9 @@
             </n-descriptions-item>
             <n-descriptions-item :span="2" label="整车报价">
               <n-input v-model:value="suggestedPrice" />
+            </n-descriptions-item>
+            <n-descriptions-item :span="2" label="底价">
+              <n-input v-model:value="costPrice" />
             </n-descriptions-item>
             <n-descriptions-item :span="2" label="预计取货日期 (必填)">
               <n-date-picker
@@ -105,7 +108,7 @@
     model?: any;
     initialKey?: any[];
   }
-
+  let allList = $ref([]);
   const prop = defineProps<Props>();
   let loading: boolean = $ref(false);
   const logisticsCompanyList = $ref([
@@ -134,27 +137,31 @@
   let isaRequired = $ref(false);
   let errorMessage = $ref('请填写必填项');
   let suggestedPrice = $ref('0');
+  let costPrice = $ref('');
 
   const totalNumber = computed(() => {
-    return safeSumBy(prop.model, 'arrivedContainerNum');
+    return safeSumBy(allList, 'arrivedContainerNum');
   });
 
   const totalTray = computed(() => {
-    return safeSumBy(prop.model, 'arrivedTrayNum');
+    return safeSumBy(allList, 'arrivedTrayNum');
   });
 
   const totalVolume = computed(() => {
-    return safeSumBy(prop.model, 'volume');
+    return safeSumBy(allList, 'volume');
   });
 
   const totalWeight = computed(() => {
-    return safeSumBy(prop.model, 'weight');
+    return safeSumBy(allList, 'weight');
   });
 
   const hasDifferentDeliveryMethods = computed(() => {
-    if (!prop.model || prop.model.length <= 1) return false;
-    const firstDeliveryMethod = prop.model[0].deliveryMethod;
-    return prop.model.some((item) => item.deliveryMethod !== firstDeliveryMethod);
+    if (allList.length <= 1) {
+      return false;
+    } else {
+      const firstDeliveryMethod = allList[0].deliveryMethod;
+      return allList.some((item) => item.deliveryMethod !== firstDeliveryMethod);
+    }
   });
 
   let needCar = $ref('0');
@@ -170,6 +177,7 @@
 
   function removeTask(row) {
     console.log(row, 'row');
+    allList = allList.filter((it) => it.id !== row.id);
   }
 
   async function handleSubmit() {
@@ -177,20 +185,20 @@
       return;
     }
     btnLoading = true;
-    const taskIds = prop.model.map((it) => it.id);
+    const taskIds = allList.map((it) => it.id);
     const res = {
-      fcAddress: prop.model[0].fcAddress ?? '',
-      deliveryMethod: prop.model[0].deliveryMethod,
-      postcode: prop.model[0].postcode ?? '',
+      fcAddress: allList[0].fcAddress ?? '',
+      deliveryMethod: allList[0].deliveryMethod,
+      postcode: allList[0].postcode ?? '',
       needCar: needCar,
       inStatus: needCar === '1' ? '已定车' : '无需定车',
       carStatus: needCar === '1' ? '已定车' : '无需定车',
       outboundDetailInfo: taskIds.join(','),
-      totalVolume: safeSumBy(prop.model, 'volume'),
-      totalWeight: safeSumBy(prop.model, 'weight'),
-      totalNumber: safeSumBy(prop.model, 'arrivedContainerNum'),
-      trayNum: safeSumBy(prop.model, 'arrivedTrayNum'),
-      suggestedPrice: safeSumBy(prop.model, 'suggestedPrice'),
+      totalVolume: safeSumBy(allList, 'volume'),
+      totalWeight: safeSumBy(allList, 'weight'),
+      totalNumber: safeSumBy(allList, 'arrivedContainerNum'),
+      trayNum: safeSumBy(allList, 'arrivedTrayNum'),
+      suggestedPrice: safeSumBy(allList, 'suggestedPrice'),
       bolitaTaskIds: taskIds,
       isa: isa,
       waybillId: waybillId,
@@ -200,20 +208,21 @@
       po: po,
       note: note,
       logisticsCompany: logisticsCompany,
+      costPrice: costPrice,
     };
     const currentInfo = Object.assign(defaultOutboundList, res);
 
     const outboundId = (await addOrUpdateWithRefOutboundForecast(currentInfo)).data.id;
     await updateTaskListAfterBookingCarWithInfo(outboundId, currentInfo);
     if (needCar === '1') {
-      if (prop.model[0].outboundMethod === '散货') {
-        if (allDeliveryList.includes(prop.model[0].deliveryMethod)) {
-          await getOutboundRef('Channel', '', prop.model[0].deliveryMethod, outboundId);
+      if (allList[0].outboundMethod === '散货') {
+        if (allDeliveryList.includes(allList[0].deliveryMethod)) {
+          await getOutboundRef('Channel', '', allList[0].deliveryMethod, outboundId);
         } else {
-          await getOutboundRef('Other', prop.model[0].postcode, '', outboundId);
+          await getOutboundRef('Other', allList[0].postcode, '', outboundId);
         }
       } else {
-        await getOutboundRef('Tray', prop.model[0].postcode, '', outboundId);
+        await getOutboundRef('Tray', allList[0].postcode, '', outboundId);
       }
     } else {
       await getOutboundRef('WithoutCar', '', '', outboundId);
@@ -247,18 +256,19 @@
             size: 'small',
             onClick: () => removeTask(row),
           },
-          { default: () => 'Play' }
+          { default: () => '异常' }
         );
       },
     },
   ]);
 
   onMounted(() => {
-    const allPriceList = prop.model.map((it) => it.suggestedPrice);
+    allList = prop.model;
+    const allPriceList = allList.map((it) => it.suggestedPrice);
     if (allPriceList.includes('人工询价')) {
       suggestedPrice = '人工询价';
     } else {
-      suggestedPrice = safeSumBy(prop.model, 'suggestedPrice');
+      suggestedPrice = safeSumBy(allList, 'suggestedPrice');
     }
   });
 </script>
