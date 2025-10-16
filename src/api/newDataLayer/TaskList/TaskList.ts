@@ -219,8 +219,19 @@ export const defaultTask = {
   tailgate: '',
 };
 
-export async function searchTaskPrice(size, weight, country, outboundMethod, number, zipCode) {
+export async function searchTaskPrice(
+  size,
+  weight,
+  country,
+  outboundMethod,
+  number,
+  zipCode,
+  deliveryMethod
+) {
   const sizeFormat = /^\d+\*\d+\*\d+$/.test(size.value);
+  if (deliveryMethod !== 'DHL') {
+    return '人工询价';
+  }
   if (!sizeFormat) {
     return '人工询价';
   }

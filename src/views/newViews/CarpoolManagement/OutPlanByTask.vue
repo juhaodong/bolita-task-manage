@@ -245,7 +245,7 @@
     { title: '仓库', key: 'inventory.name', width: 100 },
     { title: '价格', key: 'suggestedPrice', width: 100 },
     {
-      title: '异常',
+      title: '操作',
       key: 'actions',
       render(row) {
         return h(
@@ -256,7 +256,7 @@
             size: 'small',
             onClick: () => removeTask(row),
           },
-          { default: () => '异常' }
+          { default: () => '剔除' }
         );
       },
     },

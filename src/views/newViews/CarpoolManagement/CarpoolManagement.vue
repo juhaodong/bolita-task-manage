@@ -54,6 +54,43 @@
           @click="editLieferschein"
           >Lieferschein
         </n-button>
+        <n-button
+          :disabled="selectedOutboundForecastList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="showLoadingList"
+        >
+          装车信息
+        </n-button>
+        <n-button
+          :disabled="selectedOutboundForecastList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="uploadLoadingList"
+        >
+          上传装车单
+        </n-button>
+        <n-button
+          :disabled="selectedOutboundForecastList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="LoadingListPic"
+          >装车图片
+        </n-button>
+        <n-button
+          :disabled="selectedOutboundForecastList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="editPod"
+          >POD
+        </n-button>
+        <n-button
+          :disabled="selectedOutboundForecastList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="showFinishConfirm"
+          >完成
+        </n-button>
       </div>
       <!-- Filter controls are now handled by FilterBar component -->
       <div class="my-2"></div>
@@ -114,6 +151,25 @@
       >
         <add-new-mission :info="currentModel" @saved="saved" />
       </n-modal>
+      <n-modal
+        v-model:show="loadingCarDialog"
+        :show-icon="false"
+        preset="card"
+        style="width: 90%; min-width: 600px; max-width: 600px"
+        title="装车信息"
+      >
+        <loading-car-list :outbound-info="currentInfo" @saved="saved" />
+      </n-modal>
+      <n-modal
+        v-model:show="showFinishDialog"
+        :show-icon="false"
+        class="modal-small"
+        preset="card"
+        style="width: 600px"
+        title="请确认"
+      >
+        <confirm-dialog :title="'确认该Ref已经完成？'" @saved="finishRef" />
+      </n-modal>
     </n-card>
     <no-power-page v-else />
   </div>
@@ -122,7 +178,7 @@
 <script lang="ts" setup>
   import { computed, h, reactive, ref } from 'vue';
   import { BasicTable } from '@/components/Table';
-  import { DataTableColumns, NButton, NIcon, NTooltip } from 'naive-ui';
+  import { DataTableColumns, NButton, NIcon, NTooltip, useMessage } from 'naive-ui';
   import { $ref } from 'vue/macros';
   import { CarpoolManager } from '@/api/dataLayer/modules/logistic/carpool';
   import { useUserStore } from '@/store/modules/user';
@@ -152,6 +208,13 @@
   import { getOutboundForecastListByFilterWithPagination } from '@/api/newDataLayer/CarManage/CarManage';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
   import AddNewMission from '@/views/newViews/OperationDetail/NotOutbound/dialog/AddNewMission.vue';
+  import LoadingCarList from '@/views/newViews/OperationDetail/NotOutbound/LoadingCarList.vue';
+  import {
+    getTaskListByIds,
+    getTaskListByNotifyId,
+    updateTask,
+  } from '@/api/newDataLayer/TaskList/TaskList';
+  import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
 
   const showModal = ref(false);
 
@@ -174,6 +237,7 @@
   let showDetailInfoDialog = $ref(false);
   let showAddNewMissionDialog = $ref(false);
   let currentIds = $ref([]);
+  let showFinishDialog = $ref(false);
   const filters: FormField[] = [
     {
       label: 'Ref',
@@ -304,6 +368,61 @@
 
   let selectedOutboundForecastList = $ref([]);
   let checkedRowKeys = $ref([]);
+
+  let loadingCarDialog = $ref(false);
+  function showLoadingList() {
+    currentInfo = selectedOutboundForecastList[0];
+    loadingCarDialog = true;
+  }
+
+  async function uploadLoadingList() {
+    await handleFileUpload('loadingCarDoc');
+  }
+
+  async function LoadingListPic() {
+    await handleFileUpload('pickupFiles');
+  }
+
+  async function editPod() {
+    await handleFileUpload('podFiles');
+  }
+
+  const message = useMessage();
+
+  function showFinishConfirm() {
+    showFinishDialog = true;
+  }
+
+  async function finishRef() {
+    const editInfo = Object.assign({}, selectedOutboundForecastList[0]);
+    editInfo.inStatus = '已完成';
+    const taskList = await getTaskListByIds(editInfo.bolitaTaskIds);
+
+    // Check if any task has inStatus === '异常'
+    const exceptionTasks = taskList.filter((task) => task.inStatus === '异常');
+    if (exceptionTasks.length > 0) {
+      message.error('当前Ref有异常明细！');
+      return;
+    }
+
+    await addOrUpdateOutboundForecast(editInfo);
+    for (const currentTask of taskList) {
+      currentTask.inStatus = '已完成';
+      await updateTask(currentTask);
+      const allTask = await getTaskListByNotifyId(currentTask.notifyId);
+      const alreadyDoneTask = allTask.filter((it) => it.inStatus === '已完成');
+      if (alreadyDoneTask.length === allTask.length) {
+        const notify = await getNotifyById(currentTask.notifyId);
+        notify.inStatus = '全部出库';
+        await addOrUpdateNotify(notify);
+      } else {
+        const notify = await getNotifyById(currentTask.notifyId);
+        notify.inStatus = '部分出库';
+        await addOrUpdateNotify(notify);
+      }
+    }
+    reloadTable();
+  }
 
   function handleCheck(rowKeys) {
     // Update the checked keys in the table
@@ -506,9 +625,11 @@
     offerDialog = false;
     carDialog = false;
     showConfirmCancelDialog = false;
+    loadingCarDialog = false;
     selectedOutboundForecastList = [];
     showDetailInfoDialog = false;
     showAddNewMissionDialog = false;
+    showFinishDialog = false;
     checkedRowKeys = [];
   }
 

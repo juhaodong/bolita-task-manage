@@ -70,7 +70,8 @@
           defaultTask.country,
           defaultTask.outboundMethod,
           item.currentNumber,
-          defaultTask.postcode
+          defaultTask.postcode,
+          item.deliveryMethod
         );
         await addTask(defaultTask);
       }

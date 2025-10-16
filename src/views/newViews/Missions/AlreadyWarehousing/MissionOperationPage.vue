@@ -53,6 +53,14 @@
         >
           询价
         </n-button>
+        <n-button
+          :disabled="selectedTaskList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="setTaskError"
+        >
+          异常
+        </n-button>
       </div>
 
       <n-tabs
@@ -201,6 +209,13 @@
       >
         <task-files :info="currentInfo" @save="reloadTable" />
       </n-modal>
+      <n-modal v-model:show="showExceptionDialog" preset="dialog" title="异常信息">
+        <exception-dialog
+          :row="selectedTaskList[0]"
+          @saved="handleExceptionSaved"
+          @cancel="handleExceptionCancel"
+        />
+      </n-modal>
     </div>
   </n-card>
 </template>
@@ -258,6 +273,7 @@
   import { createPaginationPlaceholders } from '@/api/newDataLayer/Common/Common';
   import TaskFiles from '@/views/newViews/Missions/AlreadyWarehousing/TaskFiles.vue';
   import OutPlanByTask from '@/views/newViews/CarpoolManagement/OutPlanByTask.vue';
+  import ExceptionDialog from '@/views/newViews/OperationDetail/NotOutbound/dialog/ExceptionDialog.vue';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -300,6 +316,14 @@
       component: 'NSelect',
       componentProps: {
         options: generateOptionFromArray(allInStatusList),
+      },
+    },
+    {
+      label: '定车状态',
+      field: 'carStatus',
+      component: 'NSelect',
+      componentProps: {
+        options: generateOptionFromArray(allCarStatusList),
       },
     },
     {
@@ -519,6 +543,20 @@
     showFilesDialog = true;
   }
 
+  let showExceptionDialog = $ref(false);
+  function setTaskError() {
+    showExceptionDialog = true;
+  }
+
+  async function handleExceptionSaved() {
+    showExceptionDialog = false;
+    // Update the local list with the updated data
+  }
+
+  function handleExceptionCancel() {
+    showExceptionDialog = false;
+  }
+
   async function handleCheck(rowKeys) {
     checkedRows = rowKeys;
     const currentPageSelected = allTaskList.filter((item) => rowKeys.includes(item.id));
@@ -595,13 +633,15 @@
     const taskOutboundMethod = selectedTaskList[0].outboundMethod;
     const taskNumber = selectedTaskList[0].arrivedContainerNum;
     const taskPostcode = selectedTaskList[0].postcode;
+    const deliveryMethod = selectedTaskList[0].deliveryMethod;
     currentTask.suggestedPrice = await searchTaskPrice(
       taskSize,
       taskWeight,
       taskCountry,
       taskOutboundMethod,
       taskNumber,
-      taskPostcode
+      taskPostcode,
+      deliveryMethod
     );
     await updateTask(currentTask);
   }
@@ -772,6 +812,10 @@
     currentFilter = [];
     if (filterObj) {
       currentFilter = filterObj;
+      if (filterObj['carStatus']) {
+        currentFilter['outboundForecastInStatus'] = filterObj['carStatus'];
+      }
+      delete currentFilter['carStatus'];
       const customerId = await getUserCustomerList();
       if (!filterObj['customer.id']) {
         currentFilter['customerIds'] = customerId;

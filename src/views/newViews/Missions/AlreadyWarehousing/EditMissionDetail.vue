@@ -12,8 +12,8 @@
   import { generateOptionFromArray } from '@/store/utils/utils';
   import {
     allDeliveryMethod,
-    allInStatusList,
     allOutboundMethod,
+    editInStatusList,
   } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
   import { useUserStore } from '@/store/modules/user';
   import {
@@ -144,6 +144,11 @@
       label: '送货地址',
       field: 'address',
       defaultValue: '',
+      component: 'NInput',
+      componentProps: {
+        type: 'textarea',
+        rows: 3,
+      },
     },
     {
       label: '邮编',
@@ -194,6 +199,7 @@
     it.required = false;
     return it;
   });
+
   const otherSchemas = [
     {
       label: '品名',
@@ -237,7 +243,7 @@
       field: 'inStatus',
       component: 'NSelect',
       componentProps: {
-        options: generateOptionFromArray(allInStatusList),
+        options: generateOptionFromArray(editInStatusList),
       },
     },
   ].map((it) => {

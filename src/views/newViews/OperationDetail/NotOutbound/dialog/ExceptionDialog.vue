@@ -2,8 +2,7 @@
   import { $ref } from 'vue/macros';
   import { onMounted } from 'vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { errorStatus, updateTask } from '@/api/newDataLayer/TaskList/TaskList';
-  import { generateOptionFromArray } from '@/store/utils/utils';
+  import { updateTask } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import dayjs from 'dayjs';
   import { useUserStore } from '@/store/modules/user';
@@ -21,11 +20,7 @@
   let requiredInfo = $ref(false);
   let errorMessage = $ref('');
 
-  onMounted(() => {
-    if (props.row) {
-      status = props.row.inStatus || '异常';
-    }
-  });
+  onMounted(() => {});
 
   async function saveInfo() {
     if (!reason) {
@@ -42,6 +37,7 @@
     };
     updatedData.inStatus = status;
     updatedData.outboundForecastId = null;
+    updatedData.errorReason = reason;
 
     try {
       const userInfo = useUserStore().info;
@@ -74,7 +70,7 @@
     <div class="mt-8">
       <n-descriptions :columns="1" bordered label-placement="left">
         <n-descriptions-item :span="2" label="状态">
-          <n-select v-model:value="status" :options="generateOptionFromArray(errorStatus)" />
+          <n-input v-model:value="status" disabled />
         </n-descriptions-item>
         <n-descriptions-item :span="2" label="异常原因 (必填)">
           <n-input

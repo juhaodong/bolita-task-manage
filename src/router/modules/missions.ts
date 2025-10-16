@@ -37,6 +37,17 @@ const routes: Array<RouteRecordRaw> = [
           import('@/views/newViews/Missions/AlreadyWarehousing/MissionOperationPage.vue'),
       },
       {
+        path: 'missionError',
+        name: `missionError`,
+        meta: {
+          title: '异常看板',
+          activeMenu: 'missionError',
+          permissions: ['管理员', '运营部前端', '运营部后端', '物流部', '仓库'],
+        },
+        component: () =>
+          import('@/views/newViews/Missions/AlreadyWarehousing/MissionErrorPage.vue'),
+      },
+      {
         path: 'missionCheckPrice',
         name: `missionCheckPrice`,
         meta: {

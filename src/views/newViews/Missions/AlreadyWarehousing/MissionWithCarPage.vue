@@ -259,6 +259,14 @@
       label: 'ref',
       field: 'ref',
     },
+    {
+      label: '定车状态',
+      field: 'carStatus',
+      component: 'NSelect',
+      componentProps: {
+        options: generateOptionFromArray(allCarStatusList),
+      },
+    },
   ];
   const columns = [
     {
@@ -607,6 +615,10 @@
     currentFilter['outBoundForecastNotNull'] = true;
     if (filterObj) {
       currentFilter = filterObj;
+      if (filterObj['carStatus']) {
+        currentFilter['outboundForecastInStatus'] = filterObj['carStatus'];
+      }
+      delete currentFilter['carStatus'];
       if (!filterObj['customer.id']) {
         currentFilter['customerIds'] = customerId;
       } else {
