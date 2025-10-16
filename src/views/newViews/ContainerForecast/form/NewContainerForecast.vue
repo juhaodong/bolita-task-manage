@@ -223,7 +223,7 @@
 
   function downLoadFiles() {
     window.open(
-      currentBaseImageUrl + 'https://aaden-storage.s3.eu-central-1.amazonaws.com/NotifyMoBan.xlsx'
+      currentBaseImageUrl + 'https://aaden-storage.s3.eu-central-1.amazonaws.com/MoBanV2.xlsx'
     );
   }
 
