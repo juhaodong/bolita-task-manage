@@ -154,7 +154,7 @@
           it.country,
           it.outboundMethod,
           it.number,
-          it.postcode ? it.postcode.slice(0, 2) : '',
+          it.postcode ? it.postcode.toString().slice(0, 2) : '',
           it.deliveryMethod
         );
         it.inStatus = InBoundDetailStatus.WaitCheck;
