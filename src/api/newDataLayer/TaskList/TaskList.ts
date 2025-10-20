@@ -228,10 +228,10 @@ export async function searchTaskPrice(
   zipCode,
   deliveryMethod
 ) {
-  const sizeFormat = /^\d+\*\d+\*\d+$/.test(size.value);
   if (deliveryMethod !== 'DHL') {
     return '人工询价';
   }
+  const sizeFormat = /^\d+\*\d+\*\d+$/.test(size);
   if (!sizeFormat) {
     return '人工询价';
   }

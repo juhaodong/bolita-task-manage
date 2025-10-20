@@ -94,27 +94,27 @@
           it.ticketId = it.ticketId.trim();
         }
         //判断大件托盘
-        if (it.outboundMethod === '大件托盘') {
-          if (!it.productName) {
-            errorMessage.push({ index: index + 4, detail: '品名不可为空' });
-          }
-          if (!it.unNumber) {
-            errorMessage.push({ index: index + 4, detail: 'UN号不可为空' });
-          }
-          if (!it.recipient) {
-            errorMessage.push({ index: index + 4, detail: '收件人不可为空' });
-          }
-          if (!it.phone) {
-            errorMessage.push({ index: index + 4, detail: '电话不可为空' });
-          }
-          if (!it.email) {
-            errorMessage.push({ index: index + 4, detail: '邮箱不可为空' });
-          }
-          if (!it.tailgate) {
-            errorMessage.push({ index: index + 4, detail: '尾板不可为空' });
-          }
-          it.packing = '大件托盘';
-        }
+        // if (it.outboundMethod === '大件托盘') {
+        //   if (!it.productName) {
+        //     errorMessage.push({ index: index + 4, detail: '品名不可为空' });
+        //   }
+        //   if (!it.unNumber) {
+        //     errorMessage.push({ index: index + 4, detail: 'UN号不可为空' });
+        //   }
+        //   if (!it.recipient) {
+        //     errorMessage.push({ index: index + 4, detail: '收件人不可为空' });
+        //   }
+        //   if (!it.phone) {
+        //     errorMessage.push({ index: index + 4, detail: '电话不可为空' });
+        //   }
+        //   if (!it.email) {
+        //     errorMessage.push({ index: index + 4, detail: '邮箱不可为空' });
+        //   }
+        //   if (!it.tailgate) {
+        //     errorMessage.push({ index: index + 4, detail: '尾板不可为空' });
+        //   }
+        //   it.packing = '大件托盘';
+        // }
 
         //判断FBA卡车派送
         if (it.deliveryMethod === 'FBA卡车派送') {
