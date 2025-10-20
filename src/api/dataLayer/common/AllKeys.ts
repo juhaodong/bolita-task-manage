@@ -23,10 +23,10 @@ export const allKeysList = [
     label: '总体积',
     field: 'volume',
   },
-  {
-    label: '尺寸',
-    field: 'size',
-  },
+  // {
+  //   label: '尺寸',
+  //   field: 'size',
+  // },
   {
     label: 'FBA单号',
     field: 'fbaDeliveryCode',
