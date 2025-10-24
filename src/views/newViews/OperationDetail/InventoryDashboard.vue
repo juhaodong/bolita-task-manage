@@ -53,7 +53,7 @@
         :show-icon="false"
         class="modal-medium"
         preset="dialog"
-        style="width: 800px"
+        style="width: 800px; height: 95vh"
         title="卸柜表"
       >
         <notify-unload-form :notify-id="currentNotifyId!" @save="reloadTable" />
@@ -802,21 +802,16 @@
   }
 
   async function checkContainerStatus() {
-    if (selectedNotifyList[0]?.inStatus === InBoundStatus.Wait) {
+    if (selectedNotifyList[0]?.inStatus === InBoundStatus.WaitCheck) {
+      showNeedCheckDialog = true;
+    } else {
       currentNotifyId = selectedNotifyList[0].id!;
       showOperationTable = true;
-    } else if (selectedNotifyList[0]?.inStatus === InBoundStatus.WaitCheck) {
-      showNeedCheckDialog = true;
     }
   }
 
   const disableUnloading = $computed(() => {
-    return (
-      selectedNotifyList.length !== 1 ||
-      ![InBoundStatus.Wait, InBoundStatus.WaitUnloading, InBoundStatus.WaitCheck].includes(
-        selectedNotifyList[0]?.inStatus
-      )
-    );
+    return selectedNotifyList.length !== 1;
   });
 
   async function selectedHeader() {

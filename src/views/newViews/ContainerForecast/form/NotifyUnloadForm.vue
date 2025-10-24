@@ -52,7 +52,7 @@
   });
 
   const totalTrayCount = computed(() => {
-    return currentTaskList.reduce((sum, i) => sum + safeParseInt(i?.trayCount), 0);
+    return currentTaskList.reduce((sum, i) => sum + safeParseInt(i?.trayNum), 0);
   });
   const totalArrivedContainerCount = computed(() => {
     return safeSumInt(currentTaskList, 'arrivedContainerNumEdit') ?? 0;
@@ -183,45 +183,61 @@
 </script>
 
 <template>
-  <div id="print" class="mt-8">
+  <div id="print" style="height: 100vh">
     <loading-frame :loading="loading" :title="log">
-      <n-descriptions v-if="notifyInfo" :columns="2" bordered label-placement="left">
-        <n-descriptions-item label="货柜号">
-          {{ notifyInfo?.containerNo }}
-        </n-descriptions-item>
-
-        <n-descriptions-item label="客户ID">
-          {{ notifyInfo?.customer.customerName }}</n-descriptions-item
+      <!-- 基本信息区域 -->
+      <div class="info-section">
+        <n-descriptions
+          v-if="notifyInfo"
+          :columns="2"
+          bordered
+          label-placement="left"
+          size="medium"
         >
-        <n-descriptions-item label="预约日期时间">
-          {{ timeDisplayYMD(notifyInfo?.planArriveDateTime) }}/{{ notifyInfo?.inHouseTime }}
-        </n-descriptions-item>
-        <n-descriptions-item label="预报总数"> {{ notifyInfo?.totalCount }}</n-descriptions-item>
-        <n-descriptions-item label="实际卸柜日期">
-          <n-date-picker v-model:value="realDate" type="date" />
-        </n-descriptions-item>
-        <!--        <n-descriptions-item label="实际卸柜日期">-->
-        <!--          <n-date-picker v-model:value="currentDate" clearable type="date" />-->
-        <!--        </n-descriptions-item>-->
-        <n-descriptions-item label="卸柜起始时间">
-          <n-time-picker v-model:formatted-value="startTime" value-format="HH:mm:ss" />
-        </n-descriptions-item>
-        <n-descriptions-item label="卸柜结束时间">
-          <n-time-picker v-model:formatted-value="endTime" value-format="HH:mm:ss" />
-        </n-descriptions-item>
-        <n-descriptions-item label="卸柜时长">
-          <n-input v-model:value="totalTime" disabled />
-        </n-descriptions-item>
-      </n-descriptions>
-      <div class="mt-4 noMaxHeight" style="max-height: 800px; overflow-y: scroll">
-        <n-table :single-line="false" class="mt-4">
+          <n-descriptions-item label="货柜号">
+            {{ notifyInfo?.containerNo }}
+          </n-descriptions-item>
+
+          <n-descriptions-item label="客户ID">
+            {{ notifyInfo?.customer.customerName }}</n-descriptions-item
+          >
+          <n-descriptions-item label="预约日期时间">
+            {{ timeDisplayYMD(notifyInfo?.planArriveDateTime) }}/{{ notifyInfo?.inHouseTime }}
+          </n-descriptions-item>
+          <n-descriptions-item label="预报总数"> {{ notifyInfo?.totalCount }}</n-descriptions-item>
+          <n-descriptions-item label="实际卸柜日期">
+            <n-date-picker v-model:value="realDate" type="date" class="full-width-input" />
+          </n-descriptions-item>
+          <n-descriptions-item label="卸柜起始时间">
+            <n-time-picker
+              v-model:formatted-value="startTime"
+              value-format="HH:mm:ss"
+              class="full-width-input"
+            />
+          </n-descriptions-item>
+          <n-descriptions-item label="卸柜结束时间">
+            <n-time-picker
+              v-model:formatted-value="endTime"
+              value-format="HH:mm:ss"
+              class="full-width-input"
+            />
+          </n-descriptions-item>
+          <n-descriptions-item label="卸柜时长">
+            <n-input v-model:value="totalTime" disabled class="full-width-input" />
+          </n-descriptions-item>
+        </n-descriptions>
+      </div>
+
+      <!-- 表格区域 -->
+      <div class="table-section mt-2">
+        <n-table :bordered="true" :single-line="false">
           <thead>
             <tr>
               <th style="width: 100px">票号</th>
-              <th>预报 托</th>
-              <th>预报 箱</th>
-              <th style="width: 100px">入库 托</th>
-              <th style="width: 100px">入库 箱</th>
+              <th style="width: 40px">预报 托</th>
+              <th style="width: 40px">预报 箱</th>
+              <th style="width: 80px">入库 托</th>
+              <th style="width: 80px">入库 箱</th>
               <th style="width: 100px">尺寸</th>
               <th>库位</th>
               <th>仓库备注</th>
@@ -230,14 +246,13 @@
           <tbody v-if="currentTaskList">
             <tr v-for="item in currentTaskList" :key="item.id">
               <td>{{ item?.ticketId }}</td>
-              <td>{{ item?.trayNum ?? 0 }}</td>
-              <td>{{ item?.number ?? 0 }}</td>
+              <td class="text-center">{{ item?.trayNum ?? 0 }}</td>
+              <td class="text-center">{{ item?.number ?? 0 }}</td>
               <td>
                 <n-input
                   v-model:value="item.arrivedTrayNumEdit"
                   :disabled="!canEdit"
                   :status="compareStatus(item.arrivedTrayNumEdit, item.trayNum)"
-                  placeholder=""
                   @focus="item.arrivedTrayNumEdit = ''"
                 />
               </td>
@@ -246,54 +261,100 @@
                   v-model:value="item.arrivedContainerNumEdit"
                   :disabled="!canEdit"
                   :status="compareStatus(item.arrivedContainerNumEdit, item.containerNum)"
-                  placeholder=""
                   @focus="item.arrivedContainerNumEdit = ''"
                 />
               </td>
               <td>
-                <n-input v-model:value="item.size" :disabled="!canEdit" placeholder="" />
+                <n-input v-model:value="item.size" :disabled="!canEdit" />
               </td>
               <td>
-                <n-input
-                  v-model:value="item.warehouseLocation"
-                  :disabled="!canEdit"
-                  placeholder=""
-                />
+                <n-input v-model:value="item.warehouseLocation" :disabled="!canEdit" />
               </td>
               <td>
-                <n-input v-model:value="item.note" :disabled="!canEdit" placeholder="" />
+                <n-input v-model:value="item.note" :disabled="!canEdit" />
               </td>
             </tr>
           </tbody>
         </n-table>
       </div>
-      <div class="mt-4">
-        <table>
-          <tr class="!bg-gray-100" style="height: 32px">
-            <td>总计</td>
-            <td>预报 箱 {{ totalContainerCount }}</td>
-            <td>到达 箱 {{ totalArrivedContainerCount }}</td>
-          </tr>
-        </table>
+
+      <!-- 汇总区域 -->
+      <div class="summary-section mt-4">
+        <n-table :bordered="true" :single-line="true">
+          <tbody>
+            <tr class="summary-row">
+              <td style="width: 100px" class="font-bold">总计</td>
+              <td style="width: 200px"
+                >预报 箱/托: {{ totalContainerCount }}/{{ totalTrayCount }}</td
+              >
+              <td style="width: 200px"
+                >到达 箱/托: {{ totalArrivedContainerCount }}/{{ totalArrivedTrayCount }}</td
+              >
+            </tr>
+          </tbody>
+        </n-table>
       </div>
-      <n-space v-if="notifyInfo" :wrap-item="false" class="mt-4">
-        <n-button v-print="'#print'" type="default">打印</n-button>
-        <n-button secondary @click="allArrived">全部到齐</n-button>
-        <div class="flex-grow"></div>
-        <div>
-          <n-input v-model:value="unloadPerson" placeholder="卸柜人员" />
-        </div>
-        <n-button :disabled="!canSave" type="primary" @click="confirm">确认</n-button>
-      </n-space>
+
+      <!-- 操作按钮区域 -->
+      <div class="action-section">
+        <n-space v-if="notifyInfo" :wrap="false" justify="space-between" align="center">
+          <div>
+            <n-space>
+              <n-button v-print="'#print'" type="default">打印</n-button>
+              <n-button secondary @click="allArrived">全部到齐</n-button>
+            </n-space>
+          </div>
+          <div>
+            <n-space>
+              <n-input v-model:value="unloadPerson" placeholder="卸柜人员" style="width: 150px" />
+              <n-button :disabled="!canSave" type="primary" @click="confirm">确认</n-button>
+            </n-space>
+          </div>
+        </n-space>
+      </div>
     </loading-frame>
   </div>
 </template>
 
 <style lang="less" scoped>
+  .info-section,
+  .table-section,
+  .summary-section,
+  .action-section {
+    margin-bottom: 16px;
+  }
+
+  .table-section {
+    max-height: calc(100vh - 400px);
+    overflow-y: auto;
+    border-radius: 4px;
+  }
+
+  .full-width-input {
+    width: 100%;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .font-bold {
+    font-weight: bold;
+  }
+
+  .summary-row {
+    background-color: #f3f4f6;
+    height: 40px;
+  }
+
+  .mt-6 {
+    margin-top: 24px;
+  }
+
   @media print {
-    .noMaxHeight {
+    .table-section {
       max-height: unset !important;
-      overflow: hidden;
+      overflow: visible !important;
     }
   }
 </style>

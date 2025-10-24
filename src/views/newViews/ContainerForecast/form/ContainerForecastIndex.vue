@@ -9,8 +9,7 @@
   import NewContainerForecast from '@/views/newViews/ContainerForecast/form/NewContainerForecast.vue';
   import { useUserStore } from '@/store/modules/user';
   import readXlsxFile from 'read-excel-file';
-  import { difference, groupBy } from 'lodash-es';
-  import { allKeysList } from '@/api/dataLayer/common/AllKeys';
+  import { groupBy } from 'lodash-es';
   import { $ref } from 'vue/macros';
   import ErrorMessageDialog from '@/views/newViews/ContainerForecast/form/ErrorMessageDialog.vue';
   import dayjs from 'dayjs';
@@ -28,7 +27,6 @@
     searchTaskPrice,
   } from '@/api/newDataLayer/TaskList/TaskList';
   import { safeSumBy } from '@/store/utils/utils';
-  import { getFBACodeList } from '@/api/newDataLayer/FBACode/FBACode';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
 
   interface Prop {
@@ -70,7 +68,7 @@
         return [it.title, { prop: it.key }];
       })
     );
-    const allFBACodeList = await getFBACodeList();
+    // const allFBACodeList = await getFBACodeList();
     try {
       let currentRows = [];
       let { rows, errors } = await readXlsxFile(file, { schema, row: { from: 1 } });
@@ -82,11 +80,11 @@
         defaultValue.containerNo = groupContainerId[0];
       }
       for (const [index, it] of rows.entries()) {
-        const keys = Object.keys(it);
-        const res = difference(
-          allKeysList.map((x) => x.field),
-          keys
-        );
+        // const keys = Object.keys(it);
+        // const res = difference(
+        //   allKeysList.map((x) => x.field),
+        //   keys
+        // );
         it.uploadFileTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
         if (!isValidString(it.ticketId)) {
           errorMessage.push({ index: index + 4, detail: '票号中不可有特殊符号' });
@@ -117,33 +115,33 @@
         // }
 
         //判断FBA卡车派送
-        if (it.deliveryMethod === 'FBA卡车派送') {
-          const allFBACode = allFBACodeList.map((x) => x.code);
-          if (!allFBACode.includes(it.fcAddress)) {
-            errorMessage.push({ index: index + 4, detail: 'FC不在FBACode列表中' });
-          }
-        } else {
-          if (!it.address) {
-            errorMessage.push({ index: index + 4, detail: '送货地址不可为空' });
-          }
-          if (!it.postcode) {
-            errorMessage.push({ index: index + 4, detail: '邮编不可为空' });
-          }
-        }
-
-        if (it.packing === '纸箱') {
-          if (!it.number) {
-            errorMessage.push({ index: index + 4, detail: '件数不可为空' });
-          }
-          it.trayNum = 0;
-        }
-
-        if (['木箱', '大件托盘', '标准托盘'].includes(it.packing)) {
-          if (!it.trayNum) {
-            errorMessage.push({ index: index + 4, detail: '托数不可为空' });
-          }
-          it.number = 0;
-        }
+        // if (it.deliveryMethod === 'FBA卡车派送') {
+        //   const allFBACode = allFBACodeList.map((x) => x.code);
+        //   if (!allFBACode.includes(it.fcAddress)) {
+        //     errorMessage.push({ index: index + 4, detail: 'FC不在FBACode列表中' });
+        //   }
+        // } else {
+        //   if (!it.address) {
+        //     errorMessage.push({ index: index + 4, detail: '送货地址不可为空' });
+        //   }
+        //   if (!it.postcode) {
+        //     errorMessage.push({ index: index + 4, detail: '邮编不可为空' });
+        //   }
+        // }
+        //
+        // if (it.packing === '纸箱') {
+        //   if (!it.number) {
+        //     errorMessage.push({ index: index + 4, detail: '件数不可为空' });
+        //   }
+        //   it.trayNum = 0;
+        // }
+        //
+        // if (['木箱', '大件托盘', '标准托盘'].includes(it.packing)) {
+        //   if (!it.trayNum) {
+        //     errorMessage.push({ index: index + 4, detail: '托数不可为空' });
+        //   }
+        //   it.number = 0;
+        // }
 
         if (it.changeOrderFiles === '是') {
           it.operateInStorage = '是';
@@ -159,14 +157,14 @@
         );
         it.inStatus = InBoundDetailStatus.WaitCheck;
         currentRows.push(Object.assign({}, defaultTask, it));
-        if (res.length > 0) {
-          const realMessageDetail = [];
-          for (const item of res) {
-            const detailInfo = allKeysList.find((x) => x.field === item).label;
-            realMessageDetail.push(detailInfo);
-          }
-          errorMessage.push({ index: index + 4, detail: realMessageDetail });
-        }
+        // if (res.length > 0) {
+        //   const realMessageDetail = [];
+        //   for (const item of res) {
+        //     const detailInfo = allKeysList.find((x) => x.field === item).label;
+        //     realMessageDetail.push(detailInfo);
+        //   }
+        //   errorMessage.push({ index: index + 4, detail: realMessageDetail });
+        // }
       }
       if (currentRows.length > 0 && errors.length == 0) {
         // Handle duplicate ticketId values

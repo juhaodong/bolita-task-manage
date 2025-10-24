@@ -61,7 +61,7 @@ export async function getTaskListByIdsAndFilter(ids, filter) {
 
 export async function getTaskListByNotifyId(id) {
   return (
-    await hillo.jsonPost(typeName + '/searchForFull', {
+    await hillo.jsonPost(typeName + '/searchForFull?pageNumber=0&pageSize=100', {
       inStatusNotIn: ['已取消', '已拆分'],
       notifyId: id,
     })
