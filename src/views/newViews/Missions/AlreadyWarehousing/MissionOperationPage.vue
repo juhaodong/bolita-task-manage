@@ -57,6 +57,14 @@
           :disabled="selectedTaskList.length !== 1"
           class="action-button"
           size="small"
+          @click="checkPrice"
+        >
+          报价
+        </n-button>
+        <n-button
+          :disabled="selectedTaskList.length !== 1"
+          class="action-button"
+          size="small"
           @click="setTaskError"
         >
           异常
@@ -558,6 +566,7 @@
   }
 
   async function handleCheck(rowKeys) {
+    console.log(rowKeys, 'rowKeys');
     checkedRows = rowKeys;
     const currentPageSelected = allTaskList.filter((item) => rowKeys.includes(item.id));
     // 合并到全局选中集合
@@ -623,6 +632,10 @@
   function splitTask() {
     currentModel = selectedTaskList[0];
     showSplitTaskDialog = true;
+  }
+
+  function checkPrice() {
+    showOfferPrice = true;
   }
 
   async function updateSuggestedPrice() {
@@ -753,7 +766,7 @@
     for (const rows of checkedRows) {
       i = i + 1;
       log = '正在审核' + '第' + i + '票货物,共' + checkedRows.length + '票' + `<br>`;
-      const res = allList.find((it) => it.id === rows);
+      const res = selectedTaskList.find((it) => it.id === rows);
       if (res) {
         res.inStatus = InBoundStatus.Wait;
         const userInfo = useUserStore().info;

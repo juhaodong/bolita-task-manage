@@ -1,6 +1,6 @@
 <script lang="ts" setup>
   import { $ref } from 'vue/macros';
-  import { onMounted, reactive } from 'vue';
+  import { onMounted, reactive, ref } from 'vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { DataTableColumns, NButton } from 'naive-ui';
   import { getTaskListByFilterWithPagination } from '@/api/newDataLayer/TaskList/TaskList';
@@ -50,12 +50,12 @@
     pageSizes: [10, 20, 50, 100],
     onChange: (page: number) => {
       paginationReactive.pageNumber = page - 1;
-      reloadTable(false);
+      reloadTable();
     },
     onUpdatePageSize: (pageSize: number) => {
       paginationReactive.pageSize = pageSize;
       paginationReactive.pageNumber = 0;
-      reloadTable(false);
+      reloadTable();
     },
   });
   let selectedTaskList = $ref([]);
@@ -65,6 +65,10 @@
   onMounted(async () => {
     console.log(props.info, 'info');
   });
+  const actionRef = ref();
+  async function reloadTable() {
+    await actionRef.value.reload();
+  }
 
   async function getCurrentFilter() {
     currentFilter = [];

@@ -198,7 +198,7 @@
       totalWeight: safeSumBy(allList, 'weight'),
       totalNumber: safeSumBy(allList, 'arrivedContainerNum'),
       trayNum: safeSumBy(allList, 'arrivedTrayNum'),
-      suggestedPrice: safeSumBy(allList, 'suggestedPrice'),
+      suggestedPrice: suggestedPrice !== '人工询价' ? '整车报价:' + suggestedPrice : '人工询价',
       bolitaTaskIds: taskIds,
       isa: isa,
       waybillId: waybillId,

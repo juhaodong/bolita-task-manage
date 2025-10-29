@@ -79,9 +79,6 @@
         containIndex = containIndex + 1;
       }
       currentTaskList = flatMap(groupByInfo);
-      currentTaskList.forEach((it) => {
-        it.displayNumber = it.number !== 0 ? it.number : it.trayNum;
-      });
       emit('refresh');
     }
   }
@@ -103,8 +100,8 @@
         it.fbaDeliveryCode,
         it.number,
         it.unloadingTotalNumber,
-        '',
-        '',
+        it.trayNum,
+        it.palType,
         '',
         it.Adresse,
         it.Anmerkung,
@@ -119,7 +116,7 @@
   const columns: DataTableColumns<any> = $computed(() => [
     { title: 'Kenzeichen', key: 'ticketId' },
     { title: 'FBA', key: 'fbaDeliveryCode', width: 150 },
-    { title: 'Menge', key: 'displayNumber' },
+    { title: 'Menge', key: 'number' },
     {
       title: 'Gesamt',
       key: 'unloadingTotalNumber',
@@ -135,10 +132,10 @@
         );
       },
     },
-    { title: 'R/F', key: 'fakeDate' },
-    { title: 'Pal Menge', key: 'fakeDate' },
+    { title: 'Pal Menge', key: 'trayNum' },
     { title: 'Pal Type', key: 'palType' },
-    { title: 'Size', key: 'size' },
+    { title: 'R/F', key: 'fakeDate' },
+    { title: 'Size', key: 'size', width: 150 },
     { title: 'Adresse', key: 'Adresse', width: 200 },
     { title: 'Anmerkung', key: 'Anmerkung' },
   ]);
