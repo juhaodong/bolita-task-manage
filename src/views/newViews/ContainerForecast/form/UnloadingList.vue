@@ -144,7 +144,7 @@
 </script>
 
 <template>
-  <div id="print" class="mt-8">
+  <div style="height: 80vh" id="print" class="mt-8">
     <loading-frame :loading="loading">
       <n-descriptions v-if="notifyInfo" :columns="2" bordered label-placement="left">
         <n-descriptions-item label="Container Nr.">
@@ -158,18 +158,25 @@
         >
         <n-descriptions-item label="Ankunftszeit:"> {{ planArriveTime }}</n-descriptions-item>
       </n-descriptions>
-      <n-data-table
-        :bordered="false"
-        :columns="columns"
-        :data="currentTaskList"
-        :single-line="false"
-      />
+      <div class="table-container">
+        <n-data-table
+          :bordered="false"
+          :columns="columns"
+          :data="currentTaskList"
+          :single-line="false"
+        />
+      </div>
       <n-button @click="downloadUnloadingFile">下载</n-button>
     </loading-frame>
   </div>
 </template>
 
 <style lang="less" scoped>
+  .table-container {
+    height: 65vh;
+    overflow-y: auto;
+  }
+
   @media print {
     .noMaxHeight {
       max-height: unset !important;

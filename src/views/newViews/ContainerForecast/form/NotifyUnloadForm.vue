@@ -238,7 +238,7 @@
               <th style="width: 40px">预报 箱</th>
               <th style="width: 80px">入库 托</th>
               <th style="width: 80px">入库 箱</th>
-              <th style="width: 100px">尺寸</th>
+              <th style="width: 180px">尺寸</th>
               <th>库位</th>
               <th>仓库备注</th>
             </tr>

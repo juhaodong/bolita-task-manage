@@ -1,12 +1,7 @@
 <script lang="ts" setup>
   import { onMounted } from 'vue';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
-  import { safeSumBy } from '@/store/utils/utils';
-  import {
-    addOrUpdateWithRefOutboundForecast,
-    getOutboundForecastById,
-  } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
-  import { addOrUpdateTask, getTaskListByIds } from '@/api/newDataLayer/TaskList/TaskList';
+  import { getTaskListByIds, updateTask } from '@/api/newDataLayer/TaskList/TaskList';
 
   interface Props {
     ids: string;
@@ -34,18 +29,18 @@
     loading = true;
     await safeScope(async () => {
       for (const item of currentTaskList) {
-        item.inStatus = '待定车';
-        item.needOfferPrice = '2';
-        item.customerId = item.customer.id;
-        item.inventoryId = item.inventory.id;
-        await addOrUpdateTask(item);
-        const outboundDetail = await getOutboundForecastById(item.outboundId);
-        const detailInfo = await getTaskListByIds(outboundDetail.outboundDetailInfo.split(','));
-        const getOutOfferList = detailInfo.filter((it) => !it.outPrice);
-        if (getOutOfferList.length === 0) {
-          outboundDetail.totalOutOffer = safeSumBy(detailInfo, 'outPrice');
-          await addOrUpdateWithRefOutboundForecast(outboundDetail);
-        }
+        // item.inStatus = '待定车';
+        // item.needOfferPrice = '2';
+        // item.customerId = item.customer.id;
+        // item.inventoryId = item.inventory.id;
+        await updateTask(item);
+        // const outboundDetail = await getOutboundForecastById(item.outboundId);
+        // const detailInfo = await getTaskListByIds(outboundDetail.outboundDetailInfo.split(','));
+        // const getOutOfferList = detailInfo.filter((it) => !it.outPrice);
+        // if (getOutOfferList.length === 0) {
+        //   outboundDetail.totalOutOffer = safeSumBy(detailInfo, 'outPrice');
+        //   await addOrUpdateWithRefOutboundForecast(outboundDetail);
+        // }
       }
       loading = false;
       emit('saved');
@@ -62,12 +57,14 @@
         <n-descriptions-item :span="2" label="Ref.">
           {{ item?.outboundId }}
         </n-descriptions-item>
-        <n-descriptions-item :span="2" label="建议报价">
-          {{ item?.suggestedPrice }}</n-descriptions-item
-        >
-        <n-descriptions-item :span="2" label="物流底价"> {{ item?.costPrice }}</n-descriptions-item>
-        <n-descriptions-item :span="2" label="对外报价">
+        <n-descriptions-item :span="2" label="成本价格">
+          <n-input v-model:value="item.costPrice"
+        /></n-descriptions-item>
+        <n-descriptions-item :span="2" label="结算价格">
           <n-input v-model:value="item.outPrice"
+        /></n-descriptions-item>
+        <n-descriptions-item :span="2" label="对外报价">
+          <n-input v-model:value="item.suggestedPrice"
         /></n-descriptions-item>
       </n-descriptions>
     </n-card>
