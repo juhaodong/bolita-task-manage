@@ -245,7 +245,14 @@
           </thead>
           <tbody v-if="currentTaskList">
             <tr v-for="item in currentTaskList" :key="item.id">
-              <td>{{ item?.ticketId }}</td>
+              <td>
+                <n-tooltip v-if="item?.ticketId" trigger="hover">
+                  <template #trigger>
+                    <span class="ellipsis-cell">{{ item?.ticketId }}</span>
+                  </template>
+                  {{ item?.ticketId }}
+                </n-tooltip>
+              </td>
               <td class="text-center">{{ item?.trayNum ?? 0 }}</td>
               <td class="text-center">{{ item?.number ?? 0 }}</td>
               <td>
@@ -265,13 +272,31 @@
                 />
               </td>
               <td>
-                <n-input v-model:value="item.size" :disabled="!canEdit" />
+                <n-tooltip v-if="item.size" trigger="hover">
+                  <template #trigger>
+                    <n-input v-model:value="item.size" :disabled="!canEdit" />
+                  </template>
+                  {{ item.size }}
+                </n-tooltip>
+                <n-input v-else v-model:value="item.size" :disabled="!canEdit" />
               </td>
               <td>
-                <n-input v-model:value="item.warehouseLocation" :disabled="!canEdit" />
+                <n-tooltip v-if="item.warehouseLocation" trigger="hover">
+                  <template #trigger>
+                    <n-input v-model:value="item.warehouseLocation" :disabled="!canEdit" />
+                  </template>
+                  {{ item.warehouseLocation }}
+                </n-tooltip>
+                <n-input v-else v-model:value="item.warehouseLocation" :disabled="!canEdit" />
               </td>
               <td>
-                <n-input v-model:value="item.note" :disabled="!canEdit" />
+                <n-tooltip v-if="item.note" trigger="hover">
+                  <template #trigger>
+                    <n-input v-model:value="item.note" :disabled="!canEdit" />
+                  </template>
+                  {{ item.note }}
+                </n-tooltip>
+                <n-input v-else v-model:value="item.note" :disabled="!canEdit" />
               </td>
             </tr>
           </tbody>
@@ -349,6 +374,19 @@
 
   .mt-6 {
     margin-top: 24px;
+  }
+
+  .ellipsis-cell {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  :deep(.n-tooltip) {
+    max-width: 300px;
+    word-break: break-all;
   }
 
   @media print {

@@ -592,8 +592,8 @@
   const paginationReactive = reactive({
     defaultPage: 1,
     pageNumber: 0,
-    pageSize: 10,
-    defaultPageSize: 10,
+    pageSize: 20,
+    defaultPageSize: 20,
     showSizePicker: true,
     pageSizes: [10, 20, 50, 100],
     onChange: (page: number) => {
