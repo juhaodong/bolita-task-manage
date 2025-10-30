@@ -129,6 +129,7 @@
     {
       label: 'FBA单号',
       field: 'fbaDeliveryCode',
+      defaultValue: '',
     },
     {
       label: 'po',
@@ -159,6 +160,7 @@
       label: '出库方式',
       field: 'outboundMethod',
       component: 'NSelect',
+      defaultValue: '',
       componentProps: {
         options: generateOptionFromArray(allOutboundMethod),
       },
@@ -167,6 +169,7 @@
       label: '物流渠道',
       field: 'deliveryMethod',
       component: 'NSelect',
+      defaultValue: '',
       componentProps: {
         options: generateOptionFromArray(allDeliveryMethod),
       },
@@ -176,6 +179,7 @@
       label: '换单文件',
       field: 'changeOrderFiles',
       component: 'NSelect',
+      defaultValue: '',
       componentProps: {
         options: [
           { label: '是', value: '是' },
@@ -187,6 +191,7 @@
       label: '库内操作',
       field: 'operateInStorage',
       component: 'NSelect',
+      defaultValue: '',
       componentProps: {
         options: [
           { label: '是', value: '是' },
@@ -242,6 +247,7 @@
       label: '状态',
       field: 'inStatus',
       component: 'NSelect',
+      defaultValue: '',
       componentProps: {
         options: generateOptionFromArray(editInStatusList),
       },

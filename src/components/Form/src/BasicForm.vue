@@ -5,11 +5,7 @@
         <n-tab-pane v-for="g in groupedSchema" :key="g.group" :name="g.group" :tab="g.group">
           <n-grid v-bind="getGrid" x-gap="8">
             <n-gi v-for="schema in g.schema" :key="schema.field" v-bind="schema.giProps">
-              <n-form-item
-                :label="schema.label"
-                :path="schema.field"
-                :class="{ 'modified-field': isFieldModified(schema.field) }"
-              >
+              <n-form-item :label="schema.label" :path="schema.field">
                 <!--标签名右侧温馨提示-->
                 <template v-if="schema.labelMessage" #label>
                   {{ schema.label }}
@@ -172,11 +168,7 @@
             <n-h4>{{ g.group }}</n-h4>
           </n-gi>
           <n-gi v-for="schema in g.schema" :key="schema.field" v-bind="schema.giProps">
-            <n-form-item
-              :label="schema.label"
-              :path="schema.field"
-              :class="{ 'modified-field': isFieldModified(schema.field) }"
-            >
+            <n-form-item :label="schema.label" :path="schema.field">
               <!--标签名右侧温馨提示-->
               <template v-if="schema.labelMessage" #label>
                 {{ schema.label }}
@@ -527,18 +519,6 @@
         emit('register', formActionType);
       });
 
-      function isFieldModified(field: string): boolean {
-        // Compare current value with default value
-        const currentValue = formModel[field];
-        const defaultValue = defaultFormModel.value[field];
-
-        // Handle different types of values
-        if (typeof currentValue === 'object' && currentValue !== null) {
-          return JSON.stringify(currentValue) !== JSON.stringify(defaultValue);
-        }
-        return currentValue !== defaultValue;
-      }
-
       return {
         formElRef,
         formModel,
@@ -556,7 +536,6 @@
         unfoldToggle,
         groupedSchema,
         activeTab,
-        isFieldModified,
       };
     },
   });

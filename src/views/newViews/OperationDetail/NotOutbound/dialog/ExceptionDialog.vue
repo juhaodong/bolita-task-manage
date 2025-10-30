@@ -48,7 +48,7 @@
         bolitaTaskId: updatedData.id,
         operator: userInfo?.realName,
         detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
-        note: reason,
+        note: '状态异常!异常原因:' + reason,
       });
       loading = false;
       emit('saved', updatedData);
