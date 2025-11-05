@@ -25,25 +25,25 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('@/views/newViews/OperationDetail/InventoryDashboard.vue'),
       },
-      // {
-      //   path: 'Operation',
-      //   name: `Operation`,
-      //   meta: {
-      //     title: '出库任务看板',
-      //     permissions: ['管理员', '仓库', '物流部'],
-      //   },
-      //   component: () => import('@/views/newViews/OperationDetail/NotOutbound/WaitOperation.vue'),
-      // },
       {
-        path: 'OutMission',
-        name: `OutMission`,
+        path: 'Operation',
+        name: `Operation`,
         meta: {
           title: '出库任务看板',
           permissions: ['管理员', '仓库', '物流部'],
         },
-        component: () =>
-          import('@/views/newViews/Missions/AlreadyWarehousing/MissionWithCarPage.vue'),
+        component: () => import('@/views/newViews/OperationDetail/NotOutbound/WaitOperation.vue'),
       },
+      // {
+      //   path: 'OutMission',
+      //   name: `OutMission`,
+      //   meta: {
+      //     title: '出库任务看板',
+      //     permissions: ['管理员', '仓库', '物流部'],
+      //   },
+      //   component: () =>
+      //     import('@/views/newViews/Missions/AlreadyWarehousing/MissionWithCarPage.vue'),
+      // },
       {
         path: 'InventoryView',
         name: `InventoryView`,

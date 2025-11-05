@@ -62,7 +62,7 @@
           报价
         </n-button>
         <n-button
-          :disabled="selectedTaskList.length !== 1"
+          :disabled="selectedTaskList.length !== 1 || selectedTaskList[0].inStatus === '异常'"
           class="action-button"
           size="small"
           @click="setTaskError"
@@ -558,6 +558,7 @@
 
   async function handleExceptionSaved() {
     showExceptionDialog = false;
+    await reloadTable();
     // Update the local list with the updated data
   }
 
@@ -926,6 +927,7 @@
     checkLoading = false;
     showCheckDialog = false;
     showSplitTaskDialog = false;
+    showExceptionDialog = false;
     if (clearSelection) {
       checkedRows = [];
       selectedTaskList = [];

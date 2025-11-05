@@ -2,10 +2,11 @@
   import { $ref } from 'vue/macros';
   import { onMounted } from 'vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
+  import { useUserStore } from '@/store/modules/user';
   import { updateTask } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import dayjs from 'dayjs';
-  import { useUserStore } from '@/store/modules/user';
+  import { saveFiles } from '@/api/newDataLayer/Notify/Notify';
 
   interface Props {
     row?: any;
@@ -19,10 +20,12 @@
   let loading = $ref(false);
   let requiredInfo = $ref(false);
   let errorMessage = $ref('');
+  let fileList = $ref([]);
 
   onMounted(() => {});
 
   async function saveInfo() {
+    console.log(fileList, 'fileList');
     if (!reason) {
       requiredInfo = true;
       errorMessage = '请填写异常原因！';
@@ -39,16 +42,30 @@
     updatedData.outboundForecastId = null;
     updatedData.errorReason = reason;
 
+    // Add file list to updated data
+    if (fileList && fileList.length > 0) {
+      updatedData.fileList = fileList;
+    }
+
     try {
       const userInfo = useUserStore().info;
+      const filesUrl = await saveFiles(fileList);
+      updatedData.problemFiles = updatedData.problemFiles + ',' + filesUrl;
       // Update the task in the database
       await updateTask(updatedData);
+
+      // Create timeline note
+      let timelineNote = '状态异常!异常原因:' + reason;
+      if (fileList && fileList.length > 0) {
+        timelineNote += ' (已上传附件)';
+      }
+
       await addOrUpdateTaskTimeLine({
         useType: 'normal',
         bolitaTaskId: updatedData.id,
         operator: userInfo?.realName,
         detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
-        note: '状态异常!异常原因:' + reason,
+        note: timelineNote,
       });
       loading = false;
       emit('saved', updatedData);
@@ -81,6 +98,16 @@
           />
         </n-descriptions-item>
       </n-descriptions>
+      <n-upload abstract v-model:file-list="fileList">
+        <n-button-group>
+          <n-upload-trigger #="{ handleClick }" abstract>
+            <n-button @click="handleClick"> 上传 </n-button>
+          </n-upload-trigger>
+        </n-button-group>
+        <n-card v-if="fileList.length > 0" style="margin-top: 12px" title="文件列表">
+          <n-upload-file-list />
+        </n-card>
+      </n-upload>
       <div class="flex justify-end mt-4 gap-2">
         <n-button @click="cancel">取消</n-button>
         <n-button type="primary" @click="saveInfo">确认</n-button>

@@ -213,6 +213,7 @@ export const editInStatusList = [
   '已取消',
 ];
 
+export const editErrorInStatusList = ['等待入库', '入库待出库', '入库待操作', '存仓', '已取消'];
 // export const outMissionInStatus = ['已定车', '无需定车', '已装车', '已取消', '全部出库'];
 
 export const allCarStatusList = ['已定车', '无需定车', '已装车', '已取消'];

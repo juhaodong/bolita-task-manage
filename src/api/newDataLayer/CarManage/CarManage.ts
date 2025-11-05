@@ -42,6 +42,7 @@ export async function addOrUpdateOutboundForecast(item) {
     item.customerId = item.customer.id;
     item.inventoryId = item.inventory.id;
   }
+  // item.
   return await hillo.jsonPost(typeName + '/addOrUpdateWithRef', {
     ...item,
   });

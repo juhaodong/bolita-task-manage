@@ -54,36 +54,36 @@
           @click="editLieferschein"
           >Lieferschein
         </n-button>
-        <n-button
-          :disabled="selectedOutboundForecastList.length !== 1"
-          class="action-button"
-          size="small"
-          @click="showLoadingList"
-        >
-          装车信息
-        </n-button>
-        <n-button
-          :disabled="selectedOutboundForecastList.length !== 1"
-          class="action-button"
-          size="small"
-          @click="uploadLoadingList"
-        >
-          上传装车单
-        </n-button>
-        <n-button
-          :disabled="selectedOutboundForecastList.length !== 1"
-          class="action-button"
-          size="small"
-          @click="LoadingListPic"
-          >装车图片
-        </n-button>
-        <n-button
-          :disabled="selectedOutboundForecastList.length !== 1"
-          class="action-button"
-          size="small"
-          @click="editPod"
-          >POD
-        </n-button>
+        <!--        <n-button-->
+        <!--          :disabled="selectedOutboundForecastList.length !== 1"-->
+        <!--          class="action-button"-->
+        <!--          size="small"-->
+        <!--          @click="showLoadingList"-->
+        <!--        >-->
+        <!--          装车信息-->
+        <!--        </n-button>-->
+        <!--        <n-button-->
+        <!--          :disabled="selectedOutboundForecastList.length !== 1"-->
+        <!--          class="action-button"-->
+        <!--          size="small"-->
+        <!--          @click="uploadLoadingList"-->
+        <!--        >-->
+        <!--          上传装车单-->
+        <!--        </n-button>-->
+        <!--        <n-button-->
+        <!--          :disabled="selectedOutboundForecastList.length !== 1"-->
+        <!--          class="action-button"-->
+        <!--          size="small"-->
+        <!--          @click="LoadingListPic"-->
+        <!--          >装车图片-->
+        <!--        </n-button>-->
+        <!--        <n-button-->
+        <!--          :disabled="selectedOutboundForecastList.length !== 1"-->
+        <!--          class="action-button"-->
+        <!--          size="small"-->
+        <!--          @click="editPod"-->
+        <!--          >POD-->
+        <!--        </n-button>-->
         <n-button
           :disabled="selectedOutboundForecastList.length !== 1"
           class="action-button"
@@ -140,7 +140,11 @@
         style="width: 80%"
         :title="'Ref:' + (currentModel?.ref ? currentModel?.ref : '')"
       >
-        <detail-info-dialog :ids="currentIds" />
+        <detail-info-dialog
+          @saved="saved"
+          :ids="currentIds"
+          :outbound-forecast-info="currentModel"
+        />
       </n-modal>
       <n-modal
         v-model:show="showAddNewMissionDialog"
@@ -579,6 +583,7 @@
   function showDetailInfo() {
     currentIds = selectedOutboundForecastList[0].bolitaTaskIds;
     currentModel = selectedOutboundForecastList[0];
+    console.log(currentModel, 'model');
     showDetailInfoDialog = true;
   }
 

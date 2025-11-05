@@ -13,6 +13,7 @@
   import {
     allDeliveryMethod,
     allOutboundMethod,
+    editErrorInStatusList,
     editInStatusList,
   } from '@/views/newViews/Missions/AlreadyWarehousing/columns';
   import { useUserStore } from '@/store/modules/user';
@@ -27,10 +28,13 @@
 
   interface Props {
     model?: any;
+    normal?: boolean;
   }
 
   let loading: boolean = $ref(false);
-  const prop = defineProps<Props>();
+  const prop = withDefaults(defineProps<Props>(), {
+    normal: true,
+  });
   const normalSchemas = [
     {
       label: 'id',
@@ -150,6 +154,9 @@
         type: 'textarea',
         rows: 3,
       },
+      disableCondition: () => {
+        return prop.normal;
+      },
     },
     {
       label: '邮编',
@@ -249,7 +256,9 @@
       component: 'NSelect',
       defaultValue: '',
       componentProps: {
-        options: generateOptionFromArray(editInStatusList),
+        options: prop.normal
+          ? generateOptionFromArray(editInStatusList)
+          : generateOptionFromArray(editErrorInStatusList),
       },
     },
   ].map((it) => {

@@ -35,7 +35,7 @@
         style="width: 90%; min-width: 600px; max-width: 600px"
         title="编辑详情"
       >
-        <edit-mission-detail :model="currentModel" @saved="reloadTable" />
+        <edit-mission-detail :normal="false" :model="currentModel" @saved="reloadTable" />
       </n-modal>
     </div>
   </n-card>
