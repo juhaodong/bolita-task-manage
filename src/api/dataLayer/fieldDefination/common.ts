@@ -100,6 +100,23 @@ export async function asyncCustomerWarehouseFormField(multiple): Promise<FormFie
   };
 }
 
+export async function asyncCustomerWarehouseRequiredFormField(multiple): Promise<FormField> {
+  const warehouseList = await getInventoryList();
+  const warehouseIdList = warehouseList.map((it) => ({
+    label: it.name,
+    value: it.id,
+  }));
+  return {
+    field: 'inventory.id',
+    label: '仓库',
+    component: 'NSelect',
+    componentProps: {
+      options: warehouseIdList,
+      multiple: multiple,
+    },
+  };
+}
+
 export async function asyncSalesManFormField(): Promise<FormField> {
   const salesManList = (await getUserList()).filter((it) => it.userType === '运营部前端');
   console.log(salesManList, 'list');

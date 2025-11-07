@@ -12,7 +12,7 @@
   import { customerStatusSelection } from '@/api/dataLayer/modules/user/user';
   import { $ref } from 'vue/macros';
   import {
-    asyncCustomerWarehouseFormField,
+    asyncCustomerWarehouseRequiredFormField,
     asyncSalesManFormField,
   } from '@/api/dataLayer/fieldDefination/common';
   import { addOrUpdateCustomer } from '@/api/newDataLayer/Customer/Customer';
@@ -44,7 +44,7 @@
       field: 'businessParty',
       required: false,
     },
-    asyncCustomerWarehouseFormField(false),
+    asyncCustomerWarehouseRequiredFormField(false),
     asyncSalesManFormField(),
     customerStatusSelection,
   ];
