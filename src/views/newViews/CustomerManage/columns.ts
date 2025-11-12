@@ -15,10 +15,10 @@ export const columns: DataTableColumns = [
     title: '业务关联方',
     key: 'businessParty',
   },
-  {
-    title: '所属仓库',
-    key: 'inventory.name',
-  },
+  // {
+  //   title: '所属仓库',
+  //   key: 'inventory.name',
+  // },
   {
     title: '所属业务员',
     key: 'belongSalesMan',

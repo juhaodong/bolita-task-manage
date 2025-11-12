@@ -106,18 +106,22 @@
     {
       label: '总实重',
       field: 'weight',
+      defaultValue: '',
     },
     {
       label: '总体积',
       field: 'volume',
+      defaultValue: '',
     },
     {
       label: '尺寸',
       field: 'size',
+      defaultValue: '',
     },
     {
       label: '包装',
       field: 'packing',
+      defaultValue: '',
     },
     {
       label: '客户备注',
@@ -326,10 +330,8 @@
       detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
       note: '修改了 ' + editLabel.join(','),
     });
-    await safeScope(async () => {
-      await updateTask(Object.assign(waitEdit, values));
-      emit('saved', values);
-    });
+    await safeScope(() => updateTask(Object.assign(waitEdit, values)));
+    emit('saved', values);
     loading = false;
   }
 </script>

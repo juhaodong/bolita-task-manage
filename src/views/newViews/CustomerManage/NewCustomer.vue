@@ -11,10 +11,7 @@
   import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { customerStatusSelection } from '@/api/dataLayer/modules/user/user';
   import { $ref } from 'vue/macros';
-  import {
-    asyncCustomerWarehouseRequiredFormField,
-    asyncSalesManFormField,
-  } from '@/api/dataLayer/fieldDefination/common';
+  import { asyncSalesManFormField } from '@/api/dataLayer/fieldDefination/common';
   import { addOrUpdateCustomer } from '@/api/newDataLayer/Customer/Customer';
 
   interface Props {
@@ -44,7 +41,7 @@
       field: 'businessParty',
       required: false,
     },
-    asyncCustomerWarehouseRequiredFormField(false),
+    // asyncCustomerWarehouseRequiredFormField(false),
     asyncSalesManFormField(),
     customerStatusSelection,
   ];
@@ -55,8 +52,6 @@
     loading = true;
     values.belongSalesMan = '';
     values.businessParty = values.businessParty ?? '';
-    values.inventoryId = values['inventory.id'] ?? '';
-    console.log(values, 'values');
     await safeScope(async () => {
       await addOrUpdateCustomer(values);
       emit('saved', values);

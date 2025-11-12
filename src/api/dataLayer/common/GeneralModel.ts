@@ -16,7 +16,7 @@ import { doLog } from '@/api/dataLayer/modules/statusChangeLog';
 import { keyBy } from 'lodash-es';
 import { UploadFileInfo } from 'naive-ui';
 import { QueryCompositeFilterConstraint, QueryConstraint } from '@firebase/firestore';
-import { safeParseInt, toastError } from '@/store/utils/utils';
+import { safeParseInt, toastError, toastSuccess } from '@/store/utils/utils';
 import { FormField } from '@/views/bolita-views/composable/form-field-type';
 import { usePermission } from '@/hooks/web/usePermission';
 import { salesMan } from '@/api/dataLayer/modules/user/user';
@@ -96,7 +96,13 @@ export async function generalUpdate(value: any, collectionName: string, id: stri
 
 export async function safeScope(func): Promise<any> {
   try {
-    return await func();
+    const res = await func();
+    if (res?.code !== 200) {
+      toastError(res?.message);
+    } else {
+      toastSuccess('成功!');
+      return res;
+    }
   } catch (e: any) {
     console.error(e);
     toastError(e?.message);
