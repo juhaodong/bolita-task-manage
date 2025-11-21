@@ -27,7 +27,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'number',
     },
     {
-      label: '托数',
+      label: '数量', // 原托数
       field: 'trayNum',
     },
     {
@@ -43,7 +43,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'size',
     },
     {
-      label: '包装',
+      label: '入库方式', // 原包装
       field: 'packing',
     },
     {
@@ -68,10 +68,10 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       label: '送货地址',
       field: 'address',
     },
-    {
-      label: '邮编',
-      field: 'postcode',
-    },
+    // {
+    //   label: '邮编',
+    //   field: 'postcode',
+    // },
     {
       label: '出库方式',
       field: 'outboundMethod',

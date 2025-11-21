@@ -82,10 +82,8 @@
 
   async function handleSubmit(values: any) {
     loading = true;
-    await safeScope(async () => {
-      await addOrUpdateFBACode(values);
-      emit('saved', values);
-    });
+    await safeScope(() => addOrUpdateFBACode(values));
+    emit('saved', values);
     loading = false;
   }
 </script>

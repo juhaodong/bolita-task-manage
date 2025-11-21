@@ -74,7 +74,6 @@
     safeSumBy,
     toastError,
   } from '@/store/utils/utils';
-  import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { CarStatus } from '@/views/newViews/OutboundPlan/columns';
   import DetailInfo from '@/views/newViews/Missions/AlreadyWarehousing/DetailInfo.vue';
   import { $ref } from 'vue/macros';
@@ -90,6 +89,7 @@
   import { createPaginationPlaceholders } from '@/api/newDataLayer/Common/Common';
   import SingleFilterBar from '@/views/bolita-views/composable/SingleFilterBar.vue';
   import { deliveryMethodList } from '@/api/dataLayer/modules/deliveryMethod/detail';
+  import { safeScope } from '@/api/dataLayer/common/GeneralModel';
 
   interface Props {
     model?: any;
@@ -340,10 +340,8 @@
       it.needOfferPrice = '';
       it.usefulTimeRange = dayjs().diff(dayjs(it.arriveTime), 'day') ?? '-';
     });
-    await afterPlanDetailAdded(selectedTaskList);
-    await safeScope(() => {
-      emit('saved');
-    });
+    await safeScope(() => afterPlanDetailAdded(selectedTaskList));
+    emit('saved');
     loading = false;
   }
 

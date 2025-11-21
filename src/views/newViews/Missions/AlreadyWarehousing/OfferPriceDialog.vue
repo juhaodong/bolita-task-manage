@@ -27,24 +27,23 @@
   }
   async function confirm() {
     loading = true;
-    await safeScope(async () => {
-      for (const item of currentTaskList) {
-        // item.inStatus = '待定车';
-        // item.needOfferPrice = '2';
-        // item.customerId = item.customer.id;
-        // item.inventoryId = item.inventory.id;
-        await updateTask(item);
-        // const outboundDetail = await getOutboundForecastById(item.outboundId);
-        // const detailInfo = await getTaskListByIds(outboundDetail.outboundDetailInfo.split(','));
-        // const getOutOfferList = detailInfo.filter((it) => !it.outPrice);
-        // if (getOutOfferList.length === 0) {
-        //   outboundDetail.totalOutOffer = safeSumBy(detailInfo, 'outPrice');
-        //   await addOrUpdateWithRefOutboundForecast(outboundDetail);
-        // }
-      }
-      loading = false;
-      emit('saved');
-    });
+
+    for (const item of currentTaskList) {
+      // item.inStatus = '待定车';
+      // item.needOfferPrice = '2';
+      // item.customerId = item.customer.id;
+      // item.inventoryId = item.inventory.id;
+      await safeScope(() => updateTask(item));
+      // const outboundDetail = await getOutboundForecastById(item.outboundId);
+      // const detailInfo = await getTaskListByIds(outboundDetail.outboundDetailInfo.split(','));
+      // const getOutOfferList = detailInfo.filter((it) => !it.outPrice);
+      // if (getOutOfferList.length === 0) {
+      //   outboundDetail.totalOutOffer = safeSumBy(detailInfo, 'outPrice');
+      //   await addOrUpdateWithRefOutboundForecast(outboundDetail);
+      // }
+    }
+    loading = false;
+    emit('saved');
   }
 </script>
 <template>

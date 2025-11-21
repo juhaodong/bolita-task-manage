@@ -98,7 +98,6 @@
   import { generateOptionFromTimeArray } from '@/store/utils/utils';
   import { timeArrays } from '@/api/newDataLayer/Common/Common';
   import { currentBaseImageUrl } from '@/api/dataLayer/fieldDefination/common';
-  import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { getUserById } from '@/api/newDataLayer/User/User';
 
@@ -223,7 +222,7 @@
 
   function downLoadFiles() {
     window.open(
-      currentBaseImageUrl + 'https://aaden-storage.s3.eu-central-1.amazonaws.com/MoBanV2.xlsx'
+      currentBaseImageUrl + 'https://aaden-storage.s3.eu-central-1.amazonaws.com/MoBanV4.xlsx'
     );
   }
 
@@ -232,9 +231,7 @@
       currentData.inHouseTime = currentData.inHouseTime + '/' + adminTimeSpan;
       currentData.adminTimeSpan = adminTimeSpan;
     }
-    await safeScope(async () => {
-      emit('submit', currentData);
-    });
+    emit('submit', currentData);
   }
 </script>
 

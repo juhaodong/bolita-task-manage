@@ -61,16 +61,14 @@
     }
   }
   async function confirm() {
-    await safeScope(async () => {
-      notifyDetail.inStatus = '已结算';
-      extraInfo.status = '已结算';
-      extraInfo.notifyId = props.notifyId;
-      extraInfo.customerId = notifyDetail.customer.id;
-      extraInfo.totalFee = totalPrice.value;
-      await addOrUpdateNotify(notifyDetail);
-      await addOrUpdateNotifySettlement(extraInfo);
-      emit('save');
-    });
+    notifyDetail.inStatus = '已结算';
+    extraInfo.status = '已结算';
+    extraInfo.notifyId = props.notifyId;
+    extraInfo.customerId = notifyDetail.customer.id;
+    extraInfo.totalFee = totalPrice.value;
+    await safeScope(() => addOrUpdateNotify(notifyDetail));
+    await safeScope(() => addOrUpdateNotifySettlement(extraInfo));
+    emit('save');
   }
 </script>
 5a

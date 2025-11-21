@@ -60,7 +60,7 @@
 <script lang="ts" setup>
   import { computed, onMounted, reactive, watch } from 'vue';
   import { $ref } from 'vue/macros';
-  import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
+  import { generateOptionFromArray, safeSumBy, toastError } from '@/store/utils/utils';
   import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import Delete16Filled from '@vicons/fluent/es/Delete16Filled';
   import { assign } from 'lodash';
@@ -170,26 +170,26 @@
 
   async function handleSubmit() {
     loading = true;
-    await safeScope(async () => {
-      const res = prop.currentData;
-      let trayType = '';
-      if (parseFloat(totalFP) > 0) {
-        trayType = trayType + 'FP/';
-      }
-      if (parseFloat(totalKI) > 0) {
-        trayType = trayType + 'KI/';
-      }
-      if (parseFloat(totalXP) > 0) {
-        trayType = trayType + 'XP/';
-      }
-      if (parseFloat(totalKT) > 0) {
-        trayType = trayType + 'XP/';
-      }
-      res.trayType = trayType;
-      res.customerId = res.customer.id;
-      res.inventoryId = res.inventory.id;
-      await addOrUpdateTask(res);
-      await deleteTaskTrayItem(res.id);
+    const res = prop.currentData;
+    let trayType = '';
+    if (parseFloat(totalFP) > 0) {
+      trayType = trayType + 'FP/';
+    }
+    if (parseFloat(totalKI) > 0) {
+      trayType = trayType + 'KI/';
+    }
+    if (parseFloat(totalXP) > 0) {
+      trayType = trayType + 'XP/';
+    }
+    if (parseFloat(totalKT) > 0) {
+      trayType = trayType + 'XP/';
+    }
+    res.trayType = trayType;
+    res.customerId = res.customer.id;
+    res.inventoryId = res.inventory.id;
+    await safeScope(() => addOrUpdateTask(res));
+    await safeScope(() => deleteTaskTrayItem(res.id));
+    try {
       const currentList = trayList.filter((it) => it.amount);
       let quest = [];
       for (const item of currentList) {
@@ -202,7 +202,10 @@
       }
       await Promise.all(quest);
       emit('saved');
-    });
+    } catch (e) {
+      toastError(e?.message);
+    }
+
     loading = false;
   }
 </script>

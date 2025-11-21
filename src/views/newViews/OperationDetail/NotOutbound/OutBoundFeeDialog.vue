@@ -39,11 +39,11 @@
     }
   }
   async function confirm() {
-    await safeScope(async () => {
-      await updateOutboundForecast(currentOutBoundInfo?.id, {
+    await safeScope(() =>
+      updateOutboundForecast(currentOutBoundInfo?.id, {
         cashStatus: CashStatus.Done,
-        finalPrice: extraInfo.finalPrice,
-      });
+        finalPrice: extraInfo.finalPrice
+      }))
       // await saveCash(
       //   {
       //     ref: currentOutBoundInfo?.ref ?? '',
@@ -66,25 +66,22 @@
       cashStatus: CashStatus.WaitConfirm,
     };
 
-    await safeScope(async () => {
-      editValue.containerFinalStatus = CashStatus.WaitConfirm;
-      editValue.outFinalPrice = extraInfo.finalPrice;
-      editValue.outCashId = await saveCash(
-        {
-          ref: currentOutBoundInfo?.ref ?? '',
-          operationId: currentOutBoundInfo.id,
-          operationType: OperationType.Out,
-          amount: extraInfo.outPrice,
-          note: extraInfo.outPriceNote,
-          subtotal: safeParseFloat(extraInfo.outPrice) + safeParseFloat(extraInfo.outOtherPrice),
-          outOtherPrice: extraInfo.outOtherPrice,
-        },
-        currentOutBoundInfo?.outCashId
-      );
-      console.log(editValue, 'value');
-      await updateOutboundForecast(currentOutBoundInfo?.id, editValue);
-      emit('save');
-    });
+    editValue.containerFinalStatus = CashStatus.WaitConfirm;
+    editValue.outFinalPrice = extraInfo.finalPrice;
+    editValue.outCashId = await saveCash(
+      {
+        ref: currentOutBoundInfo?.ref ?? '',
+        operationId: currentOutBoundInfo.id,
+        operationType: OperationType.Out,
+        amount: extraInfo.outPrice,
+        note: extraInfo.outPriceNote,
+        subtotal: safeParseFloat(extraInfo.outPrice) + safeParseFloat(extraInfo.outOtherPrice),
+        outOtherPrice: extraInfo.outOtherPrice,
+      },
+      currentOutBoundInfo?.outCashId
+    );
+    await safeScope(() => updateOutboundForecast(currentOutBoundInfo?.id, editValue));
+    emit('save');
   }
 </script>
 

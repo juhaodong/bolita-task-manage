@@ -2,7 +2,6 @@
   import { computed, watchEffect } from 'vue';
   import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import { handleRequest, safeParseInt, safeSumInt, toastSuccess } from '@/store/utils/utils';
-  import { timeDisplayYMD } from '@/views/bolita-views/composable/useableColumns';
   import dayjs from 'dayjs';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { usePermission } from '@/hooks/web/usePermission';
@@ -13,6 +12,7 @@
   import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
   import { addOrUpdateTask, getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
+  import { timeDisplayYMD } from '@/views/bolita-views/composable/useableColumns';
 
   interface Props {
     notifyId: string;
@@ -23,6 +23,8 @@
   const userInfo = $computed(() => {
     return useUserStore()?.info;
   });
+
+  const options = ['纸箱', '木箱', '标准托盘', '大件托盘'];
 
   const userPowerType = $computed(() => {
     return userInfo?.userType;
@@ -238,9 +240,10 @@
               <th style="width: 40px">预报 箱</th>
               <th style="width: 80px">入库 托</th>
               <th style="width: 80px">入库 箱</th>
-              <th style="width: 180px">尺寸</th>
-              <th>库位</th>
-              <th>仓库备注</th>
+              <th style="width: 160px">尺寸</th>
+              <th style="width: 80px">包装</th>
+              <th style="width: 80px">库位</th>
+              <th style="width: 80px">仓库备注</th>
             </tr>
           </thead>
           <tbody v-if="currentTaskList">
@@ -279,6 +282,9 @@
                   {{ item.size }}
                 </n-tooltip>
                 <n-input v-else v-model:value="item.size" :disabled="!canEdit" />
+              </td>
+              <td>
+                <n-select v-model:value="item.packing" :disabled="!canEdit" :options="options" />
               </td>
               <td>
                 <n-tooltip v-if="item.warehouseLocation" trigger="hover">

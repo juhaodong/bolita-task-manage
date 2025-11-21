@@ -80,22 +80,23 @@
 
   async function handleSubmit(values: any) {
     loading = true;
-    await safeScope(async () => {
-      const res = UserTypeByArray.find((it) => it.label === values.userType);
-      values.company = values.company ?? '';
-      values.token = values.token ?? '';
-      values.department = values.department ?? '';
-      values.customerName = values?.customerName ?? '';
-      values.customerIds = values?.customerIds ? values?.customerIds : '';
-      values.realName = values.realName ?? '';
-      if (values.customerIds === 'all') {
-        values.customerIds = (await getCustomerList()).map((it) => it.id);
-      }
-      const allPowerList = (await getPowerTypeByName(res.label)) ?? [];
-      values.powerTypeItemIds = allPowerList.map((it) => it.id);
-      await addOrUpdateUser(values);
-      emit('saved');
-    });
+    const res = UserTypeByArray.find((it) => it.label === values.userType);
+    if (prop.model?.id) {
+      values.createTimestamp = prop.model.createTimestamp;
+    }
+    values.company = values.company ?? '';
+    values.token = values.token ?? '';
+    values.department = values.department ?? '';
+    values.customerName = values?.customerName ?? '';
+    values.customerIds = values?.customerIds ? values?.customerIds : '';
+    values.realName = values.realName ?? '';
+    if (values.customerIds === 'all') {
+      values.customerIds = (await getCustomerList()).map((it) => it.id);
+    }
+    const allPowerList = (await getPowerTypeByName(res.label)) ?? [];
+    values.powerTypeItemIds = allPowerList.map((it) => it.id);
+    await safeScope(() => addOrUpdateUser(values));
+    emit('saved');
     loading = false;
   }
 </script>

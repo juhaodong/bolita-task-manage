@@ -52,10 +52,8 @@
     loading = true;
     values.belongSalesMan = '';
     values.businessParty = values.businessParty ?? '';
-    await safeScope(async () => {
-      await addOrUpdateCustomer(values);
-      emit('saved', values);
-    });
+    await safeScope(() => addOrUpdateCustomer(values));
+    emit('saved', values);
     loading = false;
   }
 </script>

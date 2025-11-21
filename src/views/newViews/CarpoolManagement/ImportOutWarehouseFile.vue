@@ -6,7 +6,7 @@
 <script lang="ts" setup>
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import { getFilesUploadFormField } from '@/api/dataLayer/fieldDefination/common';
-  import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
+  import { FormFields } from '@/api/dataLayer/common/GeneralModel';
   import { getNeededColumnByOutWarehouseCar } from '@/api/dataLayer/modules/notify/NotifyRepository';
   import readXlsxFile from 'read-excel-file';
   import dayjs from 'dayjs';
@@ -77,9 +77,7 @@
   async function handleSubmit(values: any) {
     const filesUrl = await saveFiles(values.files);
     await readFile(values.files?.[0].file, filesUrl);
-    await safeScope(async () => {
-      emit('saved');
-    });
+    emit('saved');
   }
 </script>
 

@@ -170,12 +170,10 @@
     console.log(prop.model, 'model');
     loading = true;
     const currentObj = Object.assign({}, prop.model, values);
-    await safeScope(async () => {
-      currentObj.pickupDate = dayjs(currentObj.pickupDate).format('YYYY-MM-DD HH:mm:ss');
-      currentObj.deliveryDate = dayjs(currentObj.pickupDate).format('YYYY-MM-DD HH:mm:ss');
-      await updateExternalVehicle(currentObj);
-      emit('saved');
-    });
+    currentObj.pickupDate = dayjs(currentObj.pickupDate).format('YYYY-MM-DD HH:mm:ss');
+    currentObj.deliveryDate = dayjs(currentObj.pickupDate).format('YYYY-MM-DD HH:mm:ss');
+    await safeScope(() => updateExternalVehicle(currentObj));
+    emit('saved');
     loading = false;
   }
 </script>

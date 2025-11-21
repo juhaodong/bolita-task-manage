@@ -151,10 +151,8 @@
     inventoryInfoList = inventoryInfoList.filter((it) => it.useTimeSpan && it.useAmount);
     currentInfo.useTimeSpan = inventoryInfoList.map((it) => it.useTimeSpan).join(',');
     currentInfo.useAmount = inventoryInfoList.map((it) => it.useAmount).join(',');
-    await safeScope(async () => {
-      await addOrUpdateInventory(currentInfo);
-      emit('saved');
-    });
+    await safeScope(() => await addOrUpdateInventory(currentInfo));
+    emit('saved');
     loading = false;
   }
 

@@ -26,7 +26,6 @@
 </template>
 <script lang="ts" setup>
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { safeScope } from '@/api/dataLayer/common/GeneralModel';
   import { NTag } from 'naive-ui';
   import { h } from 'vue';
 
@@ -94,9 +93,7 @@
 
   async function handleSubmit(values: any) {
     loading = true;
-    await safeScope(async () => {
-      emit('saved', values);
-    });
+    emit('saved', values);
     loading = false;
   }
 </script>

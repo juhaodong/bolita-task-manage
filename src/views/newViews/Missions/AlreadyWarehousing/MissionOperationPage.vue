@@ -46,6 +46,7 @@
           拆分
         </n-button>
         <n-button
+          :loading="btnLoading"
           :disabled="selectedTaskList.length !== 1"
           class="action-button"
           size="small"
@@ -282,6 +283,7 @@
   import TaskFiles from '@/views/newViews/Missions/AlreadyWarehousing/TaskFiles.vue';
   import OutPlanByTask from '@/views/newViews/CarpoolManagement/OutPlanByTask.vue';
   import ExceptionDialog from '@/views/newViews/OperationDetail/NotOutbound/dialog/ExceptionDialog.vue';
+  import { safeScope } from '@/api/dataLayer/common/GeneralModel';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -304,6 +306,7 @@
   let log = $ref('');
   let showSplitTaskDialog = $ref(false);
   let showFilesDialog = $ref(false);
+  let btnLoading = $ref(false);
   const filters: FormField[] = [
     asyncCustomer(),
     {
@@ -640,6 +643,7 @@
   }
 
   async function updateSuggestedPrice() {
+    btnLoading = true;
     let currentTask = selectedTaskList[0];
     const taskSize = selectedTaskList[0].size;
     const taskWeight = selectedTaskList[0].weight;
@@ -657,7 +661,8 @@
       taskPostcode,
       deliveryMethod
     );
-    await updateTask(currentTask);
+    await safeScope(() => updateTask(currentTask));
+    btnLoading = false;
   }
 
   function showTaskTray() {

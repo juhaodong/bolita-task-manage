@@ -91,39 +91,37 @@
       values.inStatus = '已报价';
       values.waitPrice = '1';
     }
-    await safeScope(async () => {
-      for (const id of prop.mergedOutIds) {
-        const outboundForecastInfo = await getOutboundForecastById(id);
-        if (prop.typeName === 'car') {
-          outboundForecastInfo.AMZID = values.AMZID;
-          outboundForecastInfo.ISA = values.ISA;
-          outboundForecastInfo.bookCarTimestamp = values.bookCarTimestamp;
-          outboundForecastInfo.inStatus = values.inStatus;
-          outboundForecastInfo.carStatus = values.carStatus;
-          outboundForecastInfo.note = values.note;
-          outboundForecastInfo.reservationGetProductDetailTime =
-            values.reservationGetProductDetailTime;
-          outboundForecastInfo.reservationGetProductTime = values.reservationGetProductTime;
-          outboundForecastInfo.waitCar = '1';
-          outboundForecastInfo.waybillId = values.waybillId;
-          if (!outboundForecastInfo.ref) {
-            outboundForecastInfo.ref = outboundForecastInfo.ref
-              ? outboundForecastInfo.ref
-              : outboundForecastInfo.id;
-          }
-          await updateTaskListAfterBookingCar(id);
-        } else {
-          outboundForecastInfo.ref = values.ref.toString();
-          outboundForecastInfo.costPrice = values.costPrice;
-          outboundForecastInfo.inStatus = values.inStatus;
-          outboundForecastInfo.suggestedPrice = values.suggestedPrice;
-          outboundForecastInfo.waitPrice = '1';
-          await updateTaskListAfterOfferPriceCar(id, values);
+    for (const id of prop.mergedOutIds) {
+      const outboundForecastInfo = await getOutboundForecastById(id);
+      if (prop.typeName === 'car') {
+        outboundForecastInfo.AMZID = values.AMZID;
+        outboundForecastInfo.ISA = values.ISA;
+        outboundForecastInfo.bookCarTimestamp = values.bookCarTimestamp;
+        outboundForecastInfo.inStatus = values.inStatus;
+        outboundForecastInfo.carStatus = values.carStatus;
+        outboundForecastInfo.note = values.note;
+        outboundForecastInfo.reservationGetProductDetailTime =
+          values.reservationGetProductDetailTime;
+        outboundForecastInfo.reservationGetProductTime = values.reservationGetProductTime;
+        outboundForecastInfo.waitCar = '1';
+        outboundForecastInfo.waybillId = values.waybillId;
+        if (!outboundForecastInfo.ref) {
+          outboundForecastInfo.ref = outboundForecastInfo.ref
+            ? outboundForecastInfo.ref
+            : outboundForecastInfo.id;
         }
-        await addOrUpdateWithRefOutboundForecast(outboundForecastInfo);
+        await updateTaskListAfterBookingCar(id);
+      } else {
+        outboundForecastInfo.ref = values.ref.toString();
+        outboundForecastInfo.costPrice = values.costPrice;
+        outboundForecastInfo.inStatus = values.inStatus;
+        outboundForecastInfo.suggestedPrice = values.suggestedPrice;
+        outboundForecastInfo.waitPrice = '1';
+        await updateTaskListAfterOfferPriceCar(id, values);
       }
-      emit('saved', values);
-    });
+      await safeScope(() => addOrUpdateWithRefOutboundForecast(outboundForecastInfo));
+    }
+    emit('saved', values);
     loading = false;
   }
 </script>

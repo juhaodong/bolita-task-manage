@@ -2,6 +2,7 @@ import hillo from 'hillo';
 import dayjs from 'dayjs';
 import { checkPrice } from '@/api/dataLayer/common/common';
 import { getQuery } from '@/api/newDataLayer/Common/Common';
+import { toastError } from '@/store/utils/utils';
 
 const typeName = 'bolitaTask';
 
@@ -228,22 +229,27 @@ export async function searchTaskPrice(
   zipCode,
   deliveryMethod
 ) {
+  console.log(size, weight, country, outboundMethod, number, zipCode, deliveryMethod, '287×85×133');
   if (deliveryMethod !== 'DHL') {
+    toastError(deliveryMethod !== 'DHL');
     return '人工询价';
   }
-  const sizeFormat = /^\d+\*\d+\*\d+$/.test(size);
+  const sizeFormat = /^\d*\.?\d+\*\d*\.?\d+\*\d*\.?\d+$/.test(size);
   if (!sizeFormat) {
+    toastError('size不符合标准!');
     return '人工询价';
   }
   const [long, width, height] = size.split('*');
   let currentWeight = 0;
   if (long > 2.4 || width > 1.2 || height > 2.2 || weight > 1500) {
+    toastError('尺寸无法计算或者重量超重!');
     return '人工询价';
   }
   const isGermany = country.toLowerCase() === 'de';
   const maxItems = isGermany ? 8 : 4;
 
   if (number > maxItems) {
+    toastError('数量太大!');
     return '人工询价';
   }
   const densityFactor = isGermany ? 150 : 330;

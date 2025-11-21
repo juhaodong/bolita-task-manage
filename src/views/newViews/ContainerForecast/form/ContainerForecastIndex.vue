@@ -143,6 +143,10 @@
         //   it.number = 0;
         // }
 
+        if (['木箱', '纸箱'].includes(it.packing)) {
+          it.trayNum = it.number;
+        }
+
         if (it.changeOrderFiles === '是') {
           it.operateInStorage = '是';
         }

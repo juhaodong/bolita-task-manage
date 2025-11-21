@@ -8,7 +8,7 @@
 <script lang="ts" setup>
   import NormalForm from '@/views/bolita-views/composable/NormalForm.vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
-  import { FormFields, safeScope } from '@/api/dataLayer/common/GeneralModel';
+  import { FormFields } from '@/api/dataLayer/common/GeneralModel';
   import { schemas } from '@/views/newViews/OutboundForecast/columns';
 
   interface Props {
@@ -51,9 +51,7 @@
 
   async function handleSubmit(values: any) {
     loading = true;
-    await safeScope(async () => {
-      emit('saved', values);
-    });
+    emit('saved', values);
     loading = false;
   }
 </script>
