@@ -42,22 +42,22 @@
     await safeScope(() =>
       updateOutboundForecast(currentOutBoundInfo?.id, {
         cashStatus: CashStatus.Done,
-        finalPrice: extraInfo.finalPrice
-      }))
-      // await saveCash(
-      //   {
-      //     ref: currentOutBoundInfo?.ref ?? '',
-      //     operationId: currentOutBoundInfo.id,
-      //     operationType: OperationType.Out,
-      //     amount: extraInfo.outPrice,
-      //     note: extraInfo.outPriceNote,
-      //     subtotal: safeParseFloat(extraInfo.outPrice) + safeParseFloat(extraInfo.outOtherPrice),
-      //     outOtherPrice: extraInfo.outOtherPrice,
-      //   },
-      //   currentOutBoundInfo?.outCashId
-      // );
-      emit('save');
-    });
+        finalPrice: extraInfo.finalPrice,
+      })
+    );
+    // await saveCash(
+    //   {
+    //     ref: currentOutBoundInfo?.ref ?? '',
+    //     operationId: currentOutBoundInfo.id,
+    //     operationType: OperationType.Out,
+    //     amount: extraInfo.outPrice,
+    //     note: extraInfo.outPriceNote,
+    //     subtotal: safeParseFloat(extraInfo.outPrice) + safeParseFloat(extraInfo.outOtherPrice),
+    //     outOtherPrice: extraInfo.outOtherPrice,
+    //   },
+    //   currentOutBoundInfo?.outCashId
+    // );
+    emit('save');
   }
 
   async function save() {
