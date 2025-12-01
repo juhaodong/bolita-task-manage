@@ -24,7 +24,12 @@
     return useUserStore()?.info;
   });
 
-  const options = ['纸箱', '木箱', '标准托盘', '大件托盘'];
+  const options = [
+    { label: '纸箱', value: '纸箱' },
+    { label: '木箱', value: '木箱' },
+    { label: '标准托盘', value: '标准托盘' },
+    { label: '大件托盘', value: '大件托盘' },
+  ];
 
   const userPowerType = $computed(() => {
     return userInfo?.userType;
@@ -236,12 +241,12 @@
           <thead>
             <tr>
               <th style="width: 100px">票号</th>
-              <th style="width: 40px">预报 托</th>
-              <th style="width: 40px">预报 箱</th>
-              <th style="width: 80px">入库 托</th>
-              <th style="width: 80px">入库 箱</th>
+              <th style="width: 40px">预报 箱托</th>
+              <th style="width: 40px">预报 件</th>
+              <th style="width: 80px">入库 箱托</th>
+              <th style="width: 80px">入库 件</th>
               <th style="width: 160px">尺寸</th>
-              <th style="width: 80px">包装</th>
+              <th style="width: 80px">入库方式</th>
               <th style="width: 80px">库位</th>
               <th style="width: 80px">仓库备注</th>
             </tr>
@@ -259,20 +264,10 @@
               <td class="text-center">{{ item?.trayNum ?? 0 }}</td>
               <td class="text-center">{{ item?.number ?? 0 }}</td>
               <td>
-                <n-input
-                  v-model:value="item.arrivedTrayNumEdit"
-                  :disabled="!canEdit"
-                  :status="compareStatus(item.arrivedTrayNumEdit, item.trayNum)"
-                  @focus="item.arrivedTrayNumEdit = ''"
-                />
+                <n-input v-model:value="item.arrivedTrayNumEdit" :disabled="!canEdit" />
               </td>
               <td>
-                <n-input
-                  v-model:value="item.arrivedContainerNumEdit"
-                  :disabled="!canEdit"
-                  :status="compareStatus(item.arrivedContainerNumEdit, item.containerNum)"
-                  @focus="item.arrivedContainerNumEdit = ''"
-                />
+                <n-input v-model:value="item.arrivedContainerNumEdit" :disabled="!canEdit" />
               </td>
               <td>
                 <n-tooltip v-if="item.size" trigger="hover">
@@ -316,10 +311,10 @@
             <tr class="summary-row">
               <td style="width: 100px" class="font-bold">总计</td>
               <td style="width: 200px"
-                >预报 箱/托: {{ totalContainerCount }}/{{ totalTrayCount }}</td
+                >预报 箱/箱托: {{ totalContainerCount }}/{{ totalTrayCount }}</td
               >
               <td style="width: 200px"
-                >到达 箱/托: {{ totalArrivedContainerCount }}/{{ totalArrivedTrayCount }}</td
+                >到达 箱/箱托: {{ totalArrivedContainerCount }}/{{ totalArrivedTrayCount }}</td
               >
             </tr>
           </tbody>

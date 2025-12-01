@@ -5,7 +5,7 @@
         :columns="displayColumns"
         :data="allList"
         class="my-4"
-        max-height="450"
+        max-height="200"
         virtual-scroll
       />
       <n-alert v-if="hasDifferentDeliveryMethods" type="warning" class="mb-2">
@@ -21,7 +21,7 @@
         placeholder="是否需要定车"
       />
       <template v-if="needCar === '1'">
-        <div class="mt-2">
+        <div class="mt-2 form-container" style="max-height: 30vh; overflow-y: auto">
           <n-descriptions :columns="4" bordered label-placement="left">
             <n-descriptions-item :span="2" label="物流公司 (必填)">
               <n-select
@@ -33,18 +33,43 @@
             <n-descriptions-item :label="isaRequired ? 'isa (必填)' : 'isa'" :span="2">
               <n-input v-model:value="isa" />
             </n-descriptions-item>
-            <n-descriptions-item :span="2" label="运单号">
-              <n-input v-model:value="waybillId" />
+            <n-descriptions-item :span="4" label="运单号">
+              <div v-for="(item, index) in allList" :key="item.id" class="mb-2">
+                <div class="flex items-center">
+                  <span class="mr-2" style="width: 30%">{{ item.ticketId || index + 1 }}:</span>
+                  <n-input v-model:value="waybillIds[item.id]" placeholder="请输入运单号" />
+                </div>
+              </div>
             </n-descriptions-item>
             <n-descriptions-item :span="2" label="PO">
               <n-input v-model:value="po" />
             </n-descriptions-item>
-            <n-descriptions-item :span="2" label="整车报价">
+
+            <n-descriptions-item v-if="allList.length > 1" :span="2" label="需要整车报价">
+              <n-switch v-model:value="priceWithCar" />
+            </n-descriptions-item>
+            <n-descriptions-item
+              :span="2"
+              label="整车报价"
+              v-if="priceWithCar || allList.length === 1"
+            >
               <n-input v-model:value="suggestedPrice" />
             </n-descriptions-item>
-            <n-descriptions-item :span="2" label="底价">
-              <n-input v-model:value="costPrice" />
+            <n-descriptions-item
+              :span="4"
+              label="整车报价"
+              v-if="!priceWithCar && allList.length > 1"
+            >
+              <div v-for="(item, index) in allList" :key="item.id" class="mb-2">
+                <div class="flex items-center">
+                  <span class="mr-2" style="width: 30%">{{ item.ticketId || index + 1 }}:</span>
+                  <n-input v-model:value="itemPrices[item.id]" placeholder="请输入价格" />
+                </div>
+              </div>
             </n-descriptions-item>
+            <!--            <n-descriptions-item :span="2" label="底价">-->
+            <!--              <n-input v-model:value="costPrice" />-->
+            <!--            </n-descriptions-item>-->
             <n-descriptions-item :span="2" label="预计取货日期 (必填)">
               <n-date-picker
                 v-model:value="reservationGetProductTime"
@@ -66,7 +91,7 @@
         </div>
       </template>
       <n-space v-if="model.length > 0" align="center" class="mt-4" justify="space-between">
-        <div>总数量: {{ totalNumber }}件 {{ totalTray }}托</div>
+        <div>总数量: {{ totalNumber }}件 {{ totalTray }}箱托</div>
         <div :style="{ color: parseFloat(totalWeight) > 20000 ? 'red' : '' }"
           >总重量: {{ totalWeight }}</div
         >
@@ -74,7 +99,7 @@
           >总体积: {{ totalVolume }}</div
         >
         <div :style="{ color: parseFloat(totalVolume) > 70 ? 'red' : '' }"
-          >总价格: {{ suggestedPrice }}</div
+          >总价格: {{ totalPrice }}</div
         >
       </n-space>
       <n-button
@@ -89,7 +114,7 @@
   </n-card>
 </template>
 <script lang="ts" setup>
-  import { computed, h, onMounted, watch } from 'vue';
+  import { computed, h, onMounted, ref, watch } from 'vue';
   import { DataTableColumns, NButton } from 'naive-ui';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { generateOptionFromArray, safeSumBy } from '@/store/utils/utils';
@@ -128,7 +153,8 @@
   ]);
   let logisticsCompany = $ref('');
   let isa = $ref('');
-  let waybillId = $ref('');
+  let waybillIds = $ref({});
+  let itemPrices = $ref({});
   let reservationGetProductTime = $ref(null);
   let reservationGetProductDetailTime = $ref('');
   let note = $ref('');
@@ -166,6 +192,7 @@
 
   let needCar = $ref('0');
   let btnLoading = $ref(false);
+  let priceWithCar = ref(true);
 
   // Reset needCar to '0' if deliveryMethods become different
   watch(hasDifferentDeliveryMethods, (newVal) => {
@@ -173,10 +200,38 @@
       needCar = '0';
     }
   });
+
+  watch(
+    priceWithCar,
+    (value) => {
+      if (!value) {
+        // When priceWithCar is false and allList.length > 1, set itemPrices to suggestedPrice values from allList
+        itemPrices = {};
+        allList.forEach((item) => {
+          if (item.id && item.suggestedPrice) {
+            itemPrices[item.id] = item.suggestedPrice;
+          }
+        });
+      } else {
+        // Otherwise, set itemPrices to empty object
+        itemPrices = {};
+      }
+    },
+    { deep: true, immediate: true }
+  );
+
+  const totalPrice = computed(() => {
+    if (!priceWithCar.value && allList.length > 1) {
+      return Object.values(itemPrices)
+        .reduce((sum, price) => sum + parseFloat(price || 0), 0)
+        .toString();
+    } else {
+      return suggestedPrice;
+    }
+  });
   const emit = defineEmits(['saved']);
 
   function removeTask(row) {
-    console.log(row, 'row');
     allList = allList.filter((it) => it.id !== row.id);
   }
 
@@ -198,22 +253,22 @@
       totalWeight: safeSumBy(allList, 'weight'),
       totalNumber: safeSumBy(allList, 'arrivedContainerNum'),
       trayNum: safeSumBy(allList, 'arrivedTrayNum'),
-      suggestedPrice: suggestedPrice !== '人工询价' ? '整车报价:' + suggestedPrice : '人工询价',
+      suggestedPrice: priceWithCar.value || allList.length === 1 ? suggestedPrice : '',
       bolitaTaskIds: taskIds,
       isa: isa,
-      waybillId: waybillId,
+      waybillId: Object.values(waybillIds).join(','),
       reservationGetProductTime:
         needCar === '1' ? dayjs(reservationGetProductTime).format('YYYY-MM-DDTHH:mm:ss') : '',
       reservationGetProductDetailTime: needCar === '1' ? reservationGetProductDetailTime : '',
       po: po,
       note: note,
       logisticsCompany: logisticsCompany,
-      costPrice: costPrice,
+      // costPrice: costPrice,
     };
     const currentInfo = Object.assign(defaultOutboundList, res);
 
     const outboundId = (await addOrUpdateWithRefOutboundForecast(currentInfo)).data.id;
-    await updateTaskListAfterBookingCarWithInfo(outboundId, currentInfo);
+    await updateTaskListAfterBookingCarWithInfo(outboundId, currentInfo, itemPrices, waybillIds);
     if (needCar === '1') {
       if (allList[0].outboundMethod === '散货') {
         if (allDeliveryList.includes(allList[0].deliveryMethod)) {
@@ -264,12 +319,28 @@
 
   onMounted(() => {
     allList = prop.model;
-    const allPriceList = allList.map((it) => it.suggestedPrice);
-    if (allPriceList.includes('人工询价')) {
-      suggestedPrice = '人工询价';
-    } else {
-      suggestedPrice = safeSumBy(allList, 'suggestedPrice');
-    }
+    // const allPriceList = allList.map((it) => it.suggestedPrice);
+    // if (allPriceList.includes('人工询价')) {
+    //   suggestedPrice = '人工询价';
+    // } else {
+    //   suggestedPrice = safeSumBy(allList, 'suggestedPrice');
+    // }
+
+    // Initialize waybillIds from existing data if available
+    // if (allList.length > 0) {
+    //   // Check if there's existing waybill data
+    //   const existingWaybill = allList[0].waybillId || '';
+    //   if (existingWaybill && existingWaybill.includes(':')) {
+    //     // Parse existing waybill data in format "id1:waybill1,id2:waybill2,..."
+    //     const waybillPairs = existingWaybill.split(',');
+    //     waybillPairs.forEach((pair) => {
+    //       const [id, value] = pair.split(':');
+    //       if (id && allList.some((item) => item.id === id)) {
+    //         waybillIds[id] = value || '';
+    //       }
+    //     });
+    //   }
+    // }
   });
 </script>
 

@@ -254,7 +254,7 @@
         safeSumBy(taskList, 'number').toString() +
         '件' +
         safeSumBy(taskList, 'trayNum').toString() +
-        '托';
+        '箱托';
       if (value.files) {
         try {
           value.files = await saveFiles(value.files);

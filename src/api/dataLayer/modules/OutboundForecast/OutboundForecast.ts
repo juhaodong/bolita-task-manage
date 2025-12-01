@@ -66,10 +66,17 @@ export async function updateTaskListAfterBookingCar(id) {
   }
 }
 
-export async function updateTaskListAfterBookingCarWithInfo(id, info) {
+export async function updateTaskListAfterBookingCarWithInfo(id, info, priceInfo, waybillIds) {
   const taskListIds = info.bolitaTaskIds;
   const userInfo = useUserStore().info;
   for (const taskId of taskListIds) {
+    if (priceInfo) {
+      const res = await getTaskListById(taskId);
+      res.suggestedPrice = priceInfo[taskId];
+      res.waybillId = waybillIds[taskId];
+      await updateTask(res);
+    }
+
     await addOrUpdateTaskTimeLine({
       useType: 'normal',
       bolitaTaskId: taskId,

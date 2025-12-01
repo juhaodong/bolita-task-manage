@@ -50,8 +50,18 @@
       width: 140,
     },
     {
+      title: '运单号',
+      key: 'waybillId',
+      width: 140,
+    },
+    {
       title: '物流渠道',
       key: 'deliveryMethod',
+      width: 100,
+    },
+    {
+      title: '价格',
+      key: 'suggestedPrice',
       width: 100,
     },
     {

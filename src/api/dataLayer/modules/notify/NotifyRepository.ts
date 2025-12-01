@@ -27,7 +27,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'number',
     },
     {
-      label: '数量', // 原托数
+      label: '托数', // 现数量
       field: 'trayNum',
     },
     {
@@ -43,7 +43,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'size',
     },
     {
-      label: '入库方式', // 原包装
+      label: '包装', // 现入库方式
       field: 'packing',
     },
     {
