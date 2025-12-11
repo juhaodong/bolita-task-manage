@@ -218,6 +218,8 @@ export const editErrorInStatusList = ['等待入库', '入库待出库', '入库
 
 export const allCarStatusList = ['已定车', '无需定车', '已装车', '已取消'];
 
+export const packingList = ['纸箱', '木箱', '标准托盘', '大件托盘'];
+
 export const allOutboundMethod = ['散货', '存仓', '大件托盘', '标准托盘'];
 
 export const allDeliveryMethod = ['FBA卡车派送', 'DHL', 'DPD', 'UPS', 'GLS', '其他'];

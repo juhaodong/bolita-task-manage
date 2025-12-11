@@ -237,6 +237,7 @@
     allDeliveryMethod,
     allInStatusList,
     allOutboundMethod,
+    packingList,
   } from './columns';
   import { $ref } from 'vue/macros';
   import {
@@ -335,6 +336,14 @@
       component: 'NSelect',
       componentProps: {
         options: generateOptionFromArray(allCarStatusList),
+      },
+    },
+    {
+      label: '包装',
+      field: 'packing',
+      component: 'NSelect',
+      componentProps: {
+        options: generateOptionFromArray(packingList),
       },
     },
     {
