@@ -264,14 +264,17 @@
     {
       title: 'Ref',
       key: 'ref',
+      width: 160,
     },
     {
       title: '运单号',
       key: 'waybillId',
+      width: 160,
     },
     {
       title: 'ISA',
       key: 'isa',
+      width: 160,
     },
     statusColumnEasy({
       title: '状态',
@@ -291,11 +294,11 @@
       width: 100,
     },
     {
-      title: '总托数',
+      title: '箱托数',
       key: 'trayNum',
     },
     {
-      title: '总件数',
+      title: '件数',
       key: 'totalNumber',
     },
     // {

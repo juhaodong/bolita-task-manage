@@ -174,11 +174,11 @@
   });
 
   const totalVolume = computed(() => {
-    return safeSumBy(allList, 'volume');
+    return safeSumBy(allList, 'volume').toFixed(3);
   });
 
   const totalWeight = computed(() => {
-    return safeSumBy(allList, 'weight');
+    return safeSumBy(allList, 'weight').toFixed(2);
   });
 
   const hasDifferentDeliveryMethods = computed(() => {
