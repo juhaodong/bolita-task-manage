@@ -266,7 +266,6 @@
       // costPrice: costPrice,
     };
     const currentInfo = Object.assign(defaultOutboundList, res);
-
     const outboundId = (await addOrUpdateWithRefOutboundForecast(currentInfo)).data.id;
     await updateTaskListAfterBookingCarWithInfo(outboundId, currentInfo, itemPrices, waybillIds);
     if (needCar === '1') {

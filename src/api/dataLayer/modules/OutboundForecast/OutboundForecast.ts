@@ -72,7 +72,7 @@ export async function updateTaskListAfterBookingCarWithInfo(id, info, priceInfo,
   for (const taskId of taskListIds) {
     if (priceInfo) {
       const res = await getTaskListById(taskId);
-      res.suggestedPrice = priceInfo[taskId];
+      res.suggestedPrice = priceInfo[taskId] ?? '';
       res.waybillId = waybillIds[taskId];
       await updateTask(res);
     }
