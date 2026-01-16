@@ -25,6 +25,7 @@
     { label: 'Bolita', value: 'Bolita' },
     { label: 'FinsterWalder', value: 'FinsterWalder' },
     { label: 'Courierfeld', value: 'Courierfeld' },
+    { label: '其他', value: 'other' },
   ]);
   let logisticsCompany = $ref('');
   let isa = $ref('');
@@ -102,10 +103,13 @@
           <n-input v-model:value="isa" />
         </n-descriptions-item>
         <n-descriptions-item :span="2" label="运单号">
-          <n-input v-model:value="waybillId" />
+          <n-input disabled v-model:value="waybillId" />
         </n-descriptions-item>
         <n-descriptions-item :span="2" label="整车报价">
-          <n-input v-model:value="suggestedPrice" />
+          <n-input
+            :disabled="info.deliveryMethod === '自提' || info.deliveryMethod === '客户自提'"
+            v-model:value="suggestedPrice"
+          />
         </n-descriptions-item>
         <n-descriptions-item :span="2" label="底价">
           <n-input v-model:value="costPrice" />

@@ -44,6 +44,7 @@
           :disabled="selectedOutboundForecastList.length !== 1"
           class="action-button"
           size="small"
+          :type="cmrButton"
           @click="editCmr"
           >CMR
         </n-button>
@@ -51,8 +52,17 @@
           :disabled="selectedOutboundForecastList.length !== 1"
           class="action-button"
           size="small"
+          :type="lieferscheinButton"
           @click="editLieferschein"
           >Lieferschein
+        </n-button>
+        <n-button
+          :disabled="selectedOutboundForecastList.length !== 1"
+          class="action-button"
+          size="small"
+          :type="deliveryFilesButton"
+          @click="editDeliveryFiles"
+          >快递面单
         </n-button>
         <!--        <n-button-->
         <!--          :disabled="selectedOutboundForecastList.length !== 1"-->
@@ -567,6 +577,29 @@
   async function editLieferschein() {
     await handleFileUpload('lieferscheinFiles');
   }
+
+  async function editDeliveryFiles() {
+    await handleFileUpload('deliveryFiles');
+  }
+
+  const deliveryFilesButton = $computed(() => {
+    const res =
+      selectedOutboundForecastList.length === 1 && selectedOutboundForecastList[0].deliveryFiles;
+    return res ? 'success' : 'default';
+  });
+
+  const lieferscheinButton = $computed(() => {
+    const res =
+      selectedOutboundForecastList.length === 1 &&
+      selectedOutboundForecastList[0].lieferscheinFiles;
+    return res ? 'success' : 'default';
+  });
+
+  const cmrButton = $computed(() => {
+    const res =
+      selectedOutboundForecastList.length === 1 && selectedOutboundForecastList[0].cmrFiles;
+    return res ? 'success' : 'default';
+  });
 
   async function handleFileUpload(fieldName) {
     if (selectedOutboundForecastList.length !== 1) return;

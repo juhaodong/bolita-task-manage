@@ -38,6 +38,13 @@
           @click="editPod"
           >POD
         </n-button>
+        <n-button
+          :disabled="selectedOutboundForecastList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="showFinishConfirm"
+          >完成
+        </n-button>
       </div>
       <!-- Filter controls are now handled by FilterBar component -->
       <div class="my-2"></div>
@@ -61,6 +68,16 @@
       >
         <loading-car-list :outbound-info="currentInfo" @saved="saved" />
       </n-modal>
+      <n-modal
+        v-model:show="showFinishDialog"
+        :show-icon="false"
+        class="modal-small"
+        preset="card"
+        style="width: 600px"
+        title="请确认"
+      >
+        <confirm-dialog :title="'确认该Ref已经完成？'" @saved="finishRef" />
+      </n-modal>
     </n-card>
     <no-power-page v-else />
   </div>
@@ -69,7 +86,7 @@
 <script lang="ts" setup>
   import { reactive, ref } from 'vue';
   import { BasicTable } from '@/components/Table';
-  import { DataTableColumns, NButton } from 'naive-ui';
+  import { DataTableColumns, NButton, useMessage } from 'naive-ui';
   import { $ref } from 'vue/macros';
   import dayjs from 'dayjs';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
@@ -95,6 +112,7 @@
     updateTask,
   } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
+  import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
 
   const showModal = ref(false);
 
@@ -340,6 +358,43 @@
       console.error('下载失败:', error);
     }
   }
+  let showFinishDialog = $ref(false);
+  function showFinishConfirm() {
+    showFinishDialog = true;
+  }
+  const message = useMessage();
+
+  async function finishRef() {
+    const editInfo = Object.assign({}, selectedOutboundForecastList[0]);
+    editInfo.inStatus = '已完成';
+    const taskList = await getTaskListByIds(editInfo.bolitaTaskIds);
+
+    // Check if any task has inStatus === '异常'
+    const exceptionTasks = taskList.filter((task) => task.inStatus === '异常');
+    if (exceptionTasks.length > 0) {
+      message.error('当前Ref有异常明细！');
+      return;
+    }
+
+    await addOrUpdateOutboundForecast(editInfo);
+    for (const currentTask of taskList) {
+      currentTask.inStatus = '已完成';
+      await updateTask(currentTask);
+      const allTask = await getTaskListByNotifyId(currentTask.notifyId);
+      const alreadyDoneTask = allTask.filter((it) => it.inStatus === '已完成');
+      if (alreadyDoneTask.length === allTask.length) {
+        const notify = await getNotifyById(currentTask.notifyId);
+        notify.inStatus = '全部出库';
+        await addOrUpdateNotify(notify);
+      } else {
+        const notify = await getNotifyById(currentTask.notifyId);
+        notify.inStatus = '部分出库';
+        await addOrUpdateNotify(notify);
+      }
+    }
+    console.log('33');
+    reloadTable();
+  }
 
   function updateFilter(value) {
     filterObj = value;
@@ -423,6 +478,7 @@
     carDialog = false;
     showConfirmCancelDialog = false;
     loadingCarDialog = false;
+    showFinishDialog = false;
     selectedOutboundForecastList = [];
     checkedRowKeys = [];
   }

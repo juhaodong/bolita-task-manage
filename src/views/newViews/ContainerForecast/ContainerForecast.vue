@@ -42,6 +42,7 @@
           v-if="!userTypeIsCustomer()"
           :disabled="selectedNotifyList.length !== 1"
           class="action-button"
+          :type="uploadFromBtnColor"
           size="small"
           @click="uploadUnloadingForm"
         >
@@ -865,13 +866,10 @@
     }
   }
 
-  const disableUnloading = $computed(() => {
-    return (
-      selectedNotifyList.length !== 1 ||
-      ![InBoundStatus.Wait, InBoundStatus.WaitUnloading, InBoundStatus.WaitCheck].includes(
-        selectedNotifyList[0]?.inStatus
-      )
-    );
+  const uploadFromBtnColor = $computed(() => {
+    const res = selectedNotifyList.length === 1 && selectedNotifyList[0].unloadingFile;
+    console.log(res, 'res');
+    return res ? 'success' : 'default';
   });
 
   async function selectedHeader() {

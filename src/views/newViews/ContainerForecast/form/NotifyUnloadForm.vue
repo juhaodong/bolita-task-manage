@@ -219,6 +219,8 @@
             <n-time-picker
               v-model:formatted-value="startTime"
               value-format="HH:mm:ss"
+              format="hh:mm a"
+              :minutes="10"
               class="full-width-input"
             />
           </n-descriptions-item>
@@ -226,6 +228,8 @@
             <n-time-picker
               v-model:formatted-value="endTime"
               value-format="HH:mm:ss"
+              format="hh:mm a"
+              :minutes="10"
               class="full-width-input"
             />
           </n-descriptions-item>

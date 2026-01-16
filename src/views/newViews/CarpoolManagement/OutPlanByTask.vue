@@ -150,6 +150,7 @@
     { label: 'Bolita', value: 'Bolita' },
     { label: 'FinsterWalder', value: 'FinsterWalder' },
     { label: 'Courierfeld', value: 'Courierfeld' },
+    { label: '其他', value: 'other' },
   ]);
   let logisticsCompany = $ref('');
   let isa = $ref('');

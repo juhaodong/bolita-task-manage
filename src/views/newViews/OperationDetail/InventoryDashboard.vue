@@ -22,6 +22,7 @@
           :disabled="selectedNotifyList.length !== 1"
           class="action-button"
           size="small"
+          :type="unloadingPicButton"
           @click="showUnloadingPic"
         >
           卸柜照片
@@ -30,6 +31,7 @@
           :disabled="selectedNotifyList.length !== 1"
           class="action-button"
           size="small"
+          :type="unloadingFormButton"
           @click="uploadUnloadingForm"
         >
           下载卸柜单
@@ -362,6 +364,15 @@
     currentModel = null;
     showModal.value = true;
   }
+  const unloadingPicButton = $computed(() => {
+    const res = selectedNotifyList.length === 1 && selectedNotifyList[0].unloadingPic;
+    return res ? 'success' : 'default';
+  });
+
+  const unloadingFormButton = $computed(() => {
+    const res = selectedNotifyList.length === 1 && selectedNotifyList[0].unloadingFile;
+    return res ? 'success' : 'default';
+  });
 
   // Initialize component when mounted
   onMounted(async () => {

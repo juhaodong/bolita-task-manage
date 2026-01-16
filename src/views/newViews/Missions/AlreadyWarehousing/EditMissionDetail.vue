@@ -282,6 +282,7 @@
     let userInfo = useUserStore().info;
     if (values.outboundMethod === '存仓' && prop.model?.outboundMethod !== '存仓') {
       values.inStatus = '存仓';
+      values.outboundForecastId = null;
       await addOrUpdateTaskTimeLine({
         useType: 'storage',
         bolitaTaskId: values.id,
@@ -330,7 +331,7 @@
       detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
       note: '修改了 ' + editLabel.join(','),
     });
-    await safeScope(() => updateTask(Object.assign(waitEdit, values)));
+    await safeScope(() => updateTask(Object.assign({}, waitEdit, values)));
     emit('saved', values);
     loading = false;
   }

@@ -26,6 +26,14 @@
         >
           审核
         </n-button>
+        <n-button
+          :disabled="selectedTaskList.length !== 1"
+          class="action-button"
+          size="small"
+          @click="startEdit"
+        >
+          修改
+        </n-button>
         <n-button class="action-button" size="small" type="default" @click="downloadData">
           下载
         </n-button>
@@ -37,12 +45,7 @@
         >
           合并
         </n-button>
-        <n-button
-          :disabled="selectedTaskList.length !== 1 || !selectedTaskList[0].arrivedContainerNum"
-          class="action-button"
-          size="small"
-          @click="splitTask"
-        >
+        <n-button :disabled="splitButton" class="action-button" size="small" @click="splitTask">
           拆分
         </n-button>
         <n-button
@@ -262,6 +265,7 @@
     addOrUpdateTask,
     getTaskListByFilter,
     getTaskListByFilterWithPagination,
+    getTaskListByNotifyId,
     searchTaskPrice,
     updateTask,
   } from '@/api/newDataLayer/TaskList/TaskList';
@@ -563,6 +567,16 @@
     showFilesDialog = true;
   }
 
+  const splitButton = computed(() => {
+    console.log(selectedTaskList, 'selectedTaskList');
+    return (
+      selectedTaskList.length !== 1 ||
+      !selectedTaskList[0].arrivedContainerNum ||
+      selectedTaskList[0]?.outboundForecast?.inStatus === '已完成' ||
+      selectedTaskList[0]?.outboundForecast?.inStatus === '已定车'
+    );
+  });
+
   let showExceptionDialog = $ref(false);
   function setTaskError() {
     showExceptionDialog = true;
@@ -797,14 +811,12 @@
         await updateTask(res);
         const containerForecastInfo = await getNotifyById(res.notifyId);
         if (containerForecastInfo.inStatus === InBoundStatus.WaitCheck) {
-          const allDetailList = allList
-            .filter((x) => x.notifyId === res.notifyId)
-            .filter(
-              (b) =>
-                b.inStatus === InBoundDetailStatus.WaitSubmit ||
-                b.inStatus === InBoundDetailStatus.WaitCheck
-            );
-          if (allDetailList.length === 0) {
+          const allTaskLiatByNotify = (await getTaskListByNotifyId(res.notifyId)).filter(
+            (task) =>
+              task.inStatus === InBoundStatus.WaitCheck ||
+              task.inStatus === InBoundDetailStatus.WaitSubmit
+          );
+          if (allTaskLiatByNotify.length === 0) {
             containerForecastInfo.inStatus = InBoundStatus.Wait;
             containerForecastInfo.customerId = containerForecastInfo.customer.id;
             containerForecastInfo.inventoryId = containerForecastInfo.inventory.id;

@@ -42,6 +42,7 @@
         newSplitList.value.push({
           value: i.toString(),
           currentNumber: '',
+          currentTray: '',
           size: '',
           weight: '',
         });
@@ -59,6 +60,7 @@
         defaultTask.weight = item.weight;
         defaultTask.size = item.size ? item.size : prop.info.size;
         defaultTask.arrivedContainerNum = item.currentNumber;
+        defaultTask.arrivedTrayNum = item.currentTray;
         defaultTask.volume = (
           (parseFloat(defaultTask.volume) * parseFloat(item.currentNumber)) /
           parseFloat(prop.info.arrivedContainerNum)
@@ -118,6 +120,7 @@
           :label="'#' + item.value"
         >
           <n-input-number placeholder="请输入数量" v-model:value="item.currentNumber" />
+          <n-input-number placeholder="请输入托数" v-model:value="item.currentTray" />
           <n-input-number placeholder="请输入重量" v-model:value="item.weight" />
           <n-input placeholder="请输入尺寸" v-model:value="item.size" />
         </n-descriptions-item>
