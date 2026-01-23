@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { ref } from 'vue';
   import { NButton, NCard, NInput } from 'naive-ui';
-  import { checkPrice } from '@/api/dataLayer/common/common';
+  import { searchTaskPrice } from '@/api/newDataLayer/TaskList/TaskList';
 
   // Define reactive variables for form inputs
   const volume = ref('');
@@ -17,6 +17,7 @@
   const currentWeight = ref('');
   const outType = ref('木箱');
   const loading = ref(false);
+  const deliveryMethod = ref('DHL');
   const items = [
     {
       label: '托盘',
@@ -31,35 +32,15 @@
   // Function to handle form submission
   async function handleSubmit() {
     loading.value = true;
-    const sizeFormat = /^\d+\*\d+\*\d+$/.test(size.value);
-    if (!sizeFormat) {
-      message.value = '尺寸格式不对，请人工询价';
-      loading.value = false;
-      return;
-    }
-    const [long, width, height] = size.value.split('*');
-    message.value = '人工询价';
-    if (long > 2.4 || width > 1.2 || height > 2.2 || weight.value > 1500) {
-      loading.value = false;
-      return;
-    }
-    const isGermany = country.value.toLowerCase() === 'de';
-    const maxItems = isGermany ? 8 : 4;
-
-    if (numberAt.value > maxItems) {
-      loading.value = false;
-      return;
-    }
-    const densityFactor = isGermany ? 150 : 330;
-    const volumeWeight = long * width * height * densityFactor;
-
-    if (outType.value === '木箱') {
-      currentWeight.value = Math.max(volumeWeight, weight.value);
-    } else {
-      currentWeight.value = Math.max(volumeWeight, weight.value, densityFactor);
-    }
-    const res = await checkPrice(currentWeight.value, country.value, zipCode.value.slice(0, 2));
-    message.value = res.length > 0 ? res.map((it) => it.price).join(',') : '人工询价';
+    message.value = await searchTaskPrice(
+      size.value,
+      weight.value,
+      country.value,
+      outType.value,
+      numberAt.value,
+      zipCode.value,
+      deliveryMethod.value
+    );
     loading.value = false;
   }
 </script>
@@ -76,6 +57,9 @@
       </n-descriptions-item>
       <n-descriptions-item label="出库方式">
         <n-select :options="items" v-model:value="outType" />
+      </n-descriptions-item>
+      <n-descriptions-item label="物流方式">
+        <n-input v-model:value="deliveryMethod" />
       </n-descriptions-item>
     </n-descriptions>
     <n-descriptions :columns="2" bordered label-placement="left">
