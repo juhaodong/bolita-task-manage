@@ -162,7 +162,6 @@
     addNewFeeDialog = true;
   }
 
-
   const loadDataTable = async () => {
     // Build filter criteria
     let currentFilter = [];

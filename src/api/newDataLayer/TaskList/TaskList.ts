@@ -229,7 +229,6 @@ export async function searchTaskPrice(
   zipCode,
   deliveryMethod
 ) {
-  console.log(size, weight, country, outboundMethod, number, zipCode, deliveryMethod, '287×85×133');
   if (deliveryMethod !== 'DHL') {
     toastError(deliveryMethod !== 'DHL');
     return '人工询价';
@@ -239,9 +238,17 @@ export async function searchTaskPrice(
     toastError('size不符合标准!');
     return '人工询价';
   }
+  if (!zipCode) {
+    toastError('zipCode不符合标准!');
+    return '人工询价';
+  }
   const [long, width, height] = size.split('*');
+  // Convert dimensions from cm to m
+  const longInMeters = long / 100;
+  const widthInMeters = width / 100;
+  const heightInMeters = height / 100;
   let currentWeight = 0;
-  if (long > 2.4 || width > 1.2 || height > 2.2 || weight > 1500) {
+  if (longInMeters > 2.4 || widthInMeters > 1.2 || heightInMeters > 2.2 || weight > 1500) {
     toastError('尺寸无法计算或者重量超重!');
     return '人工询价';
   }
@@ -253,7 +260,7 @@ export async function searchTaskPrice(
     return '人工询价';
   }
   const densityFactor = isGermany ? 150 : 330;
-  const volumeWeight = long * width * height * densityFactor;
+  const volumeWeight = longInMeters * widthInMeters * heightInMeters * densityFactor;
 
   if (outboundMethod !== '大件托盘' && outboundMethod !== '标准托盘') {
     currentWeight = Math.max(volumeWeight, weight);

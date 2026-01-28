@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { onMounted, reactive, ref } from 'vue';
+  import { h, onMounted, reactive, ref } from 'vue';
   import { BasicTable } from '@/components/Table';
   import {
     allCarStatusList,
@@ -68,7 +68,7 @@
     getTaskListByFilterWithPagination,
   } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
-  import { NButton, useDialog, useMessage } from 'naive-ui';
+  import { NButton, NTooltip, useDialog, useMessage } from 'naive-ui';
   import * as XLSX from 'xlsx';
   import {
     addOrUpdateWithRefOutboundForecast,
@@ -179,6 +179,45 @@
     {
       title: '尺寸',
       key: 'size',
+      render(row) {
+        // 创建 tooltip 内容
+        const tooltipContent = h('div', {
+          style: {
+            whiteSpace: 'pre-line',
+            maxWidth: '400px',
+            lineHeight: '1.5',
+          },
+          innerHTML: row.size.replace(/\n/g, '<br>'),
+        });
+
+        // 创建单元格内容（省略显示）
+        const cellContent = h(
+          'div',
+          {
+            style: {
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              width: '100%',
+            },
+          },
+          row.size
+        );
+
+        // 用 NTooltip 包裹
+        return h(
+          NTooltip,
+          {
+            trigger: 'hover',
+            placement: 'top',
+            style: { maxWidth: '400px' },
+          },
+          {
+            trigger: () => cellContent,
+            default: () => tooltipContent,
+          }
+        );
+      },
     },
     {
       title: '包装',
@@ -210,7 +249,46 @@
     {
       title: '送货地址',
       key: 'address',
-      width: 100,
+      width: 200,
+      render(row) {
+        // 创建 tooltip 内容
+        const tooltipContent = h('div', {
+          style: {
+            whiteSpace: 'pre-line',
+            maxWidth: '400px',
+            lineHeight: '1.5',
+          },
+          innerHTML: row.address.replace(/\n/g, '<br>'),
+        });
+
+        // 创建单元格内容（省略显示）
+        const cellContent = h(
+          'div',
+          {
+            style: {
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              width: '100%',
+            },
+          },
+          row.address
+        );
+
+        // 用 NTooltip 包裹
+        return h(
+          NTooltip,
+          {
+            trigger: 'hover',
+            placement: 'top',
+            style: { maxWidth: '400px' },
+          },
+          {
+            trigger: () => cellContent,
+            default: () => tooltipContent,
+          }
+        );
+      },
     },
     {
       title: '出库方式',

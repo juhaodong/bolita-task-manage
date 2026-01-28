@@ -91,6 +91,13 @@
         } else {
           it.ticketId = it.ticketId.trim();
         }
+        if (it.normalNote) {
+          if (validateSizeFormat(it.normalNote)) {
+            it.size = it.normalNote.match(/\d+×\d+×\d+/)[0].replace(/×/g, '*');
+          } else {
+            it.size = it.normalNote;
+          }
+        }
         //判断大件托盘
         // if (it.outboundMethod === '大件托盘') {
         //   if (!it.productName) {
@@ -199,6 +206,12 @@
       console.log(e?.message);
     }
     return [];
+  }
+
+  function validateSizeFormat(str) {
+    const hasExactlyTwoCross = (str.match(/×/g) || []).length === 2;
+    const hasNoStar = !str.includes('*');
+    return hasExactlyTwoCross && hasNoStar;
   }
 
   function closeDialog() {

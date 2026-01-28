@@ -98,7 +98,21 @@
   });
 
   const canSave = $computed(() => {
-    return realDate && startTime && endTime && unloadPerson;
+    // Check if all required fields are filled
+    if (!realDate || !startTime || !endTime || !unloadPerson) {
+      return false;
+    }
+
+    // Check if packing is not empty for each row in the table
+    if (currentTaskList && currentTaskList.length > 0) {
+      for (const item of currentTaskList) {
+        if (!item.packing) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   });
 
   function allArrived() {
@@ -249,8 +263,8 @@
               <th style="width: 40px">预报 件</th>
               <th style="width: 80px">入库 箱托</th>
               <th style="width: 80px">入库 件</th>
-              <th style="width: 160px">尺寸</th>
-              <th style="width: 80px">入库方式</th>
+              <th style="width: 140px">尺寸</th>
+              <th style="width: 140px">入库方式</th>
               <th style="width: 80px">库位</th>
               <th style="width: 80px">仓库备注</th>
             </tr>
@@ -283,7 +297,12 @@
                 <n-input v-else v-model:value="item.size" :disabled="!canEdit" />
               </td>
               <td>
-                <n-select v-model:value="item.packing" :disabled="!canEdit" :options="options" />
+                <n-select
+                  v-model:value="item.packing"
+                  :disabled="!canEdit"
+                  :options="options"
+                  :class="{ 'error-border': !item.packing }"
+                />
               </td>
               <td>
                 <n-tooltip v-if="item.warehouseLocation" trigger="hover">
@@ -399,5 +418,9 @@
       max-height: unset !important;
       overflow: visible !important;
     }
+  }
+
+  :deep(.error-border) {
+    border: 1px solid red !important;
   }
 </style>
