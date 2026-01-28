@@ -538,9 +538,9 @@
       key: 'outboundForecast.waybillId',
     },
   ].map((it) => {
-    // it.ellipsis = {
-    //   tooltip: true,
-    // };
+    it.ellipsis = {
+      tooltip: true,
+    };
     return it;
   });
 
