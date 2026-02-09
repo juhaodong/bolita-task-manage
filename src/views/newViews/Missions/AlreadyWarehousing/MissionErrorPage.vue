@@ -18,6 +18,14 @@
         >
           修改
         </n-button>
+        <n-button
+          :disabled="selectedTaskList.length === 0"
+          class="action-button"
+          size="small"
+          @click="showSuccessDialog = true"
+        >
+          处理完成
+        </n-button>
       </div>
       <BasicTable
         ref="actionRef"
@@ -36,6 +44,16 @@
         title="编辑详情"
       >
         <edit-mission-detail :normal="false" :model="currentModel" @saved="reloadTable" />
+      </n-modal>
+      <n-modal
+        v-model:show="showSuccessDialog"
+        :show-icon="false"
+        class="modal-small"
+        preset="card"
+        style="width: 600px"
+        title="请确认"
+      >
+        <confirm-dialog :title="'确认已经处理完所选任务？'" @saved="confirmTask" />
       </n-modal>
     </div>
   </n-card>
@@ -58,25 +76,22 @@
   } from '@/views/bolita-views/composable/useableColumns';
   import dayjs from 'dayjs';
   import EditMissionDetail from '@/views/newViews/Missions/AlreadyWarehousing/EditMissionDetail.vue';
-  import { useUserStore } from '@/store/modules/user';
   import { getUserCustomerList } from '@/api/dataLayer/common/power';
   import { asyncCustomer, generateOptionFromArray } from '@/store/utils/utils';
   import FileSaver from 'file-saver';
   import {
-    addOrUpdateTask,
     getTaskListByFilter,
     getTaskListByFilterWithPagination,
+    updateTask,
   } from '@/api/newDataLayer/TaskList/TaskList';
-  import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { NButton, NTooltip, useDialog, useMessage } from 'naive-ui';
   import * as XLSX from 'xlsx';
-  import {
-    addOrUpdateWithRefOutboundForecast,
-    getOutboundForecastById,
-  } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import SingleFilterBar from '@/views/bolita-views/composable/SingleFilterBar.vue';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { createPaginationPlaceholders } from '@/api/newDataLayer/Common/Common';
+  import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
+  import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
+  import { useUserStore } from '@/store/modules/user';
 
   const showModal = ref(false);
   let editDetailModel = ref(false);
@@ -384,6 +399,7 @@
 
   const actionRef = ref();
   const props = defineProps<Prop>();
+  let showSuccessDialog = $ref(false);
 
   interface Prop {
     belongsToId?: string;
@@ -391,8 +407,22 @@
   let selectedTaskList = $ref([]);
   let allTaskList = $ref([]);
 
-  function startOutPlan() {
-    showModal.value = true;
+  async function confirmTask() {
+    const userInfo = useUserStore().info;
+    for (const item of selectedTaskList) {
+      item.errorStatus = '0';
+      item.errorReason = '';
+      await addOrUpdateTaskTimeLine({
+        useType: 'normal',
+        bolitaTaskId: item.id,
+        operator: userInfo?.realName,
+        detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
+        note: '异常处理完成！',
+      });
+      await updateTask(item);
+    }
+    showSuccessDialog = false;
+    await reloadTable();
   }
 
   async function handleCheck(rowKeys) {
@@ -408,34 +438,11 @@
   }
 
   let showCancelDialog = $ref(false);
-  async function cancelTask() {
-    currentInfo.inStatus = '已取消';
-    await addOrUpdateTask(currentInfo);
-    const userInfo = useUserStore().info;
-    await addOrUpdateTaskTimeLine({
-      useType: 'normal',
-      bolitaTaskId: currentInfo.id,
-      operator: userInfo?.realName,
-      detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
-      note: '取消当前任务！',
-    });
-    if (currentInfo.outboundId) {
-      const outboundInfo = await getOutboundForecastById(currentInfo.outboundId);
-      outboundInfo.inStatus = '等待审核';
-      await addOrUpdateWithRefOutboundForecast(outboundInfo);
-    }
-    showCancelDialog = false;
-  }
 
   async function startEdit() {
     currentModel = selectedTaskList[0];
     currentModel.customerName = currentModel.customer.customerName;
     editDetailModel.value = true;
-  }
-
-  function showCancel() {
-    currentInfo = selectedTaskList[0];
-    showCancelDialog = true;
   }
 
   const message = useMessage();
@@ -533,7 +540,7 @@
 
   async function getCurrentFilter() {
     currentFilter = [];
-    currentFilter['inStatusIn'] = ['异常'];
+    currentFilter['errorStatus'] = '1';
     const customerId = await getUserCustomerList();
     if (filterObj) {
       currentFilter = filterObj;
@@ -618,6 +625,7 @@
     checkedRows = [];
     selectedTaskList = [];
     showMergeDialog = false;
+    showSuccessDialog = false;
     await actionRef.value.reload();
   }
 

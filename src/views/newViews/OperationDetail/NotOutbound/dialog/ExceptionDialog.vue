@@ -38,7 +38,7 @@
     const updatedData = {
       ...props.row,
     };
-    updatedData.inStatus = status;
+    updatedData.errorStatus = '1';
     updatedData.outboundForecastId = null;
     updatedData.errorReason = reason;
 
@@ -86,9 +86,6 @@
   <loading-frame :loading="loading">
     <div class="mt-8">
       <n-descriptions :columns="1" bordered label-placement="left">
-        <n-descriptions-item :span="2" label="状态">
-          <n-input v-model:value="status" disabled />
-        </n-descriptions-item>
         <n-descriptions-item :span="2" label="异常原因 (必填)">
           <n-input
             type="textarea"

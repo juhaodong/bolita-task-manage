@@ -55,7 +55,7 @@
         :show-icon="false"
         class="modal-medium"
         preset="dialog"
-        style="width: 800px; height: 95vh"
+        style="width: 90%; height: 95vh"
         title="卸柜表"
       >
         <notify-unload-form :notify-id="currentNotifyId!" @save="reloadTable" />
@@ -229,7 +229,6 @@
   let currentId = $ref([]);
   let cancelRecord = $ref('');
   let currentRecord = $ref({});
-
   // Filter state
   let filterObj: any | null = $ref(null);
   let currentFilter = $ref([]);

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { computed, watchEffect } from 'vue';
+  import { computed, ref, watchEffect } from 'vue';
   import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import { handleRequest, safeParseInt, safeSumInt, toastSuccess } from '@/store/utils/utils';
   import dayjs from 'dayjs';
@@ -12,6 +12,7 @@
   import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
   import { addOrUpdateTask, getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
+  import ExceptionDialog from '@/views/newViews/OperationDetail/NotOutbound/dialog/ExceptionDialog.vue';
   import { timeDisplayYMD } from '@/views/bolita-views/composable/useableColumns';
 
   interface Props {
@@ -114,6 +115,25 @@
 
     return true;
   });
+
+  let showExceptionDialog = ref(false);
+  let selectedTask = ref(null);
+
+  function showErrorDialog(item) {
+    console.log(item, 'item');
+    selectedTask.value = item;
+    showExceptionDialog.value = true;
+  }
+
+  async function handleExceptionSaved() {
+    showExceptionDialog.value = false;
+    await reload();
+    // Update the local list with the updated data
+  }
+
+  function handleExceptionCancel() {
+    showExceptionDialog.value = false;
+  }
 
   function allArrived() {
     currentTaskList.forEach((it) => {
@@ -267,6 +287,7 @@
               <th style="width: 140px">入库方式</th>
               <th style="width: 80px">库位</th>
               <th style="width: 80px">仓库备注</th>
+              <th style="width: 80px">操作</th>
             </tr>
           </thead>
           <tbody v-if="currentTaskList">
@@ -322,6 +343,13 @@
                 </n-tooltip>
                 <n-input v-else v-model:value="item.note" :disabled="!canEdit" />
               </td>
+              <td>
+                <n-button
+                  :type="item.errorStatus === '1' ? 'warning' : ''"
+                  @click="showErrorDialog(item)"
+                  >异常</n-button
+                >
+              </td>
             </tr>
           </tbody>
         </n-table>
@@ -362,6 +390,13 @@
         </n-space>
       </div>
     </loading-frame>
+    <n-modal v-model:show="showExceptionDialog" preset="dialog" title="异常信息">
+      <exception-dialog
+        :row="selectedTask"
+        @saved="handleExceptionSaved"
+        @cancel="handleExceptionCancel"
+      />
+    </n-modal>
   </div>
 </template>
 

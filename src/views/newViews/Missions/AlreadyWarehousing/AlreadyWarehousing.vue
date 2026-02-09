@@ -325,6 +325,17 @@
       key: 'inStatus',
       list: generateOptionFromArray(allInStatusList),
     }),
+    {
+      title: '异常',
+      key: 'errorStatus',
+      render(record) {
+        if (record.errorStatus === '1') {
+          return h('span', { style: { color: 'red' } }, '异常');
+        } else {
+          return '';
+        }
+      },
+    },
     statusColumnSelectByTask({
       title: '订车',
       key: 'outboundForecast.inStatus',
