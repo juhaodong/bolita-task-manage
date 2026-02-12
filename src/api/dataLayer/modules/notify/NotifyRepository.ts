@@ -68,10 +68,10 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       label: '送货地址',
       field: 'address',
     },
-    // {
-    //   label: '邮编',
-    //   field: 'postcode',
-    // },
+    {
+      label: '邮编',
+      field: 'postcode',
+    },
     {
       label: '出库方式',
       field: 'outboundMethod',

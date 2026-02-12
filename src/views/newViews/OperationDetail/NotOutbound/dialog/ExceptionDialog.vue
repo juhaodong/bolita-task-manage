@@ -25,7 +25,6 @@
   onMounted(() => {});
 
   async function saveInfo() {
-    console.log(fileList, 'fileList');
     if (!reason) {
       requiredInfo = true;
       errorMessage = '请填写异常原因！';
@@ -50,7 +49,6 @@
     try {
       const userInfo = useUserStore().info;
       const filesUrl = await saveFiles(fileList);
-      updatedData.problemFiles = updatedData.problemFiles + ',' + filesUrl;
       // Update the task in the database
       await updateTask(updatedData);
 
@@ -66,6 +64,7 @@
         operator: userInfo?.realName,
         detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
         note: timelineNote,
+        problemFiles: filesUrl,
       });
       loading = false;
       emit('saved', updatedData);

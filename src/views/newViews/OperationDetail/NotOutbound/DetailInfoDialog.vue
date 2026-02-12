@@ -136,7 +136,6 @@
 
   async function letTaskOut(row) {
     loading = true;
-    console.log(row, 'row');
     const currentTaskInfo = Object.assign({}, row);
     currentTaskInfo.outboundForecastId = null;
     await updateTask(currentTaskInfo);
@@ -146,7 +145,7 @@
       bolitaTaskId: currentTaskInfo.id,
       operator: userInfo?.realName,
       detailTime: dayjs().format('YYYY-MM-DDTHH:mm:ss'),
-      note: '状态异常!异常原因:出库方式需要改为自提',
+      note: '被剔除',
     });
     const editOutboundForecast = Object.assign({}, props.outboundForecastInfo);
     editOutboundForecast.bolitaTaskIds = editOutboundForecast.bolitaTaskIds.filter(
@@ -163,7 +162,7 @@
   async function changeToPickUp(row) {
     loading = true;
     const currentTaskInfo = Object.assign({}, row);
-    currentTaskInfo.inStatus = '异常';
+    currentTaskInfo.errorStatus = '1';
     currentTaskInfo.outboundForecastId = null;
     currentTaskInfo.errorReason = '改为自提';
     await updateTask(currentTaskInfo);
