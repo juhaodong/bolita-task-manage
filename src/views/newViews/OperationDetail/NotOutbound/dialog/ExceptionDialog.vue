@@ -15,7 +15,6 @@
   const props = defineProps<Props>();
   const emit = defineEmits(['saved', 'cancel']);
 
-  let status = $ref('异常');
   let reason = $ref('');
   let loading = $ref(false);
   let requiredInfo = $ref(false);

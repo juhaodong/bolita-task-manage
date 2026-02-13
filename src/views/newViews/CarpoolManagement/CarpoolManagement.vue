@@ -201,14 +201,10 @@
   import { hasAuthPower } from '@/api/dataLayer/common/power';
   import NoPowerPage from '@/views/newViews/Common/NoPowerPage.vue';
   import FileSaver from 'file-saver';
-  import {
-    addOrUpdateOutboundForecast,
-    addOrUpdateWithRefOutboundForecast,
-  } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
+  import { addOrUpdateOutboundForecast } from '@/api/newDataLayer/OutboundForecast/OutboundForecast';
   import BookingCarDialog from '@/views/newViews/CarpoolManagement/dialog/BookingCarDialog.vue';
   import * as XLSX from 'xlsx';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
-  import { updateTaskListAfterCancelBookingCarWithInfo } from '@/api/dataLayer/modules/OutboundForecast/OutboundForecast';
   import DetailInfoDialog from '@/views/newViews/OperationDetail/NotOutbound/DetailInfoDialog.vue';
   import {
     statusColumnEasy,
@@ -487,23 +483,23 @@
   const actionRef = ref();
   let showConfirmCancelDialog = $ref(false);
 
-  async function cancelOrderCar() {
-    currentInfo.AMZID = '';
-    currentInfo.ISA = '';
-    currentInfo.bookCarTimestamp = '';
-    currentInfo.carStatus = '';
-    currentInfo.note = '';
-    currentInfo.reservationGetProductDetailTime = '';
-    currentInfo.reservationGetProductTime = '';
-    currentInfo.waitCar = '0';
-    currentInfo.waybillId = '';
-    currentInfo.logisticsCompany = '';
-    currentInfo.inStatus = '待定车';
-    await updateTaskListAfterCancelBookingCarWithInfo(currentInfo.id, currentInfo);
-    await addOrUpdateWithRefOutboundForecast(currentInfo);
-    showConfirmCancelDialog = false;
-    reloadTable();
-  }
+  // async function cancelOrderCar() {
+  //   currentInfo.AMZID = '';
+  //   currentInfo.ISA = '';
+  //   currentInfo.bookCarTimestamp = '';
+  //   currentInfo.carStatus = '';
+  //   currentInfo.note = '';
+  //   currentInfo.reservationGetProductDetailTime = '';
+  //   currentInfo.reservationGetProductTime = '';
+  //   currentInfo.waitCar = '0';
+  //   currentInfo.waybillId = '';
+  //   currentInfo.logisticsCompany = '';
+  //   currentInfo.inStatus = '待定车';
+  //   await updateTaskListAfterCancelBookingCarWithInfo(currentInfo.id, currentInfo);
+  //   await addOrUpdateWithRefOutboundForecast(currentInfo);
+  //   showConfirmCancelDialog = false;
+  //   reloadTable();
+  // }
 
   async function downloadData() {
     try {

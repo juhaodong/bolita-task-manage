@@ -214,7 +214,7 @@
 
   async function reload() {
     loading = true;
-    if (props.ids) {
+    if (props.ids.length > 0) {
       currentList = await getTaskListByIds(props.ids);
     }
     if (props.notifyId) {

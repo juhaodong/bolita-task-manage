@@ -27,7 +27,7 @@ function getNeededFieldBuilder(notifyType: NotifyType | null) {
       field: 'number',
     },
     {
-      label: '托数', // 现数量
+      label: '托数', // 现箱托数
       field: 'trayNum',
     },
     {
