@@ -22,6 +22,7 @@
           :disabled="selectedTaskList.length !== 1"
           class="action-button"
           size="small"
+          :type="changeFileBtnColor"
           @click="changeOrderFiles"
         >
           换单文件
@@ -30,6 +31,7 @@
           :disabled="selectedTaskList.length !== 1"
           class="action-button"
           size="small"
+          :type="operationBtnColor"
           @click="operationPic"
         >
           操作图片
@@ -37,6 +39,7 @@
         <n-button
           :disabled="selectedTaskList.length !== 1"
           class="action-button"
+          :type="problemFileBtnColor"
           size="small"
           @click="problemPic"
         >
@@ -147,6 +150,17 @@
       width: 120,
     },
     {
+      title: '换单',
+      key: 'changeOrderFiles',
+      component: 'NSelect',
+      componentProps: {
+        options: [
+          { label: '是', value: '是' },
+          { label: '否', value: '否' },
+        ],
+      },
+    },
+    {
       title: 'Ref',
       key: 'ref',
       width: 120,
@@ -227,22 +241,6 @@
         options: generateOptionFromArray(allDeliveryMethod),
       },
       width: 100,
-    },
-    {
-      title: '库内操作',
-      key: 'operateInStorage',
-      width: 96,
-    },
-    {
-      title: '换单',
-      key: 'changeOrderFiles',
-      component: 'NSelect',
-      componentProps: {
-        options: [
-          { label: '是', value: '是' },
-          { label: '否', value: '否' },
-        ],
-      },
     },
     {
       title: '尾板',
@@ -345,6 +343,21 @@
 
     await actionRef.value.reload();
   }
+
+  const changeFileBtnColor = $computed(() => {
+    const res = selectedTaskList.length === 1 && selectedTaskList[0].changeOrder;
+    return res ? 'success' : 'default';
+  });
+
+  const operationBtnColor = $computed(() => {
+    const res = selectedTaskList.length === 1 && selectedTaskList[0].operationFiles;
+    return res ? 'success' : 'default';
+  });
+
+  const problemFileBtnColor = $computed(() => {
+    const res = selectedTaskList.length === 1 && selectedTaskList[0].problemFiles;
+    return res ? 'success' : 'default';
+  });
 
   async function confirmEdit() {
     const currentTask = Object.assign({}, selectedTaskList[0]);
