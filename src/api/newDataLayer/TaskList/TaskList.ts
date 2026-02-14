@@ -238,7 +238,7 @@ export async function searchTaskPrice(
     toastError('size不符合标准!');
     return '人工询价';
   }
-  if (!zipCode) {
+  if (!zipCode || zipCode.length < 2) {
     toastError('zipCode不符合标准!');
     return '人工询价';
   }
