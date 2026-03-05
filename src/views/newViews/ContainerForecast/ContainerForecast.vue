@@ -287,7 +287,7 @@
       type: 'selection',
       fixed: 'left',
       key: 'selection',
-      width: 50,
+      width: 28,
     },
     {
       title: '柜号',
@@ -310,6 +310,11 @@
           { default: () => row?.containerNo }
         );
       },
+    },
+    {
+      title: '文件',
+      fixed: 'left',
+      key: 'filesDisplay',
     },
     {
       title: '客户',
@@ -519,6 +524,7 @@
     const res = await getNotifyListByFilterWithPagination(currentFilter, paginationReactive);
     const allList = res.rows.map((it) => {
       it.totalCountDisplay = it.totalCount + '/' + it.arrivedCount;
+      it.filesDisplay = it.unloadingFile ? '卸柜单' : '';
       return it;
     });
     const totalCount = res.totalRowCount;

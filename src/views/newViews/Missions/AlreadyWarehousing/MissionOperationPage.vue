@@ -55,7 +55,7 @@
           size="small"
           @click="updateSuggestedPrice"
         >
-          询价
+          同步价格
         </n-button>
         <n-button
           :disabled="selectedTaskList.length !== 1"
@@ -359,7 +359,7 @@
     {
       type: 'selection',
       fixed: 'left',
-      width: 50,
+      width: 24,
     },
     {
       title: '客户',

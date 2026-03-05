@@ -272,7 +272,7 @@
     {
       type: 'selection',
       fixed: 'left',
-      width: 50,
+      width: 24,
     },
     {
       title: '客户',

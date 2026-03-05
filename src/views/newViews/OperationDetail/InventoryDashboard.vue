@@ -42,7 +42,7 @@
         v-model:checked-row-keys="checkedRowKeys"
         ref="actionRef"
         @update:checked-row-keys="handleCheck"
-        :columns="columns"
+        :columns="currentColumns"
         :pagination="paginationReactive"
         :request="loadDataTable"
         :row-key="(row) => row.id"
@@ -171,7 +171,7 @@
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
 
   // Data and API
-  import { InBoundStatus, NotifyType } from '@/api/dataLayer/modules/notify/notify-api';
+  import { InBoundStatus } from '@/api/dataLayer/modules/notify/notify-api';
   import { FormField } from '@/views/bolita-views/composable/form-field-type';
   import { allNotifyInStatus } from '@/api/dataLayer/common/common';
   import { statusColumnSelect, timeColumn } from '@/views/bolita-views/composable/useableColumns';
@@ -194,7 +194,6 @@
   import { addOrUpdateTask, getTaskListByNotifyId } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
   import { useUserStore } from '@/store/modules/user';
-  import { currentBaseImageUrl } from '@/api/dataLayer/fieldDefination/common';
   import { useUploadDialog } from '@/store/modules/uploadFileState';
   import {
     deleteInventoryLog,
@@ -211,7 +210,6 @@
   let notifyList = $ref([]);
 
   // Modal visibility state
-  const showModal = ref(false);
   let showCurrentHeaderDataTable = $ref(false);
   let showOperationTable = $ref(false);
   let showWarehouseDialog = $ref(false);
@@ -223,10 +221,9 @@
   let showDetailInfoDialog = $ref(false);
 
   // Form and data state
-  let notifyType: NotifyType = $ref(NotifyType.Container);
   let currentModel: any | null = $ref(null);
   let currentNotifyId: string | null = $ref(null);
-  let currentId = $ref([]);
+  let currentId = $ref(null as string | null);
   let cancelRecord = $ref('');
   let currentRecord = $ref({});
   // Filter state
@@ -261,6 +258,11 @@
           { default: () => row?.containerNo }
         );
       },
+    },
+    {
+      title: '文件',
+      fixed: 'left',
+      key: 'filesDisplay',
     },
     {
       title: '客户',
@@ -354,15 +356,6 @@
     },
   });
 
-  /**
-   * Opens the dialog to add a new container forecast
-   * @param {NotifyType} type - The type of notification to create
-   */
-  function addTable(type: NotifyType) {
-    notifyType = type;
-    currentModel = null;
-    showModal.value = true;
-  }
   const unloadingPicButton = $computed(() => {
     const res = selectedNotifyList.length === 1 && selectedNotifyList[0].unloadingPic;
     return res ? 'success' : 'default';
@@ -469,6 +462,7 @@
     const res = await getNotifyListByFilterWithPagination(currentFilter, paginationReactive);
     const allList = res.rows.map((it) => {
       it.totalCountDisplay = it.totalCount + '/' + it.arrivedCount;
+      it.filesDisplay = it.unloadingFile ? '卸柜单' : '';
       return it;
     });
     const totalCount = res.totalRowCount;
@@ -489,7 +483,6 @@
 
   function updateFilter(value) {
     filterObj = value;
-    console.log(filterObj, 'filterObj');
     reloadTable();
   }
 
@@ -554,12 +547,6 @@
     } catch (error) {
       console.error('取消失败:', error);
     }
-  }
-
-  async function downloadFbaCode() {
-    window.open(
-      currentBaseImageUrl + 'https://aaden-storage.s3.eu-central-1.amazonaws.com/FbaCode.xlsx'
-    );
   }
 
   async function getAllNotifyByFilter() {
@@ -647,7 +634,7 @@
       const selectedList = await getAllNotifyByFilter();
 
       // Prepare data for Excel
-      const excelData = prepareExcelData(selectedList, columns);
+      const excelData = prepareExcelData(selectedList, currentColumns);
 
       // Create workbook and worksheet
       const workbook = XLSX.utils.book_new();
@@ -747,36 +734,6 @@
     ];
   }
 
-  async function startEdit() {
-    if (selectedNotifyList.length === 1) {
-      currentModel = selectedNotifyList[0];
-      showModal.value = true;
-    }
-  }
-
-  function cancelButton() {
-    cancelRecord = selectedNotifyList[0];
-    showConfirmDialog = true;
-  }
-
-  const disableCancel = $computed(() => {
-    return (
-      selectedNotifyList.length !== 1 ||
-      (userPowerType === '客户' && selectedNotifyList[0].inStatus !== '等待审核')
-    );
-  });
-
-  function downloadFile() {
-    currentModel = selectedNotifyList[0];
-    const files = currentModel.files.split(',');
-    window.open(files[0]);
-  }
-
-  function showUnloading() {
-    currentNotifyId = selectedNotifyList[0].id;
-    showUnloadingList = true;
-  }
-
   /**
    * Handles file upload for a specific field in the current model
    * @param {string} fieldName - The field name to update with uploaded files
@@ -824,10 +781,6 @@
     return selectedNotifyList.length !== 1;
   });
 
-  async function selectedHeader() {
-    showCurrentHeaderDataTable = true;
-  }
-
   // This function was redundant with updateFilter and has been removed
 
   function handlePageChange(page: number) {
@@ -857,16 +810,6 @@
     checkedRowKeys = [];
     selectedNotifyList = [];
   }
-
-  async function closeAddDialog() {
-    reloadTable();
-    showModal.value = false;
-  }
-
-  const userPowerType = $computed(() => {
-    const userInfo = useUserStore().info;
-    return userInfo?.userType;
-  });
 </script>
 
 <style lang="less" scoped>

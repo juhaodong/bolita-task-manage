@@ -128,7 +128,7 @@
     {
       type: 'selection',
       fixed: 'left',
-      width: 50,
+      width: 24,
     },
     {
       title: '客户',
@@ -141,6 +141,11 @@
       fixed: 'left',
       key: 'containerId',
       width: 160,
+    },
+    {
+      title: '文件',
+      key: 'filesDisplay',
+      minWidth: 140,
     },
     {
       title: '票号',
@@ -503,6 +508,17 @@
     allList = res.rows.map((it) => {
       it.numberDisplay = it.number + '/' + it.arrivedContainerNum;
       it.trayDisplay = it.trayNum + '/' + it.arrivedTrayNum;
+      let filesStatus = '';
+      if (it.changeOrder) {
+        filesStatus = filesStatus + '换单文件';
+      }
+      if (it.operationFiles) {
+        filesStatus = filesStatus + ' | 操作图片';
+      }
+      if (it.problemFiles) {
+        filesStatus = filesStatus + ' | 问题图片';
+      }
+      it.filesDisplay = filesStatus;
       return it;
     });
     const totalCount = res.totalRowCount;

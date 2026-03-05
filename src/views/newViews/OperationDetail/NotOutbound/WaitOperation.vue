@@ -86,7 +86,7 @@
 <script lang="ts" setup>
   import { reactive, ref } from 'vue';
   import { BasicTable } from '@/components/Table';
-  import { DataTableColumns, NButton, useMessage } from 'naive-ui';
+  import { DataTableColumns, useMessage } from 'naive-ui';
   import { $ref } from 'vue/macros';
   import dayjs from 'dayjs';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
@@ -114,26 +114,11 @@
   import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
   import ConfirmDialog from '@/views/newViews/Common/ConfirmDialog.vue';
 
-  const showModal = ref(false);
-
+  // Filters definition
   let filterObj: any | null = $ref(null);
   let currentModel: any | null = $ref(null);
-  let paymentDialogShow: boolean = $ref(false);
-  let selectedMonth: any | null = $ref('');
-  let monthTab: any | null = $ref(null);
-  let editOutboundForecast = $ref(false);
-  let showShareCarModel = $ref(false);
-  let typeName = $ref('');
-  let editId = $ref('');
-  let allList = $ref([]);
-  let showAll = $ref(false);
-  let dateRange = $ref(null);
   let currentInfo = $ref({});
-  let offerDialog = $ref(false);
-  let carDialog = $ref(false);
-  let filterItems = $ref<Array<{ option: string; value: string }>>([]);
-  let showDetailInfoDialog = $ref(false);
-  let currentIds = $ref([]);
+
   const filters: FormField[] = [
     {
       label: 'Ref',
@@ -149,70 +134,33 @@
     },
   ];
 
+  // Table columns
   const columns: DataTableColumns<any> = [
+    { type: 'selection' },
+    { title: 'Ref', key: 'ref', minWidth: 140 },
     {
-      type: 'selection',
+      title: '文件',
+      key: 'filesDisplay',
+      minWidth: 140,
     },
-    {
-      title: 'Ref',
-      key: 'ref',
-    },
-    {
-      title: 'ISA',
-      key: 'isa',
-    },
-    {
-      title: '运单号',
-      key: 'waybillId',
-    },
-    statusColumnEasy({
-      title: '状态',
-      key: 'inStatus',
-    }),
-    {
-      title: 'FC',
-      key: 'fcAddress',
-    },
-    // {
-    //   title: '地址',
-    //   key: 'deliveryDetail',
-    // },
-    {
-      title: '出库方式',
-      key: 'deliveryMethod',
-      width: 100,
-    },
-    {
-      title: '运单号',
-      key: 'waybillId',
-    },
-    {
-      title: '总托数',
-      key: 'trayNum',
-    },
-    {
-      title: '总件数',
-      key: 'totalNumber',
-    },
-    {
-      title: '邮编',
-      key: 'postcode',
-    },
-    {
-      title: '操作人',
-      key: 'outOperatePerson',
-    },
+    { title: 'ISA', key: 'isa', minWidth: 140 },
+    { title: '运单号', key: 'waybillId', minWidth: 140 },
+    statusColumnEasy({ title: '状态', key: 'inStatus' }),
+    { title: 'FC', key: 'fcAddress' },
+    // { title: '地址', key: 'deliveryDetail' },
+    { title: '出库方式', key: 'deliveryMethod', width: 100 },
+    { title: '总托数', key: 'trayNum' },
+    { title: '总件数', key: 'totalNumber' },
+    { title: '邮编', key: 'postcode' },
+    { title: '操作人', key: 'outOperatePerson' },
     timeTableColumn('reservationGetProductTime', '取货日期'),
-    {
-      title: '取货时间',
-      key: 'reservationGetProductDetailTime',
-      width: 100,
-    },
+    { title: '取货时间', key: 'reservationGetProductDetailTime', width: 100 },
   ].map((it) => {
     it.resizable = true;
     return it;
   });
 
+  // Pagination
   const paginationReactive = reactive({
     defaultPage: 1,
     pageNumber: 0,
@@ -222,150 +170,127 @@
     pageSizes: [10, 20, 50, 100],
     onChange: (page: number) => {
       paginationReactive.pageNumber = page - 1;
-      // reloadTable() is called by handlePageChange, no need to call it here
     },
     onUpdatePageSize: (pageSize: number) => {
       paginationReactive.pageSize = pageSize;
       paginationReactive.pageNumber = 0;
-      // Let the BasicTable component handle the data fetching
     },
   });
 
+  // Filters current value
   let currentFilter = $ref([]);
-
   async function getCurrentFilter() {
-    // Reset current filter
     currentFilter = [];
-
-    if (filterObj) {
-      currentFilter = filterObj;
-    }
+    if (filterObj) currentFilter = filterObj;
     // currentFilter['inStatusIn'] = ['已定车', '无需定车'];
   }
 
+  // Table data and selection
   let outboundForecastList = $ref([]);
-
   let selectedOutboundForecastList = $ref([]);
   let checkedRowKeys = $ref([]);
 
   function handleCheck(rowKeys) {
-    // Update the checked keys in the table
     checkedRowKeys = rowKeys;
-
-    // Get the selected items from the current page
     const currentPageSelected = outboundForecastList.filter((item) => rowKeys.includes(item.id));
-
-    // Merge with global selection, removing any items from current page that are no longer selected
     selectedOutboundForecastList = [
-      // Keep previously selected items that are not on the current page
       ...selectedOutboundForecastList.filter(
         (item) => !outboundForecastList.some((pageItem) => pageItem.id === item.id)
       ),
-      // Add newly selected items from current page
       ...currentPageSelected,
     ];
   }
 
   const loadDataTable = async () => {
-    // Build filter criteria
     await getCurrentFilter();
-
-    // Get paginated data
     const res = await getOutboundForecastListByFilterWithPagination(
       currentFilter,
       paginationReactive
     );
-    const allList = res.rows;
+    const allList = res.rows.map((it) => {
+      let filesStatus = '';
+      if (it.loadingCarDoc) {
+        filesStatus = filesStatus + '装车单';
+      }
+      if (it.pickupFiles) {
+        filesStatus = filesStatus + ' | 装车图片';
+      }
+      if (it.podFiles) {
+        filesStatus = filesStatus + ' | POD';
+      }
+      it.filesDisplay = filesStatus;
+      return it;
+    });
     const totalCount = res.totalRowCount;
-
-    // Process data if needed
-
-    // Create pagination placeholders
     const { fakeListStart, fakeListEnd } = createPaginationPlaceholders(
       paginationReactive.pageNumber,
       paginationReactive.pageSize,
       totalCount
     );
-
-    // Combine real data with placeholders
     outboundForecastList = [...fakeListStart, ...allList, ...fakeListEnd];
     return outboundForecastList;
   };
+
   const actionRef = ref();
-  let showConfirmCancelDialog = $ref(false);
 
   async function getAllOutboundForecastByFilter() {
     await getCurrentFilter();
-
-    // Get paginated data
-    return (await getOutboundForecastListByFilterWithPagination(currentFilter, paginationReactive))
-      .rows;
+    const res = await getOutboundForecastListByFilterWithPagination(
+      currentFilter,
+      paginationReactive
+    );
+    return res.rows;
   }
 
+  // Export
   async function downloadData() {
     try {
-      let selectedList = [];
-      selectedList = await getAllOutboundForecastByFilter();
-      // Create a 2D array for Excel data
-      const data = [];
+      const selectedList = await getAllOutboundForecastByFilter();
+      const data: any[] = [];
       const headers = columns.filter((it) => it.title).map((it) => it.title);
       data.push(headers);
 
-      // Add data rows
       selectedList.forEach((item) => {
-        const row = [];
+        const row: any[] = [];
         columns
           .filter((col) => col.title)
           .forEach((col) => {
-            // Handle nested properties like 'customer.customerName'
-            if (col.key && col.key.includes('.')) {
-              const keys = col.key.split('.');
-              let value = item;
-              for (const key of keys) {
-                value = value && value[key];
-              }
-              row.push(value || '');
+            if (col.key && (col.key as string).includes('.')) {
+              const keys = (col.key as string).split('.');
+              let value: any = item;
+              for (const key of keys) value = value && value[key];
+              row.push(value ?? '');
             } else if (col.key) {
-              // Handle date fields
-              if (col.key === 'createTimestamp' && item[col.key]) {
-                row.push(dayjs(item[col.key]).format('YYYY-MM-DD'));
-              } else if (col.key === 'reservationGetProductTime' && item[col.key]) {
-                row.push(dayjs(item[col.key]).format('YYYY-MM-DD'));
+              if ((col.key as string) === 'createTimestamp' && item[col.key as string]) {
+                row.push(dayjs(item[col.key as string]).format('YYYY-MM-DD'));
+              } else if (
+                (col.key as string) === 'reservationGetProductTime' &&
+                item[col.key as string]
+              ) {
+                row.push(dayjs(item[col.key as string]).format('YYYY-MM-DD'));
               } else {
-                row.push(item[col.key] || '');
+                row.push(item[col.key as string] ?? '');
               }
             } else {
               row.push('');
             }
           });
-
-        // Only add non-empty rows to the data array
-        // Check if the row has at least one non-empty value
-        const hasValue = row.some((value) => value !== '' && value !== null && value !== undefined);
-        if (hasValue) {
-          data.push(row);
-        }
+        const hasValue = row.some((v) => v !== '' && v !== null && v !== undefined);
+        if (hasValue) data.push(row);
       });
 
-      // Add data rows - filter out any rows with all empty values
-
-      // Create workbook and worksheet
       const workbook = XLSX.utils.book_new();
       const worksheet = XLSX.utils.aoa_to_sheet(data);
-
-      // Add worksheet to workbook
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-
-      // Generate Excel file
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-
-      // Save file
       FileSaver.saveAs(blob, '定车管理.xlsx');
     } catch (error) {
       console.error('下载失败:', error);
     }
   }
+
+  // Finish Ref
   let showFinishDialog = $ref(false);
   function showFinishConfirm() {
     showFinishDialog = true;
@@ -377,7 +302,6 @@
     editInfo.inStatus = '已完成';
     const taskList = await getTaskListByIds(editInfo.bolitaTaskIds);
 
-    // Check if any task has inStatus === '异常'
     const exceptionTasks = taskList.filter((task) => task.inStatus === '异常');
     if (exceptionTasks.length > 0) {
       message.error('当前Ref有异常明细！');
@@ -390,36 +314,28 @@
       await updateTask(currentTask);
       const allTask = await getTaskListByNotifyId(currentTask.notifyId);
       const alreadyDoneTask = allTask.filter((it) => it.inStatus === '已完成');
-      if (alreadyDoneTask.length === allTask.length) {
-        const notify = await getNotifyById(currentTask.notifyId);
-        notify.inStatus = '全部出库';
-        await addOrUpdateNotify(notify);
-      } else {
-        const notify = await getNotifyById(currentTask.notifyId);
-        notify.inStatus = '部分出库';
-        await addOrUpdateNotify(notify);
-      }
+      const notify = await getNotifyById(currentTask.notifyId);
+      notify.inStatus = alreadyDoneTask.length === allTask.length ? '全部出库' : '部分出库';
+      await addOrUpdateNotify(notify);
     }
-    console.log('33');
     reloadTable();
   }
 
+  // Filters update
   function updateFilter(value) {
     filterObj = value;
-    if (value === null) {
-      dateRange = null;
-    }
     reloadTable();
   }
 
+  // Dialogs
   let loadingCarDialog = $ref(false);
-
   function showLoadingList() {
     currentInfo = selectedOutboundForecastList[0];
     loadingCarDialog = true;
   }
 
-  async function handleFileUpload(fieldName) {
+  // Upload helpers
+  async function handleFileUpload(fieldName: string) {
     if (selectedOutboundForecastList.length !== 1) return;
 
     currentModel = selectedOutboundForecastList[0];
@@ -436,15 +352,9 @@
           await updateTask(currentTask);
           const allTask = await getTaskListByNotifyId(currentTask.notifyId);
           const alreadyDoneTask = allTask.filter((it) => it.inStatus === '已完成');
-          if (alreadyDoneTask.length === allTask.length) {
-            const notify = await getNotifyById(currentTask.notifyId);
-            notify.inStatus = '全部出库';
-            await addOrUpdateNotify(notify);
-          } else {
-            const notify = await getNotifyById(currentTask.notifyId);
-            notify.inStatus = '部分出库';
-            await addOrUpdateNotify(notify);
-          }
+          const notify = await getNotifyById(currentTask.notifyId);
+          notify.inStatus = alreadyDoneTask.length === allTask.length ? '全部出库' : '部分出库';
+          await addOrUpdateNotify(notify);
         }
       }
       await addOrUpdateOutboundForecast(currentModel);
@@ -456,35 +366,27 @@
   async function uploadLoadingList() {
     await handleFileUpload('loadingCarDoc');
   }
-
   async function LoadingListPic() {
     await handleFileUpload('pickupFiles');
   }
-
   async function editPod() {
     await handleFileUpload('podFiles');
   }
 
+  // Pagination handlers
   function handlePageChange(page: number) {
     paginationReactive.pageNumber = page - 1;
     reloadTable();
   }
-
   function handlePageSizeChange(pageSize: number) {
     paginationReactive.pageSize = pageSize;
     paginationReactive.pageNumber = 0;
     reloadTable();
   }
 
+  // Reload table and reset state
   function reloadTable() {
     actionRef.value.reload();
-    showModal.value = false;
-    showShareCarModel = false;
-    paymentDialogShow = false;
-    editOutboundForecast = false;
-    offerDialog = false;
-    carDialog = false;
-    showConfirmCancelDialog = false;
     loadingCarDialog = false;
     showFinishDialog = false;
     selectedOutboundForecastList = [];

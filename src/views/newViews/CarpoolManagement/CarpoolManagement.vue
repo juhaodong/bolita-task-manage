@@ -190,12 +190,10 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, h, reactive, ref } from 'vue';
+  import { reactive, ref } from 'vue';
   import { BasicTable } from '@/components/Table';
-  import { DataTableColumns, NButton, NIcon, NTooltip, useMessage } from 'naive-ui';
+  import { DataTableColumns, useMessage } from 'naive-ui';
   import { $ref } from 'vue/macros';
-  import { CarpoolManager } from '@/api/dataLayer/modules/logistic/carpool';
-  import { useUserStore } from '@/store/modules/user';
   import dayjs from 'dayjs';
   import EditOF from '@/views/newViews/OperationDetail/NotOutbound/EditOF.vue';
   import { hasAuthPower } from '@/api/dataLayer/common/power';
@@ -226,24 +224,12 @@
   } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateNotify, getNotifyById } from '@/api/newDataLayer/Notify/Notify';
 
-  const showModal = ref(false);
-
   let filterObj: any | null = $ref(null);
   let currentModel: any | null = $ref(null);
-  let paymentDialogShow: boolean = $ref(false);
-  let selectedMonth: any | null = $ref('');
-  let monthTab: any | null = $ref(null);
   let editOutboundForecast = $ref(false);
-  let showShareCarModel = $ref(false);
-  let typeName = $ref('');
   let editId = $ref('');
-  let allList = $ref([]);
-  let showAll = $ref(false);
-  let dateRange = $ref(null);
   let currentInfo = $ref({});
-  let offerDialog = $ref(false);
   let carDialog = $ref(false);
-  let filterItems = $ref<Array<{ option: string; value: string }>>([]);
   let showDetailInfoDialog = $ref(false);
   let showAddNewMissionDialog = $ref(false);
   let currentIds = $ref([]);
@@ -271,6 +257,11 @@
       title: 'Ref',
       key: 'ref',
       width: 160,
+    },
+    {
+      title: '文件',
+      key: 'filesDisplay',
+      minWidth: 140,
     },
     {
       title: '运单号',
@@ -383,22 +374,6 @@
   let checkedRowKeys = $ref([]);
 
   let loadingCarDialog = $ref(false);
-  function showLoadingList() {
-    currentInfo = selectedOutboundForecastList[0];
-    loadingCarDialog = true;
-  }
-
-  async function uploadLoadingList() {
-    await handleFileUpload('loadingCarDoc');
-  }
-
-  async function LoadingListPic() {
-    await handleFileUpload('pickupFiles');
-  }
-
-  async function editPod() {
-    await handleFileUpload('podFiles');
-  }
 
   const message = useMessage();
 
@@ -464,7 +439,20 @@
       currentFilter,
       paginationReactive
     );
-    const allList = res.rows;
+    const allList = res.rows.map((it) => {
+      let filesStatus = '';
+      if (it.cmrFiles) {
+        filesStatus = filesStatus + 'CMR';
+      }
+      if (it.lieferscheinFiles) {
+        filesStatus = filesStatus + ' | Lieferschein';
+      }
+      if (it.deliveryFiles) {
+        filesStatus = filesStatus + ' | 快递面单';
+      }
+      it.filesDisplay = filesStatus;
+      return it;
+    });
     const totalCount = res.totalRowCount;
 
     // Process data if needed
@@ -623,7 +611,6 @@
   function showDetailInfo() {
     currentIds = selectedOutboundForecastList[0].bolitaTaskIds;
     currentModel = selectedOutboundForecastList[0];
-    console.log(currentModel, 'model');
     showDetailInfoDialog = true;
   }
 
@@ -638,14 +625,6 @@
   }
 
   function updateFilter(value) {
-    filterObj = value;
-    if (value === null) {
-      dateRange = null;
-    }
-    reloadTable();
-  }
-
-  function updateFilterWithItems(value) {
     filterObj = value;
     reloadTable();
   }
@@ -663,11 +642,7 @@
 
   function reloadTable() {
     actionRef.value.reload();
-    showModal.value = false;
-    showShareCarModel = false;
-    paymentDialogShow = false;
     editOutboundForecast = false;
-    offerDialog = false;
     carDialog = false;
     showConfirmCancelDialog = false;
     loadingCarDialog = false;
@@ -680,32 +655,6 @@
 
   function saved() {
     reloadTable();
-  }
-
-  async function startEdit(id) {
-    currentModel = await CarpoolManager.getById(id);
-    showModal.value = true;
-  }
-
-  // Helper function to render icon with tooltip
-  const renderIconWithTooltip = (icon, tooltip) => {
-    return () =>
-      h(
-        NTooltip,
-        { trigger: 'hover', placement: 'top' },
-        {
-          trigger: () => h(NIcon, { size: 18, class: 'action-icon' }, { default: () => h(icon) }),
-          default: () => tooltip,
-        }
-      );
-  };
-
-  const AccountPowerList = computed(() => {
-    return useUserStore()?.info?.powerList;
-  });
-  function startEditOF(id) {
-    editId = id;
-    editOutboundForecast = true;
   }
 </script>
 
