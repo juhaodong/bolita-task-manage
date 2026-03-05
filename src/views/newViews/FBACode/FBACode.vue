@@ -3,7 +3,7 @@
     <single-filter-bar :form-fields="filters" @clear="updateFilter(null)" @submit="updateFilter" />
     <div class="mt-2">
       <n-button size="small" type="primary" @click="showAdd">新建FBACode</n-button>
-      <n-button size="small" class="ml-4" @click="downloadFBACode">下载FBACode</n-button>
+      <n-button size="small" class="ml-4" @click="downloadData">下载FBACode</n-button>
       <n-button
         :disabled="checkedRows.length !== 1"
         class="action-button"
@@ -62,6 +62,8 @@
   import { deleteFBACode, getFBACodeListByFilter } from '@/api/newDataLayer/FBACode/FBACode';
   import SingleFilterBar from '@/views/bolita-views/composable/SingleFilterBar.vue';
   import { NButton } from 'naive-ui';
+  import * as XLSX from 'xlsx';
+  import dayjs from 'dayjs';
 
   const actionRef = ref();
   let currentModel: any | null = $ref(null);
@@ -121,15 +123,69 @@
     showModal.value = true;
   }
 
-  async function downloadFBACode() {
-    let dataStrings = ['FBACode,州,地址,城市,邮编'];
-    FBACodeList.forEach((it) => {
-      const res = [it.code, it.state, it.address, it.city, it.postcode];
-      dataStrings.push(res.join());
-    });
-    dataStrings = dataStrings.join('\n');
-    const blob = new Blob([dataStrings], { type: 'text/plain;charset=utf-8' });
-    FileSaver.saveAs(blob, 'FBACode.csv');
+  async function downloadData() {
+    try {
+      let selectedList = [];
+      selectedList = await getFBACodeListByFilter(currentFilter);
+      // Create a 2D array for Excel data
+      const data = [];
+      const headers = columns.filter((it) => it.title).map((it) => it.title);
+      data.push(headers);
+
+      // Add data rows
+      selectedList.forEach((item) => {
+        const row = [];
+        columns
+          .filter((col) => col.title)
+          .forEach((col) => {
+            // Handle nested properties like 'customer.customerName'
+            if (col.key && col.key.includes('.')) {
+              const keys = col.key.split('.');
+              let value = item;
+              for (const key of keys) {
+                value = value && value[key];
+              }
+              row.push(value || '');
+            } else if (col.key) {
+              // Handle date fields
+              if (col.key === 'createTimestamp' && item[col.key]) {
+                row.push(dayjs(item[col.key]).format('YYYY-MM-DD'));
+              } else if (col.key === 'reservationGetProductTime' && item[col.key]) {
+                row.push(dayjs(item[col.key]).format('YYYY-MM-DD'));
+              } else {
+                row.push(item[col.key] || '');
+              }
+            } else {
+              row.push('');
+            }
+          });
+
+        // Only add non-empty rows to the data array
+        // Check if the row has at least one non-empty value
+        const hasValue = row.some((value) => value !== '' && value !== null && value !== undefined);
+        if (hasValue) {
+          data.push(row);
+        }
+      });
+
+      // Add data rows - filter out any rows with all empty values
+
+      // Create workbook and worksheet
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+      // Generate Excel file
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+      // Save file
+      FileSaver.saveAs(blob, 'FBACode.xlsx');
+    } catch (error) {
+      console.error('下载失败:', error);
+    }
   }
 
   function updateFilter(value) {

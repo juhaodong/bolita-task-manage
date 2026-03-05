@@ -82,7 +82,6 @@
   import FileSaver from 'file-saver';
   import {
     addOrUpdateTask,
-    getTaskListByFilter,
     getTaskListByFilterWithPagination,
   } from '@/api/newDataLayer/TaskList/TaskList';
   import { addOrUpdateTaskTimeLine } from '@/api/newDataLayer/TimeLine/TimeLine';
@@ -457,7 +456,7 @@
     await getCurrentFilter();
 
     // Get paginated data
-    return await getTaskListByFilter(currentFilter);
+    return (await getTaskListByFilterWithPagination(currentFilter, paginationReactive)).rows;
   }
 
   async function downloadData() {

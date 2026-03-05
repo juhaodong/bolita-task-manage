@@ -234,7 +234,6 @@
   import {
     addOrUpdateNotify,
     deleteNotify,
-    getNotifyListByFilter,
     getNotifyListByFilterWithPagination,
   } from '@/api/newDataLayer/Notify/Notify';
   import { getTableHeaderGroupItemList } from '@/api/newDataLayer/Header/HeaderGroup';
@@ -489,6 +488,14 @@
       if (filterObj['inventory.id']) {
         currentFilter['inventoryIds'] = [filterObj['inventory.id']];
       }
+      if (filterObj['inStatus']) {
+        currentFilter['inStatusIn'] = [filterObj['inStatus']];
+        delete currentFilter.inStatus;
+      }
+      if (currentFilter['containerNo']) {
+        currentFilter['containerNoLike'] = currentFilter['containerNo'];
+        delete currentFilter.containerNo;
+      }
       if (filterObj['planArriveDateTime']) {
         currentFilter['minPlanArriveDateTime'] =
           dayjs(filterObj['planArriveDateTime'][0]).format('YYYY-MM-DD') + 'T00:00:00';
@@ -609,7 +616,7 @@
     await getCurrentFilter();
 
     // Get paginated data
-    return await getNotifyListByFilter(currentFilter);
+    return (await getNotifyListByFilterWithPagination(currentFilter, paginationReactive)).rows;
   }
 
   /**

@@ -263,7 +263,6 @@
   import FileSaver from 'file-saver';
   import {
     addOrUpdateTask,
-    getTaskListByFilter,
     getTaskListByFilterWithPagination,
     getTaskListByNotifyId,
     searchTaskPrice,
@@ -808,7 +807,7 @@
     await getCurrentFilter();
 
     // Get paginated data
-    return await getTaskListByFilter(currentFilter);
+    return (await getTaskListByFilterWithPagination(currentFilter, paginationReactive)).rows;
   }
 
   async function downloadData() {

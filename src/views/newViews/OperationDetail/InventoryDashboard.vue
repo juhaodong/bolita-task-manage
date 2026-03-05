@@ -661,7 +661,7 @@
       const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
 
       // Save file
-      FileSaver.saveAs(blob, '到货预报.xlsx');
+      FileSaver.saveAs(blob, '入库任务看板.xlsx');
 
       toastSuccess('下载成功');
     } catch (error) {

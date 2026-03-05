@@ -628,7 +628,9 @@
 
   async function downloadData() {
     let selectedList = [];
-    selectedList = await getAllTaskListByFilter();
+    selectedList = (await getTaskListByFilterWithPagination(currentFilter, paginationReactive))
+      .rows;
+    console.log(selectedList, 'list');
     // Create a 2D array for Excel data
     const data = [];
     const headers = columns.filter((it) => it.title).map((it) => it.title);

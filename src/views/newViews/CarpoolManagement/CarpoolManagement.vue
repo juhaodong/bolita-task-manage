@@ -501,10 +501,18 @@
   //   reloadTable();
   // }
 
+  async function getAllOutboundForecastByFilter() {
+    await getCurrentFilter();
+
+    // Get paginated data
+    return (await getOutboundForecastListByFilterWithPagination(currentFilter, paginationReactive))
+      .rows;
+  }
+
   async function downloadData() {
     try {
       let selectedList = [];
-      selectedList = await loadDataTable();
+      selectedList = await getAllOutboundForecastByFilter();
       // Create a 2D array for Excel data
       const data = [];
       const headers = columns.filter((it) => it.title).map((it) => it.title);

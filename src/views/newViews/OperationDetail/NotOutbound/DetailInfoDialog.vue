@@ -6,7 +6,7 @@
     updateTask,
   } from '@/api/newDataLayer/TaskList/TaskList';
   import { statusColumnEasy } from '@/views/bolita-views/composable/useableColumns';
-  import { h, onMounted } from 'vue';
+  import { h, onMounted, computed } from 'vue';
   import LoadingFrame from '@/views/bolita-views/composable/LoadingFrame.vue';
   import { DataTableColumns, NButton } from 'naive-ui';
   import { addOrUpdateOutboundForecast } from '@/api/newDataLayer/CarManage/CarManage';
@@ -22,7 +22,7 @@
   onMounted(async () => {
     await reload();
   });
-  const allColumns: DataTableColumns<any> = [
+  const baseColumns: DataTableColumns<any> = [
     {
       title: '票号',
       key: 'ticketId',
@@ -83,45 +83,53 @@
       title: '状态',
       key: 'inStatus',
     }),
-    {
-      title: 'Action',
-      key: 'actions',
-      width: 80,
-      render(row) {
-        return h(
-          NButton,
-          {
-            strong: true,
-            tertiary: true,
-            size: 'small',
-            onClick: () => changeToPickUp(row),
-          },
-          { default: () => '自提' }
-        );
-      },
+  ];
+
+  const actionPickUpColumn = {
+    title: 'Action',
+    key: 'actions',
+    width: 80,
+    render(row) {
+      return h(
+        NButton,
+        {
+          strong: true,
+          tertiary: true,
+          size: 'small',
+          onClick: () => changeToPickUp(row),
+        },
+        { default: () => '自提' }
+      );
     },
-    {
-      title: 'Action',
-      key: 'actions',
-      width: 80,
-      render(row) {
-        return h(
-          NButton,
-          {
-            strong: true,
-            tertiary: true,
-            size: 'small',
-            onClick: () => letTaskOut(row),
-          },
-          { default: () => '剔除' }
-        );
-      },
+  } as any;
+
+  const actionExcludeColumn = {
+    title: 'Action',
+    key: 'actions',
+    width: 80,
+    render(row) {
+      return h(
+        NButton,
+        {
+          strong: true,
+          tertiary: true,
+          size: 'small',
+          onClick: () => letTaskOut(row),
+        },
+        { default: () => '剔除' }
+      );
     },
-  ].map((it) => {
-    it.ellipsis = {
-      tooltip: true,
-    };
-    return it;
+  } as any;
+
+  const allColumns = computed<DataTableColumns<any>>(() => {
+    const cols: any[] = [...baseColumns];
+    if (notifyType.value === 'task') {
+      cols.push(actionPickUpColumn, actionExcludeColumn);
+    }
+    return cols.map((it) => {
+      it.ellipsis = { tooltip: true };
+      return it;
+    });
   });
 
   interface Props {
@@ -212,12 +220,17 @@
     emit('saved');
   }
 
+  const notifyType = computed(() => {
+    return props.notifyId ? 'notify' : 'task';
+  });
+
   async function reload() {
     loading = true;
-    if (props.ids.length > 0) {
+    if (props.ids && props.ids.length > 0) {
       currentList = await getTaskListByIds(props.ids);
     }
     if (props.notifyId) {
+      console.log(props.notifyId, '3421');
       currentList = (await getTaskListByNotifyId(props.notifyId)).map((it) => {
         it.numberDisplay = it.number + '/' + it.arrivedContainerNum;
         it.trayDisplay = it.trayNum + '/' + it.arrivedTrayNum;

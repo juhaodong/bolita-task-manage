@@ -80,7 +80,6 @@
   import { asyncCustomer, generateOptionFromArray } from '@/store/utils/utils';
   import FileSaver from 'file-saver';
   import {
-    getTaskListByFilter,
     getTaskListByFilterWithPagination,
     updateTask,
   } from '@/api/newDataLayer/TaskList/TaskList';
@@ -451,7 +450,7 @@
     await getCurrentFilter();
 
     // Get paginated data
-    return await getTaskListByFilter(currentFilter);
+    return (await getTaskListByFilterWithPagination(currentFilter, paginationReactive)).rows;
   }
 
   async function downloadData() {
